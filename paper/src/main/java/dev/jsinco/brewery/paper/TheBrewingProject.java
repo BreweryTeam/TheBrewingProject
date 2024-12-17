@@ -3,7 +3,6 @@ package dev.jsinco.brewery.paper;
 import dev.jsinco.brewery.paper.config.ConfigManager;
 import dev.jsinco.brewery.paper.factories.RecipeFactory;
 import dev.jsinco.brewery.paper.listeners.BreweryEvents;
-import dev.jsinco.brewery.paper.object.cauldron.CauldronManager;
 import dev.jsinco.brewery.paper.recipe.ingredient.custom.CustomIngredientManager;
 import dev.jsinco.brewery.paper.recipe.ingredient.external.OraxenPluginIngredient;
 import dev.jsinco.brewery.paper.recipe.ingredient.PluginIngredient;
@@ -17,8 +16,6 @@ public class TheBrewingProject extends JavaPlugin {
     private static TheBrewingProject instance;
     @Getter
     private ConfigManager configManager;
-    @Getter
-    private CauldronManager cauldronManager;
     @Getter @Setter
     private static RecipeFactory recipeFactory;
 
@@ -31,7 +28,6 @@ public class TheBrewingProject extends JavaPlugin {
     public void onEnable() {
         instance = this;
         configManager = new ConfigManager();
-        cauldronManager = new CauldronManager();
         recipeFactory = new RecipeFactory();
         CustomIngredientManager.reloadCustomIngredients();
 
@@ -46,7 +42,7 @@ public class TheBrewingProject extends JavaPlugin {
 
     @Override
     public void onDisable() {
-        cauldronManager.disable();
+
     }
 
     public void registerPluginIngredients() {
