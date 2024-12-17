@@ -9,8 +9,11 @@ dependencies {
     implementation(project(":api"))
 
     compileOnly("io.papermc.paper:paper-api:1.21.4-R0.1-SNAPSHOT")
-    compileOnly("io.th0rgal:oraxen:1.183.0")
 
+    // integrations
+    compileOnly("io.th0rgal:oraxen:1.186.0")
+
+    // lombok
     implementation("eu.okaeri:okaeri-configs-yaml-snakeyaml:5.0.5")
     implementation("com.github.puregero:multilib:1.2.4") // Folia & ShreddedPaper support
 }
