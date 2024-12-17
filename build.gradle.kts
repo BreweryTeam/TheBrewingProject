@@ -26,7 +26,7 @@ subprojects {
     repositories {
         mavenCentral()
 
-        maven("https://hub.spigotmc.org/nexus/content/repositories/snapshots/")
+        maven("https://repo.papermc.io/repository/maven-public/")
         maven("https://jitpack.io")
         maven("https://repo.oraxen.com/releases")
         maven("https://storehouse.okaeri.eu/repository/maven-public/")

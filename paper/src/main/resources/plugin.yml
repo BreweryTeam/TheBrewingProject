@@ -1,0 +1,9 @@
+name: TheBrewingProject
+main: dev.jsinco.brewery.paper.TheBrewingProject
+description: 'Help me.'
+authors: [Jsinco, Mitality, Nadwey]
+version: '${version}'
+api-version: '1.20'
+softdepend:
+  - Oraxen
+  - ItemsAdder
