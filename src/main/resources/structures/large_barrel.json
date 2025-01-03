@@ -1,7 +1,11 @@
 {
   "schemFile": "large_barrel.schem",
-  "origin": [0, 1, 0],
-  "materialReplacements" : {
+  "origin": [
+    1,
+    2,
+    3
+  ],
+  "materialReplacements": {
     "excludedPattern": "_planks$",
     "materials": "#planks"
   }

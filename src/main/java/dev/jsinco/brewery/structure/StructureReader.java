@@ -1,6 +1,7 @@
 package dev.jsinco.brewery.structure;
 
 import com.google.gson.*;
+import dev.jsinco.brewery.TheBrewingProject;
 import dev.thorinwasher.schem.Schematic;
 import dev.thorinwasher.schem.SchematicReader;
 import dev.thorinwasher.schem.blockpalette.BlockPaletteParser;
@@ -11,6 +12,11 @@ import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
@@ -21,18 +27,33 @@ public class StructureReader {
     private static final Pattern SCHEM_PATTERN = Pattern.compile("\\.json", Pattern.CASE_INSENSITIVE);
     private static final Pattern TAG_PATTERN = Pattern.compile("^#");
 
+    public static Map<String, BreweryStructure> fromInternalResourceJson(String string) throws IOException, StructureReadException {
+        URL url = TheBrewingProject.class.getResource(string);
+        URI uri = null;
+        try {
+            uri = url.toURI();
+        } catch (URISyntaxException e) {
+            throw new StructureReadException(e);
+        }
+        try (FileSystem fileSystem = FileSystems.newFileSystem(uri, new HashMap<>())) {
+            return fromJson(fileSystem.getPath(uri.toString().split("!")[1]));
+        }
+    }
+
     public static Map<String, BreweryStructure> fromJson(Path path) throws IOException, StructureReadException {
         try (Reader reader = new InputStreamReader(new BufferedInputStream(Files.newInputStream(path)))) {
             JsonObject jsonObject = JsonParser.parseReader(reader).getAsJsonObject();
             String schemFileName = jsonObject.get("schemFile").getAsString();
-            JsonArray origin = jsonObject.get("origin").getAsJsonArray();
+            Optional<Vector3i> origin = Optional.ofNullable(jsonObject.get("origin"))
+                    .map(JsonElement::getAsJsonArray)
+                    .map(StructureReader::toVector3i);
             Path schemFile = path.resolveSibling(schemFileName);
             String schemName = SCHEM_PATTERN.matcher(path.getFileName().toString()).replaceAll("");
             return loadStructures(jsonObject.get("materialReplacements").getAsJsonObject(), schemFile, origin, schemName);
         }
     }
 
-    private static Map<String, BreweryStructure> loadStructures(JsonObject materialReplacements, Path schemFile, JsonArray origin, String schemName) throws StructureReadException {
+    private static Map<String, BreweryStructure> loadStructures(JsonObject materialReplacements, Path schemFile, Optional<Vector3i> origin, String schemName) throws StructureReadException {
         JsonElement excludedPatternJson = materialReplacements.get("excludedPattern");
         Pattern excludedPattern = null;
         if (excludedPatternJson instanceof JsonPrimitive) {
@@ -52,7 +73,7 @@ public class StructureReader {
         for (String materialSubstitutionPattern : includedMaterialSubstitutionsPatterns) {
             BlockPaletteParser blockPaletteParser = new SubtitutedBlockPaletteParser(includedMaterialSubstitutionsPatterns, materialSubstitutionPattern);
             Schematic schem = new SchematicReader().withBlockPaletteParser(blockPaletteParser).read(schemFile);
-            BreweryStructure struct = new BreweryStructure(schem, new Vector3i(origin.get(0).getAsInt(), origin.get(1).getAsInt(), origin.get(2).getAsInt()));
+            BreweryStructure struct = origin.map(vector3i -> new BreweryStructure(schem, vector3i)).orElse(new BreweryStructure(schem));
             output.put(schemName + "$" + materialSubstitutionPattern, struct);
         }
         return output;
@@ -79,5 +100,9 @@ public class StructureReader {
             output.add(material);
         }
         return output;
+    }
+
+    private static Vector3i toVector3i(JsonArray jsonArray) {
+        return new Vector3i(jsonArray.get(0).getAsInt(), jsonArray.get(1).getAsInt(), jsonArray.get(2).getAsInt());
     }
 }

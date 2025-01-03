@@ -1,6 +1,6 @@
 package dev.jsinco.brewery.structure;
 
-public class StructureReadException extends Exception {
+public class StructureReadException extends IllegalArgumentException {
 
     public StructureReadException(String message) {
         super(message);
