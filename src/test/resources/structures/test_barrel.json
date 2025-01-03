@@ -1,10 +1,5 @@
 {
-  "schemFile": "small_barrel.schem",
-  "origin": [
-    1,
-    2,
-    3
-  ],
+  "schemFile": "test_barrel.schem",
   "materialReplacements" : {
     "excludedPattern": "_planks$",
     "materials": "#planks"

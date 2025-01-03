@@ -18,10 +18,6 @@ public class SubtitutedBlockPaletteParser implements BlockPaletteParser {
 
     @Override
     public BlockData parse(String materialsString) {
-        String compiledMaterialsString = materialsString;
-        for (String pattern : patterns) {
-            compiledMaterialsString = compiledMaterialsString.replace(pattern, target);
-        }
-        return Bukkit.createBlockData(compiledMaterialsString);
+        return Bukkit.createBlockData(SubstitutionUtils.substituteWithTarget(materialsString, target, patterns));
     }
 }
