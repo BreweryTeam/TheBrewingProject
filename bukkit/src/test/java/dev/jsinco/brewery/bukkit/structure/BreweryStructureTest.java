@@ -91,7 +91,8 @@ class BreweryStructureTest {
                         StructureMeta.TYPE, StructureType.DISTILLERY,
                         StructureMeta.INVENTORY_SIZE, 18,
                         StructureMeta.TAGGED_MATERIAL, "decorated_pot",
-                        StructureMeta.PROCESS_TIME, 0L
+                        StructureMeta.PROCESS_TIME, 0L,
+                        StructureMeta.PROCESS_AMOUNT, 1
                 )),
                 Arguments.of(Map.of(
                         StructureMeta.TYPE, StructureType.BARREL,
