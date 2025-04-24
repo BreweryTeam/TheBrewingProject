@@ -1,7 +1,7 @@
 package dev.jsinco.brewery.bukkit.structure;
 
 import dev.jsinco.brewery.breweries.StructureHolder;
-import dev.jsinco.brewery.structure.MultiBlockStructure;
+import dev.jsinco.brewery.structure.MultiblockStructure;
 import dev.jsinco.brewery.util.Pair;
 import dev.jsinco.brewery.vector.BreweryLocation;
 import lombok.Getter;
@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Getter
-public class PlacedBreweryStructure<H extends StructureHolder<H>> implements MultiBlockStructure<H> {
+public class PlacedBreweryStructure<H extends StructureHolder<H>> implements MultiblockStructure<H> {
     private static final List<Matrix3d> ALLOWED_TRANSFORMATIONS = compileAllowedTransformations();
     private final BreweryStructure structure;
     private final Matrix3d transformation;

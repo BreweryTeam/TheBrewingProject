@@ -7,6 +7,7 @@ import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.bukkit.brew.BrewAdapter;
 import dev.jsinco.brewery.bukkit.brew.BukkitDistilleryBrewDataType;
 import dev.jsinco.brewery.bukkit.structure.PlacedBreweryStructure;
+import dev.jsinco.brewery.bukkit.util.BlockUtil;
 import dev.jsinco.brewery.bukkit.util.BukkitAdapter;
 import dev.jsinco.brewery.configuration.locale.TranslationsConfig;
 import dev.jsinco.brewery.database.PersistenceException;
@@ -14,6 +15,8 @@ import dev.jsinco.brewery.structure.StructureMeta;
 import dev.jsinco.brewery.util.Pair;
 import dev.jsinco.brewery.vector.BreweryLocation;
 import lombok.Getter;
+import net.kyori.adventure.key.Key;
+import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -124,6 +127,21 @@ public class BukkitDistillery implements Distillery<BukkitDistillery, ItemStack,
     }
 
     public void tick() {
+        BreweryLocation unique = getStructure().getUnique();
+        long timeProcessed = getTimeProcessed();
+        if (!BlockUtil.isChunkLoaded(unique) || (timeProcessed % getProcessTime() != 0 || timeProcessed == 0) || mixture.isEmpty() || distillate.isFull()) {
+            return;
+        }
+        BukkitAdapter.toWorld(unique)
+                .ifPresent(world -> world.playSound(Sound.sound()
+                                .source(Sound.Source.BLOCK)
+                                .type(Key.key("block.brewing_stand.brew"))
+                                .build(),
+                        unique.x(), unique.y(), unique.z()
+                ));
+    }
+
+    public void tickInventory() {
         checkDirty();
         boolean hasChanged;
         if (mixture.getInventory().getViewers().isEmpty()) {
@@ -143,10 +161,12 @@ public class BukkitDistillery implements Distillery<BukkitDistillery, ItemStack,
         if (distillate.getInventory().getViewers().isEmpty() && mixture.getInventory().getViewers().isEmpty()) {
             TheBrewingProject.getInstance().getBreweryRegistry().unregisterOpened(this);
         }
-        if (TheBrewingProject.getInstance().getTime() - startTime < getStructure().getStructure().getMeta(StructureMeta.PROCESS_TIME) || mixture.isEmpty()) {
+        long diff = getTimeProcessed();
+        long processTime = getProcessTime();
+        if (diff < processTime || mixture.isEmpty()) {
             return;
         }
-        transferItems(mixture, distillate);
+        transferItems(mixture, distillate, (int) (getStructure().getStructure().getMeta(StructureMeta.PROCESS_AMOUNT) * (diff / processTime)));
         if (!distillate.getInventory().getViewers().isEmpty()) {
             distillate.updateInventoryFromBrews();
         }
@@ -156,17 +176,25 @@ public class BukkitDistillery implements Distillery<BukkitDistillery, ItemStack,
         resetStartTime();
     }
 
+    private long getTimeProcessed() {
+        return TheBrewingProject.getInstance().getTime() - startTime;
+    }
+
     private void resetStartTime() {
         startTime = TheBrewingProject.getInstance().getTime();
     }
 
-    private void transferItems(DistilleryInventory inventory1, DistilleryInventory inventory2) {
+    private long getProcessTime() {
+        return getStructure().getStructure().getMeta(StructureMeta.PROCESS_TIME);
+    }
+
+    private void transferItems(DistilleryInventory inventory1, DistilleryInventory inventory2, int amount) {
         Brew[] brews = inventory1.getBrews();
-        int i = 0;
         for (int j = 0; j < inventory2.getBrews().length; j++) {
             if (inventory2.getBrews()[j] != null) {
                 continue; // Avoid overriding brews
             }
+            int i = 0;
             while (i < brews.length) {
                 if (brews[i] != null) {
                     break;
@@ -174,6 +202,9 @@ public class BukkitDistillery implements Distillery<BukkitDistillery, ItemStack,
                 i++;
             }
             if (i >= brews.length) {
+                return;
+            }
+            if (amount-- <= 0) {
                 return;
             }
             Brew mixtureBrew = inventory1.getBrews()[i];
@@ -293,6 +324,15 @@ public class BukkitDistillery implements Distillery<BukkitDistillery, ItemStack,
         public boolean isEmpty() {
             for (Brew brew : brews) {
                 if (brew != null) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        public boolean isFull() {
+            for (Brew brew : brews) {
+                if (brew == null) {
                     return false;
                 }
             }

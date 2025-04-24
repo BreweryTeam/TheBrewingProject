@@ -4,6 +4,7 @@
     "inventory_size": 9,
     "type": "distillery",
     "tagged_material": "decorated_pot",
-    "process_time": 800
+    "process_time": 80,
+    "process_amount": 1
   }
 }

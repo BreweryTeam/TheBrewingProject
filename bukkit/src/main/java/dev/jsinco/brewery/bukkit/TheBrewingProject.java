@@ -37,6 +37,7 @@ import dev.jsinco.brewery.effect.text.DrunkTextRegistry;
 import dev.jsinco.brewery.event.CustomEventRegistry;
 import dev.jsinco.brewery.recipes.RecipeReader;
 import dev.jsinco.brewery.recipes.RecipeRegistryImpl;
+import dev.jsinco.brewery.structure.MultiblockStructure;
 import dev.jsinco.brewery.structure.PlacedStructureRegistryImpl;
 import dev.jsinco.brewery.structure.StructureMeta;
 import dev.jsinco.brewery.structure.StructureType;
@@ -221,8 +222,12 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
                 .filter(Tickable.class::isInstance)
                 .map(Tickable.class::cast)
                 .forEach(Tickable::tick);
-        breweryRegistry.<BukkitBarrel>getOpened(StructureType.BARREL).forEach(Barrel::tick);
-        breweryRegistry.<BukkitDistillery>getOpened(StructureType.DISTILLERY).forEach(Distillery::tick);
+        placedStructureRegistry.getStructures(StructureType.DISTILLERY).stream()
+                .map(MultiblockStructure::getHolder)
+                .map(Distillery.class::cast)
+                .forEach(Distillery::tick);
+        breweryRegistry.<BukkitBarrel>getOpened(StructureType.BARREL).forEach(Barrel::tickInventory);
+        breweryRegistry.<BukkitDistillery>getOpened(StructureType.DISTILLERY).forEach(Distillery::tickInventory);
     }
 
     private void otherTicking() {

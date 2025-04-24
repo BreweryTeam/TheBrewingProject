@@ -2,7 +2,7 @@ package dev.jsinco.brewery.bukkit.integration.structure;
 
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.bukkit.util.BukkitAdapter;
-import dev.jsinco.brewery.structure.MultiBlockStructure;
+import dev.jsinco.brewery.structure.MultiblockStructure;
 import org.bukkit.Bukkit;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
@@ -32,10 +32,10 @@ public class BoltHook {
         if (boltAPI == null) {
             return true;
         }
-        Optional<MultiBlockStructure<?>> multiBlockStructureOptional = TheBrewingProject.getInstance().getPlacedStructureRegistry().getStructure(BukkitAdapter.toBreweryLocation(block));
+        Optional<MultiblockStructure<?>> multiBlockStructureOptional = TheBrewingProject.getInstance().getPlacedStructureRegistry().getStructure(BukkitAdapter.toBreweryLocation(block));
         return multiBlockStructureOptional
                 .stream()
-                .map(MultiBlockStructure::positions)
+                .map(MultiblockStructure::positions)
                 .flatMap(List::stream)
                 .map(BukkitAdapter::toBlock)
                 .allMatch(position -> boltAPI.canAccess(position, player))

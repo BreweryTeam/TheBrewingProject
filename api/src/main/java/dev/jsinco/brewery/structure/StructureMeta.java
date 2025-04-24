@@ -17,6 +17,7 @@ public record StructureMeta<V>(BreweryKey key, Predicate<Object> validator, Func
     public static final StructureMeta<StructureType> TYPE = new StructureMeta<>(BreweryKey.parse("type"), StructureType.class::isInstance, jsonElement -> Registry.STRUCTURE_TYPE.get(BreweryKey.parse(jsonElement.getAsString().toLowerCase(Locale.ROOT))));
     public static final StructureMeta<String> TAGGED_MATERIAL = new StructureMeta<>(BreweryKey.parse("tagged_material"), String.class::isInstance, JsonElement::getAsString);
     public static final StructureMeta<Long> PROCESS_TIME = new StructureMeta<>(BreweryKey.parse("process_time"), Long.class::isInstance, JsonElement::getAsLong);
+    public static final StructureMeta<Integer> PROCESS_AMOUNT = new StructureMeta<>(BreweryKey.parse("process_amount"), Integer.class::isInstance, JsonElement::getAsInt);
 
     @Override
     public String toString() {

@@ -95,7 +95,7 @@ public class BukkitBarrel implements Barrel<BukkitBarrel, ItemStack, Inventory>,
     }
 
     @Override
-    public void tick() {
+    public void tickInventory() {
         updateInventory();
         if (inventory.getViewers().isEmpty()) {
             close();

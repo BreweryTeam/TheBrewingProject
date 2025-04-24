@@ -45,7 +45,7 @@ public class BukkitBarrelDataType implements SqlStoredData.Findable<BukkitBarrel
             preparedStatement.setBytes(7, DecoderEncoder.asBytes(worldUuid));
             preparedStatement.setString(8, DecoderEncoder.serializeTransformation(placedStructure.getTransformation()));
             preparedStatement.setString(9, structure.getName());
-            preparedStatement.setString(10, value.getType().key().toString());
+            preparedStatement.setString(10, value.getStructureType().key().toString());
             preparedStatement.setInt(11, value.getSize());
             preparedStatement.execute();
         } catch (SQLException e) {

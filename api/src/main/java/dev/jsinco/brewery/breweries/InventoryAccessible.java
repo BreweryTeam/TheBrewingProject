@@ -13,4 +13,6 @@ public interface InventoryAccessible<IS, I> {
     boolean inventoryAllows(@NotNull UUID playerUuid, @NotNull IS item);
 
     Set<I> getInventories();
+
+    void tickInventory();
 }

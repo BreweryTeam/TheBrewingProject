@@ -9,7 +9,7 @@ import dev.jsinco.brewery.bukkit.util.BukkitAdapter;
 import dev.jsinco.brewery.configuration.locale.TranslationsConfig;
 import dev.jsinco.brewery.database.PersistenceException;
 import dev.jsinco.brewery.database.sql.Database;
-import dev.jsinco.brewery.structure.MultiBlockStructure;
+import dev.jsinco.brewery.structure.MultiblockStructure;
 import dev.jsinco.brewery.structure.PlacedStructureRegistryImpl;
 import dev.jsinco.brewery.structure.StructureMeta;
 import dev.jsinco.brewery.structure.StructureType;
@@ -172,20 +172,20 @@ public class BlockEventListener implements Listener {
     }
 
     private void onMultiBlockRemove(List<Location> locationList) {
-        Set<MultiBlockStructure<?>> multiBlockStructures = new HashSet<>();
+        Set<MultiblockStructure<?>> multiblockStructures = new HashSet<>();
         Set<StructureHolder<?>> holders = new HashSet<>();
         for (Location location : locationList) {
             BreweryLocation breweryLocation = BukkitAdapter.toBreweryLocation(location);
             placedStructureRegistry.getHolder(breweryLocation).ifPresent(holder -> {
                 holders.add(holder);
-                multiBlockStructures.add(holder.getStructure());
+                multiblockStructures.add(holder.getStructure());
                 if (holder instanceof InventoryAccessible inventoryAccessible) {
                     breweryRegistry.unregisterInventory(inventoryAccessible);
                 }
             });
             breweryRegistry.getActiveSinglePositionStructure(breweryLocation).ifPresent(cauldron -> ListenerUtil.removeActiveSinglePositionStructure(cauldron, breweryRegistry, database));
         }
-        multiBlockStructures.forEach(placedStructureRegistry::unregisterStructure);
+        multiblockStructures.forEach(placedStructureRegistry::unregisterStructure);
         for (StructureHolder<?> holder : holders) {
             holder.destroy(BukkitAdapter.toBreweryLocation(locationList.getFirst()));
             remove(holder);
@@ -209,10 +209,10 @@ public class BlockEventListener implements Listener {
      */
     private void destroyFromBlock(Block block) {
         BreweryLocation breweryLocation = BukkitAdapter.toBreweryLocation(block);
-        Optional<MultiBlockStructure<?>> multiBlockStructure = placedStructureRegistry.getStructure(breweryLocation);
+        Optional<MultiblockStructure<?>> multiBlockStructure = placedStructureRegistry.getStructure(breweryLocation);
         multiBlockStructure.ifPresent(placedStructureRegistry::unregisterStructure);
         multiBlockStructure
-                .map(MultiBlockStructure::getHolder)
+                .map(MultiblockStructure::getHolder)
                 .ifPresent(holder -> {
                     holder.destroy(breweryLocation);
                     remove(holder);

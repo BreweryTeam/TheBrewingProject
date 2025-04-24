@@ -9,6 +9,8 @@ import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Optional;
+
 public class BukkitAdapter {
 
     public static Location toLocation(BreweryLocation location) {
@@ -33,6 +35,10 @@ public class BukkitAdapter {
 
     public static BreweryKey toBreweryKey(NamespacedKey namespacedKey) {
         return new BreweryKey(namespacedKey.namespace(), namespacedKey.getKey());
+    }
+
+    public static Optional<World> toWorld(BreweryLocation location) {
+        return Optional.ofNullable(Bukkit.getWorld(location.worldUuid()));
     }
 
     public static @Nullable Location parseLocation(String teleport) {

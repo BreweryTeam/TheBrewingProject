@@ -10,13 +10,13 @@ import java.util.UUID;
 
 public interface PlacedStructureRegistry {
 
-    void registerStructure(MultiBlockStructure<?> placedBreweryStructure);
+    void registerStructure(MultiblockStructure<?> placedBreweryStructure);
 
-    void unregisterStructure(MultiBlockStructure<?> structure);
+    void unregisterStructure(MultiblockStructure<?> structure);
 
-    Optional<MultiBlockStructure<?>> getStructure(BreweryLocation location);
+    Optional<MultiblockStructure<?>> getStructure(BreweryLocation location);
 
-    Set<MultiBlockStructure<?>> getStructures(Collection<BreweryLocation> locations);
+    Set<MultiblockStructure<?>> getStructures(Collection<BreweryLocation> locations);
 
     Optional<StructureHolder<?>> getHolder(BreweryLocation location);
 
