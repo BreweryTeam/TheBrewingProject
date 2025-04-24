@@ -129,7 +129,11 @@ public class BukkitDistillery implements Distillery<BukkitDistillery, ItemStack,
     public void tick() {
         BreweryLocation unique = getStructure().getUnique();
         long timeProcessed = getTimeProcessed();
-        if (!BlockUtil.isChunkLoaded(unique) || (timeProcessed % getProcessTime() != 0 || timeProcessed == 0) || mixture.isEmpty() || distillate.isFull()) {
+        long processTime = getProcessTime();
+        if (!BlockUtil.isChunkLoaded(unique)
+                || (timeProcessed % processTime != 0 || timeProcessed == 0)
+                || mixture.brewAmount() < (timeProcessed / processTime) * getStructure().getStructure().getMeta(StructureMeta.PROCESS_AMOUNT)
+                || distillate.isFull()) {
             return;
         }
         BukkitAdapter.toWorld(unique)
@@ -337,6 +341,16 @@ public class BukkitDistillery implements Distillery<BukkitDistillery, ItemStack,
                 }
             }
             return true;
+        }
+
+        public int brewAmount() {
+            int amount = 0;
+            for (Brew brew : brews) {
+                if (brew != null) {
+                    amount++;
+                }
+            }
+            return amount;
         }
     }
 }
