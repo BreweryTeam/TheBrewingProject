@@ -6,7 +6,6 @@ import dev.jsinco.brewery.util.FileUtil;
 
 import java.io.File;
 import java.nio.file.Path;
-import java.util.List;
 import java.util.Map;
 
 public class TranslationsConfig extends AbstractConfig {
@@ -98,8 +97,8 @@ public class TranslationsConfig extends AbstractConfig {
     @Key("cauldron.type.none")
     public static String CAULDRON_TYPE_NONE;
 
-    @Key("command.create.unknown-argument")
-    public static String COMMAND_CREATE_UNKNOWN_ARGUMENT;
+    @Key("command.illegal-argument-detailed")
+    public static String COMMAND_ILLEGAL_ARGUMENT_DETAILED;
 
     @Key("command.create.missing-mandatory-argument")
     public static String COMMAND_CREATE_MISSING_MANDATORY_ARGUMENT;

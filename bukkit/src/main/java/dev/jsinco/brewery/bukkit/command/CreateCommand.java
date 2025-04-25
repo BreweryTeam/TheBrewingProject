@@ -45,6 +45,10 @@ public class CreateCommand {
         );
 
         Queue<String> arguments = new LinkedList<>(Arrays.asList(args));
+        if(arguments.isEmpty()) {
+            sender.sendMessage(missingArgument("brewing_step"));
+            return true;
+        }
         List<BrewingStep> steps = new ArrayList<>();
         while (!arguments.isEmpty()) {
             String operatorName = arguments.poll();
@@ -53,7 +57,7 @@ public class CreateCommand {
             }
             BiFunction<Queue<String>, CommandSender, BrewingStep> operator = operators.get(operatorName);
             if (operator == null) {
-                sender.sendMessage(MiniMessage.miniMessage().deserialize(TranslationsConfig.COMMAND_CREATE_UNKNOWN_ARGUMENT, Placeholder.unparsed("argument", operatorName)));
+                sender.sendMessage(MiniMessage.miniMessage().deserialize(TranslationsConfig.COMMAND_ILLEGAL_ARGUMENT_DETAILED, Placeholder.unparsed("argument", operatorName)));
                 return true;
             }
             BrewingStep brewingStep = operator.apply(arguments, sender);
@@ -157,7 +161,7 @@ public class CreateCommand {
     }
 
     private static Component illegalArgument(String argument) {
-        return MiniMessage.miniMessage().deserialize(TranslationsConfig.COMMAND_CREATE_UNKNOWN_ARGUMENT, Placeholder.unparsed("argument", argument));
+        return MiniMessage.miniMessage().deserialize(TranslationsConfig.COMMAND_ILLEGAL_ARGUMENT_DETAILED, Placeholder.unparsed("argument", argument));
     }
 
     private static Component missingArgument(String argumentType) {
