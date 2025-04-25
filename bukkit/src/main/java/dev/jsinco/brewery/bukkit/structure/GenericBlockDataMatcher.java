@@ -15,6 +15,9 @@ public class GenericBlockDataMatcher implements BlockDataMatcher<Void> {
         if (expected instanceof MultipleFacing) {
             return actual.getMaterial().equals(expected.getMaterial());
         }
+        if (expected.getMaterial() == Material.DECORATED_POT) {
+            return expected.getMaterial() == Material.DECORATED_POT;
+        }
         return actual.equals(expected);
     }
 
