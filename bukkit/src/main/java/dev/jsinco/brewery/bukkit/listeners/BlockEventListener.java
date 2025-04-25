@@ -141,7 +141,6 @@ public class BlockEventListener implements Listener {
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onPistonExtend(BlockPistonExtendEvent event) {
         onMultiBlockRemove(event.getBlocks().stream()
-                .map(block -> block.getRelative(event.getDirection()))
                 .map(Block::getLocation)
                 .toList());
     }
@@ -149,7 +148,6 @@ public class BlockEventListener implements Listener {
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onPistonRetract(BlockPistonRetractEvent event) {
         onMultiBlockRemove(event.getBlocks().stream()
-                .map(block -> block.getRelative(event.getDirection()))
                 .map(Block::getLocation)
                 .toList()
         );
