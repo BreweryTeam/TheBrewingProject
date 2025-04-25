@@ -1,6 +1,7 @@
 package dev.jsinco.brewery.bukkit.command;
 
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
+import org.bukkit.entity.Player;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -10,17 +11,14 @@ import org.mockbukkit.mockbukkit.MockBukkit;
 import org.mockbukkit.mockbukkit.MockBukkitExtension;
 import org.mockbukkit.mockbukkit.MockBukkitInject;
 import org.mockbukkit.mockbukkit.ServerMock;
-import org.mockbukkit.mockbukkit.entity.PlayerMock;
-
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 @ExtendWith(MockBukkitExtension.class)
-class CreateCommandTest {
+class BreweryCommandTest {
 
     @MockBukkitInject
     ServerMock serverMock;
+    Player target;
     TheBrewingProject theBrewingProject;
-    PlayerMock target;
 
     @BeforeEach
     void setUp() {
@@ -30,19 +28,8 @@ class CreateCommandTest {
     }
 
     @ParameterizedTest
-    @CsvFileSource(resources = "/command/create_command_invalid_args.csv")
+    @CsvFileSource(resources = "/command/brew_command_invalid_args.csv")
     void onCommand(String arguments) {
-        assertDoesNotThrow(() -> CreateCommand.onCommand(target, target, arguments.split(" ")));
-    }
-
-    @Test
-    void onCommandEmpty() {
-        assertDoesNotThrow(() -> CreateCommand.onCommand(target, target, new String[0]));
-    }
-
-    @ParameterizedTest
-    @CsvFileSource(resources = "/command/create_command_invalid_args.csv")
-    void tabComplete(String arguments) {
-        assertDoesNotThrow(() -> CreateCommand.tabComplete(arguments.split(" ")));
+        target.performCommand(arguments);
     }
 }
