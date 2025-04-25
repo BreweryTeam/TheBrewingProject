@@ -24,6 +24,7 @@ import dev.jsinco.brewery.bukkit.listeners.WorldEventListener;
 import dev.jsinco.brewery.bukkit.recipe.BukkitRecipeResultReader;
 import dev.jsinco.brewery.bukkit.recipe.DefaultRecipeReader;
 import dev.jsinco.brewery.bukkit.structure.BarrelBlockDataMatcher;
+import dev.jsinco.brewery.bukkit.structure.StructureReadException;
 import dev.jsinco.brewery.bukkit.structure.StructureReader;
 import dev.jsinco.brewery.bukkit.structure.StructureRegistry;
 import dev.jsinco.brewery.bukkit.util.BreweryTimeDataType;
@@ -41,6 +42,7 @@ import dev.jsinco.brewery.structure.PlacedStructureRegistryImpl;
 import dev.jsinco.brewery.structure.StructureMeta;
 import dev.jsinco.brewery.structure.StructureType;
 import dev.jsinco.brewery.util.BreweryKey;
+import dev.jsinco.brewery.util.Logging;
 import dev.jsinco.brewery.util.Util;
 import lombok.Getter;
 import org.bukkit.Bukkit;
@@ -143,11 +145,13 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
         Stream.of(structureRoot.listFiles())
                 .filter(file -> file.getName().endsWith(".json"))
                 .map(File::toPath)
-                .map(path -> {
+                .flatMap(path -> {
                     try {
-                        return StructureReader.fromJson(path);
-                    } catch (IOException e) {
-                        throw new RuntimeException(e);
+                        return Stream.of(StructureReader.fromJson(path));
+                    } catch (IOException | StructureReadException e) {
+                        Logging.error("Could not load structure: " + path);
+                        e.printStackTrace();
+                        return Stream.empty();
                     }
                 })
                 .forEach(structure -> {

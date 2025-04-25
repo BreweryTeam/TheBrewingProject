@@ -63,6 +63,9 @@ public class StructureReader {
                     .stream()
                     .map(entry -> {
                         StructureMeta<?> meta = dev.jsinco.brewery.util.Registry.STRUCTURE_META.get(BreweryKey.parse(entry.getKey()));
+                        if (meta == null) {
+                            throw new StructureReadException("Unknown meta: " + entry.getKey());
+                        }
                         Object value = meta.deserializer().apply(entry.getValue());
                         return new Pair<>(meta, value);
                     })
