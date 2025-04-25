@@ -193,26 +193,26 @@ public class BukkitDistillery implements Distillery<BukkitDistillery, ItemStack,
     }
 
     private void transferItems(DistilleryInventory inventory1, DistilleryInventory inventory2, int amount) {
-        Brew[] brews = inventory1.getBrews();
-        for (int j = 0; j < inventory2.getBrews().length; j++) {
-            if (inventory2.getBrews()[j] != null) {
-                continue; // Avoid overriding brews
-            }
-            int i = 0;
-            while (i < brews.length) {
-                if (brews[i] != null) {
-                    break;
-                }
-                i++;
-            }
-            if (i >= brews.length) {
-                return;
+        Queue<Pair<Brew, Integer>> brewsToTransfer = new LinkedList<>();
+        for (int i = 0; i < inventory1.brews.length; i++) {
+            if (inventory1.getBrews()[i] == null) {
+                continue;
             }
             if (amount-- <= 0) {
+                break;
+            }
+            brewsToTransfer.add(new Pair<>(inventory1.brews[i], i));
+        }
+        for (int i = 0; i < inventory2.brews.length; i++) {
+            if (inventory2.getBrews()[i] != null) {
+                continue;
+            }
+            if (brewsToTransfer.isEmpty()) {
                 return;
             }
-            Brew mixtureBrew = inventory1.getBrews()[i];
-            inventory1.store(null, i);
+            Pair<Brew, Integer> nextBrewToTransfer = brewsToTransfer.poll();
+            Brew mixtureBrew = nextBrewToTransfer.first();
+            inventory1.store(null, nextBrewToTransfer.second());
             inventory2.store(mixtureBrew.withLastStep(
                             BrewingStep.Distill.class,
                             BrewingStep.Distill::incrementAmount,
