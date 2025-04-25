@@ -82,7 +82,7 @@ public class BukkitDistilleryDataType implements SqlStoredData.Findable<BukkitDi
                 String structureName = resultSet.getString("format");
                 Optional<BreweryStructure> breweryStructure = TheBrewingProject.getInstance().getStructureRegistry().getStructure(structureName);
                 if (breweryStructure.isEmpty()) {
-                    Logging.warning("Missing structure: " + structureName);
+                    Logging.warning("Could not find format '" + structureName + "' skipping distillery at: " + structureOrigin);
                     continue;
                 }
                 Matrix3d transformation = DecoderEncoder.deserializeTransformation(resultSet.getString("transformation"));
