@@ -57,7 +57,7 @@ mixer.create-denied: <gray>Successfully created a mixer
 mixer.access-denied: <gray>Successfully created a mixer
 command.unknown-player: <red>Unknown player <player_name>
 command.undefined-player: <red>You need to define a player
-command.create.unknown-argument: <red>Unknown argument(s) '<argument>'
+command.illegal-argument-detailed: <red>Unknown argument(s) '<argument>'
 command.create.missing-mandatory-argument: <red>Missing mandatory argument(s) <arguments>
 command.create.success: <gray>Successfully created <brew_name>
 command.status.info.message: |-

@@ -3,6 +3,7 @@ package dev.jsinco.brewery.bukkit.command;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.bukkit.effect.event.NamedDrunkEventExecutor;
 import dev.jsinco.brewery.configuration.locale.TranslationsConfig;
+import dev.jsinco.brewery.event.CustomEvent;
 import dev.jsinco.brewery.event.DrunkEvent;
 import dev.jsinco.brewery.event.NamedDrunkEvent;
 import dev.jsinco.brewery.util.BreweryKey;
@@ -30,68 +31,75 @@ public class BreweryCommand implements TabExecutor {
 
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String @NotNull [] args) {
+        if (args.length == 0) {
+            return false;
+        }
+        SubCommand subCommand;
         try {
-            SubCommand subCommand = SubCommand.valueOf(args[0].toUpperCase(Locale.ROOT));
-            if (!sender.hasPermission(subCommand.getPermissionNode())) {
+            subCommand = SubCommand.valueOf(args[0].toUpperCase(Locale.ROOT));
+        } catch (IllegalArgumentException e) {
+            sender.sendMessage(MiniMessage.miniMessage().deserialize(TranslationsConfig.COMMAND_ILLEGAL_ARGUMENT_DETAILED, Placeholder.unparsed("argument", args[0])));
+            return true;
+        }
+        if (!sender.hasPermission(subCommand.getPermissionNode())) {
+            sender.sendMessage(MiniMessage.miniMessage().deserialize(TranslationsConfig.COMMAND_NOT_ENOUGH_PERMISSIONS));
+            return true;
+        }
+        OfflinePlayer target;
+        if (args.length > 1 && args[1].equals("for")) {
+            if (!sender.hasPermission("brewery.command.other")) {
                 sender.sendMessage(MiniMessage.miniMessage().deserialize(TranslationsConfig.COMMAND_NOT_ENOUGH_PERMISSIONS));
                 return true;
             }
-            OfflinePlayer target;
-            if (args.length > 1 && args[1].equals("for")) {
-                if (!sender.hasPermission("brewery.command.other")) {
-                    sender.sendMessage(MiniMessage.miniMessage().deserialize(TranslationsConfig.COMMAND_NOT_ENOUGH_PERMISSIONS));
+            if (args.length > 2) {
+                target = Bukkit.getOfflinePlayerIfCached(args[2]);
+                if (target == null) {
+                    sender.sendMessage(MiniMessage.miniMessage().deserialize(TranslationsConfig.COMMAND_UNKNOWN_PLAYER, Placeholder.unparsed("player_name", args[2])));
                     return true;
                 }
-                if (args.length > 2) {
-                    target = Bukkit.getOfflinePlayerIfCached(args[2]);
-                    if (target == null) {
-                        sender.sendMessage(MiniMessage.miniMessage().deserialize(TranslationsConfig.COMMAND_UNKNOWN_PLAYER, Placeholder.unparsed("player_name", args[2])));
-                        return true;
-                    }
-                } else {
-                    sender.sendMessage(MiniMessage.miniMessage().deserialize(TranslationsConfig.COMMAND_MISSING_ARGUMENT, Placeholder.unparsed("argument_type", "<player-name>")));
-                    return true;
-                }
-                args = Arrays.copyOfRange(args, 2, args.length);
-            } else if (sender instanceof OfflinePlayer player) {
-                target = player;
             } else {
-                target = null;
-            }
-            if ((subCommand.isRequiresOfflinePlayer() && target == null) || (!(target instanceof Player) && subCommand.isRequiresPlayer())) {
-                sender.sendMessage(MiniMessage.miniMessage().deserialize(TranslationsConfig.COMMAND_UNDEFINED_PLAYER));
+                sender.sendMessage(MiniMessage.miniMessage().deserialize(TranslationsConfig.COMMAND_MISSING_ARGUMENT, Placeholder.unparsed("argument_type", "<player_name>")));
                 return true;
             }
-            String @NotNull [] finalArgs = args;
-            return switch (subCommand) {
-                case CREATE ->
-                        CreateCommand.onCommand((Player) target, sender, Arrays.copyOfRange(args, 1, args.length));
-                case EVENT -> {
-                    NamedDrunkEvent namedDrunkEvent = Registry.DRUNK_EVENT.get(BreweryKey.parse(args[1]));
-                    if (namedDrunkEvent != null) {
-                        NamedDrunkEventExecutor.doDrunkEvent(target.getUniqueId(), namedDrunkEvent);
-                        yield true;
-                    }
-                    TheBrewingProject.getInstance().getDrunkEventExecutor().doDrunkEvent(target.getUniqueId(), TheBrewingProject.getInstance().getCustomDrunkEventRegistry().getCustomEvent(BreweryKey.parse(args[1])));
-                    yield true;
-                }
-                case STATUS -> StatusCommand.onCommand(target, sender, Arrays.copyOfRange(args, 1, args.length));
-                case INFO -> InfoCommand.onCommand((Player) target, sender, Arrays.copyOfRange(args, 1, args.length));
-                case RELOAD -> {
-                    TheBrewingProject.getInstance().reload();
-                    sender.sendMessage(MiniMessage.miniMessage().deserialize(TranslationsConfig.COMMAND_RELOAD_MESSAGE));
-                    yield true;
-                }
-                case SEAL -> SealCommand.onCommand((Player) target, sender, Arrays.copyOfRange(args, 1, args.length));
-            };
-        } catch (IndexOutOfBoundsException e) {
-            // Lazy handling
-            sender.sendMessage(MiniMessage.miniMessage().deserialize(TranslationsConfig.COMMAND_MISSING_ARGUMENT));
-            return true;
-        } catch (IllegalArgumentException | NullPointerException e) {
-            sender.sendMessage(MiniMessage.miniMessage().deserialize(TranslationsConfig.COMMAND_ILLEGAL_ARGUMENT));
+            args = Arrays.copyOfRange(args, 2, args.length);
+        } else if (sender instanceof OfflinePlayer player) {
+            target = player;
+        } else {
+            target = null;
+        }
+        if ((subCommand.isRequiresOfflinePlayer() && target == null) || (!(target instanceof Player) && subCommand.isRequiresPlayer())) {
+            sender.sendMessage(MiniMessage.miniMessage().deserialize(TranslationsConfig.COMMAND_UNDEFINED_PLAYER));
             return true;
         }
+        return switch (subCommand) {
+            case CREATE -> CreateCommand.onCommand((Player) target, sender, Arrays.copyOfRange(args, 1, args.length));
+            case EVENT -> {
+                if(args.length < 2) {
+                    sender.sendMessage(MiniMessage.miniMessage().deserialize(TranslationsConfig.COMMAND_MISSING_ARGUMENT, Placeholder.unparsed("argument_type", "<event_type>")));
+                    yield true;
+                }
+                NamedDrunkEvent namedDrunkEvent = Registry.DRUNK_EVENT.get(BreweryKey.parse(args[1]));
+                if (namedDrunkEvent != null) {
+                    NamedDrunkEventExecutor.doDrunkEvent(target.getUniqueId(), namedDrunkEvent);
+                    yield true;
+                }
+                CustomEvent customEvent = TheBrewingProject.getInstance().getCustomDrunkEventRegistry().getCustomEvent(BreweryKey.parse(args[1]));
+                if (customEvent == null) {
+                    sender.sendMessage(MiniMessage.miniMessage().deserialize(TranslationsConfig.COMMAND_ILLEGAL_ARGUMENT_DETAILED, Placeholder.unparsed("argument", args[1])));
+                    yield true;
+                }
+                TheBrewingProject.getInstance().getDrunkEventExecutor().doDrunkEvent(target.getUniqueId(), customEvent);
+                yield true;
+            }
+            case STATUS -> StatusCommand.onCommand(target, sender, Arrays.copyOfRange(args, 1, args.length));
+            case INFO -> InfoCommand.onCommand((Player) target, sender, Arrays.copyOfRange(args, 1, args.length));
+            case RELOAD -> {
+                TheBrewingProject.getInstance().reload();
+                sender.sendMessage(MiniMessage.miniMessage().deserialize(TranslationsConfig.COMMAND_RELOAD_MESSAGE));
+                yield true;
+            }
+            case SEAL -> SealCommand.onCommand((Player) target, sender, Arrays.copyOfRange(args, 1, args.length));
+        };
     }
 
     @Override
