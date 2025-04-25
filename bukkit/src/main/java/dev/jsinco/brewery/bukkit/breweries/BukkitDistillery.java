@@ -19,8 +19,10 @@ import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
+import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.Particle;
 import org.bukkit.block.Block;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
@@ -30,7 +32,9 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.awt.*;
 import java.util.*;
+import java.util.List;
 
 public class BukkitDistillery implements Distillery<BukkitDistillery, ItemStack, Inventory> {
 
@@ -131,18 +135,25 @@ public class BukkitDistillery implements Distillery<BukkitDistillery, ItemStack,
         long timeProcessed = getTimeProcessed();
         long processTime = getProcessTime();
         if (!BlockUtil.isChunkLoaded(unique)
-                || (timeProcessed % processTime != 0 || timeProcessed == 0)
                 || mixture.brewAmount() < (timeProcessed / processTime) * getStructure().getStructure().getMeta(StructureMeta.PROCESS_AMOUNT)
                 || distillate.isFull()) {
             return;
         }
-        BukkitAdapter.toWorld(unique)
-                .ifPresent(world -> world.playSound(Sound.sound()
-                                .source(Sound.Source.BLOCK)
-                                .type(Key.key("block.brewing_stand.brew"))
-                                .build(),
-                        unique.x(), unique.y(), unique.z()
-                ));
+        if (timeProcessed % processTime == 0 && timeProcessed != 0) {
+            BukkitAdapter.toWorld(unique)
+                    .ifPresent(world -> world.playSound(Sound.sound()
+                                    .source(Sound.Source.BLOCK)
+                                    .type(Key.key("block.brewing_stand.brew"))
+                                    .build(),
+                            unique.x(), unique.y(), unique.z()
+                    ));
+        }
+        if (timeProcessed % (processTime / 4) < processTime / 16) {
+            distillateContainerLocations.stream()
+                    .map(BukkitAdapter::toLocation)
+                    .map(location -> location.add(0.5, 1.3, 0.5))
+                    .forEach(location -> location.getWorld().spawnParticle(Particle.ENTITY_EFFECT, location, 2, Color.WHITE));
+        }
     }
 
     public void tickInventory() {
