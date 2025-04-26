@@ -24,4 +24,4 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
 
       - name: Run unit tests
-        run: ./gradlew test --refresh-dependencies
+        run: ./gradlew :bukkit:test --refresh-dependencies
