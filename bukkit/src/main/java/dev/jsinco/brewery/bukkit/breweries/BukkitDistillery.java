@@ -18,11 +18,7 @@ import lombok.Getter;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.minimessage.MiniMessage;
-import org.bukkit.Bukkit;
-import org.bukkit.Color;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.Particle;
+import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
@@ -32,9 +28,7 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.awt.*;
 import java.util.*;
-import java.util.List;
 
 public class BukkitDistillery implements Distillery<BukkitDistillery, ItemStack, Inventory> {
 
@@ -68,7 +62,7 @@ public class BukkitDistillery implements Distillery<BukkitDistillery, ItemStack,
         if (mixtureContainerLocations.contains(location)) {
             if (!player.hasPermission("brewery.distillery.access")) {
                 player.sendMessage(MiniMessage.miniMessage().deserialize(TranslationsConfig.DISTILLERY_ACCESS_DENIED));
-                return true;
+                return false;
             }
             mixture.updateInventoryFromBrews();
             TheBrewingProject.getInstance().getBreweryRegistry().registerOpened(this);
@@ -78,11 +72,12 @@ public class BukkitDistillery implements Distillery<BukkitDistillery, ItemStack,
         if (distillateContainerLocations.contains(location)) {
             if (!player.hasPermission("brewery.distillery.access")) {
                 player.sendMessage(MiniMessage.miniMessage().deserialize(TranslationsConfig.DISTILLERY_ACCESS_DENIED));
-                return true;
+                return false;
             }
             distillate.updateInventoryFromBrews();
             TheBrewingProject.getInstance().getBreweryRegistry().registerOpened(this);
             player.openInventory(distillate.getInventory());
+            return true;
         }
         return false;
     }

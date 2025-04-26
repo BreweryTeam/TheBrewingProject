@@ -37,10 +37,10 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.*;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.inventory.meta.PotionMeta;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -77,13 +77,12 @@ public class PlayerEventListener implements Listener {
         if (possibleStructureHolder.isEmpty()) {
             return;
         }
-        if (possibleStructureHolder.get() instanceof InventoryAccessible inventoryAccessible) {
-            if (inventoryAccessible.open(BukkitAdapter.toBreweryLocation(playerInteractEvent.getClickedBlock()), playerInteractEvent.getPlayer().getUniqueId())) {
-                playerInteractEvent.setUseItemInHand(Event.Result.DENY);
-                playerInteractEvent.setUseInteractedBlock(Event.Result.DENY);
-                breweryRegistry.registerOpened(inventoryAccessible);
-            }
+        if (possibleStructureHolder.get() instanceof InventoryAccessible<?, ?> inventoryAccessible
+                && inventoryAccessible.open(BukkitAdapter.toBreweryLocation(playerInteractEvent.getClickedBlock()), playerInteractEvent.getPlayer().getUniqueId())) {
+            breweryRegistry.registerOpened((InventoryAccessible<ItemStack, Inventory>) inventoryAccessible);
         }
+        playerInteractEvent.setUseItemInHand(Event.Result.DENY);
+        playerInteractEvent.setUseInteractedBlock(Event.Result.DENY);
     }
 
     @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
