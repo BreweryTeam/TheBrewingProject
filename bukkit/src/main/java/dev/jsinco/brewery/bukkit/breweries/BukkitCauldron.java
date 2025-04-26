@@ -94,16 +94,14 @@ public class BukkitCauldron implements dev.jsinco.brewery.breweries.Cauldron {
         ListenerUtil.removeActiveSinglePositionStructure(this, TheBrewingProject.getInstance().getBreweryRegistry(), TheBrewingProject.getInstance().getDatabase());
     }
 
-
     public boolean addIngredient(@NotNull ItemStack item, Player player) {
         // TODO: Add API event
         if (!player.hasPermission("brewery.cauldron.access")) {
             player.sendMessage(MiniMessage.miniMessage().deserialize(TranslationsConfig.CAULDRON_ACCESS_DENIED));
             return false;
         }
-        if (brewExtracted) {
-            player.sendMessage(MiniMessage.miniMessage().deserialize(TranslationsConfig.CAULDRON_CANT_ADD_MORE_INGREDIENTS));
-            return false;
+        if (!brewExtracted && item.getType() == Material.POTION) {
+            BukkitCauldron.incrementLevel(getBlock());
         }
         this.hot = isHeatSource(getBlock().getRelative(BlockFace.DOWN));
         long time = TheBrewingProject.getInstance().getTime();

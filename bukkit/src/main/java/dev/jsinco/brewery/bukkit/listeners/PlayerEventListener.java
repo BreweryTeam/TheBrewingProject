@@ -162,21 +162,13 @@ public class PlayerEventListener implements Listener {
     }
 
     private void handleIngredientAddition(ItemStack itemStack, Block block, @Nullable BukkitCauldron cauldron, Player player) {
-        if (itemStack.getType() == Material.POTION) {
-            BukkitCauldron.incrementLevel(block);
-        }
-        if (block.getType() == Material.CAULDRON) {
+        if (block.getType() == Material.CAULDRON && itemStack.getType() != Material.POTION) {
             return;
         }
         if (cauldron == null) {
             cauldron = this.initCauldron(block);
         }
-        boolean cancelled = !cauldron.addIngredient(itemStack, player);
-        if (cancelled) {
-            if (BukkitCauldron.decrementLevel(block)) {
-                ListenerUtil.removeActiveSinglePositionStructure(cauldron, breweryRegistry, database);
-            }
-        } else {
+        if (cauldron.addIngredient(itemStack, player)) {
             player.getInventory().setItemInMainHand(decreaseItem(itemStack, player));
             try {
                 database.updateValue(BukkitCauldronDataType.INSTANCE, cauldron);
