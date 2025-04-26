@@ -60,11 +60,11 @@ public class BukkitDistillery implements Distillery<BukkitDistillery, ItemStack,
         checkDirty();
         Player player = Bukkit.getPlayer(playerUuid);
         if (mixtureContainerLocations.contains(location)) {
-            interact(location, player);
+            playInteractionEffects(location, player);
             return openInventory(mixture, player);
         }
         if (distillateContainerLocations.contains(location)) {
-            interact(location, player);
+            playInteractionEffects(location, player);
             return openInventory(distillate, player);
         }
         return false;
