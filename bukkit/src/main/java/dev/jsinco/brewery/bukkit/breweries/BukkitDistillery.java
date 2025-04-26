@@ -76,7 +76,7 @@ public class BukkitDistillery implements Distillery<BukkitDistillery, ItemStack,
                                 .source(Sound.Source.BLOCK)
                                 .type(Key.key("minecraft:block.vault.fall"))
                                 .build()
-                        , location.x(), location.y(), location.z()
+                        , location.x() + 0.5, location.y() + 0.5, location.z() + 0.5
                 ));
         BlockUtil.playWobbleEffect(location, player);
     }
