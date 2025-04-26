@@ -37,6 +37,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.*;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
@@ -141,13 +142,17 @@ public class PlayerEventListener implements Listener {
             return;
         }
         if (isIngredient(itemStack)) {
-            handleIngredientAddition(itemStack, block, cauldronOptional.orElse(null), event.getPlayer());
+            boolean addedIngredient = handleIngredientAddition(itemStack, block, cauldronOptional.orElse(null), event.getPlayer(), event.getHand());
+            if (addedIngredient) {
+                event.setUseInteractedBlock(Event.Result.DENY);
+                event.setUseItemInHand(Event.Result.DENY);
+            }
         }
         if (itemStack.getType() == Material.GLASS_BOTTLE) {
             cauldronOptional
                     .map(BukkitCauldron::extractBrew)
                     .ifPresent(brewItemStack -> {
-                        event.getPlayer().getInventory().setItemInMainHand(decreaseItem(itemStack, event.getPlayer()));
+                        updateHeldItem(decreaseItem(itemStack, event.getPlayer()), event.getPlayer(), event.getHand());
                         event.getPlayer().getWorld().dropItem(event.getPlayer().getLocation(), brewItemStack);
                         if (BukkitCauldron.decrementLevel(block)) {
                             ListenerUtil.removeActiveSinglePositionStructure(cauldronOptional.get(), breweryRegistry, database);
@@ -164,20 +169,32 @@ public class PlayerEventListener implements Listener {
         });
     }
 
-    private void handleIngredientAddition(ItemStack itemStack, Block block, @Nullable BukkitCauldron cauldron, Player player) {
+    private boolean handleIngredientAddition(ItemStack itemStack, Block block, @Nullable BukkitCauldron cauldron, Player player, @Nullable EquipmentSlot hand) {
         if (block.getType() == Material.CAULDRON && itemStack.getType() != Material.POTION) {
-            return;
+            return false;
         }
         if (cauldron == null) {
             cauldron = this.initCauldron(block);
         }
-        if (cauldron.addIngredient(itemStack, player)) {
-            player.getInventory().setItemInMainHand(decreaseItem(itemStack, player));
+        boolean addedIngredient = cauldron.addIngredient(itemStack, player);
+        if (addedIngredient) {
+            updateHeldItem(decreaseItem(itemStack, player), player, hand);
             try {
                 database.updateValue(BukkitCauldronDataType.INSTANCE, cauldron);
             } catch (PersistenceException e) {
                 e.printStackTrace();
             }
+        }
+        return addedIngredient;
+    }
+
+    private void updateHeldItem(ItemStack item, Player player, EquipmentSlot equipmentSlot) {
+        if (equipmentSlot == EquipmentSlot.HAND) {
+            player.getInventory().setItemInMainHand(item);
+        } else if (equipmentSlot == EquipmentSlot.OFF_HAND) {
+            player.getInventory().setItemInOffHand(item);
+        } else {
+            throw new IllegalArgumentException("Only main hand and offhand equipment slots are allowed: " + equipmentSlot);
         }
     }
 
