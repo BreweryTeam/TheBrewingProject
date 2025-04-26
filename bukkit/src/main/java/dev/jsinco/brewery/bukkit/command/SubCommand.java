@@ -8,7 +8,8 @@ public enum SubCommand {
     STATUS("brewery.command.status", true, false),
     INFO("brewery.command.info", true, true),
     RELOAD("brewery.command.reload", false, false),
-    SEAL("brewery.command.seal", true, true);
+    SEAL("brewery.command.seal", true, true),
+    REPLICATE("brewery.command.replicate", true, true);
 
     @Getter
     private final String permissionNode;
