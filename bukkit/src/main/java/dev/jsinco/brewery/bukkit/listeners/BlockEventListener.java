@@ -75,9 +75,9 @@ public class BlockEventListener implements Listener {
             return;
         }
         event.getPlayer().sendMessage(MiniMessage.miniMessage().deserialize(TranslationsConfig.BARREL_CREATE));
-        placedStructureRegistry.registerStructure(placedBreweryStructure);
         BukkitBarrel barrel = new BukkitBarrel(event.getBlock().getLocation(), placedBreweryStructure, placedBreweryStructure.getStructure().getMeta(StructureMeta.INVENTORY_SIZE), placedStructurePair.second());
         placedBreweryStructure.setHolder(barrel);
+        placedStructureRegistry.registerStructure(placedBreweryStructure);
         breweryRegistry.registerInventory(barrel);
         try {
             database.insertValue(BukkitBarrelDataType.INSTANCE, barrel);
