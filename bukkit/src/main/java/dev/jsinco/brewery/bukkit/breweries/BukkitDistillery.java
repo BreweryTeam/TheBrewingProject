@@ -70,7 +70,7 @@ public class BukkitDistillery implements Distillery<BukkitDistillery, ItemStack,
         return false;
     }
 
-    private void interact(BreweryLocation location, Player player) {
+    private void playInteractionEffects(BreweryLocation location, Player player) {
         BukkitAdapter.toWorld(location)
                 .ifPresent(world -> world.playSound(Sound.sound()
                                 .source(Sound.Source.BLOCK)
