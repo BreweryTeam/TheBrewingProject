@@ -186,6 +186,6 @@ public class MessageUtil {
     public static @NotNull TagResolver getTimeTagResolver(long timeTicks) {
         long seconds = (timeTicks % Moment.MINUTE) / Moment.SECOND;
         long minutes = timeTicks / Moment.MINUTE;
-        return Placeholder.parsed("time", minutes + ":" + seconds);
+        return Placeholder.parsed("time", String.format("%d:%02d", minutes, seconds));
     }
 }
