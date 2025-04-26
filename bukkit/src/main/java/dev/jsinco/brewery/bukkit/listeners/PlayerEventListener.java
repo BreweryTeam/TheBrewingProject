@@ -44,9 +44,11 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 public class PlayerEventListener implements Listener {
+    public static final Set<Material> DISALLOWED_INGREDIENT_MATERIALS = Set.of(Material.CLOCK, Material.BUCKET, Material.POTION, Material.GLASS_BOTTLE);
 
     private final PlacedStructureRegistryImpl placedStructureRegistry;
     private final BreweryRegistry breweryRegistry;
@@ -205,16 +207,7 @@ public class PlayerEventListener implements Listener {
             // Probably equipment
             return false;
         }
-        if (type == Material.CLOCK) {
-            return false;
-        }
-        if (type == Material.BUCKET) {
-            return false;
-        }
-        if (type == Material.POTION) {
-            return false;
-        }
-        return type != Material.GLASS_BOTTLE;
+        return !DISALLOWED_INGREDIENT_MATERIALS.contains(type);
     }
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.LOW)
