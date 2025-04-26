@@ -80,6 +80,7 @@ public class PlayerEventListener implements Listener {
         if (possibleStructureHolder.get() instanceof InventoryAccessible inventoryAccessible) {
             if (inventoryAccessible.open(BukkitAdapter.toBreweryLocation(playerInteractEvent.getClickedBlock()), playerInteractEvent.getPlayer().getUniqueId())) {
                 playerInteractEvent.setUseItemInHand(Event.Result.DENY);
+                playerInteractEvent.setUseInteractedBlock(Event.Result.DENY);
                 breweryRegistry.registerOpened(inventoryAccessible);
             }
         }
