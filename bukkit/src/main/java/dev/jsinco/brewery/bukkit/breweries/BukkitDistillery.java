@@ -74,7 +74,7 @@ public class BukkitDistillery implements Distillery<BukkitDistillery, ItemStack,
         BukkitAdapter.toWorld(location)
                 .ifPresent(world -> world.playSound(Sound.sound()
                                 .source(Sound.Source.BLOCK)
-                                .type(Key.key("minecraft:block.decorated_pot.insert"))
+                                .type(Key.key("minecraft:block.vault.fall"))
                                 .build()
                         , location.x(), location.y(), location.z()
                 ));
