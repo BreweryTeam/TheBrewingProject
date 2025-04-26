@@ -60,12 +60,24 @@ public class BukkitDistillery implements Distillery<BukkitDistillery, ItemStack,
         checkDirty();
         Player player = Bukkit.getPlayer(playerUuid);
         if (mixtureContainerLocations.contains(location)) {
+            interact(location, player);
             return openInventory(mixture, player);
         }
         if (distillateContainerLocations.contains(location)) {
+            interact(location, player);
             return openInventory(distillate, player);
         }
         return false;
+    }
+
+    private void interact(BreweryLocation location, Player player) {
+        BukkitAdapter.toWorld(location)
+                .ifPresent(world -> world.playSound(Sound.sound()
+                                .source(Sound.Source.BLOCK)
+                                .type(Key.key("minecraft:block.decorated_pot.insert"))
+                                .build()
+                        , location.x(), location.y(), location.z()
+                ));
     }
 
     private boolean openInventory(DistilleryInventory inventory, Player player) {
