@@ -1,6 +1,9 @@
 package dev.jsinco.brewery.bukkit.util;
 
-import dev.jsinco.brewery.brew.*;
+import dev.jsinco.brewery.brew.Brew;
+import dev.jsinco.brewery.brew.BrewQuality;
+import dev.jsinco.brewery.brew.BrewScore;
+import dev.jsinco.brewery.brew.BrewingStep;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.bukkit.recipe.RecipeEffects;
 import dev.jsinco.brewery.configuration.locale.TranslationsConfig;
@@ -8,6 +11,7 @@ import dev.jsinco.brewery.effect.DrunkStateImpl;
 import dev.jsinco.brewery.effect.DrunksManagerImpl;
 import dev.jsinco.brewery.event.NamedDrunkEvent;
 import dev.jsinco.brewery.ingredient.Ingredient;
+import dev.jsinco.brewery.moment.Moment;
 import dev.jsinco.brewery.recipes.BrewScoreImpl;
 import dev.jsinco.brewery.recipes.RecipeImpl;
 import net.kyori.adventure.text.Component;
@@ -177,5 +181,11 @@ public class MessageUtil {
                 .append(Component.text(warningLevel.toString()).color(NamedTextColor.YELLOW))
                 .append(Component.text(severeLevel.toString()).color(NamedTextColor.GOLD))
                 .append(Component.text(remainder.toString()).color(NamedTextColor.BLACK));
+    }
+
+    public static @NotNull TagResolver getTimeTagResolver(long timeTicks) {
+        long seconds = (timeTicks % Moment.MINUTE) / Moment.SECOND;
+        long minutes = timeTicks / Moment.MINUTE;
+        return Placeholder.parsed("time", minutes + ":" + seconds);
     }
 }

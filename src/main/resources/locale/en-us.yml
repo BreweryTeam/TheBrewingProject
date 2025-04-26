@@ -51,6 +51,7 @@ cauldron.type:
   snow: snow
   none: none
 cauldron.cant-add-more-ingredients: <red>Can't add more ingredients
+cauldron.clock-message: <gray>Brewed for <white><time></white> minutes.
 mixer.create: <gray>Successfully created a mixer
 mixer.create-denied: <gray>Successfully created a mixer
 mixer.access-denied: <gray>Successfully created a mixer

@@ -40,7 +40,6 @@ import org.bukkit.event.player.*;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.inventory.meta.PotionMeta;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -152,6 +151,10 @@ public class PlayerEventListener implements Listener {
                         }
                     });
         }
+        cauldronOptional
+                .filter(cauldron -> itemStack.getType() == Material.CLOCK)
+                .filter(cauldron -> event.getPlayer().hasPermission("brewery.cauldron.time"))
+                .ifPresent(cauldron -> event.getPlayer().sendMessage(MiniMessage.miniMessage().deserialize(TranslationsConfig.CAULDRON_CLOCK_MESSAGE, MessageUtil.getTimeTagResolver(cauldron.getTime()))));
         cauldronOptional.ifPresent(ignored -> {
             event.setUseInteractedBlock(Event.Result.DENY);
             event.setUseItemInHand(Event.Result.DENY);

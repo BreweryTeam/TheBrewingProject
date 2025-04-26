@@ -228,4 +228,17 @@ public class BukkitCauldron implements dev.jsinco.brewery.breweries.Cauldron {
         block.setBlockData(levelled);
         return false;
     }
+
+    public long getTime() {
+        if (brew.getSteps().isEmpty()) {
+            return 0L;
+        }
+        if (brew.lastStep() instanceof BrewingStep.Cook cook) {
+            return cook.brewTime().moment();
+        }
+        if (brew.lastStep() instanceof BrewingStep.Mix mix) {
+            return mix.time().moment();
+        }
+        return 0L;
+    }
 }

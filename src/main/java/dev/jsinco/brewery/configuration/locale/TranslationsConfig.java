@@ -98,6 +98,9 @@ public class TranslationsConfig extends AbstractConfig {
     @Key("cauldron.type.none")
     public static String CAULDRON_TYPE_NONE;
 
+    @Key("cauldron.clock-message")
+    public static String CAULDRON_CLOCK_MESSAGE;
+
     @Key("command.create.unknown-argument")
     public static String COMMAND_CREATE_UNKNOWN_ARGUMENT;
 
@@ -169,9 +172,6 @@ public class TranslationsConfig extends AbstractConfig {
 
     @Key("info.after-drink")
     public static String INFO_AFTER_DRINK;
-
-    @Key("test-value")
-    public static boolean TEST_VALUE;
 
     private static final TranslationsConfig TRANSLATIONS = new TranslationsConfig();
 

@@ -108,7 +108,12 @@ bukkit {
             children = listOf("brewery.distillery.access")
         }
         register("brewery.distillery.access")
-        register("brewery.cauldron.access")
+        register("brewery.cauldron.access") {
+            childrenMap = mapOf(
+                "brewery.cauldron.time" to true
+            )
+        }
+        register("brewery.cauldron.time")
         register("brewery.structure.access") {
             childrenMap = mapOf(
                 "brewery.barrel.access" to true,
