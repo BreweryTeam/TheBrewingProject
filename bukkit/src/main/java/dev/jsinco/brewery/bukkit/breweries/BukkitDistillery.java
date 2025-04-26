@@ -60,26 +60,23 @@ public class BukkitDistillery implements Distillery<BukkitDistillery, ItemStack,
         checkDirty();
         Player player = Bukkit.getPlayer(playerUuid);
         if (mixtureContainerLocations.contains(location)) {
-            if (!player.hasPermission("brewery.distillery.access")) {
-                player.sendMessage(MiniMessage.miniMessage().deserialize(TranslationsConfig.DISTILLERY_ACCESS_DENIED));
-                return false;
-            }
-            mixture.updateInventoryFromBrews();
-            TheBrewingProject.getInstance().getBreweryRegistry().registerOpened(this);
-            player.openInventory(mixture.getInventory());
-            return true;
+            return openInventory(mixture, player);
         }
         if (distillateContainerLocations.contains(location)) {
-            if (!player.hasPermission("brewery.distillery.access")) {
-                player.sendMessage(MiniMessage.miniMessage().deserialize(TranslationsConfig.DISTILLERY_ACCESS_DENIED));
-                return false;
-            }
-            distillate.updateInventoryFromBrews();
-            TheBrewingProject.getInstance().getBreweryRegistry().registerOpened(this);
-            player.openInventory(distillate.getInventory());
-            return true;
+            return openInventory(distillate, player);
         }
         return false;
+    }
+
+    private boolean openInventory(DistilleryInventory inventory, Player player) {
+        if (!player.hasPermission("brewery.distillery.access")) {
+            player.sendMessage(MiniMessage.miniMessage().deserialize(TranslationsConfig.DISTILLERY_ACCESS_DENIED));
+            return false;
+        }
+        inventory.updateInventoryFromBrews();
+        TheBrewingProject.getInstance().getBreweryRegistry().registerOpened(this);
+        player.openInventory(inventory.getInventory());
+        return true;
     }
 
     @Override
