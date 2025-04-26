@@ -25,12 +25,14 @@ repositories {
     maven("https://repo.william278.net/releases")
     maven("https://repo.codemc.io/repository/maven-public/")
     maven("https://repo.momirealms.net/releases/")
+    maven("https://repo.dmulloy2.net/repository/public/")
 }
 
 dependencies {
     compileOnly("io.papermc.paper:paper-api:1.21.4-R0.1-SNAPSHOT")
     compileOnly("org.projectlombok:lombok:1.18.30")
     compileOnly("org.jetbrains:annotations:24.0.0")
+    compileOnly("com.comphenix.protocol:ProtocolLib:5.1.0")
 
     // Integration
     compileOnly("io.th0rgal:oraxen:1.189.0")
@@ -78,6 +80,7 @@ tasks {
             url("https://dev.bukkit.org/projects/vault/files/latest")
             url("https://github.com/EssentialsX/Essentials/releases/download/2.21.0/EssentialsX-2.21.0.jar")
             url("https://api.spiget.org/v2/resources/109679/download")
+            url("https://api.spiget.org/v2/resources/1997/download")
         }
     }
 
@@ -164,6 +167,8 @@ bukkit {
         "Towny",
         "ChestShop",
         "HuskClaims",
-        "Bolt"
+        "Bolt",
+        "CraftEngine",
+        "ProtocolLib"
     )
 }

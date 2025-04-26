@@ -78,6 +78,7 @@ public class BukkitDistillery implements Distillery<BukkitDistillery, ItemStack,
                                 .build()
                         , location.x(), location.y(), location.z()
                 ));
+        BlockUtil.playWobbleEffect(location, player);
     }
 
     private boolean openInventory(DistilleryInventory inventory, Player player) {
