@@ -6,6 +6,7 @@ import dev.jsinco.brewery.bukkit.integration.item.CraftEngineHook;
 import dev.jsinco.brewery.bukkit.integration.item.ItemsAdderHook;
 import dev.jsinco.brewery.bukkit.integration.item.NexoHook;
 import dev.jsinco.brewery.bukkit.integration.item.OraxenHook;
+import dev.jsinco.brewery.bukkit.util.BukkitAdapter;
 import dev.jsinco.brewery.bukkit.util.MessageUtil;
 import dev.jsinco.brewery.configuration.locale.TranslationsConfig;
 import dev.jsinco.brewery.recipe.RecipeResult;
@@ -46,7 +47,7 @@ public class BukkitRecipeResult implements RecipeResult<ItemStack> {
             .build();
     private final boolean glint;
     private final int customModelData;
-    private final String itemModel;
+    private final @Nullable BreweryKey itemModel;
     private final @Nullable BreweryKey customId;
 
     @Getter
@@ -60,7 +61,7 @@ public class BukkitRecipeResult implements RecipeResult<ItemStack> {
     private final Color color;
     private final boolean appendBrewInfoLore;
 
-    private BukkitRecipeResult(boolean glint, int customModelData, String itemModel, QualityData<RecipeEffects> recipeEffects, QualityData<String> names, QualityData<List<String>> lore, Color color, boolean appendBrewInfoLore, @Nullable BreweryKey customId) {
+    private BukkitRecipeResult(boolean glint, int customModelData, @Nullable BreweryKey itemModel, QualityData<RecipeEffects> recipeEffects, QualityData<String> names, QualityData<List<String>> lore, Color color, boolean appendBrewInfoLore, @Nullable BreweryKey customId) {
         this.glint = glint;
         this.customModelData = customModelData;
         this.itemModel = itemModel;
@@ -72,6 +73,7 @@ public class BukkitRecipeResult implements RecipeResult<ItemStack> {
         this.customId = customId;
     }
 
+    @SuppressWarnings("UnstableApiUsage")
     @Override
     public ItemStack newBrewItem(@NotNull BrewScore score, Brew brew, Brew.State state) {
         BrewQuality quality = score.brewQuality();
@@ -117,8 +119,8 @@ public class BukkitRecipeResult implements RecipeResult<ItemStack> {
 
 
         // If we're using modern paper maybe we should just use paper's DataComponentTypes instead of ItemMeta?
-        if (itemModel != null && !itemModel.isEmpty()) {
-            NamespacedKey namespacedKey = stringToNameSpacedKey(itemModel);
+        if (itemModel != null) {
+            NamespacedKey namespacedKey = BukkitAdapter.toNamespacedKey(itemModel);
             if (namespacedKey != null) {
                 itemStack.setData(DataComponentTypes.ITEM_MODEL, namespacedKey);
             } else {
@@ -187,24 +189,12 @@ public class BukkitRecipeResult implements RecipeResult<ItemStack> {
         return output.build();
     }
 
-    private @Nullable NamespacedKey stringToNameSpacedKey(String nameSpaceAndKey) {
-        String[] parts = nameSpaceAndKey.split(":");
-        if (parts.length != 2) {
-            return null;
-        }
-        String namespace = parts[0];
-        String key = parts[1];
-        if (namespace.isEmpty() || key.isEmpty()) {
-            return null;
-        }
-        return new NamespacedKey(namespace.toLowerCase(), key.toLowerCase());
-    }
 
     public static class Builder {
 
         private boolean glint;
         private int customModelData;
-        private String itemModel;
+        private BreweryKey itemModel;
         private QualityData<String> names;
         private QualityData<List<String>> lore;
         private QualityData<RecipeEffects> recipeEffects;
@@ -223,7 +213,9 @@ public class BukkitRecipeResult implements RecipeResult<ItemStack> {
         }
 
         public Builder itemModel(String itemModel) {
-            this.itemModel = itemModel;
+            if (itemModel != null) {
+                this.itemModel = BreweryKey.parse(itemModel);
+            }
             return this;
         }
 
