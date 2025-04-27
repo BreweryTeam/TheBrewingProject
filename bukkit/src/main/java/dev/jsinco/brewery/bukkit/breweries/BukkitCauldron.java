@@ -164,7 +164,7 @@ public class BukkitCauldron implements dev.jsinco.brewery.breweries.Cauldron {
         World world = bukkitLocation.getWorld();
 
         Sound sound = item.getType() == Material.POTION
-                ? Sound.sound().source(Sound.Source.BLOCK).type(Key.key("minecraft:item.bottle.empty")).build()
+                ? Sound.sound().source(Sound.Source.BLOCK).type(Key.key("minecraft:block.pointed_dripstone.drip_water_into_cauldron")).pitch(0.85f).build()
                 : Sound.sound().source(Sound.Source.BLOCK).type(Key.key("minecraft:entity.generic.splash")).pitch(1.5f + RANDOM.nextFloat(0.2f) - 0.1f).build();
         world.playSound(
                 sound,
