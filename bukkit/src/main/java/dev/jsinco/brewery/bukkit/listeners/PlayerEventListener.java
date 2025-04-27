@@ -24,8 +24,6 @@ import dev.jsinco.brewery.effect.text.DrunkTextRegistry;
 import dev.jsinco.brewery.effect.text.DrunkTextTransformer;
 import dev.jsinco.brewery.recipes.RecipeRegistryImpl;
 import dev.jsinco.brewery.structure.PlacedStructureRegistryImpl;
-import net.kyori.adventure.key.Key;
-import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.GameMode;
 import org.bukkit.Material;

@@ -1,6 +1,5 @@
 package dev.jsinco.brewery.bukkit.breweries;
 
-import com.destroystokyo.paper.ParticleBuilder;
 import dev.jsinco.brewery.brew.Brew;
 import dev.jsinco.brewery.brew.BrewImpl;
 import dev.jsinco.brewery.brew.BrewingStep;
