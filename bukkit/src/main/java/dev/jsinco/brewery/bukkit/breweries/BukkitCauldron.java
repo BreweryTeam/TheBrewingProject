@@ -1,5 +1,6 @@
 package dev.jsinco.brewery.bukkit.breweries;
 
+import com.destroystokyo.paper.ParticleBuilder;
 import dev.jsinco.brewery.brew.Brew;
 import dev.jsinco.brewery.brew.BrewImpl;
 import dev.jsinco.brewery.brew.BrewingStep;
@@ -21,11 +22,10 @@ import dev.jsinco.brewery.util.Registry;
 import dev.jsinco.brewery.vector.BreweryLocation;
 import lombok.Getter;
 import lombok.Setter;
+import net.kyori.adventure.key.Key;
+import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.minimessage.MiniMessage;
-import org.bukkit.Color;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.Particle;
+import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockType;
@@ -127,6 +127,8 @@ public class BukkitCauldron implements dev.jsinco.brewery.breweries.Cauldron {
                     () -> new BrewingStep.Mix(new Interval(time, time), Map.of(BukkitIngredientManager.INSTANCE.getIngredient(item), 1))
             );
         }
+
+        playIngredientAddedEffects(item);
         return true;
     }
 
@@ -155,6 +157,21 @@ public class BukkitCauldron implements dev.jsinco.brewery.breweries.Cauldron {
             // Two hovering pixely dust clouds, a bit of offset and with DustOptions to give some color and size
             block.getWorld().spawnParticle(Particle.DUST_PLUME, particleLoc, 2, 0.15, 0.2, 0.15, new Particle.DustOptions(particleColor, 1.5f));
         }
+    }
+
+    public void playIngredientAddedEffects(ItemStack item) {
+        Location bukkitLocation = BukkitAdapter.toLocation(this.location).toCenterLocation();
+        World world = bukkitLocation.getWorld();
+
+        Sound sound = item.getType() == Material.POTION
+                ? Sound.sound().source(Sound.Source.BLOCK).type(Key.key("minecraft:item.bottle.empty")).build()
+                : Sound.sound().source(Sound.Source.BLOCK).type(Key.key("minecraft:entity.generic.splash")).pitch(1.5f + RANDOM.nextFloat(0.2f) - 0.1f).build();
+        world.playSound(
+                sound,
+                bukkitLocation.x(), bukkitLocation.y(), bukkitLocation.z()
+        );
+
+        world.spawnParticle(Particle.SPLASH, bukkitLocation.add(0.0, 0.5, 0.0), 50, 0.1, 0.05, 0.1, 1.0);
     }
 
     public static boolean isHeatSource(Block block) {
