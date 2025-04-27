@@ -174,20 +174,6 @@ public class BukkitRecipeResult implements RecipeResult<ItemStack> {
         return output.build();
     }
 
-
-    private @Nullable NamespacedKey stringToNameSpacedKey(String nameSpaceAndKey) {
-        String[] parts = nameSpaceAndKey.split(":");
-        if (parts.length != 2) {
-            return null;
-        }
-        String namespace = parts[0];
-        String key = parts[1];
-        if (namespace.isEmpty() || key.isEmpty()) {
-            return null;
-        }
-        return new NamespacedKey(namespace.toLowerCase(), key.toLowerCase());
-    }
-
     public static class Builder {
 
         private boolean glint;
