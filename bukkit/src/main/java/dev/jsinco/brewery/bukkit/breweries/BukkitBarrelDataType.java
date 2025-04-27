@@ -34,7 +34,7 @@ public class BukkitBarrelDataType implements SqlStoredData.Findable<BukkitBarrel
         BreweryStructure structure = placedStructure.getStructure();
         Location origin = placedStructure.getWorldOrigin();
         UUID worldUuid = value.getWorld().getUID();
-        Location signLocation = value.getSignLocation();
+        Location signLocation = value.getUniqueLocation();
         try (PreparedStatement preparedStatement = connection.prepareStatement(FileUtil.readInternalResource("/database/generic/barrels_insert.sql"))) {
             preparedStatement.setInt(1, origin.getBlockX());
             preparedStatement.setInt(2, origin.getBlockY());
@@ -61,7 +61,7 @@ public class BukkitBarrelDataType implements SqlStoredData.Findable<BukkitBarrel
     @Override
     public void remove(BukkitBarrel toRemove, Connection connection) throws PersistenceException {
         UUID worldUuid = toRemove.getWorld().getUID();
-        Location signLocation = toRemove.getSignLocation();
+        Location signLocation = toRemove.getUniqueLocation();
         try (PreparedStatement preparedStatement = connection.prepareStatement(FileUtil.readInternalResource("/database/generic/barrels_remove.sql"))) {
             preparedStatement.setInt(1, signLocation.getBlockX());
             preparedStatement.setInt(2, signLocation.getBlockY());
@@ -81,7 +81,7 @@ public class BukkitBarrelDataType implements SqlStoredData.Findable<BukkitBarrel
             ResultSet resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
                 Location worldOrigin = new Location(Bukkit.getWorld(world), resultSet.getInt("origin_x"), resultSet.getInt("origin_y"), resultSet.getInt("origin_z"));
-                Location signLocation = new Location(Bukkit.getWorld(world), resultSet.getInt("unique_x"), resultSet.getInt("unique_y"), resultSet.getInt("unique_z"));
+                Location uniqueLocation = new Location(Bukkit.getWorld(world), resultSet.getInt("unique_x"), resultSet.getInt("unique_y"), resultSet.getInt("unique_z"));
                 Matrix3d transform = DecoderEncoder.deserializeTransformation(resultSet.getString("transformation"));
                 String format = resultSet.getString("format");
                 BarrelType type = Registry.BARREL_TYPE.get(BreweryKey.parse(resultSet.getString("barrel_type")));
@@ -89,11 +89,11 @@ public class BukkitBarrelDataType implements SqlStoredData.Findable<BukkitBarrel
 
                 Optional<BreweryStructure> breweryStructureOptional = TheBrewingProject.getInstance().getStructureRegistry().getStructure(format);
                 if (breweryStructureOptional.isEmpty()) {
-                    Logging.warning("Could not find format '" + format + "' skipping barrel at: " + signLocation);
+                    Logging.warning("Could not find format '" + format + "' skipping barrel at: " + uniqueLocation);
                     continue;
                 }
                 PlacedBreweryStructure<BukkitBarrel> structure = new PlacedBreweryStructure<>(breweryStructureOptional.get(), transform, worldOrigin);
-                BukkitBarrel barrel = new BukkitBarrel(signLocation, structure, size, type);
+                BukkitBarrel barrel = new BukkitBarrel(uniqueLocation, structure, size, type);
                 structure.setHolder(barrel);
                 output.add(barrel);
             }
@@ -101,7 +101,7 @@ public class BukkitBarrelDataType implements SqlStoredData.Findable<BukkitBarrel
             throw new PersistenceException(e);
         }
         for (BukkitBarrel barrel : output) {
-            barrel.setBrews(BukkitBarrelBrewDataType.INSTANCE.find(BukkitAdapter.toBreweryLocation(barrel.getSignLocation()), connection));
+            barrel.setBrews(BukkitBarrelBrewDataType.INSTANCE.find(BukkitAdapter.toBreweryLocation(barrel.getUniqueLocation()), connection));
         }
         return output;
     }
