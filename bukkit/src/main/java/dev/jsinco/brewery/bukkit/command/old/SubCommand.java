@@ -1,4 +1,4 @@
-package dev.jsinco.brewery.bukkit.command;
+package dev.jsinco.brewery.bukkit.command.old;
 
 import lombok.Getter;
 

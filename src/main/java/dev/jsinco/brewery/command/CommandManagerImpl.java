@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -77,16 +78,28 @@ public class CommandManagerImpl<M extends TheBrewingProjectApi, S, T> {
             return null;
         }
 
-        String command = args.getFirst();
-        for (var mapEntry : this.subCommands.entrySet()) {
-            if (!mapEntry.getKey().name().equalsIgnoreCase(command)) {
-                continue;
+        List<String> tabCompletions = new ArrayList<>();
+        if (commandManager.hasPermission(sender, "brewery.command.other") && !args.contains("for")) {
+            tabCompletions.add("for");
+        }
+        int index = args.indexOf("for");
+        if (index != -1) {
+            if (index + 1 >= args.size()) {
+                return null; // Missing player name after 'for'.
             }
+            // Remove 'for' and the player name from argsList
+            args.subList(index, Math.min(index + 2, args.size()));
+        }
 
-            List<String> completions = mapEntry.getValue().tabComplete(instance, sender, target, label, args.subList(1, args.size()));
-            if (completions != null) {
-                return completions;
-            }
+        var mapEntry = this.subCommands.entrySet().stream()
+                .filter(it -> it.getKey().name().startsWith(args.getFirst()))
+                .filter(it -> commandManager.hasPermission(sender, it.getKey().permission()))
+                .findFirst()
+                .orElse(null);
+        if (mapEntry != null) {
+            tabCompletions.addAll(mapEntry.getValue().tabComplete(instance, sender, target, label, args.subList(1, args.size())));
+
+            return tabCompletions;
         }
         return null;
     }

@@ -1,4 +1,4 @@
-package dev.jsinco.brewery.bukkit.command;
+package dev.jsinco.brewery.bukkit.command.subcommands;
 
 import dev.jsinco.brewery.brew.BrewImpl;
 import dev.jsinco.brewery.brew.BrewingStep;
@@ -6,6 +6,8 @@ import dev.jsinco.brewery.breweries.BarrelType;
 import dev.jsinco.brewery.breweries.CauldronType;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.bukkit.brew.BrewAdapter;
+import dev.jsinco.brewery.bukkit.command.BukkitCommandManager;
+import dev.jsinco.brewery.bukkit.command.BukkitSubCommand;
 import dev.jsinco.brewery.bukkit.ingredient.BukkitIngredientManager;
 import dev.jsinco.brewery.command.SubCommandInfo;
 import dev.jsinco.brewery.configuration.locale.TranslationsConfig;
@@ -47,7 +49,7 @@ public class CreateCommand implements BukkitSubCommand {
     public void execute(TheBrewingProject instance, CommandSender sender, OfflinePlayer offlineTarget, String label, List<String> args) {
         Player target = toOnlineTarget(offlineTarget);
         if (target == null) {
-            //sender.sendMessage(MiniMessage.miniMessage().deserialize(TranslationsConfig.COMMAND_CREATE_TARGET_OFFLINE));
+            sender.sendMessage(MiniMessage.miniMessage().deserialize(TranslationsConfig.COMMAND_UNDEFINED_PLAYER));
             return;
         }
 
@@ -124,7 +126,7 @@ public class CreateCommand implements BukkitSubCommand {
                 return switch (REPLACEMENTS.getOrDefault(args.get(i), args.get(i))) {
                     case "--age" -> {
                         if (precedingArgsLength == 1) {
-                            yield BreweryCommand.INTEGER_TAB_COMPLETIONS;
+                            yield BukkitCommandManager.INTEGER_TAB_COMPLETIONS;
                         } else if (precedingArgsLength == 2) {
                             yield Registry.BARREL_TYPE.values().stream()
                                     .map(BarrelType::key)
@@ -137,7 +139,7 @@ public class CreateCommand implements BukkitSubCommand {
                     }
                     case "--cook" -> {
                         if (precedingArgsLength == 1) {
-                            yield BreweryCommand.INTEGER_TAB_COMPLETIONS;
+                            yield BukkitCommandManager.INTEGER_TAB_COMPLETIONS;
                         } else if (precedingArgsLength == 2) {
                             yield Registry.CAULDRON_TYPE.values().stream()
                                     .map(CauldronType::key)
@@ -148,7 +150,7 @@ public class CreateCommand implements BukkitSubCommand {
                     }
                     case "--distill" -> {
                         if (precedingArgsLength == 1) {
-                            yield BreweryCommand.INTEGER_TAB_COMPLETIONS;
+                            yield BukkitCommandManager.INTEGER_TAB_COMPLETIONS;
                         } else if (precedingArgsLength == 2) {
                             yield TAB_COMPLETIONS;
                         }
@@ -156,7 +158,7 @@ public class CreateCommand implements BukkitSubCommand {
                     }
                     case "--mix" -> {
                         if (precedingArgsLength == 1) {
-                            yield BreweryCommand.INTEGER_TAB_COMPLETIONS;
+                            yield BukkitCommandManager.INTEGER_TAB_COMPLETIONS;
                         }
                         yield Stream.concat(Stream.of("<ingredient/amount>"), TAB_COMPLETIONS.stream()).toList();
                     }

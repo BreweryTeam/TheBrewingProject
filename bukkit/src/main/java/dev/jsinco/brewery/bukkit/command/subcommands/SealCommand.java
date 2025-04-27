@@ -1,30 +1,45 @@
-package dev.jsinco.brewery.bukkit.command;
+package dev.jsinco.brewery.bukkit.command.subcommands;
 
 import dev.jsinco.brewery.brew.Brew;
 import dev.jsinco.brewery.brew.BrewImpl;
+import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.bukkit.brew.BrewAdapter;
+import dev.jsinco.brewery.bukkit.command.BukkitSubCommand;
+import dev.jsinco.brewery.command.SubCommandInfo;
 import dev.jsinco.brewery.configuration.locale.TranslationsConfig;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 
-import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
-public class SealCommand {
+@SubCommandInfo(
+        name = "seal",
+        permission = "brewery.command.seal"
+)
+public class SealCommand implements BukkitSubCommand {
 
-    public static boolean onCommand(Player target, CommandSender sender, String[] args) {
-        PlayerInventory targetInventory = target.getInventory();
-        boolean sealAll = args.length > 0 && args[0].equals("all");
-        if (sealAll) {
-            args = Arrays.copyOfRange(args, 1, args.length);
+    @Override
+    public void execute(TheBrewingProject instance, CommandSender sender, OfflinePlayer offlineTarget, String label, List<String> args) {
+        Player target = toOnlineTarget(offlineTarget);
+        if (target == null) {
+            sender.sendMessage(MiniMessage.miniMessage().deserialize(TranslationsConfig.COMMAND_UNDEFINED_PLAYER));
+            return;
         }
-        Component volumeMessage = args.length > 0 ? LegacyComponentSerializer.legacyAmpersand().deserialize(
+
+        PlayerInventory targetInventory = target.getInventory();
+        boolean sealAll = !args.isEmpty() && args.getFirst().equals("all");
+        if (sealAll) {
+            args = args.subList(1, args.size());
+        }
+        Component volumeMessage = !args.isEmpty() ? LegacyComponentSerializer.legacyAmpersand().deserialize(
                 String.join(" ", args)
         ) : null;
         String serializedVolumeMessage = volumeMessage != null ? MiniMessage.miniMessage().serialize(volumeMessage) : null;
@@ -56,6 +71,13 @@ public class SealCommand {
                 sender.sendMessage(MiniMessage.miniMessage().deserialize(TranslationsConfig.COMMAND_SEAL_FAILURE));
             }
         }
-        return true;
+    }
+
+    @Override
+    public List<String> tabComplete(TheBrewingProject instance, CommandSender sender, OfflinePlayer target, String label, List<String> args) {
+        if (args.size() == 2) {
+            return List.of("<volume-info>", "all");
+        }
+        return List.of();
     }
 }
