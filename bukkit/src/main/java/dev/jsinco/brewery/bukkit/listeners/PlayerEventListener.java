@@ -185,8 +185,9 @@ public class PlayerEventListener implements Listener {
         boolean addedIngredient = cauldron.addIngredient(itemStack, player);
         if (addedIngredient) {
             updateHeldItem(decreaseItem(itemStack, player), player, hand);
+            String soundKey = itemStack.getType() == Material.POTION ? "minecraft:item.bottle.empty" : "minecraft:item.bundle.insert";
             block.getWorld().playSound(
-                    Sound.sound().source(Sound.Source.BLOCK).type(Key.key("minecraft:item.bottle.empty")).build()
+                    Sound.sound().source(Sound.Source.BLOCK).type(Key.key(soundKey)).build()
                     , block.getX() + 0.5, block.getY() + 1, block.getZ() + 0.5
             );
             try {
