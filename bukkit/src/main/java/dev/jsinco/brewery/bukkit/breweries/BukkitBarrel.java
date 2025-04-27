@@ -12,9 +12,9 @@ import dev.jsinco.brewery.bukkit.util.BukkitAdapter;
 import dev.jsinco.brewery.configuration.locale.TranslationsConfig;
 import dev.jsinco.brewery.database.PersistenceException;
 import dev.jsinco.brewery.database.sql.Database;
-import dev.jsinco.brewery.util.Pair;
 import dev.jsinco.brewery.moment.Interval;
 import dev.jsinco.brewery.moment.Moment;
+import dev.jsinco.brewery.util.Pair;
 import dev.jsinco.brewery.vector.BreweryLocation;
 import lombok.Getter;
 import net.kyori.adventure.text.minimessage.MiniMessage;
@@ -62,7 +62,7 @@ public class BukkitBarrel implements Barrel<BukkitBarrel, ItemStack, Inventory>,
         }
         float randPitch = (float) (Math.random() * 0.1);
         if (uniqueLocation != null) {
-            uniqueLocation.getWorld().playSound(BukkitAdapter.toLocation(location), Sound.BLOCK_BARREL_OPEN, SoundCategory.BLOCKS, 0.5f, 0.8f + randPitch);
+            uniqueLocation.getWorld().playSound(BukkitAdapter.toLocation(location).add(0.5, 0.5, 0.5), Sound.BLOCK_BARREL_OPEN, SoundCategory.BLOCKS, 0.5f, 0.8f + randPitch);
         }
         player.openInventory(inventory);
         return true;
