@@ -12,6 +12,7 @@ import dev.jsinco.brewery.recipe.RecipeResult;
 import dev.jsinco.brewery.recipes.*;
 import dev.jsinco.brewery.util.BreweryKey;
 import dev.jsinco.brewery.util.Logging;
+import io.papermc.paper.datacomponent.DataComponentTypes;
 import lombok.Getter;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -171,6 +172,20 @@ public class BukkitRecipeResult implements RecipeResult<ItemStack> {
         );
 
         return output.build();
+    }
+
+
+    private @Nullable NamespacedKey stringToNameSpacedKey(String nameSpaceAndKey) {
+        String[] parts = nameSpaceAndKey.split(":");
+        if (parts.length != 2) {
+            return null;
+        }
+        String namespace = parts[0];
+        String key = parts[1];
+        if (namespace.isEmpty() || key.isEmpty()) {
+            return null;
+        }
+        return new NamespacedKey(namespace.toLowerCase(), key.toLowerCase());
     }
 
     public static class Builder {

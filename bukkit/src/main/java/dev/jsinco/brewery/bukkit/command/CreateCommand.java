@@ -4,8 +4,10 @@ import dev.jsinco.brewery.brew.BrewImpl;
 import dev.jsinco.brewery.brew.BrewingStep;
 import dev.jsinco.brewery.breweries.BarrelType;
 import dev.jsinco.brewery.breweries.CauldronType;
+import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.bukkit.brew.BrewAdapter;
 import dev.jsinco.brewery.bukkit.ingredient.BukkitIngredientManager;
+import dev.jsinco.brewery.command.SubCommandInfo;
 import dev.jsinco.brewery.configuration.locale.TranslationsConfig;
 import dev.jsinco.brewery.ingredient.Ingredient;
 import dev.jsinco.brewery.util.BreweryKey;
@@ -14,16 +16,24 @@ import dev.jsinco.brewery.moment.Moment;
 import dev.jsinco.brewery.moment.PassedMoment;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.jetbrains.annotations.NotNull;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Queue;
 import java.util.function.BiFunction;
 import java.util.stream.Stream;
 
-public class CreateCommand {
+@SubCommandInfo(
+        name = "create",
+        permission = "brewery.command.create"
+)
+public class CreateCommand implements BukkitSubCommand {
 
     private static final List<String> TAB_COMPLETIONS = List.of("-a", "--age", "-d", "--distill", "-c", "--cook", "--mix", "-m");
     private static final Map<String, String> REPLACEMENTS = Map.of(
@@ -33,15 +43,22 @@ public class CreateCommand {
             "-m", "--mix"
     );
 
-    public static boolean onCommand(Player target, CommandSender sender, String[] args) {
+    @Override
+    public void execute(TheBrewingProject instance, CommandSender sender, OfflinePlayer offlineTarget, String label, List<String> args) {
+        Player target = toOnlineTarget(offlineTarget);
+        if (target == null) {
+            //sender.sendMessage(MiniMessage.miniMessage().deserialize(TranslationsConfig.COMMAND_CREATE_TARGET_OFFLINE));
+            return;
+        }
+
         Map<String, BiFunction<Queue<String>, CommandSender, BrewingStep>> operators = Map.of(
-                "--age", CreateCommand::getAge,
-                "--distill", CreateCommand::getDistill,
-                "--cook", CreateCommand::getCook,
-                "--mix", CreateCommand::getMix
+                "--age", this::getAge,
+                "--distill", this::getDistill,
+                "--cook", this::getCook,
+                "--mix", this::getMix
         );
 
-        Queue<String> arguments = new LinkedList<>(Arrays.asList(args));
+        Queue<String> arguments = new LinkedList<>(args);
         List<BrewingStep> steps = new ArrayList<>();
         while (!arguments.isEmpty()) {
             String operatorName = arguments.poll();
@@ -51,23 +68,22 @@ public class CreateCommand {
             BiFunction<Queue<String>, CommandSender, BrewingStep> operator = operators.get(operatorName);
             if (operator == null) {
                 sender.sendMessage(MiniMessage.miniMessage().deserialize(TranslationsConfig.COMMAND_CREATE_UNKNOWN_ARGUMENT, Placeholder.unparsed("argument", operatorName)));
-                return false;
+                return;
             }
             steps.add(operator.apply(arguments, sender));
         }
         ItemStack brewItem = BrewAdapter.toItem(new BrewImpl(steps), new BrewImpl.State.Other());
         target.getWorld().dropItem(target.getLocation(), brewItem);
         sender.sendMessage(MiniMessage.miniMessage().deserialize(TranslationsConfig.COMMAND_CREATE_SUCCESS, Placeholder.component("brew_name", brewItem.effectiveName())));
-        return true;
     }
 
-    private static BrewingStep getMix(Queue<String> arguments, CommandSender sender) {
+    private BrewingStep getMix(Queue<String> arguments, CommandSender sender) {
         long cookTime = (long) (Double.parseDouble(arguments.poll()) * Moment.MINUTE);
         Map<Ingredient, Integer> ingredients = retrieveIngredients(arguments, sender);
         return new BrewingStep.Mix(new PassedMoment(cookTime), ingredients);
     }
 
-    private static Map<Ingredient, Integer> retrieveIngredients(Queue<String> arguments, CommandSender sender) {
+    private Map<Ingredient, Integer> retrieveIngredients(Queue<String> arguments, CommandSender sender) {
         List<String> ingredientStrings = new ArrayList<>();
         while (!arguments.isEmpty() && !arguments.peek().startsWith("-")) {
             ingredientStrings.add(arguments.poll());
@@ -83,28 +99,29 @@ public class CreateCommand {
         return BukkitIngredientManager.INSTANCE.getIngredientsWithAmount(ingredientStrings);
     }
 
-    private static BrewingStep getCook(Queue<String> arguments, CommandSender sender) {
+    private BrewingStep getCook(Queue<String> arguments, CommandSender sender) {
         long cookTime = (long) (Double.parseDouble(arguments.poll()) * Moment.MINUTE);
         CauldronType cauldronType = Registry.CAULDRON_TYPE.get(BreweryKey.parse(arguments.poll()));
         return new BrewingStep.Cook(new PassedMoment(cookTime), retrieveIngredients(arguments, sender), cauldronType);
     }
 
-    private static BrewingStep getDistill(Queue<String> arguments, CommandSender sender) {
+    private BrewingStep getDistill(Queue<String> arguments, CommandSender sender) {
         int distillAmount = Integer.parseInt(arguments.poll());
         return new BrewingStep.Distill(distillAmount);
     }
 
-    private static BrewingStep getAge(Queue<String> arguments, CommandSender sender) {
+    private BrewingStep getAge(Queue<String> arguments, CommandSender sender) {
         long age = (long) (Double.parseDouble(arguments.poll()) * Moment.AGING_YEAR);
         BarrelType barrelType = Registry.BARREL_TYPE.get(BreweryKey.parse(arguments.poll()));
         return new BrewingStep.Age(new PassedMoment(age), barrelType);
     }
 
-    public static List<String> tabComplete(@NotNull String @NotNull [] args) {
-        for (int i = args.length - 2; i >= 0; i--) {
-            if (TAB_COMPLETIONS.contains(args[i])) {
-                int precedingArgsLength = args.length - i - 1;
-                return switch (REPLACEMENTS.getOrDefault(args[i], args[i])) {
+    @Override
+    public List<String> tabComplete(TheBrewingProject instance, CommandSender sender, OfflinePlayer offlineTarget, String label, List<String> args) {
+        for (int i = args.size() - 2; i >= 0; i--) {
+            if (TAB_COMPLETIONS.contains(args.get(i))) {
+                int precedingArgsLength = args.size() - i - 1;
+                return switch (REPLACEMENTS.getOrDefault(args.get(i), args.get(i))) {
                     case "--age" -> {
                         if (precedingArgsLength == 1) {
                             yield BreweryCommand.INTEGER_TAB_COMPLETIONS;
@@ -144,9 +161,9 @@ public class CreateCommand {
                         yield Stream.concat(Stream.of("<ingredient/amount>"), TAB_COMPLETIONS.stream()).toList();
                     }
                     default ->
-                            throw new IllegalStateException("Unexpected value: " + REPLACEMENTS.getOrDefault(args[i], args[i]));
+                            throw new IllegalStateException("Unexpected value: " + REPLACEMENTS.getOrDefault(args.get(i), args.get(i)));
                 };
-            } else if (args[i].startsWith("-")) {
+            } else if (args.get(i).startsWith("-")) {
                 return List.of();
             }
         }
