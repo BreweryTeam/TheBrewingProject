@@ -24,6 +24,8 @@ import dev.jsinco.brewery.effect.text.DrunkTextRegistry;
 import dev.jsinco.brewery.effect.text.DrunkTextTransformer;
 import dev.jsinco.brewery.recipes.RecipeRegistryImpl;
 import dev.jsinco.brewery.structure.PlacedStructureRegistryImpl;
+import net.kyori.adventure.key.Key;
+import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
@@ -157,6 +159,10 @@ public class PlayerEventListener implements Listener {
                         if (BukkitCauldron.decrementLevel(block)) {
                             ListenerUtil.removeActiveSinglePositionStructure(cauldronOptional.get(), breweryRegistry, database);
                         }
+                        block.getWorld().playSound(
+                                Sound.sound().source(Sound.Source.BLOCK).type(Key.key("minecraft:item.bottle.fill")).build(),
+                                block.getX() + 0.5, block.getY() + 1, block.getZ() + 0.5
+                        );
                     });
         }
         cauldronOptional
@@ -179,6 +185,10 @@ public class PlayerEventListener implements Listener {
         boolean addedIngredient = cauldron.addIngredient(itemStack, player);
         if (addedIngredient) {
             updateHeldItem(decreaseItem(itemStack, player), player, hand);
+            block.getWorld().playSound(
+                    Sound.sound().source(Sound.Source.BLOCK).type(Key.key("minecraft:item.bottle.empty")).build()
+                    , block.getX() + 0.5, block.getY() + 1, block.getZ() + 0.5
+            );
             try {
                 database.updateValue(BukkitCauldronDataType.INSTANCE, cauldron);
             } catch (PersistenceException e) {
