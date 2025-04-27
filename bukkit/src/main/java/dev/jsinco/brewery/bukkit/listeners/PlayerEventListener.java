@@ -159,10 +159,6 @@ public class PlayerEventListener implements Listener {
                         if (BukkitCauldron.decrementLevel(block)) {
                             ListenerUtil.removeActiveSinglePositionStructure(cauldronOptional.get(), breweryRegistry, database);
                         }
-                        block.getWorld().playSound(
-                                Sound.sound().source(Sound.Source.BLOCK).type(Key.key("minecraft:item.bottle.fill")).build(),
-                                block.getX() + 0.5, block.getY() + 1, block.getZ() + 0.5
-                        );
                     });
         }
         cauldronOptional

@@ -174,6 +174,13 @@ public class BukkitCauldron implements dev.jsinco.brewery.breweries.Cauldron {
         world.spawnParticle(Particle.SPLASH, bukkitLocation.add(0.0, 0.5, 0.0), 50, 0.1, 0.05, 0.1, 1.0);
     }
 
+    public void playBrewExtractedEffects() {
+        BukkitAdapter.toWorld(location).ifPresent(world  -> world.playSound(
+                Sound.sound().source(Sound.Source.BLOCK).type(Key.key("minecraft:item.bottle.fill")).build(),
+                location.x() + 0.5, location.y() + 1, location.z() + 0.5
+        ));
+    }
+
     public static boolean isHeatSource(Block block) {
         if (Config.HEAT_SOURCES.isEmpty()) {
             return true;
@@ -198,6 +205,7 @@ public class BukkitCauldron implements dev.jsinco.brewery.breweries.Cauldron {
     public ItemStack extractBrew() {
         recalculateBrewTime();
         this.brewExtracted = true;
+        playBrewingEffects();
         return BrewAdapter.toItem(brew, new Brew.State.Other());
     }
 
