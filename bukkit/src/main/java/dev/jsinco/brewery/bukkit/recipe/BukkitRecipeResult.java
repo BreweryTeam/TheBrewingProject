@@ -12,6 +12,7 @@ import dev.jsinco.brewery.recipe.RecipeResult;
 import dev.jsinco.brewery.recipes.*;
 import dev.jsinco.brewery.util.BreweryKey;
 import dev.jsinco.brewery.util.Logging;
+import io.papermc.paper.datacomponent.DataComponentTypes;
 import lombok.Getter;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -45,6 +46,7 @@ public class BukkitRecipeResult implements RecipeResult<ItemStack> {
             .build();
     private final boolean glint;
     private final int customModelData;
+    private final String itemModel;
     private final @Nullable BreweryKey customId;
 
     @Getter
@@ -58,9 +60,10 @@ public class BukkitRecipeResult implements RecipeResult<ItemStack> {
     private final Color color;
     private final boolean appendBrewInfoLore;
 
-    private BukkitRecipeResult(boolean glint, int customModelData, QualityData<RecipeEffects> recipeEffects, QualityData<String> names, QualityData<List<String>> lore, Color color, boolean appendBrewInfoLore, @Nullable BreweryKey customId) {
+    private BukkitRecipeResult(boolean glint, int customModelData, String itemModel, QualityData<RecipeEffects> recipeEffects, QualityData<String> names, QualityData<List<String>> lore, Color color, boolean appendBrewInfoLore, @Nullable BreweryKey customId) {
         this.glint = glint;
         this.customModelData = customModelData;
+        this.itemModel = itemModel;
         this.recipeEffects = recipeEffects;
         this.names = names;
         this.lore = lore;
@@ -111,6 +114,17 @@ public class BukkitRecipeResult implements RecipeResult<ItemStack> {
         }
         recipeEffects.getOrDefault(quality, RecipeEffects.GENERIC).applyTo(meta, score);
         itemStack.setItemMeta(meta);
+
+
+        // If we're using modern paper maybe we should just use paper's DataComponentTypes instead of ItemMeta?
+        if (itemModel != null && !itemModel.isEmpty()) {
+            NamespacedKey namespacedKey = stringToNameSpacedKey(itemModel);
+            if (namespacedKey != null) {
+                itemStack.setData(DataComponentTypes.ITEM_MODEL, namespacedKey);
+            } else {
+                Logging.warning("Invalid item model '" + itemModel + "' for recipe: " + names.getOrDefault(quality, "unknown"));
+            }
+        }
         return itemStack;
     }
 
@@ -173,10 +187,24 @@ public class BukkitRecipeResult implements RecipeResult<ItemStack> {
         return output.build();
     }
 
+    private @Nullable NamespacedKey stringToNameSpacedKey(String nameSpaceAndKey) {
+        String[] parts = nameSpaceAndKey.split(":");
+        if (parts.length != 2) {
+            return null;
+        }
+        String namespace = parts[0];
+        String key = parts[1];
+        if (namespace.isEmpty() || key.isEmpty()) {
+            return null;
+        }
+        return new NamespacedKey(namespace.toLowerCase(), key.toLowerCase());
+    }
+
     public static class Builder {
 
         private boolean glint;
         private int customModelData;
+        private String itemModel;
         private QualityData<String> names;
         private QualityData<List<String>> lore;
         private QualityData<RecipeEffects> recipeEffects;
@@ -191,6 +219,11 @@ public class BukkitRecipeResult implements RecipeResult<ItemStack> {
 
         public Builder customModelData(int customModelData) {
             this.customModelData = customModelData;
+            return this;
+        }
+
+        public Builder itemModel(String itemModel) {
+            this.itemModel = itemModel;
             return this;
         }
 
@@ -238,7 +271,7 @@ public class BukkitRecipeResult implements RecipeResult<ItemStack> {
             Objects.requireNonNull(names, "Names not initialized, a recipe has to have names");
             Objects.requireNonNull(lore, "Lore not initialized, a recipe has to have lore");
             Objects.requireNonNull(recipeEffects, "Effects not initialized, a recipe has to have effects");
-            return new BukkitRecipeResult(glint, customModelData, recipeEffects, names, lore, color, appendBrewInfoLore, customId);
+            return new BukkitRecipeResult(glint, customModelData, itemModel, recipeEffects, names, lore, color, appendBrewInfoLore, customId);
         }
 
         public Builder name(String name) {
