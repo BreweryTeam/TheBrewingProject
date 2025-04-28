@@ -15,7 +15,7 @@ public class RecipeImpl<I> implements Recipe<I> {
     @Getter
     private final String recipeName;
     @Getter
-    private final int brewDifficulty;
+    private final double brewDifficulty;
     @NotNull
     private final List<BrewingStep> steps;
 
@@ -24,7 +24,7 @@ public class RecipeImpl<I> implements Recipe<I> {
     private final RecipeResult<I> recipeResult;
 
 
-    private RecipeImpl(String recipeName, int brewDifficulty, List<BrewingStep> steps,
+    private RecipeImpl(String recipeName, double brewDifficulty, List<BrewingStep> steps,
                        @NotNull RecipeResult<I> recipeResult) {
         this.recipeName = recipeName;
         this.brewDifficulty = brewDifficulty;
@@ -34,7 +34,7 @@ public class RecipeImpl<I> implements Recipe<I> {
 
     public static class Builder<I> {
         private final String recipeName;
-        private int brewDifficulty = 1;
+        private double brewDifficulty = 1;
         private RecipeResult<I> recipeResult;
         private List<BrewingStep> steps;
 
@@ -42,7 +42,7 @@ public class RecipeImpl<I> implements Recipe<I> {
             this.recipeName = recipeName;
         }
 
-        public Builder<I> brewDifficulty(int brewDifficulty) {
+        public Builder<I> brewDifficulty(double brewDifficulty) {
             this.brewDifficulty = brewDifficulty;
             return this;
         }

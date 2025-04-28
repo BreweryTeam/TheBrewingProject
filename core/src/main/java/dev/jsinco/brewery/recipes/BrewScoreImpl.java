@@ -31,10 +31,10 @@ public class BrewScoreImpl implements BrewScore {
         this.brewDifficulty = 1;
     }
 
-    public BrewScoreImpl(List<Double> scores, boolean completed, int brewDifficulty) {
+    public BrewScoreImpl(List<Double> scores, boolean completed, double brewDifficulty) {
         this.scores = scores;
         this.completed = completed;
-        this.brewDifficulty = (double) brewDifficulty / 2;
+        this.brewDifficulty = brewDifficulty / 2;
     }
 
     public double getPartialScore(int stepIndex) {
