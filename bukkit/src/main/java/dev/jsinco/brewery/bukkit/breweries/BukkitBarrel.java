@@ -58,7 +58,7 @@ public class BukkitBarrel implements Barrel<BukkitBarrel, ItemStack, Inventory>,
             player.sendMessage(MiniMessage.miniMessage().deserialize(TranslationsConfig.BARREL_ACCESS_DENIED));
             return true;
         }
-        if (recentlyAccessed + 20 > TheBrewingProject.getInstance().getTime()) {
+        if (recentlyAccessed + Moment.SECOND < TheBrewingProject.getInstance().getTime()) {
             populateInventory();
         }
         recentlyAccessed = TheBrewingProject.getInstance().getTime();
@@ -99,7 +99,7 @@ public class BukkitBarrel implements Barrel<BukkitBarrel, ItemStack, Inventory>,
     @Override
     public void tickInventory() {
         updateInventory();
-        if (recentlyAccessed + 20 <= TheBrewingProject.getInstance().getTime()) {
+        if (recentlyAccessed + Moment.SECOND >= TheBrewingProject.getInstance().getTime()) {
             close();
             TheBrewingProject.getInstance().getBreweryRegistry().unregisterOpened(this);
         }
