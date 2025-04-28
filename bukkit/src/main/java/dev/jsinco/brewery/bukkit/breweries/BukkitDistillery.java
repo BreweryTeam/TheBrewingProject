@@ -43,6 +43,7 @@ public class BukkitDistillery implements Distillery<BukkitDistillery, ItemStack,
     private boolean dirty = true;
     private final Set<BreweryLocation> mixtureContainerLocations = new HashSet<>();
     private final Set<BreweryLocation> distillateContainerLocations = new HashSet<>();
+    private long recentlyAccessed;
 
 
     public BukkitDistillery(@NotNull PlacedBreweryStructure<BukkitDistillery> structure) {
@@ -86,7 +87,9 @@ public class BukkitDistillery implements Distillery<BukkitDistillery, ItemStack,
             player.sendMessage(MiniMessage.miniMessage().deserialize(TranslationsConfig.DISTILLERY_ACCESS_DENIED));
             return false;
         }
-        inventory.updateInventoryFromBrews();
+        mixture.updateInventoryFromBrews();
+        distillate.updateInventoryFromBrews();
+        this.recentlyAccessed = TheBrewingProject.getInstance().getTime();
         TheBrewingProject.getInstance().getBreweryRegistry().registerOpened(this);
         player.openInventory(inventory.getInventory());
         return true;
@@ -163,23 +166,17 @@ public class BukkitDistillery implements Distillery<BukkitDistillery, ItemStack,
 
     public void tickInventory() {
         checkDirty();
-        boolean hasChanged;
-        if (mixture.getInventory().getViewers().isEmpty()) {
-            mixture.getInventory().clear(); // Depopulate inventory, save on memory
-            hasChanged = false;
-        } else {
-            hasChanged = mixture.updateBrewsFromInventory();
+        if (recentlyAccessed + 20 <= TheBrewingProject.getInstance().getTime()) {
+            mixture.getInventory().clear();
+            distillate.getInventory().clear();
+            TheBrewingProject.getInstance().getBreweryRegistry().unregisterOpened(this);
+            // Distilling results can be computed later on
+            return;
         }
-        if (distillate.getInventory().getViewers().isEmpty()) {
-            distillate.getInventory().clear(); // Depopulate inventory, save on memory
-        } else {
-            distillate.updateBrewsFromInventory();
-        }
+        boolean hasChanged = mixture.updateBrewsFromInventory();
+        distillate.updateBrewsFromInventory();
         if (hasChanged) {
             resetStartTime();
-        }
-        if (distillate.getInventory().getViewers().isEmpty() && mixture.getInventory().getViewers().isEmpty()) {
-            TheBrewingProject.getInstance().getBreweryRegistry().unregisterOpened(this);
         }
         long diff = getTimeProcessed();
         long processTime = getProcessTime();
@@ -194,6 +191,21 @@ public class BukkitDistillery implements Distillery<BukkitDistillery, ItemStack,
             mixture.updateInventoryFromBrews();
         }
         resetStartTime();
+    }
+
+    @Override
+    public Optional<Inventory> access(@NotNull BreweryLocation breweryLocation) {
+        if (mixtureContainerLocations.contains(breweryLocation)) {
+            mixture.updateInventoryFromBrews();
+            distillate.updateInventoryFromBrews();
+            return Optional.of(mixture.getInventory());
+        }
+        if (distillateContainerLocations.contains(breweryLocation)) {
+            mixture.updateInventoryFromBrews();
+            distillate.updateInventoryFromBrews();
+            return Optional.of(distillate.getInventory());
+        }
+        return Optional.empty();
     }
 
     private long getTimeProcessed() {

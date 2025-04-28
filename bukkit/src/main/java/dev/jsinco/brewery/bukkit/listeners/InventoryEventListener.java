@@ -5,19 +5,19 @@ import dev.jsinco.brewery.breweries.InventoryAccessible;
 import dev.jsinco.brewery.bukkit.brew.BrewAdapter;
 import dev.jsinco.brewery.bukkit.breweries.BreweryRegistry;
 import dev.jsinco.brewery.database.sql.Database;
+import dev.jsinco.brewery.util.Logging;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.inventory.ClickType;
-import org.bukkit.event.inventory.InventoryAction;
-import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.inventory.InventoryDragEvent;
+import org.bukkit.event.inventory.*;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
 
@@ -101,5 +101,14 @@ public class InventoryEventListener implements Listener {
                 .allMatch(itemStack -> inventoryAccessible.inventoryAllows(dragEvent.getWhoClicked().getUniqueId(), itemStack))) {
             dragEvent.setResult(Event.Result.DENY);
         }
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onInventoryMoveItem(InventoryMoveItemEvent event) {
+        Optional.ofNullable(registry.getFromInventory(event.getDestination()))
+                .or(() -> Optional.ofNullable(registry.getFromInventory(event.getSource())))
+                .ifPresent(inventoryAccessible -> {
+                    inventoryAccessible.tickInventory();
+                });
     }
 }
