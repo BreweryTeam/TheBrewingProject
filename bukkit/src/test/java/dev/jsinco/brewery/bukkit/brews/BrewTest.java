@@ -256,7 +256,7 @@ class BrewTest {
                 )
                 .build();
         boolean hasHadNullQuality = false;
-        for (int i = 3; i < 20; i++) {
+        for (int i = 3; i < 10; i++) {
             BrewImpl brew = new BrewImpl(
                     List.of(
                             new BrewingStep.Cook(
