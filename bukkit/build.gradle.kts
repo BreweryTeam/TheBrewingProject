@@ -50,7 +50,7 @@ dependencies {
     compileOnly("net.momirealms:craft-engine-bukkit:0.0.48")
 
     implementation(project(":"))
-    implementation(project(":api"))
+    api(project(":api"))
     implementation("dev.thorinwasher.schem:schem-reader:1.0.0")
     implementation("com.github.Carleslc.Simple-YAML:Simple-Yaml:1.8.4")
 
@@ -84,17 +84,9 @@ tasks {
         }
     }
 
-    jar {
-        enabled = false
-    }
-
     shadowJar {
         archiveBaseName.set(rootProject.name)
         archiveClassifier.unset()
-    }
-
-    build {
-        dependsOn(shadowJar)
     }
 }
 

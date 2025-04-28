@@ -6,7 +6,6 @@ import dev.jsinco.brewery.util.FileUtil;
 
 import java.io.File;
 import java.nio.file.Path;
-import java.util.List;
 import java.util.Map;
 
 public class TranslationsConfig extends AbstractConfig {

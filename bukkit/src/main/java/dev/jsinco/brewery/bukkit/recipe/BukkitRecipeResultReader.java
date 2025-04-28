@@ -22,6 +22,7 @@ public class BukkitRecipeResultReader implements RecipeResultReader<ItemStack> {
         return new BukkitRecipeResult.Builder()
                 .recipeEffects(getRecipeEffects(configurationSection))
                 .customModelData(configurationSection.getInt("potion-attributes.custom-model-data", -1))
+                .itemModel(configurationSection.getString("potion-attributes.item-model", null))
                 .lore(QualityData.readQualityFactoredStringList(configurationSection.getStringList("potion-attributes.lore")))
                 .glint(configurationSection.getBoolean("potion-attributes.glint", false))
                 .names(QualityData.readQualityFactoredString(configurationSection.getString("potion-attributes.name")))

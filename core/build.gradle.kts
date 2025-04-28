@@ -8,7 +8,6 @@ buildscript {
 
 plugins {
     `java-library`
-    id("net.neoforged.gradle.common") version "7.0.181"
     id("org.ajoberstar.grgit") version "5.3.0"
 }
 

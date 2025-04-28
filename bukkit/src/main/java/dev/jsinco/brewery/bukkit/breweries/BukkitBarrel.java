@@ -12,9 +12,9 @@ import dev.jsinco.brewery.bukkit.util.BukkitAdapter;
 import dev.jsinco.brewery.configuration.locale.TranslationsConfig;
 import dev.jsinco.brewery.database.PersistenceException;
 import dev.jsinco.brewery.database.sql.Database;
-import dev.jsinco.brewery.util.Pair;
 import dev.jsinco.brewery.moment.Interval;
 import dev.jsinco.brewery.moment.Moment;
+import dev.jsinco.brewery.util.Pair;
 import dev.jsinco.brewery.vector.BreweryLocation;
 import lombok.Getter;
 import net.kyori.adventure.text.minimessage.MiniMessage;
@@ -38,16 +38,16 @@ public class BukkitBarrel implements Barrel<BukkitBarrel, ItemStack, Inventory>,
     @Getter
     private final BarrelType type;
     @Getter
-    private final Location signLocation;
+    private final Location uniqueLocation;
     private Brew[] brews;
 
-    public BukkitBarrel(Location signLocation, PlacedBreweryStructure<BukkitBarrel> structure, int size, BarrelType type) {
+    public BukkitBarrel(Location uniqueLocation, PlacedBreweryStructure<BukkitBarrel> structure, int size, BarrelType type) {
         this.structure = structure;
         this.size = size;
         this.inventory = Bukkit.createInventory(this, size, "Barrel");
         this.type = type;
         this.brews = new Brew[size];
-        this.signLocation = signLocation;
+        this.uniqueLocation = uniqueLocation;
     }
 
     @Override
@@ -61,8 +61,8 @@ public class BukkitBarrel implements Barrel<BukkitBarrel, ItemStack, Inventory>,
             populateInventory();
         }
         float randPitch = (float) (Math.random() * 0.1);
-        if (signLocation != null) {
-            signLocation.getWorld().playSound(signLocation, Sound.BLOCK_BARREL_OPEN, SoundCategory.BLOCKS, 0.5f, 0.8f + randPitch);
+        if (uniqueLocation != null) {
+            uniqueLocation.getWorld().playSound(BukkitAdapter.toLocation(location).add(0.5, 0.5, 0.5), Sound.BLOCK_BARREL_OPEN, SoundCategory.BLOCKS, 0.5f, 0.8f + randPitch);
         }
         player.openInventory(inventory);
         return true;
@@ -88,8 +88,8 @@ public class BukkitBarrel implements Barrel<BukkitBarrel, ItemStack, Inventory>,
 
     private void close() {
         float randPitch = (float) (Math.random() * 0.1);
-        if (signLocation != null) {
-            signLocation.getWorld().playSound(signLocation, Sound.BLOCK_BARREL_CLOSE, SoundCategory.BLOCKS, 0.5f, 0.8f + randPitch);
+        if (uniqueLocation != null) {
+            uniqueLocation.getWorld().playSound(uniqueLocation, Sound.BLOCK_BARREL_CLOSE, SoundCategory.BLOCKS, 0.5f, 0.8f + randPitch);
         }
         this.inventory.clear();
     }
@@ -187,11 +187,11 @@ public class BukkitBarrel implements Barrel<BukkitBarrel, ItemStack, Inventory>,
     }
 
     private BukkitBarrelBrewDataType.BarrelContext getContext(int inventoryPos) {
-        return new BukkitBarrelBrewDataType.BarrelContext(signLocation.getBlockX(), signLocation.getBlockY(), signLocation.getBlockZ(), inventoryPos, signLocation.getWorld().getUID());
+        return new BukkitBarrelBrewDataType.BarrelContext(uniqueLocation.getBlockX(), uniqueLocation.getBlockY(), uniqueLocation.getBlockZ(), inventoryPos, uniqueLocation.getWorld().getUID());
     }
 
     World getWorld() {
-        return signLocation.getWorld();
+        return uniqueLocation.getWorld();
     }
 
     public void setBrews(List<Pair<Brew, Integer>> brews) {
