@@ -8,11 +8,10 @@ buildscript {
 
 plugins {
     `java-library`
-    id("org.ajoberstar.grgit") version "5.3.0"
 }
 
 group = "dev.jsinco.brewery"
-version = "1.3.0-" + grgit.head().abbreviatedId
+version = rootProject.version
 
 repositories {
     mavenCentral()
