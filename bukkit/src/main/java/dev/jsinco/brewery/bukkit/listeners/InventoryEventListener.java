@@ -1,5 +1,6 @@
 package dev.jsinco.brewery.bukkit.listeners;
 
+import dev.jsinco.brewery.brew.Brew;
 import dev.jsinco.brewery.brew.BrewImpl;
 import dev.jsinco.brewery.breweries.InventoryAccessible;
 import dev.jsinco.brewery.bukkit.brew.BrewAdapter;
@@ -103,9 +104,12 @@ public class InventoryEventListener implements Listener {
 
     @EventHandler(ignoreCancelled = true)
     public void onInventoryMoveItem(InventoryMoveItemEvent event) {
+        Optional<InventoryAccessible<ItemStack, Inventory>> source = Optional.ofNullable(registry.getFromInventory(event.getSource()));
         Optional.ofNullable(registry.getFromInventory(event.getDestination()))
-                .or(() -> Optional.ofNullable(registry.getFromInventory(event.getSource())))
+                .or(() -> source)
                 .filter(inventoryAccessible -> !inventoryAccessible.inventoryAllows(event.getItem()))
                 .ifPresent(ignored -> event.setCancelled(true));
+        source.flatMap(ignored -> BrewAdapter.fromItem(event.getItem())
+                .map(brew -> BrewAdapter.toItem(brew, new Brew.State.Other()))).ifPresent(event::setItem);
     }
 }
