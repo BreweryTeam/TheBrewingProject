@@ -1,29 +1,8 @@
-package dev.jsinco.brewery.bukkit.command;
+package dev.jsinco.brewery.bukkit.command.old;
 
-import dev.jsinco.brewery.bukkit.TheBrewingProject;
-import dev.jsinco.brewery.bukkit.effect.event.NamedDrunkEventExecutor;
-import dev.jsinco.brewery.configuration.locale.TranslationsConfig;
-import dev.jsinco.brewery.event.DrunkEvent;
-import dev.jsinco.brewery.event.NamedDrunkEvent;
-import dev.jsinco.brewery.util.BreweryKey;
-import dev.jsinco.brewery.util.Registry;
-import net.kyori.adventure.text.minimessage.MiniMessage;
-import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
-import org.bukkit.Bukkit;
-import org.bukkit.OfflinePlayer;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandSender;
-import org.bukkit.command.TabExecutor;
-import org.bukkit.entity.Player;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+// TODO: Not deleting this just yet because I'm not sure if I migrated this 100% faithfully
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Locale;
-import java.util.stream.Stream;
-
+/*
 public class BreweryCommand implements TabExecutor {
 
     public static final List<String> INTEGER_TAB_COMPLETIONS = compileIntegerTabCompletions();
@@ -166,3 +145,4 @@ public class BreweryCommand implements TabExecutor {
         return List.copyOf(strings);
     }
 }
+*/

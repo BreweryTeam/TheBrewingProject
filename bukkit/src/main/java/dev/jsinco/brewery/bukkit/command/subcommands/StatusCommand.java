@@ -1,6 +1,9 @@
-package dev.jsinco.brewery.bukkit.command;
+package dev.jsinco.brewery.bukkit.command.subcommands;
 
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
+import dev.jsinco.brewery.bukkit.command.BukkitCommandManager;
+import dev.jsinco.brewery.bukkit.command.BukkitSubCommand;
+import dev.jsinco.brewery.command.SubCommandInfo;
 import dev.jsinco.brewery.configuration.locale.TranslationsConfig;
 import dev.jsinco.brewery.effect.DrunkStateImpl;
 import dev.jsinco.brewery.effect.DrunksManagerImpl;
@@ -14,26 +17,30 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
 
-public class StatusCommand {
-    public static boolean onCommand(OfflinePlayer player, CommandSender sender, @NotNull String[] args) {
+@SubCommandInfo(
+        name = "status",
+        permission = "brewery.command.status"
+)
+public class StatusCommand implements BukkitSubCommand {
+    @Override
+    public void execute(TheBrewingProject instance, CommandSender sender, OfflinePlayer player, String label, List<String> args) {
         DrunksManagerImpl<?> drunksManager = TheBrewingProject.getInstance().getDrunksManager();
-        return switch (args[0]) {
-            case "info" -> StatusCommand.info(player, sender, drunksManager, Arrays.copyOfRange(args, 1, args.length));
+        switch (args.getFirst()) {
+            case "info" -> StatusCommand.info(player, sender, drunksManager, args.subList(1, args.size()));
             case "consume" ->
-                    StatusCommand.consume(player, sender, drunksManager, Arrays.copyOfRange(args, 1, args.length));
+                    StatusCommand.consume(player, sender, drunksManager, args.subList(1, args.size()));
             case "clear" ->
-                    StatusCommand.clear(player, sender, drunksManager, Arrays.copyOfRange(args, 1, args.length));
-            case "set" -> StatusCommand.set(player, sender, drunksManager, Arrays.copyOfRange(args, 1, args.length));
-            default -> false;
+                    StatusCommand.clear(player, sender, drunksManager, args.subList(1, args.size()));
+            case "set" -> StatusCommand.set(player, sender, drunksManager, args.subList(1, args.size()));
+            default -> {}
         };
     }
 
-    private static boolean set(OfflinePlayer target, CommandSender sender, DrunksManagerImpl<?> drunksManager, @NotNull String[] args) {
-        if (args.length < 1) {
+    private static boolean set(OfflinePlayer target, CommandSender sender, DrunksManagerImpl<?> drunksManager, @NotNull List<String> args) {
+        if (args.isEmpty()) {
             sender.sendMessage(MiniMessage.miniMessage().deserialize(TranslationsConfig.COMMAND_MISSING_ARGUMENT, Placeholder.unparsed("argument_type", "<alcohol>")));
             return true;
         }
@@ -41,22 +48,22 @@ public class StatusCommand {
         return consume(target, sender, drunksManager, args);
     }
 
-    private static boolean clear(@NotNull OfflinePlayer target, CommandSender sender, DrunksManagerImpl<?> drunksManager, @NotNull String[] args) {
+    private static boolean clear(@NotNull OfflinePlayer target, CommandSender sender, DrunksManagerImpl<?> drunksManager, @NotNull List<String> args) {
         drunksManager.clear(target.getUniqueId());
         sender.sendMessage(MiniMessage.miniMessage().deserialize(TranslationsConfig.COMMAND_STATUS_CLEAR_MESSAGE, Placeholder.unparsed("player_name", target.getName())));
         return true;
     }
 
-    private static boolean consume(OfflinePlayer target, CommandSender sender, DrunksManagerImpl<?> drunksManager, @NotNull String[] args) {
-        if (args.length < 1) {
+    private static boolean consume(OfflinePlayer target, CommandSender sender, DrunksManagerImpl<?> drunksManager, @NotNull List<String> args) {
+        if (args.isEmpty()) {
             sender.sendMessage(MiniMessage.miniMessage().deserialize(TranslationsConfig.COMMAND_MISSING_ARGUMENT, Placeholder.unparsed("argument_type", "<alcohol>")));
             return true;
         }
         drunksManager.clear(target.getUniqueId());
-        int alcohol = Integer.parseInt(args[0]);
+        int alcohol = Integer.parseInt(args.getFirst());
         int toxins;
-        if (args.length == 2) {
-            toxins = Integer.parseInt(args[1]);
+        if (args.size() == 2) {
+            toxins = Integer.parseInt(args.get(1));
         } else {
             toxins = 0;
         }
@@ -65,9 +72,9 @@ public class StatusCommand {
         return true;
     }
 
-    private static boolean info(OfflinePlayer target, CommandSender sender, DrunksManagerImpl<?> drunksManager, @NotNull String[] args) {
+    private static boolean info(OfflinePlayer target, CommandSender sender, DrunksManagerImpl<?> drunksManager, @NotNull List<String> args) {
         if (target == null) {
-            sender.sendMessage(MiniMessage.miniMessage().deserialize(TranslationsConfig.COMMAND_UNKNOWN_PLAYER, Placeholder.unparsed("player_name", args[0])));
+            sender.sendMessage(MiniMessage.miniMessage().deserialize(TranslationsConfig.COMMAND_UNKNOWN_PLAYER, Placeholder.unparsed("player_name", args.getFirst())));
             return true;
         }
         sender.sendMessage(compileStatusMessage(target, drunksManager, TranslationsConfig.COMMAND_STATUS_INFO_MESSAGE));
@@ -89,17 +96,18 @@ public class StatusCommand {
         );
     }
 
-    public static List<String> tabComplete(@NotNull String[] args) {
-        if (args.length == 1) {
+    @Override
+    public List<String> tabComplete(TheBrewingProject instance, CommandSender sender, OfflinePlayer player, String label, List<String> args) {
+        if (args.size() == 1) {
             return Stream.of("info", "consume", "set", "clear")
                     .toList();
         }
-        return switch (args[0]) {
+        return switch (args.getFirst()) {
             case "consume", "set" -> {
-                if (args.length == 2) {
-                    yield BreweryCommand.INTEGER_TAB_COMPLETIONS;
-                } else if (args.length == 3) {
-                    yield BreweryCommand.INTEGER_TAB_COMPLETIONS;
+                if (args.size() == 2) {
+                    yield BukkitCommandManager.INTEGER_TAB_COMPLETIONS;
+                } else if (args.size() == 3) {
+                    yield BukkitCommandManager.INTEGER_TAB_COMPLETIONS;
                 }
                 yield List.of();
             }

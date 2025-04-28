@@ -12,7 +12,6 @@ import dev.jsinco.brewery.effect.DrunksManagerImpl;
 import dev.jsinco.brewery.event.CustomEventRegistry;
 import dev.jsinco.brewery.event.DrunkEvent;
 import dev.jsinco.brewery.event.EventStep;
-import dev.jsinco.brewery.recipes.BrewScoreImpl;
 import dev.jsinco.brewery.util.BreweryKey;
 import dev.jsinco.brewery.util.Registry;
 import lombok.Getter;
