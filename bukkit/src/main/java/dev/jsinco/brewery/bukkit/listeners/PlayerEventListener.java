@@ -3,6 +3,7 @@ package dev.jsinco.brewery.bukkit.listeners;
 import dev.jsinco.brewery.brew.BrewImpl;
 import dev.jsinco.brewery.breweries.InventoryAccessible;
 import dev.jsinco.brewery.breweries.StructureHolder;
+import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.bukkit.brew.BrewAdapter;
 import dev.jsinco.brewery.bukkit.breweries.BreweryRegistry;
 import dev.jsinco.brewery.bukkit.breweries.BukkitCauldron;
@@ -10,7 +11,6 @@ import dev.jsinco.brewery.bukkit.breweries.BukkitCauldronDataType;
 import dev.jsinco.brewery.bukkit.effect.event.DrunkEventExecutor;
 import dev.jsinco.brewery.bukkit.ingredient.BukkitIngredientManager;
 import dev.jsinco.brewery.bukkit.ingredient.SimpleIngredient;
-import dev.jsinco.brewery.bukkit.integration.structure.StructureAccessHook;
 import dev.jsinco.brewery.bukkit.recipe.RecipeEffects;
 import dev.jsinco.brewery.bukkit.util.BukkitAdapter;
 import dev.jsinco.brewery.bukkit.util.BukkitMessageUtil;
@@ -101,7 +101,7 @@ public class PlayerEventListener implements Listener {
         if (block == null) {
             return;
         }
-        if (!StructureAccessHook.hasAccess(event.getClickedBlock(), event.getPlayer())) {
+        if (!TheBrewingProject.getInstance().getIntegrationManager().hasAccess(event.getClickedBlock(), event.getPlayer())) {
             return;
         }
         if (Tag.CAULDRONS.isTagged(block.getType())) {

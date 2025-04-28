@@ -37,6 +37,7 @@ public class BlockUtil {
         if (!PROTOCOL_LIB_ENABLED) {
             return;
         }
+
         PacketContainer packet = new PacketContainer(PacketType.Play.Server.BLOCK_ACTION);
         packet.getBlockPositionModifier()
                 .writeSafely(0, new BlockPosition(location.x(), location.y(), location.z()));
