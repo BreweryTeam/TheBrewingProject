@@ -212,7 +212,7 @@ public class BukkitRecipeResult implements RecipeResult<ItemStack> {
             return this;
         }
 
-        public Builder itemModel(String itemModel) {
+        public Builder itemModel(@Nullable String itemModel) {
             if (itemModel != null) {
                 this.itemModel = BreweryKey.parse(itemModel);
             }
