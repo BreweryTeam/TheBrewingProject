@@ -47,7 +47,7 @@ public class BukkitBarrelDataType implements SqlStoredData.Findable<BukkitBarrel
             preparedStatement.setBytes(7, DecoderEncoder.asBytes(worldUuid));
             preparedStatement.setString(8, DecoderEncoder.serializeTransformation(placedStructure.getTransformation()));
             preparedStatement.setString(9, structure.getName());
-            preparedStatement.setString(10, value.getStructureType().key().toString());
+            preparedStatement.setString(10, value.getType().key().toString());
             preparedStatement.setInt(11, value.getSize());
             preparedStatement.execute();
         } catch (SQLException e) {
@@ -87,6 +87,10 @@ public class BukkitBarrelDataType implements SqlStoredData.Findable<BukkitBarrel
                 Matrix3d transform = DecoderEncoder.deserializeTransformation(resultSet.getString("transformation"));
                 String format = resultSet.getString("format");
                 BarrelType type = Registry.BARREL_TYPE.get(BreweryKey.parse(resultSet.getString("barrel_type")));
+                if (type == null) {
+                    Logging.warning("Unknown barrel type '" + resultSet.getString("barrel_type") + "' for structure at: " + uniqueLocation);
+                    continue;
+                }
                 int size = resultSet.getInt("size");
 
                 Optional<BreweryStructure> breweryStructureOptional = TheBrewingProject.getInstance().getStructureRegistry().getStructure(format);
