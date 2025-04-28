@@ -179,6 +179,9 @@ public class BukkitDistillery implements Distillery<BukkitDistillery, ItemStack,
             // Distilling results can be computed later on
             return;
         }
+        if (!mixture.getInventory().getViewers().isEmpty() || !distillate.getInventory().getViewers().isEmpty()) {
+            this.recentlyAccessed = TheBrewingProject.getInstance().getTime();
+        }
         boolean hasChanged = mixture.updateBrewsFromInventory();
         distillate.updateBrewsFromInventory();
         if (hasChanged) {
@@ -190,26 +193,24 @@ public class BukkitDistillery implements Distillery<BukkitDistillery, ItemStack,
             return;
         }
         transferItems(mixture, distillate, (int) (getStructure().getStructure().getMeta(StructureMeta.PROCESS_AMOUNT) * (diff / processTime)));
-        if (!distillate.getInventory().getViewers().isEmpty()) {
-            distillate.updateInventoryFromBrews();
-        }
-        if (!mixture.getInventory().getViewers().isEmpty()) {
-            mixture.updateInventoryFromBrews();
-        }
+        distillate.updateInventoryFromBrews();
+        mixture.updateInventoryFromBrews();
         resetStartTime();
     }
 
     @Override
     public Optional<Inventory> access(@NotNull BreweryLocation breweryLocation) {
-        this.recentlyAccessed = TheBrewingProject.getInstance().getTime();
-        if (mixtureContainerLocations.contains(breweryLocation)) {
+        if (recentlyAccessed + Moment.SECOND <= TheBrewingProject.getInstance().getTime()
+                && (mixtureContainerLocations.contains(breweryLocation) || distillateContainerLocations.contains(breweryLocation))) {
             mixture.updateInventoryFromBrews();
             distillate.updateInventoryFromBrews();
+            TheBrewingProject.getInstance().getBreweryRegistry().registerOpened(this);
+        }
+        this.recentlyAccessed = TheBrewingProject.getInstance().getTime();
+        if (mixtureContainerLocations.contains(breweryLocation)) {
             return Optional.of(mixture.getInventory());
         }
         if (distillateContainerLocations.contains(breweryLocation)) {
-            mixture.updateInventoryFromBrews();
-            distillate.updateInventoryFromBrews();
             return Optional.of(distillate.getInventory());
         }
         return Optional.empty();
