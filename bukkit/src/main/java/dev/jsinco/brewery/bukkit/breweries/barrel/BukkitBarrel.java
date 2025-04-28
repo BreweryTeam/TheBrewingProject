@@ -98,6 +98,9 @@ public class BukkitBarrel implements Barrel<BukkitBarrel, ItemStack, Inventory> 
     @Override
     public void tickInventory() {
         inventory.updateBrewsFromInventory();
+        if (!inventory.getInventory().getViewers().isEmpty()) {
+            this.recentlyAccessed = TheBrewingProject.getInstance().getTime();
+        }
         Brew[] brews = inventory.getBrews();
         long time = TheBrewingProject.getInstance().getTime();
         for (int i = 0; i < brews.length; i++) {
@@ -132,9 +135,9 @@ public class BukkitBarrel implements Barrel<BukkitBarrel, ItemStack, Inventory> 
     public Optional<Inventory> access(@NotNull BreweryLocation breweryLocation) {
         if (recentlyAccessed + Moment.SECOND <= TheBrewingProject.getInstance().getTime()) {
             inventory.updateInventoryFromBrews();
+            TheBrewingProject.getInstance().getBreweryRegistry().registerOpened(this);
         }
         this.recentlyAccessed = TheBrewingProject.getInstance().getTime();
-        TheBrewingProject.getInstance().getBreweryRegistry().registerOpened(this);
         return Optional.of(inventory.getInventory());
     }
 

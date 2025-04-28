@@ -74,9 +74,9 @@ tasks {
     runServer {
         minecraftVersion("1.21.4")
         downloadPlugins {
+            /*
             modrinth("worldedit", "DlD8WKr9")
             modrinth("craftengine", "OktNyJzh")
-            /*
             url("https://dev.bukkit.org/projects/chestshop/files/latest")
             url("https://dev.bukkit.org/projects/vault/files/latest")
             url("https://github.com/EssentialsX/Essentials/releases/download/2.21.0/EssentialsX-2.21.0.jar")
