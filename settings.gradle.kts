@@ -1,6 +1,5 @@
 rootProject.name = "TheBrewingProject"
 include("bukkit")
-include("neoforge")
 pluginManagement {
     repositories {
         mavenCentral()
@@ -9,5 +8,5 @@ pluginManagement {
     }
 }
 include("datagenerator")
-
 include("api")
+include("core")

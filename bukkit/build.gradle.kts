@@ -49,7 +49,7 @@ dependencies {
     compileOnly("net.momirealms:craft-engine-core:0.0.48")
     compileOnly("net.momirealms:craft-engine-bukkit:0.0.48")
 
-    implementation(project(":"))
+    implementation(project(":core"))
     api(project(":api"))
     implementation("dev.thorinwasher.schem:schem-reader:1.0.0")
     implementation("com.github.Carleslc.Simple-YAML:Simple-Yaml:1.8.4")
