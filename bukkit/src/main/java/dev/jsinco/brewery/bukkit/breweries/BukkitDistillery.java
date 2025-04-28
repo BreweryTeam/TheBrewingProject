@@ -11,6 +11,7 @@ import dev.jsinco.brewery.bukkit.util.BlockUtil;
 import dev.jsinco.brewery.bukkit.util.BukkitAdapter;
 import dev.jsinco.brewery.configuration.locale.TranslationsConfig;
 import dev.jsinco.brewery.database.PersistenceException;
+import dev.jsinco.brewery.moment.Moment;
 import dev.jsinco.brewery.structure.StructureMeta;
 import dev.jsinco.brewery.util.Pair;
 import dev.jsinco.brewery.vector.BreweryLocation;
@@ -87,8 +88,10 @@ public class BukkitDistillery implements Distillery<BukkitDistillery, ItemStack,
             player.sendMessage(MiniMessage.miniMessage().deserialize(TranslationsConfig.DISTILLERY_ACCESS_DENIED));
             return false;
         }
-        mixture.updateInventoryFromBrews();
-        distillate.updateInventoryFromBrews();
+        if(recentlyAccessed + Moment.SECOND > TheBrewingProject.getInstance().getTime()) {
+            mixture.updateInventoryFromBrews();
+            distillate.updateInventoryFromBrews();
+        }
         this.recentlyAccessed = TheBrewingProject.getInstance().getTime();
         TheBrewingProject.getInstance().getBreweryRegistry().registerOpened(this);
         player.openInventory(inventory.getInventory());
@@ -166,7 +169,7 @@ public class BukkitDistillery implements Distillery<BukkitDistillery, ItemStack,
 
     public void tickInventory() {
         checkDirty();
-        if (recentlyAccessed + 20 <= TheBrewingProject.getInstance().getTime()) {
+        if (recentlyAccessed + Moment.SECOND >= TheBrewingProject.getInstance().getTime()) {
             mixture.getInventory().clear();
             distillate.getInventory().clear();
             TheBrewingProject.getInstance().getBreweryRegistry().unregisterOpened(this);

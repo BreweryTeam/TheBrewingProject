@@ -102,13 +102,4 @@ public class InventoryEventListener implements Listener {
             dragEvent.setResult(Event.Result.DENY);
         }
     }
-
-    @EventHandler(priority = EventPriority.MONITOR)
-    public void onInventoryMoveItem(InventoryMoveItemEvent event) {
-        Optional.ofNullable(registry.getFromInventory(event.getDestination()))
-                .or(() -> Optional.ofNullable(registry.getFromInventory(event.getSource())))
-                .ifPresent(inventoryAccessible -> {
-                    inventoryAccessible.tickInventory();
-                });
-    }
 }
