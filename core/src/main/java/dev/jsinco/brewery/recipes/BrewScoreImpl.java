@@ -46,6 +46,7 @@ public class BrewScoreImpl implements BrewScore {
     }
 
     private double applyDifficulty(double score) {
+        score = Math.min(score + 0.05, 1D);
         // Avoid extreme point, log(0) is minus infinity
         if (brewDifficulty <= 0) {
             return 1D;
@@ -55,9 +56,9 @@ public class BrewScoreImpl implements BrewScore {
         if (brewDifficulty == 1) {
             scoreWithDifficulty = score;
         } else {
-            scoreWithDifficulty = (Math.exp(score * Math.log(brewDifficulty)) - 1) / (brewDifficulty - 1);
+            scoreWithDifficulty = (Math.pow(brewDifficulty, 3 * score) - 1) / (Math.pow(brewDifficulty, 3) - 1);
         }
-        return Math.max(Math.min(scoreWithDifficulty + 0.05, 1D) - 0.3, 0.0) * 1 / 0.7;
+        return Math.max(scoreWithDifficulty - 0.3, 0.0) * 1 / 0.7;
     }
 
     public String displayName() {
