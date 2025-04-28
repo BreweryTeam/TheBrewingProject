@@ -26,6 +26,9 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.*;
 import org.bukkit.event.entity.EntityChangeBlockEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
+import org.bukkit.event.inventory.HopperInventorySearchEvent;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -200,6 +203,18 @@ public class BlockEventListener implements Listener {
         destroyFromBlock(event.getBlock());
     }
 
+    @EventHandler(ignoreCancelled = true)
+    public void onHopperInventorySearch(HopperInventorySearchEvent event) {
+        Block searchBlock = event.getSearchBlock();
+        BreweryLocation breweryLocation = BukkitAdapter.toBreweryLocation(searchBlock);
+        placedStructureRegistry.getStructure(breweryLocation)
+                .map(MultiblockStructure::getHolder)
+                .filter(InventoryAccessible.class::isInstance)
+                .map(inventoryAccessible -> (InventoryAccessible<ItemStack, Inventory>) inventoryAccessible)
+                .flatMap(inventoryAccessible -> inventoryAccessible.access(breweryLocation))
+                .ifPresent(event::setInventory);
+    }
+
     /**
      * Assumes only one block has changed in the event, is not safe to use in multi-block changes
      *
@@ -214,8 +229,8 @@ public class BlockEventListener implements Listener {
                 .ifPresent(holder -> {
                     holder.destroy(breweryLocation);
                     remove(holder);
-                    if (holder instanceof InventoryAccessible inventoryAccessible) {
-                        breweryRegistry.unregisterInventory(inventoryAccessible);
+                    if (holder instanceof InventoryAccessible<?,?> inventoryAccessible) {
+                        breweryRegistry.unregisterInventory((InventoryAccessible<ItemStack, Inventory>) inventoryAccessible);
                     }
                 });
         breweryRegistry.getActiveSinglePositionStructure(breweryLocation).ifPresent(cauldron -> ListenerUtil.removeActiveSinglePositionStructure(cauldron, breweryRegistry, database));

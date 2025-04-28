@@ -40,6 +40,7 @@ public class BukkitBarrel implements Barrel<BukkitBarrel, ItemStack, Inventory>,
     @Getter
     private final Location uniqueLocation;
     private Brew[] brews;
+    private long recentlyAccessed;
 
     public BukkitBarrel(Location uniqueLocation, PlacedBreweryStructure<BukkitBarrel> structure, int size, BarrelType type) {
         this.structure = structure;
@@ -57,9 +58,10 @@ public class BukkitBarrel implements Barrel<BukkitBarrel, ItemStack, Inventory>,
             player.sendMessage(MiniMessage.miniMessage().deserialize(TranslationsConfig.BARREL_ACCESS_DENIED));
             return true;
         }
-        if (inventory.getViewers().isEmpty()) {
+        if (recentlyAccessed + 20 > TheBrewingProject.getInstance().getTime()) {
             populateInventory();
         }
+        recentlyAccessed = TheBrewingProject.getInstance().getTime();
         float randPitch = (float) (Math.random() * 0.1);
         if (uniqueLocation != null) {
             uniqueLocation.getWorld().playSound(BukkitAdapter.toLocation(location).add(0.5, 0.5, 0.5), Sound.BLOCK_BARREL_OPEN, SoundCategory.BLOCKS, 0.5f, 0.8f + randPitch);
@@ -97,10 +99,17 @@ public class BukkitBarrel implements Barrel<BukkitBarrel, ItemStack, Inventory>,
     @Override
     public void tickInventory() {
         updateInventory();
-        if (inventory.getViewers().isEmpty()) {
+        if (recentlyAccessed + 20 <= TheBrewingProject.getInstance().getTime()) {
             close();
             TheBrewingProject.getInstance().getBreweryRegistry().unregisterOpened(this);
         }
+    }
+
+    @Override
+    public Optional<Inventory> access(@NotNull BreweryLocation breweryLocation) {
+        this.recentlyAccessed = TheBrewingProject.getInstance().getTime();
+        TheBrewingProject.getInstance().getBreweryRegistry().registerOpened(this);
+        return Optional.of(inventory);
     }
 
     @Override

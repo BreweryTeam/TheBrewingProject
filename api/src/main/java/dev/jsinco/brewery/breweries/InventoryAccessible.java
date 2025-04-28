@@ -3,6 +3,7 @@ package dev.jsinco.brewery.breweries;
 import dev.jsinco.brewery.vector.BreweryLocation;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -15,4 +16,6 @@ public interface InventoryAccessible<IS, I> {
     Set<I> getInventories();
 
     void tickInventory();
+
+    Optional<I> access(@NotNull BreweryLocation breweryLocation);
 }
