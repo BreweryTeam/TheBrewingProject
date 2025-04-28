@@ -1,8 +1,9 @@
 import net.minecrell.pluginyml.bukkit.BukkitPluginDescription
 
 plugins {
-    `java-library`
+    java
     id("xyz.jpenilla.run-paper") version "2.3.0"
+    id("io.github.goooler.shadow") version "8.1.7"
     id("de.eldoria.plugin-yml.bukkit") version "0.7.1"
 }
 
@@ -49,7 +50,7 @@ dependencies {
     compileOnly("net.momirealms:craft-engine-bukkit:0.0.48")
 
     implementation(project(":core"))
-    api(project(":api"))
+    implementation(project(":api"))
     implementation("dev.thorinwasher.schem:schem-reader:1.0.0")
     implementation("com.github.Carleslc.Simple-YAML:Simple-Yaml:1.8.4")
 
@@ -83,6 +84,18 @@ tasks {
         }
     }
 
+    jar {
+        enabled = false // shadowJar
+    }
+
+    shadowJar {
+        archiveBaseName.set("${rootProject.name}-${project.name}")
+        archiveClassifier.unset()
+    }
+
+    build {
+        dependsOn(shadowJar)
+    }
 }
 
 
