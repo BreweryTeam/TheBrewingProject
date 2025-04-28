@@ -1,4 +1,4 @@
-package dev.jsinco.brewery.bukkit.integration.structure;
+package dev.jsinco.brewery.bukkit.integration.integrations.structure;
 
 import com.sk89q.worldedit.bukkit.BukkitAdapter;
 import com.sk89q.worldguard.WorldGuard;
@@ -6,26 +6,25 @@ import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 import com.sk89q.worldguard.internal.platform.WorldGuardPlatform;
 import com.sk89q.worldguard.protection.flags.Flags;
 import com.sk89q.worldguard.protection.regions.RegionQuery;
+import dev.jsinco.brewery.bukkit.integration.StructureIntegration;
+import dev.jsinco.brewery.util.ClassUtil;
+import net.william278.huskclaims.hook.Hook;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 
-public class WorldGuardHook {
-
-    private static final boolean ENABLED = checkAvailable();
-
-    private static boolean checkAvailable() {
-        try {
-            Class.forName("com.sk89q.worldguard.WorldGuard");
-            return true;
-        } catch (ClassNotFoundException e) {
-            return false;
-        }
+public class WorldGuardHook implements StructureIntegration {
+    @Override
+    public boolean shouldEnable() {
+        return ClassUtil.exists("com.sk89q.worldguard.WorldGuard");
     }
 
-    public static boolean hasAccess(Block block, Player player) {
-        if (!ENABLED) {
-            return true;
-        }
+    @Override
+    public String getId() {
+        return "worldguard";
+    }
+
+    @Override
+    public boolean hasAccess(Block block, Player player) {
         WorldGuard worldGuard = WorldGuard.getInstance();
         WorldGuardPlugin instance = WorldGuardPlugin.inst();
         if (worldGuard == null || instance == null || !instance.isEnabled()) {
