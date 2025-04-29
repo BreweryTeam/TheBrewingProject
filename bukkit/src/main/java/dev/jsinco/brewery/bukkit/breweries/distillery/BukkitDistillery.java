@@ -10,6 +10,7 @@ import dev.jsinco.brewery.bukkit.structure.PlacedBreweryStructure;
 import dev.jsinco.brewery.bukkit.util.BlockUtil;
 import dev.jsinco.brewery.bukkit.util.BukkitAdapter;
 import dev.jsinco.brewery.configuration.locale.TranslationsConfig;
+import dev.jsinco.brewery.database.PersistenceException;
 import dev.jsinco.brewery.moment.Moment;
 import dev.jsinco.brewery.structure.StructureMeta;
 import dev.jsinco.brewery.util.Pair;
@@ -41,7 +42,7 @@ public class BukkitDistillery implements Distillery<BukkitDistillery, ItemStack,
     private boolean dirty = true;
     private final Set<BreweryLocation> mixtureContainerLocations = new HashSet<>();
     private final Set<BreweryLocation> distillateContainerLocations = new HashSet<>();
-    private long recentlyAccessed;
+    private long recentlyAccessed = -1L;
 
 
     public BukkitDistillery(@NotNull PlacedBreweryStructure<BukkitDistillery> structure) {
@@ -86,7 +87,7 @@ public class BukkitDistillery implements Distillery<BukkitDistillery, ItemStack,
             player.sendMessage(MiniMessage.miniMessage().deserialize(TranslationsConfig.DISTILLERY_ACCESS_DENIED));
             return false;
         }
-        if (recentlyAccessed + Moment.SECOND <= TheBrewingProject.getInstance().getTime()) {
+        if (inventoryUnpopulated()) {
             mixture.updateInventoryFromBrews();
             distillate.updateInventoryFromBrews();
         }
@@ -142,6 +143,10 @@ public class BukkitDistillery implements Distillery<BukkitDistillery, ItemStack,
                 distillateContainerLocations.add(breweryLocation);
             }
         }
+    }
+
+    private boolean inventoryUnpopulated() {
+        return recentlyAccessed == -1L || recentlyAccessed + Moment.SECOND <= TheBrewingProject.getInstance().getTime();
     }
 
     public void tick() {
@@ -200,7 +205,7 @@ public class BukkitDistillery implements Distillery<BukkitDistillery, ItemStack,
 
     @Override
     public Optional<Inventory> access(@NotNull BreweryLocation breweryLocation) {
-        if (recentlyAccessed + Moment.SECOND <= TheBrewingProject.getInstance().getTime()
+        if (inventoryUnpopulated()
                 && (mixtureContainerLocations.contains(breweryLocation) || distillateContainerLocations.contains(breweryLocation))) {
             mixture.updateInventoryFromBrews();
             distillate.updateInventoryFromBrews();
@@ -222,6 +227,11 @@ public class BukkitDistillery implements Distillery<BukkitDistillery, ItemStack,
 
     private void resetStartTime() {
         startTime = TheBrewingProject.getInstance().getTime();
+        try {
+            TheBrewingProject.getInstance().getDatabase().updateValue(BukkitDistilleryDataType.INSTANCE, this);
+        } catch (PersistenceException e) {
+            e.printStackTrace();
+        }
     }
 
     private long getProcessTime() {
