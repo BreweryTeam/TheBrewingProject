@@ -41,6 +41,11 @@ public final class Config extends AbstractConfig {
             Campfires must be lit and lava must be a source block.""")
     public static List<String> HEAT_SOURCES = List.of("campfire", "soul_campfire", "lava", "fire", "soul_fire", "magma_block");
 
+    @Key("automation-enabled")
+    @Comment("""
+            Allow hoppers to interact with distilleries and barrels""")
+    public static boolean AUTOMATION = true;
+
     @Key("puke.despawn-rate")
     @Comment("""
             How many ticks should the puke items live
@@ -49,8 +54,7 @@ public final class Config extends AbstractConfig {
 
     @Key("puke.puke-time")
     @Comment("""
-            How many ticks the player will puke
-            """)
+            How many ticks the player will puke""")
     public static int PUKE_TIME = 4 * Moment.SECOND;
 
     @Key("events.kick-event.message")

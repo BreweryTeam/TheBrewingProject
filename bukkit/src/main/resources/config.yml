@@ -45,3 +45,5 @@ cauldrons:
   # Campfires must be lit and lava must be a source block.
   # If this list is empty, cauldrons will brew regardless of the block below them.
   heat-sources: [ campfire, soul_campfire, lava, fire, soul_fire, magma_block ]
+
+automation-enabled: true
