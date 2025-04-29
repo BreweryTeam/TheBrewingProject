@@ -13,6 +13,7 @@ import dev.jsinco.brewery.configuration.locale.TranslationsConfig;
 import dev.jsinco.brewery.database.PersistenceException;
 import dev.jsinco.brewery.moment.Moment;
 import dev.jsinco.brewery.structure.StructureMeta;
+import dev.jsinco.brewery.util.Logging;
 import dev.jsinco.brewery.util.Pair;
 import dev.jsinco.brewery.vector.BreweryLocation;
 import lombok.Getter;
@@ -158,6 +159,7 @@ public class BukkitDistillery implements Distillery<BukkitDistillery, ItemStack,
                 || distillate.isFull()) {
             return;
         }
+        checkDirty();
         if (timeProcessed % processTime == 0 && timeProcessed != 0) {
             BukkitAdapter.toWorld(unique)
                     .ifPresent(world -> world.playSound(Sound.sound()
@@ -177,7 +179,7 @@ public class BukkitDistillery implements Distillery<BukkitDistillery, ItemStack,
 
     public void tickInventory() {
         checkDirty();
-        if (recentlyAccessed + Moment.SECOND <= TheBrewingProject.getInstance().getTime()) {
+        if (inventoryUnpopulated()) {
             mixture.getInventory().clear();
             distillate.getInventory().clear();
             TheBrewingProject.getInstance().getBreweryRegistry().unregisterOpened(this);
