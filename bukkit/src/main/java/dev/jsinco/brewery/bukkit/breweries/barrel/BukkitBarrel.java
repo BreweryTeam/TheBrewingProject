@@ -35,7 +35,7 @@ public class BukkitBarrel implements Barrel<BukkitBarrel, ItemStack, Inventory> 
     @Getter
     private final Location uniqueLocation;
     private final BrewInventory inventory;
-    private long recentlyAccessed;
+    private long recentlyAccessed = -1L;
 
     public BukkitBarrel(Location uniqueLocation, @NotNull PlacedBreweryStructure<BukkitBarrel> structure, int size, @NotNull BarrelType type) {
         this.structure = Preconditions.checkNotNull(structure);
@@ -52,7 +52,7 @@ public class BukkitBarrel implements Barrel<BukkitBarrel, ItemStack, Inventory> 
             player.sendMessage(MiniMessage.miniMessage().deserialize(TranslationsConfig.BARREL_ACCESS_DENIED));
             return true;
         }
-        if (recentlyAccessed + Moment.SECOND <= TheBrewingProject.getInstance().getTime()) {
+        if (inventoryUnpopulated()) {
             inventory.updateInventoryFromBrews();
         }
         recentlyAccessed = TheBrewingProject.getInstance().getTime();
@@ -118,7 +118,7 @@ public class BukkitBarrel implements Barrel<BukkitBarrel, ItemStack, Inventory> 
             }, () -> new BrewingStep.Age(new Interval(time, time), this.type));
         }
         inventory.updateInventoryFromBrews();
-        if (recentlyAccessed + Moment.SECOND <= TheBrewingProject.getInstance().getTime()) {
+        if (inventoryUnpopulated()) {
             close();
             TheBrewingProject.getInstance().getBreweryRegistry().unregisterOpened(this);
         }
@@ -133,7 +133,7 @@ public class BukkitBarrel implements Barrel<BukkitBarrel, ItemStack, Inventory> 
 
     @Override
     public Optional<Inventory> access(@NotNull BreweryLocation breweryLocation) {
-        if (recentlyAccessed + Moment.SECOND <= TheBrewingProject.getInstance().getTime()) {
+        if (inventoryUnpopulated()) {
             inventory.updateInventoryFromBrews();
             TheBrewingProject.getInstance().getBreweryRegistry().registerOpened(this);
         }
@@ -166,5 +166,9 @@ public class BukkitBarrel implements Barrel<BukkitBarrel, ItemStack, Inventory> 
             brewList.add(new Pair<>(inventory.getBrews()[i], i));
         }
         return brewList;
+    }
+
+    private boolean inventoryUnpopulated() {
+        return recentlyAccessed == -1L || recentlyAccessed + Moment.SECOND <= TheBrewingProject.getInstance().getTime();
     }
 }
