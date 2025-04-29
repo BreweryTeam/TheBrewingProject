@@ -110,6 +110,7 @@ public class InventoryEventListener implements Listener {
                 .filter(inventoryAccessible -> !inventoryAccessible.inventoryAllows(event.getItem()))
                 .ifPresent(ignored -> event.setCancelled(true));
         source.flatMap(ignored -> BrewAdapter.fromItem(event.getItem())
-                .map(brew -> BrewAdapter.toItem(brew, new Brew.State.Other()))).ifPresent(event::setItem);
+                .map(brew -> BrewAdapter.toItem(brew, new Brew.State.Other())))
+                .ifPresent(event::setItem);
     }
 }
