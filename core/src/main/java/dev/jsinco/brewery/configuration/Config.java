@@ -48,8 +48,7 @@ public final class Config extends AbstractConfig {
 
     @Key("puke.despawn-rate")
     @Comment("""
-            How many ticks should the puke items live
-            """)
+            How many ticks should the puke items live""")
     public static int PUKE_DESPAWN_RATE = 6 * Moment.SECOND;
 
     @Key("puke.puke-time")
