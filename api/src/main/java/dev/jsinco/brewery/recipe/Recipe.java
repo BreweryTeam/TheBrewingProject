@@ -8,7 +8,7 @@ public interface Recipe<I> {
 
     String getRecipeName();
 
-    int getBrewDifficulty();
+    double getBrewDifficulty();
 
     List<BrewingStep> getSteps();
 

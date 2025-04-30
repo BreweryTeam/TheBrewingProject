@@ -25,8 +25,8 @@ public sealed interface BrewingStep {
     StepType stepType();
 
     private static double nearbyValueScore(long expected, long value) {
-        double maxValue = Math.max(expected, value);
-        return 1 - Math.abs(expected - value) / maxValue;
+        double diff = Math.abs(expected - value);
+        return 1 - Math.max(diff / expected, 0D);
     }
 
     private static double getIngredientsScore(Map<Ingredient, Integer> target, Map<Ingredient, Integer> actual) {
@@ -90,7 +90,7 @@ public sealed interface BrewingStep {
                 return 0D;
             }
             double cauldronTypeScore = cauldronType.equals(otherType) ? 1D : 0D;
-            return cauldronTypeScore * BrewingStep.nearbyValueScore(this.brewTime.moment(), otherTime.moment()) * BrewingStep.getIngredientsScore((Map<Ingredient, Integer>) this.ingredients, (Map<Ingredient, Integer>) otherIngredients);
+            return cauldronTypeScore * Math.sqrt(BrewingStep.nearbyValueScore(this.brewTime.moment(), otherTime.moment())) * BrewingStep.getIngredientsScore((Map<Ingredient, Integer>) this.ingredients, (Map<Ingredient, Integer>) otherIngredients);
         }
 
         @Override
@@ -119,7 +119,7 @@ public sealed interface BrewingStep {
             if (!(other instanceof Distill(int otherRuns))) {
                 return 0D;
             }
-            return BrewingStep.nearbyValueScore(this.runs, otherRuns);
+            return Math.sqrt(BrewingStep.nearbyValueScore(this.runs, otherRuns));
         }
 
         @Override
@@ -148,7 +148,7 @@ public sealed interface BrewingStep {
                 return 0D;
             }
             double barrelTypeScore = barrelType.equals(BarrelType.ANY) || barrelType.equals(otherType) ? 1D : 0.9D;
-            return barrelTypeScore * BrewingStep.nearbyValueScore(this.age.moment(), otherAge.moment());
+            return barrelTypeScore * Math.sqrt(BrewingStep.nearbyValueScore(this.age.moment(), otherAge.moment()));
         }
 
         @Override
@@ -189,7 +189,7 @@ public sealed interface BrewingStep {
                 return 0D;
             }
             double mixTimeScore = time1.moment() < this.time.moment() ? 1D : BrewingStep.nearbyValueScore(this.time.moment(), time1.moment());
-            return BrewingStep.getIngredientsScore((Map<Ingredient, Integer>) this.ingredients, (Map<Ingredient, Integer>) ingredients1) * mixTimeScore;
+            return BrewingStep.getIngredientsScore((Map<Ingredient, Integer>) this.ingredients, (Map<Ingredient, Integer>) ingredients1) * Math.sqrt(mixTimeScore);
         }
 
         public Mix withTime(Moment time) {

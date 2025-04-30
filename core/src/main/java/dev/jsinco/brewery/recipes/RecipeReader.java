@@ -63,7 +63,7 @@ public class RecipeReader<I> {
      */
     private RecipeImpl<I> getRecipe(ConfigurationSection recipe, String recipeName) {
         return new RecipeImpl.Builder<I>(recipeName)
-                .brewDifficulty(recipe.getInt("brew-difficulty", 1))
+                .brewDifficulty(recipe.getDouble("brew-difficulty", 1D))
                 .recipeResult(recipeResultReader.readRecipeResult(recipe))
                 .steps(parseSteps(recipe.getMapList("steps")))
                 .build();
