@@ -56,7 +56,9 @@ public class CreateCommand {
             steps.add(operator.apply(arguments, sender));
         }
         ItemStack brewItem = BrewAdapter.toItem(new BrewImpl(steps), new BrewImpl.State.Other());
-        target.getWorld().dropItem(target.getLocation(), brewItem);
+        if (!target.getInventory().addItem(brewItem).isEmpty()) {
+            target.getLocation().getWorld().dropItem(target.getLocation(), brewItem);
+        }
         sender.sendMessage(MiniMessage.miniMessage().deserialize(TranslationsConfig.COMMAND_CREATE_SUCCESS, Placeholder.component("brew_name", brewItem.effectiveName())));
         return true;
     }

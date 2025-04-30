@@ -1,10 +1,14 @@
 package dev.jsinco.brewery.bukkit.command;
 
+import dev.jsinco.brewery.brew.Brew;
+import dev.jsinco.brewery.brew.BrewImpl;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
+import dev.jsinco.brewery.bukkit.brew.BrewAdapter;
 import dev.jsinco.brewery.bukkit.effect.event.NamedDrunkEventExecutor;
 import dev.jsinco.brewery.configuration.locale.TranslationsConfig;
 import dev.jsinco.brewery.event.DrunkEvent;
 import dev.jsinco.brewery.event.NamedDrunkEvent;
+import dev.jsinco.brewery.recipe.Recipe;
 import dev.jsinco.brewery.util.BreweryKey;
 import dev.jsinco.brewery.util.Registry;
 import net.kyori.adventure.text.minimessage.MiniMessage;
@@ -15,6 +19,7 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabExecutor;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -83,6 +88,26 @@ public class BreweryCommand implements TabExecutor {
                     yield true;
                 }
                 case SEAL -> SealCommand.onCommand((Player) target, sender, Arrays.copyOfRange(args, 1, args.length));
+                case REPLICATE -> {
+                    if (args.length < 2) {
+                        sender.sendMessage(MiniMessage.miniMessage().deserialize(TranslationsConfig.COMMAND_MISSING_ARGUMENT, Placeholder.unparsed("argument_type", "<recipe_id>")));
+                        yield true;
+                    }
+                    TheBrewingProject.getInstance().getRecipeRegistry().getRecipe(args[1])
+                            .map(Recipe::getSteps)
+                            .map(BrewImpl::new)
+                            .ifPresentOrElse(
+                                    brew -> {
+                                        ItemStack brewItem = BrewAdapter.toItem(brew, new Brew.State.Other());
+                                        if (!((Player) target).getInventory().addItem(brewItem).isEmpty()) {
+                                            target.getLocation().getWorld().dropItem(target.getLocation(), brewItem);
+                                        }
+                                        sender.sendMessage(MiniMessage.miniMessage().deserialize(TranslationsConfig.COMMAND_CREATE_SUCCESS, Placeholder.component("brew_name", brewItem.effectiveName())));
+                                    },
+                                    () -> sender.sendMessage(MiniMessage.miniMessage().deserialize(TranslationsConfig.COMMAND_ILLEGAL_ARGUMENT))
+                            );
+                    yield true;
+                }
             };
         } catch (IndexOutOfBoundsException e) {
             // Lazy handling
@@ -150,6 +175,15 @@ public class BreweryCommand implements TabExecutor {
             }
             case STATUS -> StatusCommand.tabComplete(Arrays.copyOfRange(args, 1, args.length));
             case RELOAD -> List.of();
+            case REPLICATE -> {
+                if (args.length == 2) {
+                    yield TheBrewingProject.getInstance().getRecipeRegistry().getRecipes()
+                            .stream()
+                            .map(Recipe::getRecipeName)
+                            .toList();
+                }
+                yield List.of();
+            }
         });
         final String[] finalArgs = args;
         return tabCompletions.

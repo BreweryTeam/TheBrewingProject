@@ -146,6 +146,7 @@ bukkit {
         }
         register("brewery.command.other") {
         }
+        register("brewery.command.replicate")
         register("brewery.command") {
             childrenMap = mapOf(
                 "brewery.command.create" to true,
@@ -154,7 +155,8 @@ bukkit {
                 "brewery.command.reload" to true,
                 "brewery.command.info" to true,
                 "brewery.command.seal" to true,
-                "brewery.command.other" to true
+                "brewery.command.other" to true,
+                "brewery.command.replicate" to true,
             )
             default = BukkitPluginDescription.Permission.Default.OP
         }
