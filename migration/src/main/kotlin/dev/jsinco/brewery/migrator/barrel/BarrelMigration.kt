@@ -31,7 +31,6 @@ object BarrelMigration {
             .forEach {
                 TheBrewingProject.getInstance().database.insertValue(BukkitBarrelDataType.INSTANCE, it)
             }
-        TheBrewingProject.getInstance().reload()
     }
 
     private fun convertFormat(legacyBarrel: Barrel): BukkitBarrel? {
@@ -58,10 +57,17 @@ object BarrelMigration {
             barrelType
         )
         structure.holder = bukkitBarrel
-        legacyBarrel.inventory.contents.asSequence()
+        val brews = legacyBarrel.inventory.contents.withIndex().asSequence()
+            .map {
+                val index = it.index
+                it.value?.let {
+                    IndexedValue(index, BrewMigration.migrateLegacyBrew(it))
+                }
+            }
             .filterNotNull()
-            .map(BrewMigration::migrateLegacyBrew)
-
+            .map { Pair(it.value, it.index) }
+            .toList()
+        bukkitBarrel.brews = brews
         return bukkitBarrel
     }
 
