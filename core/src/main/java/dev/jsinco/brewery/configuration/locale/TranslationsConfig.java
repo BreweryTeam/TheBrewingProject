@@ -97,11 +97,11 @@ public class TranslationsConfig extends AbstractConfig {
     @Key("cauldron.type.none")
     public static String CAULDRON_TYPE_NONE;
 
+    @Key("command.illegal-argument-detailed")
+    public static String COMMAND_ILLEGAL_ARGUMENT_DETAILED;
+
     @Key("cauldron.clock-message")
     public static String CAULDRON_CLOCK_MESSAGE;
-
-    @Key("command.create.unknown-argument")
-    public static String COMMAND_CREATE_UNKNOWN_ARGUMENT;
 
     @Key("command.create.missing-mandatory-argument")
     public static String COMMAND_CREATE_MISSING_MANDATORY_ARGUMENT;

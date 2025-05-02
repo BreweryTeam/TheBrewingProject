@@ -1,0 +1,5 @@
+tbp
+tbp this_is_not_a_subcommand
+tbp create for invalid_player
+tbp event non_existent
+tbp event
