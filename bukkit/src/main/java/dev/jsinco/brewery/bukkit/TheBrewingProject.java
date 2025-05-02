@@ -23,10 +23,7 @@ import dev.jsinco.brewery.bukkit.listeners.PlayerEventListener;
 import dev.jsinco.brewery.bukkit.listeners.WorldEventListener;
 import dev.jsinco.brewery.bukkit.recipe.BukkitRecipeResultReader;
 import dev.jsinco.brewery.bukkit.recipe.DefaultRecipeReader;
-import dev.jsinco.brewery.bukkit.structure.BarrelBlockDataMatcher;
-import dev.jsinco.brewery.bukkit.structure.StructureReadException;
-import dev.jsinco.brewery.bukkit.structure.StructureReader;
-import dev.jsinco.brewery.bukkit.structure.StructureRegistry;
+import dev.jsinco.brewery.bukkit.structure.*;
 import dev.jsinco.brewery.bukkit.util.BreweryTimeDataType;
 import dev.jsinco.brewery.configuration.Config;
 import dev.jsinco.brewery.configuration.locale.TranslationsConfig;
@@ -146,6 +143,7 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
         Stream.of(structureRoot.listFiles())
                 .filter(file -> file.getName().endsWith(".json"))
                 .map(File::toPath)
+                .filter(StructureJsonFormatValidator::validate)
                 .flatMap(path -> {
                     try {
                         return Stream.of(StructureReader.fromJson(path));

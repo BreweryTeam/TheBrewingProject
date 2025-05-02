@@ -1,10 +1,11 @@
 package dev.jsinco.brewery.event;
 
 import dev.jsinco.brewery.util.BreweryKey;
+import dev.jsinco.brewery.util.BreweryKeyed;
 
 import java.util.Locale;
 
-public enum NamedDrunkEvent implements DrunkEvent {
+public enum NamedDrunkEvent implements DrunkEvent, BreweryKeyed {
     PUKE(45, 45, 40),
     PASS_OUT(80, 80, 10),
     STUMBLE(25, 0, 100),
