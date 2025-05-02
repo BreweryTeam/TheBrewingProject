@@ -45,6 +45,9 @@ public class StructureJsonFormatValidator {
                 Logging.warning("Missing meta key in structure '" + fileName + "': type");
                 return false;
             }
+            for (StructureMeta<?> meta : structureType.mandatoryMeta()) {
+                structureMeta.computeIfAbsent(meta, ignored -> meta.defaultValue());
+            }
             JsonObject reformatedJson = new JsonObject();
             for (Map.Entry<StructureMeta<?>, Object> entry : structureMeta.entrySet()) {
                 Object value = entry.getValue();
@@ -53,22 +56,24 @@ public class StructureJsonFormatValidator {
                     value = entry.getKey().defaultValue();
                 }
                 if (entry.getKey().equals(StructureMeta.TYPE)) {
+                    reformatedJson.add("type", new JsonPrimitive(((BreweryKeyed) entry.getValue()).key().key()));
                     continue;
                 }
                 if (Arrays.stream(structureType.mandatoryMeta()).noneMatch(entry.getKey()::equals)) {
                     Logging.warning("Illegal meta in structure '" + fileName + "':" + entry.getKey().key().key());
                     continue;
                 }
-                if (value instanceof Number number) {
-                    reformatedJson.add(entry.getKey().key().key(), new JsonPrimitive(number));
-                } else if (value instanceof Boolean bool) {
-                    reformatedJson.add(entry.getKey().key().key(), new JsonPrimitive(bool));
-                } else if (value instanceof BreweryKeyed breweryKeyed) {
-                    reformatedJson.add(entry.getKey().key().key(), new JsonPrimitive(breweryKeyed.key().key()));
-                } else {
-                    throw new IllegalStateException("Input should already have been validated, unreachable code.");
+                switch (value) {
+                    case Number number -> reformatedJson.add(entry.getKey().key().key(), new JsonPrimitive(number));
+                    case Boolean bool -> reformatedJson.add(entry.getKey().key().key(), new JsonPrimitive(bool));
+                    case BreweryKeyed breweryKeyed ->
+                            reformatedJson.add(entry.getKey().key().key(), new JsonPrimitive(breweryKeyed.key().key()));
+                    case String string -> reformatedJson.add(entry.getKey().key().key(), new JsonPrimitive(string));
+                    case null, default ->
+                            throw new IllegalStateException("Input should already have been validated, unreachable code.");
                 }
             }
+            jsonObject.add("meta", reformatedJson);
             dump(jsonObject, jsonPath);
             return true;
         } catch (IOException e) {

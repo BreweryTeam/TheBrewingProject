@@ -17,10 +17,10 @@ public record StructureMeta<V>(BreweryKey key, Predicate<Object> validator, Func
             value instanceof Integer integer && integer % 9 == 0 && integer > 0,
             JsonElement::getAsInt,
             9);
-    public static final StructureMeta<StructureType> TYPE = new StructureMeta<>(BreweryKey.parse("type"), StructureType.class::isInstance, jsonElement -> Registry.STRUCTURE_TYPE.get(BreweryKey.parse(jsonElement.getAsString().toLowerCase(Locale.ROOT))), StructureType.BARREL);
     public static final StructureMeta<String> TAGGED_MATERIAL = new StructureMeta<>(BreweryKey.parse("tagged_material"), String.class::isInstance, JsonElement::getAsString, "decorated_pot");
     public static final StructureMeta<Long> PROCESS_TIME = new StructureMeta<>(BreweryKey.parse("process_time"), Long.class::isInstance, JsonElement::getAsLong, 80L);
     public static final StructureMeta<Integer> PROCESS_AMOUNT = new StructureMeta<>(BreweryKey.parse("process_amount"), Integer.class::isInstance, JsonElement::getAsInt, 1);
+    public static final StructureMeta<StructureType> TYPE = new StructureMeta<>(BreweryKey.parse("type"), StructureType.class::isInstance, jsonElement -> Registry.STRUCTURE_TYPE.get(BreweryKey.parse(jsonElement.getAsString().toLowerCase(Locale.ROOT))), StructureType.BARREL);
 
     @Override
     public String toString() {
