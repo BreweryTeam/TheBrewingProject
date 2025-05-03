@@ -126,7 +126,7 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
         worldEventListener.init();
         RecipeReader<ItemStack> recipeReader = new RecipeReader<>(this.getDataFolder(), new BukkitRecipeResultReader(), BukkitIngredientManager.INSTANCE);
 
-        this.recipeRegistry.registerRecipes(recipeReader.readRecipes());
+        recipeReader.readRecipes().thenAcceptAsync(this.recipeRegistry::registerRecipes);
         this.recipeRegistry.registerDefaultRecipes(DefaultRecipeReader.readDefaultRecipes(this.getDataFolder()));
         try (InputStream inputStream = Util.class.getResourceAsStream("/drunk_text.json")) {
             drunkTextRegistry.load(inputStream);
@@ -186,7 +186,7 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
         Bukkit.getScheduler().runTaskTimer(this, this::otherTicking, 0, 1);
         RecipeReader<ItemStack> recipeReader = new RecipeReader<>(this.getDataFolder(), new BukkitRecipeResultReader(), BukkitIngredientManager.INSTANCE);
 
-        this.recipeRegistry.registerRecipes(recipeReader.readRecipes());
+        recipeReader.readRecipes().thenAcceptAsync(this.recipeRegistry::registerRecipes);
         this.recipeRegistry.registerDefaultRecipes(DefaultRecipeReader.readDefaultRecipes(this.getDataFolder()));
         getCommand("brew").setExecutor(new BreweryCommand());
         try (InputStream inputStream = Util.class.getResourceAsStream("/drunk_text.json")) {

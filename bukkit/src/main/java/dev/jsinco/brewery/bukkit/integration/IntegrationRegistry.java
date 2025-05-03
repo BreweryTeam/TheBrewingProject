@@ -2,19 +2,16 @@ package dev.jsinco.brewery.bukkit.integration;
 
 import org.jetbrains.annotations.ApiStatus;
 
-import java.util.Collections;
-import java.util.EnumMap;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 public class IntegrationRegistry {
-    private final EnumMap<IntegrationType, Set<? extends Integration>> integrations = new EnumMap<>(IntegrationType.class);
+    private final Map<IntegrationType<?>, Set<? extends Integration>> integrations = new HashMap<>();
 
-    public <T extends Integration> void register(IntegrationType type, T integration) {
+    public <T extends Integration> void register(IntegrationType<?> type, T integration) {
         Set<? extends Integration> integrationSet = integrations.computeIfAbsent(type, k -> new HashSet<>());
 
-        if (!type.integrationClass.isInstance(integration)) {
-            throw new IllegalArgumentException("Cannot register integration, class " + integration.getClass().getName() + " doesn't implement " + type.integrationClass.getName());
+        if (!type.integrationClass().isInstance(integration)) {
+            throw new IllegalArgumentException("Cannot register integration, class " + integration.getClass().getName() + " doesn't implement " + type.integrationClass().getName());
         }
 
         if (integrationSet.stream().anyMatch(existingIntegration -> existingIntegration.getId().equals(integration.getId()))) {
