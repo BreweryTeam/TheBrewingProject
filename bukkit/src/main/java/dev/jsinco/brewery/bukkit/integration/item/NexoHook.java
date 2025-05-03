@@ -1,37 +1,37 @@
 package dev.jsinco.brewery.bukkit.integration.item;
 
 import com.nexomc.nexo.api.NexoItems;
+import com.nexomc.nexo.api.events.NexoItemsLoadedEvent;
 import com.nexomc.nexo.items.ItemBuilder;
+import dev.jsinco.brewery.bukkit.TheBrewingProject;
+import dev.jsinco.brewery.bukkit.integration.ItemIntegration;
+import dev.jsinco.brewery.util.ClassUtil;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
+import org.bukkit.Bukkit;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
-public class NexoHook {
+import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
-    private static final boolean ENABLED = checkAvailable();
+public class NexoHook implements ItemIntegration, Listener {
 
-    private NexoHook() {
-        throw new IllegalStateException("Utility class");
-    }
+    private static final boolean ENABLED = ClassUtil.exists("com.nexomc.nexo.api.NexoItems");
+    private CompletableFuture<Void> initializedFuture;
 
-    private static boolean checkAvailable() {
-        try {
-            Class.forName("com.nexomc.nexo.api.NexoItems");
-            return true;
-        } catch (ClassNotFoundException e) {
-            return false;
+    @Override
+    public Optional<ItemStack> createItem(String id) {
+        ItemBuilder itemBuilder = NexoItems.itemFromId(id);
+        if (itemBuilder == null) {
+            return Optional.empty();
         }
+        return Optional.of(itemBuilder.build());
     }
 
-    public static @Nullable String nexoId(ItemStack itemStack) {
-        if (!ENABLED) {
-            return null;
-        }
-        return NexoItems.idFromItem(itemStack);
-    }
-
-    public static @Nullable String displayName(String itemsAdderId) {
+    public @Nullable String displayName(String itemsAdderId) {
         if (!ENABLED) {
             return null;
         }
@@ -43,18 +43,34 @@ public class NexoHook {
         return displayName == null ? null : PlainTextComponentSerializer.plainText().serialize(displayName);
     }
 
-    public static @Nullable ItemStack build(String itemsAdderId) {
-        if (!ENABLED) {
-            return null;
-        }
-        ItemBuilder itemBuilder = NexoItems.itemFromId(itemsAdderId);
-        if (itemBuilder == null) {
-            return null;
-        }
-        return itemBuilder.build();
+    @Override
+    public @Nullable String itemId(ItemStack itemStack) {
+        return NexoItems.idFromItem(itemStack);
     }
 
-    public static boolean isNexo(String itemsAdderId) {
-        return ENABLED && NexoItems.exists(itemsAdderId);
+    @Override
+    public CompletableFuture<Void> initialized() {
+        return initializedFuture;
+    }
+
+    @Override
+    public boolean enabled() {
+        return ENABLED && Bukkit.getPluginManager().isPluginEnabled("Nexo");
+    }
+
+    @Override
+    public String getId() {
+        return "nexo";
+    }
+
+    @Override
+    public void initialize() {
+        Bukkit.getPluginManager().registerEvents(this, TheBrewingProject.getInstance());
+        this.initializedFuture = new CompletableFuture<>();
+    }
+
+    @EventHandler
+    public void onNexoItemsLoaded(NexoItemsLoadedEvent event) {
+        initializedFuture.complete(null);
     }
 }

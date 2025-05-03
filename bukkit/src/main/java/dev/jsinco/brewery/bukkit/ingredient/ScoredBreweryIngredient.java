@@ -3,6 +3,7 @@ package dev.jsinco.brewery.bukkit.ingredient;
 import dev.jsinco.brewery.ingredient.Ingredient;
 import dev.jsinco.brewery.ingredient.ScoredIngredient;
 import dev.jsinco.brewery.util.BreweryKey;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
@@ -19,12 +20,12 @@ public class ScoredBreweryIngredient implements ScoredIngredient {
     }
 
     @Override
-    public String getKey() {
+    public @NotNull String getKey() {
         return ingredientKey.toString();
     }
 
     @Override
-    public String displayName() {
+    public @NotNull String displayName() {
         return displayName + "-" + score;
     }
 

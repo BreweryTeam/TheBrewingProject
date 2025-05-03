@@ -24,12 +24,12 @@ public class SimpleIngredient implements Ingredient {
     }
 
     @Override
-    public String getKey() {
+    public @NotNull String getKey() {
         return material.getKey().toString();
     }
 
     @Override
-    public String displayName() {
+    public @NotNull String displayName() {
         return TranslationRegistry.INSTANCE.translate(material.getItemTranslationKey());
     }
 

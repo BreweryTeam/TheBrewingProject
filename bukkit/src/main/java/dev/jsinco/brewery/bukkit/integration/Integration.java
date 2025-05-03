@@ -1,7 +1,9 @@
 package dev.jsinco.brewery.bukkit.integration;
 
 public interface Integration {
-    boolean shouldEnable();
+    boolean enabled();
 
     String getId();
+
+    void initialize();
 }

@@ -1,52 +1,64 @@
 package dev.jsinco.brewery.bukkit.integration.item;
 
+import dev.jsinco.brewery.bukkit.TheBrewingProject;
+import dev.jsinco.brewery.bukkit.integration.ItemIntegration;
+import dev.jsinco.brewery.util.ClassUtil;
 import dev.lone.itemsadder.api.CustomStack;
+import dev.lone.itemsadder.api.Events.ItemsAdderLoadDataEvent;
+import org.bukkit.Bukkit;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
-public class ItemsAdderHook {
+import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
-    private static final boolean ENABLED = checkAvailable();
+public class ItemsAdderHook implements ItemIntegration, Listener {
 
-    private ItemsAdderHook() {
-        throw new IllegalStateException("Utility class");
+    private static final boolean ENABLED = ClassUtil.exists("dev.lone.itemsadder.api.CustomStack");
+    private CompletableFuture<Void> initializedFuture;
+
+    @Override
+    public Optional<ItemStack> createItem(String id) {
+        return Optional.of(CustomStack.getInstance(id))
+                .map(CustomStack::getItemStack);
     }
 
-    private static boolean checkAvailable() {
-        try {
-            Class.forName("dev.lone.itemsadder.api.CustomStack");
-            return true;
-        } catch (ClassNotFoundException e) {
-            return false;
-        }
-    }
-
-    public static @Nullable String itemsAdderId(ItemStack itemStack) {
-        if (!ENABLED) {
-            return null;
-        }
-        CustomStack customStack = CustomStack.byItemStack(itemStack);
-        return customStack == null ? null : customStack.getId();
-    }
-
-    public static @Nullable String displayName(String itemsAdderId) {
-        if (!ENABLED) {
-            return null;
-        }
+    public @Nullable String displayName(String itemsAdderId) {
         CustomStack customStack = CustomStack.getInstance(itemsAdderId);
         return customStack == null ? null : customStack.getDisplayName();
     }
 
-    public static @Nullable ItemStack build(String itemsAdderId) {
-        if (!ENABLED) {
-            return null;
-        }
-        CustomStack customStack = CustomStack.getInstance(itemsAdderId);
-        return customStack == null ? null : customStack.getItemStack();
+    @Override
+    public @Nullable String itemId(ItemStack itemStack) {
+        CustomStack customStack = CustomStack.byItemStack(itemStack);
+        return customStack == null ? null : customStack.getId();
     }
 
-    public static boolean isItemsAdder(String itemsAdderId) {
-        return ENABLED && CustomStack.isInRegistry(itemsAdderId);
+    @Override
+    public CompletableFuture<Void> initialized() {
+        return initializedFuture;
     }
 
+    @Override
+    public boolean enabled() {
+        return ENABLED && Bukkit.getPluginManager().isPluginEnabled("ItemsAdder");
+    }
+
+    @Override
+    public String getId() {
+        return "itemsadder";
+    }
+
+    @Override
+    public void initialize() {
+        Bukkit.getPluginManager().registerEvents(this, TheBrewingProject.getInstance());
+        this.initializedFuture = new CompletableFuture<>();
+    }
+
+    @EventHandler
+    public void onItemsAdderItemsLoad(ItemsAdderLoadDataEvent loadDataEvent) {
+        initializedFuture.complete(null);
+    }
 }

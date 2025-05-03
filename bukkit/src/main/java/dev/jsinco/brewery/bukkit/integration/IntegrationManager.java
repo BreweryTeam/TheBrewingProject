@@ -18,7 +18,7 @@ public class IntegrationManager {
     }
 
     public void register(IntegrationType type, Integration integration) {
-        if (!integration.shouldEnable()) {
+        if (!integration.enabled()) {
             Logging.log("Skipping registration of integration " + integration.getId() + " with type " + type + " because it is disabled");
             return;
         }
