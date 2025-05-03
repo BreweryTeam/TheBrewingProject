@@ -10,11 +10,12 @@ import dev.jsinco.brewery.bukkit.brew.BukkitBarrelBrewDataType;
 import dev.jsinco.brewery.bukkit.ingredient.SimpleIngredient;
 import dev.jsinco.brewery.database.PersistenceException;
 import dev.jsinco.brewery.database.sql.Database;
-import dev.jsinco.brewery.util.DecoderEncoder;
-import dev.jsinco.brewery.util.FileUtil;
-import dev.jsinco.brewery.util.Pair;
 import dev.jsinco.brewery.moment.Interval;
 import dev.jsinco.brewery.moment.PassedMoment;
+import dev.jsinco.brewery.util.DecoderEncoder;
+import dev.jsinco.brewery.util.FileUtil;
+import dev.jsinco.brewery.util.FutureUtil;
+import dev.jsinco.brewery.util.Pair;
 import dev.jsinco.brewery.vector.BreweryLocation;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -71,11 +72,11 @@ class BukkitBarrelBrewDataTypeTest {
         Pair<Brew, BukkitBarrelBrewDataType.BarrelContext> data1 = new Pair<>(brew1, barrelContext1);
         Pair<Brew, BukkitBarrelBrewDataType.BarrelContext> data2 = new Pair<>(brew2, barrelContext2);
         database.insertValue(BukkitBarrelBrewDataType.INSTANCE, data1);
-        assertTrue(database.findNow(BukkitBarrelBrewDataType.INSTANCE, searchObject).contains(new Pair<>(brew1, 0)));
+        assertTrue(FutureUtil.mergeFutures(database.findNow(BukkitBarrelBrewDataType.INSTANCE, searchObject)).join().contains(new Pair<>(brew1, 0)));
         database.insertValue(BukkitBarrelBrewDataType.INSTANCE, data2);
-        assertTrue(database.findNow(BukkitBarrelBrewDataType.INSTANCE, searchObject).contains(new Pair<>(brew2, 1)));
+        assertTrue(FutureUtil.mergeFutures(database.findNow(BukkitBarrelBrewDataType.INSTANCE, searchObject)).join().contains(new Pair<>(brew2, 1)));
         database.remove(BukkitBarrelBrewDataType.INSTANCE, data1);
-        assertFalse(database.findNow(BukkitBarrelBrewDataType.INSTANCE, searchObject).contains(new Pair<>(brew1, 0)));
+        assertFalse(FutureUtil.mergeFutures(database.findNow(BukkitBarrelBrewDataType.INSTANCE, searchObject)).join().contains(new Pair<>(brew1, 0)));
     }
 
     private void prepareBarrel() throws SQLException {

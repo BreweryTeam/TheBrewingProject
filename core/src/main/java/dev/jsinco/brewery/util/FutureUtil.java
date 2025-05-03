@@ -1,6 +1,6 @@
 package dev.jsinco.brewery.util;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
@@ -11,13 +11,13 @@ public class FutureUtil {
     }
 
     public static <T> CompletableFuture<List<T>> mergeFutures(List<CompletableFuture<T>> completableFutureList) {
-        List<T> unwrappedFutures = new ArrayList<>(completableFutureList.size());
+        T[] unwrappedFutures = (T[]) new Object[completableFutureList.size()];
         CompletableFuture<?>[] completableFutures = new CompletableFuture<?>[completableFutureList.size()];
         for (int i = 0; i < completableFutureList.size(); i++) {
             final int iFinal = i;
-            completableFutures[i] = completableFutureList.get(i).thenAcceptAsync(t -> unwrappedFutures.set(iFinal, t));
+            completableFutures[i] = completableFutureList.get(i).thenAcceptAsync(t -> unwrappedFutures[iFinal] = t);
         }
         return CompletableFuture.allOf(completableFutures)
-                .thenApplyAsync(ignored -> unwrappedFutures);
+                .thenApplyAsync(ignored -> Arrays.asList(unwrappedFutures));
     }
 }
