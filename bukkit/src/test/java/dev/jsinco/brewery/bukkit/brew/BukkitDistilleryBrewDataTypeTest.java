@@ -13,6 +13,7 @@ import dev.jsinco.brewery.bukkit.structure.PlacedBreweryStructure;
 import dev.jsinco.brewery.database.PersistenceException;
 import dev.jsinco.brewery.database.sql.Database;
 import dev.jsinco.brewery.moment.PassedMoment;
+import dev.jsinco.brewery.util.FutureUtil;
 import dev.jsinco.brewery.util.Pair;
 import dev.jsinco.brewery.vector.BreweryLocation;
 import org.bukkit.Location;
@@ -76,13 +77,13 @@ class BukkitDistilleryBrewDataTypeTest {
         BukkitDistilleryBrewDataType.DistilleryContext distilleryContext2 = new BukkitDistilleryBrewDataType.DistilleryContext(searchObject.x(), searchObject.y(), searchObject.z(), searchObject.worldUuid(), 0, true);
         Pair<Brew, BukkitDistilleryBrewDataType.DistilleryContext> data1 = new Pair<>(brew1, distilleryContext1);
         Pair<Brew, BukkitDistilleryBrewDataType.DistilleryContext> data2 = new Pair<>(brew2, distilleryContext2);
-        database.insertValue(BukkitDistilleryBrewDataType.INSTANCE, data1).join();
-        assertTrue(database.findNow(BukkitDistilleryBrewDataType.INSTANCE, searchObject).contains(data1));
-        database.insertValue(BukkitDistilleryBrewDataType.INSTANCE, data2).join();
-        assertTrue(database.findNow(BukkitDistilleryBrewDataType.INSTANCE, searchObject).contains(data2));
-        assertTrue(database.findNow(BukkitDistilleryBrewDataType.INSTANCE, searchObject).contains(data1));
-        database.remove(BukkitDistilleryBrewDataType.INSTANCE, data1).join();
-        assertFalse(database.findNow(BukkitDistilleryBrewDataType.INSTANCE, searchObject).contains(data1));
+        database.insertValue(BukkitDistilleryBrewDataType.INSTANCE, data1);
+        assertTrue(FutureUtil.mergeFutures(database.findNow(BukkitDistilleryBrewDataType.INSTANCE, searchObject)).join().contains(data1));
+        database.insertValue(BukkitDistilleryBrewDataType.INSTANCE, data2);
+        assertTrue(FutureUtil.mergeFutures(database.findNow(BukkitDistilleryBrewDataType.INSTANCE, searchObject)).join().contains(data2));
+        assertTrue(FutureUtil.mergeFutures(database.findNow(BukkitDistilleryBrewDataType.INSTANCE, searchObject)).join().contains(data1));
+        database.remove(BukkitDistilleryBrewDataType.INSTANCE, data1);
+        assertFalse(FutureUtil.mergeFutures(database.findNow(BukkitDistilleryBrewDataType.INSTANCE, searchObject)).join().contains(data1));
     }
 
     private BukkitDistillery prepareDistillery() throws PersistenceException {
