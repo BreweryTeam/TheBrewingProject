@@ -1,41 +1,52 @@
 package dev.jsinco.brewery.bukkit.ingredient;
 
-import com.google.common.collect.ImmutableMap;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonPrimitive;
-import dev.jsinco.brewery.bukkit.ingredient.external.ItemsAdderPluginIngredient;
-import dev.jsinco.brewery.bukkit.ingredient.external.NexoPluginIngredient;
-import dev.jsinco.brewery.bukkit.ingredient.external.OraxenPluginIngredient;
+import dev.jsinco.brewery.bukkit.TheBrewingProject;
+import dev.jsinco.brewery.bukkit.integration.Integration;
+import dev.jsinco.brewery.bukkit.integration.IntegrationManager;
+import dev.jsinco.brewery.bukkit.integration.IntegrationType;
 import dev.jsinco.brewery.ingredient.Ingredient;
 import dev.jsinco.brewery.ingredient.IngredientManager;
-import dev.jsinco.brewery.util.Logging;
+import dev.jsinco.brewery.util.BreweryKey;
 import dev.jsinco.brewery.util.Pair;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class BukkitIngredientManager implements IngredientManager<ItemStack> {
 
     public static final BukkitIngredientManager INSTANCE = new BukkitIngredientManager();
 
+    @Override
     public Ingredient getIngredient(@NotNull ItemStack itemStack) {
-        return OraxenPluginIngredient.from(itemStack)
-                .or(() -> NexoPluginIngredient.from(itemStack))
-                .or(() -> ItemsAdderPluginIngredient.from(itemStack))
+        IntegrationManager integrationManager = TheBrewingProject.getInstance().getIntegrationManager();
+        return integrationManager.getIntegrationRegistry().getIntegrations(IntegrationType.ITEM)
+                .stream()
+                .filter(Integration::enabled)
+                .map(integration -> integration.getIngredient(itemStack))
+                .flatMap(Optional::stream)
+                .findAny()
                 .or(() -> BreweryIngredient.from(itemStack))
                 .orElse(SimpleIngredient.from(itemStack));
     }
 
 
-    public Optional<Ingredient> getIngredient(@NotNull String ingredientStr) {
+    @Override
+    public CompletableFuture<Optional<Ingredient>> getIngredient(@NotNull String ingredientStr) {
         String id = ingredientStr.toLowerCase(Locale.ROOT);
-        return OraxenPluginIngredient.from(id)
-                .or(() -> NexoPluginIngredient.from(id))
-                .or(() -> ItemsAdderPluginIngredient.from(id))
-                .or(() -> BreweryIngredient.from(id))
-                .or(() -> SimpleIngredient.from(id));
+        BreweryKey breweryKey = BreweryKey.parse(id);
+        IntegrationManager integrationManager = TheBrewingProject.getInstance().getIntegrationManager();
+        return integrationManager.getIntegrationRegistry().getIntegrations(IntegrationType.ITEM)
+                .stream()
+                .filter(Integration::enabled)
+                .filter(itemIntegration -> itemIntegration.getId().equals(breweryKey.namespace()))
+                .findAny()
+                .map(itemIntegration -> itemIntegration.createIngredient(breweryKey.key()))
+                .or(() -> BreweryIngredient.from(id).map(Optional::of).map(CompletableFuture::completedFuture))
+                .or(() -> SimpleIngredient.from(id).map(Optional::of).map(CompletableFuture::completedFuture))
+                .orElse(CompletableFuture.completedFuture(Optional.empty()));
     }
 
     /**
@@ -43,7 +54,9 @@ public class BukkitIngredientManager implements IngredientManager<ItemStack> {
      * @return An ingredient/runs pair
      * @throws IllegalArgumentException if the ingredients string is invalid
      */
-    public Pair<@NotNull Ingredient, @NotNull Integer> getIngredientWithAmount(String ingredientStr) throws IllegalArgumentException {
+    @Override
+    public CompletableFuture<Pair<Ingredient, Integer>> getIngredientWithAmount(String ingredientStr) throws
+            IllegalArgumentException {
         String[] ingredientSplit = ingredientStr.split("/");
         if (ingredientSplit.length > 2) {
             throw new IllegalArgumentException("To many '/' separators for ingredientString, was: " + ingredientStr);
@@ -55,26 +68,28 @@ public class BukkitIngredientManager implements IngredientManager<ItemStack> {
             amount = Integer.parseInt(ingredientSplit[1]);
         }
         return getIngredient(ingredientSplit[0])
-                .map(ingredient -> new Pair<>(ingredient, amount))
-                .orElseThrow(() -> new IllegalArgumentException("Invalid ingredient string '" + ingredientStr + "' could not parse type"));
+                .thenApplyAsync(ingredientOptional ->
+                        ingredientOptional.map(ingredient -> new Pair<>(ingredient, amount))
+                                .orElseThrow(() -> new IllegalArgumentException("Invalid ingredient string '" + ingredientStr + "' could not parse type"))
+                );
     }
 
-    /**
-     * Parse a list of strings into a map of ingredients with runs
-     *
-     * @param stringList A list of strings with valid formatting, see {@link #getIngredientWithAmount(String)}
-     * @return A map representing ingredients with runs
-     * @throws IllegalArgumentException if there's any invalid ingredient string
-     */
-    public Map<Ingredient, Integer> getIngredientsWithAmount(List<String> stringList) throws IllegalArgumentException {
+
+    @Override
+    public CompletableFuture<Map<Ingredient, Integer>> getIngredientsWithAmount(List<String> stringList) throws
+            IllegalArgumentException {
         if (stringList == null || stringList.isEmpty()) {
-            return new HashMap<>();
+            return CompletableFuture.completedFuture(new HashMap<>());
         }
-        Map<Ingredient, Integer> ingredientMap = new HashMap<>();
-        stringList.stream()
+        Map<Ingredient, Integer> ingredientMap = new ConcurrentHashMap<>();
+        CompletableFuture<?>[] ingredientsFuture = stringList.stream()
                 .map(this::getIngredientWithAmount)
-                .forEach(ingredientAmountPair -> IngredientManager.insertIngredientIntoMap(ingredientMap, ingredientAmountPair));
-        return ingredientMap;
+                .map(ingredientAmountPairFuture ->
+                        ingredientAmountPairFuture
+                                .thenAcceptAsync(ingredientAmountPair -> IngredientManager.insertIngredientIntoMap(ingredientMap, ingredientAmountPair))
+                ).toArray(CompletableFuture<?>[]::new);
+        return CompletableFuture.allOf(ingredientsFuture)
+                .thenApplyAsync(ignored -> ingredientMap);
     }
 
     public boolean isValidIngredient(@NotNull String ingredientWithAmount) {

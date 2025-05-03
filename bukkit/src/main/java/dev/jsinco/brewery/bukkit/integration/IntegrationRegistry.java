@@ -1,8 +1,5 @@
 package dev.jsinco.brewery.bukkit.integration;
 
-import dev.jsinco.brewery.util.Logging;
-import org.bukkit.block.Block;
-import org.bukkit.entity.Player;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.Collections;
@@ -31,14 +28,14 @@ public class IntegrationRegistry {
     }
 
     @ApiStatus.Internal
-    public Set<? extends Integration> getIntegrations(IntegrationType type) {
+    public <T extends Integration> Set<T> getIntegrations(IntegrationType<T> type) {
         Set<? extends Integration> rawSet = integrations.get(type);
 
         if (rawSet == null) {
             return Collections.emptySet();
         }
 
-        return integrations.get(type);
+        return (Set<T>) integrations.get(type);
     }
 
     @ApiStatus.Internal

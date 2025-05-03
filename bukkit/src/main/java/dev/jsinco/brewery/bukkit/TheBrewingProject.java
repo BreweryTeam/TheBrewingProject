@@ -16,7 +16,6 @@ import dev.jsinco.brewery.bukkit.effect.event.CustomDrunkEventReader;
 import dev.jsinco.brewery.bukkit.effect.event.DrunkEventExecutor;
 import dev.jsinco.brewery.bukkit.ingredient.BukkitIngredientManager;
 import dev.jsinco.brewery.bukkit.integration.IntegrationManager;
-import dev.jsinco.brewery.bukkit.integration.item.ChestShopHook;
 import dev.jsinco.brewery.bukkit.listeners.BlockEventListener;
 import dev.jsinco.brewery.bukkit.listeners.InventoryEventListener;
 import dev.jsinco.brewery.bukkit.listeners.PlayerEventListener;
@@ -196,7 +195,6 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
             throw new RuntimeException(e);
         }
         integrationManager.init();
-        ChestShopHook.initiate(this);
         Bukkit.getServicesManager().register(TheBrewingProjectApi.class, this, this, ServicePriority.Normal);
     }
 

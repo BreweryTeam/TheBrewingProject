@@ -1,12 +1,12 @@
 package dev.jsinco.brewery.ingredient;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import dev.jsinco.brewery.util.Logging;
 
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 public class IngredientUtil {
 
@@ -14,14 +14,16 @@ public class IngredientUtil {
         throw new IllegalStateException("Utility class");
     }
 
-    public static Map<Ingredient, Integer> ingredientsFromJson(JsonObject json, IngredientManager<?> ingredientManager) {
+    public static CompletableFuture<Map<Ingredient, Integer>> ingredientsFromJson(JsonObject json, IngredientManager<?> ingredientManager) {
         ImmutableMap.Builder<Ingredient, Integer> output = new ImmutableMap.Builder<>();
-        for (Map.Entry<String, JsonElement> entry : json.entrySet()) {
-            ingredientManager.getIngredient(entry.getKey())
-                    .ifPresentOrElse(ingredient -> output.put(ingredient, entry.getValue().getAsInt()),
-                            () -> Logging.warning("Could not find ingredient for stored brew: " + entry.getKey()));
-        }
-        return output.build();
+        CompletableFuture<?>[] ingredientsFuture = json.entrySet()
+                .stream()
+                .map(jsonEntry -> ingredientManager.getIngredient(jsonEntry.getKey())
+                        .thenAcceptAsync(optionalIngredient ->
+                                optionalIngredient.ifPresentOrElse(ingredient -> output.put(ingredient, jsonEntry.getValue().getAsInt()),
+                                        () -> Logging.warning("Could not find ingredient for stored brew: " + jsonEntry.getKey()))))
+                .toArray(CompletableFuture<?>[]::new);
+        return CompletableFuture.allOf(ingredientsFuture).thenApplyAsync(ignored -> output.build());
     }
 
     public static JsonObject ingredientsToJson(Map<Ingredient, Integer> ingredients) {
