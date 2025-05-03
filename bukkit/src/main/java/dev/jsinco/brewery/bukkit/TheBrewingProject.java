@@ -205,7 +205,6 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
             throw new RuntimeException(e);
         }
         integrationManager.init();
-        ChestShopHook.initiate(this);
         Bukkit.getServicesManager().register(TheBrewingProjectApi.class, this, this, ServicePriority.Normal);
     }
 
