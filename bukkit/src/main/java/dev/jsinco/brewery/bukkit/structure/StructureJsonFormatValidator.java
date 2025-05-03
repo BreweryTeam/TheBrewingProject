@@ -36,7 +36,11 @@ public class StructureJsonFormatValidator {
                             Logging.warning("Unknown meta key in structure '" + fileName + "': " + entry.getKey());
                             return null;
                         }
-                        return new Pair<>(meta, meta.deserializer().apply(entry.getValue()));
+                        try {
+                            return new Pair<>(meta, meta.deserializer().apply(entry.getValue()));
+                        } catch (IllegalArgumentException e) {
+                            return null;
+                        }
                     })
                     .filter(Objects::nonNull)
                     .collect(Collectors.toMap(Pair::first, Pair::second));

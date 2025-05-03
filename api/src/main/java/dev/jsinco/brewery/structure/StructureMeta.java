@@ -20,6 +20,7 @@ public record StructureMeta<V>(BreweryKey key, Predicate<Object> validator, Func
     public static final StructureMeta<String> TAGGED_MATERIAL = new StructureMeta<>(BreweryKey.parse("tagged_material"), String.class::isInstance, JsonElement::getAsString, "decorated_pot");
     public static final StructureMeta<Long> PROCESS_TIME = new StructureMeta<>(BreweryKey.parse("process_time"), Long.class::isInstance, JsonElement::getAsLong, 80L);
     public static final StructureMeta<Integer> PROCESS_AMOUNT = new StructureMeta<>(BreweryKey.parse("process_amount"), Integer.class::isInstance, JsonElement::getAsInt, 1);
+    // Keep this at the bottom, going to cause issues because of class initialization order otherwise
     public static final StructureMeta<StructureType> TYPE = new StructureMeta<>(BreweryKey.parse("type"), StructureType.class::isInstance, jsonElement -> Registry.STRUCTURE_TYPE.get(BreweryKey.parse(jsonElement.getAsString().toLowerCase(Locale.ROOT))), StructureType.BARREL);
 
     @Override
