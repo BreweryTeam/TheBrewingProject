@@ -10,12 +10,13 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 public final class BreweryRegistry {
 
-    private final Map<BreweryLocation, SinglePositionStructure> activeSingleBlockStructures = new HashMap<>();
-    private final Map<StructureType, Set<InventoryAccessible<ItemStack, Inventory>>> opened = new HashMap<>();
-    private final Map<Inventory, InventoryAccessible<ItemStack, Inventory>> inventories = new HashMap<>();
+    private final Map<BreweryLocation, SinglePositionStructure> activeSingleBlockStructures = new ConcurrentHashMap<>();
+    private final Map<StructureType, Set<InventoryAccessible<ItemStack, Inventory>>> opened = new ConcurrentHashMap<>();
+    private final Map<Inventory, InventoryAccessible<ItemStack, Inventory>> inventories = new ConcurrentHashMap<>();
 
     public Optional<SinglePositionStructure> getActiveSinglePositionStructure(BreweryLocation position) {
         return Optional.ofNullable(activeSingleBlockStructures.get(position));

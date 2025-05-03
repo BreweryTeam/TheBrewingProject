@@ -109,7 +109,8 @@ public class BukkitBarrelDataType implements SqlStoredData.Findable<BukkitBarrel
         }
         for (BukkitBarrel barrel : output) {
             BrewInventory barrelInventory = barrel.getInventory();
-            BukkitBarrelBrewDataType.INSTANCE.find(BukkitAdapter.toBreweryLocation(barrel.getUniqueLocation()), connection).forEach(pair -> barrelInventory.set(pair.first(), pair.second()));
+            FutureUtil.mergeFutures(BukkitBarrelBrewDataType.INSTANCE.find(BukkitAdapter.toBreweryLocation(barrel.getUniqueLocation()), connection))
+                    .thenAcceptAsync(brews -> brews.forEach(pair -> barrelInventory.set(pair.first(), pair.second())));
         }
         return output;
     }

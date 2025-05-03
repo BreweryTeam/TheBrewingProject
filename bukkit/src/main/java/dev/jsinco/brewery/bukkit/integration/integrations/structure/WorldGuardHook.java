@@ -24,6 +24,11 @@ public class WorldGuardHook implements StructureIntegration {
     }
 
     @Override
+    public void initialize() {
+        // NO-OP
+    }
+
+    @Override
     public boolean hasAccess(Block block, Player player) {
         WorldGuard worldGuard = WorldGuard.getInstance();
         WorldGuardPlugin instance = WorldGuardPlugin.inst();

@@ -17,6 +17,8 @@ import dev.jsinco.brewery.configuration.locale.TranslationsConfig;
 import dev.jsinco.brewery.ingredient.Ingredient;
 import dev.jsinco.brewery.moment.Moment;
 import dev.jsinco.brewery.moment.PassedMoment;
+import dev.jsinco.brewery.util.BreweryKey;
+import dev.jsinco.brewery.util.Registry;
 import dev.jsinco.brewery.util.Pair;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;

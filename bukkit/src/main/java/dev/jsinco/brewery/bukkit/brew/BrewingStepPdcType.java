@@ -132,7 +132,7 @@ public class BrewingStepPdcType implements PersistentDataType<byte[], BrewingSte
         Arrays.stream(bytesArray)
                 .map(bytes -> new String(bytes, StandardCharsets.UTF_8))
                 .map(BukkitIngredientManager.INSTANCE::getIngredientWithAmount)
-                .forEach(ingredientAmountPair -> IngredientManager.insertIngredientIntoMap(ingredients, ingredientAmountPair));
+                .forEach(ingredientAmountPair -> IngredientManager.insertIngredientIntoMap(ingredients, ingredientAmountPair.join()));
         return ingredients;
     }
 }

@@ -8,6 +8,7 @@ import dev.jsinco.brewery.moment.Moment;
 import dev.jsinco.brewery.moment.PassedMoment;
 import dev.jsinco.brewery.recipe.Recipe;
 import dev.jsinco.brewery.util.BreweryKey;
+import dev.jsinco.brewery.util.FutureUtil;
 import dev.jsinco.brewery.util.Logging;
 import dev.jsinco.brewery.util.Registry;
 import org.jetbrains.annotations.NotNull;
@@ -19,6 +20,7 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 public class RecipeReader<I> {
 
@@ -32,7 +34,7 @@ public class RecipeReader<I> {
         this.ingredientManager = ingredientManager;
     }
 
-    public Map<String, Recipe<I>> readRecipes() {
+    public CompletableFuture<Map<String, Recipe<I>>> readRecipes() {
         Path mainDir = folder.toPath();
         YamlFile recipesFile = new YamlFile(mainDir.resolve("recipes.yml").toFile());
 
@@ -44,15 +46,20 @@ public class RecipeReader<I> {
 
         ConfigurationSection recipesSection = recipesFile.getConfigurationSection("recipes");
         ImmutableMap.Builder<String, Recipe<I>> recipes = new ImmutableMap.Builder<>();
-        for (String recipeName : recipesSection.getKeys(false)) {
-            try {
-                recipes.put(recipeName, getRecipe(recipesSection.getConfigurationSection(recipeName), recipeName));
-            } catch (Exception e) {
-                Logging.error("Exception when reading recipe: " + recipeName);
-                e.printStackTrace();
-            }
-        }
-        return recipes.build();
+        CompletableFuture<?>[] futures = recipesSection.getKeys(false)
+                .stream()
+                .map(key -> getRecipe(recipesSection.getConfigurationSection(key), key).<Void>handleAsync((recipe, exception) -> {
+                    if (exception != null) {
+                        Logging.error("Exception when reading recipe: " + key);
+                        exception.printStackTrace();
+                    } else {
+                        recipes.put(key, recipe);
+                    }
+                    return null;
+                }))
+                .toArray(CompletableFuture<?>[]::new);
+        return CompletableFuture.allOf(futures)
+                .thenApplyAsync(ignored -> recipes.build());
     }
 
     /**
@@ -61,40 +68,43 @@ public class RecipeReader<I> {
      * @param recipeName The name/id of the recipe to obtain. Ex: 'example_recipe'
      * @return A Recipe object with all the attributes of the recipe.
      */
-    private RecipeImpl<I> getRecipe(ConfigurationSection recipe, String recipeName) {
-        return new RecipeImpl.Builder<I>(recipeName)
+    private CompletableFuture<RecipeImpl<I>> getRecipe(ConfigurationSection recipe, String recipeName) {
+        return parseSteps(recipe.getMapList("steps")).thenApplyAsync(steps -> new RecipeImpl.Builder<I>(recipeName)
                 .brewDifficulty(recipe.getDouble("brew-difficulty", 1D))
                 .recipeResult(recipeResultReader.readRecipeResult(recipe))
-                .steps(parseSteps(recipe.getMapList("steps")))
-                .build();
+                .steps(steps)
+                .build()
+        );
     }
 
-    private @NotNull List<BrewingStep> parseSteps(List<Map<?, ?>> steps) {
-        return steps.stream()
+    private @NotNull CompletableFuture<List<BrewingStep>> parseSteps(List<Map<?, ?>> steps) {
+        return FutureUtil.mergeFutures(steps.stream()
                 .map(this::parseStep)
-                .toList();
+                .toList());
     }
 
-    private BrewingStep parseStep(Map<?, ?> map) {
+    private CompletableFuture<BrewingStep> parseStep(Map<?, ?> map) {
         BrewingStep.StepType type = BrewingStep.StepType.valueOf(String.valueOf(map.get("type")).toUpperCase(Locale.ROOT));
         checkStep(type, map);
         return switch (type) {
-            case COOK -> new CookStepImpl(
-                    new PassedMoment(((Integer) map.get("cook-time")).longValue() * PassedMoment.MINUTE),
-                    ingredientManager.getIngredientsWithAmount((List<String>) map.get("ingredients")),
-                    Registry.CAULDRON_TYPE.get(BreweryKey.parse(map.containsKey("cauldron-type") ? map.get("cauldron-type").toString().toLowerCase(Locale.ROOT) : "water"))
-            );
-            case DISTILL -> new DistillStepImpl(
+            case COOK -> ingredientManager.getIngredientsWithAmount((List<String>) map.get("ingredients"))
+                    .thenApplyAsync(ingredients -> new CookStepImpl(
+                            new PassedMoment(((Integer) map.get("cook-time")).longValue() * PassedMoment.MINUTE),
+                            ingredients,
+                            Registry.CAULDRON_TYPE.get(BreweryKey.parse(map.containsKey("cauldron-type") ? map.get("cauldron-type").toString().toLowerCase(Locale.ROOT) : "water"))
+                    ));
+            case DISTILL -> CompletableFuture.completedFuture(new DistillStepImpl(
                     (int) map.get("runs")
-            );
-            case AGE -> new AgeStepImpl(
+            ));
+            case AGE -> CompletableFuture.completedFuture(new AgeStepImpl(
                     new PassedMoment(((Integer) map.get("age-years")).longValue() * Moment.AGING_YEAR),
                     Registry.BARREL_TYPE.get(BreweryKey.parse(map.get("barrel-type").toString().toLowerCase(Locale.ROOT)))
-            );
-            case MIX -> new MixStepImpl(
-                    new PassedMoment(((Integer) map.get("mix-time")).longValue() * Moment.MINUTE),
-                    ingredientManager.getIngredientsWithAmount((List<String>) map.get("ingredients"))
-            );
+            ));
+            case MIX -> ingredientManager.getIngredientsWithAmount((List<String>) map.get("ingredients"))
+                    .thenApplyAsync(ingredients -> new MixStepImpl(
+                            new PassedMoment(((Integer) map.get("mix-time")).longValue() * Moment.MINUTE),
+                            ingredients
+                    ));
         };
     }
 

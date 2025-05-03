@@ -8,8 +8,10 @@ import dev.jsinco.brewery.bukkit.structure.BreweryStructure;
 import dev.jsinco.brewery.bukkit.structure.PlacedBreweryStructure;
 import dev.jsinco.brewery.bukkit.util.BukkitAdapter;
 import dev.jsinco.brewery.database.PersistenceException;
+import dev.jsinco.brewery.database.PersistenceException;
 import dev.jsinco.brewery.database.sql.SqlStatements;
 import dev.jsinco.brewery.database.sql.SqlStoredData;
+import dev.jsinco.brewery.util.*;
 import dev.jsinco.brewery.util.DecoderEncoder;
 import dev.jsinco.brewery.util.Logging;
 import dev.jsinco.brewery.util.Pair;
@@ -27,6 +29,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 public class BukkitDistilleryDataType implements SqlStoredData.Findable<BukkitDistillery, UUID>, SqlStoredData.Insertable<BukkitDistillery>, SqlStoredData.Removable<BukkitDistillery>, SqlStoredData.Updateable<BukkitDistillery> {
 
@@ -98,12 +101,15 @@ public class BukkitDistilleryDataType implements SqlStoredData.Findable<BukkitDi
             throw new PersistenceException(e);
         }
         for (BukkitDistillery distillery : output) {
-            List<Pair<Brew, BukkitDistilleryBrewDataType.DistilleryContext>> contents = BukkitDistilleryBrewDataType.INSTANCE.find(distillery.getStructure().getUnique(), connection);
-            for (Pair<Brew, BukkitDistilleryBrewDataType.DistilleryContext> content : contents) {
-                BukkitDistilleryBrewDataType.DistilleryContext context = content.second();
-                BrewInventory inventory = context.distillate() ? distillery.getDistillate() : distillery.getMixture();
-                inventory.set(content.first(), context.inventoryPos());
-            }
+            List<CompletableFuture<Pair<Brew, BukkitDistilleryBrewDataType.DistilleryContext>>> contentsFuture = BukkitDistilleryBrewDataType.INSTANCE.find(distillery.getStructure().getUnique(), connection);
+            FutureUtil.mergeFutures(contentsFuture)
+                    .thenAcceptAsync(contents ->
+                            contents.forEach(content -> {
+                                BukkitDistilleryBrewDataType.DistilleryContext context = content.second();
+                                BrewInventory inventory = context.distillate() ? distillery.getDistillate() : distillery.getMixture();
+                                inventory.set(content.first(), context.inventoryPos());
+                            })
+                    );
         }
         return output;
     }

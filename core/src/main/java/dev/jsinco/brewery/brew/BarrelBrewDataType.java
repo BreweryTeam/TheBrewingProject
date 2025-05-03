@@ -16,11 +16,15 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 public abstract class BarrelBrewDataType<I> implements
         SqlStoredData.Insertable<Pair<Brew, BarrelBrewDataType.BarrelContext>>, SqlStoredData.Removable<Pair<Brew, BarrelBrewDataType.BarrelContext>>,
-        SqlStoredData.Findable<Pair<Brew, Integer>, BreweryLocation>, SqlStoredData.Updateable<Pair<Brew, BarrelBrewDataType.BarrelContext>> {
+        SqlStoredData.Findable<CompletableFuture<Pair<Brew, Integer>>, BreweryLocation>, SqlStoredData.Updateable<Pair<Brew, BarrelBrewDataType.BarrelContext>> {
     private final SqlStatements statements = new SqlStatements("/database/generic/barrel_brews");
+
+    protected BarrelBrewDataType() {
+    }
 
     @Override
     public void insert(Pair<Brew, BarrelContext> value, Connection connection) throws PersistenceException {
@@ -54,7 +58,7 @@ public abstract class BarrelBrewDataType<I> implements
         }
     }
 
-    private BrewImpl brewFromResultSet(ResultSet resultSet) throws SQLException {
+    private CompletableFuture<Brew> brewFromResultSet(ResultSet resultSet) throws SQLException {
         return BrewImpl.SERIALIZER.deserialize(JsonParser.parseString(resultSet.getString("brew")).getAsJsonArray(), getIngredientManager());
     }
 
@@ -65,16 +69,17 @@ public abstract class BarrelBrewDataType<I> implements
     }
 
     @Override
-    public List<Pair<Brew, Integer>> find(BreweryLocation signLocation, Connection connection) throws PersistenceException {
+    public List<CompletableFuture<Pair<Brew, Integer>>> find(BreweryLocation signLocation, Connection connection) throws PersistenceException {
         try (PreparedStatement preparedStatement = connection.prepareStatement(statements.get(SqlStatements.Type.FIND))) {
             preparedStatement.setInt(1, signLocation.x());
             preparedStatement.setInt(2, signLocation.y());
             preparedStatement.setInt(3, signLocation.z());
             preparedStatement.setBytes(4, DecoderEncoder.asBytes(signLocation.worldUuid()));
             ResultSet resultSet = preparedStatement.executeQuery();
-            List<Pair<Brew, Integer>> output = new ArrayList<>();
+            List<CompletableFuture<Pair<Brew, Integer>>>  output = new ArrayList<>();
             while (resultSet.next()) {
-                output.add(new Pair<>(brewFromResultSet(resultSet), resultSet.getInt("pos")));
+                final int pos = resultSet.getInt("pos");
+                output.add(brewFromResultSet(resultSet).thenApplyAsync(brew -> new Pair<>(brew, pos)));
             }
             return output;
         } catch (SQLException e) {

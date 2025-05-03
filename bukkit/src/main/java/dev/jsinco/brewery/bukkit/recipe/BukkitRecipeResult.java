@@ -5,10 +5,9 @@ import dev.jsinco.brewery.brew.Brew;
 import dev.jsinco.brewery.brew.BrewQuality;
 import dev.jsinco.brewery.brew.BrewScore;
 import dev.jsinco.brewery.brew.BrewingStep;
-import dev.jsinco.brewery.bukkit.integration.item.CraftEngineHook;
-import dev.jsinco.brewery.bukkit.integration.item.ItemsAdderHook;
-import dev.jsinco.brewery.bukkit.integration.item.NexoHook;
-import dev.jsinco.brewery.bukkit.integration.item.OraxenHook;
+import dev.jsinco.brewery.bukkit.TheBrewingProject;
+import dev.jsinco.brewery.bukkit.integration.Integration;
+import dev.jsinco.brewery.bukkit.integration.IntegrationType;
 import dev.jsinco.brewery.bukkit.util.BukkitAdapter;
 import dev.jsinco.brewery.configuration.locale.TranslationsConfig;
 import dev.jsinco.brewery.recipe.RecipeResult;
@@ -81,13 +80,15 @@ public class BukkitRecipeResult implements RecipeResult<ItemStack> {
     public ItemStack newBrewItem(@NotNull BrewScore score, Brew brew, Brew.State state) {
         BrewQuality quality = score.brewQuality();
         if (customId != null) {
-            ItemStack itemStack = switch (customId.namespace()) {
-                case "oraxen" -> OraxenHook.build(customId.key());
-                case "itemsadder" -> ItemsAdderHook.build(customId.key());
-                case "nexo" -> NexoHook.build(customId.key());
-                case "craftengine" -> CraftEngineHook.build(customId.key());
-                default -> throw new IllegalStateException("Namespace should be within the supported items plugins");
-            };
+            ItemStack itemStack = TheBrewingProject.getInstance().getIntegrationManager().getIntegrationRegistry()
+                    .getIntegrations(IntegrationType.ITEM)
+                    .stream()
+                    .filter(Integration::enabled)
+                    .filter(integration -> customId.namespace().equals(integration.getId()))
+                    .findAny()
+                    .orElseThrow(() -> new IllegalStateException("Namespace should be within the supported items plugins"))
+                    .createItem(customId.key())
+                    .orElse(null);
             if (itemStack != null) {
                 ItemMeta meta = itemStack.getItemMeta();
                 recipeEffects.getOrDefault(quality, RecipeEffects.GENERIC).applyTo(meta, score);
