@@ -45,21 +45,23 @@ public class RecipeReader<I> {
         }
 
         ConfigurationSection recipesSection = recipesFile.getConfigurationSection("recipes");
-        ImmutableMap.Builder<String, Recipe<I>> recipes = new ImmutableMap.Builder<>();
-        CompletableFuture<?>[] futures = recipesSection.getKeys(false)
+        List<CompletableFuture<RecipeImpl<I>>> futures = recipesSection.getKeys(false)
                 .stream()
-                .map(key -> getRecipe(recipesSection.getConfigurationSection(key), key).<Void>handleAsync((recipe, exception) -> {
+                .map(key -> getRecipe(recipesSection.getConfigurationSection(key), key).handleAsync((recipe, exception) -> {
                     if (exception != null) {
                         Logging.error("Exception when reading recipe: " + key);
                         exception.printStackTrace();
-                    } else {
-                        recipes.put(key, recipe);
+                        return null;
                     }
-                    return null;
+                    return recipe;
                 }))
-                .toArray(CompletableFuture<?>[]::new);
-        return CompletableFuture.allOf(futures)
-                .thenApplyAsync(ignored -> recipes.build());
+                .toList();
+        return FutureUtil.mergeFutures(futures)
+                .thenApplyAsync(recipes -> {
+                    ImmutableMap.Builder<String, Recipe<I>> recipesMap = new ImmutableMap.Builder<>();
+                    recipes.forEach(recipe -> recipesMap.put(recipe.getRecipeName(), recipe));
+                    return recipesMap.build();
+                });
     }
 
     /**

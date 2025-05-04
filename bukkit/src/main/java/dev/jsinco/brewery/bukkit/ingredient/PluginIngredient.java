@@ -35,7 +35,7 @@ public class PluginIngredient implements Ingredient {
             return false;
         }
         PluginIngredient that = (PluginIngredient) o;
-        return Objects.equals(key, that.key);
+        return Objects.equals(key, that.key) && itemIntegration == that.itemIntegration;
     }
 
     @Override
