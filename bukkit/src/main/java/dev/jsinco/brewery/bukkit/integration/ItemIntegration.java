@@ -17,8 +17,12 @@ public interface ItemIntegration extends Integration {
 
     default CompletableFuture<Optional<Ingredient>> createIngredient(String id) {
         return initialized().orTimeout(10, TimeUnit.SECONDS)
-                .handleAsync((ignored1, exception) ->
-                        Optional.ofNullable(exception).map(ignored2 -> new PluginIngredient(new BreweryKey(getId(), id), this))
+                .handleAsync((ignored1, exception) -> {
+                            if (exception != null) {
+                                return Optional.empty();
+                            }
+                            return Optional.of(new PluginIngredient(new BreweryKey(getId(), id), this));
+                        }
                 );
     }
 
