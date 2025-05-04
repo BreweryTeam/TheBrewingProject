@@ -101,7 +101,8 @@ public class BukkitBarrelDataType implements SqlStoredData.Findable<BukkitBarrel
             throw new PersistenceException(e);
         }
         for (BukkitBarrel barrel : output) {
-            barrel.setBrews(BukkitBarrelBrewDataType.INSTANCE.find(BukkitAdapter.toBreweryLocation(barrel.getUniqueLocation()), connection));
+            FutureUtil.mergeFutures(BukkitBarrelBrewDataType.INSTANCE.find(BukkitAdapter.toBreweryLocation(barrel.getUniqueLocation()), connection))
+                    .thenAcceptAsync(barrel::setBrews);
         }
         return output;
     }

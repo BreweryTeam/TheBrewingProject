@@ -7,12 +7,13 @@ import dev.jsinco.brewery.breweries.CauldronType;
 import dev.jsinco.brewery.ingredient.Ingredient;
 import dev.jsinco.brewery.ingredient.IngredientManager;
 import dev.jsinco.brewery.ingredient.IngredientUtil;
+import dev.jsinco.brewery.moment.Moment;
 import dev.jsinco.brewery.util.BreweryKey;
 import dev.jsinco.brewery.util.Registry;
-import dev.jsinco.brewery.moment.Moment;
 
 import java.util.Locale;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 public class BrewingStepSerializer {
 
@@ -45,22 +46,26 @@ public class BrewingStepSerializer {
         return object;
     }
 
-    public BrewingStep deserialize(JsonElement jsonElement, IngredientManager<?> ingredientManager) {
+    public CompletableFuture<BrewingStep> deserialize(JsonElement jsonElement, IngredientManager<?> ingredientManager) {
         JsonObject object = jsonElement.getAsJsonObject();
         BrewingStep.StepType stepType = BrewingStep.StepType.valueOf(object.get("type").getAsString().toUpperCase(Locale.ROOT));
         return switch (stepType) {
-            case COOK -> new BrewingStep.Cook(
-                    Moment.SERIALIZER.deserialize(object.get("brew_time")),
-                    IngredientUtil.ingredientsFromJson(object.get("ingredients").getAsJsonObject(), ingredientManager),
-                    Registry.CAULDRON_TYPE.get(BreweryKey.parse(object.get("cauldron_type").getAsString()))
-            );
-            case DISTILL -> new BrewingStep.Distill(object.get("runs").getAsInt());
-            case AGE ->
-                    new BrewingStep.Age(Moment.SERIALIZER.deserialize(object.get("age")), Registry.BARREL_TYPE.get(BreweryKey.parse(object.get("barrel_type").getAsString())));
-            case MIX -> new BrewingStep.Mix(
-                    Moment.SERIALIZER.deserialize(object.get("mix_time")),
+            case COOK ->
                     IngredientUtil.ingredientsFromJson(object.get("ingredients").getAsJsonObject(), ingredientManager)
-            );
+                            .thenApplyAsync(ingredients -> new BrewingStep.Cook(
+                                    Moment.SERIALIZER.deserialize(object.get("brew_time")),
+                                    ingredients,
+                                    Registry.CAULDRON_TYPE.get(BreweryKey.parse(object.get("cauldron_type").getAsString()))
+                            ));
+            case DISTILL -> CompletableFuture.completedFuture(new BrewingStep.Distill(object.get("runs").getAsInt()));
+            case AGE ->
+                    CompletableFuture.completedFuture(new BrewingStep.Age(Moment.SERIALIZER.deserialize(object.get("age")), Registry.BARREL_TYPE.get(BreweryKey.parse(object.get("barrel_type").getAsString()))));
+            case MIX ->
+                    IngredientUtil.ingredientsFromJson(object.get("ingredients").getAsJsonObject(), ingredientManager)
+                            .thenApplyAsync(ingredients -> new BrewingStep.Mix(
+                                    Moment.SERIALIZER.deserialize(object.get("mix_time")),
+                                    ingredients
+                            ));
         };
     }
 }

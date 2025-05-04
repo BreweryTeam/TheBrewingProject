@@ -1,6 +1,10 @@
 package dev.jsinco.brewery.bukkit.integration;
 
 import dev.jsinco.brewery.bukkit.integration.integrations.structure.WorldGuardHook;
+import dev.jsinco.brewery.bukkit.integration.item.CraftEngineHook;
+import dev.jsinco.brewery.bukkit.integration.item.ItemsAdderHook;
+import dev.jsinco.brewery.bukkit.integration.item.NexoHook;
+import dev.jsinco.brewery.bukkit.integration.item.OraxenHook;
 import dev.jsinco.brewery.util.Logging;
 import lombok.Getter;
 import org.bukkit.block.Block;
@@ -15,10 +19,16 @@ public class IntegrationManager {
 
     public void init() {
         register(IntegrationType.STRUCTURE, new WorldGuardHook());
+        register(IntegrationType.ITEM, new CraftEngineHook());
+        register(IntegrationType.ITEM, new ItemsAdderHook());
+        register(IntegrationType.ITEM, new NexoHook());
+        register(IntegrationType.ITEM, new OraxenHook());
+        integrationRegistry.getIntegrations(IntegrationType.ITEM).forEach(Integration::initialize);
+        integrationRegistry.getIntegrations(IntegrationType.STRUCTURE).forEach(Integration::initialize);
     }
 
     public void register(IntegrationType type, Integration integration) {
-        if (!integration.shouldEnable()) {
+        if (!integration.enabled()) {
             Logging.log("Skipping registration of integration " + integration.getId() + " with type " + type + " because it is disabled");
             return;
         }

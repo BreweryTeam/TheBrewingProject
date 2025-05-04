@@ -4,7 +4,7 @@ import com.google.gson.JsonParser;
 import dev.jsinco.brewery.brew.Brew;
 import dev.jsinco.brewery.brew.BrewImpl;
 import dev.jsinco.brewery.bukkit.ingredient.BukkitIngredientManager;
-import dev.jsinco.brewery.database.*;
+import dev.jsinco.brewery.database.PersistenceException;
 import dev.jsinco.brewery.database.sql.SqlStoredData;
 import dev.jsinco.brewery.util.DecoderEncoder;
 import dev.jsinco.brewery.util.FileUtil;
@@ -18,16 +18,17 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 public class BukkitDistilleryBrewDataType implements
         SqlStoredData.Insertable<Pair<Brew, BukkitDistilleryBrewDataType.DistilleryContext>>, SqlStoredData.Removable<Pair<Brew, BukkitDistilleryBrewDataType.DistilleryContext>>,
-        SqlStoredData.Findable<Pair<Brew, BukkitDistilleryBrewDataType.DistilleryContext>, BreweryLocation>, SqlStoredData.Updateable<Pair<Brew, BukkitDistilleryBrewDataType.DistilleryContext>> {
+        SqlStoredData.Findable<CompletableFuture<Pair<Brew, BukkitDistilleryBrewDataType.DistilleryContext>>, BreweryLocation>, SqlStoredData.Updateable<Pair<Brew, BukkitDistilleryBrewDataType.DistilleryContext>> {
 
     public static final BukkitDistilleryBrewDataType INSTANCE = new BukkitDistilleryBrewDataType();
 
     @Override
-    public List<Pair<Brew, DistilleryContext>> find(BreweryLocation searchObject, Connection connection) throws PersistenceException {
-        List<Pair<Brew, DistilleryContext>> output = new ArrayList<>();
+    public List<CompletableFuture<Pair<Brew, DistilleryContext>>> find(BreweryLocation searchObject, Connection connection) throws PersistenceException {
+        List<CompletableFuture<Pair<Brew, DistilleryContext>>> output = new ArrayList<>();
         try (PreparedStatement preparedStatement = connection.prepareStatement(FileUtil.readInternalResource("/database/generic/distillery_brews_find.sql"))) {
             preparedStatement.setInt(1, searchObject.x());
             preparedStatement.setInt(2, searchObject.y());
@@ -37,8 +38,10 @@ public class BukkitDistilleryBrewDataType implements
             while (resultSet.next()) {
                 int pos = resultSet.getInt("pos");
                 boolean isDistillate = resultSet.getBoolean("is_distillate");
-                Brew brew = BrewImpl.SERIALIZER.deserialize(JsonParser.parseString(resultSet.getString("brew")).getAsJsonArray(), BukkitIngredientManager.INSTANCE);
-                output.add(new Pair<>(brew, new DistilleryContext(searchObject.x(), searchObject.y(), searchObject.z(), searchObject.worldUuid(), pos, isDistillate)));
+                CompletableFuture<Brew> brewFuture = BrewImpl.SERIALIZER.deserialize(JsonParser.parseString(resultSet.getString("brew")).getAsJsonArray(), BukkitIngredientManager.INSTANCE);
+                output.add(brewFuture.thenApplyAsync(brew ->
+                        new Pair<>(brew, new DistilleryContext(searchObject.x(), searchObject.y(), searchObject.z(), searchObject.worldUuid(), pos, isDistillate))
+                ));
             }
         } catch (SQLException e) {
             throw new PersistenceException(e);

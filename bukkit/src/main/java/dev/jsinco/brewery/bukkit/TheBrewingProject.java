@@ -16,7 +16,6 @@ import dev.jsinco.brewery.bukkit.effect.event.CustomDrunkEventReader;
 import dev.jsinco.brewery.bukkit.effect.event.DrunkEventExecutor;
 import dev.jsinco.brewery.bukkit.ingredient.BukkitIngredientManager;
 import dev.jsinco.brewery.bukkit.integration.IntegrationManager;
-import dev.jsinco.brewery.bukkit.integration.item.ChestShopHook;
 import dev.jsinco.brewery.bukkit.listeners.BlockEventListener;
 import dev.jsinco.brewery.bukkit.listeners.InventoryEventListener;
 import dev.jsinco.brewery.bukkit.listeners.PlayerEventListener;
@@ -127,7 +126,7 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
         worldEventListener.init();
         RecipeReader<ItemStack> recipeReader = new RecipeReader<>(this.getDataFolder(), new BukkitRecipeResultReader(), BukkitIngredientManager.INSTANCE);
 
-        this.recipeRegistry.registerRecipes(recipeReader.readRecipes());
+        recipeReader.readRecipes().thenAcceptAsync(this.recipeRegistry::registerRecipes);
         this.recipeRegistry.registerDefaultRecipes(DefaultRecipeReader.readDefaultRecipes(this.getDataFolder()));
         try (InputStream inputStream = Util.class.getResourceAsStream("/drunk_text.json")) {
             drunkTextRegistry.load(inputStream);
@@ -168,6 +167,7 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
 
     @Override
     public void onEnable() {
+        integrationManager.init();
         saveResources();
         this.database = new Database(DatabaseDriver.SQLITE);
         try {
@@ -187,7 +187,7 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
         Bukkit.getScheduler().runTaskTimer(this, this::otherTicking, 0, 1);
         RecipeReader<ItemStack> recipeReader = new RecipeReader<>(this.getDataFolder(), new BukkitRecipeResultReader(), BukkitIngredientManager.INSTANCE);
 
-        this.recipeRegistry.registerRecipes(recipeReader.readRecipes());
+        recipeReader.readRecipes().thenAcceptAsync(this.recipeRegistry::registerRecipes);
         this.recipeRegistry.registerDefaultRecipes(DefaultRecipeReader.readDefaultRecipes(this.getDataFolder()));
         getCommand("brew").setExecutor(new BreweryCommand());
         try (InputStream inputStream = Util.class.getResourceAsStream("/drunk_text.json")) {
@@ -195,8 +195,6 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        integrationManager.init();
-        ChestShopHook.initiate(this);
         Bukkit.getServicesManager().register(TheBrewingProjectApi.class, this, this, ServicePriority.Normal);
     }
 

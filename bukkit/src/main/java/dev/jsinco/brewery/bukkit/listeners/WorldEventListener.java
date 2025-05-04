@@ -4,6 +4,7 @@ import dev.jsinco.brewery.bukkit.breweries.*;
 import dev.jsinco.brewery.database.PersistenceException;
 import dev.jsinco.brewery.database.sql.Database;
 import dev.jsinco.brewery.structure.PlacedStructureRegistryImpl;
+import dev.jsinco.brewery.util.FutureUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.event.EventHandler;
@@ -13,6 +14,7 @@ import org.bukkit.event.world.WorldLoadEvent;
 import org.bukkit.event.world.WorldUnloadEvent;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 public class WorldEventListener implements Listener {
 
@@ -46,8 +48,9 @@ public class WorldEventListener implements Listener {
                 placedStructureRegistry.registerStructure(barrel.getStructure());
                 registry.registerInventory(barrel);
             }
-            List<BukkitCauldron> cauldrons = database.findNow(BukkitCauldronDataType.INSTANCE, world.getUID());
-            cauldrons.forEach(registry::addActiveSinglePositionStructure);
+            List<CompletableFuture<BukkitCauldron>> cauldronsFuture = database.findNow(BukkitCauldronDataType.INSTANCE, world.getUID());
+            FutureUtil.mergeFutures(cauldronsFuture)
+                            .thenAcceptAsync(cauldrons -> cauldrons.forEach(registry::addActiveSinglePositionStructure));
             List<BukkitDistillery> distilleries = database.findNow(BukkitDistilleryDataType.INSTANCE, world.getUID());
             distilleries.stream()
                     .map(BukkitDistillery::getStructure)

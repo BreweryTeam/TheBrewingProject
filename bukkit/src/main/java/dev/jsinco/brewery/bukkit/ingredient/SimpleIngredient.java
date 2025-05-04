@@ -24,12 +24,12 @@ public class SimpleIngredient implements Ingredient {
     }
 
     @Override
-    public String getKey() {
+    public @NotNull String getKey() {
         return material.getKey().toString();
     }
 
     @Override
-    public String displayName() {
+    public @NotNull String displayName() {
         return TranslationRegistry.INSTANCE.translate(material.getItemTranslationKey());
     }
 
@@ -67,7 +67,7 @@ public class SimpleIngredient implements Ingredient {
      * @param materialStr A string representing the material
      * @return An optional simple ingredient
      */
-    public static Optional<SimpleIngredient> from(String materialStr) {
+    public static Optional<Ingredient> from(String materialStr) {
         return Optional.ofNullable(NamespacedKey.fromString(materialStr.toLowerCase(Locale.ROOT)))
                 .flatMap(namespacedKey -> Optional.ofNullable(Registry.MATERIAL.get(namespacedKey)))
                 .map(SimpleIngredient::new);

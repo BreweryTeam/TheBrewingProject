@@ -8,10 +8,10 @@ import dev.jsinco.brewery.bukkit.brew.BrewAdapter;
 import dev.jsinco.brewery.bukkit.ingredient.BukkitIngredientManager;
 import dev.jsinco.brewery.configuration.locale.TranslationsConfig;
 import dev.jsinco.brewery.ingredient.Ingredient;
-import dev.jsinco.brewery.util.BreweryKey;
-import dev.jsinco.brewery.util.Registry;
 import dev.jsinco.brewery.moment.Moment;
 import dev.jsinco.brewery.moment.PassedMoment;
+import dev.jsinco.brewery.util.BreweryKey;
+import dev.jsinco.brewery.util.Registry;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import org.bukkit.command.CommandSender;
@@ -80,7 +80,7 @@ public class CreateCommand {
             sender.sendMessage(MiniMessage.miniMessage().deserialize(TranslationsConfig.COMMAND_CREATE_UNKNOWN_ARGUMENT, Placeholder.unparsed("argument", invalidIngredients)));
             throw new IllegalArgumentException("Could not find the ingredient(s): " + invalidIngredients);
         }
-        return BukkitIngredientManager.INSTANCE.getIngredientsWithAmount(ingredientStrings);
+        return BukkitIngredientManager.INSTANCE.getIngredientsWithAmount(ingredientStrings).join();
     }
 
     private static BrewingStep getCook(Queue<String> arguments, CommandSender sender) {

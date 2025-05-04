@@ -2,6 +2,10 @@ package dev.jsinco.brewery.brew;
 
 import com.google.gson.JsonArray;
 import dev.jsinco.brewery.ingredient.IngredientManager;
+import dev.jsinco.brewery.util.FutureUtil;
+
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 public class BrewSerializer {
 
@@ -15,7 +19,11 @@ public class BrewSerializer {
         return array;
     }
 
-    public BrewImpl deserialize(JsonArray jsonArray, IngredientManager<?> ingredientManager) {
-        return new BrewImpl(jsonArray.asList().stream().map(jsonElement -> BrewingStepSerializer.INSTANCE.deserialize(jsonElement, ingredientManager)).toList());
+    public CompletableFuture<Brew> deserialize(JsonArray jsonArray, IngredientManager<?> ingredientManager) {
+        List<CompletableFuture<BrewingStep>> brewingStepFutures = jsonArray.asList().stream()
+                .map(jsonElement -> BrewingStepSerializer.INSTANCE.deserialize(jsonElement, ingredientManager))
+                .toList();
+        return FutureUtil.mergeFutures(brewingStepFutures)
+                .thenApplyAsync(BrewImpl::new);
     }
 }

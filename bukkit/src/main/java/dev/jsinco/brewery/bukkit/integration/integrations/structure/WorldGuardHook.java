@@ -14,13 +14,18 @@ import org.bukkit.entity.Player;
 
 public class WorldGuardHook implements StructureIntegration {
     @Override
-    public boolean shouldEnable() {
+    public boolean enabled() {
         return ClassUtil.exists("com.sk89q.worldguard.WorldGuard");
     }
 
     @Override
     public String getId() {
         return "worldguard";
+    }
+
+    @Override
+    public void initialize() {
+        // NO-OP
     }
 
     @Override

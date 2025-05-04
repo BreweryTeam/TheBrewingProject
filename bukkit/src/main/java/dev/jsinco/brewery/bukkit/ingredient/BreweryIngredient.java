@@ -7,6 +7,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -21,12 +22,12 @@ public class BreweryIngredient implements Ingredient {
     }
 
     @Override
-    public String getKey() {
+    public @NotNull String getKey() {
         return ingredientKey.toString();
     }
 
     @Override
-    public String displayName() {
+    public @NotNull String displayName() {
         return displayName;
     }
 
