@@ -11,6 +11,9 @@ public class FutureUtil {
     }
 
     public static <T> CompletableFuture<List<T>> mergeFutures(List<CompletableFuture<T>> completableFutureList) {
+        if (completableFutureList.isEmpty()) {
+            return CompletableFuture.completedFuture(List.of());
+        }
         T[] unwrappedFutures = (T[]) new Object[completableFutureList.size()];
         CompletableFuture<?>[] completableFutures = new CompletableFuture<?>[completableFutureList.size()];
         for (int i = 0; i < completableFutureList.size(); i++) {

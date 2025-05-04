@@ -1,9 +1,9 @@
 package dev.jsinco.brewery.bukkit.integration.item;
 
-import com.nexomc.nexo.api.events.NexoItemsLoadedEvent;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.bukkit.integration.ItemIntegration;
 import dev.jsinco.brewery.util.ClassUtil;
+import net.momirealms.craftengine.bukkit.api.event.CraftEngineReloadEvent;
 import net.momirealms.craftengine.bukkit.plugin.BukkitCraftEngine;
 import net.momirealms.craftengine.core.item.Item;
 import net.momirealms.craftengine.core.util.Key;
@@ -42,7 +42,7 @@ public class CraftEngineHook implements ItemIntegration, Listener {
 
     @Override
     public boolean enabled() {
-        return ENABLED && Bukkit.getPluginManager().isPluginEnabled("CraftEngine");
+        return ENABLED;
     }
 
     @Override
@@ -52,12 +52,12 @@ public class CraftEngineHook implements ItemIntegration, Listener {
 
     @Override
     public void initialize() {
-        Bukkit.getPluginManager().registerEvents(this, TheBrewingProject.getInstance());
         this.initializedFuture = new CompletableFuture<>();
+        Bukkit.getPluginManager().registerEvents(this, TheBrewingProject.getInstance());
     }
 
     @EventHandler
-    public void onItemsLoaded(NexoItemsLoadedEvent itemsLoadedEvent) {
-        initializedFuture.complete(null);
+    public void onCraftEngineReload(CraftEngineReloadEvent ignored) {
+        initializedFuture.completeAsync(() -> null);
     }
 }

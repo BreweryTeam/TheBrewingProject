@@ -44,7 +44,7 @@ public class OraxenHook implements ItemIntegration, Listener {
 
     @Override
     public boolean enabled() {
-        return ENABLED && Bukkit.getPluginManager().isPluginEnabled("Oraxen");
+        return ENABLED;
     }
 
     @Override
@@ -60,7 +60,7 @@ public class OraxenHook implements ItemIntegration, Listener {
 
     @EventHandler
     public void onOraxenItemsLoaded(OraxenItemsLoadedEvent event) {
-        initializedFuture.complete(null);
+        initializedFuture.completeAsync(() -> null);
     }
 
 }
