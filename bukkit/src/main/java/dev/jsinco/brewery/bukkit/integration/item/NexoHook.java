@@ -55,7 +55,7 @@ public class NexoHook implements ItemIntegration, Listener {
 
     @Override
     public boolean enabled() {
-        return ENABLED && Bukkit.getPluginManager().isPluginEnabled("Nexo");
+        return ENABLED;
     }
 
     @Override
@@ -71,6 +71,6 @@ public class NexoHook implements ItemIntegration, Listener {
 
     @EventHandler
     public void onNexoItemsLoaded(NexoItemsLoadedEvent event) {
-        initializedFuture.complete(null);
+        initializedFuture.completeAsync(() -> null);
     }
 }

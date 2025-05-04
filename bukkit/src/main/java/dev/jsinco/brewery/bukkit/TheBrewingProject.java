@@ -173,6 +173,7 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
 
     @Override
     public void onEnable() {
+        integrationManager.init();
         saveResources();
         this.database = new Database(DatabaseDriver.SQLITE);
         try {
@@ -205,7 +206,6 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        integrationManager.init();
         Bukkit.getServicesManager().register(TheBrewingProjectApi.class, this, this, ServicePriority.Normal);
     }
 

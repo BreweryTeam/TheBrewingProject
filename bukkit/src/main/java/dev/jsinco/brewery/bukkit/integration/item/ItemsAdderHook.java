@@ -43,7 +43,7 @@ public class ItemsAdderHook implements ItemIntegration, Listener {
 
     @Override
     public boolean enabled() {
-        return ENABLED && Bukkit.getPluginManager().isPluginEnabled("ItemsAdder");
+        return ENABLED;
     }
 
     @Override
@@ -59,6 +59,6 @@ public class ItemsAdderHook implements ItemIntegration, Listener {
 
     @EventHandler
     public void onItemsAdderItemsLoad(ItemsAdderLoadDataEvent loadDataEvent) {
-        initializedFuture.complete(null);
+        initializedFuture.completeAsync(() -> null);
     }
 }
