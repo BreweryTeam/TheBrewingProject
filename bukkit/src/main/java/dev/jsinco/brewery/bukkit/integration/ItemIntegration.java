@@ -9,14 +9,13 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeUnit;
 
 public interface ItemIntegration extends Integration {
 
     Optional<ItemStack> createItem(String id);
 
     default CompletableFuture<Optional<Ingredient>> createIngredient(String id) {
-        return initialized().orTimeout(10, TimeUnit.SECONDS)
+        return initialized()
                 .handleAsync((ignored1, exception) -> {
                             if (exception != null) {
                                 return Optional.empty();
