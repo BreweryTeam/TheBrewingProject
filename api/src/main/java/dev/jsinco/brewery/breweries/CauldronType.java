@@ -1,12 +1,13 @@
 package dev.jsinco.brewery.breweries;
 
 import dev.jsinco.brewery.util.BreweryKey;
+import dev.jsinco.brewery.util.BreweryKeyed;
 import dev.jsinco.brewery.util.Registry;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Locale;
 
-public enum CauldronType {
+public enum CauldronType implements BreweryKeyed {
 
     WATER("minecraft:water_cauldron"),
     LAVA("minecraft:lava_cauldron"),
