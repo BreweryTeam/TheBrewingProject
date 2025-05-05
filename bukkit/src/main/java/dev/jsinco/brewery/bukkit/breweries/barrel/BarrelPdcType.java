@@ -1,4 +1,4 @@
-package dev.jsinco.brewery.bukkit.breweries;
+package dev.jsinco.brewery.bukkit.breweries.barrel;
 
 import dev.jsinco.brewery.breweries.BarrelType;
 import dev.jsinco.brewery.util.BreweryKey;

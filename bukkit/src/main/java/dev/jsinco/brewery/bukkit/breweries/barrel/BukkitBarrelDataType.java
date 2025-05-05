@@ -1,10 +1,11 @@
-package dev.jsinco.brewery.bukkit.breweries;
+package dev.jsinco.brewery.bukkit.breweries.barrel;
 
 import dev.jsinco.brewery.brew.BarrelBrewDataType;
 import dev.jsinco.brewery.brew.Brew;
 import dev.jsinco.brewery.breweries.BarrelType;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.bukkit.brew.BukkitBarrelBrewDataType;
+import dev.jsinco.brewery.bukkit.breweries.BrewInventory;
 import dev.jsinco.brewery.bukkit.structure.BreweryStructure;
 import dev.jsinco.brewery.bukkit.structure.PlacedBreweryStructure;
 import dev.jsinco.brewery.bukkit.util.BukkitAdapter;
@@ -45,7 +46,7 @@ public class BukkitBarrelDataType implements SqlStoredData.Findable<BukkitBarrel
             preparedStatement.setBytes(7, DecoderEncoder.asBytes(worldUuid));
             preparedStatement.setString(8, DecoderEncoder.serializeTransformation(placedStructure.getTransformation()));
             preparedStatement.setString(9, structure.getName());
-            preparedStatement.setString(10, value.getStructureType().key().toString());
+            preparedStatement.setString(10, value.getType().key().toString());
             preparedStatement.setInt(11, value.getSize());
             preparedStatement.execute();
         } catch (SQLException e) {
@@ -85,6 +86,10 @@ public class BukkitBarrelDataType implements SqlStoredData.Findable<BukkitBarrel
                 Matrix3d transform = DecoderEncoder.deserializeTransformation(resultSet.getString("transformation"));
                 String format = resultSet.getString("format");
                 BarrelType type = Registry.BARREL_TYPE.get(BreweryKey.parse(resultSet.getString("barrel_type")));
+                if (type == null) {
+                    Logging.warning("Unknown barrel type '" + resultSet.getString("barrel_type") + "' for structure at: " + uniqueLocation);
+                    continue;
+                }
                 int size = resultSet.getInt("size");
 
                 Optional<BreweryStructure> breweryStructureOptional = TheBrewingProject.getInstance().getStructureRegistry().getStructure(format);
@@ -101,7 +106,8 @@ public class BukkitBarrelDataType implements SqlStoredData.Findable<BukkitBarrel
             throw new PersistenceException(e);
         }
         for (BukkitBarrel barrel : output) {
-            barrel.setBrews(BukkitBarrelBrewDataType.INSTANCE.find(BukkitAdapter.toBreweryLocation(barrel.getUniqueLocation()), connection));
+            BrewInventory barrelInventory = barrel.getInventory();
+            BukkitBarrelBrewDataType.INSTANCE.find(BukkitAdapter.toBreweryLocation(barrel.getUniqueLocation()), connection).forEach(pair -> barrelInventory.set(pair.first(), pair.second()));
         }
         return output;
     }

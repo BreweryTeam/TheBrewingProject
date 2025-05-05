@@ -1,23 +1,23 @@
 package dev.jsinco.brewery.bukkit.listeners;
 
+import dev.jsinco.brewery.brew.Brew;
 import dev.jsinco.brewery.brew.BrewImpl;
 import dev.jsinco.brewery.breweries.InventoryAccessible;
 import dev.jsinco.brewery.bukkit.brew.BrewAdapter;
 import dev.jsinco.brewery.bukkit.breweries.BreweryRegistry;
+import dev.jsinco.brewery.configuration.Config;
 import dev.jsinco.brewery.database.sql.Database;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.inventory.ClickType;
-import org.bukkit.event.inventory.InventoryAction;
-import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.inventory.InventoryDragEvent;
+import org.bukkit.event.inventory.*;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
 
@@ -101,5 +101,22 @@ public class InventoryEventListener implements Listener {
                 .allMatch(itemStack -> inventoryAccessible.inventoryAllows(dragEvent.getWhoClicked().getUniqueId(), itemStack))) {
             dragEvent.setResult(Event.Result.DENY);
         }
+    }
+
+    @EventHandler(ignoreCancelled = true)
+    public void onInventoryMoveItem(InventoryMoveItemEvent event) {
+        Optional<InventoryAccessible<ItemStack, Inventory>> source = Optional.ofNullable(registry.getFromInventory(event.getSource()));
+        Optional<InventoryAccessible<ItemStack, Inventory>> destination = Optional.ofNullable(registry.getFromInventory(event.getDestination()));
+        Optional<InventoryAccessible<ItemStack, Inventory>> both = destination.or(() -> source);
+        if (!Config.AUTOMATION) {
+            both.ifPresent(ignored -> event.setCancelled(true));
+            return;
+        }
+        both.filter(inventoryAccessible -> !inventoryAccessible.inventoryAllows(event.getItem()))
+                .ifPresent(ignored -> event.setCancelled(true));
+        source.flatMap(ignored -> BrewAdapter.fromItem(event.getItem())
+                        .map(brew -> BrewAdapter.toItem(brew, new Brew.State.Other())))
+                .ifPresent(event::setItem);
+
     }
 }
