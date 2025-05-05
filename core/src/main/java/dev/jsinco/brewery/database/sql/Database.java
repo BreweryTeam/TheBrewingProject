@@ -20,7 +20,7 @@ import java.util.concurrent.ScheduledExecutorService;
 
 public class Database implements PersistenceHandler<Connection> {
 
-    private static final int BREWERY_DATABASE_VERSION = 1;
+    private static final int BREWERY_DATABASE_VERSION = 2;
     private final DatabaseDriver driver;
     private HikariDataSource hikariDataSource;
     private final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
@@ -34,6 +34,7 @@ public class Database implements PersistenceHandler<Connection> {
             case SQLITE -> getHikariConfigForSqlite(dataFolder);
             default -> throw new UnsupportedOperationException("Currently not implemented");
         };
+        config.setConnectionInitSql("PRAGMA foreign_keys = ON;");
         this.hikariDataSource = new HikariDataSource(config);
         try (Connection connection = hikariDataSource.getConnection()) {
             createTables(connection);
@@ -61,15 +62,16 @@ public class Database implements PersistenceHandler<Connection> {
             connection.prepareStatement(statement + ";").execute();
         }
         ResultSet resultSet = connection.prepareStatement(FileUtil.readInternalResource("/database/generic/get_version.sql")).executeQuery();
-        resultSet.next();
-        int previousVersion = resultSet.getInt("version");
-        resultSet.close();
-        if (previousVersion < BREWERY_DATABASE_VERSION) {
-            for (int i = previousVersion; i < BREWERY_DATABASE_VERSION; i++) {
-                runMigration(i, connection);
+        if (resultSet.next()) {
+            int previousVersion = resultSet.getInt("version");
+            resultSet.close();
+            if (previousVersion < BREWERY_DATABASE_VERSION) {
+                for (int i = previousVersion; i < BREWERY_DATABASE_VERSION; i++) {
+                    runMigration(i, connection);
+                }
+            } else if (previousVersion > BREWERY_DATABASE_VERSION) {
+                throw new IllegalStateException("Can not downgrade The Brewing Project!");
             }
-        } else if (previousVersion > BREWERY_DATABASE_VERSION) {
-            throw new IllegalStateException("Can not downgrade The Brewing Project!");
         }
         PreparedStatement preparedStatement = connection.prepareStatement(FileUtil.readInternalResource("/database/generic/set_version.sql"));
         preparedStatement.setInt(1, BREWERY_DATABASE_VERSION);
@@ -80,6 +82,11 @@ public class Database implements PersistenceHandler<Connection> {
         switch (version) {
             case 0 -> {
                 for (String statement : FileUtil.readInternalResource("/database/migration/version_migration.sql").split(";")) {
+                    connection.prepareStatement(statement + ";").execute();
+                }
+            }
+            case 1 -> {
+                for (String statement : FileUtil.readInternalResource("/database/migration/foreign_keys_on_migration.sql").split(";")) {
                     connection.prepareStatement(statement + ";").execute();
                 }
             }
