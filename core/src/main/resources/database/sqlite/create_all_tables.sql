@@ -1,3 +1,5 @@
+PRAGMA foreign_keys = OFF;
+
 CREATE TABLE IF NOT EXISTS barrels
 (
     origin_x       INTEGER,
@@ -99,3 +101,5 @@ CREATE TABLE IF NOT EXISTS mixers
     brew       JSON,
     PRIMARY KEY (cauldron_x, cauldron_y, cauldron_z, world_uuid)
 );
+
+PRAGMA foreign_keys = ON;
