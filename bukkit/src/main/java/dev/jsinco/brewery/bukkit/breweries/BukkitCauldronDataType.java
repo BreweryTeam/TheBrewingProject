@@ -5,12 +5,10 @@ import dev.jsinco.brewery.brew.Brew;
 import dev.jsinco.brewery.brew.BrewImpl;
 import dev.jsinco.brewery.bukkit.ingredient.BukkitIngredientManager;
 import dev.jsinco.brewery.database.PersistenceException;
+import dev.jsinco.brewery.database.sql.SqlStatements;
 import dev.jsinco.brewery.database.sql.SqlStoredData;
 import dev.jsinco.brewery.util.DecoderEncoder;
-import dev.jsinco.brewery.util.FileUtil;
 import dev.jsinco.brewery.vector.BreweryLocation;
-import org.bukkit.Bukkit;
-import org.bukkit.World;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -23,10 +21,11 @@ import java.util.UUID;
 public class BukkitCauldronDataType implements SqlStoredData.Findable<BukkitCauldron, UUID>, SqlStoredData.Insertable<BukkitCauldron>, SqlStoredData.Updateable<BukkitCauldron>, SqlStoredData.Removable<BukkitCauldron> {
 
     public static final BukkitCauldronDataType INSTANCE = new BukkitCauldronDataType();
+    private final SqlStatements statements = new SqlStatements("/database/generic/cauldrons");
 
     @Override
     public void insert(BukkitCauldron value, Connection connection) throws PersistenceException {
-        try (PreparedStatement preparedStatement = connection.prepareStatement(FileUtil.readInternalResource("/database/generic/cauldrons_insert.sql"))) {
+        try (PreparedStatement preparedStatement = connection.prepareStatement(statements.get(SqlStatements.Type.INSERT))) {
             BreweryLocation location = value.position();
             preparedStatement.setInt(1, location.x());
             preparedStatement.setInt(2, location.y());
@@ -41,7 +40,7 @@ public class BukkitCauldronDataType implements SqlStoredData.Findable<BukkitCaul
 
     @Override
     public void update(BukkitCauldron newValue, Connection connection) throws PersistenceException {
-        try (PreparedStatement preparedStatement = connection.prepareStatement(FileUtil.readInternalResource("/database/generic/cauldrons_update.sql"))) {
+        try (PreparedStatement preparedStatement = connection.prepareStatement(statements.get(SqlStatements.Type.UPDATE))) {
             BreweryLocation location = newValue.position();
             preparedStatement.setString(1, BrewImpl.SERIALIZER.serialize(newValue.getBrew()).toString());
             preparedStatement.setInt(2, location.x());
@@ -56,7 +55,7 @@ public class BukkitCauldronDataType implements SqlStoredData.Findable<BukkitCaul
 
     @Override
     public void remove(BukkitCauldron toRemove, Connection connection) throws PersistenceException {
-        try (PreparedStatement preparedStatement = connection.prepareStatement(FileUtil.readInternalResource("/database/generic/cauldrons_remove.sql"))) {
+        try (PreparedStatement preparedStatement = connection.prepareStatement(statements.get(SqlStatements.Type.DELETE))) {
             BreweryLocation location = toRemove.position();
             preparedStatement.setInt(1, location.x());
             preparedStatement.setInt(2, location.y());
@@ -70,7 +69,7 @@ public class BukkitCauldronDataType implements SqlStoredData.Findable<BukkitCaul
 
     @Override
     public List<BukkitCauldron> find(UUID worldUuid, Connection connection) throws PersistenceException {
-        try (PreparedStatement preparedStatement = connection.prepareStatement(FileUtil.readInternalResource("/database/generic/cauldrons_select_all.sql"))) {
+        try (PreparedStatement preparedStatement = connection.prepareStatement(statements.get(SqlStatements.Type.FIND))) {
             preparedStatement.setBytes(1, DecoderEncoder.asBytes(worldUuid));
             ResultSet resultSet = preparedStatement.executeQuery();
             List<BukkitCauldron> cauldrons = new ArrayList<>();

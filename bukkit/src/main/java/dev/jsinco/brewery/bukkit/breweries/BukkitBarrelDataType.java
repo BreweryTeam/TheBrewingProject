@@ -9,6 +9,7 @@ import dev.jsinco.brewery.bukkit.structure.BreweryStructure;
 import dev.jsinco.brewery.bukkit.structure.PlacedBreweryStructure;
 import dev.jsinco.brewery.bukkit.util.BukkitAdapter;
 import dev.jsinco.brewery.database.PersistenceException;
+import dev.jsinco.brewery.database.sql.SqlStatements;
 import dev.jsinco.brewery.database.sql.SqlStoredData;
 import dev.jsinco.brewery.util.*;
 import org.bukkit.Bukkit;
@@ -26,6 +27,7 @@ import java.util.UUID;
 
 public class BukkitBarrelDataType implements SqlStoredData.Findable<BukkitBarrel, UUID>, SqlStoredData.Removable<BukkitBarrel>, SqlStoredData.Insertable<BukkitBarrel> {
     public static final BukkitBarrelDataType INSTANCE = new BukkitBarrelDataType();
+    private final SqlStatements statements = new SqlStatements("/database/generic/barrels");
 
     @Override
     public void insert(BukkitBarrel value, Connection connection) throws PersistenceException {
@@ -35,7 +37,7 @@ public class BukkitBarrelDataType implements SqlStoredData.Findable<BukkitBarrel
         Location origin = placedStructure.getWorldOrigin();
         UUID worldUuid = value.getWorld().getUID();
         Location signLocation = value.getUniqueLocation();
-        try (PreparedStatement preparedStatement = connection.prepareStatement(FileUtil.readInternalResource("/database/generic/barrels_insert.sql"))) {
+        try (PreparedStatement preparedStatement = connection.prepareStatement(statements.get(SqlStatements.Type.INSERT))) {
             preparedStatement.setInt(1, origin.getBlockX());
             preparedStatement.setInt(2, origin.getBlockY());
             preparedStatement.setInt(3, origin.getBlockZ());
@@ -62,7 +64,7 @@ public class BukkitBarrelDataType implements SqlStoredData.Findable<BukkitBarrel
     public void remove(BukkitBarrel toRemove, Connection connection) throws PersistenceException {
         UUID worldUuid = toRemove.getWorld().getUID();
         Location signLocation = toRemove.getUniqueLocation();
-        try (PreparedStatement preparedStatement = connection.prepareStatement(FileUtil.readInternalResource("/database/generic/barrels_remove.sql"))) {
+        try (PreparedStatement preparedStatement = connection.prepareStatement(statements.get(SqlStatements.Type.DELETE))) {
             preparedStatement.setInt(1, signLocation.getBlockX());
             preparedStatement.setInt(2, signLocation.getBlockY());
             preparedStatement.setInt(3, signLocation.getBlockZ());
@@ -76,7 +78,7 @@ public class BukkitBarrelDataType implements SqlStoredData.Findable<BukkitBarrel
     @Override
     public List<BukkitBarrel> find(UUID world, Connection connection) throws PersistenceException {
         List<BukkitBarrel> output = new ArrayList<>();
-        try (PreparedStatement preparedStatement = connection.prepareStatement(FileUtil.readInternalResource("/database/generic/barrels_select_all.sql"))) {
+        try (PreparedStatement preparedStatement = connection.prepareStatement(statements.get(SqlStatements.Type.FIND))) {
             preparedStatement.setBytes(1, DecoderEncoder.asBytes(world));
             ResultSet resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {

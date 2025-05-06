@@ -80,7 +80,7 @@ class BukkitBarrelBrewDataTypeTest {
 
     private void prepareBarrel() throws SQLException {
         try (Connection connection = this.database.getConnection()) {
-            PreparedStatement preparedStatement = connection.prepareStatement(FileUtil.readInternalResource("/database/generic/barrels_insert.sql"));
+            PreparedStatement preparedStatement = connection.prepareStatement(FileUtil.readInternalResource("/database/generic/barrels/insert.sql"));
             preparedStatement.setInt(1, 0);
             preparedStatement.setInt(2, 0);
             preparedStatement.setInt(3, 0);
