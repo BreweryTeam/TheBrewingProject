@@ -50,7 +50,7 @@ class BukkitDistilleryBrewDataTypeTest {
     }
 
     @Test
-    void checkPersistence() throws SQLException, PersistenceException {
+    void checkPersistence() throws PersistenceException {
         BukkitDistillery bukkitDistillery = prepareDistillery();
         BreweryLocation searchObject = bukkitDistillery.getStructure().getUnique();
         BrewImpl brew1 = new BrewImpl(
@@ -76,12 +76,12 @@ class BukkitDistilleryBrewDataTypeTest {
         BukkitDistilleryBrewDataType.DistilleryContext distilleryContext2 = new BukkitDistilleryBrewDataType.DistilleryContext(searchObject.x(), searchObject.y(), searchObject.z(), searchObject.worldUuid(), 0, true);
         Pair<Brew, BukkitDistilleryBrewDataType.DistilleryContext> data1 = new Pair<>(brew1, distilleryContext1);
         Pair<Brew, BukkitDistilleryBrewDataType.DistilleryContext> data2 = new Pair<>(brew2, distilleryContext2);
-        database.insertValue(BukkitDistilleryBrewDataType.INSTANCE, data1);
+        database.insertValue(BukkitDistilleryBrewDataType.INSTANCE, data1).join();
         assertTrue(database.findNow(BukkitDistilleryBrewDataType.INSTANCE, searchObject).contains(data1));
-        database.insertValue(BukkitDistilleryBrewDataType.INSTANCE, data2);
+        database.insertValue(BukkitDistilleryBrewDataType.INSTANCE, data2).join();
         assertTrue(database.findNow(BukkitDistilleryBrewDataType.INSTANCE, searchObject).contains(data2));
         assertTrue(database.findNow(BukkitDistilleryBrewDataType.INSTANCE, searchObject).contains(data1));
-        database.remove(BukkitDistilleryBrewDataType.INSTANCE, data1);
+        database.remove(BukkitDistilleryBrewDataType.INSTANCE, data1).join();
         assertFalse(database.findNow(BukkitDistilleryBrewDataType.INSTANCE, searchObject).contains(data1));
     }
 

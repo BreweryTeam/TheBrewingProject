@@ -45,7 +45,7 @@ class BukkitDistilleryDataTypeTest {
         StructurePlacerUtils.constructBambooDistillery(world);
         Optional<Pair<PlacedBreweryStructure<BukkitDistillery>, Void>> optional = PlacedBreweryStructure.findValid(plugin.getStructureRegistry().getStructure("bamboo_distillery").get(), block.getLocation(), GenericBlockDataMatcher.INSTANCE, new Void[1]);
         BukkitDistillery distillery = new BukkitDistillery(optional.get().first(), 100);
-        database.insertValue(BukkitDistilleryDataType.INSTANCE, distillery);
+        database.insertValue(BukkitDistilleryDataType.INSTANCE, distillery).join();
         List<BukkitDistillery> distilleries = database.findNow(BukkitDistilleryDataType.INSTANCE, world.getUID());
         assertEquals(1, distilleries.size());
         BukkitDistillery found = distilleries.get(0);
@@ -53,7 +53,7 @@ class BukkitDistilleryDataTypeTest {
         assertEquals(distillery.getStructure().getTransformation(), found.getStructure().getTransformation());
         assertEquals(100, found.getStartTime());
         BukkitDistillery newDistillery = new BukkitDistillery(optional.get().first(), 200);
-        database.updateValue(BukkitDistilleryDataType.INSTANCE, newDistillery);
+        database.updateValue(BukkitDistilleryDataType.INSTANCE, newDistillery).join();
         List<BukkitDistillery> fetchWithUpdatedValue = database.findNow(BukkitDistilleryDataType.INSTANCE, world.getUID());
         assertEquals(1, distilleries.size());
         assertEquals(newDistillery.getStructure().getStructure().getName(), fetchWithUpdatedValue.getFirst().getStructure().getStructure().getName());
