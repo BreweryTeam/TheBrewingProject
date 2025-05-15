@@ -74,6 +74,7 @@ tasks {
     runServer {
         minecraftVersion("1.21.4")
         downloadPlugins {
+            /*
             modrinth("worldedit", "DlD8WKr9")
             modrinth("craftengine", "OktNyJzh")
             url("https://dev.bukkit.org/projects/chestshop/files/latest")
@@ -81,6 +82,8 @@ tasks {
             url("https://github.com/EssentialsX/Essentials/releases/download/2.21.0/EssentialsX-2.21.0.jar")
             url("https://api.spiget.org/v2/resources/109679/download")
             url("https://api.spiget.org/v2/resources/1997/download")
+
+             */
         }
     }
 
@@ -98,8 +101,8 @@ bukkit {
     authors = listOf("Jsinco", "Mitality", "Thorinwasher")
     name = rootProject.name
     commands {
-        register("brew") {
-            aliases = listOf("brewery", "tbp")
+        register("tbp") {
+            aliases = listOf("brewery", "brew")
         }
     }
     permissions {
