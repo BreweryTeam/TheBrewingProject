@@ -12,7 +12,7 @@ plugins {
 }
 
 group = "dev.jsinco.brewery"
-version = "1.3.0-" + grgit.head().abbreviatedId
+version = project.findProperty("version")!!
 
 repositories {
     mavenCentral()

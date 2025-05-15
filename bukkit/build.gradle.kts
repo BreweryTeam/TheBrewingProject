@@ -8,7 +8,7 @@ plugins {
 }
 
 group = "dev.jsinco.brewery"
-version = rootProject.version
+version = project.findProperty("version")!!
 
 repositories {
     mavenCentral()
@@ -29,7 +29,7 @@ repositories {
 }
 
 dependencies {
-    compileOnly("io.papermc.paper:paper-api:1.21.4-R0.1-SNAPSHOT")
+    compileOnly("io.papermc.paper:paper-api:${project.findProperty("paper.version")!!}")
     compileOnly("org.projectlombok:lombok:1.18.30")
     compileOnly("org.jetbrains:annotations:24.0.0")
     compileOnly("com.comphenix.protocol:ProtocolLib:5.1.0")
@@ -72,15 +72,17 @@ tasks {
 
 
     runServer {
-        minecraftVersion("1.21.4")
-        downloadPlugins {
-            modrinth("worldedit", "DlD8WKr9")
-            modrinth("craftengine", "OktNyJzh")
-            url("https://dev.bukkit.org/projects/chestshop/files/latest")
-            url("https://dev.bukkit.org/projects/vault/files/latest")
-            url("https://github.com/EssentialsX/Essentials/releases/download/2.21.0/EssentialsX-2.21.0.jar")
-            url("https://api.spiget.org/v2/resources/109679/download")
-            url("https://api.spiget.org/v2/resources/1997/download")
+        minecraftVersion(project.findProperty("minecraft.version")!! as String)
+        if (project.findProperty("testing.integrations")!! == "true") {
+            downloadPlugins {
+                modrinth("worldedit", "DlD8WKr9")
+                modrinth("craftengine", "OktNyJzh")
+                url("https://dev.bukkit.org/projects/chestshop/files/latest")
+                url("https://dev.bukkit.org/projects/vault/files/latest")
+                url("https://github.com/EssentialsX/Essentials/releases/download/2.21.0/EssentialsX-2.21.0.jar")
+                url("https://api.spiget.org/v2/resources/109679/download")
+                url("https://api.spiget.org/v2/resources/1997/download")
+            }
         }
     }
 
