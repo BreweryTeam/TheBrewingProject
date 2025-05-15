@@ -3,13 +3,14 @@ package dev.jsinco.brewery.bukkit.listeners;
 import dev.jsinco.brewery.breweries.BarrelType;
 import dev.jsinco.brewery.breweries.InventoryAccessible;
 import dev.jsinco.brewery.breweries.StructureHolder;
-import dev.jsinco.brewery.bukkit.breweries.*;
+import dev.jsinco.brewery.bukkit.breweries.BreweryRegistry;
 import dev.jsinco.brewery.bukkit.breweries.barrel.BukkitBarrel;
 import dev.jsinco.brewery.bukkit.breweries.barrel.BukkitBarrelDataType;
 import dev.jsinco.brewery.bukkit.breweries.distillery.BukkitDistillery;
 import dev.jsinco.brewery.bukkit.breweries.distillery.BukkitDistilleryDataType;
 import dev.jsinco.brewery.bukkit.structure.*;
 import dev.jsinco.brewery.bukkit.util.BukkitAdapter;
+import dev.jsinco.brewery.configuration.Config;
 import dev.jsinco.brewery.configuration.locale.TranslationsConfig;
 import dev.jsinco.brewery.database.PersistenceException;
 import dev.jsinco.brewery.database.sql.Database;
@@ -211,10 +212,15 @@ public class BlockEventListener implements Listener {
     public void onHopperInventorySearch(HopperInventorySearchEvent event) {
         Block searchBlock = event.getSearchBlock();
         BreweryLocation breweryLocation = BukkitAdapter.toBreweryLocation(searchBlock);
-        placedStructureRegistry.getStructure(breweryLocation)
+        Optional<InventoryAccessible<ItemStack, Inventory>> inventoryAccessibleOptional = placedStructureRegistry.getStructure(breweryLocation)
                 .map(MultiblockStructure::getHolder)
                 .filter(InventoryAccessible.class::isInstance)
-                .map(inventoryAccessible -> (InventoryAccessible<ItemStack, Inventory>) inventoryAccessible)
+                .map(inventoryAccessible -> (InventoryAccessible<ItemStack, Inventory>) inventoryAccessible);
+        if (!Config.AUTOMATION) {
+            inventoryAccessibleOptional.ifPresent(ignored -> event.setInventory(null));
+            return;
+        }
+        inventoryAccessibleOptional
                 .flatMap(inventoryAccessible -> inventoryAccessible.access(breweryLocation))
                 .ifPresent(event::setInventory);
     }
@@ -233,7 +239,7 @@ public class BlockEventListener implements Listener {
                 .ifPresent(holder -> {
                     holder.destroy(breweryLocation);
                     remove(holder);
-                    if (holder instanceof InventoryAccessible<?,?> inventoryAccessible) {
+                    if (holder instanceof InventoryAccessible<?, ?> inventoryAccessible) {
                         breweryRegistry.unregisterInventory((InventoryAccessible<ItemStack, Inventory>) inventoryAccessible);
                     }
                 });
