@@ -187,6 +187,7 @@ public class DrunksManagerImpl<C> implements DrunksManager {
         return passOutTimeStamp + (long) Config.PASS_OUT_TIME * Moment.MINUTE > timeSupplier.getAsLong();
     }
 
+    @Override
     public @Nullable Pair<DrunkEvent, Long> getPlannedEvent(UUID playerUUID) {
         Long time = plannedEvents.get(playerUUID);
         if (time == null) {

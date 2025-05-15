@@ -98,8 +98,8 @@ bukkit {
     authors = listOf("Jsinco", "Mitality", "Thorinwasher")
     name = rootProject.name
     commands {
-        register("brew") {
-            aliases = listOf("brewery", "tbp")
+        register("tbp") {
+            aliases = listOf("brewery", "brew")
         }
     }
     permissions {
