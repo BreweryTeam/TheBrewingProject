@@ -3,7 +3,7 @@ plugins {
 }
 
 group = "dev.jsinco.brewery"
-version = "1.2.0-38974eb"
+version = project.findProperty("version")!!
 
 repositories {
     mavenCentral()
