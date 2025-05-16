@@ -14,6 +14,7 @@ import dev.jsinco.brewery.bukkit.command.BreweryCommand;
 import dev.jsinco.brewery.bukkit.effect.SqlDrunkStateDataType;
 import dev.jsinco.brewery.bukkit.effect.event.CustomDrunkEventReader;
 import dev.jsinco.brewery.bukkit.effect.event.DrunkEventExecutor;
+import dev.jsinco.brewery.bukkit.effect.event.ActiveEventsRegistry;
 import dev.jsinco.brewery.bukkit.ingredient.BukkitIngredientManager;
 import dev.jsinco.brewery.bukkit.integration.item.ChestShopHook;
 import dev.jsinco.brewery.bukkit.integration.structure.StructureAccessHook;
@@ -83,6 +84,8 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
     private long time;
     @Getter
     private BrewManager<ItemStack> brewManager = new BukkitBrewManager();
+    @Getter
+    private final ActiveEventsRegistry activeEventsRegistry = new ActiveEventsRegistry();
 
     @Override
     public void onLoad() {

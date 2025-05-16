@@ -12,7 +12,8 @@ public enum NamedDrunkEvent implements DrunkEvent, BreweryKeyed {
     CHICKEN(99, 50, 2),
     TELEPORT(90, 40, 14),
     DRUNK_MESSAGE(25, 0, 30),
-    NAUSEA(60, 50, 50);
+    NAUSEA(60, 50, 50),
+    DRUNKEN_WALK(60, 20, 20);
 
 
     private final int alcoholRequirement;

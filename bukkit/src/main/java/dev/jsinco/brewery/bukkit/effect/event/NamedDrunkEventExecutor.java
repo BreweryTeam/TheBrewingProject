@@ -5,16 +5,15 @@ import dev.jsinco.brewery.bukkit.util.BukkitAdapter;
 import dev.jsinco.brewery.bukkit.util.MessageUtil;
 import dev.jsinco.brewery.configuration.Config;
 import dev.jsinco.brewery.configuration.locale.TranslationsConfig;
-import dev.jsinco.brewery.effect.DrunkStateImpl;
 import dev.jsinco.brewery.effect.DrunksManagerImpl;
 import dev.jsinco.brewery.event.NamedDrunkEvent;
 import dev.jsinco.brewery.moment.Moment;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
-import org.bukkit.*;
-import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Chicken;
-import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -22,8 +21,6 @@ import org.bukkit.loot.LootContext;
 import org.bukkit.loot.LootTable;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
-import org.bukkit.scheduler.BukkitTask;
-import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -35,6 +32,7 @@ import java.util.UUID;
 public class NamedDrunkEventExecutor {
     private static final Random RANDOM = new Random();
     private static final int STUMBLE_DURATION = 10;
+    private static final int DRUNKEN_WALK_DURATION = 200;
 
     public static void doDrunkEvent(UUID playerUuid, NamedDrunkEvent event) {
         Player player = Bukkit.getPlayer(playerUuid);
@@ -44,7 +42,8 @@ public class NamedDrunkEventExecutor {
         switch (event) {
             case PUKE -> {
                 PukeHandler pukeHandler = new PukeHandler(Config.PUKE_TIME, player);
-                Bukkit.getScheduler().runTaskTimer(TheBrewingProject.getInstance(), pukeHandler::doPuke, 0, 1);
+                TheBrewingProject.getInstance().getActiveEventsRegistry().registerActiveEvent(playerUuid, event, Config.PUKE_TIME);
+                Bukkit.getScheduler().runTaskTimer(TheBrewingProject.getInstance(), pukeHandler::tick, 0, 1);
             }
             case PASS_OUT -> {
                 DrunksManagerImpl<?> drunksManager = TheBrewingProject.getInstance().getDrunksManager();
@@ -57,7 +56,9 @@ public class NamedDrunkEventExecutor {
             }
             case STUMBLE -> {
                 DrunksManagerImpl<?> drunksManager = TheBrewingProject.getInstance().getDrunksManager();
-                StumbleHandler stumbleHandler = new StumbleHandler(RANDOM.nextInt(STUMBLE_DURATION / 2, STUMBLE_DURATION * 3 / 2 + 1), player, drunksManager);
+                int duration = RANDOM.nextInt(STUMBLE_DURATION / 2, STUMBLE_DURATION * 3 / 2 + 1);
+                StumbleHandler stumbleHandler = new StumbleHandler(duration, player, drunksManager);
+                TheBrewingProject.getInstance().getActiveEventsRegistry().registerActiveEvent(playerUuid, event, duration);
                 Bukkit.getScheduler().runTaskTimer(TheBrewingProject.getInstance(), stumbleHandler::doStumble, 0, 1);
             }
             case CHICKEN -> {
@@ -113,81 +114,12 @@ public class NamedDrunkEventExecutor {
             case NAUSEA -> {
                 player.addPotionEffect(new PotionEffect(PotionEffectType.NAUSEA, RANDOM.nextInt(Moment.MINUTE / 2, Moment.MINUTE * 3 / 2), 1));
             }
-        }
-    }
-
-
-    private static class PukeHandler {
-        private int countDown;
-        private final Player player;
-
-        private PukeHandler(int pukingTicks, Player player) {
-            this.countDown = pukingTicks;
-            this.player = player;
-        }
-
-        private void doPuke(BukkitTask task) {
-            if (!player.isOnline() || countDown-- <= 0) {
-                task.cancel();
-                return;
+            case DRUNKEN_WALK -> {
+                int duration = RANDOM.nextInt(DRUNKEN_WALK_DURATION / 2, DRUNKEN_WALK_DURATION * 3 / 2);
+                DrunkenWalkHandler drunkenWalkHandler = new DrunkenWalkHandler(duration, player, TheBrewingProject.getInstance().getDrunksManager());
+                Bukkit.getScheduler().runTaskTimer(TheBrewingProject.getInstance(), drunkenWalkHandler::tick, 0, 1);
+                TheBrewingProject.getInstance().getActiveEventsRegistry().registerActiveEvent(playerUuid, event, duration);
             }
-            Location loc = player.getLocation();
-            loc.setY(loc.getY() + 1.1);
-            loc.setPitch(player.getPitch() + RANDOM.nextInt(-10, 11));
-            loc.setYaw(player.getYaw() + RANDOM.nextInt(-10, 11));
-            Vector direction = loc.getDirection();
-            direction.multiply(0.5);
-            loc.add(direction);
-            Item item = player.getWorld().dropItem(loc, new ItemStack(Material.SOUL_SAND));
-            item.setVelocity(direction);
-            item.setPersistent(false);
-            item.setPickupDelay(32767);
-
-            World world = loc.getWorld();
-            YamlConfiguration spigotConfig = Bukkit.spigot().getConfig();
-            int worldDespawnRate = spigotConfig.getInt("world-settings." + world.getName() + ".item-despawn-rate", -1);
-            if (worldDespawnRate < 0) {
-                worldDespawnRate = spigotConfig.getInt("world-settings.default.item-despawn-rate", 6000);
-            }
-            int despawnRate = Math.max(Config.PUKE_DESPAWN_RATE, 4);
-            item.setTicksLived(worldDespawnRate - despawnRate + RANDOM.nextInt(-despawnRate / 2, despawnRate / 2 + 1));
-        }
-    }
-
-    private static class StumbleHandler {
-        private final Vector pushDirection2;
-        private int countDown;
-        private final int duration;
-        private final Player player;
-        private final Vector pushDirection1;
-
-        public StumbleHandler(int duration, Player player, DrunksManagerImpl<?> drunksManager) {
-            this.countDown = duration;
-            this.duration = duration;
-            this.player = player;
-            double radians1 = RANDOM.nextDouble(Math.PI * 2);
-            DrunkStateImpl drunkState = drunksManager.getDrunkState(player.getUniqueId());
-            double maxMagnitude = Math.max(0.1, drunkState == null ? 0 : Math.sqrt(drunkState.walkSpeedSquared()));
-            this.pushDirection1 = new Vector(Math.cos(radians1), 0, Math.sin(radians1))
-                    .multiply(RANDOM.nextDouble(maxMagnitude));
-            double radians2 = RANDOM.nextDouble(Math.PI * 2);
-            this.pushDirection2 = new Vector(Math.cos(radians2), 0, Math.sin(radians2))
-                    .multiply(RANDOM.nextDouble(maxMagnitude));
-        }
-
-        public void doStumble(BukkitTask task) {
-            if (!player.isOnline() || countDown-- < 0) {
-                task.cancel();
-                return;
-            }
-            if (!player.isOnGround()) {
-                return;
-            }
-            double progress = ((double) duration - (double) countDown) / duration;
-            Vector pushDirection = pushDirection2.clone()
-                    .multiply(progress)
-                    .add(pushDirection1.clone().multiply(1 - progress));
-            player.setVelocity(pushDirection);
         }
     }
 }

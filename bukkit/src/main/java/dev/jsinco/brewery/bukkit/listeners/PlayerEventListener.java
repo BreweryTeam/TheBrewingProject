@@ -27,6 +27,7 @@ import dev.jsinco.brewery.recipes.RecipeRegistryImpl;
 import dev.jsinco.brewery.structure.PlacedStructureRegistryImpl;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.GameMode;
+import org.bukkit.Input;
 import org.bukkit.Material;
 import org.bukkit.Tag;
 import org.bukkit.block.Block;
@@ -271,6 +272,11 @@ public class PlayerEventListener implements Listener {
 
     @EventHandler(ignoreCancelled = true)
     public void onPlayerMove(PlayerMoveEvent event) {
-        drunksManager.registerMovement(event.getPlayer().getUniqueId(), event.getTo().clone().subtract(event.getFrom()).lengthSquared());
+        Input input = event.getPlayer().getCurrentInput();
+        if (input.isBackward() || input.isForward() || input.isLeft() || input.isRight()) {
+            drunksManager.registerMovement(event.getPlayer().getUniqueId(), event.getTo().clone().subtract(event.getFrom()).lengthSquared());
+        } else {
+            drunksManager.registerMovement(event.getPlayer().getUniqueId(), 0);
+        }
     }
 }
