@@ -6,12 +6,12 @@ import dev.jsinco.brewery.util.BreweryKeyed;
 import java.util.Locale;
 
 public enum NamedDrunkEvent implements DrunkEvent, BreweryKeyed {
-    PUKE(45, 45, 40),
+    PUKE(45, 45, 20),
     PASS_OUT(80, 80, 10),
     STUMBLE(25, 0, 100),
-    CHICKEN(99, 50, 2),
-    TELEPORT(90, 40, 14),
-    DRUNK_MESSAGE(25, 0, 30),
+    CHICKEN(99, 50, 1),
+    TELEPORT(90, 40, 2),
+    DRUNK_MESSAGE(25, 0, 5),
     NAUSEA(60, 50, 50),
     DRUNKEN_WALK(60, 20, 20);
 
