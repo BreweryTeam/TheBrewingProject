@@ -1,6 +1,10 @@
 package dev.jsinco.brewery.bukkit.listeners;
 
 import dev.jsinco.brewery.bukkit.breweries.*;
+import dev.jsinco.brewery.bukkit.breweries.barrel.BukkitBarrel;
+import dev.jsinco.brewery.bukkit.breweries.barrel.BukkitBarrelDataType;
+import dev.jsinco.brewery.bukkit.breweries.distillery.BukkitDistillery;
+import dev.jsinco.brewery.bukkit.breweries.distillery.BukkitDistilleryDataType;
 import dev.jsinco.brewery.database.PersistenceException;
 import dev.jsinco.brewery.database.sql.Database;
 import dev.jsinco.brewery.structure.PlacedStructureRegistryImpl;

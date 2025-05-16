@@ -1,6 +1,8 @@
 package dev.jsinco.brewery.bukkit.breweries;
 
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
+import dev.jsinco.brewery.bukkit.breweries.distillery.BukkitDistillery;
+import dev.jsinco.brewery.bukkit.breweries.distillery.BukkitDistilleryDataType;
 import dev.jsinco.brewery.bukkit.structure.GenericBlockDataMatcher;
 import dev.jsinco.brewery.bukkit.structure.PlacedBreweryStructure;
 import dev.jsinco.brewery.bukkit.structure.StructurePlacerUtils;
