@@ -32,7 +32,7 @@ import java.util.UUID;
 public class NamedDrunkEventExecutor {
     private static final Random RANDOM = new Random();
     private static final int STUMBLE_DURATION = 10;
-    private static final int DRUNKEN_WALK_DURATION = 200;
+    private static final int DRUNKEN_WALK_DURATION = 400;
 
     public static void doDrunkEvent(UUID playerUuid, NamedDrunkEvent event) {
         Player player = Bukkit.getPlayer(playerUuid);
