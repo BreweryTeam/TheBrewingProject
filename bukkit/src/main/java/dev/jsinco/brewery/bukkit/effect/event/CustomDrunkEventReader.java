@@ -60,8 +60,8 @@ public class CustomDrunkEventReader {
                 }
             } else if (stepType.equals("potion")) {
                 String effect = (String) step.get("effect");
-                Interval amplifier = Interval.parse((String) step.get("amplifier"));
-                Interval duration = Interval.parse((String) step.get("duration"));
+                Interval amplifier = Interval.parse(step.get("amplifier"));
+                Interval duration = Interval.parse(step.get("duration"));
                 builder.addStep(new ApplyPotionEffect(effect, amplifier, duration));
             } else if (stepType.equals("consume")) {
                 builder.addStep(new ConsumeStep(
