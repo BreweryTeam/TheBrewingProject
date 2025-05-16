@@ -15,16 +15,10 @@ import org.bukkit.Location;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Chicken;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.loot.LootContext;
-import org.bukkit.loot.LootTable;
+import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Random;
 import java.util.UUID;
@@ -33,6 +27,7 @@ public class NamedDrunkEventExecutor {
     private static final Random RANDOM = new Random();
     private static final int STUMBLE_DURATION = 10;
     private static final int DRUNKEN_WALK_DURATION = 400;
+    public static final NamespacedKey NO_DROPS = new NamespacedKey("brewery", "no_drops");
 
     public static void doDrunkEvent(UUID playerUuid, NamedDrunkEvent event) {
         Player player = Bukkit.getPlayer(playerUuid);
@@ -66,22 +61,7 @@ public class NamedDrunkEventExecutor {
                     chicken.setEggLayTime(Integer.MAX_VALUE);
                     chicken.setPersistent(false);
                     chicken.setAge(0);
-                    chicken.setLootTable(new LootTable() {
-                        @Override
-                        public @NotNull Collection<ItemStack> populateLoot(@Nullable Random random, @NotNull LootContext context) {
-                            return List.of();
-                        }
-
-                        @Override
-                        public void fillInventory(@NotNull Inventory inventory, @Nullable Random random, @NotNull LootContext context) {
-
-                        }
-
-                        @Override
-                        public @NotNull NamespacedKey getKey() {
-                            return NamespacedKey.fromString("brewery:empty");
-                        }
-                    });
+                    chicken.getPersistentDataContainer().set(NO_DROPS, PersistentDataType.BOOLEAN, true);
                     chicken.setBreed(false);
                 });
                 player.sendMessage(MiniMessage.miniMessage().deserialize(TranslationsConfig.CHICKEN_MESSAGE, MessageUtil.getPlayerTagResolver(player)));
