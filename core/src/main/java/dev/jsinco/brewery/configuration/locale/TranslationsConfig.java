@@ -157,6 +157,9 @@ public class TranslationsConfig extends AbstractConfig {
     @Key("events.default-kick-event-message")
     public static String KICK_EVENT_MESSAGE;
 
+    @Key("events.drunken-join-deny-message")
+    public static String DRUNKEN_JOIN_DENY_MESSAGE;
+
     @Key("events.types")
     public static Map<String, String> EVENT_TYPES;
 

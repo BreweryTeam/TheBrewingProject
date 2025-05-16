@@ -18,6 +18,7 @@ import dev.jsinco.brewery.configuration.Config;
 import dev.jsinco.brewery.configuration.locale.TranslationsConfig;
 import dev.jsinco.brewery.database.PersistenceException;
 import dev.jsinco.brewery.database.sql.Database;
+import dev.jsinco.brewery.effect.DrunkState;
 import dev.jsinco.brewery.effect.DrunkStateImpl;
 import dev.jsinco.brewery.effect.DrunksManagerImpl;
 import dev.jsinco.brewery.effect.text.DrunkTextRegistry;
@@ -46,11 +47,13 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
+import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
 
 public class PlayerEventListener implements Listener {
     public static final Set<Material> DISALLOWED_INGREDIENT_MATERIALS = Set.of(Material.CLOCK, Material.BUCKET, Material.POTION, Material.GLASS_BOTTLE);
+    private static final Random RANDOM = new Random();
 
     private final PlacedStructureRegistryImpl placedStructureRegistry;
     private final BreweryRegistry breweryRegistry;
@@ -249,8 +252,14 @@ public class PlayerEventListener implements Listener {
     @EventHandler(ignoreCancelled = true)
     public void onPlayerLogin(PlayerLoginEvent event) {
         if (drunksManager.isPassedOut(event.getPlayer().getUniqueId())) {
-            event.setResult(PlayerLoginEvent.Result.KICK_FULL);
+            event.setResult(PlayerLoginEvent.Result.KICK_OTHER);
             event.kickMessage(MessageUtil.compilePlayerMessage(Config.KICK_EVENT_MESSAGE == null ? TranslationsConfig.KICK_EVENT_MESSAGE : Config.KICK_EVENT_MESSAGE, event.getPlayer(), drunksManager, 0));
+            return;
+        }
+        DrunkState drunkState = drunksManager.getDrunkState(event.getPlayer().getUniqueId());
+        if (Config.DRUNKEN_JOIN_DENY && drunkState != null && drunkState.alcohol() >= 85 && RANDOM.nextInt(15) <= drunkState.alcohol() - 85) {
+            event.setResult(PlayerLoginEvent.Result.KICK_OTHER);
+            event.kickMessage(MessageUtil.compilePlayerMessage(TranslationsConfig.DRUNKEN_JOIN_DENY_MESSAGE, event.getPlayer(), drunksManager, drunkState.alcohol()));
         }
     }
 

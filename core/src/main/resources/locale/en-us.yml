@@ -86,6 +86,7 @@ command.reload-message: <green>Reloaded <gold>The Brewing Project</gold>!
 command.seal-success: <gray>Successfully sealed item(s) for <player_name>!
 command.seal-failure: <red>Could not find any brew to seal.
 events.default-kick-event-message: <rainbow>You passed out... ZZzzz</rainbow>
+events.drunken-join-deny-message: In your drunken state, you <red>missed</red> the button. Try again
 events.types:
   puke: puke
   stumble: stumble
