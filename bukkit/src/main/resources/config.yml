@@ -11,6 +11,7 @@ events:
     - stumble
     - chicken
     - nausea
+    - tunnel_vision
   # In minutes
   pass-out-time: 5
   messages:
@@ -30,9 +31,18 @@ events:
         - type: consume
           alcohol: -30
           toxins: -15
-      alcohol: 90
-      toxins: 60
-      probability-weight: 15
+      alcohol: 60
+      toxins: 90
+      probability-weight: 5
+    tunnel_vision:
+      steps:
+        - type: potion
+          effect: darkness
+          duration: 20
+          amplifier: 1
+      alcohol: 60
+      toxins: 50
+      probability-weight: 20
 
   teleport-destinations:
     - world, 0, 80, 0

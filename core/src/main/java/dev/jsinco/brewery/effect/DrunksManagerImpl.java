@@ -155,7 +155,7 @@ public class DrunksManagerImpl<C> implements DrunksManager {
         }
         int cumulativeSum = RandomUtil.cumulativeSum(drunkEvents);
         DrunkEvent drunkEvent = RandomUtil.randomWeighted(drunkEvents);
-        double value = (double) 10000 * (125 - drunkState.alcohol()) / cumulativeSum / 25;
+        double value = (double) 500 * (110 - drunkState.alcohol()) / cumulativeSum;
         long time = (long) (timeSupplier.getAsLong() + Math.max(1, RANDOM.nextGaussian(value, value / 2)));
         events.computeIfAbsent(time, ignored -> new HashMap<>()).put(playerUuid, drunkEvent);
         plannedEvents.put(playerUuid, time);
