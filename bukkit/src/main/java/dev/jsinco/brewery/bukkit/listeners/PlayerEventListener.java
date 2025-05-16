@@ -257,6 +257,7 @@ public class PlayerEventListener implements Listener {
     @EventHandler(ignoreCancelled = true)
     public void onPlayerJoin(PlayerJoinEvent event) {
         drunkEventExecutor.onPlayerJoin(event.getPlayer().getUniqueId());
+        drunksManager.planEvent(event.getPlayer().getUniqueId());
     }
 
     @EventHandler(ignoreCancelled = true)

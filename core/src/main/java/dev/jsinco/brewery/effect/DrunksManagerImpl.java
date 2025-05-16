@@ -17,6 +17,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.LongSupplier;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 public class DrunksManagerImpl<C> implements DrunksManager {
@@ -104,11 +105,17 @@ public class DrunksManagerImpl<C> implements DrunksManager {
         this.allowedEvents = allowedEvents;
         events.clear();
         loadDrunkStates();
+        drunks.keySet().forEach(this::planEvent);
     }
 
     public void clear(UUID playerUuid) {
         Long plannedEventTime = plannedEvents.remove(playerUuid);
         drunks.remove(playerUuid);
+        try {
+            persistenceHandler.remove(drunkStateDataType, playerUuid);
+        } catch (PersistenceException e) {
+            e.printStackTrace();
+        }
         if (plannedEventTime == null) {
             return;
         }
@@ -117,7 +124,7 @@ public class DrunksManagerImpl<C> implements DrunksManager {
         }
     }
 
-    public void tick(BiConsumer<UUID, DrunkEvent> action) {
+    public void tick(BiConsumer<UUID, DrunkEvent> action, Predicate<UUID> onlinePredicate) {
         Map<UUID, DrunkEvent> currentEvents = events.remove(timeSupplier.getAsLong());
         if (currentEvents == null) {
             return;
@@ -131,7 +138,10 @@ public class DrunksManagerImpl<C> implements DrunksManager {
         currentEvents.forEach((key, value) -> plannedEvents.remove(key));
         toRemove.forEach(currentEvents::remove);
         currentEvents.forEach(action);
-        currentEvents.forEach((playerUuid, event) -> planEvent(playerUuid));
+        currentEvents.keySet()
+                .stream()
+                .filter(onlinePredicate)
+                .forEach(this::planEvent);
     }
 
     public void planEvent(UUID playerUuid) {

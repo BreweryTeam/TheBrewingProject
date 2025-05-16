@@ -233,7 +233,7 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
     }
 
     private void otherTicking() {
-        drunksManager.tick(drunkEventExecutor::doDrunkEvent);
+        drunksManager.tick(drunkEventExecutor::doDrunkEvent, uuid -> Bukkit.getPlayer(uuid) != null);
         try {
             if (++time % 200 == 0) {
                 database.setSingleton(BreweryTimeDataType.INSTANCE, time);
