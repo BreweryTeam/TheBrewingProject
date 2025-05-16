@@ -57,16 +57,12 @@ class DrunkenWalkHandler {
     public void tick(BukkitTask task) {
         if (duration <= timestamp++ || currentPush == null) {
             task.cancel();
-            Logging.log("Cancelled");
             return;
         }
         DrunkState drunkState = drunksManager.getDrunkState(player.getUniqueId());
         if (!player.isOnline() || !player.isOnGround() || drunkState == null || drunkState.walkSpeedSquared() == 0
                 || TheBrewingProject.getInstance().getActiveEventsRegistry().hasActiveEvent(player.getUniqueId(), NamedDrunkEvent.STUMBLE)
         ) {
-            Logging.log("Interrupted");
-            Logging.log("walk speed: " + drunkState.walkSpeedSquared());
-            Logging.log("stumbling: " + TheBrewingProject.getInstance().getActiveEventsRegistry().hasActiveEvent(player.getUniqueId(), NamedDrunkEvent.STUMBLE));
             return;
         }
         Pair<Vector, Integer> next = vectors.peek();

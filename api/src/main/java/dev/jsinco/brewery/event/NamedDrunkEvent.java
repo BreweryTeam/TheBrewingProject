@@ -38,6 +38,7 @@ public enum NamedDrunkEvent implements DrunkEvent, BreweryKeyed {
         return toxinsRequirement;
     }
 
+    @Override
     public BreweryKey key() {
         return this.key;
     }
