@@ -12,15 +12,13 @@ import dev.jsinco.brewery.bukkit.breweries.BukkitBarrel;
 import dev.jsinco.brewery.bukkit.breweries.BukkitDistillery;
 import dev.jsinco.brewery.bukkit.command.BreweryCommand;
 import dev.jsinco.brewery.bukkit.effect.SqlDrunkStateDataType;
+import dev.jsinco.brewery.bukkit.effect.event.ActiveEventsRegistry;
 import dev.jsinco.brewery.bukkit.effect.event.CustomDrunkEventReader;
 import dev.jsinco.brewery.bukkit.effect.event.DrunkEventExecutor;
 import dev.jsinco.brewery.bukkit.ingredient.BukkitIngredientManager;
 import dev.jsinco.brewery.bukkit.integration.item.ChestShopHook;
 import dev.jsinco.brewery.bukkit.integration.structure.StructureAccessHook;
-import dev.jsinco.brewery.bukkit.listeners.BlockEventListener;
-import dev.jsinco.brewery.bukkit.listeners.InventoryEventListener;
-import dev.jsinco.brewery.bukkit.listeners.PlayerEventListener;
-import dev.jsinco.brewery.bukkit.listeners.WorldEventListener;
+import dev.jsinco.brewery.bukkit.listeners.*;
 import dev.jsinco.brewery.bukkit.recipe.BukkitRecipeResultReader;
 import dev.jsinco.brewery.bukkit.recipe.DefaultRecipeReader;
 import dev.jsinco.brewery.bukkit.structure.*;
@@ -45,6 +43,7 @@ import dev.jsinco.brewery.util.Util;
 import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -83,6 +82,8 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
     private long time;
     @Getter
     private BrewManager<ItemStack> brewManager = new BukkitBrewManager();
+    @Getter
+    private final ActiveEventsRegistry activeEventsRegistry = new ActiveEventsRegistry();
 
     @Override
     public void onLoad() {
@@ -173,12 +174,15 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
             throw new RuntimeException(e); // Hard exit if any issues here
         }
         this.drunksManager = new DrunksManagerImpl<>(customDrunkEventRegistry, Config.ENABLED_RANDOM_EVENTS.stream().map(BreweryKey::parse).collect(Collectors.toSet()), () -> this.time, database, SqlDrunkStateDataType.INSTANCE);
-        Bukkit.getPluginManager().registerEvents(new BlockEventListener(this.structureRegistry, placedStructureRegistry, this.database, this.breweryRegistry), this);
-        Bukkit.getPluginManager().registerEvents(new PlayerEventListener(this.placedStructureRegistry, this.breweryRegistry, this.database, this.drunksManager, this.drunkTextRegistry, recipeRegistry, drunkEventExecutor), this);
-        Bukkit.getPluginManager().registerEvents(new InventoryEventListener(breweryRegistry, database), this);
+        PluginManager pluginManager = Bukkit.getPluginManager();
+        pluginManager.registerEvents(new BlockEventListener(this.structureRegistry, placedStructureRegistry, this.database, this.breweryRegistry), this);
+        pluginManager.registerEvents(new PlayerEventListener(this.placedStructureRegistry, this.breweryRegistry, this.database, this.drunksManager, this.drunkTextRegistry, recipeRegistry, drunkEventExecutor), this);
+        pluginManager.registerEvents(new InventoryEventListener(breweryRegistry, database), this);
         this.worldEventListener = new WorldEventListener(this.database, this.placedStructureRegistry, this.breweryRegistry);
         worldEventListener.init();
-        Bukkit.getPluginManager().registerEvents(worldEventListener, this);
+        pluginManager.registerEvents(worldEventListener, this);
+        pluginManager.registerEvents(new EntityEventListener(), this);
+
         Bukkit.getScheduler().runTaskTimer(this, this::updateStructures, 0, 1);
         Bukkit.getScheduler().runTaskTimer(this, this::otherTicking, 0, 1);
         RecipeReader<ItemStack> recipeReader = new RecipeReader<>(this.getDataFolder(), new BukkitRecipeResultReader(), BukkitIngredientManager.INSTANCE);
@@ -233,7 +237,7 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
     }
 
     private void otherTicking() {
-        drunksManager.tick(drunkEventExecutor::doDrunkEvent);
+        drunksManager.tick(drunkEventExecutor::doDrunkEvent, uuid -> Bukkit.getPlayer(uuid) != null);
         try {
             if (++time % 200 == 0) {
                 database.setSingleton(BreweryTimeDataType.INSTANCE, time);

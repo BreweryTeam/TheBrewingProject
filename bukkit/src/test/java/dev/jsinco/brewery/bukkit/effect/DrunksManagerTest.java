@@ -64,7 +64,7 @@ class DrunksManagerTest {
             time.incrementAndGet();
             drunksManager.tick((uuid, event) -> {
                 atomicBoolean.set(true);
-            });
+            }, uuid -> true);
         }
         assertTrue(atomicBoolean.get());
     }
@@ -77,7 +77,7 @@ class DrunksManagerTest {
             time.incrementAndGet();
             drunksManager.tick((uuid, event) -> {
                 atomicBoolean.set(true);
-            });
+            }, uuid -> true);
         }
         assertFalse(atomicBoolean.get());
     }
@@ -92,7 +92,7 @@ class DrunksManagerTest {
             time.incrementAndGet();
             drunksManager.tick((uuid, event) -> {
                 atomicBoolean.set(true);
-            });
+            }, uuid -> true);
         }
         assertFalse(atomicBoolean.get());
 

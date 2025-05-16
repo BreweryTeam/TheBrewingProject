@@ -1,7 +1,7 @@
 package dev.jsinco.brewery.configuration;
 
-import dev.jsinco.brewery.util.FileUtil;
 import dev.jsinco.brewery.moment.Moment;
+import dev.jsinco.brewery.util.FileUtil;
 import org.simpleyaml.configuration.file.YamlFile;
 
 import java.io.File;
@@ -76,6 +76,9 @@ public final class Config extends AbstractConfig {
 
     @Key("events.default")
     public static Map<String, Object> DEFAULT_EVENTS = Map.of();
+
+    @Key("events.drunken-join-deny")
+    public static boolean DRUNKEN_JOIN_DENY = true;
 
     @Key("decay-rates.alcohol")
     @Comment("How many ticks until alcohol level decays by 1%")

@@ -1,5 +1,7 @@
 package dev.jsinco.brewery.moment;
 
+import org.jetbrains.annotations.NotNull;
+
 public record Interval(long start, long stop) implements Moment {
 
     @Override
@@ -17,13 +19,19 @@ public record Interval(long start, long stop) implements Moment {
         return new Interval(newEnd - stop + start, newEnd);
     }
 
-    public static Interval parse(String string) throws IllegalArgumentException {
-        if (!string.contains("-")) {
-            int i = Integer.parseInt(string);
-            return new Interval(i, i);
+    public static Interval parse(@NotNull Object value) throws IllegalArgumentException {
+        if (value instanceof String string) {
+            if (!string.contains("-")) {
+                int i = Integer.parseInt(string);
+                return new Interval(i, i);
+            }
+            String[] split = string.split("-");
+            return new Interval(Integer.parseInt(split[0]), Integer.parseInt(split[1]));
+        } else if (value instanceof Integer integer) {
+            return new Interval(integer, integer);
+        } else {
+            throw new IllegalArgumentException("Illegal value: " + value);
         }
-        String[] split = string.split("-");
-        return new Interval(Integer.parseInt(split[0]), Integer.parseInt(split[1]));
     }
 
     @Override
