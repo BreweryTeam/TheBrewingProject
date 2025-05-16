@@ -1,14 +1,12 @@
 import net.minecrell.pluginyml.bukkit.BukkitPluginDescription
 
 plugins {
-    `java-library`
+    `tbp-module`
+
     id("io.github.goooler.shadow") version "8.1.7"
     id("xyz.jpenilla.run-paper") version "2.3.0"
     id("de.eldoria.plugin-yml.bukkit") version "0.7.1"
 }
-
-group = "dev.jsinco.brewery"
-version = project.findProperty("version")!!
 
 repositories {
     mavenCentral()

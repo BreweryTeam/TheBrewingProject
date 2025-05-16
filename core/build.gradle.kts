@@ -7,11 +7,8 @@ buildscript {
 }
 
 plugins {
-    `java-library`
+    `tbp-module`
 }
-
-group = "dev.jsinco.brewery"
-version = project.findProperty("version")!!
 
 repositories {
     mavenCentral()
@@ -38,10 +35,6 @@ dependencies {
     testImplementation("org.joml:joml:1.10.8")
     testImplementation("com.google.guava:guava:33.4.0-jre")
     testImplementation("org.xerial:sqlite-jdbc:3.47.2.0")
-}
-
-java {
-    toolchain.languageVersion = JavaLanguageVersion.of(21)
 }
 
 tasks {

@@ -1,9 +1,6 @@
 plugins {
-    id("java")
+    `tbp-module`
 }
-
-group = "dev.jsinco.brewery"
-version = project.findProperty("version")!!
 
 repositories {
     mavenCentral()
