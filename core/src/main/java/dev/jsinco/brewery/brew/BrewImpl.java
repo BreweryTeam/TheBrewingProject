@@ -1,10 +1,9 @@
 package dev.jsinco.brewery.brew;
 
-import com.google.common.base.Preconditions;
+import dev.jsinco.brewery.moment.Moment;
 import dev.jsinco.brewery.recipe.Recipe;
 import dev.jsinco.brewery.recipe.RecipeRegistry;
 import dev.jsinco.brewery.recipes.BrewScoreImpl;
-import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -16,7 +15,6 @@ import java.util.stream.Stream;
 
 public class BrewImpl implements Brew {
 
-    @Getter
     private final List<BrewingStep> steps;
     public static final BrewSerializer SERIALIZER = new BrewSerializer();
 
@@ -33,7 +31,7 @@ public class BrewImpl implements Brew {
     }
 
     public BrewImpl withStep(BrewingStep step) {
-        return new BrewImpl(Stream.concat(steps.stream(), Stream.of(step)).toList());
+        return new BrewImpl(Stream.concat(getSteps().stream(), Stream.of(step)).toList());
     }
 
     public BrewImpl witModifiedLastStep(Function<BrewingStep, BrewingStep> modifier) {
@@ -55,6 +53,17 @@ public class BrewImpl implements Brew {
         return withStep(stepSupplier.get());
     }
 
+    @Override
+    public List<BrewingStep> getSteps() {
+        return steps.stream()
+                .filter(this::isCompleted)
+                .toList();
+    }
+
+    private boolean isCompleted(BrewingStep step) {
+        return !(step instanceof BrewingStep.Age age) || age.age().moment() > Moment.AGING_YEAR / 2;
+    }
+
     public <I> Optional<Recipe<I>> closestRecipe(RecipeRegistry<I> registry) {
         double bestScore = 0;
         Recipe<I> bestMatch = null;
@@ -71,18 +80,19 @@ public class BrewImpl implements Brew {
     public @NotNull BrewScore score(Recipe<?> recipe) {
         List<BrewingStep> recipeSteps = recipe.getSteps();
         List<Double> scores = new ArrayList<>();
-        if (steps.size() > recipeSteps.size()) {
+        List<BrewingStep> completedSteps = getSteps();
+        if (completedSteps.size() > recipeSteps.size()) {
             return BrewScoreImpl.NONE;
         }
-        for (int i = 0; i < steps.size(); i++) {
+        for (int i = 0; i < completedSteps.size(); i++) {
             BrewingStep recipeStep = recipeSteps.get(i);
-            scores.add(recipeStep.proximity(steps.get(i)));
+            scores.add(recipeStep.proximity(completedSteps.get(i)));
         }
-        boolean completed = steps.size() == recipeSteps.size();
+        boolean completed = completedSteps.size() == recipeSteps.size();
         BrewScoreImpl brewScore = new BrewScoreImpl(scores, completed, recipe.getBrewDifficulty());
         if (brewScore.brewQuality() == null) {
             scores.removeLast();
-            scores.add(recipeSteps.get(steps.size() - 1).maximumScore(steps.getLast()));
+            scores.add(recipeSteps.get(completedSteps.size() - 1).maximumScore(completedSteps.getLast()));
             return new BrewScoreImpl(scores, false, recipe.getBrewDifficulty());
         }
         return brewScore;
