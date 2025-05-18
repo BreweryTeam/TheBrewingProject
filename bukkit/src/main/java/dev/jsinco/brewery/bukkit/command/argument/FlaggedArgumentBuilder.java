@@ -35,7 +35,7 @@ public class FlaggedArgumentBuilder {
         for (Flag flag : flagsToUse) {
             Set<Flag> reducedFlags = new HashSet<>(flags);
             reducedFlags.remove(flag);
-            ArgumentBuilder<CommandSourceStack, ?> fullFlagArgument = Commands.literal("--" + flag.fullName());
+            ArgumentBuilder<CommandSourceStack, ?> fullFlagArgument = Commands.literal(flag.fullName());
             List<ArgumentBuilder<CommandSourceStack, ?>> flagArguments = build(reducedFlags, depth + 1);
             stack(flag.flagArguments(), (argument) -> {
                 argument.executes(this::execute);
@@ -43,7 +43,7 @@ public class FlaggedArgumentBuilder {
             }).ifPresentOrElse(fullFlagArgument::then, () -> flagArguments.forEach(fullFlagArgument::then));
             output.add(fullFlagArgument);
             if (flag.shortName() != null) {
-                ArgumentBuilder<CommandSourceStack, ?> shortFlagArgument = Commands.literal("-" + flag.shortName());
+                ArgumentBuilder<CommandSourceStack, ?> shortFlagArgument = Commands.literal(flag.shortName());
                 stack(flag.flagArguments(), (argument) -> {
                     argument.executes(this::execute);
                     flagArguments.forEach(argument::then);
@@ -73,15 +73,11 @@ public class FlaggedArgumentBuilder {
     }
 
     private Optional<Flag> findFlag(String argument) {
-        if (!argument.startsWith("-")) {
-            return Optional.empty();
-        }
-        String noPrefixedFlag = argument.replace("-", "");
         for (Flag flag : flags) {
-            if (flag.fullName().equals(noPrefixedFlag)) {
+            if (argument.equals(flag.fullName())) {
                 return Optional.of(flag);
             }
-            if (noPrefixedFlag.equals(flag.shortName())) {
+            if (argument.equals(flag.shortName())) {
                 return Optional.of(flag);
             }
         }

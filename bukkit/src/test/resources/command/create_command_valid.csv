@@ -1,0 +1,14 @@
+tbp create cook 10 water "wheat/6"
+tbp create c 10 water "wheat/6"
+tbp create cook 10 water "wheat/6" age acacia 3
+tbp create c 10 water "wheat/6" age acacia 3
+tbp create cook 10 water "wheat/6" a acacia 3
+tbp create c 10 water "wheat/6" a acacia 3
+tbp create mix 10 "wheat/6"
+tbp create m 10 "wheat/6"
+tbp create mix 10 "wheat/6" age acacia 3
+tbp create m 10 "wheat/6" age acacia 3
+tbp create mix 10 "wheat/6" a acacia 3
+tbp create m 10 "wheat/6" a acacia 3
+tbp create cook 10 water "wheat/6" age acacia 3 distill 2
+tbp create cook 10 water "wheat/6" age acacia 3 d 2

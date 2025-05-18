@@ -23,6 +23,7 @@ import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.ArrayList;
@@ -64,7 +65,10 @@ public class CreateCommand {
             }
             Player target = BreweryCommand.getPlayer(context);
             ItemStack brewItem = BrewAdapter.toItem(new BrewImpl(steps), new BrewImpl.State.Other());
-            target.getWorld().dropItem(target.getLocation(), brewItem);
+            PlayerInventory inventory = target.getInventory();
+            if (!inventory.addItem(brewItem).isEmpty()) {
+                target.getWorld().dropItem(target.getLocation(), brewItem);
+            }
             ItemMeta brewItemMeta = brewItem.getItemMeta();
             context.getSource().getSender().sendMessage(MiniMessage.miniMessage().deserialize(TranslationsConfig.COMMAND_CREATE_SUCCESS, Placeholder.component("brew_name", brewItemMeta.hasCustomName() ? brewItemMeta.customName() : brewItemMeta.itemName())));
         }).build();

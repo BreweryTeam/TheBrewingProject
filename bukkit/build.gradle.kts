@@ -10,6 +10,7 @@ plugins {
 
 repositories {
     mavenCentral()
+    mavenLocal()
     maven("https://hub.spigotmc.org/nexus/content/repositories/snapshots/")
     maven("https://jitpack.io")
     maven("https://repo.papermc.io/repository/maven-public/")
@@ -55,7 +56,7 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter:5.12.1")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
-    testImplementation("org.mockbukkit.mockbukkit:mockbukkit-v1.21:4.43.1")
+    testImplementation("org.mockbukkit.mockbukkit:mockbukkit-v1.21:dev-ca9b1aaef")
     testImplementation("net.kyori:adventure-nbt:4.17.0")
     testImplementation("org.xerial:sqlite-jdbc:3.47.2.0")
 
