@@ -97,11 +97,6 @@ bukkit {
     apiVersion = "1.21"
     authors = listOf("Jsinco", "Mitality", "Thorinwasher")
     name = rootProject.name
-    commands {
-        register("tbp") {
-            aliases = listOf("brewery", "brew")
-        }
-    }
     permissions {
         register("brewery.barrel.create") {
             children = listOf("brewery.barrel.access")

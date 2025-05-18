@@ -19,6 +19,7 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import java.util.List;
 import java.util.function.Consumer;
 
 public class BreweryCommand {
@@ -62,7 +63,7 @@ public class BreweryCommand {
                         .then(playerBranch(argument -> argument.then(eventCommand)))
                         .requires(commandSourceStack -> commandSourceStack.getSender().hasPermission("brewery.command.event"))
                 )
-                .build());
+                .build(), List.of("brew", "brewery"));
     }
 
     public static ArgumentBuilder<CommandSourceStack, ?> playerBranch(Consumer<ArgumentBuilder<CommandSourceStack, ?>> childAction) {
