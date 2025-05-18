@@ -12,6 +12,8 @@ import org.mockbukkit.mockbukkit.MockBukkitExtension;
 import org.mockbukkit.mockbukkit.MockBukkitInject;
 import org.mockbukkit.mockbukkit.ServerMock;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+
 @ExtendWith(MockBukkitExtension.class)
 class BreweryCommandTest {
 
@@ -30,6 +32,12 @@ class BreweryCommandTest {
     @ParameterizedTest
     @CsvFileSource(resources = "/command/brew_command_invalid_args.csv")
     void onCommand(String arguments) {
-        target.performCommand(arguments);
+        assertDoesNotThrow(() -> target.performCommand(arguments));
+    }
+
+    @ParameterizedTest
+    @CsvFileSource(resources = "/command/create_command_invalid_args.csv")
+    void onCreateCommand(String arguments) {
+        assertDoesNotThrow(() -> target.performCommand(arguments));
     }
 }

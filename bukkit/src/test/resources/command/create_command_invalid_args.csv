@@ -1,18 +1,18 @@
-wrong_everything
---cook 3g water wheat/3
---cook 3
---cook 3 salt_water wheat/3
---cook 3 water
---cook 3 water invalid_ingredient/3
---cook
---mix
---mix 3g
---mix 3
---mix 3 invalid_ingredient/3
---mix 3 wheat
---cook 3 water wheat/3 --distill -1
---cook 3 water wheat/3 --distill
---cook 3 water wheat/3 --age
---cook 3 water wheat/3 --age 1
---cook 3 water wheat/3 --age g
---cook 3 water wheat/3 --age 1 bush
+tbp wrong_everything
+tbp --cook 3g water wheat/3
+tbp --cook 3
+tbp --cook 3 salt_water wheat/3
+tbp --cook 3 water
+tbp --cook 3 water invalid_ingredient/3
+tbp --cook
+tbp --mix
+tbp --mix 3g
+tbp --mix 3
+tbp --mix 3 invalid_ingredient/3
+tbp --mix 3 wheat
+tbp --cook 3 water wheat/3 --distill -1
+tbp --cook 3 water wheat/3 --distill
+tbp --cook 3 water wheat/3 --age
+tbp --cook 3 water wheat/3 --age 1
+tbp --cook 3 water wheat/3 --age g
+tbp --cook 3 water wheat/3 --age 1 bush
