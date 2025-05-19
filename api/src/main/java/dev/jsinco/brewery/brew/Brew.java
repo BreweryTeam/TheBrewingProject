@@ -28,6 +28,8 @@ public interface Brew {
 
     <B extends BrewingStep> Brew withLastStep(Class<B> bClass, Function<B, B> modifier, Supplier<B> stepSupplier);
 
+    List<BrewingStep> getCompletedSteps();
+
     List<BrewingStep> getSteps();
 
     sealed interface State {

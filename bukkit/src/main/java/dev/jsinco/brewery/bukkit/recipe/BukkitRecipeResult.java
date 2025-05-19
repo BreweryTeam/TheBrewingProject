@@ -164,7 +164,7 @@ public class BukkitRecipeResult implements RecipeResult<ItemStack> {
         BrewingStep brewingStep = brew.lastStep();
         streamBuilder.add(MiniMessage.miniMessage().deserialize(
                 TranslationsConfig.BREW_TOOLTIP.get(brewingStep.stepType().name().toLowerCase(Locale.ROOT)),
-                MessageUtil.getBrewStepTagResolver(brewingStep, score.getPartialScore(brew.getSteps().size() - 1)))
+                MessageUtil.getBrewStepTagResolver(brewingStep, score.getPartialScore(brew.getCompletedSteps().size() - 1)))
         );
         if (recipeEffects.get(quality).getAlcohol() > 0) {
             streamBuilder.add(MiniMessage.miniMessage().deserialize(TranslationsConfig.ALCOHOLIC));

@@ -73,7 +73,7 @@ public class BrewAdapter {
         PotionMeta potionMeta = (PotionMeta) itemStack.getItemMeta();
         potionMeta.addItemFlags(ItemFlag.HIDE_ENCHANTS, ItemFlag.HIDE_ATTRIBUTES, ItemFlag.HIDE_ADDITIONAL_TOOLTIP);
         Map<Ingredient, Integer> ingredients = new HashMap<>();
-        for (BrewingStep brewingStep : brew.getSteps()) {
+        for (BrewingStep brewingStep : brew.getCompletedSteps()) {
             if (brewingStep instanceof BrewingStep.Cook cook) {
                 IngredientManager.merge(ingredients, (Map<Ingredient, Integer>) cook.ingredients());
             }
@@ -83,7 +83,7 @@ public class BrewAdapter {
         }
         Pair<org.bukkit.Color, Ingredient> itemsInfo = IngredientUtil.ingredientData(ingredients);
         Ingredient topIngredient = itemsInfo.second();
-        String displayName = switch (brew.getSteps().getLast().stepType()) {
+        String displayName = switch (brew.getCompletedSteps().getLast().stepType()) {
             case COOK ->
                     topIngredient == null ? TranslationsConfig.BREW_DISPLAY_NAME_UNFINISHED_FERMENTED_UNKNOWN : TranslationsConfig.BREW_DISPLAY_NAME_UNFINISHED_FERMENTED.replace("<ingredient>", topIngredient.displayName().toLowerCase());
             case DISTILL ->

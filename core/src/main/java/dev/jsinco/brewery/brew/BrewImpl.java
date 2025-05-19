@@ -4,6 +4,7 @@ import dev.jsinco.brewery.moment.Moment;
 import dev.jsinco.brewery.recipe.Recipe;
 import dev.jsinco.brewery.recipe.RecipeRegistry;
 import dev.jsinco.brewery.recipes.BrewScoreImpl;
+import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -15,6 +16,7 @@ import java.util.stream.Stream;
 
 public class BrewImpl implements Brew {
 
+    @Getter
     private final List<BrewingStep> steps;
     public static final BrewSerializer SERIALIZER = new BrewSerializer();
 
@@ -31,7 +33,7 @@ public class BrewImpl implements Brew {
     }
 
     public BrewImpl withStep(BrewingStep step) {
-        return new BrewImpl(Stream.concat(getSteps().stream(), Stream.of(step)).toList());
+        return new BrewImpl(Stream.concat(steps.stream(), Stream.of(step)).toList());
     }
 
     public BrewImpl witModifiedLastStep(Function<BrewingStep, BrewingStep> modifier) {
@@ -54,7 +56,7 @@ public class BrewImpl implements Brew {
     }
 
     @Override
-    public List<BrewingStep> getSteps() {
+    public List<BrewingStep> getCompletedSteps() {
         return steps.stream()
                 .filter(this::isCompleted)
                 .toList();
@@ -80,7 +82,7 @@ public class BrewImpl implements Brew {
     public @NotNull BrewScore score(Recipe<?> recipe) {
         List<BrewingStep> recipeSteps = recipe.getSteps();
         List<Double> scores = new ArrayList<>();
-        List<BrewingStep> completedSteps = getSteps();
+        List<BrewingStep> completedSteps = getCompletedSteps();
         if (completedSteps.size() > recipeSteps.size()) {
             return BrewScoreImpl.NONE;
         }

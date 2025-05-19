@@ -135,7 +135,7 @@ public class MessageUtil {
     }
 
     public static @NotNull Stream<Component> compileBrewInfo(Brew brew, BrewScore score, boolean detailed) {
-        List<BrewingStep> brewingSteps = brew.getSteps();
+        List<BrewingStep> brewingSteps = brew.getCompletedSteps();
         Stream.Builder<Component> streamBuilder = Stream.builder();
         for (int i = 0; i < brewingSteps.size(); i++) {
             BrewingStep brewingStep = brewingSteps.get(i);

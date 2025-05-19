@@ -9,7 +9,7 @@ public class BrewSerializer {
 
     public JsonArray serialize(Brew brew) {
         JsonArray array = new JsonArray();
-        for (BrewingStep step : brew.getSteps()) {
+        for (BrewingStep step : brew.getCompletedSteps()) {
             array.add(BrewingStepSerializer.INSTANCE.serialize(step));
         }
         return array;
