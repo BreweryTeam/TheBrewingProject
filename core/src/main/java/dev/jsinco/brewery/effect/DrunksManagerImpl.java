@@ -65,7 +65,7 @@ public class DrunksManagerImpl<C> implements DrunksManager {
     public @Nullable DrunkStateImpl consume(UUID playerUuid, int alcohol, int toxins, long timestamp) {
         boolean alreadyDrunk = drunks.containsKey(playerUuid);
         DrunkStateImpl drunkState = alreadyDrunk ?
-                drunks.get(playerUuid).recalculate(timestamp).addAlcohol(alcohol, toxins) : new DrunkStateImpl(alcohol, toxins, 0, timestamp, -1);
+                drunks.get(playerUuid).recalculate(timestamp).addAlcohol(alcohol, toxins) : new DrunkStateImpl(alcohol, toxins, timestamp, -1);
 
         if (drunkState.alcohol() <= 0 && !isPassedOut(drunkState)) {
             drunks.remove(playerUuid);
@@ -193,12 +193,5 @@ public class DrunksManagerImpl<C> implements DrunksManager {
             return null;
         }
         return new Pair<>(events.get(time).get(playerUUID), time);
-    }
-
-    public void registerMovement(@NotNull UUID playerUUID, double speedSquared) {
-        if (!drunks.containsKey(playerUUID)) {
-            return;
-        }
-        drunks.computeIfPresent(playerUUID, (ignored, state) -> state.withSpeedSquared(speedSquared));
     }
 }

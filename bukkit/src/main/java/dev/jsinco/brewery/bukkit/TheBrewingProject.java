@@ -84,6 +84,8 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
     private BrewManager<ItemStack> brewManager = new BukkitBrewManager();
     @Getter
     private final ActiveEventsRegistry activeEventsRegistry = new ActiveEventsRegistry();
+    @Getter
+    private PlayerWalkListener playerWalkListener;
 
     @Override
     public void onLoad() {
@@ -122,7 +124,6 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
         this.drunksManager.reset(Config.ENABLED_RANDOM_EVENTS.stream().map(BreweryKey::parse).collect(Collectors.toSet()));
         worldEventListener.init();
         RecipeReader<ItemStack> recipeReader = new RecipeReader<>(this.getDataFolder(), new BukkitRecipeResultReader(), BukkitIngredientManager.INSTANCE);
-
         this.recipeRegistry.registerRecipes(recipeReader.readRecipes());
         this.recipeRegistry.registerDefaultRecipes(DefaultRecipeReader.readDefaultRecipes(this.getDataFolder()));
         try (InputStream inputStream = Util.class.getResourceAsStream("/drunk_text.json")) {
@@ -180,7 +181,9 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
         pluginManager.registerEvents(new InventoryEventListener(breweryRegistry, database), this);
         this.worldEventListener = new WorldEventListener(this.database, this.placedStructureRegistry, this.breweryRegistry);
         worldEventListener.init();
+        this.playerWalkListener = new PlayerWalkListener();
         pluginManager.registerEvents(worldEventListener, this);
+        pluginManager.registerEvents(playerWalkListener, this);
         pluginManager.registerEvents(new EntityEventListener(), this);
 
         Bukkit.getScheduler().runTaskTimer(this, this::updateStructures, 0, 1);

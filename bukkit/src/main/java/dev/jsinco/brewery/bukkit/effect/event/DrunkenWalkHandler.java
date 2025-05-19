@@ -1,10 +1,8 @@
 package dev.jsinco.brewery.bukkit.effect.event;
 
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
-import dev.jsinco.brewery.effect.DrunkState;
 import dev.jsinco.brewery.effect.DrunksManager;
 import dev.jsinco.brewery.event.NamedDrunkEvent;
-import dev.jsinco.brewery.util.Logging;
 import dev.jsinco.brewery.util.Pair;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
@@ -15,7 +13,6 @@ import java.util.Random;
 
 class DrunkenWalkHandler {
 
-    private final DrunksManager drunksManager;
     private final LinkedList<Pair<Vector, Integer>> vectors;
     private int currentTimestamp;
     private int duration;
@@ -28,10 +25,9 @@ class DrunkenWalkHandler {
     private static double MAXIMUM_PUSH_MAGNITUDE = 0.4;
     private static final Random RANDOM = new Random();
 
-    DrunkenWalkHandler(int duration, Player player, DrunksManager drunksManager) {
+    DrunkenWalkHandler(int duration, Player player) {
         this.duration = duration;
         this.player = player;
-        this.drunksManager = drunksManager;
         this.vectors = compileRandomVectors(duration);
         pollNewCurrentVector(vectors);
     }
@@ -59,8 +55,8 @@ class DrunkenWalkHandler {
             task.cancel();
             return;
         }
-        DrunkState drunkState = drunksManager.getDrunkState(player.getUniqueId());
-        if (!player.isOnline() || !player.isOnGround() || drunkState == null || drunkState.walkSpeedSquared() == 0
+        Vector walk = TheBrewingProject.getInstance().getPlayerWalkListener().getRegisteredMovement(player.getUniqueId());
+        if (!player.isOnline() || !player.isOnGround() || walk == null || walk.lengthSquared() == 0D
                 || TheBrewingProject.getInstance().getActiveEventsRegistry().hasActiveEvent(player.getUniqueId(), NamedDrunkEvent.STUMBLE)
         ) {
             return;

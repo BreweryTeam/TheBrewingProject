@@ -1,7 +1,6 @@
 package dev.jsinco.brewery.bukkit.effect.event;
 
-import dev.jsinco.brewery.effect.DrunkStateImpl;
-import dev.jsinco.brewery.effect.DrunksManagerImpl;
+import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.util.Vector;
@@ -16,13 +15,18 @@ class StumbleHandler {
     private final Vector pushDirection1;
     private static final Random RANDOM = new Random();
 
-    public StumbleHandler(int duration, Player player, DrunksManagerImpl<?> drunksManager) {
+    public StumbleHandler(int duration, Player player) {
         this.countDown = duration;
         this.duration = duration;
         this.player = player;
         double radians1 = RANDOM.nextDouble(Math.PI * 2);
-        DrunkStateImpl drunkState = drunksManager.getDrunkState(player.getUniqueId());
-        double maxMagnitude = Math.max(0.1, drunkState == null ? 0 : Math.sqrt(drunkState.walkSpeedSquared()));
+        Vector walk = TheBrewingProject.getInstance().getPlayerWalkListener().getRegisteredMovement(player.getUniqueId());
+        double maxMagnitude;
+        if (walk == null) {
+            maxMagnitude = 0.1;
+        } else {
+            maxMagnitude = Math.max(0.1, walk.length());
+        }
         this.pushDirection1 = new Vector(Math.cos(radians1), 0, Math.sin(radians1))
                 .multiply(RANDOM.nextDouble(maxMagnitude));
         double radians2 = RANDOM.nextDouble(Math.PI * 2);

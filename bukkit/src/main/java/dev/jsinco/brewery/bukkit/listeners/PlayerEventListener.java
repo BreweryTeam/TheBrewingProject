@@ -269,14 +269,4 @@ public class PlayerEventListener implements Listener {
         drunkEventExecutor.onPlayerJoin(event.getPlayer().getUniqueId());
         drunksManager.planEvent(event.getPlayer().getUniqueId());
     }
-
-    @EventHandler(ignoreCancelled = true)
-    public void onPlayerMove(PlayerMoveEvent event) {
-        Input input = event.getPlayer().getCurrentInput();
-        if (input.isBackward() || input.isForward() || input.isLeft() || input.isRight()) {
-            drunksManager.registerMovement(event.getPlayer().getUniqueId(), event.getTo().clone().subtract(event.getFrom()).lengthSquared());
-        } else {
-            drunksManager.registerMovement(event.getPlayer().getUniqueId(), 0);
-        }
-    }
 }

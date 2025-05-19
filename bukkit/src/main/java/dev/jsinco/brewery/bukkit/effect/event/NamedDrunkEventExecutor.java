@@ -52,7 +52,7 @@ public class NamedDrunkEventExecutor {
             case STUMBLE -> {
                 DrunksManagerImpl<?> drunksManager = TheBrewingProject.getInstance().getDrunksManager();
                 int duration = RANDOM.nextInt(STUMBLE_DURATION / 2, STUMBLE_DURATION * 3 / 2 + 1);
-                StumbleHandler stumbleHandler = new StumbleHandler(duration, player, drunksManager);
+                StumbleHandler stumbleHandler = new StumbleHandler(duration, player);
                 TheBrewingProject.getInstance().getActiveEventsRegistry().registerActiveEvent(playerUuid, event, duration);
                 Bukkit.getScheduler().runTaskTimer(TheBrewingProject.getInstance(), stumbleHandler::doStumble, 0, 1);
             }

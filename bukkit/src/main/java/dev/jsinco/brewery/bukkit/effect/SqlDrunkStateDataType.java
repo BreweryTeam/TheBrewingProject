@@ -69,7 +69,6 @@ public class SqlDrunkStateDataType implements DrunkStateDataType<Connection> {
                 drunks.add(new Pair<>(
                         new DrunkStateImpl(resultSet.getInt("alcohol_level"),
                                 resultSet.getInt("toxin_level"),
-                                0,
                                 resultSet.getLong("time_stamp"),
                                 resultSet.getLong("kicked_timestamp")),
                         DecoderEncoder.asUuid(resultSet.getBytes("player_uuid"))

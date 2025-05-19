@@ -6,15 +6,11 @@ public interface DrunkState {
 
     DrunkState addAlcohol(int alcohol, int toxins);
 
-    DrunkState withSpeedSquared(double speedSquared);
-
     DrunkState withPassOut(long kickedTimestamp);
 
     int alcohol();
 
     int toxins();
-
-    double walkSpeedSquared();
 
     long timestamp();
 
