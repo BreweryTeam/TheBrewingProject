@@ -1,9 +1,10 @@
 package dev.jsinco.brewery.bukkit.command;
 
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
+import dev.jsinco.brewery.effect.DrunkState;
 import org.bukkit.Material;
-import org.bukkit.entity.Player;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvFileSource;
@@ -48,5 +49,23 @@ class BreweryCommandTest {
     void onCreateCommand_valid(String command) {
         target.performCommand(command);
         assertEquals(Material.POTION, target.getInventory().getItemInMainHand().getType(), target.nextMessage());
+    }
+
+    @Test
+    void setStatus() {
+        assertDoesNotThrow(() -> target.performCommand("tbp status info"));
+        target.performCommand("tbp status consume 30 40");
+        DrunkState drunkState = TheBrewingProject.getInstance().getDrunksManager().getDrunkState(target.getUniqueId());
+        assertEquals(30, drunkState.alcohol());
+        assertEquals(40, drunkState.toxins());
+        target.performCommand("tbp status set 10 20");
+        assertDoesNotThrow(() -> target.performCommand("tbp status info"));
+        drunkState = TheBrewingProject.getInstance().getDrunksManager().getDrunkState(target.getUniqueId());
+        assertEquals(10, drunkState.alcohol());
+        assertEquals(20, drunkState.toxins());
+        target.performCommand("tbp status clear");
+        drunkState = TheBrewingProject.getInstance().getDrunksManager().getDrunkState(target.getUniqueId());
+        assertEquals(0, drunkState.alcohol());
+        assertEquals(0, drunkState.toxins());
     }
 }
