@@ -1,17 +1,17 @@
-tbp wrong_everything
-tbp cook 3g water "wheat/3"
-tbp cook 3
-tbp cook 3 salt_water "wheat/3"
-tbp cook 3 water
-tbp cook 3 water "invalid_ingredient/3"
-tbp cook
-tbp mix
-tbp mix 3g
-tbp mix 3
-tbp mix 3 "invalid_ingredient/3"
-tbp cook 3 water "wheat/3" distill 0
-tbp cook 3 water "wheat/3" distill
-tbp cook 3 water "wheat/3" age
-tbp cook 3 water "wheat/3" age 1
-tbp cook 3 water "wheat/3" age g
-tbp cook 3 water "wheat/3" age 1 bush
+tbp create wrong_everything
+tbp create cook 3g water "wheat/3"
+tbp create cook 3
+tbp create cook 3 salt_water "wheat/3"
+tbp create cook 3 water
+tbp create cook 3 water "invalid_ingredient/3"
+tbp create cook
+tbp create mix
+tbp create mix 3g
+tbp create mix 3
+tbp create mix 3 "invalid_ingredient/3"
+tbp create cook 3 water "wheat/3" distill 0
+tbp create cook 3 water "wheat/3" distill
+tbp create cook 3 water "wheat/3" age
+tbp create cook 3 water "wheat/3" age 1
+tbp create cook 3 water "wheat/3" age g
+tbp create cook 3 water "wheat/3" age 1 bush
