@@ -1,20 +1,20 @@
-brew.tooltip.age: Aged <aging_years> years
+brew.tooltip.age: Aged <aging_years> years in <barrel_type>
 brew.tooltip.distill: Distilled <distill_runs> times
 brew.tooltip.cook: Cooked <cooking_time> minutes
 brew.tooltip.mix: Mixed <mixing_time> minutes
-brew.tooltip-brewing.age: <partial_quality_color>Aged <aging_years> years</partial_quality_color>
-brew.tooltip-brewing.distill: <partial_quality_color>Distilled <distill_runs> times</partial_quality_color>
-brew.tooltip-brewing.cook: <partial_quality_color>Cooked <cooking_time> minutes</partial_quality_color>
-brew.tooltip-brewing.mix: <partial_quality_color>Mixed <mixing_time> minutes</partial_quality_color>
+brew.tooltip-brewing.age: <quality_color_time>Aged <aging_years> years in <quality_color_barrel_type><barrel_type></quality_color_barrel_type></quality_color_time>
+brew.tooltip-brewing.distill: <quality_color_distill_amount>Distilled <distill_runs> times</quality_color_distill_amount>
+brew.tooltip-brewing.cook: <quality_color_ingredients>Ingredients <quality_color_time>cooked for <cooking_time> minutes</quality_color_time></quality_color_ingredients>
+brew.tooltip-brewing.mix: <quality_color_ingredients>Ingredients <quality_color_time>mixed for <mixing_time> minutes</quality_color_time></quality_color_ingredients>
 brew.tooltip.quality-sealed: <dark_gray>[<gray><quality></gray>]
 brew.tooltip.quality-brewing: <quality_color><quality></quality_color>
 brew.tooltip.quality: <quality>
 brew.tooltip.alcoholic: <dark_gray>Alcoholic
 brew.tooltip.detailed-alcoholic: <dark_gray>Alc <alcohol>ml
-brew.detailed-tooltip.age: <partial_quality_color>Aged <aging_years> years in <barrel_type></partial_quality_color>
-brew.detailed-tooltip.distill: <partial_quality_color>Distilled <distill_runs> times</partial_quality_color>
-brew.detailed-tooltip.cook: <partial_quality_color><ingredients> cooked <cooking_time> minutes in a <cauldron_type> cauldron</partial_quality_color>
-brew.detailed-tooltip.mix: <partial_quality_color><ingredients> Mixed <mixing_time> minutes</partial_quality_color>
+brew.detailed-tooltip.age: <quality_color_time>Aged <aging_years> years in <quality_color_barrel_type><barrel_type></quality_color_barrel_type></quality_color_time>
+brew.detailed-tooltip.distill: <quality_color_distill_amount>Distilled <distill_runs> times</quality_color_distill_amount>
+brew.detailed-tooltip.cook: <quality_color_ingredients><ingredients> <quality_color_time>cooked <cooking_time> minutes in a <cauldron_type> cauldron</quality_color_time></quality_color_ingredients>
+brew.detailed-tooltip.mix: <quality_color_ingredients><ingredients> <quality_color_time>mixed <mixing_time> minutes</quality_color_time></quality_color_ingredients>
 brew.tooltip.volume: "<gray>Volume: <volume>"
 brew.display-name.unfinished-aged: Aged <ingredient> brew
 brew.display-name.unfinished-aged-unknown: Aged brew

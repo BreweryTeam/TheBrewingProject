@@ -4,15 +4,15 @@ import com.google.common.base.Preconditions;
 import dev.jsinco.brewery.brew.BrewScore;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.bukkit.util.BukkitAdapter;
+import dev.jsinco.brewery.bukkit.util.BukkitMessageUtil;
 import dev.jsinco.brewery.bukkit.util.ListPersistentDataType;
-import dev.jsinco.brewery.bukkit.util.MessageUtil;
+import dev.jsinco.brewery.util.MessageUtil;
 import dev.jsinco.brewery.configuration.locale.TranslationsConfig;
 import dev.jsinco.brewery.effect.DrunkStateImpl;
 import dev.jsinco.brewery.effect.DrunksManagerImpl;
 import dev.jsinco.brewery.event.CustomEventRegistry;
 import dev.jsinco.brewery.event.DrunkEvent;
 import dev.jsinco.brewery.event.EventStep;
-import dev.jsinco.brewery.recipes.BrewScoreImpl;
 import dev.jsinco.brewery.util.BreweryKey;
 import dev.jsinco.brewery.util.Registry;
 import lombok.Getter;
@@ -138,13 +138,13 @@ public class RecipeEffects {
     public void applyTo(Player player, DrunksManagerImpl<?> drunksManager) {
         drunksManager.consume(player.getUniqueId(), alcohol, toxins);
         if (title != null) {
-            player.showTitle(Title.title(MessageUtil.compilePlayerMessage(title, player, drunksManager, this.alcohol), Component.empty()));
+            player.showTitle(Title.title(BukkitMessageUtil.compilePlayerMessage(title, player, drunksManager, this.alcohol), Component.empty()));
         }
         if (message != null) {
-            player.sendMessage(MessageUtil.compilePlayerMessage(message, player, drunksManager, this.alcohol));
+            player.sendMessage(BukkitMessageUtil.compilePlayerMessage(message, player, drunksManager, this.alcohol));
         }
         if (actionBar != null) {
-            player.sendActionBar(MessageUtil.compilePlayerMessage(actionBar, player, drunksManager, this.alcohol));
+            player.sendActionBar(BukkitMessageUtil.compilePlayerMessage(actionBar, player, drunksManager, this.alcohol));
         } else {
             player.sendActionBar(
                     MiniMessage.miniMessage().deserialize(TranslationsConfig.INFO_AFTER_DRINK,

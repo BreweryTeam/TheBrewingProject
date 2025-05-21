@@ -1,6 +1,7 @@
 package dev.jsinco.brewery.bukkit.breweries.barrel;
 
 import com.google.common.base.Preconditions;
+import dev.jsinco.brewery.brew.AgeStepImpl;
 import dev.jsinco.brewery.brew.Brew;
 import dev.jsinco.brewery.brew.BrewingStep;
 import dev.jsinco.brewery.breweries.Barrel;
@@ -109,13 +110,13 @@ public class BukkitBarrel implements Barrel<BukkitBarrel, ItemStack, Inventory> 
                 continue;
             }
             if (brew.lastStep() instanceof BrewingStep.Age age && age.barrelType() != type) {
-                brew = brew.withStep(new BrewingStep.Age(new Interval(time, time), this.type));
+                brew = brew.withStep(new AgeStepImpl(new Interval(time, time), this.type));
             }
             brews[i] = brew.withLastStep(BrewingStep.Age.class, age -> {
                 Moment moment = age.age();
                 Interval interval = moment instanceof Interval interval1 ? interval1.withLastStep(time) : new Interval(time - moment.moment(), time);
                 return age.withAge(interval);
-            }, () -> new BrewingStep.Age(new Interval(time, time), this.type));
+            }, () -> new AgeStepImpl(new Interval(time, time), this.type));
         }
         inventory.updateInventoryFromBrews();
         if (inventoryUnpopulated()) {

@@ -1,17 +1,11 @@
-package dev.jsinco.brewery.bukkit.util;
+package dev.jsinco.brewery.util;
 
-import dev.jsinco.brewery.brew.Brew;
-import dev.jsinco.brewery.brew.BrewQuality;
-import dev.jsinco.brewery.brew.BrewScore;
-import dev.jsinco.brewery.brew.BrewingStep;
-import dev.jsinco.brewery.bukkit.TheBrewingProject;
-import dev.jsinco.brewery.bukkit.recipe.RecipeEffects;
+import dev.jsinco.brewery.brew.*;
 import dev.jsinco.brewery.configuration.locale.TranslationsConfig;
 import dev.jsinco.brewery.effect.DrunkStateImpl;
-import dev.jsinco.brewery.effect.DrunksManagerImpl;
-import dev.jsinco.brewery.event.NamedDrunkEvent;
 import dev.jsinco.brewery.ingredient.Ingredient;
 import dev.jsinco.brewery.moment.Moment;
+import dev.jsinco.brewery.recipe.RecipeRegistry;
 import dev.jsinco.brewery.recipes.BrewScoreImpl;
 import dev.jsinco.brewery.recipes.RecipeImpl;
 import net.kyori.adventure.text.Component;
@@ -24,8 +18,6 @@ import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Formatter;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
-import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -39,24 +31,6 @@ public class MessageUtil {
 
     private static final char SKULL = '\u2620';
 
-    public static Component compilePlayerMessage(String message, Player player, DrunksManagerImpl<?> drunksManager, int alcohol) {
-        DrunkStateImpl drunkState = drunksManager.getDrunkState(player.getUniqueId());
-        return MiniMessage.miniMessage().deserialize(
-                message,
-                Placeholder.parsed("alcohol", String.valueOf(alcohol)),
-                Placeholder.parsed("player_alcohol", String.valueOf(drunkState == null ? "0" : drunkState.alcohol())),
-                getPlayerTagResolver(player)
-        );
-    }
-
-    public static TagResolver getPlayerTagResolver(Player player) {
-        return TagResolver.resolver(
-                Placeholder.component("player_name", player.name()),
-                Placeholder.component("team_name", player.teamDisplayName()),
-                Placeholder.unparsed("world", player.getWorld().getName())
-        );
-    }
-
     public static TagResolver getScoreTagResolver(@NotNull BrewScore score) {
         BrewQuality quality = score.brewQuality();
         return TagResolver.resolver(
@@ -65,7 +39,7 @@ public class MessageUtil {
         );
     }
 
-    public static @NotNull TagResolver getBrewStepTagResolver(BrewingStep brewingStep, double score) {
+    public static @NotNull TagResolver getBrewStepTagResolver(BrewingStep brewingStep, List<PartialBrewScore> scores, double difficulty) {
         TagResolver resolver = switch (brewingStep) {
             case BrewingStep.Age age -> TagResolver.resolver(
                     Formatter.number("aging_years", age.age().agingYears()),
@@ -89,40 +63,25 @@ public class MessageUtil {
                             .collect(Collectors.joining(", "))
                     )
             );
+            default -> throw new IllegalStateException("Unexpected value: " + brewingStep);
         };
-        return TagResolver.resolver(resolver, Placeholder.styling("partial_quality_color", resolveQualityColor(BrewScoreImpl.quality(score))));
-    }
-
-    private static @NotNull StyleBuilderApplicable[] resolveQualityColor(@Nullable BrewQuality quality) {
-        return quality != null ? new StyleBuilderApplicable[]{TextColor.color(quality.getColor())} : new StyleBuilderApplicable[]{NamedTextColor.GRAY, TextDecoration.STRIKETHROUGH};
-    }
-
-    public static TagResolver recipeTagResolver(RecipeImpl<ItemStack> recipe) {
-        return TagResolver.resolver(
-                Placeholder.parsed("recipe_name", recipe.getRecipeName()),
-                Formatter.number("recipe_difficulty", recipe.getBrewDifficulty())
+        return TagResolver.resolver(resolver, TagResolver.resolver(scores.stream()
+                .map(partialBrewScore ->
+                        Placeholder.styling(partialBrewScore.type().colorKey(), resolveQualityColor(
+                                BrewScoreImpl.quality(BrewScoreImpl.applyDifficulty(partialBrewScore.score(), difficulty))
+                        ))
+                ).toArray(TagResolver[]::new))
         );
     }
 
-    public static TagResolver recipeEffectResolver(RecipeEffects effects) {
+    public static @NotNull StyleBuilderApplicable[] resolveQualityColor(@Nullable BrewQuality quality) {
+        return quality != null ? new StyleBuilderApplicable[]{TextColor.color(quality.getColor())} : new StyleBuilderApplicable[]{NamedTextColor.GRAY, TextDecoration.STRIKETHROUGH};
+    }
+
+    public static TagResolver recipeTagResolver(RecipeImpl<?> recipe) {
         return TagResolver.resolver(
-                Placeholder.component("potion_effects", effects.getEffects().stream()
-                        .map(effect ->
-                                Component.translatable(effect.type().translationKey())
-                                        .append(Component.text("/" + effect.durationRange() + "/" + effect.amplifierRange()))
-                        ).collect(Component.toComponent(Component.text(",")))
-                ),
-                Formatter.number("effect_alcohol", effects.getAlcohol()),
-                Formatter.number("effect_toxins", effects.getToxins()),
-                Placeholder.parsed("effect_title_message", effects.getTitle() == null ? "" : effects.getTitle()),
-                Placeholder.parsed("effect_message", effects.getMessage() == null ? "" : effects.getMessage()),
-                Placeholder.parsed("effect_action_bar", effects.getActionBar() == null ? "" : effects.getActionBar()),
-                Placeholder.parsed("effect_events", effects.getEvents().stream().map(drunkEvent -> {
-                    if (drunkEvent instanceof NamedDrunkEvent namedDrunkEvent) {
-                        return TranslationsConfig.EVENT_TYPES.get(namedDrunkEvent.name().toLowerCase(Locale.ROOT));
-                    }
-                    return drunkEvent.displayName();
-                }).collect(Collectors.joining(",")))
+                Placeholder.parsed("recipe_name", recipe.getRecipeName()),
+                Formatter.number("recipe_difficulty", recipe.getBrewDifficulty())
         );
     }
 
@@ -140,13 +99,13 @@ public class MessageUtil {
         for (int i = 0; i < brewingSteps.size(); i++) {
             BrewingStep brewingStep = brewingSteps.get(i);
             String line = (detailed ? TranslationsConfig.DETAILED_BREW_TOOLTIP : TranslationsConfig.BREW_TOOLTIP_BREWING).get(brewingStep.stepType().name().toLowerCase(Locale.ROOT));
-            streamBuilder.add(MiniMessage.miniMessage().deserialize(line, MessageUtil.getBrewStepTagResolver(brewingStep, score.getPartialScore(i))));
+            streamBuilder.add(MiniMessage.miniMessage().deserialize(line, MessageUtil.getBrewStepTagResolver(brewingStep, score.getPartialScores(i), score.brewDifficulty())));
         }
         return streamBuilder.build();
     }
 
-    public static @NotNull Stream<Component> compileBrewInfo(Brew brew, boolean detailed) {
-        BrewScore score = brew.closestRecipe(TheBrewingProject.getInstance().getRecipeRegistry())
+    public static @NotNull Stream<Component> compileBrewInfo(Brew brew, boolean detailed, RecipeRegistry<?> registry) {
+        BrewScore score = brew.closestRecipe(registry)
                 .map(brew::score)
                 .orElse(BrewScoreImpl.NONE);
         return compileBrewInfo(brew, score, detailed);

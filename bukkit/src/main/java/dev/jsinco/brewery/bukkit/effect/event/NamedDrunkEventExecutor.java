@@ -2,7 +2,8 @@ package dev.jsinco.brewery.bukkit.effect.event;
 
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.bukkit.util.BukkitAdapter;
-import dev.jsinco.brewery.bukkit.util.MessageUtil;
+import dev.jsinco.brewery.bukkit.util.BukkitMessageUtil;
+import dev.jsinco.brewery.util.MessageUtil;
 import dev.jsinco.brewery.configuration.Config;
 import dev.jsinco.brewery.configuration.locale.TranslationsConfig;
 import dev.jsinco.brewery.effect.DrunksManagerImpl;
@@ -42,9 +43,9 @@ public class NamedDrunkEventExecutor {
             }
             case PASS_OUT -> {
                 DrunksManagerImpl<?> drunksManager = TheBrewingProject.getInstance().getDrunksManager();
-                player.kick(MessageUtil.compilePlayerMessage(Config.KICK_EVENT_MESSAGE == null ? TranslationsConfig.KICK_EVENT_MESSAGE : Config.KICK_EVENT_MESSAGE, player, drunksManager, 0));
+                player.kick(BukkitMessageUtil.compilePlayerMessage(Config.KICK_EVENT_MESSAGE == null ? TranslationsConfig.KICK_EVENT_MESSAGE : Config.KICK_EVENT_MESSAGE, player, drunksManager, 0));
                 if (Config.KICK_EVENT_SERVER_MESSAGE != null) {
-                    Component message = MessageUtil.compilePlayerMessage(Config.KICK_EVENT_SERVER_MESSAGE, player, drunksManager, 0);
+                    Component message = BukkitMessageUtil.compilePlayerMessage(Config.KICK_EVENT_SERVER_MESSAGE, player, drunksManager, 0);
                     Bukkit.getOnlinePlayers().forEach(player1 -> player1.sendMessage(message));
                 }
                 drunksManager.registerPassedOut(player.getUniqueId());
@@ -64,7 +65,7 @@ public class NamedDrunkEventExecutor {
                     chicken.getPersistentDataContainer().set(NO_DROPS, PersistentDataType.BOOLEAN, true);
                     chicken.setBreed(false);
                 });
-                player.sendMessage(MiniMessage.miniMessage().deserialize(TranslationsConfig.CHICKEN_MESSAGE, MessageUtil.getPlayerTagResolver(player)));
+                player.sendMessage(MiniMessage.miniMessage().deserialize(TranslationsConfig.CHICKEN_MESSAGE, BukkitMessageUtil.getPlayerTagResolver(player)));
             }
             case DRUNK_MESSAGE -> {
                 List<String> drunkMessages = Config.DRUNK_MESSAGES;
@@ -89,7 +90,7 @@ public class NamedDrunkEventExecutor {
                     return;
                 }
                 player.teleport(location);
-                player.sendMessage(MiniMessage.miniMessage().deserialize(TranslationsConfig.TELEPORT_MESSAGE, MessageUtil.getPlayerTagResolver(player)));
+                player.sendMessage(MiniMessage.miniMessage().deserialize(TranslationsConfig.TELEPORT_MESSAGE, BukkitMessageUtil.getPlayerTagResolver(player)));
             }
             case NAUSEA -> {
                 player.addPotionEffect(new PotionEffect(PotionEffectType.NAUSEA, RANDOM.nextInt(Moment.MINUTE / 2, Moment.MINUTE * 3 / 2), 1));

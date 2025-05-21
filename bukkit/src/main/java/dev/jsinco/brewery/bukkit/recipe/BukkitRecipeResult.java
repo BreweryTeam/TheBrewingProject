@@ -1,18 +1,21 @@
 package dev.jsinco.brewery.bukkit.recipe;
 
 import com.google.common.base.Preconditions;
-import dev.jsinco.brewery.brew.*;
+import dev.jsinco.brewery.brew.Brew;
+import dev.jsinco.brewery.brew.BrewQuality;
+import dev.jsinco.brewery.brew.BrewScore;
+import dev.jsinco.brewery.brew.BrewingStep;
 import dev.jsinco.brewery.bukkit.integration.item.CraftEngineHook;
 import dev.jsinco.brewery.bukkit.integration.item.ItemsAdderHook;
 import dev.jsinco.brewery.bukkit.integration.item.NexoHook;
 import dev.jsinco.brewery.bukkit.integration.item.OraxenHook;
 import dev.jsinco.brewery.bukkit.util.BukkitAdapter;
-import dev.jsinco.brewery.bukkit.util.MessageUtil;
 import dev.jsinco.brewery.configuration.locale.TranslationsConfig;
 import dev.jsinco.brewery.recipe.RecipeResult;
-import dev.jsinco.brewery.recipes.*;
+import dev.jsinco.brewery.recipes.QualityData;
 import dev.jsinco.brewery.util.BreweryKey;
 import dev.jsinco.brewery.util.Logging;
+import dev.jsinco.brewery.util.MessageUtil;
 import io.papermc.paper.datacomponent.DataComponentTypes;
 import lombok.Getter;
 import net.kyori.adventure.text.Component;
@@ -164,7 +167,7 @@ public class BukkitRecipeResult implements RecipeResult<ItemStack> {
         BrewingStep brewingStep = brew.lastStep();
         streamBuilder.add(MiniMessage.miniMessage().deserialize(
                 TranslationsConfig.BREW_TOOLTIP.get(brewingStep.stepType().name().toLowerCase(Locale.ROOT)),
-                MessageUtil.getBrewStepTagResolver(brewingStep, score.getPartialScore(brew.getCompletedSteps().size() - 1)))
+                MessageUtil.getBrewStepTagResolver(brewingStep, score.getPartialScores(brew.getCompletedSteps().size() - 1), score.brewDifficulty()))
         );
         if (recipeEffects.get(quality).getAlcohol() > 0) {
             streamBuilder.add(MiniMessage.miniMessage().deserialize(TranslationsConfig.ALCOHOLIC));

@@ -2,6 +2,7 @@ package dev.jsinco.brewery.bukkit.breweries.distillery;
 
 import dev.jsinco.brewery.brew.Brew;
 import dev.jsinco.brewery.brew.BrewingStep;
+import dev.jsinco.brewery.brew.DistillStepImpl;
 import dev.jsinco.brewery.breweries.Distillery;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.bukkit.brew.BrewAdapter;
@@ -13,7 +14,6 @@ import dev.jsinco.brewery.configuration.locale.TranslationsConfig;
 import dev.jsinco.brewery.database.PersistenceException;
 import dev.jsinco.brewery.moment.Moment;
 import dev.jsinco.brewery.structure.StructureMeta;
-import dev.jsinco.brewery.util.Logging;
 import dev.jsinco.brewery.util.Pair;
 import dev.jsinco.brewery.vector.BreweryLocation;
 import lombok.Getter;
@@ -264,7 +264,7 @@ public class BukkitDistillery implements Distillery<BukkitDistillery, ItemStack,
             inventory2.store(mixtureBrew.withLastStep(
                             BrewingStep.Distill.class,
                             BrewingStep.Distill::incrementAmount,
-                            () -> new BrewingStep.Distill(1))
+                            () -> new DistillStepImpl(1))
                     , i);
         }
     }

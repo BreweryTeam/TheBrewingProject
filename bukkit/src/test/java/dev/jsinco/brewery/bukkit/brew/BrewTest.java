@@ -1,7 +1,9 @@
 package dev.jsinco.brewery.bukkit.brew;
 
+import dev.jsinco.brewery.brew.AgeStepImpl;
 import dev.jsinco.brewery.brew.BrewImpl;
-import dev.jsinco.brewery.brew.BrewingStep;
+import dev.jsinco.brewery.brew.CookStepImpl;
+import dev.jsinco.brewery.brew.DistillStepImpl;
 import dev.jsinco.brewery.breweries.BarrelType;
 import dev.jsinco.brewery.breweries.CauldronType;
 import dev.jsinco.brewery.bukkit.ingredient.SimpleIngredient;
@@ -23,15 +25,15 @@ public class BrewTest {
     void equals() {
         BrewImpl brew1 = new BrewImpl(
                 List.of(
-                        new BrewingStep.Cook(
+                        new CookStepImpl(
                                 new PassedMoment(20),
                                 Map.of(SimpleIngredient.from("wheat").get(), 1),
                                 CauldronType.LAVA
                         ),
-                        new BrewingStep.Distill(
+                        new DistillStepImpl(
                                 3
                         ),
-                        new BrewingStep.Age(
+                        new AgeStepImpl(
                                 new PassedMoment(20),
                                 BarrelType.ACACIA
                         )
@@ -39,15 +41,15 @@ public class BrewTest {
         );
         BrewImpl brew2 = new BrewImpl(
                 List.of(
-                        new BrewingStep.Cook(
+                        new CookStepImpl(
                                 new PassedMoment(20),
                                 Map.of(SimpleIngredient.from("wheat").get(), 1),
                                 CauldronType.LAVA
                         ),
-                        new BrewingStep.Distill(
+                        new DistillStepImpl(
                                 3
                         ),
-                        new BrewingStep.Age(
+                        new AgeStepImpl(
                                 new PassedMoment(20),
                                 BarrelType.ACACIA
                         )
@@ -60,15 +62,15 @@ public class BrewTest {
     void equals_notEqual() {
         BrewImpl brew1 = new BrewImpl(
                 List.of(
-                        new BrewingStep.Cook(
+                        new CookStepImpl(
                                 new PassedMoment(20),
                                 Map.of(SimpleIngredient.from("wheat").get(), 1),
                                 CauldronType.LAVA
                         ),
-                        new BrewingStep.Distill(
+                        new DistillStepImpl(
                                 3
                         ),
-                        new BrewingStep.Age(
+                        new AgeStepImpl(
                                 new PassedMoment(20),
                                 BarrelType.ACACIA
                         )
@@ -76,15 +78,15 @@ public class BrewTest {
         );
         BrewImpl brew2 = new BrewImpl(
                 List.of(
-                        new BrewingStep.Cook(
+                        new CookStepImpl(
                                 new PassedMoment(20),
                                 Map.of(SimpleIngredient.from("wheat").get(), 1),
                                 CauldronType.LAVA
                         ),
-                        new BrewingStep.Distill(
+                        new DistillStepImpl(
                                 2
                         ),
-                        new BrewingStep.Age(
+                        new AgeStepImpl(
                                 new PassedMoment(20),
                                 BarrelType.ACACIA
                         )
@@ -97,15 +99,15 @@ public class BrewTest {
     void equals_notEquals2() {
         BrewImpl brew1 = new BrewImpl(
                 List.of(
-                        new BrewingStep.Cook(
+                        new CookStepImpl(
                                 new PassedMoment(20),
                                 Map.of(SimpleIngredient.from("wheat").get(), 1),
                                 CauldronType.LAVA
                         ),
-                        new BrewingStep.Distill(
+                        new DistillStepImpl(
                                 2
                         ),
-                        new BrewingStep.Age(
+                        new AgeStepImpl(
                                 new PassedMoment(20),
                                 BarrelType.ACACIA
                         )
@@ -113,15 +115,15 @@ public class BrewTest {
         );
         BrewImpl brew2 = new BrewImpl(
                 List.of(
-                        new BrewingStep.Cook(
+                        new CookStepImpl(
                                 new PassedMoment(20),
                                 Map.of(SimpleIngredient.from("wheat").get(), 2),
                                 CauldronType.LAVA
                         ),
-                        new BrewingStep.Distill(
+                        new DistillStepImpl(
                                 2
                         ),
-                        new BrewingStep.Age(
+                        new AgeStepImpl(
                                 new PassedMoment(20),
                                 BarrelType.ACACIA
                         )

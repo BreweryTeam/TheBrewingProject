@@ -2,10 +2,9 @@ package dev.jsinco.brewery.recipes;
 
 import dev.jsinco.brewery.brew.BrewQuality;
 import dev.jsinco.brewery.brew.BrewScore;
-import dev.jsinco.brewery.brew.BrewingStep;
+import dev.jsinco.brewery.brew.PartialBrewScore;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Arrays;
 import java.util.List;
 
 public class BrewScoreImpl implements BrewScore {
@@ -16,7 +15,7 @@ public class BrewScoreImpl implements BrewScore {
     private static final char HALF_STAR = '\u2BEA';
     private static final char EMPTY_STAR = '\u2606';
 
-    private final List<Double> scores;
+    private final List<List<PartialBrewScore>> scores;
     private final boolean completed;
     private final double brewDifficulty;
 
@@ -25,27 +24,28 @@ public class BrewScoreImpl implements BrewScore {
     }
 
     private BrewScoreImpl(double score) {
-        double modifiedScore = Math.pow(score, (double) 1 / BrewingStep.StepType.values().length);
-        this.scores = Arrays.stream(BrewingStep.StepType.values()).map(ignored -> modifiedScore).toList();
+        this.scores = List.of(List.of(new PartialBrewScore(score, PartialBrewScore.Type.TIME)));
         this.completed = true;
         this.brewDifficulty = 1;
     }
 
-    public BrewScoreImpl(List<Double> scores, boolean completed, double brewDifficulty) {
+    public BrewScoreImpl(List<List<PartialBrewScore>> scores, boolean completed, double brewDifficulty) {
         this.scores = scores;
         this.completed = completed;
         this.brewDifficulty = brewDifficulty / 2;
     }
 
-    public double getPartialScore(int stepIndex) {
-        return applyDifficulty(scores.get(stepIndex));
+    @Override
+    public List<PartialBrewScore> getPartialScores(int stepIndex) {
+        return scores.get(stepIndex);
     }
 
+    @Override
     public double score() {
-        return applyDifficulty(rawScore());
+        return applyDifficulty(rawScore(), brewDifficulty);
     }
 
-    private double applyDifficulty(double score) {
+    public static double applyDifficulty(double score, double brewDifficulty) {
         score = Math.min(score + 0.05, 1D);
         // Avoid extreme point, log(0) is minus infinity
         if (brewDifficulty <= 0) {
@@ -61,6 +61,7 @@ public class BrewScoreImpl implements BrewScore {
         return Math.max(scoreWithDifficulty - 0.3, 0.0) * 1 / 0.7;
     }
 
+    @Override
     public String displayName() {
         StringBuilder builder = new StringBuilder();
         int score = (int) (score() * 10);
@@ -76,13 +77,28 @@ public class BrewScoreImpl implements BrewScore {
         return builder.toString();
     }
 
+    @Override
     public double rawScore() {
         return this.scores.stream()
+                .map(this::rawPartialScore)
                 .reduce(1D, (aDouble, aDouble2) -> aDouble * aDouble2);
     }
 
+    private double rawPartialScore(List<PartialBrewScore> partialBrewScores) {
+        return partialBrewScores.stream()
+                .map(PartialBrewScore::score)
+                .map(score -> partialBrewScores.size() == 1 ? score : Math.sqrt(score))
+                .reduce(1D, (value1, value2) -> value1 * value2);
+    }
+
+    @Override
     public boolean completed() {
         return completed;
+    }
+
+    @Override
+    public double brewDifficulty() {
+        return brewDifficulty;
     }
 
     public static BrewQuality quality(double score) {

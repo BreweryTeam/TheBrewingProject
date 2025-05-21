@@ -9,9 +9,10 @@ import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.bukkit.brew.BrewAdapter;
 import dev.jsinco.brewery.bukkit.command.argument.EnumArgument;
 import dev.jsinco.brewery.bukkit.recipe.RecipeEffects;
-import dev.jsinco.brewery.bukkit.util.MessageUtil;
+import dev.jsinco.brewery.bukkit.util.BukkitMessageUtil;
 import dev.jsinco.brewery.configuration.locale.TranslationsConfig;
 import dev.jsinco.brewery.recipes.BrewScoreImpl;
+import dev.jsinco.brewery.util.MessageUtil;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
 import net.kyori.adventure.text.Component;
@@ -75,14 +76,14 @@ public class InfoCommand {
                                 MessageUtil.getScoreTagResolver(brew.closestRecipe(TheBrewingProject.getInstance().getRecipeRegistry())
                                         .map(brew::score)
                                         .orElse(BrewScoreImpl.NONE)),
-                                Placeholder.component("brewing_step_info", MessageUtil.compileBrewInfo(brew, true)
+                                Placeholder.component("brewing_step_info", MessageUtil.compileBrewInfo(brew, true, TheBrewingProject.getInstance().getRecipeRegistry())
                                         .collect(Component.toComponent(Component.text("\n")))
                                 )
                         )
                 ));
         Optional<RecipeEffects> recipeEffectsOptional = RecipeEffects.fromItem(itemStack);
         recipeEffectsOptional.ifPresent(effects -> {
-            sender.sendMessage(MiniMessage.miniMessage().deserialize(TranslationsConfig.COMMAND_INFO_EFFECT_MESSAGE, MessageUtil.recipeEffectResolver(effects)));
+            sender.sendMessage(MiniMessage.miniMessage().deserialize(TranslationsConfig.COMMAND_INFO_EFFECT_MESSAGE, BukkitMessageUtil.recipeEffectResolver(effects)));
         });
         if (brewOptional.isEmpty() && recipeEffectsOptional.isEmpty()) {
             sender.sendMessage(MiniMessage.miniMessage().deserialize(TranslationsConfig.COMMAND_INFO_NOT_A_BREW));

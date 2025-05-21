@@ -1,5 +1,6 @@
 package dev.jsinco.brewery.bukkit.command;
 
+import dev.jsinco.brewery.brew.*;
 import com.mojang.brigadier.arguments.DoubleArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
@@ -80,23 +81,23 @@ public class CreateCommand {
 
     private static BrewingStep parseAge(CommandContext<CommandSourceStack> context) {
         double agingYears = context.getArgument("aging-years", double.class);
-        return new BrewingStep.Age(new PassedMoment((long) (agingYears * Moment.AGING_YEAR)), context.getArgument("barrel-type", BarrelType.class));
+        return new AgeStepImpl(new PassedMoment((long) (agingYears * Moment.AGING_YEAR)), context.getArgument("barrel-type", BarrelType.class));
     }
 
     private static BrewingStep parseDistill(CommandContext<CommandSourceStack> context) {
-        return new BrewingStep.Distill(context.getArgument("distill-runs", int.class));
+        return new DistillStepImpl(context.getArgument("distill-runs", int.class));
     }
 
     private static BrewingStep parseMix(CommandContext<CommandSourceStack> context) {
         double mixTIme = context.getArgument("mix-time", double.class);
         Map<Ingredient, Integer> ingredients = context.getArgument("mix-ingredients", Map.class);
-        return new BrewingStep.Mix(new PassedMoment((long) (mixTIme * Moment.MINUTE)), ingredients);
+        return new MixStepImpl(new PassedMoment((long) (mixTIme * Moment.MINUTE)), ingredients);
     }
 
     private static BrewingStep parseCook(CommandContext<CommandSourceStack> context) {
         double cookTime = context.getArgument("cook-time", double.class);
         CauldronType cauldronType = context.getArgument("cook-type", CauldronType.class);
         Map<Ingredient, Integer> ingredients = context.getArgument("cook-ingredients", Map.class);
-        return new BrewingStep.Cook(new PassedMoment((long) (cookTime * Moment.MINUTE)), ingredients, cauldronType);
+        return new CookStepImpl(new PassedMoment((long) (cookTime * Moment.MINUTE)), ingredients, cauldronType);
     }
 }

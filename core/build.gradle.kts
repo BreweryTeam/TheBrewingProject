@@ -35,6 +35,8 @@ dependencies {
     testImplementation("org.joml:joml:1.10.8")
     testImplementation("com.google.guava:guava:33.4.0-jre")
     testImplementation("org.xerial:sqlite-jdbc:3.47.2.0")
+    compileOnly("net.kyori:adventure-api:4.21.0")
+    compileOnly("net.kyori:adventure-text-minimessage:4.21.0")
 }
 
 tasks {

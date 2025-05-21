@@ -1,15 +1,15 @@
 package dev.jsinco.brewery.bukkit.brew;
 
-import dev.jsinco.brewery.brew.BrewingStep;
+import dev.jsinco.brewery.brew.*;
 import dev.jsinco.brewery.bukkit.ingredient.BukkitIngredientManager;
 import dev.jsinco.brewery.ingredient.Ingredient;
 import dev.jsinco.brewery.ingredient.IngredientManager;
-import dev.jsinco.brewery.util.BreweryKey;
-import dev.jsinco.brewery.util.DecoderEncoder;
-import dev.jsinco.brewery.util.Registry;
 import dev.jsinco.brewery.moment.Interval;
 import dev.jsinco.brewery.moment.Moment;
 import dev.jsinco.brewery.moment.PassedMoment;
+import dev.jsinco.brewery.util.BreweryKey;
+import dev.jsinco.brewery.util.DecoderEncoder;
+import dev.jsinco.brewery.util.Registry;
 import org.bukkit.persistence.PersistentDataAdapterContext;
 import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
@@ -53,6 +53,7 @@ public class BrewingStepPdcType implements PersistentDataType<byte[], BrewingSte
                     encodeMoment(mix.time(), dataOutputStream);
                     encodeIngredients(mix.ingredients(), dataOutputStream);
                 }
+                default -> throw new IllegalStateException("Unexpected value: " + complex);
             }
             return output.toByteArray();
         } catch (IOException e) {
@@ -66,19 +67,19 @@ public class BrewingStepPdcType implements PersistentDataType<byte[], BrewingSte
         try (DataInputStream dataInputStream = new DataInputStream(input)) {
             BrewingStep.StepType stepType = BrewingStep.StepType.valueOf(dataInputStream.readUTF());
             return switch (stepType) {
-                case COOK -> new BrewingStep.Cook(
+                case COOK -> new CookStepImpl(
                         decodeMoment(dataInputStream),
                         decodeIngredients(dataInputStream),
                         Registry.CAULDRON_TYPE.get(BreweryKey.parse(dataInputStream.readUTF()))
                 );
-                case DISTILL -> new BrewingStep.Distill(
+                case DISTILL -> new DistillStepImpl(
                         dataInputStream.readInt()
                 );
-                case AGE -> new BrewingStep.Age(
+                case AGE -> new AgeStepImpl(
                         decodeMoment(dataInputStream),
                         Registry.BARREL_TYPE.get(BreweryKey.parse(dataInputStream.readUTF()))
                 );
-                case MIX -> new BrewingStep.Mix(
+                case MIX -> new MixStepImpl(
                         decodeMoment(dataInputStream),
                         decodeIngredients(dataInputStream)
                 );

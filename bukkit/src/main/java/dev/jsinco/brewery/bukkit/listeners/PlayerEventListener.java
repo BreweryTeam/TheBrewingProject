@@ -13,7 +13,8 @@ import dev.jsinco.brewery.bukkit.ingredient.SimpleIngredient;
 import dev.jsinco.brewery.bukkit.integration.structure.StructureAccessHook;
 import dev.jsinco.brewery.bukkit.recipe.RecipeEffects;
 import dev.jsinco.brewery.bukkit.util.BukkitAdapter;
-import dev.jsinco.brewery.bukkit.util.MessageUtil;
+import dev.jsinco.brewery.bukkit.util.BukkitMessageUtil;
+import dev.jsinco.brewery.util.MessageUtil;
 import dev.jsinco.brewery.configuration.Config;
 import dev.jsinco.brewery.configuration.locale.TranslationsConfig;
 import dev.jsinco.brewery.database.PersistenceException;
@@ -27,7 +28,6 @@ import dev.jsinco.brewery.recipes.RecipeRegistryImpl;
 import dev.jsinco.brewery.structure.PlacedStructureRegistryImpl;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.GameMode;
-import org.bukkit.Input;
 import org.bukkit.Material;
 import org.bukkit.Tag;
 import org.bukkit.block.Block;
@@ -254,13 +254,13 @@ public class PlayerEventListener implements Listener {
     public void onPlayerLogin(PlayerLoginEvent event) {
         if (drunksManager.isPassedOut(event.getPlayer().getUniqueId())) {
             event.setResult(PlayerLoginEvent.Result.KICK_OTHER);
-            event.kickMessage(MessageUtil.compilePlayerMessage(Config.KICK_EVENT_MESSAGE == null ? TranslationsConfig.KICK_EVENT_MESSAGE : Config.KICK_EVENT_MESSAGE, event.getPlayer(), drunksManager, 0));
+            event.kickMessage(BukkitMessageUtil.compilePlayerMessage(Config.KICK_EVENT_MESSAGE == null ? TranslationsConfig.KICK_EVENT_MESSAGE : Config.KICK_EVENT_MESSAGE, event.getPlayer(), drunksManager, 0));
             return;
         }
         DrunkState drunkState = drunksManager.getDrunkState(event.getPlayer().getUniqueId());
         if (Config.DRUNKEN_JOIN_DENY && drunkState != null && drunkState.alcohol() >= 85 && RANDOM.nextInt(15) <= drunkState.alcohol() - 85) {
             event.setResult(PlayerLoginEvent.Result.KICK_OTHER);
-            event.kickMessage(MessageUtil.compilePlayerMessage(TranslationsConfig.DRUNKEN_JOIN_DENY_MESSAGE, event.getPlayer(), drunksManager, drunkState.alcohol()));
+            event.kickMessage(BukkitMessageUtil.compilePlayerMessage(TranslationsConfig.DRUNKEN_JOIN_DENY_MESSAGE, event.getPlayer(), drunksManager, drunkState.alcohol()));
         }
     }
 

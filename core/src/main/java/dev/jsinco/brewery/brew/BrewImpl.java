@@ -81,21 +81,24 @@ public class BrewImpl implements Brew {
 
     public @NotNull BrewScore score(Recipe<?> recipe) {
         List<BrewingStep> recipeSteps = recipe.getSteps();
-        List<Double> scores = new ArrayList<>();
+        List<List<PartialBrewScore>> scores = new ArrayList<>();
         List<BrewingStep> completedSteps = getCompletedSteps();
         if (completedSteps.size() > recipeSteps.size()) {
             return BrewScoreImpl.NONE;
         }
         for (int i = 0; i < completedSteps.size(); i++) {
             BrewingStep recipeStep = recipeSteps.get(i);
-            scores.add(recipeStep.proximity(completedSteps.get(i)));
+            scores.add(recipeStep.proximityScores(completedSteps.get(i)));
         }
         boolean completed = completedSteps.size() == recipeSteps.size();
         BrewScoreImpl brewScore = new BrewScoreImpl(scores, completed, recipe.getBrewDifficulty());
         if (brewScore.brewQuality() == null) {
             scores.removeLast();
-            scores.add(recipeSteps.get(completedSteps.size() - 1).maximumScore(completedSteps.getLast()));
-            return new BrewScoreImpl(scores, false, recipe.getBrewDifficulty());
+            scores.add(recipeSteps.get(completedSteps.size() - 1).maximumScores(completedSteps.getLast()));
+            BrewScoreImpl uncompleted = new BrewScoreImpl(scores, false, recipe.getBrewDifficulty());
+            if (uncompleted.brewQuality() != null) {
+                return uncompleted;
+            }
         }
         return brewScore;
     }

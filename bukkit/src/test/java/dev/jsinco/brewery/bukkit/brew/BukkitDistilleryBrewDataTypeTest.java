@@ -2,7 +2,8 @@ package dev.jsinco.brewery.bukkit.brew;
 
 import dev.jsinco.brewery.brew.Brew;
 import dev.jsinco.brewery.brew.BrewImpl;
-import dev.jsinco.brewery.brew.BrewingStep;
+import dev.jsinco.brewery.brew.CookStepImpl;
+import dev.jsinco.brewery.brew.DistillStepImpl;
 import dev.jsinco.brewery.breweries.CauldronType;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.bukkit.breweries.distillery.BukkitDistillery;
@@ -11,8 +12,8 @@ import dev.jsinco.brewery.bukkit.ingredient.SimpleIngredient;
 import dev.jsinco.brewery.bukkit.structure.PlacedBreweryStructure;
 import dev.jsinco.brewery.database.PersistenceException;
 import dev.jsinco.brewery.database.sql.Database;
-import dev.jsinco.brewery.util.Pair;
 import dev.jsinco.brewery.moment.PassedMoment;
+import dev.jsinco.brewery.util.Pair;
 import dev.jsinco.brewery.vector.BreweryLocation;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -26,7 +27,6 @@ import org.mockbukkit.mockbukkit.MockBukkitExtension;
 import org.mockbukkit.mockbukkit.MockBukkitInject;
 import org.mockbukkit.mockbukkit.ServerMock;
 
-import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 
@@ -55,7 +55,7 @@ class BukkitDistilleryBrewDataTypeTest {
         BreweryLocation searchObject = bukkitDistillery.getStructure().getUnique();
         BrewImpl brew1 = new BrewImpl(
                 List.of(
-                        new BrewingStep.Cook(
+                        new CookStepImpl(
                                 new PassedMoment(10),
                                 Map.of(new SimpleIngredient(Material.ACACIA_BUTTON), 3),
                                 CauldronType.LAVA
@@ -64,12 +64,12 @@ class BukkitDistilleryBrewDataTypeTest {
         );
         BrewImpl brew2 = new BrewImpl(
                 List.of(
-                        new BrewingStep.Cook(
+                        new CookStepImpl(
                                 new PassedMoment(10),
                                 Map.of(new SimpleIngredient(Material.ACACIA_BUTTON), 3),
                                 CauldronType.LAVA
                         ),
-                        new BrewingStep.Distill(3)
+                        new DistillStepImpl(3)
                 )
         );
         BukkitDistilleryBrewDataType.DistilleryContext distilleryContext1 = new BukkitDistilleryBrewDataType.DistilleryContext(searchObject.x(), searchObject.y(), searchObject.z(), searchObject.worldUuid(), 0, false);

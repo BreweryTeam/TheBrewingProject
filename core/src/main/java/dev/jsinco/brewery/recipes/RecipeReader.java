@@ -2,14 +2,14 @@ package dev.jsinco.brewery.recipes;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
-import dev.jsinco.brewery.brew.BrewingStep;
+import dev.jsinco.brewery.brew.*;
 import dev.jsinco.brewery.ingredient.IngredientManager;
+import dev.jsinco.brewery.moment.Moment;
+import dev.jsinco.brewery.moment.PassedMoment;
 import dev.jsinco.brewery.recipe.Recipe;
 import dev.jsinco.brewery.util.BreweryKey;
 import dev.jsinco.brewery.util.Logging;
 import dev.jsinco.brewery.util.Registry;
-import dev.jsinco.brewery.moment.Moment;
-import dev.jsinco.brewery.moment.PassedMoment;
 import org.jetbrains.annotations.NotNull;
 import org.simpleyaml.configuration.ConfigurationSection;
 import org.simpleyaml.configuration.file.YamlFile;
@@ -79,19 +79,19 @@ public class RecipeReader<I> {
         BrewingStep.StepType type = BrewingStep.StepType.valueOf(String.valueOf(map.get("type")).toUpperCase(Locale.ROOT));
         checkStep(type, map);
         return switch (type) {
-            case COOK -> new BrewingStep.Cook(
+            case COOK -> new CookStepImpl(
                     new PassedMoment(((Integer) map.get("cook-time")).longValue() * PassedMoment.MINUTE),
                     ingredientManager.getIngredientsWithAmount((List<String>) map.get("ingredients")),
                     Registry.CAULDRON_TYPE.get(BreweryKey.parse(map.containsKey("cauldron-type") ? map.get("cauldron-type").toString().toLowerCase(Locale.ROOT) : "water"))
             );
-            case DISTILL -> new BrewingStep.Distill(
+            case DISTILL -> new DistillStepImpl(
                     (int) map.get("runs")
             );
-            case AGE -> new BrewingStep.Age(
+            case AGE -> new AgeStepImpl(
                     new PassedMoment(((Integer) map.get("age-years")).longValue() * Moment.AGING_YEAR),
                     Registry.BARREL_TYPE.get(BreweryKey.parse(map.get("barrel-type").toString().toLowerCase(Locale.ROOT)))
             );
-            case MIX -> new BrewingStep.Mix(
+            case MIX -> new MixStepImpl(
                     new PassedMoment(((Integer) map.get("mix-time")).longValue() * Moment.MINUTE),
                     ingredientManager.getIngredientsWithAmount((List<String>) map.get("ingredients"))
             );

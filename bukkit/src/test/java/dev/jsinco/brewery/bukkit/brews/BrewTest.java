@@ -1,20 +1,17 @@
 package dev.jsinco.brewery.bukkit.brews;
 
-import dev.jsinco.brewery.brew.Brew;
-import dev.jsinco.brewery.brew.BrewImpl;
-import dev.jsinco.brewery.brew.BrewingStep;
+import dev.jsinco.brewery.brew.*;
 import dev.jsinco.brewery.breweries.BarrelType;
 import dev.jsinco.brewery.breweries.CauldronType;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.bukkit.ingredient.SimpleIngredient;
 import dev.jsinco.brewery.bukkit.recipe.BukkitRecipeResult;
-import dev.jsinco.brewery.brew.BrewQuality;
-import dev.jsinco.brewery.recipe.Recipe;
-import dev.jsinco.brewery.recipes.RecipeImpl;
-import dev.jsinco.brewery.recipes.RecipeRegistryImpl;
 import dev.jsinco.brewery.moment.Interval;
 import dev.jsinco.brewery.moment.Moment;
 import dev.jsinco.brewery.moment.PassedMoment;
+import dev.jsinco.brewery.recipe.Recipe;
+import dev.jsinco.brewery.recipes.RecipeImpl;
+import dev.jsinco.brewery.recipes.RecipeRegistryImpl;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.junit.jupiter.api.BeforeEach;
@@ -48,7 +45,7 @@ class BrewTest {
         setupRecipes();
         BrewImpl brew = new BrewImpl(
                 List.of(
-                        new BrewingStep.Cook(
+                        new CookStepImpl(
                                 new Interval(0, Interval.MINUTE * 10),
                                 Map.of(
                                         new SimpleIngredient(Material.WHEAT), 11,
@@ -56,8 +53,8 @@ class BrewTest {
                                 ),
                                 CauldronType.WATER
                         ),
-                        new BrewingStep.Distill(129),
-                        new BrewingStep.Age(
+                        new DistillStepImpl(129),
+                        new AgeStepImpl(
                                 new Interval(0, Interval.AGING_YEAR * 13),
                                 BarrelType.ACACIA
                         )
@@ -74,7 +71,7 @@ class BrewTest {
         setupRecipes();
         BrewImpl brew = new BrewImpl(
                 List.of(
-                        new BrewingStep.Cook(
+                        new CookStepImpl(
                                 new Interval(0, Interval.MINUTE * 10),
                                 Map.of(
                                         new SimpleIngredient(Material.WHEAT), 10,
@@ -82,8 +79,8 @@ class BrewTest {
                                 ),
                                 CauldronType.WATER
                         ),
-                        new BrewingStep.Distill(129),
-                        new BrewingStep.Age(
+                        new DistillStepImpl(129),
+                        new AgeStepImpl(
                                 new Interval(0, Interval.AGING_YEAR * 13),
                                 BarrelType.BAMBOO
                         )
@@ -100,7 +97,7 @@ class BrewTest {
         setupRecipes();
         BrewImpl brew = new BrewImpl(
                 List.of(
-                        new BrewingStep.Cook(
+                        new CookStepImpl(
                                 new Interval(0, Interval.MINUTE * 10),
                                 Map.of(
                                         new SimpleIngredient(Material.WHEAT), 10,
@@ -108,8 +105,8 @@ class BrewTest {
                                 ),
                                 CauldronType.LAVA
                         ),
-                        new BrewingStep.Distill(129),
-                        new BrewingStep.Age(
+                        new DistillStepImpl(129),
+                        new AgeStepImpl(
                                 new Interval(0, Interval.AGING_YEAR * 13),
                                 BarrelType.ACACIA
                         )
@@ -126,7 +123,7 @@ class BrewTest {
         setupRecipes();
         BrewImpl brew = new BrewImpl(
                 List.of(
-                        new BrewingStep.Cook(
+                        new CookStepImpl(
                                 new Interval(0, Interval.MINUTE * 10),
                                 Map.of(
                                         new SimpleIngredient(Material.WHEAT), 10,
@@ -134,8 +131,8 @@ class BrewTest {
                                 ),
                                 CauldronType.WATER
                         ),
-                        new BrewingStep.Distill(128),
-                        new BrewingStep.Age(
+                        new DistillStepImpl(128),
+                        new AgeStepImpl(
                                 new Interval(0, Interval.AGING_YEAR * 13),
                                 BarrelType.ACACIA
                         )
@@ -152,7 +149,7 @@ class BrewTest {
         setupRecipes();
         BrewImpl brew = new BrewImpl(
                 List.of(
-                        new BrewingStep.Cook(
+                        new CookStepImpl(
                                 new Interval(0, Interval.MINUTE * 11),
                                 Map.of(
                                         new SimpleIngredient(Material.WHEAT), 10,
@@ -160,8 +157,8 @@ class BrewTest {
                                 ),
                                 CauldronType.WATER
                         ),
-                        new BrewingStep.Distill(129),
-                        new BrewingStep.Age(
+                        new DistillStepImpl(129),
+                        new AgeStepImpl(
                                 new Interval(0, Interval.AGING_YEAR * 13),
                                 BarrelType.ACACIA
                         )
@@ -178,7 +175,7 @@ class BrewTest {
         setupRecipes();
         BrewImpl brew = new BrewImpl(
                 List.of(
-                        new BrewingStep.Cook(
+                        new CookStepImpl(
                                 new Interval(0, Interval.MINUTE * 10),
                                 Map.of(
                                         new SimpleIngredient(Material.WHEAT), 10,
@@ -186,8 +183,8 @@ class BrewTest {
                                 ),
                                 CauldronType.WATER
                         ),
-                        new BrewingStep.Distill(129),
-                        new BrewingStep.Age(
+                        new DistillStepImpl(129),
+                        new AgeStepImpl(
                                 new Interval(0, Interval.AGING_YEAR * 10),
                                 BarrelType.ACACIA
                         )
@@ -207,12 +204,12 @@ class BrewTest {
                 .recipeResult(BukkitRecipeResult.GENERIC)
                 .steps(
                         List.of(
-                                new BrewingStep.Cook(
+                                new CookStepImpl(
                                         new PassedMoment(8 * Moment.MINUTE),
                                         Map.of(new SimpleIngredient(Material.WHEAT), 3),
                                         CauldronType.WATER
                                 ),
-                                new BrewingStep.Age(
+                                new AgeStepImpl(
                                         new PassedMoment(2 * Moment.AGING_YEAR),
                                         BarrelType.BAMBOO
                                 )
@@ -221,12 +218,12 @@ class BrewTest {
                 .build();
         Brew brew = new BrewImpl(
                 List.of(
-                        new BrewingStep.Cook(
+                        new CookStepImpl(
                                 new PassedMoment(8 * Moment.MINUTE),
                                 Map.of(new SimpleIngredient(Material.WHEAT), 3),
                                 CauldronType.WATER
                         ),
-                        new BrewingStep.Age(
+                        new AgeStepImpl(
                                 new PassedMoment(2 * Moment.AGING_YEAR),
                                 BarrelType.BAMBOO
                         )
@@ -243,12 +240,12 @@ class BrewTest {
                 .recipeResult(BukkitRecipeResult.GENERIC)
                 .steps(
                         List.of(
-                                new BrewingStep.Cook(
+                                new CookStepImpl(
                                         new PassedMoment(8 * Moment.MINUTE),
                                         Map.of(new SimpleIngredient(Material.WHEAT), 3),
                                         CauldronType.WATER
                                 ),
-                                new BrewingStep.Age(
+                                new AgeStepImpl(
                                         new PassedMoment(2 * Moment.AGING_YEAR),
                                         BarrelType.BAMBOO
                                 )
@@ -259,12 +256,12 @@ class BrewTest {
         for (int i = 3; i < 10; i++) {
             BrewImpl brew = new BrewImpl(
                     List.of(
-                            new BrewingStep.Cook(
+                            new CookStepImpl(
                                     new PassedMoment(8 * Moment.MINUTE),
                                     Map.of(new SimpleIngredient(Material.WHEAT), i),
                                     CauldronType.WATER
                             ),
-                            new BrewingStep.Age(
+                            new AgeStepImpl(
                                     new PassedMoment(2 * Moment.AGING_YEAR),
                                     BarrelType.BAMBOO
                             )
@@ -286,12 +283,12 @@ class BrewTest {
                 .recipeResult(BukkitRecipeResult.GENERIC)
                 .steps(
                         List.of(
-                                new BrewingStep.Cook(
+                                new CookStepImpl(
                                         new PassedMoment(8 * Moment.MINUTE),
                                         Map.of(new SimpleIngredient(Material.WHEAT), 3),
                                         CauldronType.WATER
                                 ),
-                                new BrewingStep.Age(
+                                new AgeStepImpl(
                                         new PassedMoment(2 * Moment.AGING_YEAR),
                                         BarrelType.BAMBOO
                                 )
@@ -302,12 +299,12 @@ class BrewTest {
         for (int i = 3; i >= 0; i--) {
             BrewImpl brew = new BrewImpl(
                     List.of(
-                            new BrewingStep.Cook(
+                            new CookStepImpl(
                                     new PassedMoment(8 * Moment.MINUTE),
                                     Map.of(new SimpleIngredient(Material.WHEAT), i),
                                     CauldronType.WATER
                             ),
-                            new BrewingStep.Age(
+                            new AgeStepImpl(
                                     new PassedMoment(2 * Moment.AGING_YEAR),
                                     BarrelType.BAMBOO
                             )
@@ -327,7 +324,7 @@ class BrewTest {
                 .recipeResult(BukkitRecipeResult.GENERIC)
                 .steps(
                         List.of(
-                                new BrewingStep.Cook(
+                                new CookStepImpl(
                                         new PassedMoment(10 * Moment.MINUTE),
                                         Map.of(
                                                 new SimpleIngredient(Material.WHEAT), 10,
@@ -335,8 +332,8 @@ class BrewTest {
                                         ),
                                         CauldronType.WATER
                                 ),
-                                new BrewingStep.Distill(129),
-                                new BrewingStep.Age(
+                                new DistillStepImpl(129),
+                                new AgeStepImpl(
                                         new PassedMoment(13 * Moment.AGING_YEAR),
                                         BarrelType.ACACIA
                                 )
@@ -348,7 +345,7 @@ class BrewTest {
                 .recipeResult(BukkitRecipeResult.GENERIC)
                 .steps(
                         List.of(
-                                new BrewingStep.Cook(
+                                new CookStepImpl(
                                         new PassedMoment(10 * Moment.MINUTE),
                                         Map.of(
                                                 new SimpleIngredient(Material.WHEAT), 11,
@@ -356,8 +353,8 @@ class BrewTest {
                                         ),
                                         CauldronType.WATER
                                 ),
-                                new BrewingStep.Distill(129),
-                                new BrewingStep.Age(
+                                new DistillStepImpl(129),
+                                new AgeStepImpl(
                                         new PassedMoment(13 * Moment.AGING_YEAR),
                                         BarrelType.ACACIA
                                 )
@@ -369,7 +366,7 @@ class BrewTest {
                 .recipeResult(BukkitRecipeResult.GENERIC)
                 .steps(
                         List.of(
-                                new BrewingStep.Cook(
+                                new CookStepImpl(
                                         new PassedMoment(10 * Moment.MINUTE),
                                         Map.of(
                                                 new SimpleIngredient(Material.WHEAT), 10,
@@ -377,8 +374,8 @@ class BrewTest {
                                         ),
                                         CauldronType.WATER
                                 ),
-                                new BrewingStep.Distill(129),
-                                new BrewingStep.Age(
+                                new DistillStepImpl(129),
+                                new AgeStepImpl(
                                         new PassedMoment(13 * Moment.AGING_YEAR),
                                         BarrelType.BAMBOO
                                 )
@@ -390,7 +387,7 @@ class BrewTest {
                 .recipeResult(BukkitRecipeResult.GENERIC)
                 .steps(
                         List.of(
-                                new BrewingStep.Cook(
+                                new CookStepImpl(
                                         new PassedMoment(10 * Moment.MINUTE),
                                         Map.of(
                                                 new SimpleIngredient(Material.WHEAT), 10,
@@ -398,8 +395,8 @@ class BrewTest {
                                         ),
                                         CauldronType.LAVA
                                 ),
-                                new BrewingStep.Distill(129),
-                                new BrewingStep.Age(
+                                new DistillStepImpl(129),
+                                new AgeStepImpl(
                                         new PassedMoment(13 * Moment.AGING_YEAR),
                                         BarrelType.ACACIA
                                 )
@@ -411,7 +408,7 @@ class BrewTest {
                 .recipeResult(BukkitRecipeResult.GENERIC)
                 .steps(
                         List.of(
-                                new BrewingStep.Cook(
+                                new CookStepImpl(
                                         new PassedMoment(10 * Moment.MINUTE),
                                         Map.of(
                                                 new SimpleIngredient(Material.WHEAT), 10,
@@ -419,8 +416,8 @@ class BrewTest {
                                         ),
                                         CauldronType.WATER
                                 ),
-                                new BrewingStep.Distill(128),
-                                new BrewingStep.Age(
+                                new DistillStepImpl(128),
+                                new AgeStepImpl(
                                         new PassedMoment(13 * Moment.AGING_YEAR),
                                         BarrelType.ACACIA
                                 )
@@ -432,7 +429,7 @@ class BrewTest {
                 .recipeResult(BukkitRecipeResult.GENERIC)
                 .steps(
                         List.of(
-                                new BrewingStep.Cook(
+                                new CookStepImpl(
                                         new PassedMoment(11 * Moment.MINUTE),
                                         Map.of(
                                                 new SimpleIngredient(Material.WHEAT), 10,
@@ -440,8 +437,8 @@ class BrewTest {
                                         ),
                                         CauldronType.WATER
                                 ),
-                                new BrewingStep.Distill(129),
-                                new BrewingStep.Age(
+                                new DistillStepImpl(129),
+                                new AgeStepImpl(
                                         new PassedMoment(13 * Moment.AGING_YEAR),
                                         BarrelType.ACACIA
                                 )
@@ -453,7 +450,7 @@ class BrewTest {
                 .recipeResult(BukkitRecipeResult.GENERIC)
                 .steps(
                         List.of(
-                                new BrewingStep.Cook(
+                                new CookStepImpl(
                                         new PassedMoment(10 * Moment.MINUTE),
                                         Map.of(
                                                 new SimpleIngredient(Material.WHEAT), 10,
@@ -461,8 +458,8 @@ class BrewTest {
                                         ),
                                         CauldronType.WATER
                                 ),
-                                new BrewingStep.Distill(129),
-                                new BrewingStep.Age(
+                                new DistillStepImpl(129),
+                                new AgeStepImpl(
                                         new PassedMoment(10 * Moment.AGING_YEAR),
                                         BarrelType.ACACIA
                                 )

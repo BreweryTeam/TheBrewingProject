@@ -1,8 +1,9 @@
 package dev.jsinco.brewery.bukkit.brews;
 
+import dev.jsinco.brewery.brew.AgeStepImpl;
 import dev.jsinco.brewery.brew.Brew;
 import dev.jsinco.brewery.brew.BrewImpl;
-import dev.jsinco.brewery.brew.BrewingStep;
+import dev.jsinco.brewery.brew.CookStepImpl;
 import dev.jsinco.brewery.breweries.BarrelType;
 import dev.jsinco.brewery.breweries.CauldronType;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
@@ -10,11 +11,11 @@ import dev.jsinco.brewery.bukkit.brew.BukkitBarrelBrewDataType;
 import dev.jsinco.brewery.bukkit.ingredient.SimpleIngredient;
 import dev.jsinco.brewery.database.PersistenceException;
 import dev.jsinco.brewery.database.sql.Database;
+import dev.jsinco.brewery.moment.Interval;
+import dev.jsinco.brewery.moment.PassedMoment;
 import dev.jsinco.brewery.util.DecoderEncoder;
 import dev.jsinco.brewery.util.FileUtil;
 import dev.jsinco.brewery.util.Pair;
-import dev.jsinco.brewery.moment.Interval;
-import dev.jsinco.brewery.moment.PassedMoment;
 import dev.jsinco.brewery.vector.BreweryLocation;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -56,14 +57,14 @@ class BukkitBarrelBrewDataTypeTest {
         BreweryLocation searchObject = new BreweryLocation(1, 2, 3, world.getUID());
         BrewImpl brew1 = new BrewImpl(
                 List.of(
-                        new BrewingStep.Cook(new PassedMoment(10), Map.of(new SimpleIngredient(Material.ACACIA_BUTTON), 3), CauldronType.WATER),
-                        new BrewingStep.Age(new Interval(1010, 1010), BarrelType.ACACIA)
+                        new CookStepImpl(new PassedMoment(10), Map.of(new SimpleIngredient(Material.ACACIA_BUTTON), 3), CauldronType.WATER),
+                        new AgeStepImpl(new Interval(1010, 1010), BarrelType.ACACIA)
                 )
         );
         BrewImpl brew2 = new BrewImpl(
                 List.of(
-                        new BrewingStep.Cook(new PassedMoment(10), Map.of(new SimpleIngredient(Material.ACACIA_BUTTON), 3), CauldronType.WATER),
-                        new BrewingStep.Age(new Interval(1010, 1010), BarrelType.ACACIA)
+                        new CookStepImpl(new PassedMoment(10), Map.of(new SimpleIngredient(Material.ACACIA_BUTTON), 3), CauldronType.WATER),
+                        new AgeStepImpl(new Interval(1010, 1010), BarrelType.ACACIA)
                 )
         );
         BukkitBarrelBrewDataType.BarrelContext barrelContext1 = new BukkitBarrelBrewDataType.BarrelContext(1, 2, 3, 0, world.getUID());

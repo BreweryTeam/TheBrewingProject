@@ -1,8 +1,6 @@
 package dev.jsinco.brewery.bukkit.breweries;
 
-import dev.jsinco.brewery.brew.Brew;
-import dev.jsinco.brewery.brew.BrewImpl;
-import dev.jsinco.brewery.brew.BrewingStep;
+import dev.jsinco.brewery.brew.*;
 import dev.jsinco.brewery.breweries.CauldronType;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.bukkit.brew.BrewAdapter;
@@ -113,7 +111,7 @@ public class BukkitCauldron implements dev.jsinco.brewery.breweries.Cauldron {
                         ingredients.put(ingredient, amount + 1);
                         return cook.withIngredients(ingredients);
                     },
-                    () -> new BrewingStep.Cook(new Interval(time, time), Map.of(BukkitIngredientManager.INSTANCE.getIngredient(item), 1), findCauldronType(getBlock()))
+                    () -> new CookStepImpl(new Interval(time, time), Map.of(BukkitIngredientManager.INSTANCE.getIngredient(item), 1), findCauldronType(getBlock()))
             );
         } else {
             brew = brew.withLastStep(BrewingStep.Mix.class,
@@ -123,7 +121,7 @@ public class BukkitCauldron implements dev.jsinco.brewery.breweries.Cauldron {
                         ingredients.put(ingredient, amount + 1);
                         return mix.withIngredients(ingredients);
                     },
-                    () -> new BrewingStep.Mix(new Interval(time, time), Map.of(BukkitIngredientManager.INSTANCE.getIngredient(item), 1))
+                    () -> new MixStepImpl(new Interval(time, time), Map.of(BukkitIngredientManager.INSTANCE.getIngredient(item), 1))
             );
         }
 
@@ -174,7 +172,7 @@ public class BukkitCauldron implements dev.jsinco.brewery.breweries.Cauldron {
     }
 
     public void playBrewExtractedEffects() {
-        BukkitAdapter.toWorld(location).ifPresent(world  -> world.playSound(
+        BukkitAdapter.toWorld(location).ifPresent(world -> world.playSound(
                 Sound.sound().source(Sound.Source.BLOCK).type(Key.key("minecraft:item.bottle.fill")).build(),
                 location.x() + 0.5, location.y() + 1, location.z() + 0.5
         ));
@@ -213,11 +211,11 @@ public class BukkitCauldron implements dev.jsinco.brewery.breweries.Cauldron {
         if (hot) {
             brew = brew.withLastStep(BrewingStep.Cook.class,
                     cook -> cook.withBrewTime(cook.brewTime().withLastStep(time)),
-                    () -> new BrewingStep.Cook(new Interval(time, time), Map.of(), findCauldronType(getBlock())));
+                    () -> new CookStepImpl(new Interval(time, time), Map.of(), findCauldronType(getBlock())));
         } else {
             brew = brew.withLastStep(BrewingStep.Mix.class,
                     mix -> mix.withTime(mix.time().withLastStep(time)),
-                    () -> new BrewingStep.Mix(new Interval(time, time), Map.of())
+                    () -> new MixStepImpl(new Interval(time, time), Map.of())
             );
         }
     }

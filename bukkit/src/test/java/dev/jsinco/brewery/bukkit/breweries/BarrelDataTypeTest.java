@@ -1,7 +1,8 @@
 package dev.jsinco.brewery.bukkit.breweries;
 
+import dev.jsinco.brewery.brew.AgeStepImpl;
 import dev.jsinco.brewery.brew.BrewImpl;
-import dev.jsinco.brewery.brew.BrewingStep;
+import dev.jsinco.brewery.brew.CookStepImpl;
 import dev.jsinco.brewery.breweries.BarrelType;
 import dev.jsinco.brewery.breweries.CauldronType;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
@@ -66,15 +67,15 @@ class BarrelDataTypeTest {
         BrewInventory inventory = barrel.getInventory();
         inventory.set(new BrewImpl(
                 List.of(
-                        new BrewingStep.Cook(new PassedMoment(10), Map.of(), CauldronType.WATER),
-                        new BrewingStep.Age(new Interval(10, 10), BarrelType.OAK)
+                        new CookStepImpl(new PassedMoment(10), Map.of(), CauldronType.WATER),
+                        new AgeStepImpl(new Interval(10, 10), BarrelType.OAK)
                 )
         ), 4);
         inventory.set(
                 new BrewImpl(
                         List.of(
-                                new BrewingStep.Cook(new PassedMoment(10), Map.of(), CauldronType.WATER),
-                                new BrewingStep.Age(new Interval(10, 10), BarrelType.OAK)
+                                new CookStepImpl(new PassedMoment(10), Map.of(), CauldronType.WATER),
+                                new AgeStepImpl(new Interval(10, 10), BarrelType.OAK)
                         )
                 ), 5
         );
