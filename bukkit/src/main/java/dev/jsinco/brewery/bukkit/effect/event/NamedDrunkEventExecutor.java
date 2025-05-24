@@ -96,7 +96,7 @@ public class NamedDrunkEventExecutor {
             }
             case DRUNKEN_WALK -> {
                 int duration = RANDOM.nextInt(DRUNKEN_WALK_DURATION / 2, DRUNKEN_WALK_DURATION * 3 / 2);
-                DrunkenWalkHandler drunkenWalkHandler = new DrunkenWalkHandler(duration, player, TheBrewingProject.getInstance().getDrunksManager());
+                DrunkenWalkHandler drunkenWalkHandler = new DrunkenWalkHandler(duration, player);
                 Bukkit.getScheduler().runTaskTimer(TheBrewingProject.getInstance(), drunkenWalkHandler::tick, 0, 1);
                 TheBrewingProject.getInstance().getActiveEventsRegistry().registerActiveEvent(playerUuid, event, duration);
             }

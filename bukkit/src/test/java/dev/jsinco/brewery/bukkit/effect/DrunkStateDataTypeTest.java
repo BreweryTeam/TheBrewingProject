@@ -30,10 +30,10 @@ class DrunkStateDataTypeTest {
     @Test
     void checkPersistence() throws PersistenceException {
         UUID uuid = UUID.randomUUID();
-        DrunkStateImpl drunkState = new DrunkStateImpl(10, 20, 0, 11, 22);
+        DrunkStateImpl drunkState = new DrunkStateImpl(10, 20, 11, 22);
         database.insertValue(SqlDrunkStateDataType.INSTANCE, new Pair<>(drunkState, uuid));
         assertTrue(database.retrieveAllNow(SqlDrunkStateDataType.INSTANCE).contains(new Pair<>(drunkState, uuid)));
-        DrunkStateImpl drunkState2 = new DrunkStateImpl(20, 30, 0, 22, 33);
+        DrunkStateImpl drunkState2 = new DrunkStateImpl(20, 30, 22, 33);
         database.updateValue(SqlDrunkStateDataType.INSTANCE, new Pair<>(drunkState2, uuid));
         assertTrue(database.retrieveAllNow(SqlDrunkStateDataType.INSTANCE).contains(new Pair<>(drunkState2, uuid)));
         assertFalse(database.retrieveAllNow(SqlDrunkStateDataType.INSTANCE).contains(new Pair<>(drunkState, uuid)));

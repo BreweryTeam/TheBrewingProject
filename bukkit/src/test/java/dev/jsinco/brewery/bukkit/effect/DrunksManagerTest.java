@@ -41,9 +41,9 @@ class DrunksManagerTest {
     @Test
     void consume() {
         drunksManager.consume(playerUuid, 10, 0, 0);
-        assertEquals(new DrunkStateImpl(10, 0, 0, 0, -1), drunksManager.getDrunkState(playerUuid));
+        assertEquals(new DrunkStateImpl(10, 0, 0, -1), drunksManager.getDrunkState(playerUuid));
         drunksManager.consume(playerUuid, 0, 0, 400);
-        assertEquals(new DrunkStateImpl(8, 0, 0, 400, -1), drunksManager.getDrunkState(playerUuid));
+        assertEquals(new DrunkStateImpl(8, 0, 400, -1), drunksManager.getDrunkState(playerUuid));
         drunksManager.consume(playerUuid, -9, 0, 0);
         assertNull(drunksManager.getDrunkState(playerUuid));
         drunksManager.consume(playerUuid, -10, 20, 0);
