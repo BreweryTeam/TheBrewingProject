@@ -127,20 +127,14 @@ bukkit {
                 "brewery.distillery.create" to true
             )
         }
-        register("brewery.command.create") {
-        }
-        register("brewery.command.status") {
-        }
-        register("brewery.command.event") {
-        }
-        register("brewery.command.reload") {
-        }
-        register("brewery.command.info") {
-        }
-        register("brewery.command.seal") {
-        }
-        register("brewery.command.other") {
-        }
+        register("brewery.command.create")
+        register("brewery.command.status")
+        register("brewery.command.event")
+        register("brewery.command.reload")
+        register("brewery.command.info")
+        register("brewery.command.seal")
+        register("brewery.command.other")
+        register("brewery.command.replicate")
         register("brewery.command") {
             childrenMap = mapOf(
                 "brewery.command.create" to true,
@@ -149,7 +143,8 @@ bukkit {
                 "brewery.command.reload" to true,
                 "brewery.command.info" to true,
                 "brewery.command.seal" to true,
-                "brewery.command.other" to true
+                "brewery.command.other" to true,
+                "brewery.command.replicate" to true,
             )
             default = BukkitPluginDescription.Permission.Default.OP
         }

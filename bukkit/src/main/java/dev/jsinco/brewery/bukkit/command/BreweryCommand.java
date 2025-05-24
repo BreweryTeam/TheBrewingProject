@@ -62,6 +62,10 @@ public class BreweryCommand {
                         .then(eventCommand)
                         .then(playerBranch(argument -> argument.then(eventCommand)))
                         .requires(commandSourceStack -> commandSourceStack.getSender().hasPermission("brewery.command.event"))
+                ).then(Commands.literal("replicate")
+                        .then(playerBranch(argument -> argument.then(ReplicateCommand.command())))
+                        .then(ReplicateCommand.command())
+                        .requires(commandSourceStack -> commandSourceStack.getSender().hasPermission("brewery.command.replicate"))
                 )
                 .build(), List.of("brew", "brewery"));
     }
