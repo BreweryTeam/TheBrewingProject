@@ -14,8 +14,7 @@ import org.mockbukkit.mockbukkit.MockBukkitInject;
 import org.mockbukkit.mockbukkit.ServerMock;
 import org.mockbukkit.mockbukkit.entity.PlayerMock;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(MockBukkitExtension.class)
 class BreweryCommandTest {
@@ -65,7 +64,6 @@ class BreweryCommandTest {
         assertEquals(20, drunkState.toxins());
         target.performCommand("tbp status clear");
         drunkState = TheBrewingProject.getInstance().getDrunksManager().getDrunkState(target.getUniqueId());
-        assertEquals(0, drunkState.alcohol());
-        assertEquals(0, drunkState.toxins());
+        assertNull(drunkState);
     }
 }
