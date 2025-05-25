@@ -15,7 +15,7 @@ public class IngredientsArgument implements CustomArgumentType.Converted<Map<Ing
     public Map<Ingredient, Integer> convert(String nativeType) throws CommandSyntaxException {
         return BukkitIngredientManager.INSTANCE.getIngredientsWithAmount(
                 Arrays.asList(nativeType.split(","))
-        );
+        ).join();
     }
 
     @Override
