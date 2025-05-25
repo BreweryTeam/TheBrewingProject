@@ -20,6 +20,7 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 
 public class RecipeReader<I> {
@@ -59,7 +60,9 @@ public class RecipeReader<I> {
         return FutureUtil.mergeFutures(futures)
                 .thenApplyAsync(recipes -> {
                     ImmutableMap.Builder<String, Recipe<I>> recipesMap = new ImmutableMap.Builder<>();
-                    recipes.forEach(recipe -> recipesMap.put(recipe.getRecipeName(), recipe));
+                    recipes.stream()
+                            .filter(Objects::nonNull)
+                            .forEach(recipe -> recipesMap.put(recipe.getRecipeName(), recipe));
                     return recipesMap.build();
                 });
     }
