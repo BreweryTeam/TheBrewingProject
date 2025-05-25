@@ -20,7 +20,7 @@ class DrunkenWalkHandler {
     private final Player player;
     private Vector currentPush;
 
-    private static int DIRECTION_INTERVAL = 40;
+    private static int DIRECTION_INTERVAL = 20;
     private static double MINIMUM_PUSH_MAGNITUDE = 0.1;
     private static double MAXIMUM_PUSH_MAGNITUDE = 0.4;
     private static final Random RANDOM = new Random();
