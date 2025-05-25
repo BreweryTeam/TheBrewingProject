@@ -98,6 +98,7 @@ public class BukkitBarrel implements Barrel<BukkitBarrel, ItemStack, Inventory> 
 
     @Override
     public void tickInventory() {
+        Brew[] previousBrews = Arrays.copyOf(inventory.getBrews(), inventory.getBrews().length);
         inventory.updateBrewsFromInventory();
         if (!inventory.getInventory().getViewers().isEmpty()) {
             this.recentlyAccessed = TheBrewingProject.getInstance().getTime();
@@ -112,11 +113,16 @@ public class BukkitBarrel implements Barrel<BukkitBarrel, ItemStack, Inventory> 
             if (brew.lastStep() instanceof BrewingStep.Age age && age.barrelType() != type) {
                 brew = brew.withStep(new AgeStepImpl(new Interval(time, time), this.type));
             }
-            brews[i] = brew.withLastStep(BrewingStep.Age.class, age -> {
-                Moment moment = age.age();
-                Interval interval = moment instanceof Interval interval1 ? interval1.withLastStep(time) : new Interval(time - moment.moment(), time);
-                return age.withAge(interval);
-            }, () -> new AgeStepImpl(new Interval(time, time), this.type));
+            if (Objects.equals(previousBrews[i], brew)) {
+                brews[i] = brew.withLastStep(BrewingStep.Age.class,
+                        age -> age.withAge(age.age().withLastStep(time)),
+                        () -> new AgeStepImpl(new Interval(time, time), this.type));
+            } else {
+                brews[i] = brew.withLastStep(BrewingStep.Age.class,
+                        age -> age.withAge(age.age().withMovedEnding(time)),
+                        () -> new AgeStepImpl(new Interval(time, time), this.type));
+            }
+
         }
         inventory.updateInventoryFromBrews();
         if (inventoryUnpopulated()) {
