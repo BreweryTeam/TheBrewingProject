@@ -164,7 +164,7 @@ public class BukkitRecipeResult implements RecipeResult<ItemStack> {
     }
 
     private void addLastStepLore(Brew brew, Stream.Builder<Component> streamBuilder, BrewQuality quality, BrewScore score) {
-        BrewingStep brewingStep = brew.lastStep();
+        BrewingStep brewingStep = brew.lastCompletedStep();
         streamBuilder.add(MiniMessage.miniMessage().deserialize(
                 TranslationsConfig.BREW_TOOLTIP.get(brewingStep.stepType().name().toLowerCase(Locale.ROOT)),
                 MessageUtil.getBrewStepTagResolver(brewingStep, score.getPartialScores(brew.getCompletedSteps().size() - 1), score.brewDifficulty()))

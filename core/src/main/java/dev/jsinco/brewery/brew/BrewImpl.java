@@ -107,7 +107,18 @@ public class BrewImpl implements Brew {
         return Optional.ofNullable(score(recipe).brewQuality());
     }
 
-    public BrewingStep lastStep() {
+    @Override
+    public @NotNull BrewingStep lastCompletedStep() {
+        for (int i = steps.size() - 1; i >= 0; i--) {
+            BrewingStep step = steps.get(i);
+            if (isCompleted(step)) {
+                return step;
+            }
+        }
+        throw new IndexOutOfBoundsException();
+    }
+
+    public @NotNull BrewingStep lastStep() {
         return steps.getLast();
     }
 

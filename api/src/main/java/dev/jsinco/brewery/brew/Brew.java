@@ -20,6 +20,8 @@ public interface Brew {
 
     Optional<BrewQuality> quality(Recipe<?> recipe);
 
+    BrewingStep lastCompletedStep();
+
     BrewingStep lastStep();
 
     Brew withStep(BrewingStep step);
