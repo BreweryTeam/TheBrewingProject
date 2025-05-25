@@ -154,8 +154,9 @@ public class BukkitDistillery implements Distillery<BukkitDistillery, ItemStack,
         BreweryLocation unique = getStructure().getUnique();
         long timeProcessed = getTimeProcessed();
         long processTime = getProcessTime();
+        int processedBrews = (int) ((timeProcessed / processTime) * getStructure().getStructure().getMeta(StructureMeta.PROCESS_AMOUNT));
         if (!BlockUtil.isChunkLoaded(unique)
-                || mixture.brewAmount() < (timeProcessed / processTime) * getStructure().getStructure().getMeta(StructureMeta.PROCESS_AMOUNT)
+                || mixture.brewAmount() < processedBrews
                 || distillate.isFull()) {
             return;
         }
@@ -169,7 +170,7 @@ public class BukkitDistillery implements Distillery<BukkitDistillery, ItemStack,
                             unique.x(), unique.y(), unique.z()
                     ));
         }
-        if (timeProcessed % (processTime / 4) < processTime / 16) {
+        if (timeProcessed % (processTime / 4) < processTime / 16 && mixture.brewAmount() > processedBrews) {
             distillateContainerLocations.stream()
                     .map(BukkitAdapter::toLocation)
                     .map(location -> location.add(0.5, 1.3, 0.5))
