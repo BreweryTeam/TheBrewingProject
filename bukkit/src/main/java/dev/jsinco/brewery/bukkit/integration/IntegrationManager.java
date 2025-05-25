@@ -1,6 +1,6 @@
 package dev.jsinco.brewery.bukkit.integration;
 
-import dev.jsinco.brewery.bukkit.integration.integrations.structure.WorldGuardHook;
+import dev.jsinco.brewery.bukkit.integration.structure.*;
 import dev.jsinco.brewery.bukkit.integration.item.CraftEngineHook;
 import dev.jsinco.brewery.bukkit.integration.item.ItemsAdderHook;
 import dev.jsinco.brewery.bukkit.integration.item.NexoHook;
@@ -19,6 +19,11 @@ public class IntegrationManager {
 
     public void init() {
         register(IntegrationType.STRUCTURE, new WorldGuardHook());
+        register(IntegrationType.STRUCTURE, new BoltHook());
+        register(IntegrationType.STRUCTURE, new GriefPreventionHook());
+        register(IntegrationType.STRUCTURE, new HuskClaimsHook());
+        register(IntegrationType.STRUCTURE, new LandsHook());
+        register(IntegrationType.STRUCTURE, new TownyHook());
         register(IntegrationType.ITEM, new CraftEngineHook());
         register(IntegrationType.ITEM, new ItemsAdderHook());
         register(IntegrationType.ITEM, new NexoHook());

@@ -1,5 +1,7 @@
 package dev.jsinco.brewery.bukkit.integration.structure;
 
+import dev.jsinco.brewery.bukkit.integration.StructureIntegration;
+import dev.jsinco.brewery.util.ClassUtil;
 import me.ryanhamshire.GriefPrevention.Claim;
 import me.ryanhamshire.GriefPrevention.ClaimPermission;
 import me.ryanhamshire.GriefPrevention.GriefPrevention;
@@ -9,20 +11,11 @@ import org.bukkit.entity.Player;
 
 import java.util.function.Supplier;
 
-public class GriefPreventionHook {
+public class GriefPreventionHook implements StructureIntegration {
 
-    private static final boolean ENABLED = checkAvailable();
+    private static final boolean ENABLED = ClassUtil.exists("me.ryanhamshire.GriefPrevention.GriefPrevention");
 
-    private static boolean checkAvailable() {
-        try {
-            Class.forName("me.ryanhamshire.GriefPrevention.GriefPrevention");
-            return true;
-        } catch (ClassNotFoundException e) {
-            return false;
-        }
-    }
-
-    public static boolean hasAccess(Block block, Player player) {
+    public boolean hasAccess(Block block, Player player) {
         if (!ENABLED) {
             return true;
         }
@@ -53,5 +46,20 @@ public class GriefPreventionHook {
             playerData.pvpImmune = false;
         }
         return true;
+    }
+
+    @Override
+    public boolean enabled() {
+        return ENABLED;
+    }
+
+    @Override
+    public String getId() {
+        return "griefprevention";
+    }
+
+    @Override
+    public void initialize() {
+
     }
 }

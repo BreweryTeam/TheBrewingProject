@@ -2,26 +2,34 @@ package dev.jsinco.brewery.bukkit.integration.structure;
 
 import com.palmergames.bukkit.towny.object.TownyPermission;
 import com.palmergames.bukkit.towny.utils.PlayerCacheUtil;
+import dev.jsinco.brewery.bukkit.integration.StructureIntegration;
+import dev.jsinco.brewery.util.ClassUtil;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 
-public class TownyHook {
+public class TownyHook implements StructureIntegration {
 
-    private static final boolean ENABLED = checkAvailable();
+    private static final boolean ENABLED = ClassUtil.exists("com.palmergames.bukkit.towny.utils.PlayerCacheUtil");
 
-    private static boolean checkAvailable() {
-        try {
-            Class.forName("com.palmergames.bukkit.towny.utils.PlayerCacheUtil");
-            return true;
-        } catch (ClassNotFoundException e) {
-            return false;
-        }
-    }
-
-    public static boolean hasAccess(Block block, Player player) {
+    public boolean hasAccess(Block block, Player player) {
         if (!ENABLED) {
             return true;
         }
         return PlayerCacheUtil.getCachePermission(player, block.getLocation(), block.getType(), TownyPermission.ActionType.SWITCH);
+    }
+
+    @Override
+    public boolean enabled() {
+        return ENABLED;
+    }
+
+    @Override
+    public String getId() {
+        return "towny";
+    }
+
+    @Override
+    public void initialize() {
+
     }
 }

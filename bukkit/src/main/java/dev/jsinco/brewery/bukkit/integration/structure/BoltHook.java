@@ -1,8 +1,10 @@
 package dev.jsinco.brewery.bukkit.integration.structure;
 
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
+import dev.jsinco.brewery.bukkit.integration.StructureIntegration;
 import dev.jsinco.brewery.bukkit.util.BukkitAdapter;
 import dev.jsinco.brewery.structure.MultiblockStructure;
+import dev.jsinco.brewery.util.ClassUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
@@ -11,21 +13,13 @@ import org.popcraft.bolt.BoltAPI;
 import java.util.List;
 import java.util.Optional;
 
-public class BoltHook {
+public class BoltHook implements StructureIntegration {
 
-    private static final boolean ENABLED = checkAvailable();
+    private static final boolean ENABLED = ClassUtil.exists("org.popcraft.bolt.BoltAPI");
     private static BoltAPI boltAPI;
 
-    private static boolean checkAvailable() {
-        try {
-            Class.forName("org.popcraft.bolt.BoltAPI");
-            return true;
-        } catch (ClassNotFoundException e) {
-            return false;
-        }
-    }
 
-    public static boolean hasAccess(Block block, Player player) {
+    public boolean hasAccess(Block block, Player player) {
         if (!ENABLED) {
             return true;
         }
@@ -42,7 +36,18 @@ public class BoltHook {
                 && boltAPI.canAccess(block, player);
     }
 
-    public static void initiate() {
+    @Override
+    public boolean enabled() {
+        return ENABLED;
+    }
+
+    @Override
+    public String getId() {
+        return "bolt";
+    }
+
+    @Override
+    public void initialize() {
         if (!ENABLED) {
             return;
         }
