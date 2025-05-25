@@ -51,7 +51,11 @@ public class RecipeReader<I> {
                 .map(key -> getRecipe(recipesSection.getConfigurationSection(key), key).handleAsync((recipe, exception) -> {
                     if (exception != null) {
                         Logging.error("Exception when reading recipe: " + key);
-                        exception.printStackTrace();
+                        if (exception.getCause() != null) {
+                            exception.getCause().printStackTrace();
+                        } else {
+                            exception.printStackTrace();
+                        }
                         return null;
                     }
                     return recipe;
