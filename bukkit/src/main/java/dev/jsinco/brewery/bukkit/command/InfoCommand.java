@@ -75,7 +75,7 @@ public class InfoCommand {
                         MiniMessage.miniMessage().deserialize(TranslationsConfig.COMMAND_INFO_BREW_MESSAGE,
                                 MessageUtil.getScoreTagResolver(brew.closestRecipe(TheBrewingProject.getInstance().getRecipeRegistry())
                                         .map(brew::score)
-                                        .orElse(BrewScoreImpl.NONE)),
+                                        .orElse(BrewScoreImpl.failed(brew))),
                                 Placeholder.component("brewing_step_info", MessageUtil.compileBrewInfo(brew, true, TheBrewingProject.getInstance().getRecipeRegistry())
                                         .collect(Component.toComponent(Component.text("\n")))
                                 )

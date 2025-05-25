@@ -84,7 +84,7 @@ public class BrewImpl implements Brew {
         List<List<PartialBrewScore>> scores = new ArrayList<>();
         List<BrewingStep> completedSteps = getCompletedSteps();
         if (completedSteps.size() > recipeSteps.size()) {
-            return BrewScoreImpl.NONE;
+            return BrewScoreImpl.failed(this);
         }
         for (int i = 0; i < completedSteps.size(); i++) {
             BrewingStep recipeStep = recipeSteps.get(i);

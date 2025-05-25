@@ -1,8 +1,6 @@
 package dev.jsinco.brewery.recipes;
 
-import dev.jsinco.brewery.brew.BrewQuality;
-import dev.jsinco.brewery.brew.BrewScore;
-import dev.jsinco.brewery.brew.PartialBrewScore;
+import dev.jsinco.brewery.brew.*;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -10,7 +8,6 @@ import java.util.List;
 public class BrewScoreImpl implements BrewScore {
 
     public static final BrewScoreImpl EXCELLENT = new BrewScoreImpl(1D);
-    public static final BrewScoreImpl NONE = new BrewScoreImpl(0D);
     private static final char FULL_STAR = '\u2605';
     private static final char HALF_STAR = '\u2BEA';
     private static final char EMPTY_STAR = '\u2606';
@@ -19,14 +16,21 @@ public class BrewScoreImpl implements BrewScore {
     private final boolean completed;
     private final double brewDifficulty;
 
-    public @Nullable BrewQuality brewQuality() {
-        return quality(score());
+    public BrewScoreImpl(double score) {
+        this.scores = List.of(List.of(new PartialBrewScore(score, PartialBrewScore.Type.TIME)));
+        completed = true;
+        brewDifficulty = 1;
     }
 
-    private BrewScoreImpl(double score) {
-        this.scores = List.of(List.of(new PartialBrewScore(score, PartialBrewScore.Type.TIME)));
-        this.completed = true;
-        this.brewDifficulty = 1;
+    public static BrewScoreImpl failed(Brew brew) {
+        List<List<PartialBrewScore>> scores = brew.getCompletedSteps()
+                .stream().map(BrewingStep::failedScores)
+                .toList();
+        return new BrewScoreImpl(scores, true, 1);
+    }
+
+    public @Nullable BrewQuality brewQuality() {
+        return quality(score());
     }
 
     public BrewScoreImpl(List<List<PartialBrewScore>> scores, boolean completed, double brewDifficulty) {

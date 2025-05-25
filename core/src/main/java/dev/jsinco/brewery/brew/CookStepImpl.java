@@ -59,4 +59,9 @@ public record CookStepImpl(Moment brewTime, Map<? extends Ingredient, Integer> i
                 new PartialBrewScore(ingredientsScore, PartialBrewScore.Type.INGREDIENTS)
         );
     }
+
+    @Override
+    public List<PartialBrewScore> failedScores() {
+        return BREW_STEP_MISMATCH;
+    }
 }

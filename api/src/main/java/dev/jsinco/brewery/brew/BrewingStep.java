@@ -22,6 +22,8 @@ public interface BrewingStep {
 
     List<PartialBrewScore> maximumScores(BrewingStep other);
 
+    List<PartialBrewScore> failedScores();
+
     interface Cook extends BrewingStep {
         Moment brewTime();
 

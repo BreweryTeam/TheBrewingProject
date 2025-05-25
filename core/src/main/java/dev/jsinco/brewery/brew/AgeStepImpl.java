@@ -9,7 +9,7 @@ public record AgeStepImpl(Moment age, BarrelType barrelType) implements BrewingS
 
     private static final List<PartialBrewScore> BREW_STEP_MISMATCH = List.of(
             new PartialBrewScore(0, PartialBrewScore.Type.TIME),
-            new PartialBrewScore(0, PartialBrewScore.Type.INGREDIENTS)
+            new PartialBrewScore(0, PartialBrewScore.Type.BARREL_TYPE)
     );
 
     public AgeStepImpl withAge(Moment age) {
@@ -45,5 +45,10 @@ public record AgeStepImpl(Moment age, BarrelType barrelType) implements BrewingS
                 new PartialBrewScore(timeScore, PartialBrewScore.Type.TIME),
                 new PartialBrewScore(barrelTypeScore, PartialBrewScore.Type.BARREL_TYPE)
         );
+    }
+
+    @Override
+    public List<PartialBrewScore> failedScores() {
+        return BREW_STEP_MISMATCH;
     }
 }

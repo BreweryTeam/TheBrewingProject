@@ -34,4 +34,9 @@ public record DistillStepImpl(int runs) implements BrewingStep.Distill {
         double maximumDistillScore = runs1 < this.runs ? 1D : BrewingStepUtil.nearbyValueScore(this.runs, runs1);
         return List.of(new PartialBrewScore(maximumDistillScore, PartialBrewScore.Type.DISTILL_AMOUNT));
     }
+
+    @Override
+    public List<PartialBrewScore> failedScores() {
+        return BREW_STEP_MISMATCH;
+    }
 }

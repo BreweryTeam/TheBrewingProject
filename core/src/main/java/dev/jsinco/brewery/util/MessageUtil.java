@@ -107,7 +107,7 @@ public class MessageUtil {
     public static @NotNull Stream<Component> compileBrewInfo(Brew brew, boolean detailed, RecipeRegistry<?> registry) {
         BrewScore score = brew.closestRecipe(registry)
                 .map(brew::score)
-                .orElse(BrewScoreImpl.NONE);
+                .orElse(BrewScoreImpl.failed(brew));
         return compileBrewInfo(brew, score, detailed);
     }
 

@@ -50,6 +50,11 @@ public record MixStepImpl(Moment time, Map<? extends Ingredient, Integer> ingred
     }
 
     @Override
+    public List<PartialBrewScore> failedScores() {
+        return BREW_STEP_MISMATCH;
+    }
+
+    @Override
     public MixStepImpl withTime(Moment time) {
         return new MixStepImpl(time, this.ingredients);
     }
