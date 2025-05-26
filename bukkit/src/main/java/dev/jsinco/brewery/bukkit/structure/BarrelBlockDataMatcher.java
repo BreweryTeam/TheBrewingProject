@@ -72,7 +72,7 @@ public class BarrelBlockDataMatcher implements BlockDataMatcher<BarrelType> {
         if (matcherType == BarrelType.COPPER) {
             return true;
         }
-        return actual.getMaterial() == expected.getMaterial();
+        return materialMatches(actual, expected, matcherType);
     }
 
     private boolean materialMatches(BlockData actual, BlockData expected, BarrelType matcherType) {
