@@ -1,5 +1,7 @@
 package dev.jsinco.brewery.bukkit.structure;
 
+import com.destroystokyo.paper.MaterialTags;
+import com.google.common.collect.ImmutableSet;
 import dev.jsinco.brewery.breweries.BarrelType;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -11,6 +13,8 @@ import org.bukkit.block.data.type.Stairs;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Locale;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class BarrelBlockDataMatcher implements BlockDataMatcher<BarrelType> {
 
@@ -35,14 +39,26 @@ public class BarrelBlockDataMatcher implements BlockDataMatcher<BarrelType> {
             return stairMatches(actuallStairs, expectedStairs, matcherType);
         }
         if (BarrelType.COPPER == matcherType) {
-            Material actualMaterial = actual.getMaterial();
-            return actualMaterial == Material.CUT_COPPER || actualMaterial == Material.OXIDIZED_CUT_COPPER || actualMaterial == Material.EXPOSED_CUT_COPPER;
+            return MaterialTags.CUT_COPPER_BLOCKS.isTagged(actual.getMaterial());
         }
         return materialMatches(actual, expected, matcherType);
     }
 
     @Override
-    public @Nullable Material findSubstitution(BlockData expected, BarrelType matcherType) {
+    public Set<Material> findStructureMaterials(BarrelType matcherType, BreweryStructure structure) {
+        if (matcherType == BarrelType.COPPER) {
+            ImmutableSet.Builder<Material> output = new ImmutableSet.Builder<>();
+            output.addAll(MaterialTags.CUT_COPPER_BLOCKS.getValues());
+            output.addAll(MaterialTags.CUT_COPPER_STAIRS.getValues());
+            output.addAll(Tag.FENCES.getValues());
+            return output.build();
+        }
+        return structure.getPalette()
+                .stream().map(blockData -> findSubstitution(blockData, matcherType))
+                .collect(Collectors.toSet());
+    }
+
+    private @Nullable Material findSubstitution(BlockData expected, BarrelType matcherType) {
         String materialString = expected.getMaterial().getKey().toString();
         NamespacedKey key = NamespacedKey.fromString(materialString.replaceAll("oak", matcherType.name().toLowerCase(Locale.ROOT)));
         return Registry.MATERIAL.get(key);
@@ -59,8 +75,7 @@ public class BarrelBlockDataMatcher implements BlockDataMatcher<BarrelType> {
             return false;
         }
         if (matcherType == BarrelType.COPPER) {
-            Material actualMaterial = actualStairs.getMaterial();
-            return actualMaterial == Material.CUT_COPPER_STAIRS || actualMaterial == Material.OXIDIZED_CUT_COPPER_STAIRS || actualMaterial == Material.EXPOSED_CUT_COPPER_STAIRS;
+            return MaterialTags.CUT_COPPER_STAIRS.isTagged(actualStairs.getMaterial());
         }
         return materialMatches(actualStairs, expectedStairs, matcherType);
     }
