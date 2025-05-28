@@ -54,6 +54,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -239,8 +240,8 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
                 .map(MultiblockStructure::getHolder)
                 .map(Distillery.class::cast)
                 .forEach(Distillery::tick);
-        breweryRegistry.<BukkitBarrel>getOpened(StructureType.BARREL).forEach(Barrel::tickInventory);
-        breweryRegistry.<BukkitDistillery>getOpened(StructureType.DISTILLERY).forEach(Distillery::tickInventory);
+        List.copyOf(breweryRegistry.<BukkitBarrel>getOpened(StructureType.BARREL)).forEach(Barrel::tickInventory);
+        List.copyOf( breweryRegistry.<BukkitDistillery>getOpened(StructureType.DISTILLERY)).forEach(Distillery::tickInventory);
     }
 
     private void otherTicking() {
