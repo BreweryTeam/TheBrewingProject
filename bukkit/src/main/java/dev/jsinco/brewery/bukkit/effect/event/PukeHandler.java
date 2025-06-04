@@ -1,23 +1,22 @@
 package dev.jsinco.brewery.bukkit.effect.event;
 
 import dev.jsinco.brewery.configuration.Config;
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.World;
+import org.bukkit.*;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.util.Vector;
 
 import java.util.Random;
 
-class PukeHandler {
+public class PukeHandler {
     private int countDown;
     private final Player player;
     private static final Random RANDOM = new Random();
+    public static final NamespacedKey PUKE_ITEM = new NamespacedKey("brewery", "puke");
 
     PukeHandler(int pukingTicks, Player player) {
         this.countDown = pukingTicks;
@@ -39,7 +38,10 @@ class PukeHandler {
         Item item = player.getWorld().dropItem(loc, new ItemStack(Material.SOUL_SAND));
         item.setVelocity(direction);
         item.setPersistent(false);
+        item.setCanPlayerPickup(false);
+        item.setCanMobPickup(false);
         item.setPickupDelay(32767);
+        item.getPersistentDataContainer().set(PUKE_ITEM, PersistentDataType.BOOLEAN, true);
 
         World world = loc.getWorld();
         YamlConfiguration spigotConfig = Bukkit.spigot().getConfig();

@@ -5,6 +5,7 @@ import dev.jsinco.brewery.brew.BrewImpl;
 import dev.jsinco.brewery.breweries.InventoryAccessible;
 import dev.jsinco.brewery.bukkit.brew.BrewAdapter;
 import dev.jsinco.brewery.bukkit.breweries.BreweryRegistry;
+import dev.jsinco.brewery.bukkit.effect.event.PukeHandler;
 import dev.jsinco.brewery.configuration.Config;
 import dev.jsinco.brewery.database.sql.Database;
 import org.bukkit.event.Event;
@@ -118,5 +119,12 @@ public class InventoryEventListener implements Listener {
                         .map(brew -> BrewAdapter.toItem(brew, new Brew.State.Other())))
                 .ifPresent(event::setItem);
 
+    }
+
+    @EventHandler(ignoreCancelled = true)
+    public void onInventoryPickupItem(InventoryPickupItemEvent event) {
+        if (event.getItem().getPersistentDataContainer().has(PukeHandler.PUKE_ITEM)) {
+            event.setCancelled(true);
+        }
     }
 }
