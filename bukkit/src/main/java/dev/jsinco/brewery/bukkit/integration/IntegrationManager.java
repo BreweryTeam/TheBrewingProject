@@ -1,10 +1,7 @@
 package dev.jsinco.brewery.bukkit.integration;
 
+import dev.jsinco.brewery.bukkit.integration.item.*;
 import dev.jsinco.brewery.bukkit.integration.structure.*;
-import dev.jsinco.brewery.bukkit.integration.item.CraftEngineIntegration;
-import dev.jsinco.brewery.bukkit.integration.item.ItemsAdderIntegration;
-import dev.jsinco.brewery.bukkit.integration.item.NexoIntegration;
-import dev.jsinco.brewery.bukkit.integration.item.OraxenIntegration;
 import dev.jsinco.brewery.util.Logging;
 import lombok.Getter;
 import org.bukkit.block.Block;
@@ -28,6 +25,7 @@ public class IntegrationManager {
         register(IntegrationType.ITEM, new ItemsAdderIntegration());
         register(IntegrationType.ITEM, new NexoIntegration());
         register(IntegrationType.ITEM, new OraxenIntegration());
+        register(IntegrationType.ITEM, new MmoItemsIntegration());
         integrationRegistry.getIntegrations(IntegrationType.ITEM).forEach(Integration::initialize);
         integrationRegistry.getIntegrations(IntegrationType.STRUCTURE).forEach(Integration::initialize);
     }
