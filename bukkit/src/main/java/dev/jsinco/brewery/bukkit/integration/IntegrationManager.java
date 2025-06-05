@@ -45,7 +45,6 @@ public class IntegrationManager {
 
     @ApiStatus.Internal
     public boolean hasAccess(Block block, Player player) {
-        @SuppressWarnings("unchecked")
         Set<StructureIntegration> structureIntegrations = integrationRegistry.getIntegrations(IntegrationType.STRUCTURE);
 
         if (structureIntegrations.isEmpty())
