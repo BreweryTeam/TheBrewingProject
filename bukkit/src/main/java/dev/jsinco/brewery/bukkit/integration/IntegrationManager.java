@@ -1,10 +1,10 @@
 package dev.jsinco.brewery.bukkit.integration;
 
 import dev.jsinco.brewery.bukkit.integration.structure.*;
-import dev.jsinco.brewery.bukkit.integration.item.CraftEngineHook;
-import dev.jsinco.brewery.bukkit.integration.item.ItemsAdderHook;
-import dev.jsinco.brewery.bukkit.integration.item.NexoHook;
-import dev.jsinco.brewery.bukkit.integration.item.OraxenHook;
+import dev.jsinco.brewery.bukkit.integration.item.CraftEngineIntegration;
+import dev.jsinco.brewery.bukkit.integration.item.ItemsAdderIntegration;
+import dev.jsinco.brewery.bukkit.integration.item.NexoIntegration;
+import dev.jsinco.brewery.bukkit.integration.item.OraxenIntegration;
 import dev.jsinco.brewery.util.Logging;
 import lombok.Getter;
 import org.bukkit.block.Block;
@@ -18,16 +18,16 @@ public class IntegrationManager {
     private final IntegrationRegistry integrationRegistry = new IntegrationRegistry();
 
     public void init() {
-        register(IntegrationType.STRUCTURE, new WorldGuardHook());
-        register(IntegrationType.STRUCTURE, new BoltHook());
-        register(IntegrationType.STRUCTURE, new GriefPreventionHook());
-        register(IntegrationType.STRUCTURE, new HuskClaimsHook());
-        register(IntegrationType.STRUCTURE, new LandsHook());
-        register(IntegrationType.STRUCTURE, new TownyHook());
-        register(IntegrationType.ITEM, new CraftEngineHook());
-        register(IntegrationType.ITEM, new ItemsAdderHook());
-        register(IntegrationType.ITEM, new NexoHook());
-        register(IntegrationType.ITEM, new OraxenHook());
+        register(IntegrationType.STRUCTURE, new WorldGuardIntegration());
+        register(IntegrationType.STRUCTURE, new BoltIntegration());
+        register(IntegrationType.STRUCTURE, new GriefPreventionIntegration());
+        register(IntegrationType.STRUCTURE, new HuskClaimsIntegration());
+        register(IntegrationType.STRUCTURE, new LandsIntegration());
+        register(IntegrationType.STRUCTURE, new TownyIntegration());
+        register(IntegrationType.ITEM, new CraftEngineIntegration());
+        register(IntegrationType.ITEM, new ItemsAdderIntegration());
+        register(IntegrationType.ITEM, new NexoIntegration());
+        register(IntegrationType.ITEM, new OraxenIntegration());
         integrationRegistry.getIntegrations(IntegrationType.ITEM).forEach(Integration::initialize);
         integrationRegistry.getIntegrations(IntegrationType.STRUCTURE).forEach(Integration::initialize);
     }
@@ -48,7 +48,7 @@ public class IntegrationManager {
     @ApiStatus.Internal
     public boolean hasAccess(Block block, Player player) {
         @SuppressWarnings("unchecked")
-        Set<StructureIntegration> structureIntegrations = (Set<StructureIntegration>) integrationRegistry.getIntegrations(IntegrationType.STRUCTURE);
+        Set<StructureIntegration> structureIntegrations = integrationRegistry.getIntegrations(IntegrationType.STRUCTURE);
 
         if (structureIntegrations.isEmpty())
             return true;

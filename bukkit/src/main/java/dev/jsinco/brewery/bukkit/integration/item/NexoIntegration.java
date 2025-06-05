@@ -1,41 +1,52 @@
 package dev.jsinco.brewery.bukkit.integration.item;
 
+import com.nexomc.nexo.api.NexoItems;
+import com.nexomc.nexo.api.events.NexoItemsLoadedEvent;
+import com.nexomc.nexo.items.ItemBuilder;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.bukkit.integration.ItemIntegration;
-import dev.jsinco.brewery.ingredient.Ingredient;
 import dev.jsinco.brewery.util.ClassUtil;
-import io.th0rgal.oraxen.api.OraxenItems;
-import io.th0rgal.oraxen.api.events.OraxenItemsLoadedEvent;
-import io.th0rgal.oraxen.items.ItemBuilder;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.inventory.ItemStack;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeoutException;
 
-public class OraxenHook implements ItemIntegration, Listener {
+public class NexoIntegration implements ItemIntegration, Listener {
 
-    private static final boolean ENABLED = ClassUtil.exists("io.th0rgal.oraxen.api.OraxenItem");
+    private static final boolean ENABLED = ClassUtil.exists("com.nexomc.nexo.api.NexoItems");
     private CompletableFuture<Void> initializedFuture;
 
     @Override
     public Optional<ItemStack> createItem(String id) {
-        return Optional.ofNullable(OraxenItems.getItemById(id))
-                .map(ItemBuilder::build);
+        ItemBuilder itemBuilder = NexoItems.itemFromId(id);
+        if (itemBuilder == null) {
+            return Optional.empty();
+        }
+        return Optional.of(itemBuilder.build());
     }
 
-    public @Nullable String displayName(String oraxenId) {
-        return OraxenItems.exists(oraxenId) ? OraxenItems.getItemById(oraxenId).getDisplayName() : null;
+    public @Nullable String displayName(String itemsAdderId) {
+        if (!ENABLED) {
+            return null;
+        }
+        ItemBuilder itemBuilder = NexoItems.itemFromId(itemsAdderId);
+        if (itemBuilder == null) {
+            return null;
+        }
+        Component displayName = itemBuilder.getDisplayName();
+        return displayName == null ? null : PlainTextComponentSerializer.plainText().serialize(displayName);
     }
 
     @Override
     public @Nullable String itemId(ItemStack itemStack) {
-        return OraxenItems.getIdByItem(itemStack);
+        return NexoItems.idFromItem(itemStack);
     }
 
     @Override
@@ -50,7 +61,7 @@ public class OraxenHook implements ItemIntegration, Listener {
 
     @Override
     public String getId() {
-        return "oraxen";
+        return "nexo";
     }
 
     @Override
@@ -61,8 +72,7 @@ public class OraxenHook implements ItemIntegration, Listener {
     }
 
     @EventHandler
-    public void onOraxenItemsLoaded(OraxenItemsLoadedEvent event) {
+    public void onNexoItemsLoaded(NexoItemsLoadedEvent event) {
         initializedFuture.completeAsync(() -> null);
     }
-
 }

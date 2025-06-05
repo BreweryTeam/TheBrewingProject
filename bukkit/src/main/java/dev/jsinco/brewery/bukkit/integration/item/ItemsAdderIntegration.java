@@ -1,13 +1,10 @@
 package dev.jsinco.brewery.bukkit.integration.item;
 
-import com.nexomc.nexo.api.NexoItems;
-import com.nexomc.nexo.api.events.NexoItemsLoadedEvent;
-import com.nexomc.nexo.items.ItemBuilder;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.bukkit.integration.ItemIntegration;
 import dev.jsinco.brewery.util.ClassUtil;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
+import dev.lone.itemsadder.api.CustomStack;
+import dev.lone.itemsadder.api.Events.ItemsAdderLoadDataEvent;
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -18,35 +15,26 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeoutException;
 
-public class NexoHook implements ItemIntegration, Listener {
+public class ItemsAdderIntegration implements ItemIntegration, Listener {
 
-    private static final boolean ENABLED = ClassUtil.exists("com.nexomc.nexo.api.NexoItems");
+    private static final boolean ENABLED = ClassUtil.exists("dev.lone.itemsadder.api.CustomStack");
     private CompletableFuture<Void> initializedFuture;
 
     @Override
     public Optional<ItemStack> createItem(String id) {
-        ItemBuilder itemBuilder = NexoItems.itemFromId(id);
-        if (itemBuilder == null) {
-            return Optional.empty();
-        }
-        return Optional.of(itemBuilder.build());
+        return Optional.of(CustomStack.getInstance(id))
+                .map(CustomStack::getItemStack);
     }
 
     public @Nullable String displayName(String itemsAdderId) {
-        if (!ENABLED) {
-            return null;
-        }
-        ItemBuilder itemBuilder = NexoItems.itemFromId(itemsAdderId);
-        if (itemBuilder == null) {
-            return null;
-        }
-        Component displayName = itemBuilder.getDisplayName();
-        return displayName == null ? null : PlainTextComponentSerializer.plainText().serialize(displayName);
+        CustomStack customStack = CustomStack.getInstance(itemsAdderId);
+        return customStack == null ? null : customStack.getDisplayName();
     }
 
     @Override
     public @Nullable String itemId(ItemStack itemStack) {
-        return NexoItems.idFromItem(itemStack);
+        CustomStack customStack = CustomStack.byItemStack(itemStack);
+        return customStack == null ? null : customStack.getId();
     }
 
     @Override
@@ -61,7 +49,7 @@ public class NexoHook implements ItemIntegration, Listener {
 
     @Override
     public String getId() {
-        return "nexo";
+        return "itemsadder";
     }
 
     @Override
@@ -72,7 +60,7 @@ public class NexoHook implements ItemIntegration, Listener {
     }
 
     @EventHandler
-    public void onNexoItemsLoaded(NexoItemsLoadedEvent event) {
+    public void onItemsAdderItemsLoad(ItemsAdderLoadDataEvent loadDataEvent) {
         initializedFuture.completeAsync(() -> null);
     }
 }

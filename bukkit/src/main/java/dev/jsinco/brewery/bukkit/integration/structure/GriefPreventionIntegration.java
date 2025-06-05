@@ -11,7 +11,7 @@ import org.bukkit.entity.Player;
 
 import java.util.function.Supplier;
 
-public class GriefPreventionHook implements StructureIntegration {
+public class GriefPreventionIntegration implements StructureIntegration {
 
     private static final boolean ENABLED = ClassUtil.exists("me.ryanhamshire.GriefPrevention.GriefPrevention");
 

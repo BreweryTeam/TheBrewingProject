@@ -3,7 +3,6 @@ package dev.jsinco.brewery.bukkit.integration.structure;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.bukkit.integration.StructureIntegration;
 import dev.jsinco.brewery.util.ClassUtil;
-import me.angeschossen.lands.api.LandsIntegration;
 import me.angeschossen.lands.api.flags.enums.FlagTarget;
 import me.angeschossen.lands.api.flags.enums.RoleFlagCategory;
 import me.angeschossen.lands.api.flags.type.RoleFlag;
@@ -15,10 +14,10 @@ import org.bukkit.inventory.ItemStack;
 
 import java.util.List;
 
-public class LandsHook implements StructureIntegration {
+public class LandsIntegration implements StructureIntegration {
 
     private static final boolean ENABLED = ClassUtil.exists("me.angeschossen.lands.api.LandsIntegration");
-    private static LandsIntegration landsIntegration;
+    private static me.angeschossen.lands.api.LandsIntegration landsIntegration;
     private static RoleFlag barrelAccessFlag;
 
 
@@ -48,7 +47,7 @@ public class LandsHook implements StructureIntegration {
         if (!ENABLED) {
             return;
         }
-        landsIntegration = LandsIntegration.of(
+        landsIntegration = me.angeschossen.lands.api.LandsIntegration.of(
                 TheBrewingProject.getInstance()
         );
         barrelAccessFlag = RoleFlag.of(landsIntegration, FlagTarget.PLAYER, RoleFlagCategory.ACTION, "barrel_access")

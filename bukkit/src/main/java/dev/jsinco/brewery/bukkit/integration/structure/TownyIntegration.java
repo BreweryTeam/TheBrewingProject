@@ -7,7 +7,7 @@ import dev.jsinco.brewery.util.ClassUtil;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 
-public class TownyHook implements StructureIntegration {
+public class TownyIntegration implements StructureIntegration {
 
     private static final boolean ENABLED = ClassUtil.exists("com.palmergames.bukkit.towny.utils.PlayerCacheUtil");
 

@@ -3,8 +3,9 @@ package dev.jsinco.brewery.bukkit.integration.item;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.bukkit.integration.ItemIntegration;
 import dev.jsinco.brewery.util.ClassUtil;
-import dev.lone.itemsadder.api.CustomStack;
-import dev.lone.itemsadder.api.Events.ItemsAdderLoadDataEvent;
+import io.th0rgal.oraxen.api.OraxenItems;
+import io.th0rgal.oraxen.api.events.OraxenItemsLoadedEvent;
+import io.th0rgal.oraxen.items.ItemBuilder;
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -15,26 +16,24 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeoutException;
 
-public class ItemsAdderHook implements ItemIntegration, Listener {
+public class OraxenIntegration implements ItemIntegration, Listener {
 
-    private static final boolean ENABLED = ClassUtil.exists("dev.lone.itemsadder.api.CustomStack");
+    private static final boolean ENABLED = ClassUtil.exists("io.th0rgal.oraxen.api.OraxenItem");
     private CompletableFuture<Void> initializedFuture;
 
     @Override
     public Optional<ItemStack> createItem(String id) {
-        return Optional.of(CustomStack.getInstance(id))
-                .map(CustomStack::getItemStack);
+        return Optional.ofNullable(OraxenItems.getItemById(id))
+                .map(ItemBuilder::build);
     }
 
-    public @Nullable String displayName(String itemsAdderId) {
-        CustomStack customStack = CustomStack.getInstance(itemsAdderId);
-        return customStack == null ? null : customStack.getDisplayName();
+    public @Nullable String displayName(String oraxenId) {
+        return OraxenItems.exists(oraxenId) ? OraxenItems.getItemById(oraxenId).getDisplayName() : null;
     }
 
     @Override
     public @Nullable String itemId(ItemStack itemStack) {
-        CustomStack customStack = CustomStack.byItemStack(itemStack);
-        return customStack == null ? null : customStack.getId();
+        return OraxenItems.getIdByItem(itemStack);
     }
 
     @Override
@@ -49,7 +48,7 @@ public class ItemsAdderHook implements ItemIntegration, Listener {
 
     @Override
     public String getId() {
-        return "itemsadder";
+        return "oraxen";
     }
 
     @Override
@@ -60,7 +59,8 @@ public class ItemsAdderHook implements ItemIntegration, Listener {
     }
 
     @EventHandler
-    public void onItemsAdderItemsLoad(ItemsAdderLoadDataEvent loadDataEvent) {
+    public void onOraxenItemsLoaded(OraxenItemsLoadedEvent event) {
         initializedFuture.completeAsync(() -> null);
     }
+
 }

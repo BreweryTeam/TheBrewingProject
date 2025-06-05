@@ -7,7 +7,7 @@ import net.william278.huskclaims.libraries.cloplib.operation.OperationType;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 
-public class HuskClaimsHook implements StructureIntegration {
+public class HuskClaimsIntegration implements StructureIntegration {
 
     private static final boolean ENABLED = ClassUtil.exists("net.william278.huskclaims.api.BukkitHuskClaimsAPI");
 

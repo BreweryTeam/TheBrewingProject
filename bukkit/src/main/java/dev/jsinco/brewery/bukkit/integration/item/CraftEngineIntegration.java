@@ -17,7 +17,7 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeoutException;
 
-public class CraftEngineHook implements ItemIntegration, Listener {
+public class CraftEngineIntegration implements ItemIntegration, Listener {
 
     private static final boolean ENABLED = ClassUtil.exists("net.momirealms.craftengine.bukkit.plugin.BukkitCraftEngine");
     private CompletableFuture<Void> initializedFuture;

@@ -13,7 +13,7 @@ import org.popcraft.bolt.BoltAPI;
 import java.util.List;
 import java.util.Optional;
 
-public class BoltHook implements StructureIntegration {
+public class BoltIntegration implements StructureIntegration {
 
     private static final boolean ENABLED = ClassUtil.exists("org.popcraft.bolt.BoltAPI");
     private static BoltAPI boltAPI;

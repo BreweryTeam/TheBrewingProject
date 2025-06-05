@@ -11,7 +11,7 @@ import dev.jsinco.brewery.util.ClassUtil;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 
-public class WorldGuardHook implements StructureIntegration {
+public class WorldGuardIntegration implements StructureIntegration {
     @Override
     public boolean enabled() {
         return ClassUtil.exists("com.sk89q.worldguard.WorldGuard");
