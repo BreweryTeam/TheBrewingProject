@@ -173,6 +173,7 @@ bukkit {
         "ProtocolLib",
         "PlaceholderAPI",
         "MythicLib",
-        "MMOItems"
+        "MMOItems",
+        "MiniPlaceholders"
     )
 }
