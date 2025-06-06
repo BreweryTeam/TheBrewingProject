@@ -1,12 +1,7 @@
 package dev.jsinco.brewery.bukkit.integration;
 
-import dev.jsinco.brewery.bukkit.integration.item.CraftEngineHook;
-import dev.jsinco.brewery.bukkit.integration.item.ItemsAdderHook;
-import dev.jsinco.brewery.bukkit.integration.item.NexoHook;
-import dev.jsinco.brewery.bukkit.integration.item.OraxenHook;
-import dev.jsinco.brewery.bukkit.integration.placeholder.PlaceholderApiIntegration;
-import dev.jsinco.brewery.bukkit.integration.structure.*;
 import dev.jsinco.brewery.bukkit.integration.item.*;
+import dev.jsinco.brewery.bukkit.integration.placeholder.PlaceholderApiIntegration;
 import dev.jsinco.brewery.bukkit.integration.structure.*;
 import dev.jsinco.brewery.util.Logging;
 import lombok.Getter;
@@ -38,7 +33,7 @@ public class IntegrationManager {
         integrationRegistry.getIntegrations(IntegrationType.PLACEHOLDER).forEach(Integration::initialize);
     }
 
-    public void register(IntegrationType type, Integration integration) {
+    public void register(IntegrationType<?> type, Integration integration) {
         if (!integration.enabled()) {
             return;
         }
@@ -51,13 +46,11 @@ public class IntegrationManager {
         integrationRegistry.clear();
     }
 
-    @ApiStatus.Internal
-    public boolean hasAccess(Block block, Player player) {
-        Set<StructureIntegration> structureIntegrations = integrationRegistry.getIntegrations(IntegrationType.STRUCTURE);
-
-        if (structureIntegrations.isEmpty())
-            return true;
-
-        return structureIntegrations.stream().allMatch(structureIntegration -> structureIntegration.hasAccess(block, player));
+    public <T extends Integration> Set<T> retrieve(IntegrationType<T> type) {
+        Set<T> integrations = integrationRegistry.getIntegrations(type);
+        if (integrations.isEmpty()) {
+            return Set.of();
+        }
+        return integrations;
     }
 }

@@ -11,10 +11,10 @@ import dev.jsinco.brewery.bukkit.breweries.BukkitCauldronDataType;
 import dev.jsinco.brewery.bukkit.effect.event.DrunkEventExecutor;
 import dev.jsinco.brewery.bukkit.ingredient.BukkitIngredientManager;
 import dev.jsinco.brewery.bukkit.ingredient.SimpleIngredient;
+import dev.jsinco.brewery.bukkit.integration.IntegrationType;
 import dev.jsinco.brewery.bukkit.recipe.RecipeEffects;
 import dev.jsinco.brewery.bukkit.util.BukkitAdapter;
 import dev.jsinco.brewery.bukkit.util.BukkitMessageUtil;
-import dev.jsinco.brewery.util.MessageUtil;
 import dev.jsinco.brewery.configuration.Config;
 import dev.jsinco.brewery.configuration.locale.TranslationsConfig;
 import dev.jsinco.brewery.database.PersistenceException;
@@ -26,6 +26,7 @@ import dev.jsinco.brewery.effect.text.DrunkTextRegistry;
 import dev.jsinco.brewery.effect.text.DrunkTextTransformer;
 import dev.jsinco.brewery.recipes.RecipeRegistryImpl;
 import dev.jsinco.brewery.structure.PlacedStructureRegistryImpl;
+import dev.jsinco.brewery.util.MessageUtil;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
@@ -101,15 +102,21 @@ public class PlayerEventListener implements Listener {
         if (block == null) {
             return;
         }
-        if (!TheBrewingProject.getInstance().getIntegrationManager().hasAccess(event.getClickedBlock(), event.getPlayer())) {
+        if (!TheBrewingProject.getInstance().getIntegrationManager().retrieve(IntegrationType.STRUCTURE)
+                .stream()
+                .map(structureIntegration -> structureIntegration.hasAccess(event.getClickedBlock(), event.getPlayer()))
+                .reduce(true, Boolean::logicalAnd)) {
             return;
         }
         if (Tag.CAULDRONS.isTagged(block.getType())) {
             handleCauldron(event, block);
         }
+
         PlayerInventory inventory = event.getPlayer().getInventory();
         ItemStack offHand = inventory.getItemInOffHand();
-        if (block.getType() == Material.CRAFTING_TABLE && offHand.getType() == Material.PAPER && event.getPlayer().isSneaking() && event.getAction() == Action.RIGHT_CLICK_BLOCK) {
+        if (block.getType() == Material.CRAFTING_TABLE && offHand.getType() == Material.PAPER && event.getPlayer().
+
+                isSneaking() && event.getAction() == Action.RIGHT_CLICK_BLOCK) {
             ItemMeta offHandMeta = offHand.getItemMeta();
             ItemStack mainHand = inventory.getItemInMainHand();
             ItemStack sealed = BrewAdapter.fromItem(mainHand)

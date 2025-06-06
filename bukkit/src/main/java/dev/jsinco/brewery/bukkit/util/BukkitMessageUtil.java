@@ -1,5 +1,8 @@
 package dev.jsinco.brewery.bukkit.util;
 
+import dev.jsinco.brewery.bukkit.TheBrewingProject;
+import dev.jsinco.brewery.bukkit.integration.IntegrationType;
+import dev.jsinco.brewery.bukkit.integration.PlaceholderIntegration;
 import dev.jsinco.brewery.bukkit.recipe.RecipeEffects;
 import dev.jsinco.brewery.configuration.locale.TranslationsConfig;
 import dev.jsinco.brewery.effect.DrunkStateImpl;
@@ -46,7 +49,7 @@ public class BukkitMessageUtil {
     public static Component compilePlayerMessage(String message, Player player, DrunksManagerImpl<?> drunksManager, int alcohol) {
         DrunkStateImpl drunkState = drunksManager.getDrunkState(player.getUniqueId());
         return MiniMessage.miniMessage().deserialize(
-                message,
+                preProcessPlayerMessage(message, player),
                 Placeholder.parsed("alcohol", String.valueOf(alcohol)),
                 Placeholder.parsed("player_alcohol", String.valueOf(drunkState == null ? "0" : drunkState.alcohol())),
                 getPlayerTagResolver(player)
@@ -57,7 +60,20 @@ public class BukkitMessageUtil {
         return TagResolver.resolver(
                 Placeholder.component("player_name", player.name()),
                 Placeholder.component("team_name", player.teamDisplayName()),
-                Placeholder.unparsed("world", player.getWorld().getName())
+                Placeholder.unparsed("world", player.getWorld().getName()),
+                TagResolver.resolver(
+                        TheBrewingProject.getInstance().getIntegrationManager().retrieve(IntegrationType.PLACEHOLDER).stream()
+                                .map(placeholderIntegration -> placeholderIntegration.resolve(player))
+                                .toArray(TagResolver[]::new)
+                )
         );
+    }
+
+    private static String preProcessPlayerMessage(String message, Player player) {
+        String modifiedMessage = message;
+        for (PlaceholderIntegration placeholderIntegration : TheBrewingProject.getInstance().getIntegrationManager().retrieve(IntegrationType.PLACEHOLDER)) {
+            modifiedMessage = placeholderIntegration.process(modifiedMessage, player);
+        }
+        return modifiedMessage;
     }
 }
