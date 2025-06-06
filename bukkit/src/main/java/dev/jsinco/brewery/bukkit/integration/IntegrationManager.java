@@ -1,5 +1,11 @@
 package dev.jsinco.brewery.bukkit.integration;
 
+import dev.jsinco.brewery.bukkit.integration.item.CraftEngineHook;
+import dev.jsinco.brewery.bukkit.integration.item.ItemsAdderHook;
+import dev.jsinco.brewery.bukkit.integration.item.NexoHook;
+import dev.jsinco.brewery.bukkit.integration.item.OraxenHook;
+import dev.jsinco.brewery.bukkit.integration.placeholder.PlaceholderApiIntegration;
+import dev.jsinco.brewery.bukkit.integration.structure.*;
 import dev.jsinco.brewery.bukkit.integration.item.*;
 import dev.jsinco.brewery.bukkit.integration.structure.*;
 import dev.jsinco.brewery.util.Logging;
@@ -26,8 +32,10 @@ public class IntegrationManager {
         register(IntegrationType.ITEM, new NexoIntegration());
         register(IntegrationType.ITEM, new OraxenIntegration());
         register(IntegrationType.ITEM, new MmoItemsIntegration());
+        register(IntegrationType.PLACEHOLDER, new PlaceholderApiIntegration());
         integrationRegistry.getIntegrations(IntegrationType.ITEM).forEach(Integration::initialize);
         integrationRegistry.getIntegrations(IntegrationType.STRUCTURE).forEach(Integration::initialize);
+        integrationRegistry.getIntegrations(IntegrationType.PLACEHOLDER).forEach(Integration::initialize);
     }
 
     public void register(IntegrationType type, Integration integration) {

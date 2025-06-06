@@ -24,6 +24,7 @@ repositories {
     maven("https://repo.codemc.io/repository/maven-public/")
     maven("https://repo.momirealms.net/releases/")
     maven("https://repo.dmulloy2.net/repository/public/")
+    maven("https://repo.extendedclip.com/releases/")
     maven("https://nexus.phoenixdevt.fr/repository/maven-public/")
 }
 
@@ -47,6 +48,7 @@ dependencies {
     compileOnly("org.popcraft:bolt-common:1.1.33")
     compileOnly("net.momirealms:craft-engine-core:0.0.48")
     compileOnly("net.momirealms:craft-engine-bukkit:0.0.48")
+    compileOnly("me.clip:placeholderapi:2.11.6")
     compileOnly("io.lumine:MythicLib-dist:1.7.1-SNAPSHOT")
     compileOnly("net.Indyuce:MMOItems-API:6.10.1-SNAPSHOT")
 
@@ -98,7 +100,7 @@ bukkit {
     main = "dev.jsinco.brewery.bukkit.TheBrewingProject"
     foliaSupported = false
     apiVersion = "1.21"
-    authors = listOf("Jsinco", "Mitality", "Thorinwasher")
+    authors = listOf("Jsinco", "Mitality", "Thorinwasher", "Nadwey")
     name = rootProject.name
     permissions {
         register("brewery.barrel.create") {
@@ -168,6 +170,7 @@ bukkit {
         "Bolt",
         "CraftEngine",
         "ProtocolLib",
+        "PlaceholderAPI",
         "MythicLib",
         "MMOItems"
     )
