@@ -1,6 +1,7 @@
 package dev.jsinco.brewery.bukkit.integration;
 
 import dev.jsinco.brewery.bukkit.integration.item.*;
+import dev.jsinco.brewery.bukkit.integration.placeholder.MiniPlaceholdersIntegration;
 import dev.jsinco.brewery.bukkit.integration.placeholder.PlaceholderApiIntegration;
 import dev.jsinco.brewery.bukkit.integration.structure.*;
 import dev.jsinco.brewery.util.Logging;
@@ -28,6 +29,7 @@ public class IntegrationManager {
         register(IntegrationType.ITEM, new OraxenIntegration());
         register(IntegrationType.ITEM, new MmoItemsIntegration());
         register(IntegrationType.PLACEHOLDER, new PlaceholderApiIntegration());
+        register(IntegrationType.PLACEHOLDER, new MiniPlaceholdersIntegration());
         integrationRegistry.getIntegrations(IntegrationType.ITEM).forEach(Integration::initialize);
         integrationRegistry.getIntegrations(IntegrationType.STRUCTURE).forEach(Integration::initialize);
         integrationRegistry.getIntegrations(IntegrationType.PLACEHOLDER).forEach(Integration::initialize);
