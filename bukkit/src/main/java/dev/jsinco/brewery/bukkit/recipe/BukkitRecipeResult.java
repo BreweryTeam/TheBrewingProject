@@ -261,7 +261,7 @@ public class BukkitRecipeResult implements RecipeResult<ItemStack> {
                 this.customId = namespacedKey;
                 return this;
             }
-            throw new IllegalArgumentException("Unknown custom namespace!");
+            throw new IllegalArgumentException("Unknown key, can not identify namespace: " + namespacedKey);
         }
 
         public BukkitRecipeResult build() {

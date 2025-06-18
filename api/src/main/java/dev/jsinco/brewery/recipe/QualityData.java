@@ -1,8 +1,6 @@
 package dev.jsinco.brewery.recipe;
 
-import com.google.common.base.Preconditions;
 import dev.jsinco.brewery.brew.BrewQuality;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -14,7 +12,6 @@ public class QualityData<T> {
     private final Map<BrewQuality, T> backing;
 
     private QualityData(Map<BrewQuality, T> backing) {
-        Preconditions.checkArgument(Arrays.stream(BrewQuality.values()).allMatch(backing::containsKey), "Missing brew quality");
         this.backing = backing;
     }
 
@@ -31,7 +28,7 @@ public class QualityData<T> {
         return new QualityData<>(newBacking);
     }
 
-    public @NotNull T get(BrewQuality brewQuality) {
+    public @Nullable T get(BrewQuality brewQuality) {
         return backing.get(brewQuality);
     }
 
@@ -42,7 +39,7 @@ public class QualityData<T> {
 
     public static QualityData<String> readQualityFactoredString(@Nullable String string) {
         if (string == null) {
-            return QualityData.equalValued(null);
+            return new QualityData<>(Map.of());
         }
         if (!string.contains("/")) {
             return new QualityData<>(Map.of(BrewQuality.BAD, string, BrewQuality.GOOD, string, BrewQuality.EXCELLENT, string));
