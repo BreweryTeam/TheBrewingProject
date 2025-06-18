@@ -1,27 +1,26 @@
 package dev.jsinco.brewery.bukkit.recipe;
 
 import com.google.common.base.Preconditions;
-import dev.jsinco.brewery.brew.BrewScore;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.bukkit.util.BukkitAdapter;
 import dev.jsinco.brewery.bukkit.util.BukkitMessageUtil;
 import dev.jsinco.brewery.bukkit.util.ListPersistentDataType;
-import dev.jsinco.brewery.util.MessageUtil;
 import dev.jsinco.brewery.configuration.locale.TranslationsConfig;
-import dev.jsinco.brewery.effect.DrunkStateImpl;
 import dev.jsinco.brewery.effect.DrunksManagerImpl;
 import dev.jsinco.brewery.event.CustomEventRegistry;
 import dev.jsinco.brewery.event.DrunkEvent;
 import dev.jsinco.brewery.event.EventStep;
 import dev.jsinco.brewery.util.BreweryKey;
+import dev.jsinco.brewery.util.MessageUtil;
 import dev.jsinco.brewery.util.Registry;
 import lombok.Getter;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
-import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.kyori.adventure.title.Title;
 import org.bukkit.NamespacedKey;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Projectile;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.PotionMeta;
@@ -84,13 +83,17 @@ public class RecipeEffects {
                 .toList();
     }
 
-    public void applyTo(ItemMeta meta, BrewScore score) {
+    public void applyTo(ItemMeta meta) {
         if (meta instanceof PotionMeta potionMeta) {
             for (RecipeEffect recipeEffect : effects) {
                 potionMeta.addCustomEffect(recipeEffect.newPotionEffect(), true);
             }
         }
         PersistentDataContainer container = meta.getPersistentDataContainer();
+        applyTo(container);
+    }
+
+    private void applyTo(PersistentDataContainer container) {
         PDC_TYPES.forEach(container::remove);
         if (title != null) {
             container.set(TITLE, PersistentDataType.STRING, title);
@@ -102,20 +105,19 @@ public class RecipeEffects {
             container.set(ACTION_BAR, PersistentDataType.STRING, actionBar);
         }
         container.set(ALCOHOL, PersistentDataType.INTEGER, alcohol);
-        container.set(TOXINS, PersistentDataType.INTEGER, (int) (alcohol * (1.5 - score.score())));
+        container.set(TOXINS, PersistentDataType.INTEGER, toxins);
         container.set(EVENTS, ListPersistentDataType.STRING_LIST, events.stream().map(BreweryKey::toString).toList());
     }
 
-    public static Optional<RecipeEffects> fromItem(@NotNull ItemStack item) {
-        RecipeEffects.Builder builder = new RecipeEffects.Builder();
-        ItemMeta meta = item.getItemMeta();
-        if (meta == null) {
-            return Optional.empty();
-        }
-        PersistentDataContainer persistentDataContainer = meta.getPersistentDataContainer();
+    public static Optional<RecipeEffects> fromEntity(Entity entity) {
+        return fromPdc(entity.getPersistentDataContainer());
+    }
+
+    private static Optional<RecipeEffects> fromPdc(PersistentDataContainer persistentDataContainer) {
         if (!persistentDataContainer.has(ALCOHOL)) {
             return Optional.empty();
         }
+        RecipeEffects.Builder builder = new RecipeEffects.Builder();
         builder.alcohol(persistentDataContainer.getOrDefault(ALCOHOL, PersistentDataType.INTEGER, 0));
         builder.toxins(persistentDataContainer.getOrDefault(TOXINS, PersistentDataType.INTEGER, 0));
         if (persistentDataContainer.has(TITLE)) {
@@ -135,7 +137,17 @@ public class RecipeEffects {
         return Optional.of(builder.build());
     }
 
-    public void applyTo(Player player, DrunksManagerImpl<?> drunksManager) {
+    public static Optional<RecipeEffects> fromItem(@NotNull ItemStack item) {
+        ItemMeta meta = item.getItemMeta();
+        if (meta == null) {
+            return Optional.empty();
+        }
+        PersistentDataContainer persistentDataContainer = meta.getPersistentDataContainer();
+        return fromPdc(persistentDataContainer);
+    }
+
+    public void applyTo(Player player) {
+        DrunksManagerImpl<?> drunksManager = TheBrewingProject.getInstance().getDrunksManager();
         drunksManager.consume(player.getUniqueId(), alcohol, toxins);
         if (title != null) {
             player.showTitle(Title.title(BukkitMessageUtil.compilePlayerMessage(title, player, drunksManager, this.alcohol), Component.empty()));
@@ -155,14 +167,14 @@ public class RecipeEffects {
         TheBrewingProject.getInstance().getDrunkEventExecutor().doDrunkEvents(player.getUniqueId(), getEvents().stream().map(EventStep.class::cast).toList());
     }
 
-    private String compileUnparsedEffectMessage(String message, Player player, DrunksManagerImpl<?> drunksManager) {
-        DrunkStateImpl drunkState = drunksManager.getDrunkState(player.getUniqueId());
-        return message
-                .replace("<player_name>", player.getName())
-                .replace("<team_name>", PlainTextComponentSerializer.plainText().serialize(player.teamDisplayName()))
-                .replace("<alcohol>", String.valueOf(this.getAlcohol()))
-                .replace("<player_alcohol>", String.valueOf(String.valueOf(drunkState == null ? "0" : drunkState.alcohol())))
-                .replace("<world>", player.getWorld().getName());
+    public void applyTo(Projectile projectile) {
+        PersistentDataContainer persistentDataContainer = projectile.getPersistentDataContainer();
+        applyTo(persistentDataContainer);
+    }
+
+    public RecipeEffects withToxins(RecipeEffects recipeEffects, int toxins) {
+        return new RecipeEffects(recipeEffects.effects, recipeEffects.title, recipeEffects.message,
+                recipeEffects.actionBar, recipeEffects.alcohol, recipeEffects.events, toxins);
     }
 
     public static class Builder {

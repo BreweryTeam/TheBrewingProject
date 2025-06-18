@@ -83,6 +83,9 @@ public class BukkitRecipeResult implements RecipeResult<ItemStack> {
             if (itemStack != null) {
                 ItemMeta meta = itemStack.getItemMeta();
                 applyMeta(meta, score, brew, state);
+                if (meta instanceof PotionMeta potionMeta) {
+                    potionMeta.setColor(color);
+                }
                 itemStack.setItemMeta(meta);
                 return itemStack;
             }
@@ -91,7 +94,6 @@ public class BukkitRecipeResult implements RecipeResult<ItemStack> {
         ItemStack itemStack = new ItemStack(Material.POTION);
         PotionMeta meta = (PotionMeta) itemStack.getItemMeta();
         meta.setColor(color);
-        itemStack.setItemMeta(meta);
         applyMeta(meta, score, brew, state);
         itemStack.setItemMeta(meta);
 
@@ -139,7 +141,7 @@ public class BukkitRecipeResult implements RecipeResult<ItemStack> {
         if (customModelData > 0) {
             meta.setCustomModelData(customModelData);
         }
-        recipeEffects.applyTo(meta, score);
+        recipeEffects.withToxins(recipeEffects, (int) (recipeEffects.getAlcohol() * (1.5D - score.score()))).applyTo(meta);
     }
 
     private Stream<? extends Component> compileExtraLore(BrewScore score, Brew brew, Brew.State state) {

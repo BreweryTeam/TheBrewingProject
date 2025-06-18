@@ -1,5 +1,6 @@
 package dev.jsinco.brewery.bukkit.listeners;
 
+import com.destroystokyo.paper.event.player.PlayerLaunchProjectileEvent;
 import dev.jsinco.brewery.brew.BrewImpl;
 import dev.jsinco.brewery.breweries.InventoryAccessible;
 import dev.jsinco.brewery.breweries.StructureHolder;
@@ -254,7 +255,7 @@ public class PlayerEventListener implements Listener {
     @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
     public void onPlayerItemConsume(PlayerItemConsumeEvent event) {
         RecipeEffects.fromItem(event.getItem())
-                .ifPresent(effect -> effect.applyTo(event.getPlayer(), drunksManager));
+                .ifPresent(effect -> effect.applyTo(event.getPlayer()));
     }
 
     @EventHandler(ignoreCancelled = true)
@@ -275,5 +276,11 @@ public class PlayerEventListener implements Listener {
     public void onPlayerJoin(PlayerJoinEvent event) {
         drunkEventExecutor.onPlayerJoin(event.getPlayer().getUniqueId());
         drunksManager.planEvent(event.getPlayer().getUniqueId());
+    }
+
+    @EventHandler(ignoreCancelled = true)
+    public void onPlayerProjectileLaunch(PlayerLaunchProjectileEvent event) {
+        RecipeEffects.fromItem(event.getItemStack())
+                .ifPresent(recipeEffects -> recipeEffects.applyTo(event.getProjectile()));
     }
 }
