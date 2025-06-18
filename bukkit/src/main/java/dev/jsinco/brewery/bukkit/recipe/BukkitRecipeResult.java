@@ -1,6 +1,5 @@
 package dev.jsinco.brewery.bukkit.recipe;
 
-import com.google.common.base.Preconditions;
 import dev.jsinco.brewery.brew.Brew;
 import dev.jsinco.brewery.brew.BrewQuality;
 import dev.jsinco.brewery.brew.BrewScore;
@@ -8,6 +7,7 @@ import dev.jsinco.brewery.brew.BrewingStep;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.bukkit.integration.Integration;
 import dev.jsinco.brewery.bukkit.integration.IntegrationType;
+import dev.jsinco.brewery.bukkit.integration.ItemIntegration;
 import dev.jsinco.brewery.bukkit.util.BukkitAdapter;
 import dev.jsinco.brewery.configuration.locale.TranslationsConfig;
 import dev.jsinco.brewery.recipe.RecipeResult;
@@ -27,9 +27,11 @@ import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
+import org.bukkit.Registry;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.ItemType;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.jetbrains.annotations.NotNull;
@@ -77,50 +79,24 @@ public class BukkitRecipeResult implements RecipeResult<ItemStack> {
 
     @SuppressWarnings("UnstableApiUsage")
     @Override
-    public ItemStack newBrewItem(@NotNull BrewScore score, Brew brew, Brew.State state) {
+    public ItemStack newBrewItem(@NotNull BrewScore score, @NotNull Brew brew, @NotNull Brew.State state) {
         BrewQuality quality = score.brewQuality();
         if (customId != null) {
-            ItemStack itemStack = TheBrewingProject.getInstance().getIntegrationManager().getIntegrationRegistry()
-                    .getIntegrations(IntegrationType.ITEM)
-                    .stream()
-                    .filter(Integration::enabled)
-                    .filter(integration -> customId.namespace().equals(integration.getId()))
-                    .findAny()
-                    .orElseThrow(() -> new IllegalStateException("Namespace should be within the supported items plugins"))
-                    .createItem(customId.key())
-                    .orElse(null);
+            ItemStack itemStack = createCustomItem(score, brew, state, quality);
             if (itemStack != null) {
                 ItemMeta meta = itemStack.getItemMeta();
-                recipeEffects.getOrDefault(quality, RecipeEffects.GENERIC).applyTo(meta, score);
+                applyMeta(meta, score, brew, state, quality);
                 itemStack.setItemMeta(meta);
                 return itemStack;
-            } else {
-                Logging.warning("Invalid item id '" + customId + "' for recipe: " + names.getOrDefault(quality, "unknown"));
             }
+            Logging.warning("Invalid item id '" + customId + "' for recipe: " + names.getOrDefault(quality, "unknown"));
         }
         ItemStack itemStack = new ItemStack(Material.POTION);
         PotionMeta meta = (PotionMeta) itemStack.getItemMeta();
-        Preconditions.checkNotNull(quality);
-        meta.addItemFlags(ItemFlag.HIDE_ENCHANTS, ItemFlag.HIDE_ATTRIBUTES, ItemFlag.HIDE_ADDITIONAL_TOOLTIP);
-        meta.displayName(compileMessage(score, brew, names.get(quality), true).decoration(TextDecoration.ITALIC, false));
-        meta.lore(Stream.concat(lore.get(quality).stream()
-                                        .map(line -> compileMessage(score, brew, line, false)),
-                                compileExtraLore(score, brew, state, quality)
-                        )
-                        .map(component -> component.decoration(TextDecoration.ITALIC, false))
-                        .map(component -> component.colorIfAbsent(NamedTextColor.GRAY))
-                        .toList()
-        );
         meta.setColor(color);
-        if (glint) {
-            meta.addEnchant(Enchantment.MENDING, 1, true);
-        }
-        if (customModelData > 0) {
-            meta.setCustomModelData(customModelData);
-        }
-        recipeEffects.getOrDefault(quality, RecipeEffects.GENERIC).applyTo(meta, score);
         itemStack.setItemMeta(meta);
-
+        applyMeta(meta, score, brew, state, quality);
+        itemStack.setItemMeta(meta);
 
         // If we're using modern paper maybe we should just use paper's DataComponentTypes instead of ItemMeta?
         if (itemModel != null) {
@@ -132,6 +108,46 @@ public class BukkitRecipeResult implements RecipeResult<ItemStack> {
             }
         }
         return itemStack;
+    }
+
+    private ItemStack createCustomItem(@NotNull BrewScore score, @NotNull Brew brew, @NotNull Brew.State state, BrewQuality quality) {
+        if (customId.namespace().equals("minecraft")) {
+            ItemType itemType = Registry.ITEM.get(BukkitAdapter.toNamespacedKey(customId));
+            if (itemType == null || itemType == ItemType.AIR) {
+                return null;
+            }
+            return itemType.createItemStack();
+        } else {
+            return TheBrewingProject.getInstance().getIntegrationManager().getIntegrationRegistry()
+                    .getIntegrations(IntegrationType.ITEM)
+                    .stream()
+                    .filter(Integration::enabled)
+                    .filter(integration -> customId.namespace().equals(integration.getId()))
+                    .findAny()
+                    .orElseThrow(() -> new IllegalStateException("Namespace should be within the supported items plugins"))
+                    .createItem(customId.key())
+                    .orElse(null);
+        }
+    }
+
+    private void applyMeta(ItemMeta meta, BrewScore score, Brew brew, Brew.State state, BrewQuality quality) {
+        meta.addItemFlags(ItemFlag.HIDE_ENCHANTS, ItemFlag.HIDE_ATTRIBUTES, ItemFlag.HIDE_ADDITIONAL_TOOLTIP);
+        meta.displayName(compileMessage(score, brew, names.get(quality), true).decoration(TextDecoration.ITALIC, false));
+        meta.lore(Stream.concat(lore.get(quality).stream()
+                                        .map(line -> compileMessage(score, brew, line, false)),
+                                compileExtraLore(score, brew, state, quality)
+                        )
+                        .map(component -> component.decoration(TextDecoration.ITALIC, false))
+                        .map(component -> component.colorIfAbsent(NamedTextColor.GRAY))
+                        .toList()
+        );
+        if (glint) {
+            meta.addEnchant(Enchantment.MENDING, 1, true);
+        }
+        if (customModelData > 0) {
+            meta.setCustomModelData(customModelData);
+        }
+        recipeEffects.getOrDefault(quality, RecipeEffects.GENERIC).applyTo(meta, score);
     }
 
     private Stream<? extends Component> compileExtraLore(BrewScore score, Brew brew, Brew.State state, BrewQuality quality) {
@@ -253,12 +269,12 @@ public class BukkitRecipeResult implements RecipeResult<ItemStack> {
                 this.customId = null;
                 return this;
             }
-            BreweryKey namespacedKey = BreweryKey.parse(customId.toLowerCase(Locale.ROOT));
-            switch (namespacedKey.namespace()) {
-                case "oraxen", "itemsadder", "nexo", "craftengine" -> {
-                    this.customId = namespacedKey;
-                    return this;
-                }
+            BreweryKey namespacedKey = BreweryKey.parse(customId.toLowerCase(Locale.ROOT), "minecraft");
+            List<String> ids = TheBrewingProject.getInstance().getIntegrationManager().retrieve(IntegrationType.ITEM)
+                    .stream().map(ItemIntegration::getId)
+                    .toList();
+            if (ids.contains(namespacedKey.namespace()) || "minecraft".equals(namespacedKey.namespace())) {
+                this.customId = namespacedKey;
             }
             throw new IllegalArgumentException("Unknown custom namespace!");
         }

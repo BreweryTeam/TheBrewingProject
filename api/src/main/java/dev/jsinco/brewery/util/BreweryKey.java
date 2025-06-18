@@ -23,6 +23,17 @@ public record BreweryKey(String namespace, String key) {
         throw new IllegalArgumentException("Invalid Brewery Key: " + input);
     }
 
+    public static @NotNull BreweryKey parse(@NotNull String input, @NotNull String defaultNamespace) {
+        String[] split = input.split(":", 2); // Allow recursive namespaced keys
+        if (split.length == 1) {
+            return new BreweryKey(defaultNamespace, split[0].toLowerCase(Locale.ROOT));
+        }
+        if (split.length == 2) {
+            return new BreweryKey(split[0].toLowerCase(Locale.ROOT), split[1].toLowerCase(Locale.ROOT));
+        }
+        throw new IllegalArgumentException("Invalid Brewery Key: " + input);
+    }
+
     @Override
     public String toString() {
         return namespace + ":" + key;
