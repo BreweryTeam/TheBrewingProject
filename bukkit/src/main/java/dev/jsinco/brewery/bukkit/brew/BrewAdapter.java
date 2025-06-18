@@ -7,11 +7,12 @@ import dev.jsinco.brewery.bukkit.util.BukkitAdapter;
 import dev.jsinco.brewery.bukkit.util.IngredientUtil;
 import dev.jsinco.brewery.bukkit.util.ListPersistentDataType;
 import dev.jsinco.brewery.configuration.locale.TranslationsConfig;
-import dev.jsinco.brewery.recipe.Recipe;
-import dev.jsinco.brewery.recipe.RecipeResult;
-import dev.jsinco.brewery.recipes.*;
 import dev.jsinco.brewery.ingredient.Ingredient;
 import dev.jsinco.brewery.ingredient.IngredientManager;
+import dev.jsinco.brewery.recipe.Recipe;
+import dev.jsinco.brewery.recipe.RecipeResult;
+import dev.jsinco.brewery.recipes.BrewScoreImpl;
+import dev.jsinco.brewery.recipes.RecipeRegistryImpl;
 import dev.jsinco.brewery.util.BreweryKey;
 import dev.jsinco.brewery.util.Pair;
 import net.kyori.adventure.text.format.TextDecoration;
@@ -25,7 +26,10 @@ import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 
 public class BrewAdapter {
 
@@ -51,12 +55,13 @@ public class BrewAdapter {
         } else if (!score.map(BrewScore::completed).get()) {
             itemStack = incompletePotion(brew);
         } else {
-            itemStack = recipe.get().getRecipeResult().newBrewItem(score.get(), brew, state);
+            RecipeResult<ItemStack> recipeResult = recipe.get().getRecipeResult(quality.get());
+            itemStack = recipeResult.newBrewItem(score.get(), brew, state);
             ItemMeta meta = itemStack.getItemMeta();
             meta.getPersistentDataContainer().set(BREWERY_TAG, PersistentDataType.STRING, BreweryKey.parse(recipe.get().getRecipeName()).toString());
             meta.getPersistentDataContainer().set(BREWERY_SCORE, PersistentDataType.DOUBLE, score.get().score());
-            if (recipe.get().getRecipeResult() instanceof BukkitRecipeResult recipeResult) {
-                meta.getPersistentDataContainer().set(BREWERY_DISPLAY_NAME, PersistentDataType.STRING, recipeResult.getNames().get(quality.get()));
+            if (recipeResult instanceof BukkitRecipeResult bukkitRecipeResult) {
+                meta.getPersistentDataContainer().set(BREWERY_DISPLAY_NAME, PersistentDataType.STRING, bukkitRecipeResult.getName());
             }
             itemStack.setItemMeta(meta);
         }

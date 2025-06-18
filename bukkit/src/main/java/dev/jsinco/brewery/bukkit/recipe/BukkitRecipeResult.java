@@ -1,7 +1,6 @@
 package dev.jsinco.brewery.bukkit.recipe;
 
 import dev.jsinco.brewery.brew.Brew;
-import dev.jsinco.brewery.brew.BrewQuality;
 import dev.jsinco.brewery.brew.BrewScore;
 import dev.jsinco.brewery.brew.BrewingStep;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
@@ -11,7 +10,6 @@ import dev.jsinco.brewery.bukkit.integration.ItemIntegration;
 import dev.jsinco.brewery.bukkit.util.BukkitAdapter;
 import dev.jsinco.brewery.configuration.locale.TranslationsConfig;
 import dev.jsinco.brewery.recipe.RecipeResult;
-import dev.jsinco.brewery.recipes.QualityData;
 import dev.jsinco.brewery.util.BreweryKey;
 import dev.jsinco.brewery.util.Logging;
 import dev.jsinco.brewery.util.MessageUtil;
@@ -44,10 +42,10 @@ import java.util.stream.Stream;
 
 public class BukkitRecipeResult implements RecipeResult<ItemStack> {
 
-    public static final BukkitRecipeResult GENERIC = new Builder()
-            .names(QualityData.equalValue("Unknown brew"))
-            .lore(QualityData.equalValue(List.of()))
-            .recipeEffects(QualityData.equalValue(RecipeEffects.GENERIC))
+    public static final @NotNull RecipeResult<ItemStack> GENERIC = new Builder()
+            .lore(List.of())
+            .name("Generic")
+            .recipeEffects(RecipeEffects.GENERIC)
             .build();
     private final boolean glint;
     private final int customModelData;
@@ -55,22 +53,22 @@ public class BukkitRecipeResult implements RecipeResult<ItemStack> {
     private final @Nullable BreweryKey customId;
 
     @Getter
-    private final QualityData<String> names;
+    private final String name;
     @Getter
-    private final QualityData<List<String>> lore;
+    private final List<String> lore;
 
     @Getter
-    private final QualityData<RecipeEffects> recipeEffects;
+    private final RecipeEffects recipeEffects;
     @Getter
     private final Color color;
     private final boolean appendBrewInfoLore;
 
-    private BukkitRecipeResult(boolean glint, int customModelData, @Nullable NamespacedKey itemModel, QualityData<RecipeEffects> recipeEffects, QualityData<String> names, QualityData<List<String>> lore, Color color, boolean appendBrewInfoLore, @Nullable BreweryKey customId) {
+    private BukkitRecipeResult(boolean glint, int customModelData, @Nullable NamespacedKey itemModel, RecipeEffects recipeEffects, String name, List<String> lore, Color color, boolean appendBrewInfoLore, @Nullable BreweryKey customId) {
         this.glint = glint;
         this.customModelData = customModelData;
         this.itemModel = itemModel;
         this.recipeEffects = recipeEffects;
-        this.names = names;
+        this.name = name;
         this.lore = lore;
         this.color = color;
         this.appendBrewInfoLore = appendBrewInfoLore;
@@ -80,22 +78,21 @@ public class BukkitRecipeResult implements RecipeResult<ItemStack> {
     @SuppressWarnings("UnstableApiUsage")
     @Override
     public ItemStack newBrewItem(@NotNull BrewScore score, @NotNull Brew brew, @NotNull Brew.State state) {
-        BrewQuality quality = score.brewQuality();
         if (customId != null) {
             ItemStack itemStack = createCustomItem();
             if (itemStack != null) {
                 ItemMeta meta = itemStack.getItemMeta();
-                applyMeta(meta, score, brew, state, quality);
+                applyMeta(meta, score, brew, state);
                 itemStack.setItemMeta(meta);
                 return itemStack;
             }
-            Logging.warning("Invalid item id '" + customId + "' for recipe: " + names.getOrDefault(quality, "unknown"));
+            Logging.warning("Invalid item id '" + customId + "' for recipe: " + name);
         }
         ItemStack itemStack = new ItemStack(Material.POTION);
         PotionMeta meta = (PotionMeta) itemStack.getItemMeta();
         meta.setColor(color);
         itemStack.setItemMeta(meta);
-        applyMeta(meta, score, brew, state, quality);
+        applyMeta(meta, score, brew, state);
         itemStack.setItemMeta(meta);
 
         // If we're using modern paper maybe we should just use paper's DataComponentTypes instead of ItemMeta?
@@ -125,12 +122,12 @@ public class BukkitRecipeResult implements RecipeResult<ItemStack> {
         }
     }
 
-    private void applyMeta(ItemMeta meta, BrewScore score, Brew brew, Brew.State state, BrewQuality quality) {
+    private void applyMeta(ItemMeta meta, BrewScore score, Brew brew, Brew.State state) {
         meta.addItemFlags(ItemFlag.HIDE_ENCHANTS, ItemFlag.HIDE_ATTRIBUTES, ItemFlag.HIDE_ADDITIONAL_TOOLTIP);
-        meta.displayName(compileMessage(score, brew, names.get(quality), true).decoration(TextDecoration.ITALIC, false));
-        meta.lore(Stream.concat(lore.get(quality).stream()
+        meta.displayName(compileMessage(score, brew, name, true).decoration(TextDecoration.ITALIC, false));
+        meta.lore(Stream.concat(lore.stream()
                                         .map(line -> compileMessage(score, brew, line, false)),
-                                compileExtraLore(score, brew, state, quality)
+                                compileExtraLore(score, brew, state)
                         )
                         .map(component -> component.decoration(TextDecoration.ITALIC, false))
                         .map(component -> component.colorIfAbsent(NamedTextColor.GRAY))
@@ -142,46 +139,46 @@ public class BukkitRecipeResult implements RecipeResult<ItemStack> {
         if (customModelData > 0) {
             meta.setCustomModelData(customModelData);
         }
-        recipeEffects.getOrDefault(quality, RecipeEffects.GENERIC).applyTo(meta, score);
+        recipeEffects.applyTo(meta, score);
     }
 
-    private Stream<? extends Component> compileExtraLore(BrewScore score, Brew brew, Brew.State state, BrewQuality quality) {
+    private Stream<? extends Component> compileExtraLore(BrewScore score, Brew brew, Brew.State state) {
         if (!appendBrewInfoLore) {
             return Stream.empty();
         }
         Stream.Builder<Component> streamBuilder = Stream.builder();
         streamBuilder.add(Component.empty());
         switch (state) {
-            case Brew.State.Brewing brewing -> {
+            case Brew.State.Brewing ignored -> {
                 streamBuilder.add(compileMessage(score, brew, TranslationsConfig.BREW_TOOLTIP_QUALITY_BREWING, false));
                 MessageUtil.compileBrewInfo(brew, score, false).forEach(streamBuilder::add);
-                int alcohol = recipeEffects.map(RecipeEffects::getAlcohol).getOrDefault(quality, 0);
+                int alcohol = recipeEffects.getAlcohol();
                 if (alcohol > 0) {
                     streamBuilder.add(MiniMessage.miniMessage().deserialize(TranslationsConfig.DETAILED_ALCOHOLIC, Formatter.number("alcohol", alcohol)));
                 }
             }
-            case Brew.State.Other other -> {
+            case Brew.State.Other ignored -> {
                 streamBuilder.add(compileMessage(score, brew, TranslationsConfig.BREW_TOOLTIP_QUALITY, false));
-                addLastStepLore(brew, streamBuilder, quality, score);
+                addLastStepLore(brew, streamBuilder, score);
             }
             case Brew.State.Seal seal -> {
                 if (seal.volumeMessage() != null) {
                     streamBuilder.add(MiniMessage.miniMessage().deserialize(TranslationsConfig.BREW_TOOLTIP_VOLUME, Placeholder.parsed("volume", seal.volumeMessage())));
                 }
                 streamBuilder.add(MiniMessage.miniMessage().deserialize(TranslationsConfig.BREW_TOOLTIP_QUALITY_SEALED, MessageUtil.getScoreTagResolver(score)));
-                addLastStepLore(brew, streamBuilder, quality, score);
+                addLastStepLore(brew, streamBuilder, score);
             }
         }
         return streamBuilder.build();
     }
 
-    private void addLastStepLore(Brew brew, Stream.Builder<Component> streamBuilder, BrewQuality quality, BrewScore score) {
+    private void addLastStepLore(Brew brew, Stream.Builder<Component> streamBuilder, BrewScore score) {
         BrewingStep brewingStep = brew.lastCompletedStep();
         streamBuilder.add(MiniMessage.miniMessage().deserialize(
                 TranslationsConfig.BREW_TOOLTIP.get(brewingStep.stepType().name().toLowerCase(Locale.ROOT)),
                 MessageUtil.getBrewStepTagResolver(brewingStep, score.getPartialScores(brew.getCompletedSteps().size() - 1), score.brewDifficulty()))
         );
-        if (recipeEffects.get(quality).getAlcohol() > 0) {
+        if (recipeEffects.getAlcohol() > 0) {
             streamBuilder.add(MiniMessage.miniMessage().deserialize(TranslationsConfig.ALCOHOLIC));
         }
     }
@@ -191,13 +188,12 @@ public class BukkitRecipeResult implements RecipeResult<ItemStack> {
     }
 
     private @NotNull TagResolver getResolver(BrewScore score, Brew brew, boolean isBrewName) {
-        BrewQuality quality = score.brewQuality();
         TagResolver.Builder output = TagResolver.builder();
         if (!isBrewName) {
-            output.resolver(Placeholder.component("brew_name", compileMessage(score, brew, this.names.get(quality), true)));
+            output.resolver(Placeholder.component("brew_name", compileMessage(score, brew, this.name, true)));
         }
         output.resolvers(
-                Formatter.number("alcohol", this.getRecipeEffects().get(quality).getAlcohol()),
+                Formatter.number("alcohol", this.getRecipeEffects().getAlcohol()),
                 MessageUtil.getScoreTagResolver(score)
         );
 
@@ -210,9 +206,9 @@ public class BukkitRecipeResult implements RecipeResult<ItemStack> {
         private boolean glint;
         private int customModelData;
         private NamespacedKey itemModel;
-        private QualityData<String> names;
-        private QualityData<List<String>> lore;
-        private QualityData<RecipeEffects> recipeEffects;
+        private String name;
+        private List<String> lore;
+        private RecipeEffects recipeEffects;
         private Color color = Color.BLUE;
         private boolean appendBrewInfoLore = true;
         private BreweryKey customId;
@@ -237,17 +233,7 @@ public class BukkitRecipeResult implements RecipeResult<ItemStack> {
             return this;
         }
 
-        public Builder names(@NotNull QualityData<String> names) {
-            this.names = Objects.requireNonNull(names);
-            return this;
-        }
-
-        public Builder lore(@NotNull QualityData<List<String>> lore) {
-            this.lore = Objects.requireNonNull(lore);
-            return this;
-        }
-
-        public Builder recipeEffects(@NotNull QualityData<RecipeEffects> recipeEffects) {
+        public Builder recipeEffects(@NotNull RecipeEffects recipeEffects) {
             this.recipeEffects = Objects.requireNonNull(recipeEffects);
             return this;
         }
@@ -279,19 +265,19 @@ public class BukkitRecipeResult implements RecipeResult<ItemStack> {
         }
 
         public BukkitRecipeResult build() {
-            Objects.requireNonNull(names, "Names not initialized, a recipe has to have names");
+            Objects.requireNonNull(name, "Names not initialized, a recipe has to have names");
             Objects.requireNonNull(lore, "Lore not initialized, a recipe has to have lore");
             Objects.requireNonNull(recipeEffects, "Effects not initialized, a recipe has to have effects");
-            return new BukkitRecipeResult(glint, customModelData, itemModel, recipeEffects, names, lore, color, appendBrewInfoLore, customId);
+            return new BukkitRecipeResult(glint, customModelData, itemModel, recipeEffects, name, lore, color, appendBrewInfoLore, customId);
         }
 
         public Builder name(String name) {
-            this.names = QualityData.equalValue(name);
+            this.name = name;
             return this;
         }
 
         public Builder lore(List<String> lore) {
-            this.lore = QualityData.equalValue(lore);
+            this.lore = lore;
             return this;
         }
     }

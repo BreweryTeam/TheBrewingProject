@@ -80,7 +80,7 @@ public class RecipeReader<I> {
     private CompletableFuture<RecipeImpl<I>> getRecipe(ConfigurationSection recipe, String recipeName) {
         return parseSteps(recipe.getMapList("steps")).thenApplyAsync(steps -> new RecipeImpl.Builder<I>(recipeName)
                 .brewDifficulty(recipe.getDouble("brew-difficulty", 1D))
-                .recipeResult(recipeResultReader.readRecipeResult(recipe))
+                .recipeResults(recipeResultReader.readRecipeResults(recipe))
                 .steps(steps)
                 .build()
         );

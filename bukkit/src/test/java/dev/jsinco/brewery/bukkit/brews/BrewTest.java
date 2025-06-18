@@ -9,6 +9,7 @@ import dev.jsinco.brewery.bukkit.recipe.BukkitRecipeResult;
 import dev.jsinco.brewery.moment.Interval;
 import dev.jsinco.brewery.moment.Moment;
 import dev.jsinco.brewery.moment.PassedMoment;
+import dev.jsinco.brewery.recipe.QualityData;
 import dev.jsinco.brewery.recipe.Recipe;
 import dev.jsinco.brewery.recipes.RecipeImpl;
 import dev.jsinco.brewery.recipes.RecipeRegistryImpl;
@@ -201,7 +202,7 @@ class BrewTest {
     void quality_differingDifficulties(int difficulty) {
         RecipeImpl<ItemStack> recipe = new RecipeImpl.Builder<ItemStack>("test")
                 .brewDifficulty(difficulty)
-                .recipeResult(BukkitRecipeResult.GENERIC)
+                .recipeResults(QualityData.equalValued(BukkitRecipeResult.GENERIC))
                 .steps(
                         List.of(
                                 new CookStepImpl(
@@ -237,7 +238,7 @@ class BrewTest {
     void quality_increasingIngredient(int difficulty) {
         Recipe<ItemStack> recipe = new RecipeImpl.Builder<ItemStack>("test")
                 .brewDifficulty(difficulty)
-                .recipeResult(BukkitRecipeResult.GENERIC)
+                .recipeResults(QualityData.equalValued(BukkitRecipeResult.GENERIC))
                 .steps(
                         List.of(
                                 new CookStepImpl(
@@ -280,7 +281,7 @@ class BrewTest {
     void quality_decreasingIngredient(int difficulty) {
         Recipe<ItemStack> recipe = new RecipeImpl.Builder<ItemStack>("test")
                 .brewDifficulty(difficulty)
-                .recipeResult(BukkitRecipeResult.GENERIC)
+                .recipeResults(QualityData.equalValued(BukkitRecipeResult.GENERIC))
                 .steps(
                         List.of(
                                 new CookStepImpl(
@@ -321,7 +322,7 @@ class BrewTest {
     void setupRecipes() {
         Recipe<ItemStack> recipe1 = new RecipeImpl.Builder<ItemStack>("recipe1")
                 .brewDifficulty(10)
-                .recipeResult(BukkitRecipeResult.GENERIC)
+                .recipeResults(QualityData.equalValued(BukkitRecipeResult.GENERIC))
                 .steps(
                         List.of(
                                 new CookStepImpl(
@@ -342,7 +343,7 @@ class BrewTest {
                 .build();
         RecipeImpl<ItemStack> recipe2 = new RecipeImpl.Builder<ItemStack>("recipe2")
                 .brewDifficulty(10)
-                .recipeResult(BukkitRecipeResult.GENERIC)
+                .recipeResults(QualityData.equalValued(BukkitRecipeResult.GENERIC))
                 .steps(
                         List.of(
                                 new CookStepImpl(
@@ -363,7 +364,7 @@ class BrewTest {
                 .build();
         RecipeImpl<ItemStack> recipe3 = new RecipeImpl.Builder<ItemStack>("recipe3")
                 .brewDifficulty(10)
-                .recipeResult(BukkitRecipeResult.GENERIC)
+                .recipeResults(QualityData.equalValued(BukkitRecipeResult.GENERIC))
                 .steps(
                         List.of(
                                 new CookStepImpl(
@@ -384,7 +385,7 @@ class BrewTest {
                 .build();
         RecipeImpl<ItemStack> recipe4 = new RecipeImpl.Builder<ItemStack>("recipe4")
                 .brewDifficulty(10)
-                .recipeResult(BukkitRecipeResult.GENERIC)
+                .recipeResults(QualityData.equalValued(BukkitRecipeResult.GENERIC))
                 .steps(
                         List.of(
                                 new CookStepImpl(
@@ -405,7 +406,7 @@ class BrewTest {
                 .build();
         RecipeImpl<ItemStack> recipe5 = new RecipeImpl.Builder<ItemStack>("recipe5")
                 .brewDifficulty(10)
-                .recipeResult(BukkitRecipeResult.GENERIC)
+                .recipeResults(QualityData.equalValued(BukkitRecipeResult.GENERIC))
                 .steps(
                         List.of(
                                 new CookStepImpl(
@@ -426,7 +427,7 @@ class BrewTest {
                 .build();
         RecipeImpl<ItemStack> recipe6 = new RecipeImpl.Builder<ItemStack>("recipe6")
                 .brewDifficulty(10)
-                .recipeResult(BukkitRecipeResult.GENERIC)
+                .recipeResults(QualityData.equalValued(BukkitRecipeResult.GENERIC))
                 .steps(
                         List.of(
                                 new CookStepImpl(
@@ -447,7 +448,7 @@ class BrewTest {
                 .build();
         RecipeImpl<ItemStack> recipe7 = new RecipeImpl.Builder<ItemStack>("recipe7")
                 .brewDifficulty(10)
-                .recipeResult(BukkitRecipeResult.GENERIC)
+                .recipeResults(QualityData.equalValued(BukkitRecipeResult.GENERIC))
                 .steps(
                         List.of(
                                 new CookStepImpl(

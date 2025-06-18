@@ -1,6 +1,8 @@
-package dev.jsinco.brewery.recipes;
+package dev.jsinco.brewery.recipe;
 
+import com.google.common.base.Preconditions;
 import dev.jsinco.brewery.brew.BrewQuality;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -12,10 +14,11 @@ public class QualityData<T> {
     private final Map<BrewQuality, T> backing;
 
     private QualityData(Map<BrewQuality, T> backing) {
+        Preconditions.checkArgument(Arrays.stream(BrewQuality.values()).allMatch(backing::containsKey), "Missing brew quality");
         this.backing = backing;
     }
 
-    public static <T> QualityData<T> equalValue(T t) {
+    public static <T> QualityData<T> equalValued(T t) {
         return new QualityData<>(Arrays.stream(BrewQuality.values())
                 .collect(Collectors.toMap(quality -> quality, ignored -> t)));
     }
@@ -28,11 +31,7 @@ public class QualityData<T> {
         return new QualityData<>(newBacking);
     }
 
-    public T getOrDefault(BrewQuality brewQuality, T defaultValue) {
-        return backing.getOrDefault(brewQuality, defaultValue);
-    }
-
-    public @Nullable T get(BrewQuality brewQuality) {
+    public @NotNull T get(BrewQuality brewQuality) {
         return backing.get(brewQuality);
     }
 
@@ -41,14 +40,13 @@ public class QualityData<T> {
                 .collect(Collectors.toMap(quality -> quality, mapper)));
     }
 
-    public static QualityData<String> readQualityFactoredString(String string) {
+    public static QualityData<String> readQualityFactoredString(@Nullable String string) {
         if (string == null) {
-            return new QualityData<>(Map.of());
+            return QualityData.equalValued(null);
         }
         if (!string.contains("/")) {
             return new QualityData<>(Map.of(BrewQuality.BAD, string, BrewQuality.GOOD, string, BrewQuality.EXCELLENT, string));
         }
-
         String[] list = string.split("/");
         if (list.length != 3) {
             throw new IllegalArgumentException("Expected a string with format <bad>/<good>/<excellent>");
@@ -84,5 +82,9 @@ public class QualityData<T> {
             map.putIfAbsent(quality, new ArrayList<>());
         }
         return new QualityData<>(map);
+    }
+
+    public T getOrDefault(BrewQuality quality, T t) {
+        return backing.getOrDefault(quality, t);
     }
 }
