@@ -51,7 +51,7 @@ public class BukkitRecipeResult implements RecipeResult<ItemStack> {
             .build();
     private final boolean glint;
     private final int customModelData;
-    private final @Nullable BreweryKey itemModel;
+    private final @Nullable NamespacedKey itemModel;
     private final @Nullable BreweryKey customId;
 
     @Getter
@@ -65,7 +65,7 @@ public class BukkitRecipeResult implements RecipeResult<ItemStack> {
     private final Color color;
     private final boolean appendBrewInfoLore;
 
-    private BukkitRecipeResult(boolean glint, int customModelData, @Nullable BreweryKey itemModel, QualityData<RecipeEffects> recipeEffects, QualityData<String> names, QualityData<List<String>> lore, Color color, boolean appendBrewInfoLore, @Nullable BreweryKey customId) {
+    private BukkitRecipeResult(boolean glint, int customModelData, @Nullable NamespacedKey itemModel, QualityData<RecipeEffects> recipeEffects, QualityData<String> names, QualityData<List<String>> lore, Color color, boolean appendBrewInfoLore, @Nullable BreweryKey customId) {
         this.glint = glint;
         this.customModelData = customModelData;
         this.itemModel = itemModel;
@@ -100,17 +100,12 @@ public class BukkitRecipeResult implements RecipeResult<ItemStack> {
 
         // If we're using modern paper maybe we should just use paper's DataComponentTypes instead of ItemMeta?
         if (itemModel != null) {
-            NamespacedKey namespacedKey = BukkitAdapter.toNamespacedKey(itemModel);
-            if (namespacedKey != null) {
-                itemStack.setData(DataComponentTypes.ITEM_MODEL, namespacedKey);
-            } else {
-                Logging.warning("Invalid item model '" + itemModel + "' for recipe: " + names.getOrDefault(quality, "unknown"));
-            }
+            itemStack.setData(DataComponentTypes.ITEM_MODEL, itemModel);
         }
         return itemStack;
     }
 
-    private ItemStack createCustomItem() {
+    private @Nullable ItemStack createCustomItem() {
         if (customId.namespace().equals("minecraft")) {
             ItemType itemType = Registry.ITEM.get(BukkitAdapter.toNamespacedKey(customId));
             if (itemType == null || itemType == ItemType.AIR) {
@@ -214,7 +209,7 @@ public class BukkitRecipeResult implements RecipeResult<ItemStack> {
 
         private boolean glint;
         private int customModelData;
-        private BreweryKey itemModel;
+        private NamespacedKey itemModel;
         private QualityData<String> names;
         private QualityData<List<String>> lore;
         private QualityData<RecipeEffects> recipeEffects;
@@ -234,7 +229,10 @@ public class BukkitRecipeResult implements RecipeResult<ItemStack> {
 
         public Builder itemModel(@Nullable String itemModel) {
             if (itemModel != null) {
-                this.itemModel = BreweryKey.parse(itemModel);
+                this.itemModel = NamespacedKey.fromString(itemModel);
+                if (this.itemModel == null) {
+                    throw new IllegalArgumentException("Illegal namespaced key");
+                }
             }
             return this;
         }
