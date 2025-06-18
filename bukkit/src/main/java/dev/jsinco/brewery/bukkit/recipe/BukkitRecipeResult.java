@@ -273,6 +273,7 @@ public class BukkitRecipeResult implements RecipeResult<ItemStack> {
                     .toList();
             if (ids.contains(namespacedKey.namespace()) || "minecraft".equals(namespacedKey.namespace())) {
                 this.customId = namespacedKey;
+                return this;
             }
             throw new IllegalArgumentException("Unknown custom namespace!");
         }
