@@ -82,7 +82,7 @@ public class BukkitRecipeResult implements RecipeResult<ItemStack> {
     public ItemStack newBrewItem(@NotNull BrewScore score, @NotNull Brew brew, @NotNull Brew.State state) {
         BrewQuality quality = score.brewQuality();
         if (customId != null) {
-            ItemStack itemStack = createCustomItem(score, brew, state, quality);
+            ItemStack itemStack = createCustomItem();
             if (itemStack != null) {
                 ItemMeta meta = itemStack.getItemMeta();
                 applyMeta(meta, score, brew, state, quality);
@@ -110,7 +110,7 @@ public class BukkitRecipeResult implements RecipeResult<ItemStack> {
         return itemStack;
     }
 
-    private ItemStack createCustomItem(@NotNull BrewScore score, @NotNull Brew brew, @NotNull Brew.State state, BrewQuality quality) {
+    private ItemStack createCustomItem() {
         if (customId.namespace().equals("minecraft")) {
             ItemType itemType = Registry.ITEM.get(BukkitAdapter.toNamespacedKey(customId));
             if (itemType == null || itemType == ItemType.AIR) {
