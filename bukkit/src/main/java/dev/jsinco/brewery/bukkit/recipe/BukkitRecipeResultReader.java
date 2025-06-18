@@ -42,7 +42,7 @@ public class BukkitRecipeResultReader implements RecipeResultReader<ItemStack> {
                         .lore(lore.getOrDefault(brewQuality, List.of()))
                         .glint(glint.getOrDefault(brewQuality, false))
                         .color(Preconditions.checkNotNull(colors.get(brewQuality)))
-                        .appendBrewInfoLore(appendBrewInfoLore.getOrDefault(brewQuality, false))
+                        .appendBrewInfoLore(appendBrewInfoLore.getOrDefault(brewQuality, true))
                         .customId(customId.get(brewQuality))
                         .customModelData(customModelData.getOrDefault(brewQuality, -1))
                         .itemModel(itemModel.get(brewQuality))

@@ -6,6 +6,7 @@ import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.bukkit.brew.BrewAdapter;
 import dev.jsinco.brewery.bukkit.ingredient.BukkitIngredientManager;
 import dev.jsinco.brewery.bukkit.listeners.ListenerUtil;
+import dev.jsinco.brewery.bukkit.recipe.BukkitRecipeResult;
 import dev.jsinco.brewery.bukkit.util.BlockUtil;
 import dev.jsinco.brewery.bukkit.util.BukkitAdapter;
 import dev.jsinco.brewery.bukkit.util.ColorUtil;
@@ -44,8 +45,11 @@ public class BukkitCauldron implements dev.jsinco.brewery.breweries.Cauldron {
     private boolean hot = false;
     @Getter
     private Brew brew;
-    private Color particleColor = Color.AQUA;
+    private static final Color LAVA_COLOR = Color.fromRGB(Integer.parseInt("d45a12", 16));
+    private static final Color WATER_COLOR = Color.AQUA;
+    private static final Color SNOW_COLOR = Color.fromRGB(Integer.parseInt("f8fdfd", 16));
     private boolean brewExtracted = false;
+    private Color particleColor = Color.AQUA;
 
 
     public BukkitCauldron(BreweryLocation location, boolean hot) {
@@ -73,17 +77,43 @@ public class BukkitCauldron implements dev.jsinco.brewery.breweries.Cauldron {
             return;
         }
         this.hot = isHeatSource(getBlock().getRelative(BlockFace.DOWN));
-        Optional<Recipe<ItemStack>> recipeOptional = brew.closestRecipe(TheBrewingProject.getInstance().getRecipeRegistry());
         recalculateBrewTime();
-        if (recipeOptional.isPresent() && recipeOptional.get().getSteps().get(brew.getCompletedSteps().size() - 1) instanceof BrewingStep.Cook recipeCook) {
-            if (hot) {
-                BrewingStep.Cook cook = (BrewingStep.Cook) brew.lastStep();
-                this.particleColor = ColorUtil.getNextColor(Color.AQUA, IngredientUtil.ingredientData(cook.ingredients()).first(), cook.brewTime().moment(), recipeCook.brewTime().moment());
-            } else {
-                this.particleColor = Color.AQUA;
-            }
-        }
+        Color baseParticleColor = computeBaseParticleColor(getBlock());
+        Optional<Recipe<ItemStack>> recipeOptional = brew.closestRecipe(TheBrewingProject.getInstance().getRecipeRegistry());
+        Color resultColor = computeResultColor(recipeOptional);
+        this.particleColor = recipeOptional.map(recipe -> computeParticleColor(baseParticleColor, resultColor, recipe))
+                .orElse(Color.GRAY);
+
         this.playBrewingEffects();
+    }
+
+    private Color computeParticleColor(Color baseColor, Color resultColor, Recipe<ItemStack> recipe) {
+        if (brew.lastStep() instanceof BrewingStep.Cook cook) {
+            BrewingStep.Cook expectedCook = (BrewingStep.Cook) recipe.getSteps().get(brew.getCompletedSteps().size() - 1);
+            return ColorUtil.getNextColor(baseColor, resultColor, cook.brewTime().moment(), expectedCook.brewTime().moment());
+        } else if (brew.lastStep() instanceof BrewingStep.Mix mix) {
+            BrewingStep.Mix expectedMix = (BrewingStep.Mix) recipe.getSteps().get(brew.getCompletedSteps().size() - 1);
+            return ColorUtil.getNextColor(baseColor, resultColor, mix.time().moment(), expectedMix.time().moment());
+        }
+        return baseColor;
+    }
+
+    private Color computeResultColor(Optional<Recipe<ItemStack>> recipeOptional) {
+        if (recipeOptional.isEmpty()) {
+            return Color.GRAY;
+        }
+        Map<? extends Ingredient, Integer> ingredients;
+        if (brew.lastStep() instanceof BrewingStep.Cook cook) {
+            ingredients = cook.ingredients();
+        } else if (brew.lastStep() instanceof BrewingStep.Mix mix) {
+            ingredients = mix.ingredients();
+        } else {
+            return Color.AQUA;
+        }
+        BrewScore score = brew.score(recipeOptional.get());
+        return !score.completed() ?
+                IngredientUtil.ingredientData(ingredients).first() :
+                ((BukkitRecipeResult) recipeOptional.get().getRecipeResults().getOrDefault(score.brewQuality(), BukkitRecipeResult.GENERIC)).getColor();
     }
 
 
@@ -129,6 +159,15 @@ public class BukkitCauldron implements dev.jsinco.brewery.breweries.Cauldron {
         return true;
     }
 
+    private Color computeBaseParticleColor(Block block) {
+        return switch (block.getType()) {
+            case WATER_CAULDRON -> WATER_COLOR;
+            case LAVA_CAULDRON -> LAVA_COLOR;
+            case POWDER_SNOW_CAULDRON -> SNOW_COLOR;
+            default -> throw new IllegalStateException("Expected block to be cauldron type");
+        };
+    }
+
     public void playBrewingEffects() {
         Block block = getBlock();
         Location particleLoc = // Complex particle location based off BreweryX
@@ -167,8 +206,9 @@ public class BukkitCauldron implements dev.jsinco.brewery.breweries.Cauldron {
                 sound,
                 bukkitLocation.x(), bukkitLocation.y(), bukkitLocation.z()
         );
-
-        world.spawnParticle(Particle.SPLASH, bukkitLocation.add(0.0, 0.5, 0.0), 50, 0.1, 0.05, 0.1, 1.0);
+        if (getBlock().getType() == Material.WATER_CAULDRON) {
+            world.spawnParticle(Particle.SPLASH, bukkitLocation.add(0.0, 0.5, 0.0), 50, 0.1, 0.05, 0.1, 1.0);
+        }
     }
 
     public void playBrewExtractedEffects() {
@@ -202,7 +242,7 @@ public class BukkitCauldron implements dev.jsinco.brewery.breweries.Cauldron {
     public ItemStack extractBrew() {
         recalculateBrewTime();
         this.brewExtracted = true;
-        playBrewingEffects();
+        playBrewExtractedEffects();
         return BrewAdapter.toItem(brew, new Brew.State.Other());
     }
 
@@ -237,7 +277,11 @@ public class BukkitCauldron implements dev.jsinco.brewery.breweries.Cauldron {
     }
 
     public static boolean decrementLevel(Block block) {
+        if (!Tag.CAULDRONS.isTagged(block.getType())) {
+            return true;
+        }
         if (!(block.getBlockData() instanceof Levelled levelled)) {
+            block.setType(Material.CAULDRON);
             return true;
         }
         if (levelled.getLevel() == 1) {
