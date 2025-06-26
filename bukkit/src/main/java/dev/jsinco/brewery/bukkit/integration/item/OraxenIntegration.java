@@ -6,6 +6,7 @@ import dev.jsinco.brewery.util.ClassUtil;
 import io.th0rgal.oraxen.api.OraxenItems;
 import io.th0rgal.oraxen.api.events.OraxenItemsLoadedEvent;
 import io.th0rgal.oraxen.items.ItemBuilder;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -27,8 +28,11 @@ public class OraxenIntegration implements ItemIntegration, Listener {
                 .map(ItemBuilder::build);
     }
 
-    public @Nullable String displayName(String oraxenId) {
-        return OraxenItems.exists(oraxenId) ? OraxenItems.getItemById(oraxenId).getDisplayName() : null;
+    public @Nullable Component displayName(String oraxenId) {
+        return OraxenItems.getOptionalItemById(oraxenId)
+                .map(ItemBuilder::getDisplayName)
+                .map(Component::text)
+                .orElse(null);
     }
 
     @Override

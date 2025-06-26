@@ -12,6 +12,7 @@ import net.Indyuce.mmoitems.api.item.build.ItemStackBuilder;
 import net.Indyuce.mmoitems.api.item.build.MMOItemBuilder;
 import net.Indyuce.mmoitems.api.item.mmoitem.MMOItem;
 import net.Indyuce.mmoitems.api.item.template.MMOItemTemplate;
+import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
@@ -33,10 +34,9 @@ public class MmoItemsIntegration implements ItemIntegration, Listener {
     }
 
     @Override
-    public @Nullable String displayName(String id) {
+    public @Nullable Component displayName(String id) {
         return createItem(id)
                 .map(ItemStack::displayName)
-                .map(MiniMessage.miniMessage()::serialize)
                 .orElse(null);
     }
 

@@ -3,6 +3,7 @@ package dev.jsinco.brewery.bukkit.integration;
 import dev.jsinco.brewery.bukkit.ingredient.PluginIngredient;
 import dev.jsinco.brewery.ingredient.Ingredient;
 import dev.jsinco.brewery.util.BreweryKey;
+import net.kyori.adventure.text.Component;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -25,7 +26,7 @@ public interface ItemIntegration extends Integration {
                 );
     }
 
-    @Nullable String displayName(String id);
+    @Nullable Component displayName(String id);
 
     @Nullable String itemId(ItemStack itemStack);
 

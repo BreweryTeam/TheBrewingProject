@@ -3,9 +3,9 @@ import net.minecrell.pluginyml.bukkit.BukkitPluginDescription
 plugins {
     `tbp-module`
 
-    id("io.github.goooler.shadow") version "8.1.7"
-    id("xyz.jpenilla.run-paper") version "2.3.0"
-    id("de.eldoria.plugin-yml.bukkit") version "0.7.1"
+    alias(libs.plugins.shadow)
+    alias(libs.plugins.run.paper)
+    alias(libs.plugins.plugin.yml.bukkit)
 }
 
 repositories {
@@ -29,44 +29,49 @@ repositories {
 }
 
 dependencies {
-    compileOnly("io.papermc.paper:paper-api:${project.findProperty("paper.version")!!}")
-    compileOnly("org.projectlombok:lombok:1.18.30")
-    compileOnly("org.jetbrains:annotations:24.0.0")
-    compileOnly("com.comphenix.protocol:ProtocolLib:5.1.0")
-
-    // Integration
-    compileOnly("io.th0rgal:oraxen:1.189.0")
-    compileOnly("dev.lone:api-itemsadder:4.0.10")
-    compileOnly("com.nexomc:nexo:1.1.0")
-    compileOnly("com.sk89q.worldguard:worldguard-bukkit:7.0.13")
-    compileOnly("com.github.GriefPrevention:GriefPrevention:17.0.0")
-    compileOnly("com.palmergames.bukkit.towny:towny:0.100.1.9")
-    compileOnly("com.github.Angeschossen:LandsAPI:7.13.1")
-    compileOnly("com.acrobot.chestshop:chestshop:3.12.2")
-    compileOnly("net.william278.huskclaims:huskclaims-bukkit:1.5.2")
-    compileOnly("org.popcraft:bolt-bukkit:1.1.33")
-    compileOnly("org.popcraft:bolt-common:1.1.33")
-    compileOnly("net.momirealms:craft-engine-core:0.0.48")
-    compileOnly("net.momirealms:craft-engine-bukkit:0.0.48")
-    compileOnly("me.clip:placeholderapi:2.11.6")
-    compileOnly("io.lumine:MythicLib-dist:1.7.1-SNAPSHOT")
-    compileOnly("net.Indyuce:MMOItems-API:6.10.1-SNAPSHOT")
-    compileOnly("io.github.miniplaceholders:miniplaceholders-api:2.3.0")
-
     implementation(project(":core"))
     api(project(":api"))
-    implementation("dev.thorinwasher.schem:schem-reader:1.0.0")
-    implementation("com.github.Carleslc.Simple-YAML:Simple-Yaml:1.8.4")
 
-    testImplementation("org.junit.jupiter:junit-jupiter:5.12.1")
-    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+    compileOnly(libs.paper.api)
 
-    testImplementation("org.mockbukkit.mockbukkit:mockbukkit-v1.21:4.50.0")
-    testImplementation("net.kyori:adventure-nbt:4.17.0")
-    testImplementation("org.xerial:sqlite-jdbc:3.47.2.0")
+    // libraries
+    compileOnly(libs.protocolLib)
+    implementation(libs.schem.reader)
+    implementation(libs.simple.yaml)
 
-    annotationProcessor("org.projectlombok:lombok:1.18.30")
-    testAnnotationProcessor("org.projectlombok:lombok:1.18.30")
+    // integrations
+    compileOnly(libs.bolt.bukkit)
+    compileOnly(libs.bolt.common)
+    compileOnly(libs.chestshop)
+    compileOnly(libs.craft.engine.bukkit)
+    compileOnly(libs.craft.engine.core)
+    compileOnly(libs.griefprevention)
+    compileOnly(libs.huskclaims.bukkit)
+    compileOnly(libs.itemsadder)
+    compileOnly(libs.landsapi)
+    compileOnly(libs.miniplaceholders)
+    compileOnly(libs.mmoitems.api)
+    compileOnly(libs.mythiclib)
+    compileOnly(libs.nexo)
+    compileOnly(libs.oraxen)
+    compileOnly(libs.placeholderapi)
+    compileOnly(libs.towny)
+    compileOnly(libs.worldguard.bukkit)
+
+    // other
+    compileOnly(libs.jetbrains.annotations)
+    compileOnly(libs.lombok)
+    annotationProcessor(libs.lombok)
+
+    // test
+    testImplementation(libs.junit.jupiter)
+    testRuntimeOnly(libs.junit.platform.launcher)
+
+    testImplementation(libs.adventure.nbt)
+    testImplementation(libs.mockbukkit)
+    testImplementation(libs.sqlite.jdbc)
+
+    testAnnotationProcessor(libs.lombok)
 }
 
 tasks {
@@ -79,13 +84,13 @@ tasks {
         minecraftVersion(project.findProperty("minecraft.version")!! as String)
         if (project.findProperty("testing.integrations")!! == "true") {
             downloadPlugins {
-                modrinth("worldedit", "DlD8WKr9")
-                modrinth("craftengine", "OktNyJzh")
+                modrinth("worldedit", "DYf6XJqU")
+                modrinth("craftengine", "uZpi6zim")
                 url("https://dev.bukkit.org/projects/chestshop/files/latest")
                 url("https://dev.bukkit.org/projects/vault/files/latest")
-                url("https://github.com/EssentialsX/Essentials/releases/download/2.21.0/EssentialsX-2.21.0.jar")
-                url("https://api.spiget.org/v2/resources/109679/download")
-                url("https://api.spiget.org/v2/resources/1997/download")
+                url("https://github.com/EssentialsX/Essentials/releases/download/2.21.1/EssentialsX-2.21.1.jar")
+                modrinth("bolt", "1f2gAAFO")
+                url("https://ci.dmulloy2.net/job/ProtocolLib/lastSuccessfulBuild/artifact/build/libs/ProtocolLib.jar")
             }
         }
     }
@@ -93,9 +98,29 @@ tasks {
     shadowJar {
         archiveBaseName.set(rootProject.name)
         archiveClassifier.unset()
+
+        dependencies {
+            exclude {
+                it.moduleGroup == "org.jetbrains.kotlin"
+                        || it.moduleGroup == "org.jetbrains.kotlinx"
+                        || it.moduleGroup == "org.joml"
+                        || it.moduleGroup == "org.slf4j"
+            }
+        }
+
+        exclude("org/jetbrains/annotations/**")
+        exclude("org/intellij/lang/annotations/**")
+
+        listOf(
+            "com.zaxxer.hikari",
+            "dev.thorinwasher.schem",
+            "net.kyori.adventure.nbt",
+            "net.kyori.examination",
+            "org.simpleyaml",
+            "org.yaml.snakeyaml"
+        ).forEach { relocate(it, "${project.group}.bukkit.lib.$it") }
     }
 }
-
 
 bukkit {
     main = "dev.jsinco.brewery.bukkit.TheBrewingProject"

@@ -15,8 +15,10 @@ import dev.jsinco.brewery.recipes.BrewScoreImpl;
 import dev.jsinco.brewery.recipes.RecipeRegistryImpl;
 import dev.jsinco.brewery.util.BreweryKey;
 import dev.jsinco.brewery.util.Pair;
+import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemFlag;
@@ -88,17 +90,20 @@ public class BrewAdapter {
         }
         Pair<org.bukkit.Color, Ingredient> itemsInfo = IngredientUtil.ingredientData(ingredients);
         Ingredient topIngredient = itemsInfo.second();
-        String displayName = switch (brew.getCompletedSteps().getLast().stepType()) {
-            case COOK ->
-                    topIngredient == null ? TranslationsConfig.BREW_DISPLAY_NAME_UNFINISHED_FERMENTED_UNKNOWN : TranslationsConfig.BREW_DISPLAY_NAME_UNFINISHED_FERMENTED.replace("<ingredient>", topIngredient.displayName().toLowerCase());
-            case DISTILL ->
-                    topIngredient == null ? TranslationsConfig.BREW_DISPLAY_NAME_UNFINISHED_DISTILLED_UNKNOWN : TranslationsConfig.BREW_DISPLAY_NAME_UNFINISHED_DISTILLED.replace("<ingredient>", topIngredient.displayName());
-            case AGE ->
-                    topIngredient == null ? TranslationsConfig.BREW_DISPLAY_NAME_UNFINISHED_AGED_UNKNOWN : TranslationsConfig.BREW_DISPLAY_NAME_UNFINISHED_AGED.replace("<ingredient>", topIngredient.displayName().toLowerCase());
-            case MIX ->
-                    topIngredient == null ? TranslationsConfig.BREW_DISPLAY_NAME_UNFINISHED_MIXED_UNKNOWN : TranslationsConfig.BREW_DISPLAY_NAME_UNFINISHED_MIXED.replace("<ingredient>", topIngredient.displayName());
-        };
-        potionMeta.displayName(MiniMessage.miniMessage().deserialize(displayName).decoration(TextDecoration.ITALIC, false));
+
+        final Map<BrewingStep.StepType, String> displayNameByStep = Map.of(
+                BrewingStep.StepType.COOK, TranslationsConfig.BREW_DISPLAY_NAME_UNFINISHED_FERMENTED_UNKNOWN,
+                BrewingStep.StepType.DISTILL, TranslationsConfig.BREW_DISPLAY_NAME_UNFINISHED_DISTILLED_UNKNOWN,
+                BrewingStep.StepType.AGE, TranslationsConfig.BREW_DISPLAY_NAME_UNFINISHED_AGED_UNKNOWN,
+                BrewingStep.StepType.MIX, TranslationsConfig.BREW_DISPLAY_NAME_UNFINISHED_MIXED_UNKNOWN
+        );
+
+        BrewingStep.StepType lastStep = brew.getCompletedSteps().getLast().stepType();
+        Component displayName = topIngredient == null
+                ? MiniMessage.miniMessage().deserialize(displayNameByStep.get(lastStep))
+                : MiniMessage.miniMessage().deserialize(displayNameByStep.get(lastStep), Placeholder.component("ingredient", topIngredient.displayName()));
+
+        potionMeta.customName(displayName.decoration(TextDecoration.ITALIC, false));
         potionMeta.setColor(itemsInfo.first());
         itemStack.setItemMeta(potionMeta);
         return itemStack;

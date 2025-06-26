@@ -5,6 +5,7 @@ import dev.jsinco.brewery.bukkit.integration.ItemIntegration;
 import dev.jsinco.brewery.util.ClassUtil;
 import dev.lone.itemsadder.api.CustomStack;
 import dev.lone.itemsadder.api.Events.ItemsAdderLoadDataEvent;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -26,9 +27,9 @@ public class ItemsAdderIntegration implements ItemIntegration, Listener {
                 .map(CustomStack::getItemStack);
     }
 
-    public @Nullable String displayName(String itemsAdderId) {
+    public @Nullable Component displayName(String itemsAdderId) {
         CustomStack customStack = CustomStack.getInstance(itemsAdderId);
-        return customStack == null ? null : customStack.getDisplayName();
+        return customStack == null ? null : customStack.itemName();
     }
 
     @Override

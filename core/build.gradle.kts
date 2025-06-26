@@ -16,27 +16,31 @@ repositories {
 }
 
 dependencies {
-    implementation("com.github.Carleslc.Simple-YAML:Simple-Yaml:1.8.4")
-    implementation("com.zaxxer:HikariCP:6.2.1")
     api(project(":api"))
-    compileOnly("org.xerial:sqlite-jdbc:3.47.2.0")
 
-    compileOnly("org.jetbrains:annotations:24.0.0")
-    compileOnly("com.google.guava:guava:33.4.0-jre")
-    compileOnly("com.google.code.gson:gson:2.12.1")
-    compileOnly("org.joml:joml:1.10.8")
-    compileOnly("org.projectlombok:lombok:1.18.30")
+    // libraries
+    compileOnly(libs.sqlite.jdbc)
+    compileOnly(libs.guava)
+    compileOnly(libs.gson)
+    compileOnly(libs.joml)
+    compileOnly(libs.adventure.api)
+    compileOnly(libs.adventure.text.minimessage)
+    implementation(libs.simple.yaml)
+    implementation(libs.hikaricp)
 
-    annotationProcessor("org.projectlombok:lombok:1.18.30")
-    testAnnotationProcessor("org.projectlombok:lombok:1.18.30")
+    // other
+    compileOnly(libs.jetbrains.annotations)
+    compileOnly(libs.lombok)
+    annotationProcessor(libs.lombok)
 
-    testImplementation("org.junit.jupiter:junit-jupiter:5.11.3")
-    testImplementation("com.google.code.gson:gson:2.12.1")
-    testImplementation("org.joml:joml:1.10.8")
-    testImplementation("com.google.guava:guava:33.4.0-jre")
-    testImplementation("org.xerial:sqlite-jdbc:3.47.2.0")
-    compileOnly("net.kyori:adventure-api:4.21.0")
-    compileOnly("net.kyori:adventure-text-minimessage:4.21.0")
+    // test
+    testImplementation(libs.junit.jupiter)
+    testImplementation(libs.gson)
+    testImplementation(libs.joml)
+    testImplementation(libs.guava)
+    testImplementation(libs.sqlite.jdbc)
+
+    testAnnotationProcessor(libs.lombok)
 }
 
 tasks {

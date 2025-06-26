@@ -3,6 +3,7 @@ package dev.jsinco.brewery.bukkit.ingredient;
 import dev.jsinco.brewery.bukkit.integration.ItemIntegration;
 import dev.jsinco.brewery.ingredient.Ingredient;
 import dev.jsinco.brewery.util.BreweryKey;
+import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
@@ -22,9 +23,9 @@ public class PluginIngredient implements Ingredient {
     }
 
     @Override
-    public @NotNull String displayName() {
-        String displayName = itemIntegration.displayName(key.key());
-        return displayName == null ? key.key() : displayName;
+    public @NotNull Component displayName() {
+        Component displayName = itemIntegration.displayName(key.key());
+        return displayName == null ? Component.text(key.key()) : displayName;
     }
 
     public boolean equals(Object o) {

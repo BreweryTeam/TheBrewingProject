@@ -1,6 +1,8 @@
 package dev.jsinco.brewery.bukkit.ingredient;
 
 import dev.jsinco.brewery.ingredient.Ingredient;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.translation.GlobalTranslator;
 import net.md_5.bungee.chat.TranslationRegistry;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -29,8 +31,14 @@ public class SimpleIngredient implements Ingredient {
     }
 
     @Override
-    public @NotNull String displayName() {
-        return TranslationRegistry.INSTANCE.translate(material.getItemTranslationKey());
+    public @NotNull Component displayName() {
+        String translationKey = material.getItemTranslationKey();
+
+        if (translationKey == null) {
+            return Component.text(material.toString());
+        }
+
+        return Component.translatable(translationKey);
     }
 
     @Override

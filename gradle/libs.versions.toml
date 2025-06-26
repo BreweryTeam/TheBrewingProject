@@ -1,0 +1,92 @@
+[versions]
+paper = "1.21.6-R0.1-SNAPSHOT"
+
+# libraries
+gson = "2.13.1"
+guava = "33.4.8-jre"
+hikaricp = "6.3.0"
+joml = "1.10.8"
+protocolLib = "5.3.0"
+schem-reader = "1.0.0"
+simple-yaml = "1.8.4"
+
+# integrations
+bolt = "1.1.66"
+chestshop = "3.12.2"
+craft-engine = "0.0.58"
+griefprevention = "17.0.0"
+huskclaims = "1.5.9"
+itemsadder = "4.0.10"
+landsapi = "7.15.20"
+miniplaceholders = "2.3.0"
+mmoitems-api = "6.10.1-SNAPSHOT"
+mythiclib = "1.7.1-SNAPSHOT"
+nexo = "1.8.0"
+oraxen = "1.190.0"
+placeholderapi = "2.11.6"
+towny = "0.100.1.14"
+worldguard = "7.0.14"
+
+# other
+jetbrainsAnnotations = "26.0.2"
+lombok = "1.18.38"
+
+# test
+adventure = "4.23.0"
+junit = "5.13.2"
+junit-platform-launcher = "1.13.2"
+mockbukkit = "4.52.1"
+sqlite-jdbc = "3.50.1.0"
+
+[libraries]
+paper-api = { group = "io.papermc.paper", name = "paper-api", version.ref = "paper" }
+
+# libraries
+gson = { group = "com.google.code.gson", name = "gson", version.ref = "gson" }
+guava = { group = "com.google.guava", name = "guava", version.ref = "guava" }
+hikaricp = { group = "com.zaxxer", name = "HikariCP", version.ref = "hikaricp" }
+joml = { group = "org.joml", name = "joml", version.ref = "joml" }
+protocolLib = { group = "com.comphenix.protocol", name = "ProtocolLib", version.ref = "protocolLib" }
+schem-reader = { group = "dev.thorinwasher.schem", name = "schem-reader", version.ref = "schem-reader" }
+simple-yaml = { group = "com.github.Carleslc.Simple-YAML", name = "Simple-Yaml", version.ref = "simple-yaml" }
+
+# integrations
+
+bolt-bukkit = { group = "org.popcraft", name = "bolt-bukkit", version.ref = "bolt" }
+bolt-common = { group = "org.popcraft", name = "bolt-common", version.ref = "bolt" }
+chestshop = { group = "com.acrobot.chestshop", name = "chestshop", version.ref = "chestshop" }
+craft-engine-bukkit = { group = "net.momirealms", name = "craft-engine-bukkit", version.ref = "craft-engine" }
+craft-engine-core = { group = "net.momirealms", name = "craft-engine-core", version.ref = "craft-engine" }
+griefprevention = { group = "com.github.GriefPrevention", name = "GriefPrevention", version.ref = "griefprevention" }
+huskclaims-bukkit = { group = "net.william278.huskclaims", name = "huskclaims-bukkit", version.ref = "huskclaims" }
+itemsadder = { group = "dev.lone", name = "api-itemsadder", version.ref = "itemsadder" }
+landsapi = { group = "com.github.Angeschossen", name = "LandsAPI", version.ref = "landsapi" }
+miniplaceholders = { group = "io.github.miniplaceholders", name = "miniplaceholders-api", version.ref = "miniplaceholders" }
+mmoitems-api = { group = "net.Indyuce", name = "MMOItems-API", version.ref = "mmoitems-api" }
+mythiclib = { group = "io.lumine", name = "MythicLib-dist", version.ref = "mythiclib" }
+nexo = { group = "com.nexomc", name = "nexo", version.ref = "nexo" }
+oraxen = { group = "io.th0rgal", name = "oraxen", version.ref = "oraxen" }
+placeholderapi = { group = "me.clip", name = "placeholderapi", version.ref = "placeholderapi" }
+towny = { group = "com.palmergames.bukkit.towny", name = "towny", version.ref = "towny" }
+worldguard-bukkit = { group = "com.sk89q.worldguard", name = "worldguard-bukkit", version.ref = "worldguard" }
+
+# other
+jetbrains-annotations = { group = "org.jetbrains", name = "annotations", version.ref = "jetbrainsAnnotations" }
+lombok = { group = "org.projectlombok", name = "lombok", version.ref = "lombok" }
+
+# test
+adventure-api = { group = "net.kyori", name = "adventure-api", version.ref = "adventure" }
+adventure-nbt = { group = "net.kyori", name = "adventure-nbt", version.ref = "adventure" }
+adventure-text-minimessage = { group = "net.kyori", name = "adventure-text-minimessage", version.ref = "adventure" }
+junit-bom = { group = "org.junit", name = "junit-bom", version.ref = "junit" }
+junit-jupiter = { group = "org.junit.jupiter", name = "junit-jupiter", version.ref = "junit" }
+junit-platform-launcher = { group = "org.junit.platform", name = "junit-platform-launcher", version.ref = "junit-platform-launcher" }
+mockbukkit = { group = "org.mockbukkit.mockbukkit", name = "mockbukkit-v1.21", version.ref = "mockbukkit" }
+sqlite-jdbc = { group = "org.xerial", name = "sqlite-jdbc", version.ref = "sqlite-jdbc" }
+
+[plugins]
+shadow = { id = "com.gradleup.shadow", version = "8.3.7" }
+run-paper = { id = "xyz.jpenilla.run-paper", version = "2.3.1" }
+plugin-yml-bukkit = { id = "de.eldoria.plugin-yml.bukkit", version = "0.7.1" }
+
+neoforged-gradle-common = { id = "net.neoforged.gradle.common", version = "7.0.188" }

@@ -32,7 +32,7 @@ public class NexoIntegration implements ItemIntegration, Listener {
         return Optional.of(itemBuilder.build());
     }
 
-    public @Nullable String displayName(String itemsAdderId) {
+    public @Nullable Component displayName(String itemsAdderId) {
         if (!ENABLED) {
             return null;
         }
@@ -40,8 +40,7 @@ public class NexoIntegration implements ItemIntegration, Listener {
         if (itemBuilder == null) {
             return null;
         }
-        Component displayName = itemBuilder.getDisplayName();
-        return displayName == null ? null : PlainTextComponentSerializer.plainText().serialize(displayName);
+        return itemBuilder.getDisplayName();
     }
 
     @Override

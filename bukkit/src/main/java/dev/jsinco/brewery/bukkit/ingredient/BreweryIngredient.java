@@ -3,6 +3,8 @@ package dev.jsinco.brewery.bukkit.ingredient;
 import dev.jsinco.brewery.bukkit.brew.BrewAdapter;
 import dev.jsinco.brewery.ingredient.Ingredient;
 import dev.jsinco.brewery.util.BreweryKey;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
@@ -27,8 +29,8 @@ public class BreweryIngredient implements Ingredient {
     }
 
     @Override
-    public @NotNull String displayName() {
-        return displayName;
+    public @NotNull Component displayName() {
+        return MiniMessage.miniMessage().deserialize(displayName);
     }
 
     @Override

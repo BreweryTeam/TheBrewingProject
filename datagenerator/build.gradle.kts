@@ -1,6 +1,7 @@
 plugins {
     application
-    id("net.neoforged.gradle.common") version "7.0.181"
+
+    alias(libs.plugins.neoforged.gradle.common)
 }
 
 group = "dev.jsinco.brewery.datagenerator"
@@ -13,7 +14,7 @@ repositories {
 
 dependencies {
     implementation("net.minecraft:client:${project.findProperty("minecraft.version")!!}:client-extra")
-    implementation("com.google.code.gson:gson:2.12.1")
+    implementation(libs.gson)
 }
 
 tasks {
