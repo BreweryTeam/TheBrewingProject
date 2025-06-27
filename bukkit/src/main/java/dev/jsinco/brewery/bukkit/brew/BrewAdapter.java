@@ -92,10 +92,10 @@ public class BrewAdapter {
         Ingredient topIngredient = itemsInfo.second();
 
         final Map<BrewingStep.StepType, String> displayNameByStep = Map.of(
-                BrewingStep.StepType.COOK, TranslationsConfig.BREW_DISPLAY_NAME_UNFINISHED_FERMENTED_UNKNOWN,
-                BrewingStep.StepType.DISTILL, TranslationsConfig.BREW_DISPLAY_NAME_UNFINISHED_DISTILLED_UNKNOWN,
-                BrewingStep.StepType.AGE, TranslationsConfig.BREW_DISPLAY_NAME_UNFINISHED_AGED_UNKNOWN,
-                BrewingStep.StepType.MIX, TranslationsConfig.BREW_DISPLAY_NAME_UNFINISHED_MIXED_UNKNOWN
+                BrewingStep.StepType.COOK, topIngredient == null ? TranslationsConfig.BREW_DISPLAY_NAME_UNFINISHED_FERMENTED_UNKNOWN : TranslationsConfig.BREW_DISPLAY_NAME_UNFINISHED_FERMENTED,
+                BrewingStep.StepType.DISTILL, topIngredient == null ? TranslationsConfig.BREW_DISPLAY_NAME_UNFINISHED_DISTILLED_UNKNOWN : TranslationsConfig.BREW_DISPLAY_NAME_UNFINISHED_DISTILLED,
+                BrewingStep.StepType.AGE,  topIngredient == null ? TranslationsConfig.BREW_DISPLAY_NAME_UNFINISHED_AGED_UNKNOWN : TranslationsConfig.BREW_DISPLAY_NAME_UNFINISHED_AGED,
+                BrewingStep.StepType.MIX, topIngredient == null ? TranslationsConfig.BREW_DISPLAY_NAME_UNFINISHED_MIXED_UNKNOWN : TranslationsConfig.BREW_DISPLAY_NAME_UNFINISHED_MIXED
         );
 
         BrewingStep.StepType lastStep = brew.getCompletedSteps().getLast().stepType();
