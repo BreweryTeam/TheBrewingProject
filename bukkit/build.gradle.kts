@@ -118,7 +118,7 @@ tasks {
             "net.kyori.examination",
             "org.simpleyaml",
             "org.yaml.snakeyaml"
-        ).forEach { relocate(it, "${project.group}.bukkit.lib.$it") }
+        ).forEach { relocate(it, "${project.group}.lib.$it") }
     }
 }
 
