@@ -14,7 +14,10 @@ public class IngredientsArgument implements CustomArgumentType.Converted<Map<Ing
     @Override
     public Map<Ingredient, Integer> convert(String nativeType) throws CommandSyntaxException {
         return BukkitIngredientManager.INSTANCE.getIngredientsWithAmount(
-                Arrays.asList(nativeType.split(","))
+                Arrays.stream(nativeType.split("[, ]"))
+                        .map(String::strip)
+                        .filter(string -> !string.isBlank())
+                        .toList()
         ).join();
     }
 
