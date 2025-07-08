@@ -1,12 +1,10 @@
 package dev.jsinco.brewery.bukkit.command;
 
-import dev.jsinco.brewery.brew.*;
 import com.mojang.brigadier.arguments.DoubleArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
-import dev.jsinco.brewery.brew.BrewImpl;
-import dev.jsinco.brewery.brew.BrewingStep;
+import dev.jsinco.brewery.brew.*;
 import dev.jsinco.brewery.breweries.BarrelType;
 import dev.jsinco.brewery.breweries.CauldronType;
 import dev.jsinco.brewery.bukkit.brew.BrewAdapter;
@@ -38,7 +36,7 @@ public class CreateCommand {
     public static ArgumentBuilder<CommandSourceStack, ?> command() {
         FlaggedArgumentBuilder.Flag cook = new FlaggedArgumentBuilder.Flag("cook", "c", List.of(
                 new Pair<>("cook-time", DoubleArgumentType.doubleArg(0)),
-                new Pair<>("cook-type", new EnumArgument<>(CauldronType.class)),
+                new Pair<>("cauldron-type", new EnumArgument<>(CauldronType.class)),
                 new Pair<>("cook-ingredients", new IngredientsArgument())
         ), Set.of(FlaggedArgumentBuilder.FlagProperty.MANDATORY_FIRST, FlaggedArgumentBuilder.FlagProperty.ONLY_FIRST));
         FlaggedArgumentBuilder.Flag mix = new FlaggedArgumentBuilder.Flag("mix", "m", List.of(
