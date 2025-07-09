@@ -9,7 +9,6 @@ import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.bukkit.ingredient.BukkitIngredientManager;
 import dev.jsinco.brewery.ingredient.Ingredient;
-import dev.jsinco.brewery.util.Logging;
 import io.papermc.paper.command.brigadier.argument.CustomArgumentType;
 import org.jetbrains.annotations.NotNull;
 
@@ -42,6 +41,9 @@ public class IngredientsArgument implements CustomArgumentType.Converted<Map<Ing
     public <S> CompletableFuture<Suggestions> listSuggestions(@NotNull CommandContext<S> context, SuggestionsBuilder builder) {
         if (builder.getRemainingLowerCase().isBlank()) {
             builder.suggest("\"");
+            return builder.buildFuture();
+        }
+        if (!builder.getRemainingLowerCase().startsWith("\"")) {
             return builder.buildFuture();
         }
         Matcher matcher = INGREDIENT_PATTERN.matcher(builder.getRemainingLowerCase().substring(1));
