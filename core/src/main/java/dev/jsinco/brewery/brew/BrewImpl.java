@@ -1,6 +1,6 @@
 package dev.jsinco.brewery.brew;
 
-import dev.jsinco.brewery.moment.Moment;
+import dev.jsinco.brewery.configuration.Config;
 import dev.jsinco.brewery.recipe.Recipe;
 import dev.jsinco.brewery.recipe.RecipeRegistry;
 import dev.jsinco.brewery.recipes.BrewScoreImpl;
@@ -63,7 +63,7 @@ public class BrewImpl implements Brew {
     }
 
     private boolean isCompleted(BrewingStep step) {
-        return !(step instanceof BrewingStep.Age age) || age.time().moment() > Moment.AGING_YEAR / 2;
+        return !(step instanceof BrewingStep.Age age) || age.time().moment() > Config.AGING_YEAR_TICKS / 2;
     }
 
     public <I> Optional<Recipe<I>> closestRecipe(RecipeRegistry<I> registry) {

@@ -41,6 +41,14 @@ public final class Config extends AbstractConfig {
             Campfires must be lit and lava must be a source block.""")
     public static List<String> HEAT_SOURCES = List.of("campfire", "soul_campfire", "lava", "fire", "soul_fire", "magma_block");
 
+    @Key("cauldrons.cooking-minute-ticks")
+    @Comment("How many ticks it will take to cook something one minute")
+    public static long COOKING_MINUTE_TICKS = Moment.MINUTE;
+
+    @Key("barrels.aging-year-ticks")
+    @Comment("How many ticks it will take to age a brew one year")
+    public static long AGING_YEAR_TICKS = Moment.DEFAULT_AGING_YEAR;
+
     @Key("automation-enabled")
     @Comment("""
             Allow hoppers to interact with distilleries and barrels""")

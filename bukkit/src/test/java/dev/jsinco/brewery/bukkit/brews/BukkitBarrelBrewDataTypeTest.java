@@ -60,13 +60,13 @@ class BukkitBarrelBrewDataTypeTest {
         BrewImpl brew1 = new BrewImpl(
                 List.of(
                         new CookStepImpl(new PassedMoment(10), Map.of(new SimpleIngredient(Material.ACACIA_BUTTON), 3), CauldronType.WATER),
-                        new AgeStepImpl(new Interval(1010, 1010 + Moment.AGING_YEAR), BarrelType.ACACIA)
+                        new AgeStepImpl(new Interval(1010, 1010 + Moment.DEFAULT_AGING_YEAR), BarrelType.ACACIA)
                 )
         );
         BrewImpl brew2 = new BrewImpl(
                 List.of(
                         new CookStepImpl(new PassedMoment(10), Map.of(new SimpleIngredient(Material.ACACIA_BUTTON), 3), CauldronType.WATER),
-                        new AgeStepImpl(new Interval(1010, 1010 + Moment.AGING_YEAR), BarrelType.ACACIA)
+                        new AgeStepImpl(new Interval(1010, 1010 + Moment.DEFAULT_AGING_YEAR), BarrelType.ACACIA)
                 )
         );
         BukkitBarrelBrewDataType.BarrelContext barrelContext1 = new BukkitBarrelBrewDataType.BarrelContext(1, 2, 3, 0, world.getUID());

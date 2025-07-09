@@ -13,12 +13,11 @@ import dev.jsinco.brewery.bukkit.brew.BrewAdapter;
 import dev.jsinco.brewery.bukkit.command.argument.EnumArgument;
 import dev.jsinco.brewery.bukkit.command.argument.FlaggedArgumentBuilder;
 import dev.jsinco.brewery.bukkit.command.argument.IngredientsArgument;
+import dev.jsinco.brewery.configuration.Config;
 import dev.jsinco.brewery.configuration.locale.TranslationsConfig;
 import dev.jsinco.brewery.ingredient.Ingredient;
 import dev.jsinco.brewery.moment.Moment;
 import dev.jsinco.brewery.moment.PassedMoment;
-import dev.jsinco.brewery.util.BreweryKey;
-import dev.jsinco.brewery.util.Registry;
 import dev.jsinco.brewery.util.Pair;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
@@ -83,7 +82,7 @@ public class CreateCommand {
 
     private static BrewingStep parseAge(CommandContext<CommandSourceStack> context) {
         double agingYears = context.getArgument("aging-years", double.class);
-        return new AgeStepImpl(new PassedMoment((long) (agingYears * Moment.AGING_YEAR)), context.getArgument("barrel-type", BarrelType.class));
+        return new AgeStepImpl(new PassedMoment((long) (agingYears * Config.AGING_YEAR_TICKS)), context.getArgument("barrel-type", BarrelType.class));
     }
 
     private static BrewingStep parseDistill(CommandContext<CommandSourceStack> context) {
@@ -93,13 +92,13 @@ public class CreateCommand {
     private static BrewingStep parseMix(CommandContext<CommandSourceStack> context) {
         double mixTime = context.getArgument("mix-time", double.class);
         Map<Ingredient, Integer> ingredients = context.getArgument("mix-ingredients", Map.class);
-        return new MixStepImpl(new PassedMoment((long) (mixTime * Moment.MINUTE)), ingredients);
+        return new MixStepImpl(new PassedMoment((long) (mixTime * Config.COOKING_MINUTE_TICKS)), ingredients);
     }
 
     private static BrewingStep parseCook(CommandContext<CommandSourceStack> context) {
         double cookTime = context.getArgument("cook-time", double.class);
         CauldronType cauldronType = context.getArgument("cook-type", CauldronType.class);
         Map<Ingredient, Integer> ingredients = context.getArgument("cook-ingredients", Map.class);
-        return new CookStepImpl(new PassedMoment((long) (cookTime * Moment.MINUTE)), ingredients, cauldronType);
+        return new CookStepImpl(new PassedMoment((long) (cookTime * Config.COOKING_MINUTE_TICKS)), ingredients, cauldronType);
     }
 }

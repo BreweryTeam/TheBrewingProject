@@ -8,19 +8,11 @@ public sealed interface Moment permits Interval, PassedMoment {
 
     int SECOND = 20;
     int MINUTE = SECOND * 60;
-    int AGING_YEAR = MINUTE * 20; //TODO: make this a setting
+    int DEFAULT_AGING_YEAR = MINUTE * 20; //TODO: make this a setting
 
     Serializer SERIALIZER = new Serializer();
 
     long moment();
-
-    default int minutes() {
-        return (int) (moment() / MINUTE);
-    }
-
-    default int agingYears() {
-        return (int) (moment() / AGING_YEAR);
-    }
 
     Interval withLastStep(long lastStep);
 
