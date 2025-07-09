@@ -10,6 +10,7 @@ import dev.jsinco.brewery.bukkit.breweries.BrewInventory;
 import dev.jsinco.brewery.bukkit.structure.PlacedBreweryStructure;
 import dev.jsinco.brewery.bukkit.util.BlockUtil;
 import dev.jsinco.brewery.bukkit.util.BukkitAdapter;
+import dev.jsinco.brewery.bukkit.util.SoundPlayer;
 import dev.jsinco.brewery.configuration.locale.TranslationsConfig;
 import dev.jsinco.brewery.database.PersistenceException;
 import dev.jsinco.brewery.moment.Moment;
@@ -17,7 +18,6 @@ import dev.jsinco.brewery.structure.StructureMeta;
 import dev.jsinco.brewery.util.Pair;
 import dev.jsinco.brewery.vector.BreweryLocation;
 import lombok.Getter;
-import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.*;
@@ -74,11 +74,10 @@ public class BukkitDistillery implements Distillery<BukkitDistillery, ItemStack,
 
     private void playInteractionEffects(BreweryLocation location, Player player) {
         BukkitAdapter.toWorld(location)
-                .ifPresent(world -> world.playSound(Sound.sound()
-                                .source(Sound.Source.BLOCK)
-                                .type(Key.key("minecraft:block.vault.fall"))
-                                .build()
-                        , location.x() + 0.5, location.y() + 0.5, location.z() + 0.5
+                .ifPresent(world -> SoundPlayer.playSoundEffect(
+                        "distillery-access",
+                        Sound.Source.BLOCK,
+                        world, location.x() + 0.5, location.y() + 0.5, location.z() + 0.5
                 ));
         BlockUtil.playWobbleEffect(location, player);
     }
@@ -163,11 +162,10 @@ public class BukkitDistillery implements Distillery<BukkitDistillery, ItemStack,
         checkDirty();
         if (timeProcessed % processTime == 0 && timeProcessed != 0) {
             BukkitAdapter.toWorld(unique)
-                    .ifPresent(world -> world.playSound(Sound.sound()
-                                    .source(Sound.Source.BLOCK)
-                                    .type(Key.key("block.brewing_stand.brew"))
-                                    .build(),
-                            unique.x(), unique.y(), unique.z()
+                    .ifPresent(world -> SoundPlayer.playSoundEffect(
+                            "distillery-process",
+                            Sound.Source.BLOCK,
+                            world, unique.x() + 0.5, unique.y() + 0.5, unique.z() + 0.5
                     ));
         }
         if (timeProcessed % (processTime / 4) < processTime / 16 && mixture.brewAmount() > processedBrews) {

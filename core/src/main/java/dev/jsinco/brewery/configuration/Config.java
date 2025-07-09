@@ -99,6 +99,10 @@ public final class Config extends AbstractConfig {
     @Comment("Whether items should be consumed when in creative mode when using it on tbp structures")
     public static boolean CONSUME_ITEMS_IN_CREATIVE = false;
 
+    @Key("sounds")
+    @Comment("TODO: Comment")
+    public static Map<String, Object> SOUNDS = Map.of();
+
     private static final Config CONFIG = new Config();
 
     public static void reload(File dataFolder) {

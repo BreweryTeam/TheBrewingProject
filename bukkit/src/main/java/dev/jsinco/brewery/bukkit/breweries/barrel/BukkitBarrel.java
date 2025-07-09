@@ -11,14 +11,18 @@ import dev.jsinco.brewery.bukkit.brew.BrewAdapter;
 import dev.jsinco.brewery.bukkit.breweries.BrewInventory;
 import dev.jsinco.brewery.bukkit.structure.PlacedBreweryStructure;
 import dev.jsinco.brewery.bukkit.util.BukkitAdapter;
+import dev.jsinco.brewery.bukkit.util.SoundPlayer;
 import dev.jsinco.brewery.configuration.locale.TranslationsConfig;
 import dev.jsinco.brewery.moment.Interval;
 import dev.jsinco.brewery.moment.Moment;
 import dev.jsinco.brewery.util.Pair;
 import dev.jsinco.brewery.vector.BreweryLocation;
 import lombok.Getter;
+import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.minimessage.MiniMessage;
-import org.bukkit.*;
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -57,9 +61,8 @@ public class BukkitBarrel implements Barrel<BukkitBarrel, ItemStack, Inventory> 
             inventory.updateInventoryFromBrews();
         }
         recentlyAccessed = TheBrewingProject.getInstance().getTime();
-        float randPitch = (float) (Math.random() * 0.1);
         if (uniqueLocation != null) {
-            uniqueLocation.getWorld().playSound(BukkitAdapter.toLocation(location).add(0.5, 0.5, 0.5), Sound.BLOCK_BARREL_OPEN, SoundCategory.BLOCKS, 0.5f, 0.8f + randPitch);
+            SoundPlayer.playSoundEffect("barrel-open", Sound.Source.BLOCK, uniqueLocation.toCenterLocation());
         }
         player.openInventory(inventory.getInventory());
         return true;
@@ -89,9 +92,8 @@ public class BukkitBarrel implements Barrel<BukkitBarrel, ItemStack, Inventory> 
     }
 
     private void close() {
-        float randPitch = (float) (Math.random() * 0.1);
         if (uniqueLocation != null) {
-            uniqueLocation.getWorld().playSound(uniqueLocation, Sound.BLOCK_BARREL_CLOSE, SoundCategory.BLOCKS, 0.5f, 0.8f + randPitch);
+            SoundPlayer.playSoundEffect("barrel-close", Sound.Source.BLOCK, uniqueLocation.toCenterLocation());
         }
         this.inventory.getInventory().clear();
     }

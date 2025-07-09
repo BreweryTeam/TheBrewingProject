@@ -7,10 +7,7 @@ import dev.jsinco.brewery.bukkit.brew.BrewAdapter;
 import dev.jsinco.brewery.bukkit.ingredient.BukkitIngredientManager;
 import dev.jsinco.brewery.bukkit.listeners.ListenerUtil;
 import dev.jsinco.brewery.bukkit.recipe.BukkitRecipeResult;
-import dev.jsinco.brewery.bukkit.util.BlockUtil;
-import dev.jsinco.brewery.bukkit.util.BukkitAdapter;
-import dev.jsinco.brewery.bukkit.util.ColorUtil;
-import dev.jsinco.brewery.bukkit.util.IngredientUtil;
+import dev.jsinco.brewery.bukkit.util.*;
 import dev.jsinco.brewery.configuration.Config;
 import dev.jsinco.brewery.configuration.locale.TranslationsConfig;
 import dev.jsinco.brewery.ingredient.Ingredient;
@@ -20,7 +17,6 @@ import dev.jsinco.brewery.util.Registry;
 import dev.jsinco.brewery.vector.BreweryLocation;
 import lombok.Getter;
 import lombok.Setter;
-import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.*;
@@ -203,23 +199,20 @@ public class BukkitCauldron implements dev.jsinco.brewery.breweries.Cauldron {
         Location bukkitLocation = BukkitAdapter.toLocation(this.location).toCenterLocation();
         World world = bukkitLocation.getWorld();
 
-        Sound sound = item.getType() == Material.POTION
-                ? Sound.sound().source(Sound.Source.BLOCK).type(Key.key("minecraft:block.pointed_dripstone.drip_water_into_cauldron")).pitch(0.85f).build()
-                : Sound.sound().source(Sound.Source.BLOCK).type(Key.key("minecraft:entity.generic.splash")).pitch(1.5f + RANDOM.nextFloat(0.2f) - 0.1f).build();
-        world.playSound(
-                sound,
-                bukkitLocation.x(), bukkitLocation.y(), bukkitLocation.z()
-        );
+        String sound = item.getType() == Material.POTION ? "cauldron-ingredient-add-brew" : "cauldron-ingredient-add";
+        SoundPlayer.playSoundEffect(sound, Sound.Source.BLOCK, bukkitLocation);
+
         if (getBlock().getType() == Material.WATER_CAULDRON) {
             world.spawnParticle(Particle.SPLASH, bukkitLocation.add(0.0, 0.5, 0.0), 50, 0.1, 0.05, 0.1, 1.0);
         }
     }
 
     public void playBrewExtractedEffects() {
-        BukkitAdapter.toWorld(location).ifPresent(world -> world.playSound(
-                Sound.sound().source(Sound.Source.BLOCK).type(Key.key("minecraft:item.bottle.fill")).build(),
-                location.x() + 0.5, location.y() + 1, location.z() + 0.5
-        ));
+        BukkitAdapter.toWorld(location).ifPresent(world ->
+                SoundPlayer.playSoundEffect(
+                        "cauldron-brew-extract", Sound.Source.BLOCK,
+                        world, location.x() + 0.5, location.y() + 1, location.z() + 0.5)
+        );
     }
 
     public static boolean isHeatSource(Block block) {

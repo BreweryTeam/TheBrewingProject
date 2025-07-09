@@ -56,5 +56,13 @@ cauldrons:
   # Campfires must be lit and lava must be a source block.
   # If this list is empty, cauldrons will brew regardless of the block below them.
   heat-sources: [ campfire, soul_campfire, lava, fire, soul_fire, magma_block ]
+sounds:
+  barrel-close: minecraft:block.barrel.close
+  barrel-open: minecraft:block.barrel.open
+  cauldron-ingredient-add-brew: minecraft:block.pointed_dripstone.drip_water_into_cauldron
+  cauldron-ingredient-add: minecraft:entity.generic.splash
+  cauldron-brew-extract: minecraft:item.bottle.fill
+  distillery-access: minecraft:block.vault.fall
+  distillery-process: minecraft:block.brewing_stand.brew
 
 automation-enabled: true
