@@ -16,6 +16,9 @@ public class TranslationsConfig extends AbstractConfig {
     @Key("brew.tooltip")
     public static Map<String, String> BREW_TOOLTIP;
 
+    @Key("brew.tooltip-sealed")
+    public static Map<String, String> BREW_TOOLTIP_SEALED;
+
     @Key("brew.detailed-tooltip")
     public static Map<String, String> DETAILED_BREW_TOOLTIP;
 

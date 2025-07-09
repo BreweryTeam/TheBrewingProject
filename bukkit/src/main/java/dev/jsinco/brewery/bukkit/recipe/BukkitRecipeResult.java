@@ -37,6 +37,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Stream;
 
@@ -161,23 +162,24 @@ public class BukkitRecipeResult implements RecipeResult<ItemStack> {
             }
             case Brew.State.Other ignored -> {
                 streamBuilder.add(compileMessage(score, brew, TranslationsConfig.BREW_TOOLTIP_QUALITY, false));
-                addLastStepLore(brew, streamBuilder, score);
+                addLastStepLore(brew, streamBuilder, score, false);
             }
             case Brew.State.Seal seal -> {
                 if (seal.message() != null) {
                     streamBuilder.add(MiniMessage.miniMessage().deserialize(TranslationsConfig.BREW_TOOLTIP_VOLUME, Placeholder.parsed("volume", seal.message())));
                 }
                 streamBuilder.add(MiniMessage.miniMessage().deserialize(TranslationsConfig.BREW_TOOLTIP_QUALITY_SEALED, MessageUtil.getScoreTagResolver(score)));
-                addLastStepLore(brew, streamBuilder, score);
+                addLastStepLore(brew, streamBuilder, score, true);
             }
         }
         return streamBuilder.build();
     }
 
-    private void addLastStepLore(Brew brew, Stream.Builder<Component> streamBuilder, BrewScore score) {
+    private void addLastStepLore(Brew brew, Stream.Builder<Component> streamBuilder, BrewScore score, boolean sealed) {
+        Map<String, String> lore = sealed ? TranslationsConfig.BREW_TOOLTIP_SEALED : TranslationsConfig.BREW_TOOLTIP;
         BrewingStep brewingStep = brew.lastCompletedStep();
         streamBuilder.add(MiniMessage.miniMessage().deserialize(
-                TranslationsConfig.BREW_TOOLTIP.get(brewingStep.stepType().name().toLowerCase(Locale.ROOT)),
+                lore.get(brewingStep.stepType().name().toLowerCase(Locale.ROOT)),
                 MessageUtil.getBrewStepTagResolver(brewingStep, score.getPartialScores(brew.getCompletedSteps().size() - 1), score.brewDifficulty()))
         );
         if (recipeEffects.getAlcohol() > 0) {
