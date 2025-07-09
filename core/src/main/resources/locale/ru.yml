@@ -1,0 +1,121 @@
+# by Vutka1
+# Данный файл содержит не только перевод на русский язык,
+# но и некоторые стилистические (в основном, цвет) изменения в сравнении с оригинальной локализацией.
+# Критика приветствуется. Официальный Discord Brewery Team: discord.gg/3FkNaNDnta
+brew:
+  tooltip:
+    age: 'Настаивалось: <aging_years> года/лет (<barrel_type>)'
+    distill: 'Дистиллировалось: <distill_runs> раз'
+    cook: 'Варилось: <cooking_time> минут'
+    mix: 'Смешивалось: <mixing_time> минут'
+    quality-sealed: <dark_gray>[<gray><quality></gray>]
+    quality-brewing: <quality_color><quality></quality_color>
+    quality: <quality>
+    alcoholic: <dark_gray>(Алкогольное)
+    detailed-alcoholic: <dark_gray>Алк. <alcohol>мл
+    volume: '<gray>Объем: <volume>'
+  tooltip-brewing:
+    age: 'Настаивалось: <quality_color_time><aging_years> года/лет</quality_color_time> (<quality_color_barrel_type><barrel_type></quality_color_barrel_type>)'
+    distill: 'Дистиллировалось: <quality_color_distill_amount><distill_runs> раз</quality_color_distill_amount>'
+    cook: <quality_color_ingredients>Ингредиенты</quality_color_ingredients> варились<quality_color_time><cooking_time> минут</quality_color_time>
+    mix: <quality_color_ingredients>Ингредиенты</quality_color_ingredients> смешивались<quality_color_time> <mixing_time> минут</quality_color_time>
+  detailed-tooltip: # Если что, это используется в /tbp info
+    age: 'Настаивалось: <quality_color_time><aging_years> года/лет</quality_color_time> (<quality_color_barrel_type><barrel_type></quality_color_barrel_type>)'
+    distill: 'Дистиллировалось: <quality_color_distill_amount><distill_runs> раз</quality_color_distill_amount>'
+    cook: <quality_color_ingredients><ingredients></quality_color_ingredients>, варилось <quality_color_time><cooking_time> минут</quality_color_time>, в <cauldron_type> котле
+    mix: <quality_color_ingredients><ingredients></quality_color_ingredients>, смешивалось <quality_color_time><mixing_time> минут</quality_color_time>
+  display-name: # Не уверен, как тут всё так обыграть, чтобы и звучало нормально, и не нужно было склонять <ingredient>
+    unfinished-aged: Настоявшийся напиток (<ingredient>) # ну такое...
+    unfinished-aged-unknown: Настоявшийся напиток
+    unfinished-distilled: Дистиллят (<ingredient>)
+    unfinished-distilled-unknown: Дистиллят
+    unfinished-fermented: Котельное варево (<ingredient>) # ну че-то хз
+    unfinished-fermented-unknown: Котельное варево
+    unfinished-mixed: Котельная смесь (<ingredient>)
+    unfinished-mixed-unknown: Котельная смесь
+distillery:
+  create: <gray>Перегонный аппарат создан! # distillery - либо перегонный аппарат, либо куб. Куб звучит более компактно, а у нас тут 2х3 структура, так что аппарат.
+  create-denied: <red>У вас недостаточно прав для создания перегонного аппарата!
+  access-denied: <red>У вас недостаточно прав для использования перегонного аппарата!
+barrel:
+  create: <gray>Бочка создана!
+  create-denied: <red>У вас недостаточно прав для создания бочки!
+  access-denied: <red>У вас недостаточно прав для использования бочки!
+  type:
+    any: любое
+    oak: дуб
+    birch: береза
+    spruce: ель
+    jungle: тропическая
+    acacia: акация
+    dark_oak: тёмный дуб
+    crimson: багровая
+    warped: искаженная
+    cherry: вишня
+    bamboo: бамбук
+    copper: медь
+    none: отсутствует
+cauldron:
+  access-denied: <red>У вас недостаточно прав для использования котла!
+  type: # используется формация "<ингредиент>, варилось/смешивалось в <type> котле", поэтому склоняем
+    water: '<blue>водном</blue>'
+    lava: '<orange>лавовом</orange>'
+    snow: '<white>снежном</white>'
+    none: отсутствует # не знаю, что тут написать.
+  cant-add-more-ingredients: <red>Невозможно добавить больше ингредиентов
+  clock-message: <gray>Котел кипит уже <white><time></white>
+command:
+  unknown-player: '<red>Игрок не найден: <player_name>'
+  undefined-player: <red>Нужно указать имя игрока
+  illegal-argument-detailed: <red>Неизвестный(-ые) аргумент(-ы) '<argument>'
+  create:
+    missing-mandatory-argument: '<red>Отсутствуют необходимые аргументы: <arguments>'
+    success: <gray>Успешно создан напиток <brew_name>
+  status:
+    info:
+      message: |-
+        <gray>----<player_name>----
+        Опьянение: <alcohol>
+        Токсины: <toxins>
+        Следующее событие: <gold><next_event></gold> через <red><next_event_time></red> тиков
+    consume:
+      message: <gray>Опьянение игрока <#00FF00><player_name></#00FF00> изменено на <gold><alcohol></gold>, токсины - на <gold><toxins></gold>
+    clear:
+      message: <gray>Эффекты опьянения очищены для игрока <#00FF00><player_name></#00FF00>
+    set:
+      message: <gray>Уровень опьянения игрока <#00FF00><player_name></#00FF00> установлен на <gold><alcohol></gold>, токсины - на <gold><toxins></gold>
+  not-enough-permissions: <red>Недостаточно прав!
+  illegal-argument: <red>Неправильный аргумент
+  missing-argument: '<red>Недостающий аргумент: <argument_type>'
+  info:
+    message: |-
+      <gray>----<quality_color><quality></quality_color>----
+      <brewing_step_info>
+    effect-message: |-
+      <gray>Эффекты: <potion_effects>
+      Опьянение/токсины: <gold><effect_alcohol></gold>/<red><effect_toxins></red>
+      Сообщ. на экране при употреблении: <effect_title_message>
+      Сообщ. в чате при употреблении: <effect_message>
+      Сообщ. снизу при употреблении: <effect_action_bar>
+      События при употреблении: <effect_events>
+    not-a-brew: <red>Вы не держите в руках напиток!
+  reload-message: <gold>The Brewing Project</gold> <green>перезагружен!
+  seal-success: <gray>Успешно запечатан(-ы) предмет(-ы) для игрока <player_name>!
+  seal-failure: <red>Не удалось найти подходящие для запечатывания напитки.
+events:
+  default-kick-event-message: <rainbow>Вы отрубились... ZZzzz</rainbow>
+  drunken-join-deny-message: Вы <red>слишком пьяны</red>, чтобы попасть по кнопке подключения...
+    Попробуйте позже
+  types:
+    puke: блевать
+    stumble: споткнуться
+    kick: в отключке
+    chicken: отложить яйцо...
+    teleport: телепортация
+    drunk_message: пьяный бубнёж
+    nausea: тошнота
+  chicken-message: <gray>Откуда тут курица???
+  nothing-planned: ничего
+  teleport-message: <gray>А? Чегось? <red>Где я?...</red>
+info:
+  after-drink: 'Опьянение: <gray>[<alcohol_level>] Токсины: <red>[<toxins_level>]'
