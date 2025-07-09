@@ -67,6 +67,7 @@ public class SoundManager {
     }
 
     public void reload() {
+        sounds.clear();
         Map<String, Object> configSounds = Config.SOUNDS;
 
         for (Map.Entry<String, Object> entry : configSounds.entrySet()) {
