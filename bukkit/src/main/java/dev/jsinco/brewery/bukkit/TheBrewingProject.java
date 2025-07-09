@@ -32,6 +32,7 @@ import dev.jsinco.brewery.effect.text.DrunkTextRegistry;
 import dev.jsinco.brewery.event.CustomEventRegistry;
 import dev.jsinco.brewery.recipes.RecipeReader;
 import dev.jsinco.brewery.recipes.RecipeRegistryImpl;
+import dev.jsinco.brewery.sound.SoundManager;
 import dev.jsinco.brewery.structure.MultiblockStructure;
 import dev.jsinco.brewery.structure.PlacedStructureRegistryImpl;
 import dev.jsinco.brewery.structure.StructureMeta;
@@ -88,6 +89,8 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
     @Getter
     private final IntegrationManager integrationManager = new IntegrationManager();
     @Getter
+    private final SoundManager soundManager = new SoundManager();
+    @Getter
     private final ActiveEventsRegistry activeEventsRegistry = new ActiveEventsRegistry();
     @Getter
     private PlayerWalkListener playerWalkListener;
@@ -115,6 +118,7 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
         this.placedStructureRegistry.clear();
         this.breweryRegistry.clear();
         loadStructures();
+        this.soundManager.reload();
         this.drunkTextRegistry.clear();
         this.customDrunkEventRegistry.clear();
         this.drunkEventExecutor.clear();
@@ -173,6 +177,7 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
     @Override
     public void onEnable() {
         integrationManager.init();
+        soundManager.reload();
         saveResources();
         this.database = new Database(DatabaseDriver.SQLITE);
         try {
