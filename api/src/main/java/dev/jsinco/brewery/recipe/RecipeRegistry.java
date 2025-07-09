@@ -1,9 +1,11 @@
 package dev.jsinco.brewery.recipe;
 
+import dev.jsinco.brewery.ingredient.Ingredient;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 import java.util.Optional;
+import java.util.Set;
 
 public interface RecipeRegistry<I> {
 
@@ -22,4 +24,8 @@ public interface RecipeRegistry<I> {
     void registerDefaultRecipe(String name, RecipeResult<I> recipe);
 
     void unRegisterDefaultRecipe(String name);
+
+    boolean isRegisteredIngredient(Ingredient ingredient);
+
+    Set<Ingredient> registeredIngredients();
 }

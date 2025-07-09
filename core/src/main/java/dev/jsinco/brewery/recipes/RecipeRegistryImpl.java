@@ -98,7 +98,13 @@ public class RecipeRegistryImpl<I> implements RecipeRegistry<I> {
         this.defaultRecipeList = List.copyOf(defaultRecipes.values());
     }
 
+    @Override
     public boolean isRegisteredIngredient(Ingredient ingredient) {
         return allIngredients.contains(ingredient);
+    }
+
+    @Override
+    public Set<Ingredient> registeredIngredients() {
+        return allIngredients;
     }
 }

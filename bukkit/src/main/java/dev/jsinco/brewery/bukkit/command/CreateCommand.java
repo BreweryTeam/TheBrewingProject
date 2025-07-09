@@ -95,7 +95,7 @@ public class CreateCommand {
 
     private static BrewingStep parseCook(CommandContext<CommandSourceStack> context) {
         double cookTime = context.getArgument("cook-time", double.class);
-        CauldronType cauldronType = context.getArgument("cook-type", CauldronType.class);
+        CauldronType cauldronType = context.getArgument("cauldron-type", CauldronType.class);
         Map<Ingredient, Integer> ingredients = context.getArgument("cook-ingredients", Map.class);
         return new CookStepImpl(new PassedMoment((long) (cookTime * Config.COOKING_MINUTE_TICKS)), ingredients, cauldronType);
     }
