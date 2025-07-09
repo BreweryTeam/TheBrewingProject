@@ -100,7 +100,16 @@ public final class Config extends AbstractConfig {
     public static boolean CONSUME_ITEMS_IN_CREATIVE = false;
 
     @Key("sounds")
-    @Comment("TODO: Comment")
+    @Comment("""
+            This field accepts either a single sound definition or a list of definitions.
+            If a list is provided, one sound will be chosen randomly.
+            
+            A single sound entry is a string with one of the following formats
+             - <sound_id>
+             - <sound_id>/<pitch>
+             - <sound_id>/<min_pitch>;<max_pitch>
+            
+            See the default values below for examples""")
     public static Map<String, Object> SOUNDS = Map.of();
 
     private static final Config CONFIG = new Config();
