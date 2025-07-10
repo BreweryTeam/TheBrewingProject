@@ -6,7 +6,7 @@ public record RangeF(float min, float max) {
     private static final Random RANDOM = new Random();
 
     /**
-     * Returns a random number between mix and max
+     * Returns a random number between min and max
      */
     public Float getRandom() {
         if (this.min() == this.max()) {

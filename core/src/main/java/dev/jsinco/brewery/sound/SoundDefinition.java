@@ -9,7 +9,7 @@ public record SoundDefinition(Sound.Builder sound, RangeF pitch) {
     /**
      * Builds and returns the sound with processed values (e.g. random pitch)
      *
-     * @returns The sound
+     * @return The sound
      */
     @Override
     public Sound.Builder sound() {
