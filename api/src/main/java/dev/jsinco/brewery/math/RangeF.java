@@ -1,22 +1,32 @@
 package dev.jsinco.brewery.math;
 
-import org.jetbrains.annotations.NotNull;
+import java.util.Random;
 
-import java.util.Objects;
+public record RangeF(float min, float max) {
+    private static final Random RANDOM = new Random();
 
-public class RangeF extends Range<Float> {
-    public RangeF(@NotNull Float min, @NotNull Float max) {
-        super(min, max);
-    }
-
-    @Override
+    /**
+     * Returns a random number between mix and max
+     */
     public Float getRandom() {
-        if (Objects.equals(this.getMin(), this.getMax())) {
-            return this.getMax();
+        if (this.min() == this.max()) {
+            return this.max();
         }
-        return RANDOM.nextFloat(this.getMin(), this.getMax());
+        return RANDOM.nextFloat(this.min(), this.max());
     }
 
+    /**
+     * <p>
+     * Creates a RangeF object from a string, accepted formats are <code>&lt;min&gt;;&lt;max&gt;</code> or just <code>&lt;min_and_max&gt;</code>
+     * </p>
+     * <p>
+     * Examples:
+     *     <ul>
+     *         <li><code>-3.5;6.1</code> min: -3.5, max: 6.1</li>
+     *         <li><code>1.0</code> min: 1.0, max: 1.0</li>
+     *     </ul>
+     * </p>
+     */
     public static RangeF fromString(String str) {
         String[] parts = str.trim().split(";");
         if (parts.length == 0 || parts.length > 2) {

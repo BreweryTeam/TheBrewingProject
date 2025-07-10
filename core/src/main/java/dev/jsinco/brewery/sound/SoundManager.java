@@ -63,7 +63,7 @@ public class SoundManager {
             return null;
         }
 
-        return supplier.get().getSound();
+        return supplier.get().sound();
     }
 
     public void reload() {
