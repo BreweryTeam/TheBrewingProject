@@ -8,8 +8,6 @@ import java.util.Random;
 
 @Getter
 public class SoundDefinition {
-    public static final Random RANDOM = new Random();
-
     private final Sound.Builder sound;
     private final RangeF pitch;
 
