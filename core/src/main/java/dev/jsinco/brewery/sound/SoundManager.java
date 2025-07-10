@@ -31,7 +31,7 @@ public class SoundManager {
         }
 
         Sound.Builder sound = Sound.sound().type(Key.key(split[0]));
-        RangeF pitchRange = split.length > 1 ? new RangeF(split[1]) : new RangeF(1.0f, 1.0f);
+        RangeF pitchRange = split.length > 1 ? RangeF.fromString(split[1]) : new RangeF(1.0f, 1.0f);
 
         return new SoundDefinition(sound, pitchRange);
     }

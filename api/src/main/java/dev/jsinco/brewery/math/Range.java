@@ -1,39 +1,31 @@
 package dev.jsinco.brewery.math;
 
+import org.jetbrains.annotations.NotNull;
+
+import java.util.Objects;
 import java.util.Random;
 
 public abstract class Range<T extends Number> {
     protected static final Random RANDOM = new Random();
 
-    private T min;
-    private T max;
+    private final @NotNull T min;
+    private final @NotNull T max;
 
-    public Range(T min, T max) {
-        this.min = min;
-        this.max = max;
+    public Range(@NotNull T min, @NotNull T max) {
+        this.min = Objects.requireNonNull(min, "min cannot be null");
+        this.max = Objects.requireNonNull(max, "max cannot be null");
     }
 
-    public Range(String str) {
-        fromString(str);
-    }
-
-    public T getMin() {
+    public @NotNull T getMin() {
         return min;
     }
 
-    public void setMin(T min) {
-        this.min = min;
-    }
-
-    public T getMax() {
+    public @NotNull T getMax() {
         return max;
     }
 
-    public void setMax(T max) {
-        this.max = max;
-    }
-
-    protected abstract void fromString(String str);
-
+    /**
+     * Returns a random number between mix and max
+     */
     public abstract T getRandom();
 }
