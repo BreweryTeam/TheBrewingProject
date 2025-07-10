@@ -29,7 +29,7 @@ public record RangeF(float min, float max) {
      */
     public static RangeF fromString(String str) {
         String[] parts = str.trim().split(";");
-        if (parts.length == 0 || parts.length > 2) {
+        if (parts.length > 2) {
             throw new IllegalArgumentException("Invalid range");
         }
 
