@@ -91,9 +91,9 @@ public class CreateCommand {
     }
 
     private static BrewingStep parseMix(CommandContext<CommandSourceStack> context) {
-        double mixTIme = context.getArgument("mix-time", double.class);
+        double mixTime = context.getArgument("mix-time", double.class);
         Map<Ingredient, Integer> ingredients = context.getArgument("mix-ingredients", Map.class);
-        return new MixStepImpl(new PassedMoment((long) (mixTIme * Moment.MINUTE)), ingredients);
+        return new MixStepImpl(new PassedMoment((long) (mixTime * Moment.MINUTE)), ingredients);
     }
 
     private static BrewingStep parseCook(CommandContext<CommandSourceStack> context) {
