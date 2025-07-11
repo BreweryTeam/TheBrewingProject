@@ -44,15 +44,11 @@ dependencies {
 }
 
 tasks {
-    val dataGeneratorTask = project(":datagenerator").getTasksByName("run", false)
-
-    jar {
-        dependsOn(dataGeneratorTask)
+    processResources {
+        dependsOn(project(":datagenerator").getTasksByName("run", false))
     }
 
     test {
-        dependsOn(dataGeneratorTask)
-
         useJUnitPlatform()
     }
 }
