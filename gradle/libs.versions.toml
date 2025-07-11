@@ -1,5 +1,5 @@
 [versions]
-paper = "1.21.6-R0.1-SNAPSHOT"
+paper = "1.21.7-R0.1-SNAPSHOT"
 
 # libraries
 gson = "2.13.1"
@@ -35,7 +35,7 @@ lombok = "1.18.38"
 adventure = "4.23.0"
 junit = "5.13.2"
 junit-platform-launcher = "1.13.2"
-mockbukkit = "4.60.0"
+mockbukkit = "4.64.0"
 sqlite-jdbc = "3.50.1.0"
 
 [libraries]
