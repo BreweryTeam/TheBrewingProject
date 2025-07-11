@@ -128,7 +128,7 @@ public class MessageUtil {
     }
 
     public static @NotNull TagResolver getTimeTagResolver(long timeTicks) {
-        long seconds = (timeTicks % Config.COOKING_MINUTE_TICKS) / Moment.SECOND;
+        long seconds = (timeTicks % Config.COOKING_MINUTE_TICKS) * 60 / Config.COOKING_MINUTE_TICKS;
         long minutes = timeTicks / Config.COOKING_MINUTE_TICKS;
         return Placeholder.parsed("time", String.format("%d:%02d", minutes, seconds));
     }
