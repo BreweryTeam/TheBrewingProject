@@ -35,6 +35,8 @@ dependencies {
 
     // test
     testImplementation(libs.junit.jupiter)
+    testRuntimeOnly(libs.junit.platform.launcher)
+
     testImplementation(libs.gson)
     testImplementation(libs.joml)
     testImplementation(libs.guava)
