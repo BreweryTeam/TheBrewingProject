@@ -79,7 +79,7 @@ public class PlayerEventListener implements Listener {
 
 
     @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
-    public void onPLayerInteract(PlayerInteractEvent playerInteractEvent) {
+    public void onPlayerInteractStructure(PlayerInteractEvent playerInteractEvent) {
         if (playerInteractEvent.getAction() != Action.RIGHT_CLICK_BLOCK || playerInteractEvent.getPlayer().isSneaking() || playerInteractEvent.getHand() != EquipmentSlot.HAND) {
             return;
         }
