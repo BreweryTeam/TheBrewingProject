@@ -78,12 +78,16 @@ public class RecipeReader<I> {
      * @return A Recipe object with all the attributes of the recipe.
      */
     private CompletableFuture<RecipeImpl<I>> getRecipe(ConfigurationSection recipe, String recipeName) {
-        return parseSteps(recipe.getMapList("steps")).thenApplyAsync(steps -> new RecipeImpl.Builder<I>(recipeName)
-                .brewDifficulty(recipe.getDouble("brew-difficulty", 1D))
-                .recipeResults(recipeResultReader.readRecipeResults(recipe))
-                .steps(steps)
-                .build()
-        );
+        try {
+            return parseSteps(recipe.getMapList("steps")).thenApplyAsync(steps -> new RecipeImpl.Builder<I>(recipeName)
+                    .brewDifficulty(recipe.getDouble("brew-difficulty", 1D))
+                    .recipeResults(recipeResultReader.readRecipeResults(recipe))
+                    .steps(steps)
+                    .build()
+            );
+        } catch (Throwable e) {
+            return CompletableFuture.failedFuture(e);
+        }
     }
 
     private @NotNull CompletableFuture<List<BrewingStep>> parseSteps(List<Map<?, ?>> steps) {
