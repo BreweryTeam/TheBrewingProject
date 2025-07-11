@@ -40,8 +40,6 @@ import dev.jsinco.brewery.structure.StructureType;
 import dev.jsinco.brewery.util.BreweryKey;
 import dev.jsinco.brewery.util.Logging;
 import dev.jsinco.brewery.util.Util;
-import io.papermc.paper.plugin.lifecycle.event.LifecycleEvent;
-import io.papermc.paper.plugin.lifecycle.event.handler.LifecycleEventHandler;
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
 import lombok.Getter;
 import org.bukkit.Bukkit;
@@ -98,7 +96,7 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
     @Override
     public void onLoad() {
         instance = this;
-        Config.reload(this.getDataFolder());
+        Config.load(this.getDataFolder());
         TranslationsConfig.reload(this.getDataFolder());
         this.structureRegistry = new StructureRegistry();
         this.placedStructureRegistry = new PlacedStructureRegistryImpl();
@@ -245,7 +243,7 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
                 .map(Distillery.class::cast)
                 .forEach(Distillery::tick);
         List.copyOf(breweryRegistry.<BukkitBarrel>getOpened(StructureType.BARREL)).forEach(Barrel::tickInventory);
-        List.copyOf( breweryRegistry.<BukkitDistillery>getOpened(StructureType.DISTILLERY)).forEach(Distillery::tickInventory);
+        List.copyOf(breweryRegistry.<BukkitDistillery>getOpened(StructureType.DISTILLERY)).forEach(Distillery::tickInventory);
     }
 
     private void otherTicking() {

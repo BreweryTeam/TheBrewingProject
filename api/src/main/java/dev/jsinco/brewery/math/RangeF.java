@@ -33,9 +33,13 @@ public record RangeF(float min, float max) {
             throw new IllegalArgumentException("Invalid range");
         }
 
-        return new RangeF(
+        RangeF output = new RangeF(
                 Float.parseFloat(parts[0]),
                 parts.length == 2 ? Float.parseFloat(parts[1]) : Float.parseFloat(parts[0])
         );
+        if (output.max() < output.min()) {
+            throw new IllegalArgumentException("Range max needs to be larger than range min");
+        }
+        return output;
     }
 }

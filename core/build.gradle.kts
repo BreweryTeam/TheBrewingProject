@@ -25,6 +25,7 @@ dependencies {
     compileOnly(libs.joml)
     compileOnly(libs.adventure.api)
     compileOnly(libs.adventure.text.minimessage)
+    compileOnly(libs.configurate)
     implementation(libs.simple.yaml)
     implementation(libs.hikaricp)
 

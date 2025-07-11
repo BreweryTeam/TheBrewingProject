@@ -36,6 +36,7 @@ dependencies {
 
     // libraries
     compileOnly(libs.protocolLib)
+    compileOnly(libs.configurate)
     implementation(libs.schem.reader)
     implementation(libs.simple.yaml)
 
