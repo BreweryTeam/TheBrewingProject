@@ -138,7 +138,7 @@ public class RecipeReader<I> {
             case DISTILL ->
                     Preconditions.checkArgument(map.get("runs") instanceof Integer, "Expected integer value for 'runs' in distill step!");
             case AGE -> {
-                Preconditions.checkArgument(map.get("age-years") instanceof Number doubleValue && doubleValue.doubleValue() >= 0.5, "Expected number larger or equal to 0.5 for 'age-years' in age step!");
+                Preconditions.checkArgument(map.get("age-years") instanceof Number doubleValue && doubleValue.doubleValue() > 0.5, "Expected number larger than 0.5 for 'age-years' in age step!");
                 Preconditions.checkArgument(!map.containsKey("barrel-type") || map.get("barrel-type") instanceof String, "Expected string value for 'barrel-type' in age step!");
                 String barrelType = map.containsKey("barrel-type") ? (String) map.get("barrel-type") : "any";
                 Preconditions.checkArgument(Registry.BARREL_TYPE.containsKey(BreweryKey.parse(barrelType)), "Expected a valid barrel type for 'barrel-type' in age step!");
