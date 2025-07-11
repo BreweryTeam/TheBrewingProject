@@ -98,7 +98,7 @@ public class RecipeReader<I> {
         return switch (type) {
             case COOK -> ingredientManager.getIngredientsWithAmount((List<String>) map.get("ingredients"))
                     .thenApplyAsync(ingredients -> new CookStepImpl(
-                            new PassedMoment(((Integer) map.get("cook-time")).longValue() * Config.COOKING_MINUTE_TICKS),
+                            new PassedMoment((long) ((Double) map.get("cook-time") * Config.COOKING_MINUTE_TICKS)),
                             ingredients,
                             Registry.CAULDRON_TYPE.get(BreweryKey.parse(map.containsKey("cauldron-type") ? map.get("cauldron-type").toString().toLowerCase(Locale.ROOT) : "water"))
                     ));
@@ -106,12 +106,12 @@ public class RecipeReader<I> {
                     (int) map.get("runs")
             ));
             case AGE -> CompletableFuture.completedFuture(new AgeStepImpl(
-                    new PassedMoment(((Integer) map.get("age-years")).longValue() * Config.AGING_YEAR_TICKS),
+                    new PassedMoment((long) ((Double) map.get("age-years") * Config.AGING_YEAR_TICKS)),
                     Registry.BARREL_TYPE.get(BreweryKey.parse(map.get("barrel-type").toString().toLowerCase(Locale.ROOT)))
             ));
             case MIX -> ingredientManager.getIngredientsWithAmount((List<String>) map.get("ingredients"))
                     .thenApplyAsync(ingredients -> new MixStepImpl(
-                            new PassedMoment(((Integer) map.get("mix-time")).longValue() * Config.COOKING_MINUTE_TICKS),
+                            new PassedMoment((long) ((Double) map.get("mix-time") * Config.COOKING_MINUTE_TICKS)),
                             ingredients
                     ));
         };
@@ -120,7 +120,7 @@ public class RecipeReader<I> {
     private void checkStep(BrewingStep.StepType type, Map<?, ?> map) throws IllegalArgumentException {
         switch (type) {
             case COOK -> {
-                Preconditions.checkArgument(map.get("cook-time") instanceof Integer, "Expected integer value for 'cook-time' in cook step!");
+                Preconditions.checkArgument(map.get("cook-time") instanceof Double doubleValue && doubleValue > 0, "Expected positive number value for 'cook-time' in cook step!");
                 Preconditions.checkArgument(map.get("ingredients") instanceof List, "Expected string list value for 'ingredients' in cook step!");
                 Preconditions.checkArgument(!map.containsKey("cauldron-type") || map.get("cauldron-type") instanceof String, "Expected string value for 'cauldron-type' in cook step!");
                 String cauldronType = map.containsKey("cauldron-type") ? (String) map.get("cauldron-type") : "water";
@@ -129,13 +129,13 @@ public class RecipeReader<I> {
             case DISTILL ->
                     Preconditions.checkArgument(map.get("runs") instanceof Integer, "Expected integer value for 'runs' in distill step!");
             case AGE -> {
-                Preconditions.checkArgument(map.get("age-years") instanceof Integer, "Expected integer value for 'age-years' in age step!");
+                Preconditions.checkArgument(map.get("age-years") instanceof Double doubleValue && doubleValue > 0, "Expected positive number value for 'age-years' in age step!");
                 Preconditions.checkArgument(!map.containsKey("barrel-type") || map.get("barrel-type") instanceof String, "Expected string value for 'barrel-type' in age step!");
                 String barrelType = map.containsKey("barrel-type") ? (String) map.get("barrel-type") : "any";
                 Preconditions.checkArgument(Registry.BARREL_TYPE.containsKey(BreweryKey.parse(barrelType)), "Expected a valid barrel type for 'barrel-type' in age step!");
             }
             case MIX -> {
-                Preconditions.checkArgument(map.get("mix-time") instanceof Integer, "Expected integer value for 'mix-time' in mix step!");
+                Preconditions.checkArgument(map.get("mix-time") instanceof Double doubleValue && doubleValue > 0, "Expected positive number value for 'mix-time' in mix step!");
                 Preconditions.checkArgument(map.get("ingredients") instanceof List, "Expected string list value for 'ingredients' in mix step!");
             }
         }
