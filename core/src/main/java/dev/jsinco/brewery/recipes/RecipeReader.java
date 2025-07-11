@@ -22,12 +22,16 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 
 public class RecipeReader<I> {
 
     private final File folder;
     private final RecipeResultReader<I> recipeResultReader;
     private final IngredientManager<I> ingredientManager;
+
+    private final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
 
     public RecipeReader(File folder, RecipeResultReader<I> recipeResultReader, IngredientManager<I> ingredientManager) {
         this.folder = folder;
@@ -49,17 +53,18 @@ public class RecipeReader<I> {
         List<CompletableFuture<RecipeImpl<I>>> futures = recipesSection.getKeys(false)
                 .stream()
                 .map(key -> getRecipe(recipesSection.getConfigurationSection(key), key).handleAsync((recipe, exception) -> {
-                    if (exception != null) {
-                        Logging.error("Exception when reading recipe: " + key);
-                        if (exception.getCause() != null) {
-                            exception.getCause().printStackTrace();
-                        } else {
-                            exception.printStackTrace();
-                        }
-                        return null;
-                    }
-                    return recipe;
-                }))
+                            if (exception != null) {
+                                Logging.error("Exception when reading recipe: " + key);
+                                if (exception.getCause() != null) {
+                                    exception.getCause().printStackTrace();
+                                } else {
+                                    exception.printStackTrace();
+                                }
+                                return null;
+                            }
+                            return recipe;
+                        }, executor) // Single thread executor to make reading stacktraces possible
+                )
                 .toList();
         return FutureUtil.mergeFutures(futures)
                 .thenApplyAsync(recipes -> {
@@ -102,7 +107,7 @@ public class RecipeReader<I> {
         return switch (type) {
             case COOK -> ingredientManager.getIngredientsWithAmount((List<String>) map.get("ingredients"))
                     .thenApplyAsync(ingredients -> new CookStepImpl(
-                            new PassedMoment((long) ((Double) map.get("cook-time") * Config.COOKING_MINUTE_TICKS)),
+                            new PassedMoment((long) (((Number) map.get("cook-time")).doubleValue() * Config.COOKING_MINUTE_TICKS)),
                             ingredients,
                             Registry.CAULDRON_TYPE.get(BreweryKey.parse(map.containsKey("cauldron-type") ? map.get("cauldron-type").toString().toLowerCase(Locale.ROOT) : "water"))
                     ));
@@ -110,12 +115,12 @@ public class RecipeReader<I> {
                     (int) map.get("runs")
             ));
             case AGE -> CompletableFuture.completedFuture(new AgeStepImpl(
-                    new PassedMoment((long) ((Double) map.get("age-years") * Config.AGING_YEAR_TICKS)),
+                    new PassedMoment((long) (((Number) map.get("age-years")).doubleValue() * Config.AGING_YEAR_TICKS)),
                     Registry.BARREL_TYPE.get(BreweryKey.parse(map.get("barrel-type").toString().toLowerCase(Locale.ROOT)))
             ));
             case MIX -> ingredientManager.getIngredientsWithAmount((List<String>) map.get("ingredients"))
                     .thenApplyAsync(ingredients -> new MixStepImpl(
-                            new PassedMoment((long) ((Double) map.get("mix-time") * Config.COOKING_MINUTE_TICKS)),
+                            new PassedMoment((long) (((Number) map.get("mix-time")).doubleValue() * Config.COOKING_MINUTE_TICKS)),
                             ingredients
                     ));
         };
@@ -124,7 +129,7 @@ public class RecipeReader<I> {
     private void checkStep(BrewingStep.StepType type, Map<?, ?> map) throws IllegalArgumentException {
         switch (type) {
             case COOK -> {
-                Preconditions.checkArgument(map.get("cook-time") instanceof Double doubleValue && doubleValue > 0, "Expected positive number value for 'cook-time' in cook step!");
+                Preconditions.checkArgument(map.get("cook-time") instanceof Number doubleValue && doubleValue.doubleValue() > 0, "Expected positive number value for 'cook-time' in cook step!");
                 Preconditions.checkArgument(map.get("ingredients") instanceof List, "Expected string list value for 'ingredients' in cook step!");
                 Preconditions.checkArgument(!map.containsKey("cauldron-type") || map.get("cauldron-type") instanceof String, "Expected string value for 'cauldron-type' in cook step!");
                 String cauldronType = map.containsKey("cauldron-type") ? (String) map.get("cauldron-type") : "water";
@@ -133,13 +138,13 @@ public class RecipeReader<I> {
             case DISTILL ->
                     Preconditions.checkArgument(map.get("runs") instanceof Integer, "Expected integer value for 'runs' in distill step!");
             case AGE -> {
-                Preconditions.checkArgument(map.get("age-years") instanceof Double doubleValue && doubleValue > 0, "Expected positive number value for 'age-years' in age step!");
+                Preconditions.checkArgument(map.get("age-years") instanceof Number doubleValue && doubleValue.doubleValue() >= 0.5, "Expected number larger or equal to 0.5 for 'age-years' in age step!");
                 Preconditions.checkArgument(!map.containsKey("barrel-type") || map.get("barrel-type") instanceof String, "Expected string value for 'barrel-type' in age step!");
                 String barrelType = map.containsKey("barrel-type") ? (String) map.get("barrel-type") : "any";
                 Preconditions.checkArgument(Registry.BARREL_TYPE.containsKey(BreweryKey.parse(barrelType)), "Expected a valid barrel type for 'barrel-type' in age step!");
             }
             case MIX -> {
-                Preconditions.checkArgument(map.get("mix-time") instanceof Double doubleValue && doubleValue > 0, "Expected positive number value for 'mix-time' in mix step!");
+                Preconditions.checkArgument(map.get("mix-time") instanceof Number doubleValue && doubleValue.doubleValue() > 0, "Expected positive number value for 'mix-time' in mix step!");
                 Preconditions.checkArgument(map.get("ingredients") instanceof List, "Expected string list value for 'ingredients' in mix step!");
             }
         }
