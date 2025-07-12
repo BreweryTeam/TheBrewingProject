@@ -1,7 +1,7 @@
 package dev.jsinco.brewery.configuration;
 
 import dev.jsinco.brewery.sound.SoundDefinition;
-import dev.jsinco.brewery.sound.SoundDefinitionSerializer;
+import dev.jsinco.brewery.configuration.serializers.SoundDefinitionSerializer;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 import java.util.List;

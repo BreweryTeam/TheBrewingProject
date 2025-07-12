@@ -1,7 +1,8 @@
-package dev.jsinco.brewery.sound;
+package dev.jsinco.brewery.configuration.serializers;
 
 import com.google.common.base.Preconditions;
 import dev.jsinco.brewery.math.RangeF;
+import dev.jsinco.brewery.sound.SoundDefinition;
 import net.kyori.adventure.key.Key;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.jetbrains.annotations.NotNull;

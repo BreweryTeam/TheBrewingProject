@@ -1,14 +1,16 @@
-package dev.jsinco.brewery.bukkit.util;
+package dev.jsinco.brewery.bukkit.configuration.serializer;
 
 import dev.jsinco.brewery.vector.BreweryLocation;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jetbrains.annotations.NotNull;
 import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.serialize.SerializationException;
 import org.spongepowered.configurate.serialize.TypeSerializer;
 
 import java.lang.reflect.Type;
+import java.util.Arrays;
 import java.util.UUID;
 
 public class BreweryLocationSerializer implements TypeSerializer<BreweryLocation> {
@@ -35,7 +37,6 @@ public class BreweryLocationSerializer implements TypeSerializer<BreweryLocation
             int x = Integer.parseInt(split[1]);
             int y = Integer.parseInt(split[2]);
             int z = Integer.parseInt(split[3]);
-            return new BreweryLocation(x, y, z, world.getUID());
             return new BreweryLocation(x, y, z, world.getUID());
         } catch (IllegalArgumentException e) {
             throw new SerializationException(e);

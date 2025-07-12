@@ -1,4 +1,4 @@
-package dev.jsinco.brewery.effect.event;
+package dev.jsinco.brewery.configuration.serializers;
 
 import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
