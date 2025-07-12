@@ -42,7 +42,7 @@ public class EventRegistrySerializer implements TypeSerializer<CustomEventRegist
                 eventData.put("toxins", event.toxinsRequirement());
             }
             if (event.probabilityWeight() != 0) {
-                eventData.put("probability-weight", 20);
+                eventData.put("probability-weight", event.probabilityWeight());
             }
             eventData.put("steps", event.getSteps().stream()
                     .map(EventRegistrySerializer::stepToConfigSerializable)
