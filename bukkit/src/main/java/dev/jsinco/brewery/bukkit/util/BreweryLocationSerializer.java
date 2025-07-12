@@ -43,7 +43,7 @@ public class BreweryLocationSerializer implements TypeSerializer<BreweryLocation
     }
 
     @Override
-    public void serialize(Type type, @Nullable BreweryLocation obj, ConfigurationNode node) throws SerializationException {
+    public void serialize(@NotNull Type type, @Nullable BreweryLocation obj, ConfigurationNode node) throws SerializationException {
         node.set(
                 String.format("%s, %d, %d, %d", Bukkit.getWorld(obj.worldUuid()).getName(), obj.x(), obj.y(), obj.z())
         );
