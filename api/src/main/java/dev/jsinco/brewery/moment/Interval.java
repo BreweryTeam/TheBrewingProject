@@ -38,4 +38,11 @@ public record Interval(long start, long stop) implements Moment {
     public String toString() {
         return start + "-" + stop;
     }
+
+    public String asString() {
+        if (start == stop) {
+            return String.valueOf(start);
+        }
+        return String.format("%d-%d", start, stop);
+    }
 }

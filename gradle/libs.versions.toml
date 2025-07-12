@@ -5,6 +5,7 @@ paper = "1.21.7-R0.1-SNAPSHOT"
 gson = "2.13.1"
 guava = "33.4.8-jre"
 hikaricp = "6.3.0"
+configurate = "4.2.0"
 joml = "1.10.8"
 protocolLib = "5.3.0"
 schem-reader = "1.0.0"
@@ -45,6 +46,7 @@ paper-api = { group = "io.papermc.paper", name = "paper-api", version.ref = "pap
 gson = { group = "com.google.code.gson", name = "gson", version.ref = "gson" }
 guava = { group = "com.google.guava", name = "guava", version.ref = "guava" }
 hikaricp = { group = "com.zaxxer", name = "HikariCP", version.ref = "hikaricp" }
+configurate = { group = "org.spongepowered", name = "configurate-yaml", version.ref = "configurate" }
 joml = { group = "org.joml", name = "joml", version.ref = "joml" }
 protocolLib = { group = "com.comphenix.protocol", name = "ProtocolLib", version.ref = "protocolLib" }
 schem-reader = { group = "dev.thorinwasher.schem", name = "schem-reader", version.ref = "schem-reader" }

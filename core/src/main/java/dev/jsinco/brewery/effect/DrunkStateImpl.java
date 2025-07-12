@@ -11,8 +11,8 @@ public record DrunkStateImpl(int alcohol, int toxins, long timestamp,
         }
         int diff = (int) (timestamp - this.timestamp);
         // Assume that the drunk value does not get recalculated that much
-        int alcohol = (this.alcohol - diff / Config.ALCOHOL_DECAY_RATE);
-        int toxins = (this.toxins - diff / Config.TOXIN_DECAY_RATE);
+        int alcohol = (this.alcohol - diff / Config.config().decayRate.alcohol);
+        int toxins = (this.toxins - diff / Config.config().decayRate.toxin);
         return new DrunkStateImpl(Math.max(0, Math.min(alcohol, 100)), Math.max(0, Math.min(toxins, 100)), timestamp, this.kickedTimestamp);
     }
 

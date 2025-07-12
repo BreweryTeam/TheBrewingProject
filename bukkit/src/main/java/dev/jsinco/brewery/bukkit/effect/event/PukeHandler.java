@@ -49,7 +49,7 @@ public class PukeHandler {
         if (worldDespawnRate < 0) {
             worldDespawnRate = spigotConfig.getInt("world-settings.default.item-despawn-rate", 6000);
         }
-        int despawnRate = Math.max(Config.PUKE_DESPAWN_RATE, 4);
+        int despawnRate = Math.max(Config.config().puke.pukeDespawnTime, 4);
         item.setTicksLived(worldDespawnRate - despawnRate + RANDOM.nextInt(-despawnRate / 2, despawnRate / 2 + 1));
     }
 }

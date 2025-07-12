@@ -1,18 +1,27 @@
 package dev.jsinco.brewery.sound;
 
 import dev.jsinco.brewery.math.RangeF;
-import lombok.Getter;
+import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
 
-public record SoundDefinition(Sound.Builder sound, RangeF pitch) {
+import java.util.List;
+import java.util.Random;
+
+public record SoundDefinition(List<SoundSetting> sounds) {
+
+    private static final Random RANDOM = new Random();
 
     /**
      * Builds and returns the sound with processed values (e.g. random pitch)
      *
      * @return The sound
      */
-    @Override
     public Sound.Builder sound() {
-        return sound.pitch(pitch.getRandom());
+        SoundSetting soundSetting = sounds.get(RANDOM.nextInt(sounds.size()));
+        return Sound.sound().type(soundSetting.soundKey()).pitch(soundSetting.pitch().getRandom());
+    }
+
+    public record SoundSetting(Key soundKey, RangeF pitch) {
+
     }
 }

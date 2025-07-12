@@ -11,6 +11,7 @@ import dev.jsinco.brewery.bukkit.structure.PlacedBreweryStructure;
 import dev.jsinco.brewery.bukkit.util.BlockUtil;
 import dev.jsinco.brewery.bukkit.util.BukkitAdapter;
 import dev.jsinco.brewery.bukkit.util.SoundPlayer;
+import dev.jsinco.brewery.configuration.Config;
 import dev.jsinco.brewery.configuration.locale.TranslationsConfig;
 import dev.jsinco.brewery.database.PersistenceException;
 import dev.jsinco.brewery.moment.Moment;
@@ -75,7 +76,7 @@ public class BukkitDistillery implements Distillery<BukkitDistillery, ItemStack,
     private void playInteractionEffects(BreweryLocation location, Player player) {
         BukkitAdapter.toWorld(location)
                 .ifPresent(world -> SoundPlayer.playSoundEffect(
-                        "distillery-access",
+                        Config.config().sounds.distilleryAccess,
                         Sound.Source.BLOCK,
                         world, location.x() + 0.5, location.y() + 0.5, location.z() + 0.5
                 ));
@@ -163,7 +164,7 @@ public class BukkitDistillery implements Distillery<BukkitDistillery, ItemStack,
         if (timeProcessed % processTime == 0 && timeProcessed != 0) {
             BukkitAdapter.toWorld(unique)
                     .ifPresent(world -> SoundPlayer.playSoundEffect(
-                            "distillery-process",
+                            Config.config().sounds.distilleryProcess,
                             Sound.Source.BLOCK,
                             world, unique.x() + 0.5, unique.y() + 0.5, unique.z() + 0.5
                     ));
