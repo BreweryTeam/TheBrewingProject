@@ -18,23 +18,24 @@ public class BreweryLocationSerializer implements TypeSerializer<BreweryLocation
         if (string == null) {
             throw new SerializationException("Can not deserialize empty node");
         }
-        String[] split = string.split(",");
+        String[] split = Arrays.stream(string.split(",")).map(String::trim).toArray(String[]::new);
         if (split.length != 4) {
             throw new SerializationException("Expected location of format world, x, y, z");
         }
         World world;
         try {
-            world = Bukkit.getWorld(UUID.fromString(split[0].trim()));
+            world = Bukkit.getWorld(UUID.fromString(split[0]));
         } catch (IllegalArgumentException e) {
-            world = Bukkit.getWorld(split[0].trim());
+            world = Bukkit.getWorld(split[0]);
         }
         if (world == null) {
             throw new SerializationException("Could not find world: " + split[0]);
         }
         try {
-            int x = Integer.parseInt(split[1].trim());
-            int y = Integer.parseInt(split[2].trim());
-            int z = Integer.parseInt(split[3].trim());
+            int x = Integer.parseInt(split[1]);
+            int y = Integer.parseInt(split[2]);
+            int z = Integer.parseInt(split[3]);
+            return new BreweryLocation(x, y, z, world.getUID());
             return new BreweryLocation(x, y, z, world.getUID());
         } catch (IllegalArgumentException e) {
             throw new SerializationException(e);
