@@ -13,7 +13,7 @@ import java.util.UUID;
 
 public class BreweryLocationSerializer implements TypeSerializer<BreweryLocation> {
     @Override
-    public BreweryLocation deserialize(Type type, ConfigurationNode node) throws SerializationException {
+    public BreweryLocation deserialize(@NotNull Type type, ConfigurationNode node) throws SerializationException {
         String string = node.getString();
         if (string == null) {
             throw new SerializationException("Can not deserialize empty node");
