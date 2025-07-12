@@ -5,6 +5,12 @@ import java.util.Random;
 public record RangeF(float min, float max) {
     private static final Random RANDOM = new Random();
 
+    public RangeF {
+        if (this.max() < this.min()) {
+            throw new IllegalArgumentException("Range max needs to be larger than range min");
+        }
+    }
+
     /**
      * Returns a random number between min and max
      */
@@ -37,9 +43,6 @@ public record RangeF(float min, float max) {
                 Float.parseFloat(parts[0]),
                 parts.length == 2 ? Float.parseFloat(parts[1]) : Float.parseFloat(parts[0])
         );
-        if (output.max() < output.min()) {
-            throw new IllegalArgumentException("Range max needs to be larger than range min");
-        }
         return output;
     }
 }
