@@ -12,6 +12,7 @@ import dev.jsinco.brewery.bukkit.breweries.BrewInventory;
 import dev.jsinco.brewery.bukkit.structure.PlacedBreweryStructure;
 import dev.jsinco.brewery.bukkit.util.BukkitAdapter;
 import dev.jsinco.brewery.bukkit.util.SoundPlayer;
+import dev.jsinco.brewery.configuration.Config;
 import dev.jsinco.brewery.configuration.locale.TranslationsConfig;
 import dev.jsinco.brewery.moment.Interval;
 import dev.jsinco.brewery.moment.Moment;
@@ -62,7 +63,7 @@ public class BukkitBarrel implements Barrel<BukkitBarrel, ItemStack, Inventory> 
         }
         recentlyAccessed = TheBrewingProject.getInstance().getTime();
         if (uniqueLocation != null) {
-            SoundPlayer.playSoundEffect("barrel-open", Sound.Source.BLOCK, uniqueLocation.toCenterLocation());
+            SoundPlayer.playSoundEffect(Config.config().sounds.barrelOpen, Sound.Source.BLOCK, uniqueLocation.toCenterLocation());
         }
         player.openInventory(inventory.getInventory());
         return true;
@@ -93,7 +94,7 @@ public class BukkitBarrel implements Barrel<BukkitBarrel, ItemStack, Inventory> 
 
     private void close() {
         if (uniqueLocation != null) {
-            SoundPlayer.playSoundEffect("barrel-close", Sound.Source.BLOCK, uniqueLocation.toCenterLocation());
+            SoundPlayer.playSoundEffect(Config.config().sounds.barrelClose, Sound.Source.BLOCK, uniqueLocation.toCenterLocation());
         }
         this.inventory.getInventory().clear();
     }
