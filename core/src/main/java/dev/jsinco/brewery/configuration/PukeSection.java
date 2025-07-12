@@ -5,12 +5,11 @@ import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 import org.spongepowered.configurate.objectmapping.meta.Comment;
 
 @ConfigSerializable
-public record PukeSection(
-        @Comment("""
-                How many ticks should the puke items live""")
-        int pukeDespawnTime,
-        @Comment("""
-                How many ticks the player will puke""")
-        int pukeTime) {
-    public static final PukeSection DEFAULT = new PukeSection(6 * Moment.SECOND, 4 * Moment.SECOND);
+public class PukeSection {
+
+    @Comment("How many ticks should the puke items live")
+    public int pukeDespawnTime = 6 * Moment.SECOND;
+
+    @Comment("How many ticks the player will puke")
+    public int pukeTime = 4 * Moment.SECOND;
 }
