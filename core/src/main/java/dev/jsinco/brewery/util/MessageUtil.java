@@ -4,7 +4,6 @@ import dev.jsinco.brewery.brew.*;
 import dev.jsinco.brewery.configuration.Config;
 import dev.jsinco.brewery.configuration.locale.TranslationsConfig;
 import dev.jsinco.brewery.effect.DrunkStateImpl;
-import dev.jsinco.brewery.moment.Moment;
 import dev.jsinco.brewery.recipe.RecipeRegistry;
 import dev.jsinco.brewery.recipes.BrewScoreImpl;
 import net.kyori.adventure.text.Component;
@@ -39,11 +38,11 @@ public class MessageUtil {
     public static @NotNull TagResolver getBrewStepTagResolver(BrewingStep brewingStep, List<PartialBrewScore> scores, double difficulty) {
         TagResolver resolver = switch (brewingStep) {
             case BrewingStep.Age age -> TagResolver.resolver(
-                    Formatter.number("aging_years", age.time().moment() / Config.AGING_YEAR_TICKS),
-                    Placeholder.parsed("barrel_type", TranslationsConfig.BARREL_TYPE.get(age.barrelType().name().toLowerCase(Locale.ROOT)))
+                    Placeholder.parsed("barrel_type", TranslationsConfig.BARREL_TYPE.get(age.barrelType().name().toLowerCase(Locale.ROOT))),
+                    Formatter.number("aging_years", age.time().moment() / Config.config().barrels.agingYearTicks)
             );
             case BrewingStep.Cook cook -> TagResolver.resolver(
-                    Formatter.number("cooking_time", cook.time().moment() / Config.COOKING_MINUTE_TICKS),
+                    Formatter.number("cooking_time", cook.time().moment() / Config.config().cauldrons.cookingMinuteTicks),
                     Placeholder.component("ingredients", cook.ingredients().entrySet()
                             .stream()
                             .map(entry -> entry.getKey().displayName()
@@ -55,7 +54,7 @@ public class MessageUtil {
             );
             case BrewingStep.Distill distill -> Formatter.number("distill_runs", distill.runs());
             case BrewingStep.Mix mix -> TagResolver.resolver(
-                    Formatter.number("mixing_time", mix.time().moment() / Config.COOKING_MINUTE_TICKS),
+                    Formatter.number("mixing_time", mix.time().moment() / Config.config().cauldrons.cookingMinuteTicks),
                     Placeholder.component("ingredients", mix.ingredients().entrySet()
                             .stream()
                             .map(entry -> entry.getKey().displayName()
@@ -128,8 +127,8 @@ public class MessageUtil {
     }
 
     public static @NotNull TagResolver getTimeTagResolver(long timeTicks) {
-        long seconds = (timeTicks % Config.COOKING_MINUTE_TICKS) * 60 / Config.COOKING_MINUTE_TICKS;
-        long minutes = timeTicks / Config.COOKING_MINUTE_TICKS;
+        long seconds = (timeTicks % Config.config().cauldrons.cookingMinuteTicks) * 60 / Config.config().cauldrons.cookingMinuteTicks;
+        long minutes = timeTicks / Config.config().cauldrons.cookingMinuteTicks;
         return Placeholder.parsed("time", String.format("%d:%02d", minutes, seconds));
     }
 }

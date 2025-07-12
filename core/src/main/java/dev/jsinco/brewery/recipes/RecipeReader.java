@@ -107,7 +107,7 @@ public class RecipeReader<I> {
         return switch (type) {
             case COOK -> ingredientManager.getIngredientsWithAmount((List<String>) map.get("ingredients"))
                     .thenApplyAsync(ingredients -> new CookStepImpl(
-                            new PassedMoment((long) (((Number) map.get("cook-time")).doubleValue() * Config.COOKING_MINUTE_TICKS)),
+                            new PassedMoment((long) (((Number) map.get("cook-time")).doubleValue() * Config.config().cauldrons.cookingMinuteTicks)),
                             ingredients,
                             Registry.CAULDRON_TYPE.get(BreweryKey.parse(map.containsKey("cauldron-type") ? map.get("cauldron-type").toString().toLowerCase(Locale.ROOT) : "water"))
                     ));
@@ -115,12 +115,12 @@ public class RecipeReader<I> {
                     (int) map.get("runs")
             ));
             case AGE -> CompletableFuture.completedFuture(new AgeStepImpl(
-                    new PassedMoment((long) (((Number) map.get("age-years")).doubleValue() * Config.AGING_YEAR_TICKS)),
+                    new PassedMoment((long) (((Number) map.get("age-years")).doubleValue() * Config.config().barrels.agingYearTicks)),
                     Registry.BARREL_TYPE.get(BreweryKey.parse(map.get("barrel-type").toString().toLowerCase(Locale.ROOT)))
             ));
             case MIX -> ingredientManager.getIngredientsWithAmount((List<String>) map.get("ingredients"))
                     .thenApplyAsync(ingredients -> new MixStepImpl(
-                            new PassedMoment((long) (((Number) map.get("mix-time")).doubleValue() * Config.COOKING_MINUTE_TICKS)),
+                            new PassedMoment((long) (((Number) map.get("mix-time")).doubleValue() * Config.config().cauldrons.cookingMinuteTicks)),
                             ingredients
                     ));
         };

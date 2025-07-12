@@ -4,6 +4,7 @@ import dev.jsinco.brewery.event.*;
 import dev.jsinco.brewery.moment.Interval;
 import dev.jsinco.brewery.moment.Moment;
 import dev.jsinco.brewery.util.BreweryKey;
+import dev.jsinco.brewery.vector.BreweryLocation;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 import java.util.List;
@@ -34,9 +35,9 @@ public class EventSection {
                             )).build()
             ).build();
     public List<String> enabledRandomEvents = List.of("puke", "memory_loss", "stumble", "chicken", "nausea", "tunnel_vision", "drunken_walk");
-    public List<String> teleportDestinations = List.of();
+    public List<BreweryLocation> teleportDestinations = List.of();
     public boolean drunkenJoinDeny = true;
-    
+
     @ConfigSerializable
     public static class KickEventSection {
         public String kickEventMessage = null;

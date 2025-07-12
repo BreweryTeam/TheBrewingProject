@@ -176,7 +176,7 @@ public class BukkitCauldron implements dev.jsinco.brewery.breweries.Cauldron {
         block.getWorld().spawnParticle(Particle.ENTITY_EFFECT, particleLoc, 0, particleColor);
 
 
-        if (!Config.MINIMAL_PARTICLES || !hot) {
+        if (!Config.config().cauldrons.minimalParticles || !hot) {
             return;
         }
 
@@ -216,11 +216,11 @@ public class BukkitCauldron implements dev.jsinco.brewery.breweries.Cauldron {
     }
 
     public static boolean isHeatSource(Block block) {
-        if (Config.HEAT_SOURCES.isEmpty()) {
+        if (Config.config().cauldrons.heatSources.isEmpty()) {
             return true;
         }
         Material material = block.getType();
-        if (!Config.HEAT_SOURCES.contains(material.name().toLowerCase())) {
+        if (!Config.config().cauldrons.heatSources.contains(material.name().toLowerCase())) {
             return false;
         }
         if (material == Material.CAMPFIRE || material == Material.SOUL_CAMPFIRE) {

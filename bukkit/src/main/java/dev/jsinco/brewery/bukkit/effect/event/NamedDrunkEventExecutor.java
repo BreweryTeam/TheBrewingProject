@@ -8,6 +8,7 @@ import dev.jsinco.brewery.configuration.locale.TranslationsConfig;
 import dev.jsinco.brewery.effect.DrunksManagerImpl;
 import dev.jsinco.brewery.event.NamedDrunkEvent;
 import dev.jsinco.brewery.moment.Moment;
+import dev.jsinco.brewery.vector.BreweryLocation;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
@@ -36,15 +37,15 @@ public class NamedDrunkEventExecutor {
         }
         switch (event) {
             case PUKE -> {
-                PukeHandler pukeHandler = new PukeHandler(Config.PUKE_TIME, player);
-                TheBrewingProject.getInstance().getActiveEventsRegistry().registerActiveEvent(playerUuid, event, Config.PUKE_TIME);
+                PukeHandler pukeHandler = new PukeHandler(Config.config().puke.pukeTime, player);
+                TheBrewingProject.getInstance().getActiveEventsRegistry().registerActiveEvent(playerUuid, event, Config.config().puke.pukeTime);
                 Bukkit.getScheduler().runTaskTimer(TheBrewingProject.getInstance(), pukeHandler::tick, 0, 1);
             }
             case PASS_OUT -> {
                 DrunksManagerImpl<?> drunksManager = TheBrewingProject.getInstance().getDrunksManager();
-                player.kick(BukkitMessageUtil.compilePlayerMessage(Config.KICK_EVENT_MESSAGE == null ? TranslationsConfig.KICK_EVENT_MESSAGE : Config.KICK_EVENT_MESSAGE, player, drunksManager, 0));
-                if (Config.KICK_EVENT_SERVER_MESSAGE != null) {
-                    Component message = BukkitMessageUtil.compilePlayerMessage(Config.KICK_EVENT_SERVER_MESSAGE, player, drunksManager, 0);
+                player.kick(BukkitMessageUtil.compilePlayerMessage(Config.config().events.kickEvent.kickEventMessage == null ? TranslationsConfig.KICK_EVENT_MESSAGE : Config.config().events.kickEvent.kickEventMessage, player, drunksManager, 0));
+                if (Config.config().events.kickEvent.kickServerMessage != null) {
+                    Component message = BukkitMessageUtil.compilePlayerMessage(Config.config().events.kickEvent.kickServerMessage, player, drunksManager, 0);
                     Bukkit.getOnlinePlayers().forEach(player1 -> player1.sendMessage(message));
                 }
                 drunksManager.registerPassedOut(player.getUniqueId());
@@ -67,7 +68,7 @@ public class NamedDrunkEventExecutor {
                 player.sendMessage(MiniMessage.miniMessage().deserialize(TranslationsConfig.CHICKEN_MESSAGE, BukkitMessageUtil.getPlayerTagResolver(player)));
             }
             case DRUNK_MESSAGE -> {
-                List<String> drunkMessages = Config.DRUNK_MESSAGES;
+                List<String> drunkMessages = Config.config().events.drunkMessages;
                 if (drunkMessages.isEmpty()) {
                     return;
                 }
@@ -83,11 +84,12 @@ public class NamedDrunkEventExecutor {
                 player.chat(drunkMessages.get(RANDOM.nextInt(drunkMessages.size())).replace("<random_player_name>", randomPlayer.getName()));
             }
             case TELEPORT -> {
-                String teleport = Config.TELEPORT_DESTINATIONS.get(RANDOM.nextInt(Config.TELEPORT_DESTINATIONS.size()));
-                Location location = BukkitAdapter.parseLocation(teleport);
-                if (location == null) {
+                List<BreweryLocation> locations = Config.config().events.teleportDestinations;
+                if (locations.isEmpty()) {
                     return;
                 }
+                BreweryLocation teleport = locations.get(RANDOM.nextInt(locations.size()));
+                Location location = BukkitAdapter.toLocation(teleport);
                 player.teleport(location);
                 player.sendMessage(MiniMessage.miniMessage().deserialize(TranslationsConfig.TELEPORT_MESSAGE, BukkitMessageUtil.getPlayerTagResolver(player)));
             }

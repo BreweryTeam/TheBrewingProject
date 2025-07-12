@@ -109,7 +109,7 @@ public class InventoryEventListener implements Listener {
         Optional<InventoryAccessible<ItemStack, Inventory>> source = Optional.ofNullable(registry.getFromInventory(event.getSource()));
         Optional<InventoryAccessible<ItemStack, Inventory>> destination = Optional.ofNullable(registry.getFromInventory(event.getDestination()));
         Optional<InventoryAccessible<ItemStack, Inventory>> both = destination.or(() -> source);
-        if (!Config.AUTOMATION) {
+        if (!Config.config().automation) {
             both.ifPresent(ignored -> event.setCancelled(true));
             return;
         }

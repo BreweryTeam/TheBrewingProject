@@ -36,7 +36,6 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class BlockEventListener implements Listener {
 
@@ -207,7 +206,7 @@ public class BlockEventListener implements Listener {
                 .map(MultiblockStructure::getHolder)
                 .filter(InventoryAccessible.class::isInstance)
                 .map(inventoryAccessible -> (InventoryAccessible<ItemStack, Inventory>) inventoryAccessible);
-        if (!Config.AUTOMATION) {
+        if (!Config.config().automation) {
             inventoryAccessibleOptional.ifPresent(ignored -> event.setInventory(null));
             return;
         }
