@@ -2,5 +2,7 @@ package dev.jsinco.brewery.event;
 
 import dev.jsinco.brewery.vector.BreweryLocation;
 
-public record Teleport(BreweryLocation location) implements EventStep {
+import java.util.function.Supplier;
+
+public record Teleport(Supplier<BreweryLocation> location) implements EventStep {
 }

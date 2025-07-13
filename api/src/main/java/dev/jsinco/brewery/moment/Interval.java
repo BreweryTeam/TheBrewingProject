@@ -21,12 +21,7 @@ public record Interval(long start, long stop) implements Moment {
 
     public static Interval parse(@NotNull Object value) throws IllegalArgumentException {
         if (value instanceof String string) {
-            if (!string.contains("-")) {
-                int i = Integer.parseInt(string);
-                return new Interval(i, i);
-            }
-            String[] split = string.split("-");
-            return new Interval(Integer.parseInt(split[0]), Integer.parseInt(split[1]));
+            return parseString(string);
         } else if (value instanceof Integer integer) {
             return new Interval(integer, integer);
         } else {
@@ -34,15 +29,28 @@ public record Interval(long start, long stop) implements Moment {
         }
     }
 
+    public static Interval parseString(@NotNull String string) {
+        if (string.contains(";")) {
+            String[] split = string.split(";");
+            return new Interval(Integer.parseInt(split[0]), Integer.parseInt(split[1]));
+        }
+        if (!string.contains("-")) {
+            int i = Integer.parseInt(string);
+            return new Interval(i, i);
+        }
+        String[] split = string.split("-");
+        return new Interval(Integer.parseInt(split[0]), Integer.parseInt(split[1]));
+    }
+
     @Override
-    public String toString() {
-        return start + "-" + stop;
+    public @NotNull String toString() {
+        return start + ";" + stop;
     }
 
     public String asString() {
         if (start == stop) {
             return String.valueOf(start);
         }
-        return String.format("%d-%d", start, stop);
+        return String.format("%d;%d", start, stop);
     }
 }

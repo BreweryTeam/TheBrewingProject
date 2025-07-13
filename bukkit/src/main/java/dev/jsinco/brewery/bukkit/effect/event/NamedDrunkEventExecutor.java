@@ -23,6 +23,7 @@ import org.bukkit.potion.PotionEffectType;
 import java.util.List;
 import java.util.Random;
 import java.util.UUID;
+import java.util.function.Supplier;
 
 public class NamedDrunkEventExecutor {
     private static final Random RANDOM = new Random();
@@ -84,7 +85,7 @@ public class NamedDrunkEventExecutor {
                 player.chat(drunkMessages.get(RANDOM.nextInt(drunkMessages.size())).replace("<random_player_name>", randomPlayer.getName()));
             }
             case TELEPORT -> {
-                List<BreweryLocation> locations = Config.config().events.teleportDestinations;
+                List<BreweryLocation> locations = Config.config().events.teleportDestinations.stream().map(Supplier::get).toList();
                 if (locations.isEmpty()) {
                     return;
                 }

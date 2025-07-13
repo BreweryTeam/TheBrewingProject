@@ -8,6 +8,7 @@ import dev.jsinco.brewery.vector.BreweryLocation;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 import java.util.List;
+import java.util.function.Supplier;
 
 @ConfigSerializable
 public class EventSection {
@@ -35,7 +36,7 @@ public class EventSection {
                             )).build()
             ).build();
     public List<String> enabledRandomEvents = List.of("puke", "memory_loss", "stumble", "chicken", "nausea", "tunnel_vision", "drunken_walk");
-    public List<BreweryLocation> teleportDestinations = List.of();
+    public List<Supplier<BreweryLocation>> teleportDestinations = List.of();
     public boolean drunkenJoinDeny = true;
 
     @ConfigSerializable

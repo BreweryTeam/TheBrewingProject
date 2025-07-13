@@ -1,13 +1,14 @@
 package dev.jsinco.brewery.configuration.serializers;
 
-import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
 import dev.jsinco.brewery.event.*;
 import dev.jsinco.brewery.moment.Interval;
+import dev.jsinco.brewery.moment.Moment;
 import dev.jsinco.brewery.util.BreweryKey;
 import dev.jsinco.brewery.util.Logging;
 import dev.jsinco.brewery.util.Registry;
 import dev.jsinco.brewery.vector.BreweryLocation;
+import io.leangen.geantyref.TypeToken;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.jetbrains.annotations.NotNull;
 import org.spongepowered.configurate.ConfigurationNode;
@@ -16,6 +17,7 @@ import org.spongepowered.configurate.serialize.TypeSerializer;
 
 import java.lang.reflect.Type;
 import java.util.*;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -53,7 +55,7 @@ public class EventRegistrySerializer implements TypeSerializer<CustomEventRegist
         node.set(output);
     }
 
-    private static <T> T readWithDefault(Map<Object, ? extends ConfigurationNode> data, String key, Function<ConfigurationNode, T> function, T defaultValue) {
+    private static <T> T readWithDefault(Map<Object, ? extends ConfigurationNode> data, String key, FunctionThatThrows<ConfigurationNode, T, SerializationException> function, T defaultValue) throws SerializationException {
         return data.containsKey(key) ? function.apply(data.get(key)) : defaultValue;
     }
 
@@ -71,13 +73,9 @@ public class EventRegistrySerializer implements TypeSerializer<CustomEventRegist
                     .alcoholRequirement(alcohol)
                     .toxinsRequirement(toxin)
                     .probabilityWeight(probabilityWeight);
-            List<? extends Map<Object, ? extends ConfigurationNode>> steps = EventRegistrySerializer.<List<ConfigurationNode>>readWithDefault(eventData, "steps", configurationNode -> {
-                        try {
-                            return configurationNode.getList(ConfigurationNode.class);
-                        } catch (SerializationException e) {
-                            throw new RuntimeException(e);
-                        }
-                    }, List.of()).stream()
+            List<? extends Map<Object, ? extends ConfigurationNode>> steps = EventRegistrySerializer.<List<ConfigurationNode>>readWithDefault(eventData, "steps", configurationNode ->
+                                    configurationNode.getList(ConfigurationNode.class)
+                            , List.of()).stream()
                     .map(ConfigurationNode::childrenMap)
                     .toList();
             for (Map<Object, ? extends ConfigurationNode> step : steps) {
@@ -85,7 +83,7 @@ public class EventRegistrySerializer implements TypeSerializer<CustomEventRegist
             }
             return builder.build();
         } catch (IllegalArgumentException e) {
-            Logging.error("Exception when reading custom event:" + eventName);
+            Logging.error("Exception when reading custom event: " + eventName);
             throw new SerializationException(e);
         }
     }
@@ -126,8 +124,8 @@ public class EventRegistrySerializer implements TypeSerializer<CustomEventRegist
             Preconditions.checkArgument(step.containsKey("effect"));
             String effect = step.get("effect").getString();
             Preconditions.checkArgument(effect != null, "Effect can not be empty");
-            Interval amplifier = Interval.parse(step.get("amplifier"));
-            Interval duration = Interval.parse(step.get("duration"));
+            Interval amplifier = readWithDefault(step, "amplifier", node -> node.get(Interval.class), new Interval(1, 1));
+            Interval duration = readWithDefault(step, "duration", node -> node.get(Interval.class), new Interval(10 * Moment.SECOND, 10 * Moment.SECOND));
             return List.of(new ApplyPotionEffect(effect, amplifier, duration));
         } else if (stepType.equals("consume")) {
             int alcohol = 0;
@@ -145,7 +143,8 @@ public class EventRegistrySerializer implements TypeSerializer<CustomEventRegist
             );
         } else if (stepType.equals("teleport")) {
             Preconditions.checkArgument(step.containsKey("location"), "Expected a location");
-            BreweryLocation breweryLocation = step.get("location").get(BreweryLocation.class);
+            Supplier<BreweryLocation> breweryLocation = step.get("location").get(new TypeToken<>() {
+            });
             Preconditions.checkArgument(breweryLocation != null, "Expected a non empty locaiton");
             return List.of(new Teleport(breweryLocation));
         }
@@ -189,5 +188,10 @@ public class EventRegistrySerializer implements TypeSerializer<CustomEventRegist
                     "duration", waitStep.durationTicks() + "t");
             default -> throw new IllegalArgumentException("Unsupported event step: " + step);
         };
+    }
+
+    private interface FunctionThatThrows<T, U, E extends Throwable> {
+
+        U apply(T t) throws E;
     }
 }
