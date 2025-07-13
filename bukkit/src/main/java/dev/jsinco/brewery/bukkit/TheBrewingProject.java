@@ -43,6 +43,7 @@ import dev.jsinco.brewery.util.Util;
 import io.papermc.paper.plugin.lifecycle.event.LifecycleEvent;
 import io.papermc.paper.plugin.lifecycle.event.handler.LifecycleEventHandler;
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
+import io.papermc.paper.threadedregions.scheduler.ScheduledTask;
 import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.inventory.ItemStack;
@@ -198,8 +199,8 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
         pluginManager.registerEvents(playerWalkListener, this);
         pluginManager.registerEvents(new EntityEventListener(), this);
 
-        Bukkit.getScheduler().runTaskTimer(this, this::updateStructures, 0, 1);
-        Bukkit.getScheduler().runTaskTimer(this, this::otherTicking, 0, 1);
+        Bukkit.getGlobalRegionScheduler().runAtFixedRate(this, task -> this.updateStructures(), 1, 1);
+        Bukkit.getGlobalRegionScheduler().runAtFixedRate(this, task -> this.otherTicking(), 1, 1);
         RecipeReader<ItemStack> recipeReader = new RecipeReader<>(this.getDataFolder(), new BukkitRecipeResultReader(), BukkitIngredientManager.INSTANCE);
 
         recipeReader.readRecipes().thenAcceptAsync(this.recipeRegistry::registerRecipes);

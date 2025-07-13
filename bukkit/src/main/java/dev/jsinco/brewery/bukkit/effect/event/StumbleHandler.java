@@ -1,6 +1,7 @@
 package dev.jsinco.brewery.bukkit.effect.event;
 
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
+import io.papermc.paper.threadedregions.scheduler.ScheduledTask;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.util.Vector;
@@ -34,7 +35,7 @@ class StumbleHandler {
                 .multiply(RANDOM.nextDouble(maxMagnitude));
     }
 
-    public void doStumble(BukkitTask task) {
+    public void doStumble(ScheduledTask task) {
         if (!player.isOnline() || countDown-- < 0) {
             task.cancel();
             return;

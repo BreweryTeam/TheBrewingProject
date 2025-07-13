@@ -1,6 +1,7 @@
 package dev.jsinco.brewery.bukkit.effect.event;
 
 import dev.jsinco.brewery.configuration.Config;
+import io.papermc.paper.threadedregions.scheduler.ScheduledTask;
 import org.bukkit.*;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Item;
@@ -23,7 +24,7 @@ public class PukeHandler {
         this.player = player;
     }
 
-    public void tick(BukkitTask task) {
+    public void tick(ScheduledTask task) {
         if (!player.isOnline() || countDown-- <= 0) {
             task.cancel();
             return;

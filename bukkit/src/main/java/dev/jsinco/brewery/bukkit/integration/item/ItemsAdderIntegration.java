@@ -57,7 +57,8 @@ public class ItemsAdderIntegration implements ItemIntegration, Listener {
     public void initialize() {
         Bukkit.getPluginManager().registerEvents(this, TheBrewingProject.getInstance());
         this.initializedFuture = new CompletableFuture<>();
-        Bukkit.getScheduler().runTask(TheBrewingProject.getInstance(), () -> initializedFuture.completeExceptionally(new TimeoutException()));
+        Bukkit.getAsyncScheduler().runNow(TheBrewingProject.getInstance(), task ->
+                initializedFuture.completeExceptionally(new TimeoutException()));
     }
 
     @EventHandler

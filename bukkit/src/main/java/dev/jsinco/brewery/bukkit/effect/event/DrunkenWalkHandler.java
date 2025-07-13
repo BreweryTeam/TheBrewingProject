@@ -4,6 +4,7 @@ import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.effect.DrunksManager;
 import dev.jsinco.brewery.event.NamedDrunkEvent;
 import dev.jsinco.brewery.util.Pair;
+import io.papermc.paper.threadedregions.scheduler.ScheduledTask;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.util.Vector;
@@ -50,7 +51,7 @@ class DrunkenWalkHandler {
         return output;
     }
 
-    public void tick(BukkitTask task) {
+    public void tick(ScheduledTask task) {
         if (duration <= timestamp++ || currentPush == null) {
             task.cancel();
             return;
