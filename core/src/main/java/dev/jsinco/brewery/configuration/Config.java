@@ -16,6 +16,9 @@ import java.io.File;
 @Getter
 @Accessors(fluent = true)
 public class Config {
+    public static final int CONFIG_INDENT = 2;
+
+
     @Comment("Config version. Don't change this")
     private int configVersion = 0;
 
@@ -61,7 +64,7 @@ public class Config {
                     .file(new File(dataFolder, "config.yml"))
                     .defaultOptions(opts -> opts.serializers(build -> build.registerAll(serializers)))
                     .nodeStyle(NodeStyle.BLOCK)
-                    .indent(2)
+                    .indent(CONFIG_INDENT)
                     .build();
             CommentedConfigurationNode node = loader.load();
             Config.instance = node.get(Config.class);
