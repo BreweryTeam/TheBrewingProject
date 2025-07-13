@@ -1,5 +1,7 @@
 package dev.jsinco.brewery.configuration;
 
+import lombok.Getter;
+import lombok.experimental.Accessors;
 import org.spongepowered.configurate.CommentedConfigurationNode;
 import org.spongepowered.configurate.ConfigurateException;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
@@ -11,31 +13,33 @@ import org.spongepowered.configurate.yaml.YamlConfigurationLoader;
 import java.io.File;
 
 @ConfigSerializable
+@Getter
+@Accessors(fluent = true)
 public class Config {
     @Comment("Config version. Don't change this")
-    public int configVersion = 0;
+    private int configVersion = 0;
 
     @Comment("What language file should we use? See: /TheBrewingProject/languages")
-    public String language = "en-us";
+    private String language = "en-us";
 
-    public CauldronSection cauldrons = new CauldronSection();
+    private CauldronSection cauldrons = new CauldronSection();
 
-    public BarrelSection barrels = new BarrelSection();
+    private BarrelSection barrels = new BarrelSection();
 
     @Comment("Allow hoppers to interact with distilleries and barrels")
-    public boolean automation = true;
+    private boolean automation = true;
 
-    public PukeSection puke = new PukeSection();
+    private PukeSection puke = new PukeSection();
 
-    public EventSection events = new EventSection();
+    private EventSection events = new EventSection();
 
-    public DecayRateSection decayRate = new DecayRateSection();
+    private DecayRateSection decayRate = new DecayRateSection();
 
     @Comment("Whether an ingredient can be added into a brew regardless if it's not in any of the recipes")
-    public boolean allowUnregisteredIngredients = false;
+    private boolean allowUnregisteredIngredients = false;
 
     @Comment("Whether items should be consumed when in creative mode when using it on tbp structures")
-    public boolean consumeItemsInCreative = false;
+    private boolean consumeItemsInCreative = false;
 
     @Comment("""
             This field accepts either a single sound definition or a list of definitions.
@@ -47,7 +51,7 @@ public class Config {
              - <sound_id>/<min_pitch>;<max_pitch>
             
             See the default values below for examples""")
-    public SoundSection sounds = new SoundSection();
+    private SoundSection sounds = new SoundSection();
 
     private static Config instance;
 

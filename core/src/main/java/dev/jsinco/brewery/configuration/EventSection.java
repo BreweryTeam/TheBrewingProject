@@ -5,21 +5,25 @@ import dev.jsinco.brewery.moment.Interval;
 import dev.jsinco.brewery.moment.Moment;
 import dev.jsinco.brewery.util.BreweryKey;
 import dev.jsinco.brewery.vector.BreweryLocation;
+import lombok.Getter;
+import lombok.experimental.Accessors;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 import java.util.List;
 import java.util.function.Supplier;
 
 @ConfigSerializable
+@Getter
+@Accessors(fluent = true)
 public class EventSection {
-    public KickEventSection kickEvent = new KickEventSection();
-    public int passOutTime = 5;
-    public List<String> drunkMessages = List.of("I love you <random_player_name>, you're my best friend.",
+    private KickEventSection kickEvent = new KickEventSection();
+    private int passOutTime = 5;
+    private List<String> drunkMessages = List.of("I love you <random_player_name>, you're my best friend.",
             "I could do one more.",
             "Who is she?",
             "Watch this!",
             "I'm not drunk. You're drunk.");
-    public CustomEventRegistry customEvents = CustomEventRegistry.builder()
+    private CustomEventRegistry customEvents = CustomEventRegistry.builder()
             .addEvent(new CustomEvent.Builder(BreweryKey.parse("memory_loss"))
                     .alcoholRequirement(60)
                     .toxinsRequirement(90)
@@ -35,13 +39,15 @@ public class EventSection {
                                     new Interval(1, 1), new Interval(20 * Moment.SECOND, 20 * Moment.SECOND)
                             )).build()
             ).build();
-    public List<String> enabledRandomEvents = List.of("puke", "memory_loss", "stumble", "chicken", "nausea", "tunnel_vision", "drunken_walk");
-    public List<Supplier<BreweryLocation>> teleportDestinations = List.of();
-    public boolean drunkenJoinDeny = true;
+    private List<String> enabledRandomEvents = List.of("puke", "memory_loss", "stumble", "chicken", "nausea", "tunnel_vision", "drunken_walk");
+    private List<Supplier<BreweryLocation>> teleportDestinations = List.of();
+    private boolean drunkenJoinDeny = true;
 
     @ConfigSerializable
+    @Getter
+    @Accessors(fluent = true)
     public static class KickEventSection {
-        public String kickEventMessage = null;
-        public String kickServerMessage = null;
+        private String kickEventMessage = null;
+        private String kickServerMessage = null;
     }
 }

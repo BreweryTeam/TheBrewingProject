@@ -4,6 +4,7 @@ import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.bukkit.util.BukkitAdapter;
 import dev.jsinco.brewery.bukkit.util.BukkitMessageUtil;
 import dev.jsinco.brewery.configuration.Config;
+import dev.jsinco.brewery.configuration.EventSection;
 import dev.jsinco.brewery.configuration.locale.TranslationsConfig;
 import dev.jsinco.brewery.effect.DrunksManagerImpl;
 import dev.jsinco.brewery.event.NamedDrunkEvent;
@@ -38,21 +39,21 @@ public class NamedDrunkEventExecutor {
         }
         switch (event) {
             case PUKE -> {
-                PukeHandler pukeHandler = new PukeHandler(Config.config().puke.pukeTime, player);
-                TheBrewingProject.getInstance().getActiveEventsRegistry().registerActiveEvent(playerUuid, event, Config.config().puke.pukeTime);
+                PukeHandler pukeHandler = new PukeHandler(Config.config().puke().pukeTime(), player);
+                TheBrewingProject.getInstance().getActiveEventsRegistry().registerActiveEvent(playerUuid, event, Config.config().puke().pukeTime());
                 Bukkit.getScheduler().runTaskTimer(TheBrewingProject.getInstance(), pukeHandler::tick, 0, 1);
             }
             case PASS_OUT -> {
                 DrunksManagerImpl<?> drunksManager = TheBrewingProject.getInstance().getDrunksManager();
-                player.kick(BukkitMessageUtil.compilePlayerMessage(Config.config().events.kickEvent.kickEventMessage == null ? TranslationsConfig.KICK_EVENT_MESSAGE : Config.config().events.kickEvent.kickEventMessage, player, drunksManager, 0));
-                if (Config.config().events.kickEvent.kickServerMessage != null) {
-                    Component message = BukkitMessageUtil.compilePlayerMessage(Config.config().events.kickEvent.kickServerMessage, player, drunksManager, 0);
+                EventSection.KickEventSection kickEventSection = Config.config().events().kickEvent();
+                player.kick(BukkitMessageUtil.compilePlayerMessage(kickEventSection.kickEventMessage() == null ? TranslationsConfig.KICK_EVENT_MESSAGE : kickEventSection.kickEventMessage(), player, drunksManager, 0));
+                if (kickEventSection.kickServerMessage() != null) {
+                    Component message = BukkitMessageUtil.compilePlayerMessage(kickEventSection.kickServerMessage(), player, drunksManager, 0);
                     Bukkit.getOnlinePlayers().forEach(player1 -> player1.sendMessage(message));
                 }
                 drunksManager.registerPassedOut(player.getUniqueId());
             }
             case STUMBLE -> {
-                DrunksManagerImpl<?> drunksManager = TheBrewingProject.getInstance().getDrunksManager();
                 int duration = RANDOM.nextInt(STUMBLE_DURATION / 2, STUMBLE_DURATION * 3 / 2 + 1);
                 StumbleHandler stumbleHandler = new StumbleHandler(duration, player);
                 TheBrewingProject.getInstance().getActiveEventsRegistry().registerActiveEvent(playerUuid, event, duration);
@@ -69,7 +70,7 @@ public class NamedDrunkEventExecutor {
                 player.sendMessage(MiniMessage.miniMessage().deserialize(TranslationsConfig.CHICKEN_MESSAGE, BukkitMessageUtil.getPlayerTagResolver(player)));
             }
             case DRUNK_MESSAGE -> {
-                List<String> drunkMessages = Config.config().events.drunkMessages;
+                List<String> drunkMessages = Config.config().events().drunkMessages();
                 if (drunkMessages.isEmpty()) {
                     return;
                 }
@@ -85,7 +86,7 @@ public class NamedDrunkEventExecutor {
                 player.chat(drunkMessages.get(RANDOM.nextInt(drunkMessages.size())).replace("<random_player_name>", randomPlayer.getName()));
             }
             case TELEPORT -> {
-                List<BreweryLocation> locations = Config.config().events.teleportDestinations.stream().map(Supplier::get).toList();
+                List<BreweryLocation> locations = Config.config().events().teleportDestinations().stream().map(Supplier::get).toList();
                 if (locations.isEmpty()) {
                     return;
                 }

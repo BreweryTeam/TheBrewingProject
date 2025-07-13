@@ -133,7 +133,7 @@ public class PlayerEventListener implements Listener {
     }
 
     private ItemStack decreaseItem(ItemStack itemStack, Player player) {
-        if (player.getGameMode() == GameMode.CREATIVE && !Config.config().consumeItemsInCreative) {
+        if (player.getGameMode() == GameMode.CREATIVE && !Config.config().consumeItemsInCreative()) {
             return itemStack;
         }
         if (itemStack.getType() == Material.POTION) {
@@ -231,7 +231,7 @@ public class PlayerEventListener implements Listener {
         if (DISALLOWED_INGREDIENT_MATERIALS.contains(type)) {
             return false;
         }
-        if (Config.config().allowUnregisteredIngredients) {
+        if (Config.config().allowUnregisteredIngredients()) {
             return true;
         }
         Ingredient ingredient = BukkitIngredientManager.INSTANCE.getIngredient(itemStack);
@@ -263,11 +263,12 @@ public class PlayerEventListener implements Listener {
     public void onPlayerLogin(PlayerLoginEvent event) {
         if (drunksManager.isPassedOut(event.getPlayer().getUniqueId())) {
             event.setResult(PlayerLoginEvent.Result.KICK_OTHER);
-            event.kickMessage(BukkitMessageUtil.compilePlayerMessage(Config.config().events.kickEvent.kickEventMessage == null ? TranslationsConfig.KICK_EVENT_MESSAGE : Config.config().events.kickEvent.kickEventMessage, event.getPlayer(), drunksManager, 0));
+            String kickEventMessage = Config.config().events().kickEvent().kickEventMessage();
+            event.kickMessage(BukkitMessageUtil.compilePlayerMessage(kickEventMessage == null ? TranslationsConfig.KICK_EVENT_MESSAGE : kickEventMessage, event.getPlayer(), drunksManager, 0));
             return;
         }
         DrunkState drunkState = drunksManager.getDrunkState(event.getPlayer().getUniqueId());
-        if (Config.config().events.drunkenJoinDeny && drunkState != null && drunkState.alcohol() >= 85 && RANDOM.nextInt(15) <= drunkState.alcohol() - 85) {
+        if (Config.config().events().drunkenJoinDeny() && drunkState != null && drunkState.alcohol() >= 85 && RANDOM.nextInt(15) <= drunkState.alcohol() - 85) {
             event.setResult(PlayerLoginEvent.Result.KICK_OTHER);
             event.kickMessage(BukkitMessageUtil.compilePlayerMessage(TranslationsConfig.DRUNKEN_JOIN_DENY_MESSAGE, event.getPlayer(), drunksManager, drunkState.alcohol()));
         }

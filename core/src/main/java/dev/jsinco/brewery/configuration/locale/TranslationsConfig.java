@@ -184,7 +184,7 @@ public class TranslationsConfig extends AbstractConfig {
         Path mainDir = dataFolder.toPath();
 
         // extract default config from jar
-        String fileName = "locale/" + Config.config().language + ".yml";
+        String fileName = "locale/" + Config.config().language() + ".yml";
         FileUtil.extractFile(TranslationsConfig.class, fileName, mainDir, false);
 
         TRANSLATIONS.reload(mainDir.resolve(fileName), fileName, TranslationsConfig.class);

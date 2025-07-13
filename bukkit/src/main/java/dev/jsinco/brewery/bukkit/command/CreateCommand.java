@@ -79,7 +79,7 @@ public class CreateCommand {
 
     private static BrewingStep parseAge(CommandContext<CommandSourceStack> context) {
         double agingYears = context.getArgument("aging-years", double.class);
-        return new AgeStepImpl(new PassedMoment((long) (agingYears * Config.config().barrels.agingYearTicks)), context.getArgument("barrel-type", BarrelType.class));
+        return new AgeStepImpl(new PassedMoment((long) (agingYears * Config.config().barrels().agingYearTicks())), context.getArgument("barrel-type", BarrelType.class));
     }
 
     private static BrewingStep parseDistill(CommandContext<CommandSourceStack> context) {
@@ -89,13 +89,13 @@ public class CreateCommand {
     private static BrewingStep parseMix(CommandContext<CommandSourceStack> context) {
         double mixTime = context.getArgument("mix-time", double.class);
         Map<Ingredient, Integer> ingredients = context.getArgument("mix-ingredients", Map.class);
-        return new MixStepImpl(new PassedMoment((long) (mixTime * Config.config().cauldrons.cookingMinuteTicks)), ingredients);
+        return new MixStepImpl(new PassedMoment((long) (mixTime * Config.config().cauldrons().cookingMinuteTicks())), ingredients);
     }
 
     private static BrewingStep parseCook(CommandContext<CommandSourceStack> context) {
         double cookTime = context.getArgument("cook-time", double.class);
         CauldronType cauldronType = context.getArgument("cauldron-type", CauldronType.class);
         Map<Ingredient, Integer> ingredients = context.getArgument("cook-ingredients", Map.class);
-        return new CookStepImpl(new PassedMoment((long) (cookTime * Config.config().cauldrons.cookingMinuteTicks)), ingredients, cauldronType);
+        return new CookStepImpl(new PassedMoment((long) (cookTime * Config.config().cauldrons().cookingMinuteTicks())), ingredients, cauldronType);
     }
 }

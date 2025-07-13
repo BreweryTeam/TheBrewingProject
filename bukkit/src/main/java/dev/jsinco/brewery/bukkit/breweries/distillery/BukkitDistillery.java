@@ -76,7 +76,7 @@ public class BukkitDistillery implements Distillery<BukkitDistillery, ItemStack,
     private void playInteractionEffects(BreweryLocation location, Player player) {
         BukkitAdapter.toWorld(location)
                 .ifPresent(world -> SoundPlayer.playSoundEffect(
-                        Config.config().sounds.distilleryAccess,
+                        Config.config().sounds().distilleryAccess(),
                         Sound.Source.BLOCK,
                         world, location.x() + 0.5, location.y() + 0.5, location.z() + 0.5
                 ));
@@ -164,7 +164,7 @@ public class BukkitDistillery implements Distillery<BukkitDistillery, ItemStack,
         if (timeProcessed % processTime == 0 && timeProcessed != 0) {
             BukkitAdapter.toWorld(unique)
                     .ifPresent(world -> SoundPlayer.playSoundEffect(
-                            Config.config().sounds.distilleryProcess,
+                            Config.config().sounds().distilleryProcess(),
                             Sound.Source.BLOCK,
                             world, unique.x() + 0.5, unique.y() + 0.5, unique.z() + 0.5
                     ));

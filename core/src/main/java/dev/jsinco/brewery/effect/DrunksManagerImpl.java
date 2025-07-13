@@ -184,7 +184,7 @@ public class DrunksManagerImpl<C> implements DrunksManager {
         if (passOutTimeStamp == -1) {
             return false;
         }
-        return passOutTimeStamp + (long) Config.config().events.passOutTime * Moment.MINUTE > timeSupplier.getAsLong();
+        return passOutTimeStamp + (long) Config.config().events().passOutTime() * Moment.MINUTE > timeSupplier.getAsLong();
     }
 
     @Override

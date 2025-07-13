@@ -206,7 +206,7 @@ public class BlockEventListener implements Listener {
                 .map(MultiblockStructure::getHolder)
                 .filter(InventoryAccessible.class::isInstance)
                 .map(inventoryAccessible -> (InventoryAccessible<ItemStack, Inventory>) inventoryAccessible);
-        if (!Config.config().automation) {
+        if (!Config.config().automation()) {
             inventoryAccessibleOptional.ifPresent(ignored -> event.setInventory(null));
             return;
         }

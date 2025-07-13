@@ -39,10 +39,10 @@ public class MessageUtil {
         TagResolver resolver = switch (brewingStep) {
             case BrewingStep.Age age -> TagResolver.resolver(
                     Placeholder.parsed("barrel_type", TranslationsConfig.BARREL_TYPE.get(age.barrelType().name().toLowerCase(Locale.ROOT))),
-                    Formatter.number("aging_years", age.time().moment() / Config.config().barrels.agingYearTicks)
+                    Formatter.number("aging_years", age.time().moment() / Config.config().barrels().agingYearTicks())
             );
             case BrewingStep.Cook cook -> TagResolver.resolver(
-                    Formatter.number("cooking_time", cook.time().moment() / Config.config().cauldrons.cookingMinuteTicks),
+                    Formatter.number("cooking_time", cook.time().moment() / Config.config().cauldrons().cookingMinuteTicks()),
                     Placeholder.component("ingredients", cook.ingredients().entrySet()
                             .stream()
                             .map(entry -> entry.getKey().displayName()
@@ -54,7 +54,7 @@ public class MessageUtil {
             );
             case BrewingStep.Distill distill -> Formatter.number("distill_runs", distill.runs());
             case BrewingStep.Mix mix -> TagResolver.resolver(
-                    Formatter.number("mixing_time", mix.time().moment() / Config.config().cauldrons.cookingMinuteTicks),
+                    Formatter.number("mixing_time", mix.time().moment() / Config.config().cauldrons().cookingMinuteTicks()),
                     Placeholder.component("ingredients", mix.ingredients().entrySet()
                             .stream()
                             .map(entry -> entry.getKey().displayName()
@@ -127,8 +127,9 @@ public class MessageUtil {
     }
 
     public static @NotNull TagResolver getTimeTagResolver(long timeTicks) {
-        long seconds = (timeTicks % Config.config().cauldrons.cookingMinuteTicks) * 60 / Config.config().cauldrons.cookingMinuteTicks;
-        long minutes = timeTicks / Config.config().cauldrons.cookingMinuteTicks;
+        long cookingMinuteTicks = Config.config().cauldrons().cookingMinuteTicks();
+        long seconds = (timeTicks % cookingMinuteTicks) * 60 / cookingMinuteTicks;
+        long minutes = timeTicks / cookingMinuteTicks;
         return Placeholder.parsed("time", String.format("%d:%02d", minutes, seconds));
     }
 }

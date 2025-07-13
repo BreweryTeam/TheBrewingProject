@@ -63,7 +63,7 @@ public class BukkitBarrel implements Barrel<BukkitBarrel, ItemStack, Inventory> 
         }
         recentlyAccessed = TheBrewingProject.getInstance().getTime();
         if (uniqueLocation != null) {
-            SoundPlayer.playSoundEffect(Config.config().sounds.barrelOpen, Sound.Source.BLOCK, uniqueLocation.toCenterLocation());
+            SoundPlayer.playSoundEffect(Config.config().sounds().barrelOpen(), Sound.Source.BLOCK, uniqueLocation.toCenterLocation());
         }
         player.openInventory(inventory.getInventory());
         return true;
@@ -94,7 +94,7 @@ public class BukkitBarrel implements Barrel<BukkitBarrel, ItemStack, Inventory> 
 
     private void close() {
         if (uniqueLocation != null) {
-            SoundPlayer.playSoundEffect(Config.config().sounds.barrelClose, Sound.Source.BLOCK, uniqueLocation.toCenterLocation());
+            SoundPlayer.playSoundEffect(Config.config().sounds().barrelClose(), Sound.Source.BLOCK, uniqueLocation.toCenterLocation());
         }
         this.inventory.getInventory().clear();
     }

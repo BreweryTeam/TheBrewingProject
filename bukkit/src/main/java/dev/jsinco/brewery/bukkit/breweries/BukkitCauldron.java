@@ -177,7 +177,7 @@ public class BukkitCauldron implements dev.jsinco.brewery.breweries.Cauldron {
         block.getWorld().spawnParticle(Particle.ENTITY_EFFECT, particleLoc, 0, particleColor);
 
 
-        if (!Config.config().cauldrons.minimalParticles || !hot) {
+        if (!Config.config().cauldrons().minimalParticles() || !hot) {
             return;
         }
 
@@ -200,7 +200,7 @@ public class BukkitCauldron implements dev.jsinco.brewery.breweries.Cauldron {
         Location bukkitLocation = BukkitAdapter.toLocation(this.location).toCenterLocation();
         World world = bukkitLocation.getWorld();
 
-        SoundDefinition sound = item.getType() == Material.POTION ? Config.config().sounds.cauldronIngredientAddBrew : Config.config().sounds.cauldronIngredientAdd;
+        SoundDefinition sound = item.getType() == Material.POTION ? Config.config().sounds().cauldronIngredientAddBrew() : Config.config().sounds().cauldronIngredientAdd();
         SoundPlayer.playSoundEffect(sound, Sound.Source.BLOCK, bukkitLocation);
 
         if (getBlock().getType() == Material.WATER_CAULDRON) {
@@ -211,17 +211,17 @@ public class BukkitCauldron implements dev.jsinco.brewery.breweries.Cauldron {
     public void playBrewExtractedEffects() {
         BukkitAdapter.toWorld(location).ifPresent(world ->
                 SoundPlayer.playSoundEffect(
-                        Config.config().sounds.cauldronBrewExtract, Sound.Source.BLOCK,
+                        Config.config().sounds().cauldronBrewExtract(), Sound.Source.BLOCK,
                         world, location.x() + 0.5, location.y() + 1, location.z() + 0.5)
         );
     }
 
     public static boolean isHeatSource(Block block) {
-        if (Config.config().cauldrons.heatSources.isEmpty()) {
+        if (Config.config().cauldrons().heatSources().isEmpty()) {
             return true;
         }
         Material material = block.getType();
-        if (!Config.config().cauldrons.heatSources.contains(BukkitAdapter.toMaterialHolder(material))) {
+        if (!Config.config().cauldrons().heatSources().contains(BukkitAdapter.toMaterialHolder(material))) {
             return false;
         }
         if (material == Material.CAMPFIRE || material == Material.SOUL_CAMPFIRE) {
