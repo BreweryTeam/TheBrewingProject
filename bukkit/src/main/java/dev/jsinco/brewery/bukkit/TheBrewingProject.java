@@ -199,8 +199,8 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
         pluginManager.registerEvents(playerWalkListener, this);
         pluginManager.registerEvents(new EntityEventListener(), this);
 
-        Bukkit.getGlobalRegionScheduler().runAtFixedRate(this, task -> this.updateStructures(), 1, 1);
-        Bukkit.getGlobalRegionScheduler().runAtFixedRate(this, task -> this.otherTicking(), 1, 1);
+        Bukkit.getGlobalRegionScheduler().runAtFixedRate(this, task -> this.updateStructures(), 20, 1);
+        Bukkit.getGlobalRegionScheduler().runAtFixedRate(this, task -> this.otherTicking(), 20, 1);
         RecipeReader<ItemStack> recipeReader = new RecipeReader<>(this.getDataFolder(), new BukkitRecipeResultReader(), BukkitIngredientManager.INSTANCE);
 
         recipeReader.readRecipes().thenAcceptAsync(this.recipeRegistry::registerRecipes);
