@@ -22,11 +22,10 @@ public record Interval(long start, long stop) implements Moment {
     public static Interval parse(@NotNull Object value) throws IllegalArgumentException {
         if (value instanceof String string) {
             return parseString(string);
-        } else if (value instanceof Integer integer) {
+        if (value instanceof Integer integer) {
             return new Interval(integer, integer);
-        } else {
-            throw new IllegalArgumentException("Illegal value: " + value);
         }
+        throw new IllegalArgumentException("Illegal value: " + value);
     }
 
     public static Interval parseString(@NotNull String string) {
