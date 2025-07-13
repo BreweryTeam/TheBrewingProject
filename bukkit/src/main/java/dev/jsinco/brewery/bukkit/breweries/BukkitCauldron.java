@@ -221,7 +221,7 @@ public class BukkitCauldron implements dev.jsinco.brewery.breweries.Cauldron {
             return true;
         }
         Material material = block.getType();
-        if (!Config.config().cauldrons.heatSources.contains(material.name().toLowerCase())) {
+        if (!Config.config().cauldrons.heatSources.contains(BukkitAdapter.toMaterialHolder(material))) {
             return false;
         }
         if (material == Material.CAMPFIRE || material == Material.SOUL_CAMPFIRE) {

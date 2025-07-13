@@ -1,10 +1,12 @@
 package dev.jsinco.brewery.configuration;
 
 import dev.jsinco.brewery.moment.Moment;
+import dev.jsinco.brewery.util.Holder;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 import org.spongepowered.configurate.objectmapping.meta.Comment;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 @ConfigSerializable
 public class CauldronSection {
@@ -17,7 +19,9 @@ public class CauldronSection {
             What blocks cauldrons must have below them to be able to brew.
             If this list is empty, cauldrons will brew regardless of the block below them.
             Campfires must be lit and lava must be a source block.""")
-    public List<String> heatSources = List.of("campfire", "soul_campfire", "lava", "fire", "soul_fire", "magma_block");
+    public List<Holder.Material> heatSources = Stream.of("campfire", "soul_campfire", "lava", "fire", "soul_fire", "magma_block")
+            .map(Holder.Material::fromMinecraftId)
+            .toList();
 
     @Comment("How many ticks it will take to cook something one minute")
     public long cookingMinuteTicks = Moment.MINUTE;
