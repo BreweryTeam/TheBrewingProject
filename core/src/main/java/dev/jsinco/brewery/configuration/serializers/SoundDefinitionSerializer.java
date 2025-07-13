@@ -47,6 +47,7 @@ public class SoundDefinitionSerializer implements TypeSerializer<SoundDefinition
         }
         if (obj.sounds().size() == 1) {
             node.set(serializeSoundSetting(obj.sounds().get(0)));
+            return;
         }
         node.set(obj.sounds().stream()
                 .map(this::serializeSoundSetting)

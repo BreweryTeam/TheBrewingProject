@@ -5,6 +5,7 @@ import org.spongepowered.configurate.ConfigurateException;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 import org.spongepowered.configurate.objectmapping.meta.Comment;
 import org.spongepowered.configurate.serialize.TypeSerializerCollection;
+import org.spongepowered.configurate.yaml.NodeStyle;
 import org.spongepowered.configurate.yaml.YamlConfigurationLoader;
 
 import java.io.File;
@@ -55,9 +56,12 @@ public class Config {
             YamlConfigurationLoader loader = YamlConfigurationLoader.builder()
                     .file(new File(dataFolder, "config.yml"))
                     .defaultOptions(opts -> opts.serializers(build -> build.registerAll(serializers)))
+                    .nodeStyle(NodeStyle.BLOCK)
+                    .indent(2)
                     .build();
             CommentedConfigurationNode node = loader.load();
             Config.instance = node.get(Config.class);
+            loader.save(node);
         } catch (ConfigurateException e) {
             throw new RuntimeException(e);
         }
