@@ -39,10 +39,9 @@ public record RangeF(float min, float max) {
             throw new IllegalArgumentException("Invalid range");
         }
 
-        RangeF output = new RangeF(
-                Float.parseFloat(parts[0]),
-                parts.length == 2 ? Float.parseFloat(parts[1]) : Float.parseFloat(parts[0])
-        );
-        return output;
+        return new RangeF(
+Float.parseFloat(parts[0]),
+parts.length == 2 ? Float.parseFloat(parts[1]) : Float.parseFloat(parts[0])
+);
     }
 }
