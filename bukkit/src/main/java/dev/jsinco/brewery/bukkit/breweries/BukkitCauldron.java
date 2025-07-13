@@ -13,6 +13,7 @@ import dev.jsinco.brewery.configuration.locale.TranslationsConfig;
 import dev.jsinco.brewery.ingredient.Ingredient;
 import dev.jsinco.brewery.moment.Interval;
 import dev.jsinco.brewery.recipe.Recipe;
+import dev.jsinco.brewery.structure.SinglePositionStructure;
 import dev.jsinco.brewery.util.Registry;
 import dev.jsinco.brewery.vector.BreweryLocation;
 import lombok.Getter;
@@ -69,22 +70,28 @@ public class BukkitCauldron implements dev.jsinco.brewery.breweries.Cauldron {
 
     @Override
     public void tick() {
-        if (!BlockUtil.isChunkLoaded(location)) {
-            return;
-        }
-        if (!Tag.CAULDRONS.isTagged(getBlock().getType()) || getBlock().getType() == Material.CAULDRON) {
-            ListenerUtil.removeActiveSinglePositionStructure(this, TheBrewingProject.getInstance().getBreweryRegistry(), TheBrewingProject.getInstance().getDatabase());
-            return;
-        }
-        this.hot = isHeatSource(getBlock().getRelative(BlockFace.DOWN));
-        recalculateBrewTime();
-        Color baseParticleColor = computeBaseParticleColor(getBlock());
-        Optional<Recipe<ItemStack>> recipeOptional = brew.closestRecipe(TheBrewingProject.getInstance().getRecipeRegistry());
-        Color resultColor = computeResultColor(recipeOptional);
-        this.particleColor = recipeOptional.map(recipe -> computeParticleColor(baseParticleColor, resultColor, recipe))
-                .orElse(Color.GRAY);
-
-        this.playBrewingEffects();
+        Optional<World> optionalWorld = BukkitAdapter.toWorld(location);
+        SinglePositionStructure structure = this;
+        optionalWorld.ifPresent(world -> new FoliaRunnable(Bukkit.getRegionScheduler(), world, location.x() >> 4, location.z() >> 4) {
+            @Override
+            public void run() {
+                if (!BlockUtil.isChunkLoaded(location)) {
+                    return;
+                }
+                if (!Tag.CAULDRONS.isTagged(getBlock().getType()) || getBlock().getType() == Material.CAULDRON) {
+                    ListenerUtil.removeActiveSinglePositionStructure(structure, TheBrewingProject.getInstance().getBreweryRegistry(), TheBrewingProject.getInstance().getDatabase());
+                    return;
+                }
+                hot = isHeatSource(getBlock().getRelative(BlockFace.DOWN));
+                recalculateBrewTime();
+                Color baseParticleColor = computeBaseParticleColor(getBlock());
+                Optional<Recipe<ItemStack>> recipeOptional = brew.closestRecipe(TheBrewingProject.getInstance().getRecipeRegistry());
+                Color resultColor = computeResultColor(recipeOptional);
+                particleColor = recipeOptional.map(recipe -> computeParticleColor(baseParticleColor, resultColor, recipe))
+                        .orElse(Color.GRAY);
+                playBrewingEffects();
+            }
+        }.runAtFixedRate(TheBrewingProject.getInstance(), 20, 1));
     }
 
     private Color computeParticleColor(Color baseColor, Color resultColor, Recipe<ItemStack> recipe) {
@@ -169,6 +176,10 @@ public class BukkitCauldron implements dev.jsinco.brewery.breweries.Cauldron {
     }
 
     public void playBrewingEffects() {
+        if (RANDOM.nextFloat() > 0.5f) {
+            return; // Randomly skip particle effects to reduce load
+        }
+
         Block block = getBlock();
         Location particleLoc = // Complex particle location based off BreweryX
                 block.getLocation().add(0.5 + (RANDOM.nextDouble() * 0.8 - 0.4), 0.9, 0.5 + (RANDOM.nextDouble() * 0.8 - 0.4));
