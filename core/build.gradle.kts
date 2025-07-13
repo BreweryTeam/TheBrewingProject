@@ -42,6 +42,7 @@ dependencies {
     testImplementation(libs.joml)
     testImplementation(libs.guava)
     testImplementation(libs.sqlite.jdbc)
+    testImplementation(libs.configurate)
 
     testAnnotationProcessor(libs.lombok)
 }

@@ -71,6 +71,7 @@ dependencies {
     testImplementation(libs.adventure.nbt)
     testImplementation(libs.mockbukkit)
     testImplementation(libs.sqlite.jdbc)
+    testImplementation(libs.configurate)
 
     testAnnotationProcessor(libs.lombok)
 }
