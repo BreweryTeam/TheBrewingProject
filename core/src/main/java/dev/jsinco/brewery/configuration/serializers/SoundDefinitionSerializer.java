@@ -25,7 +25,9 @@ public class SoundDefinitionSerializer implements TypeSerializer<SoundDefinition
                 return null;
             }
             return new SoundDefinition(
-                    serialized.stream().map(SoundDefinitionSerializer::parseSoundSetting).toList()
+                    serialized.stream()
+                            .filter(string -> !string.isBlank())
+                            .map(SoundDefinitionSerializer::parseSoundSetting).toList()
             );
         }
         String serialized = node.get(String.class);
