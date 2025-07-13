@@ -12,6 +12,7 @@ import dev.jsinco.brewery.bukkit.breweries.barrel.BukkitBarrel;
 import dev.jsinco.brewery.bukkit.breweries.distillery.BukkitDistillery;
 import dev.jsinco.brewery.bukkit.command.BreweryCommand;
 import dev.jsinco.brewery.bukkit.configuration.serializer.BreweryLocationSerializer;
+import dev.jsinco.brewery.bukkit.configuration.serializer.MaterialSerializer;
 import dev.jsinco.brewery.bukkit.effect.SqlDrunkStateDataType;
 import dev.jsinco.brewery.bukkit.effect.event.ActiveEventsRegistry;
 import dev.jsinco.brewery.bukkit.effect.event.DrunkEventExecutor;
@@ -42,6 +43,7 @@ import dev.jsinco.brewery.structure.PlacedStructureRegistryImpl;
 import dev.jsinco.brewery.structure.StructureMeta;
 import dev.jsinco.brewery.structure.StructureType;
 import dev.jsinco.brewery.util.BreweryKey;
+import dev.jsinco.brewery.util.Holder;
 import dev.jsinco.brewery.util.Logging;
 import dev.jsinco.brewery.util.Util;
 import io.leangen.geantyref.TypeToken;
@@ -119,6 +121,7 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
                 .register(CustomEventRegistry.class, new EventRegistrySerializer())
                 .register(SoundDefinition.class, new SoundDefinitionSerializer())
                 .register(Interval.class, new IntervalSerializer())
+                .register(Holder.Material.class, new MaterialSerializer())
                 .build();
     }
 
@@ -234,7 +237,6 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
 
     private void saveResources() {
         this.saveResourceIfNotExists("recipes.yml");
-        this.saveResourceIfNotExists("config.yml");
     }
 
     private void saveResourceIfNotExists(String resource) {

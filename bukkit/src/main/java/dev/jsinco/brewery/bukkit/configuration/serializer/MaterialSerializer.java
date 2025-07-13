@@ -36,6 +36,6 @@ public class MaterialSerializer implements TypeSerializer<Holder.Material> {
         if (obj == null) {
             return;
         }
-        node.set(obj.value());
+        node.set(obj.value().toString());
     }
 }
