@@ -43,7 +43,6 @@ dependencies {
     // integrations
     compileOnly(libs.bolt.bukkit)
     compileOnly(libs.bolt.common)
-    compileOnly(libs.chestshop)
     compileOnly(libs.craft.engine.bukkit)
     compileOnly(libs.craft.engine.core)
     compileOnly(libs.griefprevention)

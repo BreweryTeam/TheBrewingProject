@@ -13,7 +13,6 @@ simple-yaml = "1.8.4"
 
 # integrations
 bolt = "1.1.66"
-chestshop = "3.12.2"
 craft-engine = "0.0.59"
 griefprevention = "17.0.0"
 huskclaims = "1.5.9"
@@ -56,7 +55,6 @@ simple-yaml = { group = "com.github.Carleslc.Simple-YAML", name = "Simple-Yaml",
 
 bolt-bukkit = { group = "org.popcraft", name = "bolt-bukkit", version.ref = "bolt" }
 bolt-common = { group = "org.popcraft", name = "bolt-common", version.ref = "bolt" }
-chestshop = { group = "com.acrobot.chestshop", name = "chestshop", version.ref = "chestshop" }
 craft-engine-bukkit = { group = "net.momirealms", name = "craft-engine-bukkit", version.ref = "craft-engine" }
 craft-engine-core = { group = "net.momirealms", name = "craft-engine-core", version.ref = "craft-engine" }
 griefprevention = { group = "com.github.GriefPrevention", name = "GriefPrevention", version.ref = "griefprevention" }
