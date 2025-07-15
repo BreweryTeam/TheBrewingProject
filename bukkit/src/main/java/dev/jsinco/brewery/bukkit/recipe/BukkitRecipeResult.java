@@ -11,7 +11,7 @@ import dev.jsinco.brewery.bukkit.util.BukkitAdapter;
 import dev.jsinco.brewery.configuration.locale.TranslationsConfig;
 import dev.jsinco.brewery.recipe.RecipeResult;
 import dev.jsinco.brewery.util.BreweryKey;
-import dev.jsinco.brewery.util.Logging;
+import dev.jsinco.brewery.util.Logger;
 import dev.jsinco.brewery.util.MessageUtil;
 import io.papermc.paper.datacomponent.DataComponentTypes;
 import lombok.Getter;
@@ -90,7 +90,7 @@ public class BukkitRecipeResult implements RecipeResult<ItemStack> {
                 itemStack.setItemMeta(meta);
                 return itemStack;
             }
-            Logging.warning("Invalid item id '" + customId + "' for recipe: " + name);
+            Logger.logErr("Invalid item id '" + customId + "' for recipe: " + name);
         }
         ItemStack itemStack = new ItemStack(Material.POTION);
         PotionMeta meta = (PotionMeta) itemStack.getItemMeta();

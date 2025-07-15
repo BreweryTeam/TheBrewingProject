@@ -6,10 +6,7 @@ import dev.jsinco.brewery.database.PersistenceHandler;
 import dev.jsinco.brewery.event.CustomEventRegistry;
 import dev.jsinco.brewery.event.DrunkEvent;
 import dev.jsinco.brewery.moment.Moment;
-import dev.jsinco.brewery.util.BreweryKey;
-import dev.jsinco.brewery.util.Pair;
-import dev.jsinco.brewery.util.RandomUtil;
-import dev.jsinco.brewery.util.Registry;
+import dev.jsinco.brewery.util.*;
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -49,7 +46,7 @@ public class DrunksManagerImpl<C> implements DrunksManager {
             persistenceHandler.retrieveAllNow(drunkStateDataType)
                     .forEach(pair -> drunks.put(pair.second(), pair.first()));
         } catch (PersistenceException e) {
-            e.printStackTrace();
+            Logger.logErr(e);
         }
     }
 
@@ -73,7 +70,7 @@ public class DrunksManagerImpl<C> implements DrunksManager {
                 try {
                     persistenceHandler.remove(drunkStateDataType, playerUuid);
                 } catch (PersistenceException e) {
-                    e.printStackTrace();
+                    Logger.logErr(e);
                 }
             }
             return null;
@@ -87,7 +84,7 @@ public class DrunksManagerImpl<C> implements DrunksManager {
                 persistenceHandler.insertValue(drunkStateDataType, new Pair<>(drunkState, playerUuid));
             }
         } catch (PersistenceException e) {
-            e.printStackTrace();
+            Logger.logErr(e);
         }
         return drunkState;
     }
@@ -114,7 +111,7 @@ public class DrunksManagerImpl<C> implements DrunksManager {
         try {
             persistenceHandler.remove(drunkStateDataType, playerUuid);
         } catch (PersistenceException e) {
-            e.printStackTrace();
+            Logger.logErr(e);
         }
         if (plannedEventTime == null) {
             return;
@@ -184,7 +181,7 @@ public class DrunksManagerImpl<C> implements DrunksManager {
         if (passOutTimeStamp == -1) {
             return false;
         }
-        return passOutTimeStamp + (long) Config.PASS_OUT_TIME * Moment.MINUTE > timeSupplier.getAsLong();
+        return passOutTimeStamp + (long) Config.config().events().passOutTime() * Moment.MINUTE > timeSupplier.getAsLong();
     }
 
     @Override

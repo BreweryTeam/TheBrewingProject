@@ -31,19 +31,19 @@ public class InfoCommand {
     private static final int PLAYER_INVENTORY_SIZE = 41;
 
     public static ArgumentBuilder<CommandSourceStack, ?> command() {
-        ArgumentBuilder<CommandSourceStack, ?> withIndex = Commands.argument("slot", IntegerArgumentType.integer(0, PLAYER_INVENTORY_SIZE - 1))
+        ArgumentBuilder<CommandSourceStack, ?> withIndex = Commands.argument("inventory_slot", IntegerArgumentType.integer(0, PLAYER_INVENTORY_SIZE - 1))
                 .executes(context -> {
                     Player target = BreweryCommand.getPlayer(context);
-                    int slot = context.getArgument("slot", int.class);
+                    int slot = context.getArgument("inventory_slot", int.class);
                     PlayerInventory inventory = target.getInventory();
                     showInfo(inventory.getItem(slot), context.getSource().getSender());
                     return 1;
                 });
-        ArgumentBuilder<CommandSourceStack, ?> withNamedSlot = Commands.argument("slot", new EnumArgument<>(EquipmentSlot.class))
+        ArgumentBuilder<CommandSourceStack, ?> withNamedSlot = Commands.argument("equipment_slot", new EnumArgument<>(EquipmentSlot.class))
                 .executes(context -> {
                     Player target = BreweryCommand.getPlayer(context);
                     PlayerInventory inventory = target.getInventory();
-                    showInfo(inventory.getItem(context.getArgument("slot", EquipmentSlot.class)), context.getSource().getSender());
+                    showInfo(inventory.getItem(context.getArgument("equipment_slot", EquipmentSlot.class)), context.getSource().getSender());
                     return 1;
                 });
         return Commands.literal("info")

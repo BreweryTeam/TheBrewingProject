@@ -2,7 +2,6 @@ package dev.jsinco.brewery.datagenerator;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.util.function.Function;
 
 public class ColorUtil {
 

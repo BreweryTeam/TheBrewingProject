@@ -9,6 +9,7 @@ import dev.jsinco.brewery.database.PersistenceException;
 import dev.jsinco.brewery.database.sql.Database;
 import dev.jsinco.brewery.structure.PlacedStructureRegistryImpl;
 import dev.jsinco.brewery.util.FutureUtil;
+import dev.jsinco.brewery.util.Logger;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.event.EventHandler;
@@ -61,7 +62,7 @@ public class WorldEventListener implements Listener {
                     .forEach(placedStructureRegistry::registerStructure);
             distilleries.forEach(registry::registerInventory);
         } catch (PersistenceException e) {
-            e.printStackTrace();
+            Logger.logErr(e);
         }
     }
 }

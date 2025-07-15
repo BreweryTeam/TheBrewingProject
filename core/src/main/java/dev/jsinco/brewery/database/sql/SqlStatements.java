@@ -1,5 +1,6 @@
 package dev.jsinco.brewery.database.sql;
 
+import dev.jsinco.brewery.util.Logger;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
@@ -27,7 +28,7 @@ public class SqlStatements {
                 String statement = new String(inputStream.readAllBytes());
                 statements.put(type, statement);
             } catch (IOException e) {
-                e.printStackTrace();
+                Logger.logErr(e);
             }
         }
     }

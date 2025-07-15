@@ -52,7 +52,7 @@ public class DrunkEventExecutor {
                         case SERVER -> Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), sendCommand.command());
                     }
                 }
-                case Teleport teleport -> player.teleport(BukkitAdapter.toLocation(teleport.location()));
+                case Teleport teleport -> player.teleport(BukkitAdapter.toLocation(teleport.location().get()));
                 case ConditionalWaitStep conditionalWaitStep -> {
                     if (conditionalWaitStep.condition() == ConditionalWaitStep.Condition.JOIN && i + 1 < events.size()) {
                         onJoinExecutions.put(playerUuid, events.subList(i + 1, events.size()));

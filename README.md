@@ -1,13 +1,61 @@
-# TheBrewingProject
-A complete rewrite of BreweryX to add new features and expand upon the plugin.
+# <p align="center">TheBrewingProject<br>[![Typing SVG](https://readme-typing-svg.demolab.com?font=system-ui&pause=1000&color=F7F7F7&center=true&random=true&width=435&lines=Age+your+brews+to+perfection.;Discover+the+art+of+fermentation.;Where+patience+creates+flavor.;Barrels+hold+what+miners+forget.;Distill+what+villagers+fear+to+taste.;Ferment+dreams%2C+one+barrel+at+a+time.;Distill+stories+from+every+harvest.;Every+brew+a+memory.+Every+sip+a+story.;Brew+stories+deeper+than+bedrock.;Flavor+sleeps+where+torches+fade.)](https://git.io/typing-svg)</p>
 
-### Announcement from TheBrewingProject [discord](https://discord.gg/QsDKaruwcC):
+**What if you could get drunk in Minecraft? Like, actually experience nausea, stumbling, puking, tunnel vision... heck, even memory loss?**
+You're in luck! You can simply install this plugin and find out today! Experience what's listed above and much more with TheBrewingProject.
 
-# If you are a Java and/or Kotlin developer, please read
+***
 
+### Get the Plugin
 
-I'm looking to assemble a team of developers to rewrite Brewery. While I still plan to maintain BreweryX unless this plan comes to fruition, Brewery is an extremely old plugin with it being over a decade old now. 'DieReicheEtherons', the group consisting of **TTTheKing, Grafe, and Sn0wStorm**, have made poor code choices over the years which now hurts this project and especially me as a solo developer maintaining BreweryX. The old developers of this plugin are long gone, and while I have gotten familiar with this projects code, it's incredibly bad overall and spending hours cleaning up messes left behind by the original developers has been frustrating at times.
+You can download the latest release on [Hangar](https://hangar.papermc.io/BreweryTeam/TheBrewingProject) and [Modrinth](https://modrinth.com/plugin/thebrewingproject).
+> [!IMPORTANT]
+> TheBrewingProject only works on PaperMC and its forks!
 
-If you are a Java and/or Kotlin developer, please message me if you'd like to be onboard with this project. If you are a server owner who has benefited from BreweryX and has a team with Java/Kotlin developers on it, please refer them to this discord. I don't have the time to rewrite Brewery alone, and I don't want Brewery to fizzle out due to being virtually unmaintainable because of it's poor code. If you're neither of those, leave a star on the [repository](https://github.com/Jsinco/BreweryX) or consider [sponsoring](https://github.com/sponsors/Jsinco).
+[Button Icon]: https://img.shields.io/badge/Installation-EF2D5E?style=for-the-badge&logoColor=white&logo=Files
 
-I would very much like to rewrite Brewery to add new features, and overall give the plugin a long overdue makeover.
+***
+
+### Commands and Permissions
+| Command | Permission | Description |
+| :-------- | :------- | :------------------------- |
+| `/tbp reload` | `brewery.command.reload` | **Reloads the plugin.** |
+| `/tbp info [slot]` | `brewery.command.info` | **Displays information about a given brew.**|
+| `/tbp create --cook/--distill/--age/--mix` | `brewery.command.create` | **Create a new brew with the given arguments.** |
+| `/tbp status info/set/clear/consume`| `brewery.command.status` | **Inspect or modify your drunkenness status.** |
+| `/tbp event <event_name>`| `brewery.command.event` | **Simmulate an event, such as `stumble`.** |
+| `/tbp seal [slot]/all`| `brewery.command.seal` | **Seal the given brew(s).** |
+
+| Permission | Description |
+| :------- | :------------------------- |
+| `brewery.structure.create` | **Allows creating TBP structures such as a distillery.** |
+| `brewery.structure.access` | **Allows accessing and using structures from TBP.** |
+| `brewery.distillery.create` | **Allows creating new TBP distilleries.** |
+| `brewery.distillery.access` | **Allows accessing TBP distilleries.** |
+| `brewery.barrel.create` | **Allows creating TBP custom barrels.** |
+| `brewery.barrel.access` | **Allows accessing TBP custom barrels.**|
+| `brewery.cauldron.access` | **Allows brewing brews in cauldrons.** |
+
+***
+
+### Wiki Entries
+
+- [Creating Brews](https://hangar.papermc.io/Thorinwasher/TheBrewingProject/pages/Wiki/Creating-brews)
+- [Custom Recipes](https://hangar.papermc.io/Thorinwasher/TheBrewingProject/pages/Wiki/Custom-Recipes)
+- [Configuration](https://hangar.papermc.io/Thorinwasher/TheBrewingProject/pages/Wiki/Configuration)
+- [Commands](https://hangar.papermc.io/Thorinwasher/TheBrewingProject/pages/Wiki/Commands)
+- [Permissions](https://hangar.papermc.io/Thorinwasher/TheBrewingProject/pages/Wiki/Permissions)
+
+> [!NOTE]
+> This will be expanded upon and possibly relocated
+
+***
+
+### Developers
+**API**
+```
+W.I.P. stay tuned.
+```
+**Build**
+```
+gradlew bukkit:shadowJar
+```

@@ -6,6 +6,7 @@ import dev.jsinco.brewery.bukkit.brew.BukkitDistilleryBrewDataType;
 import dev.jsinco.brewery.bukkit.breweries.BrewInventory;
 import dev.jsinco.brewery.bukkit.breweries.BrewPersistenceHandler;
 import dev.jsinco.brewery.database.PersistenceException;
+import dev.jsinco.brewery.util.Logger;
 import dev.jsinco.brewery.util.Pair;
 import dev.jsinco.brewery.vector.BreweryLocation;
 import org.jetbrains.annotations.NotNull;
@@ -50,7 +51,7 @@ public class DistilleryBrewPersistenceHandler implements BrewPersistenceHandler 
             }
             TheBrewingProject.getInstance().getDatabase().updateValue(BukkitDistilleryBrewDataType.INSTANCE, data);
         } catch (PersistenceException e) {
-            e.printStackTrace();
+            Logger.logErr(e);
         }
 
     }

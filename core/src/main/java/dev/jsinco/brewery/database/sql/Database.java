@@ -4,6 +4,7 @@ import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import dev.jsinco.brewery.database.*;
 import dev.jsinco.brewery.util.FileUtil;
+import dev.jsinco.brewery.util.Logger;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
@@ -121,7 +122,7 @@ public class Database implements PersistenceHandler<Connection> {
             try (Connection connection = hikariDataSource.getConnection()) {
                 dataType.remove(toRemove, connection);
             } catch (SQLException | PersistenceException e) {
-                e.printStackTrace();
+                Logger.logErr(e);
             }
         }, executor);
     }
@@ -135,7 +136,7 @@ public class Database implements PersistenceHandler<Connection> {
             try (Connection connection = hikariDataSource.getConnection()) {
                 dataType.update(newValue, connection);
             } catch (SQLException | PersistenceException e) {
-                e.printStackTrace();
+                Logger.logErr(e);
             }
         }, executor);
     }
@@ -149,7 +150,7 @@ public class Database implements PersistenceHandler<Connection> {
             try (Connection connection = hikariDataSource.getConnection()) {
                 dataType.insert(value, connection);
             } catch (SQLException | PersistenceException e) {
-                e.printStackTrace();
+                Logger.logErr(e);
             }
         }, executor);
     }
@@ -199,7 +200,7 @@ public class Database implements PersistenceHandler<Connection> {
             try (Connection connection = hikariDataSource.getConnection()) {
                 dataType.set(t, connection);
             } catch (SQLException | PersistenceException e) {
-                e.printStackTrace();
+                Logger.logErr(e);
             }
         }, executor);
     }

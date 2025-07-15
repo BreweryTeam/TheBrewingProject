@@ -63,7 +63,7 @@ cauldron:
     snow: '<white>снежном</white>'
     none: отсутствует # не знаю, что тут написать.
   cant-add-more-ingredients: <red>Невозможно добавить больше ингредиентов
-  clock-message: <gray>Котел кипит уже <white><time></white>
+  clock-message: <gray>Котел готовит уже <white><time></white> # "кипит" здесь не подходит, т.к. существует еще смешивание. Но если в вашем конфиге нет рецептов с mix, то можно и заменить на "кипит"
 command:
   unknown-player: '<red>Игрок не найден: <player_name>'
   undefined-player: <red>Нужно указать имя игрока

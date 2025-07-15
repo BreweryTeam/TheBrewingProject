@@ -18,6 +18,7 @@ import dev.jsinco.brewery.structure.MultiblockStructure;
 import dev.jsinco.brewery.structure.PlacedStructureRegistryImpl;
 import dev.jsinco.brewery.structure.StructureMeta;
 import dev.jsinco.brewery.structure.StructureType;
+import dev.jsinco.brewery.util.Logger;
 import dev.jsinco.brewery.util.Pair;
 import dev.jsinco.brewery.vector.BreweryLocation;
 import net.kyori.adventure.text.minimessage.MiniMessage;
@@ -36,7 +37,6 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class BlockEventListener implements Listener {
 
@@ -83,7 +83,7 @@ public class BlockEventListener implements Listener {
         try {
             database.insertValue(BukkitBarrelDataType.INSTANCE, barrel);
         } catch (PersistenceException e) {
-            e.printStackTrace();
+            Logger.logErr(e);
         }
     }
 
@@ -115,7 +115,7 @@ public class BlockEventListener implements Listener {
             database.insertValue(BukkitDistilleryDataType.INSTANCE, bukkitDistillery);
             breweryRegistry.registerInventory(bukkitDistillery);
         } catch (PersistenceException e) {
-            e.printStackTrace();
+            Logger.logErr(e);
         }
     }
 
@@ -207,7 +207,7 @@ public class BlockEventListener implements Listener {
                 .map(MultiblockStructure::getHolder)
                 .filter(InventoryAccessible.class::isInstance)
                 .map(inventoryAccessible -> (InventoryAccessible<ItemStack, Inventory>) inventoryAccessible);
-        if (!Config.AUTOMATION) {
+        if (!Config.config().automation()) {
             inventoryAccessibleOptional.ifPresent(ignored -> event.setInventory(null));
             return;
         }
@@ -246,7 +246,7 @@ public class BlockEventListener implements Listener {
                 database.remove(BukkitDistilleryDataType.INSTANCE, distillery);
             }
         } catch (PersistenceException e) {
-            e.printStackTrace();
+            Logger.logErr(e);
         }
     }
 }

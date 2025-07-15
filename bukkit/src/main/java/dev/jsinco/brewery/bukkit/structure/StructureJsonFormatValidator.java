@@ -33,7 +33,7 @@ public class StructureJsonFormatValidator {
                     .map(entry -> {
                         StructureMeta<?> meta = Registry.STRUCTURE_META.get(BreweryKey.parse(entry.getKey()));
                         if (meta == null) {
-                            Logging.warning("Unknown meta key in structure '" + fileName + "': " + entry.getKey());
+                            Logger.logErr("Unknown meta key in structure '" + fileName + "': " + entry.getKey());
                             return null;
                         }
                         try {
@@ -46,7 +46,7 @@ public class StructureJsonFormatValidator {
                     .collect(Collectors.toMap(Pair::first, Pair::second));
             StructureType structureType = get(structureMeta, StructureMeta.TYPE);
             if (structureType == null) {
-                Logging.warning("Missing meta key in structure '" + fileName + "': type");
+                Logger.logErr("Missing meta key in structure '" + fileName + "': type");
                 return false;
             }
             for (StructureMeta<?> meta : structureType.mandatoryMeta()) {
@@ -56,7 +56,7 @@ public class StructureJsonFormatValidator {
             for (Map.Entry<StructureMeta<?>, Object> entry : structureMeta.entrySet()) {
                 Object value = entry.getValue();
                 if (!entry.getKey().validator().test(value)) {
-                    Logging.warning("Invalid value for meta type in structure '" + fileName + "':" + entry.getKey().key().key());
+                    Logger.logErr("Invalid value for meta type in structure '" + fileName + "':" + entry.getKey().key().key());
                     value = entry.getKey().defaultValue();
                 }
                 if (entry.getKey().equals(StructureMeta.TYPE)) {
@@ -64,7 +64,7 @@ public class StructureJsonFormatValidator {
                     continue;
                 }
                 if (Arrays.stream(structureType.mandatoryMeta()).noneMatch(entry.getKey()::equals)) {
-                    Logging.warning("Illegal meta in structure '" + fileName + "':" + entry.getKey().key().key());
+                    Logger.logErr("Illegal meta in structure '" + fileName + "':" + entry.getKey().key().key());
                     continue;
                 }
                 switch (value) {
@@ -81,7 +81,7 @@ public class StructureJsonFormatValidator {
             dump(jsonObject, jsonPath);
             return true;
         } catch (IOException e) {
-            e.printStackTrace();
+            Logger.logErr(e);
             return false;
         }
     }

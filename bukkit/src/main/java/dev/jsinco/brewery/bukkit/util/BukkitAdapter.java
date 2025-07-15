@@ -1,12 +1,11 @@
 package dev.jsinco.brewery.bukkit.util;
 
 import dev.jsinco.brewery.util.BreweryKey;
+import dev.jsinco.brewery.util.Holder;
 import dev.jsinco.brewery.vector.BreweryLocation;
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.NamespacedKey;
-import org.bukkit.World;
+import org.bukkit.*;
 import org.bukkit.block.Block;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
@@ -51,5 +50,13 @@ public class BukkitAdapter {
         int y = Integer.parseInt(split[2].strip());
         int z = Integer.parseInt(split[3].strip());
         return new Location(world, x, y, z);
+    }
+
+    public static @Nullable Material toMaterial(Holder.Material material) {
+        return Registry.MATERIAL.get(toNamespacedKey(material.value()));
+    }
+
+    public static @NotNull Holder.Material toMaterialHolder(Material material) {
+        return new Holder.Material(toBreweryKey(material.getKey()));
     }
 }

@@ -32,8 +32,8 @@ public class BarrelBlockDataMatcher implements BlockDataMatcher<BarrelType> {
             }
             return fenceMatches((Fence) actual, (Fence) expected, matcherType);
         }
-        if (actual instanceof Stairs actuallStairs) {
-            if (!(expected instanceof Stairs expectedStairs)) {
+        if (expected instanceof Stairs expectedStairs) {
+            if (!(actual instanceof Stairs actuallStairs)) {
                 return false;
             }
             return stairMatches(actuallStairs, expectedStairs, matcherType);

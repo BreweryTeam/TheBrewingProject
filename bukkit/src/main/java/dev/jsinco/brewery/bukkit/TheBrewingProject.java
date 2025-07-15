@@ -11,9 +11,10 @@ import dev.jsinco.brewery.bukkit.breweries.BreweryRegistry;
 import dev.jsinco.brewery.bukkit.breweries.barrel.BukkitBarrel;
 import dev.jsinco.brewery.bukkit.breweries.distillery.BukkitDistillery;
 import dev.jsinco.brewery.bukkit.command.BreweryCommand;
+import dev.jsinco.brewery.bukkit.configuration.serializer.BreweryLocationSerializer;
+import dev.jsinco.brewery.bukkit.configuration.serializer.MaterialSerializer;
 import dev.jsinco.brewery.bukkit.effect.SqlDrunkStateDataType;
 import dev.jsinco.brewery.bukkit.effect.event.ActiveEventsRegistry;
-import dev.jsinco.brewery.bukkit.effect.event.CustomDrunkEventReader;
 import dev.jsinco.brewery.bukkit.effect.event.DrunkEventExecutor;
 import dev.jsinco.brewery.bukkit.ingredient.BukkitIngredientManager;
 import dev.jsinco.brewery.bukkit.integration.IntegrationManager;
@@ -24,32 +25,36 @@ import dev.jsinco.brewery.bukkit.structure.*;
 import dev.jsinco.brewery.bukkit.util.BreweryTimeDataType;
 import dev.jsinco.brewery.configuration.Config;
 import dev.jsinco.brewery.configuration.locale.TranslationsConfig;
+import dev.jsinco.brewery.configuration.serializers.EventRegistrySerializer;
+import dev.jsinco.brewery.configuration.serializers.IntervalSerializer;
+import dev.jsinco.brewery.configuration.serializers.SoundDefinitionSerializer;
 import dev.jsinco.brewery.database.PersistenceException;
 import dev.jsinco.brewery.database.sql.Database;
 import dev.jsinco.brewery.database.sql.DatabaseDriver;
 import dev.jsinco.brewery.effect.DrunksManagerImpl;
 import dev.jsinco.brewery.effect.text.DrunkTextRegistry;
 import dev.jsinco.brewery.event.CustomEventRegistry;
+import dev.jsinco.brewery.moment.Interval;
 import dev.jsinco.brewery.recipes.RecipeReader;
 import dev.jsinco.brewery.recipes.RecipeRegistryImpl;
-import dev.jsinco.brewery.sound.SoundManager;
+import dev.jsinco.brewery.sound.SoundDefinition;
 import dev.jsinco.brewery.structure.MultiblockStructure;
 import dev.jsinco.brewery.structure.PlacedStructureRegistryImpl;
 import dev.jsinco.brewery.structure.StructureMeta;
 import dev.jsinco.brewery.structure.StructureType;
 import dev.jsinco.brewery.util.BreweryKey;
-import dev.jsinco.brewery.util.Logging;
+import dev.jsinco.brewery.util.Holder;
+import dev.jsinco.brewery.util.Logger;
 import dev.jsinco.brewery.util.Util;
-import io.papermc.paper.plugin.lifecycle.event.LifecycleEvent;
-import io.papermc.paper.plugin.lifecycle.event.handler.LifecycleEventHandler;
+import io.leangen.geantyref.TypeToken;
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
-import io.papermc.paper.threadedregions.scheduler.ScheduledTask;
 import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.spongepowered.configurate.serialize.TypeSerializerCollection;
 
 import java.io.File;
 import java.io.IOException;
@@ -90,8 +95,6 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
     @Getter
     private final IntegrationManager integrationManager = new IntegrationManager();
     @Getter
-    private final SoundManager soundManager = new SoundManager();
-    @Getter
     private final ActiveEventsRegistry activeEventsRegistry = new ActiveEventsRegistry();
     @Getter
     private PlayerWalkListener playerWalkListener;
@@ -99,7 +102,7 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
     @Override
     public void onLoad() {
         instance = this;
-        Config.reload(this.getDataFolder());
+        Config.load(this.getDataFolder(), serializers());
         TranslationsConfig.reload(this.getDataFolder());
         this.structureRegistry = new StructureRegistry();
         this.placedStructureRegistry = new PlacedStructureRegistryImpl();
@@ -109,29 +112,38 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
         this.drunkTextRegistry = new DrunkTextRegistry();
         this.customDrunkEventRegistry = new CustomEventRegistry();
         this.drunkEventExecutor = new DrunkEventExecutor();
-        CustomDrunkEventReader.read(Config.CUSTOM_EVENTS).forEach(customDrunkEventRegistry::registerCustomEvent);
+    }
+
+    private TypeSerializerCollection serializers() {
+        return TypeSerializerCollection.builder()
+                .register(new TypeToken<>() {
+                }, new BreweryLocationSerializer())
+                .register(CustomEventRegistry.class, new EventRegistrySerializer())
+                .register(SoundDefinition.class, new SoundDefinitionSerializer())
+                .register(Interval.class, new IntervalSerializer())
+                .register(Holder.Material.class, new MaterialSerializer())
+                .build();
     }
 
     public void reload() {
-        Config.reload(this.getDataFolder());
+        Config.load(this.getDataFolder(), serializers());
         TranslationsConfig.reload(this.getDataFolder());
         this.structureRegistry.clear();
         this.placedStructureRegistry.clear();
         this.breweryRegistry.clear();
         loadStructures();
-        this.soundManager.reload();
         this.drunkTextRegistry.clear();
         this.customDrunkEventRegistry.clear();
         this.drunkEventExecutor.clear();
-        CustomDrunkEventReader.read(Config.CUSTOM_EVENTS).forEach(customDrunkEventRegistry::registerCustomEvent);
+        customDrunkEventRegistry = Config.config().events().customEvents();
         saveResources();
         this.database = new Database(DatabaseDriver.SQLITE);
         try {
             database.init(this.getDataFolder());
         } catch (IOException | SQLException e) {
-            throw new RuntimeException(e); // Hard exit if any issues here
+            throw new RuntimeException(e);
         }
-        this.drunksManager.reset(Config.ENABLED_RANDOM_EVENTS.stream().map(BreweryKey::parse).collect(Collectors.toSet()));
+        this.drunksManager.reset(Config.config().events().enabledRandomEvents().stream().map(BreweryKey::parse).collect(Collectors.toSet()));
         worldEventListener.init();
         RecipeReader<ItemStack> recipeReader = new RecipeReader<>(this.getDataFolder(), new BukkitRecipeResultReader(), BukkitIngredientManager.INSTANCE);
 
@@ -161,8 +173,8 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
                     try {
                         return Stream.of(StructureReader.fromJson(path));
                     } catch (IOException | StructureReadException e) {
-                        Logging.error("Could not load structure: " + path);
-                        e.printStackTrace();
+                        Logger.logErr("Could not load structure: " + path);
+                        Logger.logErr(e);
                         return Stream.empty();
                     }
                 })
@@ -178,16 +190,19 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
     @Override
     public void onEnable() {
         integrationManager.init();
-        soundManager.reload();
         saveResources();
         this.database = new Database(DatabaseDriver.SQLITE);
         try {
-            database.init(this.getDataFolder());
+            try {
+                database.init(this.getDataFolder());
+            } catch (IOException | SQLException e) {
+                throw new RuntimeException(e);
+            }
             this.time = database.getSingletonNow(BreweryTimeDataType.INSTANCE);
-        } catch (IOException | PersistenceException | SQLException e) {
+        } catch (PersistenceException e) {
             throw new RuntimeException(e); // Hard exit if any issues here
         }
-        this.drunksManager = new DrunksManagerImpl<>(customDrunkEventRegistry, Config.ENABLED_RANDOM_EVENTS.stream().map(BreweryKey::parse).collect(Collectors.toSet()), () -> this.time, database, SqlDrunkStateDataType.INSTANCE);
+        this.drunksManager = new DrunksManagerImpl<>(customDrunkEventRegistry, Config.config().events().enabledRandomEvents().stream().map(BreweryKey::parse).collect(Collectors.toSet()), () -> this.time, database, SqlDrunkStateDataType.INSTANCE);
         PluginManager pluginManager = Bukkit.getPluginManager();
         pluginManager.registerEvents(new BlockEventListener(this.structureRegistry, placedStructureRegistry, this.database, this.breweryRegistry), this);
         pluginManager.registerEvents(new PlayerEventListener(this.placedStructureRegistry, this.breweryRegistry, this.database, this.drunksManager, this.drunkTextRegistry, recipeRegistry, drunkEventExecutor), this);
@@ -220,13 +235,12 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
             database.setSingleton(BreweryTimeDataType.INSTANCE, time).join();
             database.flush().join();
         } catch (PersistenceException e) {
-            e.printStackTrace();
+            Logger.logErr(e);
         }
     }
 
     private void saveResources() {
         this.saveResourceIfNotExists("recipes.yml");
-        this.saveResourceIfNotExists("config.yml");
     }
 
     private void saveResourceIfNotExists(String resource) {
@@ -246,7 +260,7 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
                 .map(Distillery.class::cast)
                 .forEach(Distillery::tick);
         List.copyOf(breweryRegistry.<BukkitBarrel>getOpened(StructureType.BARREL)).forEach(Barrel::tickInventory);
-        List.copyOf( breweryRegistry.<BukkitDistillery>getOpened(StructureType.DISTILLERY)).forEach(Distillery::tickInventory);
+        List.copyOf(breweryRegistry.<BukkitDistillery>getOpened(StructureType.DISTILLERY)).forEach(Distillery::tickInventory);
     }
 
     private void otherTicking() {
@@ -256,7 +270,7 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
                 database.setSingleton(BreweryTimeDataType.INSTANCE, time);
             }
         } catch (PersistenceException e) {
-            e.printStackTrace();
+            Logger.logErr(e);
         }
     }
 }

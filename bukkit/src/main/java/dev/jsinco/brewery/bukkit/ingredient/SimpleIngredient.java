@@ -2,8 +2,6 @@ package dev.jsinco.brewery.bukkit.ingredient;
 
 import dev.jsinco.brewery.ingredient.Ingredient;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.translation.GlobalTranslator;
-import net.md_5.bungee.chat.TranslationRegistry;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Registry;

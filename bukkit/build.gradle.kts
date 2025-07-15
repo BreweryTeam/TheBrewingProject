@@ -36,13 +36,13 @@ dependencies {
 
     // libraries
     compileOnly(libs.protocolLib)
+    compileOnly(libs.configurate)
     implementation(libs.schem.reader)
     implementation(libs.simple.yaml)
 
     // integrations
     compileOnly(libs.bolt.bukkit)
     compileOnly(libs.bolt.common)
-    compileOnly(libs.chestshop)
     compileOnly(libs.craft.engine.bukkit)
     compileOnly(libs.craft.engine.core)
     compileOnly(libs.griefprevention)
@@ -70,6 +70,7 @@ dependencies {
     testImplementation(libs.adventure.nbt)
     testImplementation(libs.mockbukkit)
     testImplementation(libs.sqlite.jdbc)
+    testImplementation(libs.configurate)
 
     testAnnotationProcessor(libs.lombok)
 }

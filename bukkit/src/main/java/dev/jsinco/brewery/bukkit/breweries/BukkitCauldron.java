@@ -13,6 +13,7 @@ import dev.jsinco.brewery.configuration.locale.TranslationsConfig;
 import dev.jsinco.brewery.ingredient.Ingredient;
 import dev.jsinco.brewery.moment.Interval;
 import dev.jsinco.brewery.recipe.Recipe;
+import dev.jsinco.brewery.sound.SoundDefinition;
 import dev.jsinco.brewery.structure.SinglePositionStructure;
 import dev.jsinco.brewery.util.Registry;
 import dev.jsinco.brewery.vector.BreweryLocation;
@@ -195,7 +196,7 @@ public class BukkitCauldron implements dev.jsinco.brewery.breweries.Cauldron {
         block.getWorld().spawnParticle(Particle.ENTITY_EFFECT, particleLoc, 0, particleColor);
 
 
-        if (!Config.MINIMAL_PARTICLES || !hot) {
+        if (!Config.config().cauldrons().minimalParticles() || !hot) {
             return;
         }
 
@@ -218,7 +219,7 @@ public class BukkitCauldron implements dev.jsinco.brewery.breweries.Cauldron {
         Location bukkitLocation = BukkitAdapter.toLocation(this.location).toCenterLocation();
         World world = bukkitLocation.getWorld();
 
-        String sound = item.getType() == Material.POTION ? "cauldron-ingredient-add-brew" : "cauldron-ingredient-add";
+        SoundDefinition sound = item.getType() == Material.POTION ? Config.config().sounds().cauldronIngredientAddBrew() : Config.config().sounds().cauldronIngredientAdd();
         SoundPlayer.playSoundEffect(sound, Sound.Source.BLOCK, bukkitLocation);
 
         if (getBlock().getType() == Material.WATER_CAULDRON) {
@@ -229,17 +230,17 @@ public class BukkitCauldron implements dev.jsinco.brewery.breweries.Cauldron {
     public void playBrewExtractedEffects() {
         BukkitAdapter.toWorld(location).ifPresent(world ->
                 SoundPlayer.playSoundEffect(
-                        "cauldron-brew-extract", Sound.Source.BLOCK,
+                        Config.config().sounds().cauldronBrewExtract(), Sound.Source.BLOCK,
                         world, location.x() + 0.5, location.y() + 1, location.z() + 0.5)
         );
     }
 
     public static boolean isHeatSource(Block block) {
-        if (Config.HEAT_SOURCES.isEmpty()) {
+        if (Config.config().cauldrons().heatSources().isEmpty()) {
             return true;
         }
         Material material = block.getType();
-        if (!Config.HEAT_SOURCES.contains(material.name().toLowerCase())) {
+        if (!Config.config().cauldrons().heatSources().contains(BukkitAdapter.toMaterialHolder(material))) {
             return false;
         }
         if (material == Material.CAMPFIRE || material == Material.SOUL_CAMPFIRE) {

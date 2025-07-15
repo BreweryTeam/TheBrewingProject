@@ -89,14 +89,14 @@ public class BukkitBarrelDataType implements SqlStoredData.Findable<BukkitBarrel
                 String format = resultSet.getString("format");
                 BarrelType type = Registry.BARREL_TYPE.get(BreweryKey.parse(resultSet.getString("barrel_type")));
                 if (type == null) {
-                    Logging.warning("Unknown barrel type '" + resultSet.getString("barrel_type") + "' for structure at: " + uniqueLocation);
+                    Logger.logErr("Unknown barrel type '" + resultSet.getString("barrel_type") + "' for structure at: " + uniqueLocation);
                     continue;
                 }
                 int size = resultSet.getInt("size");
 
                 Optional<BreweryStructure> breweryStructureOptional = TheBrewingProject.getInstance().getStructureRegistry().getStructure(format);
                 if (breweryStructureOptional.isEmpty()) {
-                    Logging.warning("Could not find format '" + format + "' skipping barrel at: " + uniqueLocation);
+                    Logger.logErr("Could not find format '" + format + "' skipping barrel at: " + uniqueLocation);
                     continue;
                 }
                 PlacedBreweryStructure<BukkitBarrel> structure = new PlacedBreweryStructure<>(breweryStructureOptional.get(), transform, worldOrigin);

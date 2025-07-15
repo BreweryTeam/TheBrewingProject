@@ -11,4 +11,6 @@ public record BreweryLocation(int x, int y, int z, UUID worldUuid) {
     public BreweryLocation add(int x, int y, int z) {
         return new BreweryLocation(x + x(), y + y(), z + z(), worldUuid);
     }
+
+
 }
