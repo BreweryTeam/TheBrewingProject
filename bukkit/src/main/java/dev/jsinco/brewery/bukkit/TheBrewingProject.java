@@ -99,8 +99,7 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
     @Getter
     private PlayerWalkListener playerWalkListener;
 
-    @Override
-    public void onLoad() {
+    public void initialize() {
         instance = this;
         Config.load(this.getDataFolder(), serializers());
         TranslationsConfig.reload(this.getDataFolder());
@@ -189,6 +188,7 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
 
     @Override
     public void onEnable() {
+        initialize();
         integrationManager.init();
         saveResources();
         this.database = new Database(DatabaseDriver.SQLITE);
