@@ -41,7 +41,6 @@ public class NamedDrunkEventExecutor {
             case PUKE -> {
                 PukeHandler pukeHandler = new PukeHandler(Config.config().puke().pukeTime(), player);
                 TheBrewingProject.getInstance().getActiveEventsRegistry().registerActiveEvent(playerUuid, event, Config.config().puke().pukeTime());
-
                 player.getScheduler().runAtFixedRate(TheBrewingProject.getInstance(), pukeHandler::tick,null ,1, 1);
             }
             case PASS_OUT -> {
