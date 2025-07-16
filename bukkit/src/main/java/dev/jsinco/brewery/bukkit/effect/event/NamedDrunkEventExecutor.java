@@ -41,7 +41,7 @@ public class NamedDrunkEventExecutor {
             case PUKE -> {
                 PukeHandler pukeHandler = new PukeHandler(Config.config().puke().pukeTime(), player);
                 TheBrewingProject.getInstance().getActiveEventsRegistry().registerActiveEvent(playerUuid, event, Config.config().puke().pukeTime());
-                Bukkit.getScheduler().runTaskTimer(TheBrewingProject.getInstance(), pukeHandler::tick, 0, 1);
+                player.getScheduler().runAtFixedRate(TheBrewingProject.getInstance(), pukeHandler::tick,null ,1, 1);
             }
             case PASS_OUT -> {
                 DrunksManagerImpl<?> drunksManager = TheBrewingProject.getInstance().getDrunksManager();
@@ -57,7 +57,7 @@ public class NamedDrunkEventExecutor {
                 int duration = RANDOM.nextInt(STUMBLE_DURATION / 2, STUMBLE_DURATION * 3 / 2 + 1);
                 StumbleHandler stumbleHandler = new StumbleHandler(duration, player);
                 TheBrewingProject.getInstance().getActiveEventsRegistry().registerActiveEvent(playerUuid, event, duration);
-                Bukkit.getScheduler().runTaskTimer(TheBrewingProject.getInstance(), stumbleHandler::doStumble, 0, 1);
+                player.getScheduler().runAtFixedRate(TheBrewingProject.getInstance(), stumbleHandler::doStumble, null ,1, 1);
             }
             case CHICKEN -> {
                 player.getWorld().spawn(player.getLocation(), Chicken.class, chicken -> {
@@ -92,16 +92,16 @@ public class NamedDrunkEventExecutor {
                 }
                 BreweryLocation teleport = locations.get(RANDOM.nextInt(locations.size()));
                 Location location = BukkitAdapter.toLocation(teleport);
-                player.teleport(location);
+                player.teleportAsync(location);
                 player.sendMessage(MiniMessage.miniMessage().deserialize(TranslationsConfig.TELEPORT_MESSAGE, BukkitMessageUtil.getPlayerTagResolver(player)));
             }
-            case NAUSEA -> {
-                player.addPotionEffect(new PotionEffect(PotionEffectType.NAUSEA, RANDOM.nextInt(Moment.MINUTE / 2, Moment.MINUTE * 3 / 2), 1));
-            }
+            case NAUSEA ->
+                    player.getScheduler().run(TheBrewingProject.getInstance(), task ->
+                    player.addPotionEffect(new PotionEffect(PotionEffectType.NAUSEA, RANDOM.nextInt(Moment.MINUTE / 2, Moment.MINUTE * 3 / 2), 1)), null);
             case DRUNKEN_WALK -> {
                 int duration = RANDOM.nextInt(DRUNKEN_WALK_DURATION / 2, DRUNKEN_WALK_DURATION * 3 / 2);
                 DrunkenWalkHandler drunkenWalkHandler = new DrunkenWalkHandler(duration, player);
-                Bukkit.getScheduler().runTaskTimer(TheBrewingProject.getInstance(), drunkenWalkHandler::tick, 0, 1);
+                player.getScheduler().runAtFixedRate(TheBrewingProject.getInstance(), drunkenWalkHandler::tick, null, 1, 1);
                 TheBrewingProject.getInstance().getActiveEventsRegistry().registerActiveEvent(playerUuid, event, duration);
             }
         }

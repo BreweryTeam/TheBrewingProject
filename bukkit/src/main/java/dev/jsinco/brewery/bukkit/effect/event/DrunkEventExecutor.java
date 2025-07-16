@@ -38,16 +38,18 @@ public class DrunkEventExecutor {
                             applyPotionEffect.durationBounds(),
                             applyPotionEffect.amplifierBounds()
                     ).newPotionEffect();
-                    player.addPotionEffect(potionEffect);
+                    player.getScheduler().run(TheBrewingProject.getInstance(), task -> {
+                        if (player.isOnline()) {
+                            player.addPotionEffect(potionEffect);
+                        }
+                    }, null);
                 }
-                case NamedDrunkEvent namedDrunkEvent ->
-                        NamedDrunkEventExecutor.doDrunkEvent(playerUuid, namedDrunkEvent);
+                case NamedDrunkEvent namedDrunkEvent -> NamedDrunkEventExecutor.doDrunkEvent(playerUuid, namedDrunkEvent);
                 case CustomEvent customEvent -> doDrunkEvents(playerUuid, customEvent.getSteps());
                 case SendCommand sendCommand -> {
                     switch (sendCommand.senderType()) {
                         case PLAYER -> player.performCommand(sendCommand.command());
-                        case SERVER ->
-                                Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), sendCommand.command());
+                        case SERVER -> Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), sendCommand.command());
                     }
                 }
                 case Teleport teleport -> player.teleport(BukkitAdapter.toLocation(teleport.location().get()));
@@ -62,16 +64,13 @@ public class DrunkEventExecutor {
                         return;
                     }
                     final List<EventStep> eventsLeft = events.subList(i + 1, events.size());
-                    Bukkit.getScheduler().runTaskLater(
+                    player.getScheduler().runDelayed(
                             TheBrewingProject.getInstance(),
-                            () -> doDrunkEvents(playerUuid, eventsLeft),
-                            waitStep.durationTicks()
-                    );
+                            task ->
+                            doDrunkEvents(playerUuid, eventsLeft),null, waitStep.durationTicks());
                     return;
                 }
-                case ConsumeStep consumeStep -> {
-                    TheBrewingProject.getInstance().getDrunksManager().consume(playerUuid, consumeStep.alcohol(), consumeStep.toxins());
-                }
+                case ConsumeStep consumeStep -> TheBrewingProject.getInstance().getDrunksManager().consume(playerUuid, consumeStep.alcohol(), consumeStep.toxins());
             }
         }
     }

@@ -140,7 +140,7 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
         try {
             database.init(this.getDataFolder());
         } catch (IOException | SQLException e) {
-            throw new RuntimeException(e); // Hard exit if any issues here
+            throw new RuntimeException(e);
         }
         this.drunksManager.reset(Config.config().events().enabledRandomEvents().stream().map(BreweryKey::parse).collect(Collectors.toSet()));
         worldEventListener.init();
@@ -193,9 +193,13 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
         saveResources();
         this.database = new Database(DatabaseDriver.SQLITE);
         try {
-            database.init(this.getDataFolder());
+            try {
+                database.init(this.getDataFolder());
+            } catch (IOException | SQLException e) {
+                throw new RuntimeException(e);
+            }
             this.time = database.getSingletonNow(BreweryTimeDataType.INSTANCE);
-        } catch (IOException | PersistenceException | SQLException e) {
+        } catch (PersistenceException e) {
             throw new RuntimeException(e); // Hard exit if any issues here
         }
         this.drunksManager = new DrunksManagerImpl<>(customDrunkEventRegistry, Config.config().events().enabledRandomEvents().stream().map(BreweryKey::parse).collect(Collectors.toSet()), () -> this.time, database, SqlDrunkStateDataType.INSTANCE);
@@ -210,8 +214,8 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
         pluginManager.registerEvents(playerWalkListener, this);
         pluginManager.registerEvents(new EntityEventListener(), this);
 
-        Bukkit.getScheduler().runTaskTimer(this, this::updateStructures, 0, 1);
-        Bukkit.getScheduler().runTaskTimer(this, this::otherTicking, 0, 1);
+        Bukkit.getGlobalRegionScheduler().runAtFixedRate(this, task -> this.updateStructures(), 20, 1);
+        Bukkit.getGlobalRegionScheduler().runAtFixedRate(this, task -> this.otherTicking(), 20, 1);
         RecipeReader<ItemStack> recipeReader = new RecipeReader<>(this.getDataFolder(), new BukkitRecipeResultReader(), BukkitIngredientManager.INSTANCE);
 
         recipeReader.readRecipes().thenAcceptAsync(this.recipeRegistry::registerRecipes);

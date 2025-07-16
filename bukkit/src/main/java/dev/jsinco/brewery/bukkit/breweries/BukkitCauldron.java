@@ -14,8 +14,10 @@ import dev.jsinco.brewery.ingredient.Ingredient;
 import dev.jsinco.brewery.moment.Interval;
 import dev.jsinco.brewery.recipe.Recipe;
 import dev.jsinco.brewery.sound.SoundDefinition;
+import dev.jsinco.brewery.structure.SinglePositionStructure;
 import dev.jsinco.brewery.util.Registry;
 import dev.jsinco.brewery.vector.BreweryLocation;
+import io.papermc.paper.threadedregions.scheduler.ScheduledTask;
 import lombok.Getter;
 import lombok.Setter;
 import net.kyori.adventure.sound.Sound;
@@ -48,6 +50,7 @@ public class BukkitCauldron implements dev.jsinco.brewery.breweries.Cauldron {
     private boolean brewExtracted = false;
     private Color particleColor = Color.AQUA;
 
+    private ScheduledTask cauldronTask;
 
     public BukkitCauldron(BreweryLocation location, boolean hot) {
         this.location = location;
@@ -68,24 +71,40 @@ public class BukkitCauldron implements dev.jsinco.brewery.breweries.Cauldron {
                 .orElseThrow(() -> new IllegalArgumentException("Expected cauldron"));
     }
 
+    private void startCauldronTask() {
+        final SinglePositionStructure structure = this;
+        if (cauldronTask != null && !cauldronTask.isCancelled()) {
+            return;
+        }
+        cauldronTask = new FoliaRunnable(Bukkit.getRegionScheduler(), getBlock().getWorld(), getBlock().getX() >> 4, getBlock().getZ() >> 4) {
+            @Override
+            public void run() {
+                if (!BlockUtil.isChunkLoaded(location)) {
+                    cancel();
+                    cauldronTask = null;
+                    return;
+                }
+                if (!Tag.CAULDRONS.isTagged(getBlock().getType()) || getBlock().getType() == Material.CAULDRON) {
+                    ListenerUtil.removeActiveSinglePositionStructure(structure, TheBrewingProject.getInstance().getBreweryRegistry(), TheBrewingProject.getInstance().getDatabase());
+                    cancel();
+                    cauldronTask = null;
+                    return;
+                }
+                hot = isHeatSource(getBlock().getRelative(BlockFace.DOWN));
+                recalculateBrewTime();
+                Color baseParticleColor = computeBaseParticleColor(getBlock());
+                Optional<Recipe<ItemStack>> recipeOptional = brew.closestRecipe(TheBrewingProject.getInstance().getRecipeRegistry());
+                Color resultColor = computeResultColor(recipeOptional);
+                particleColor = recipeOptional.map(recipe -> computeParticleColor(baseParticleColor, resultColor, recipe))
+                        .orElse(Color.GRAY);
+                playBrewingEffects();
+            }
+        }.runAtFixedRate(TheBrewingProject.getInstance(), 20, 1);
+    }
+
     @Override
     public void tick() {
-        if (!BlockUtil.isChunkLoaded(location)) {
-            return;
-        }
-        if (!Tag.CAULDRONS.isTagged(getBlock().getType()) || getBlock().getType() == Material.CAULDRON) {
-            ListenerUtil.removeActiveSinglePositionStructure(this, TheBrewingProject.getInstance().getBreweryRegistry(), TheBrewingProject.getInstance().getDatabase());
-            return;
-        }
-        this.hot = isHeatSource(getBlock().getRelative(BlockFace.DOWN));
-        recalculateBrewTime();
-        Color baseParticleColor = computeBaseParticleColor(getBlock());
-        Optional<Recipe<ItemStack>> recipeOptional = brew.closestRecipe(TheBrewingProject.getInstance().getRecipeRegistry());
-        Color resultColor = computeResultColor(recipeOptional);
-        this.particleColor = recipeOptional.map(recipe -> computeParticleColor(baseParticleColor, resultColor, recipe))
-                .orElse(Color.GRAY);
-
-        this.playBrewingEffects();
+        this.startCauldronTask();
     }
 
     private Color computeParticleColor(Color baseColor, Color resultColor, Recipe<ItemStack> recipe) {
