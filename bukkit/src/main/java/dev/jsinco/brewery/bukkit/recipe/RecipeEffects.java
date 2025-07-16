@@ -13,6 +13,9 @@ import dev.jsinco.brewery.event.EventStep;
 import dev.jsinco.brewery.util.BreweryKey;
 import dev.jsinco.brewery.util.MessageUtil;
 import dev.jsinco.brewery.util.Registry;
+import io.papermc.paper.datacomponent.DataComponentTypes;
+import io.papermc.paper.datacomponent.item.PotionContents;
+import io.papermc.paper.persistence.PersistentDataContainerView;
 import lombok.Getter;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.title.Title;
@@ -21,8 +24,6 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
@@ -82,14 +83,11 @@ public class RecipeEffects {
                 .toList();
     }
 
-    public void applyTo(ItemMeta meta) {
-        if (meta instanceof PotionMeta potionMeta) {
-            for (RecipeEffect recipeEffect : effects) {
-                potionMeta.addCustomEffect(recipeEffect.newPotionEffect(), true);
-            }
-        }
-        PersistentDataContainer container = meta.getPersistentDataContainer();
-        applyTo(container);
+    public void applyTo(ItemStack itemStack) {
+        itemStack.setData(DataComponentTypes.POTION_CONTENTS, PotionContents.potionContents().addCustomEffects(
+                effects.stream().map(RecipeEffect::newPotionEffect).toList()
+        ).build());
+        itemStack.editPersistentDataContainer(this::applyTo);
     }
 
     private void applyTo(PersistentDataContainer container) {
@@ -112,7 +110,7 @@ public class RecipeEffects {
         return fromPdc(entity.getPersistentDataContainer());
     }
 
-    private static Optional<RecipeEffects> fromPdc(PersistentDataContainer persistentDataContainer) {
+    private static Optional<RecipeEffects> fromPdc(PersistentDataContainerView persistentDataContainer) {
         if (!persistentDataContainer.has(ALCOHOL)) {
             return Optional.empty();
         }
@@ -137,12 +135,7 @@ public class RecipeEffects {
     }
 
     public static Optional<RecipeEffects> fromItem(@NotNull ItemStack item) {
-        ItemMeta meta = item.getItemMeta();
-        if (meta == null) {
-            return Optional.empty();
-        }
-        PersistentDataContainer persistentDataContainer = meta.getPersistentDataContainer();
-        return fromPdc(persistentDataContainer);
+        return fromPdc(item.getPersistentDataContainer());
     }
 
     public void applyTo(Player player) {

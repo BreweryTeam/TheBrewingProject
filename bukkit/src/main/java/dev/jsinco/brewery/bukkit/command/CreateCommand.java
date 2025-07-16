@@ -24,11 +24,12 @@ import dev.jsinco.brewery.util.MessageUtil;
 import dev.jsinco.brewery.util.Pair;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
+import io.papermc.paper.datacomponent.DataComponentTypes;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
-import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -73,7 +74,6 @@ public class CreateCommand {
             if (!inventory.addItem(brewItem).isEmpty()) {
                 target.getWorld().dropItem(target.getLocation(), brewItem);
             }
-            ItemMeta brewItemMeta = brewItem.getItemMeta();
             MessageUtil.message(context.getSource().getSender(), TranslationsConfig.COMMAND_CREATE_SUCCESS, Placeholder.component("brew_name", brewItemMeta.hasCustomName() ? brewItemMeta.customName() : brewItemMeta.itemName()));
         }).build();
         ArgumentBuilder<CommandSourceStack, ?> root = Commands.literal("create");

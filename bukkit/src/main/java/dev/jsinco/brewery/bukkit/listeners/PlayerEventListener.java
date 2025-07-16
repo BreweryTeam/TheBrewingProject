@@ -32,6 +32,7 @@ import dev.jsinco.brewery.util.Logger;
 import dev.jsinco.brewery.util.MessageUtil;
 import io.papermc.paper.connection.PlayerConfigurationConnection;
 import io.papermc.paper.connection.PlayerLoginConnection;
+import io.papermc.paper.datacomponent.DataComponentTypes;
 import io.papermc.paper.event.connection.PlayerConnectionValidateLoginEvent;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
@@ -54,7 +55,6 @@ import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
-import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -127,10 +127,9 @@ public class PlayerEventListener implements Listener {
         if (block.getType() == Material.CRAFTING_TABLE && offHand.getType() == Material.PAPER && event.getPlayer().
 
                 isSneaking() && event.getAction() == Action.RIGHT_CLICK_BLOCK) {
-            ItemMeta offHandMeta = offHand.getItemMeta();
             ItemStack mainHand = inventory.getItemInMainHand();
             ItemStack sealed = BrewAdapter.fromItem(mainHand)
-                    .map(brew -> BrewAdapter.toItem(brew, new BrewImpl.State.Seal(offHandMeta.hasCustomName() ? MiniMessage.miniMessage().serialize(offHandMeta.customName()) : null)))
+                    .map(brew -> BrewAdapter.toItem(brew, new BrewImpl.State.Seal(offHand.hasData(DataComponentTypes.CUSTOM_NAME) ? MiniMessage.miniMessage().serialize(offHand.getData(DataComponentTypes.CUSTOM_NAME)) : null)))
                     .orElse(mainHand);
             inventory.setItemInMainHand(sealed);
             event.setUseItemInHand(Event.Result.DENY);

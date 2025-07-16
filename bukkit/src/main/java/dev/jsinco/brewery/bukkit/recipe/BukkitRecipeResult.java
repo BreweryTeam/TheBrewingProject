@@ -14,6 +14,7 @@ import dev.jsinco.brewery.util.BreweryKey;
 import dev.jsinco.brewery.util.Logger;
 import dev.jsinco.brewery.util.MessageUtil;
 import io.papermc.paper.datacomponent.DataComponentTypes;
+import io.papermc.paper.datacomponent.item.*;
 import lombok.Getter;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -26,11 +27,8 @@ import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Registry;
 import org.bukkit.enchantments.Enchantment;
-import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ItemType;
-import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.inventory.meta.PotionMeta;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -38,6 +36,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class BukkitRecipeResult implements RecipeResult<ItemStack> {
@@ -81,26 +80,13 @@ public class BukkitRecipeResult implements RecipeResult<ItemStack> {
         if (customId != null) {
             ItemStack itemStack = createCustomItem();
             if (itemStack != null) {
-                ItemMeta meta = itemStack.getItemMeta();
-                applyMeta(meta, score, brew, state);
-                if (meta instanceof PotionMeta potionMeta) {
-                    potionMeta.setColor(color);
-                }
-                itemStack.setItemMeta(meta);
+                applyData(itemStack, score, brew, state);
                 return itemStack;
             }
             Logger.logErr("Invalid item id '" + customId + "' for recipe: " + name);
         }
         ItemStack itemStack = new ItemStack(Material.POTION);
-        PotionMeta meta = (PotionMeta) itemStack.getItemMeta();
-        meta.setColor(color);
-        applyMeta(meta, score, brew, state);
-        itemStack.setItemMeta(meta);
-
-        // If we're using modern paper maybe we should just use paper's DataComponentTypes instead of ItemMeta?
-        if (itemModel != null) {
-            itemStack.setData(DataComponentTypes.ITEM_MODEL, itemModel);
-        }
+        applyData(itemStack, score, brew, state);
         return itemStack;
     }
 
@@ -124,24 +110,37 @@ public class BukkitRecipeResult implements RecipeResult<ItemStack> {
         }
     }
 
-    private void applyMeta(ItemMeta meta, BrewScore score, Brew brew, Brew.State state) {
-        meta.addItemFlags(ItemFlag.HIDE_ENCHANTS, ItemFlag.HIDE_ATTRIBUTES, ItemFlag.HIDE_ADDITIONAL_TOOLTIP);
-        meta.displayName(compileMessage(score, brew, name, true).decoration(TextDecoration.ITALIC, false));
-        meta.lore(Stream.concat(lore.stream()
+    private void applyData(ItemStack itemStack, BrewScore score, Brew brew, Brew.State state) {
+        itemStack.setData(DataComponentTypes.TOOLTIP_DISPLAY, TooltipDisplay.tooltipDisplay().hiddenComponents(
+                Registry.DATA_COMPONENT_TYPE.stream()
+                        .filter(dataComponentType -> dataComponentType != DataComponentTypes.LORE)
+                        .collect(Collectors.toSet())
+        ));
+        itemStack.setData(DataComponentTypes.CUSTOM_NAME, compileMessage(score, brew, name, true).decoration(TextDecoration.ITALIC, false));
+        itemStack.setData(DataComponentTypes.LORE, ItemLore.lore(
+                Stream.concat(lore.stream()
                                         .map(line -> compileMessage(score, brew, line, false)),
                                 compileExtraLore(score, brew, state)
                         )
                         .map(component -> component.decoration(TextDecoration.ITALIC, false))
                         .map(component -> component.colorIfAbsent(NamedTextColor.GRAY))
                         .toList()
-        );
+        ));
         if (glint) {
-            meta.addEnchant(Enchantment.MENDING, 1, true);
+            itemStack.setData(DataComponentTypes.ENCHANTMENTS, ItemEnchantments.itemEnchantments().add(Enchantment.MENDING, 1));
         }
         if (customModelData > 0) {
-            meta.setCustomModelData(customModelData);
+            itemStack.setData(DataComponentTypes.CUSTOM_MODEL_DATA, CustomModelData.customModelData().addFloat(customModelData).build());
         }
-        recipeEffects.withToxins(recipeEffects, (int) (recipeEffects.getAlcohol() * (1.5D - score.score()))).applyTo(meta);
+        if (itemModel != null) {
+            itemStack.setData(DataComponentTypes.ITEM_MODEL, itemModel);
+        }
+        recipeEffects.withToxins(recipeEffects, (int) (recipeEffects.getAlcohol() * (1.5D - score.score()))).applyTo(itemStack);
+        // After recipe effects, as both might modify potion contents
+        itemStack.setData(DataComponentTypes.POTION_CONTENTS, PotionContents.potionContents()
+                .addCustomEffects(itemStack.getData(DataComponentTypes.POTION_CONTENTS).customEffects())
+                .customColor(color)
+        );
     }
 
     private Stream<? extends Component> compileExtraLore(BrewScore score, Brew brew, Brew.State state) {
