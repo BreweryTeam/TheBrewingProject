@@ -11,6 +11,8 @@ public interface InventoryAccessible<IS, I> {
 
     boolean open(@NotNull BreweryLocation breweryLocation, @NotNull UUID playerUuid);
 
+    void close(boolean silent);
+
     boolean inventoryAllows(@NotNull UUID playerUuid, @NotNull IS item);
 
     boolean inventoryAllows(@NotNull IS item);

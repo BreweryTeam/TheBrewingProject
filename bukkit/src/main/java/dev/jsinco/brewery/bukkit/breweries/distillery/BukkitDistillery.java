@@ -31,6 +31,7 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
+import java.util.stream.Stream;
 
 public class BukkitDistillery implements Distillery<BukkitDistillery, ItemStack, Inventory> {
 
@@ -72,6 +73,15 @@ public class BukkitDistillery implements Distillery<BukkitDistillery, ItemStack,
             return openInventory(distillate, player);
         }
         return false;
+    }
+
+    @Override
+    public void close(boolean silent) {
+        Stream.of(mixture, distillate).forEach(inventory -> {
+                    inventory.updateBrewsFromInventory();
+                    inventory.getInventory().clear();
+                }
+        );
     }
 
     private void playInteractionEffects(BreweryLocation location, Player player) {
@@ -181,8 +191,7 @@ public class BukkitDistillery implements Distillery<BukkitDistillery, ItemStack,
     public void tickInventory() {
         checkDirty();
         if (inventoryUnpopulated()) {
-            mixture.getInventory().clear();
-            distillate.getInventory().clear();
+            close(false);
             TheBrewingProject.getInstance().getBreweryRegistry().unregisterOpened(this);
             // Distilling results can be computed later on
             return;
@@ -190,15 +199,15 @@ public class BukkitDistillery implements Distillery<BukkitDistillery, ItemStack,
         if (!mixture.getInventory().getViewers().isEmpty() || !distillate.getInventory().getViewers().isEmpty()) {
             this.recentlyAccessed = TheBrewingProject.getInstance().getTime();
         }
-        boolean hasChanged = mixture.updateBrewsFromInventory();
-        distillate.updateBrewsFromInventory();
-        if (hasChanged) {
-            resetStartTime();
-        }
         long diff = getTimeProcessed();
         long processTime = getProcessTime();
         if (diff < processTime || mixture.isEmpty()) {
             return;
+        }
+        boolean hasChanged = mixture.updateBrewsFromInventory();
+        distillate.updateBrewsFromInventory();
+        if (hasChanged) {
+            resetStartTime();
         }
         transferItems(mixture, distillate, (int) (getStructure().getStructure().getMeta(StructureMeta.PROCESS_AMOUNT) * (diff / processTime)));
         distillate.updateInventoryFromBrews();
