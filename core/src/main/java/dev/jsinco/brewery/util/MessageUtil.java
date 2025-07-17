@@ -3,6 +3,7 @@ package dev.jsinco.brewery.util;
 import dev.jsinco.brewery.brew.*;
 import dev.jsinco.brewery.configuration.Config;
 import dev.jsinco.brewery.configuration.locale.TranslationsConfig;
+import dev.jsinco.brewery.effect.DrunkState;
 import dev.jsinco.brewery.effect.DrunkStateImpl;
 import dev.jsinco.brewery.recipe.RecipeRegistry;
 import dev.jsinco.brewery.recipes.BrewScoreImpl;
@@ -95,7 +96,7 @@ public class MessageUtil {
         return compileBrewInfo(brew, score, detailed);
     }
 
-    public static @NotNull TagResolver getDrunkStateTagResolver(@Nullable DrunkStateImpl drunkState) {
+    public static @NotNull TagResolver getDrunkStateTagResolver(@Nullable DrunkState drunkState) {
         return TagResolver.resolver(
                 Placeholder.component("alcohol_level", compileAlcoholLevel(drunkState == null ? 0 : drunkState.alcohol())),
                 Placeholder.component("toxins_level", compileToxinsLevel(drunkState == null ? 0 : drunkState.toxins()))
