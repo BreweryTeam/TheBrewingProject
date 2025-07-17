@@ -191,8 +191,7 @@ public class BukkitDistillery implements Distillery<BukkitDistillery, ItemStack,
     public void tickInventory() {
         checkDirty();
         if (inventoryUnpopulated()) {
-            mixture.getInventory().clear();
-            distillate.getInventory().clear();
+            close(false);
             TheBrewingProject.getInstance().getBreweryRegistry().unregisterOpened(this);
             // Distilling results can be computed later on
             return;
@@ -200,15 +199,15 @@ public class BukkitDistillery implements Distillery<BukkitDistillery, ItemStack,
         if (!mixture.getInventory().getViewers().isEmpty() || !distillate.getInventory().getViewers().isEmpty()) {
             this.recentlyAccessed = TheBrewingProject.getInstance().getTime();
         }
-        boolean hasChanged = mixture.updateBrewsFromInventory();
-        distillate.updateBrewsFromInventory();
-        if (hasChanged) {
-            resetStartTime();
-        }
         long diff = getTimeProcessed();
         long processTime = getProcessTime();
         if (diff < processTime || mixture.isEmpty()) {
             return;
+        }
+        boolean hasChanged = mixture.updateBrewsFromInventory();
+        distillate.updateBrewsFromInventory();
+        if (hasChanged) {
+            resetStartTime();
         }
         transferItems(mixture, distillate, (int) (getStructure().getStructure().getMeta(StructureMeta.PROCESS_AMOUNT) * (diff / processTime)));
         distillate.updateInventoryFromBrews();
