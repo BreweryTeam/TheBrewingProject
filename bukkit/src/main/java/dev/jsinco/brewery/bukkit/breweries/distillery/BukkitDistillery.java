@@ -22,11 +22,7 @@ import dev.jsinco.brewery.vector.BreweryLocation;
 import lombok.Getter;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.minimessage.MiniMessage;
-import org.bukkit.Bukkit;
-import org.bukkit.Color;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.Particle;
+import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
@@ -34,14 +30,8 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Optional;
-import java.util.Queue;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Stream;
 
 public class BukkitDistillery implements Distillery<BukkitDistillery, ItemStack, Inventory> {
 
@@ -83,6 +73,15 @@ public class BukkitDistillery implements Distillery<BukkitDistillery, ItemStack,
             return openInventory(distillate, player);
         }
         return false;
+    }
+
+    @Override
+    public void close(boolean silent) {
+        Stream.of(mixture, distillate).forEach(inventory -> {
+                    inventory.updateBrewsFromInventory();
+                    inventory.getInventory().clear();
+                }
+        );
     }
 
     private void playInteractionEffects(BreweryLocation location, Player player) {

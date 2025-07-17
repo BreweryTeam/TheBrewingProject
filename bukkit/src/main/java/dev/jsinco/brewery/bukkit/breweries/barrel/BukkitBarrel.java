@@ -48,6 +48,8 @@ public class BukkitBarrel implements Barrel<BukkitBarrel, ItemStack, Inventory> 
     private final Location uniqueLocation;
     private final BrewInventory inventory;
     private long recentlyAccessed = -1L;
+    private long ticksUntilNextCheck = 0L;
+    private static final Random RANDOM = new Random();
 
     public BukkitBarrel(Location uniqueLocation, @NotNull PlacedBreweryStructure<BukkitBarrel> structure, int size, @NotNull BarrelType type) {
         this.structure = Preconditions.checkNotNull(structure);
@@ -98,8 +100,10 @@ public class BukkitBarrel implements Barrel<BukkitBarrel, ItemStack, Inventory> 
         return Set.of(this.inventory.getInventory());
     }
 
-    private void close() {
-        if (uniqueLocation != null) {
+    public void close(boolean silent) {
+        this.ticksUntilNextCheck = 0L;
+        this.inventory.updateBrewsFromInventory();
+        if (!silent && uniqueLocation != null) {
             SoundPlayer.playSoundEffect(Config.config().sounds().barrelClose(), Sound.Source.BLOCK, uniqueLocation.toCenterLocation());
         }
         this.inventory.getInventory().clear();
@@ -107,11 +111,22 @@ public class BukkitBarrel implements Barrel<BukkitBarrel, ItemStack, Inventory> 
 
     @Override
     public void tickInventory() {
-        Brew[] previousBrews = Arrays.copyOf(inventory.getBrews(), inventory.getBrews().length);
-        inventory.updateBrewsFromInventory();
+        if (inventoryUnpopulated()) {
+            close(false);
+            TheBrewingProject.getInstance().getBreweryRegistry().unregisterOpened(this);
+            return;
+        }
         if (!inventory.getInventory().getViewers().isEmpty()) {
             this.recentlyAccessed = TheBrewingProject.getInstance().getTime();
         }
+        if (ticksUntilNextCheck-- > 0L) {
+            return;
+        }
+        // Choose randomly, so to not do this everywhere at the same time
+        long minAgingYearsTickUpdate = Config.config().barrels().agingYearTicks() / 20L;
+        ticksUntilNextCheck = RANDOM.nextLong(minAgingYearsTickUpdate, 2 * minAgingYearsTickUpdate);
+        Brew[] previousBrews = Arrays.copyOf(inventory.getBrews(), inventory.getBrews().length);
+        inventory.updateBrewsFromInventory();
         Brew[] brews = inventory.getBrews();
         long time = TheBrewingProject.getInstance().getTime();
         for (int i = 0; i < brews.length; i++) {
@@ -135,17 +150,11 @@ public class BukkitBarrel implements Barrel<BukkitBarrel, ItemStack, Inventory> 
 
         }
         inventory.updateInventoryFromBrews();
-        if (inventoryUnpopulated()) {
-            close();
-            TheBrewingProject.getInstance().getBreweryRegistry().unregisterOpened(this);
-        }
-        if (time % 32 == 0) {
-            getInventory().getInventory().getViewers()
-                    .stream()
-                    .filter(Player.class::isInstance)
-                    .map(Player.class::cast)
-                    .forEach(Player::updateInventory);
-        }
+        getInventory().getInventory().getViewers()
+                .stream()
+                .filter(Player.class::isInstance)
+                .map(Player.class::cast)
+                .forEach(Player::updateInventory);
     }
 
     @Override
