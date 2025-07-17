@@ -1,6 +1,7 @@
 package dev.jsinco.brewery.bukkit.listeners;
 
 import com.destroystokyo.paper.event.player.PlayerLaunchProjectileEvent;
+import com.destroystokyo.paper.profile.PlayerProfile;
 import dev.jsinco.brewery.brew.BrewImpl;
 import dev.jsinco.brewery.breweries.InventoryAccessible;
 import dev.jsinco.brewery.breweries.StructureHolder;
@@ -14,7 +15,6 @@ import dev.jsinco.brewery.bukkit.ingredient.BukkitIngredientManager;
 import dev.jsinco.brewery.bukkit.integration.IntegrationType;
 import dev.jsinco.brewery.bukkit.recipe.RecipeEffects;
 import dev.jsinco.brewery.bukkit.util.BukkitAdapter;
-import dev.jsinco.brewery.bukkit.util.BukkitMessageUtil;
 import dev.jsinco.brewery.configuration.Config;
 import dev.jsinco.brewery.configuration.locale.TranslationsConfig;
 import dev.jsinco.brewery.database.PersistenceException;
@@ -30,7 +30,9 @@ import dev.jsinco.brewery.recipes.RecipeRegistryImpl;
 import dev.jsinco.brewery.structure.PlacedStructureRegistryImpl;
 import dev.jsinco.brewery.util.Logger;
 import dev.jsinco.brewery.util.MessageUtil;
+import io.papermc.paper.event.connection.configuration.AsyncPlayerConnectionConfigureEvent;
 import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.Tag;
@@ -46,7 +48,6 @@ import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerItemConsumeEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -265,17 +266,25 @@ public class PlayerEventListener implements Listener {
     }
 
     @EventHandler(ignoreCancelled = true)
-    public void onPlayerLogin(PlayerLoginEvent event) {
-        if (drunksManager.isPassedOut(event.getPlayer().getUniqueId())) {
-            event.setResult(PlayerLoginEvent.Result.KICK_OTHER);
+    public void onPlayerLogin(AsyncPlayerConnectionConfigureEvent event) {
+        PlayerProfile profile = event.getConnection().getProfile();
+        DrunkState drunkState = drunksManager.getDrunkState(profile.getUniqueId());
+        String playerName = profile.getName();
+        if (drunksManager.isPassedOut(profile.getId())) {
             String kickEventMessage = Config.config().events().kickEvent().kickEventMessage();
-            event.kickMessage(BukkitMessageUtil.compilePlayerMessage(kickEventMessage == null ? TranslationsConfig.KICK_EVENT_MESSAGE : kickEventMessage, event.getPlayer(), drunksManager, 0));
+            event.getConnection().disconnect(
+                    MiniMessage.miniMessage().deserialize(kickEventMessage == null ? TranslationsConfig.KICK_EVENT_MESSAGE : kickEventMessage,
+                            MessageUtil.getDrunkStateTagResolver(drunkState), Placeholder.unparsed("player_name", playerName == null ? "" : playerName)
+                    )
+            );
             return;
         }
-        DrunkState drunkState = drunksManager.getDrunkState(event.getPlayer().getUniqueId());
         if (Config.config().events().drunkenJoinDeny() && drunkState != null && drunkState.alcohol() >= 85 && RANDOM.nextInt(15) <= drunkState.alcohol() - 85) {
-            event.setResult(PlayerLoginEvent.Result.KICK_OTHER);
-            event.kickMessage(BukkitMessageUtil.compilePlayerMessage(TranslationsConfig.DRUNKEN_JOIN_DENY_MESSAGE, event.getPlayer(), drunksManager, drunkState.alcohol()));
+            event.getConnection().disconnect(
+                    MiniMessage.miniMessage().deserialize(TranslationsConfig.DRUNKEN_JOIN_DENY_MESSAGE,
+                            MessageUtil.getDrunkStateTagResolver(drunkState), Placeholder.unparsed("player_name", playerName == null ? "" : playerName)
+                    )
+            );
         }
     }
 
