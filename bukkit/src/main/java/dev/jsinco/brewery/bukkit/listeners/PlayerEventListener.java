@@ -268,7 +268,7 @@ public class PlayerEventListener implements Listener {
     @EventHandler(ignoreCancelled = true)
     public void onPlayerLogin(AsyncPlayerConnectionConfigureEvent event) {
         PlayerProfile profile = event.getConnection().getProfile();
-        DrunkState drunkState = drunksManager.getDrunkState(profile.getUniqueId());
+        DrunkState drunkState = drunksManager.getDrunkState(profile.getId());
         String playerName = profile.getName();
         if (drunksManager.isPassedOut(profile.getId())) {
             String kickEventMessage = Config.config().events().kickEvent().kickEventMessage();
