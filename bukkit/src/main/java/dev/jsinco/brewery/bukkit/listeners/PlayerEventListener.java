@@ -278,9 +278,13 @@ public class PlayerEventListener implements Listener {
         if (profile == null) {
             return;
         }
-        DrunkState drunkState = drunksManager.getDrunkState(profile.getId());
+        UUID playerUuid = profile.getId();
+        if (playerUuid == null) {
+            return;
+        }
+        DrunkState drunkState = drunksManager.getDrunkState(playerUuid);
         String playerName = profile.getName();
-        if (drunksManager.isPassedOut(profile.getId())) {
+        if (drunksManager.isPassedOut(playerUuid)) {
             String kickEventMessage = Config.config().events().kickEvent().kickEventMessage();
             event.kickMessage(
                     MiniMessage.miniMessage().deserialize(kickEventMessage == null ? TranslationsConfig.KICK_EVENT_MESSAGE : kickEventMessage,
