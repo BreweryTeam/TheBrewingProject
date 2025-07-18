@@ -30,7 +30,9 @@ import dev.jsinco.brewery.recipes.RecipeRegistryImpl;
 import dev.jsinco.brewery.structure.PlacedStructureRegistryImpl;
 import dev.jsinco.brewery.util.Logger;
 import dev.jsinco.brewery.util.MessageUtil;
-import io.papermc.paper.event.connection.configuration.AsyncPlayerConnectionConfigureEvent;
+import io.papermc.paper.connection.PlayerConfigurationConnection;
+import io.papermc.paper.connection.PlayerLoginConnection;
+import io.papermc.paper.event.connection.PlayerConnectionValidateLoginEvent;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import org.bukkit.GameMode;
@@ -266,13 +268,21 @@ public class PlayerEventListener implements Listener {
     }
 
     @EventHandler(ignoreCancelled = true)
-    public void onPlayerLogin(AsyncPlayerConnectionConfigureEvent event) {
-        PlayerProfile profile = event.getConnection().getProfile();
+    public void onPlayerLogin(PlayerConnectionValidateLoginEvent event) {
+        PlayerProfile profile = null;
+        if (event.getConnection() instanceof PlayerLoginConnection connection) {
+            profile = connection.getAuthenticatedProfile();
+        } else if (event.getConnection() instanceof PlayerConfigurationConnection connection) {
+            profile = connection.getProfile();
+        }
+        if (profile == null) {
+            return;
+        }
         DrunkState drunkState = drunksManager.getDrunkState(profile.getId());
         String playerName = profile.getName();
         if (drunksManager.isPassedOut(profile.getId())) {
             String kickEventMessage = Config.config().events().kickEvent().kickEventMessage();
-            event.getConnection().disconnect(
+            event.kickMessage(
                     MiniMessage.miniMessage().deserialize(kickEventMessage == null ? TranslationsConfig.KICK_EVENT_MESSAGE : kickEventMessage,
                             MessageUtil.getDrunkStateTagResolver(drunkState), Placeholder.unparsed("player_name", playerName == null ? "" : playerName)
                     )
@@ -280,7 +290,7 @@ public class PlayerEventListener implements Listener {
             return;
         }
         if (Config.config().events().drunkenJoinDeny() && drunkState != null && drunkState.alcohol() >= 85 && RANDOM.nextInt(15) <= drunkState.alcohol() - 85) {
-            event.getConnection().disconnect(
+            event.kickMessage(
                     MiniMessage.miniMessage().deserialize(TranslationsConfig.DRUNKEN_JOIN_DENY_MESSAGE,
                             MessageUtil.getDrunkStateTagResolver(drunkState), Placeholder.unparsed("player_name", playerName == null ? "" : playerName)
                     )
