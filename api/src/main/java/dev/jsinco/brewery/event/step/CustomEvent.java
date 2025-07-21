@@ -1,52 +1,42 @@
 package dev.jsinco.brewery.event.step;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableList;
 import dev.jsinco.brewery.event.DrunkEvent;
 import dev.jsinco.brewery.event.EventStep;
 import dev.jsinco.brewery.util.BreweryKey;
+import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
 import java.util.List;
 
-public final class CustomEvent implements DrunkEvent {
+public final class CustomEvent {
 
     private final List<EventStep> steps;
     private final int alcohol;
     private final int toxins;
     private final int probabilityWeight;
     private final String displayName;
-    private final BreweryKey key;
 
-    public CustomEvent(List<EventStep> steps, int alcohol, int toxins, int probabilityWeight, String displayName, BreweryKey key) {
+    public CustomEvent(List<EventStep> steps, int alcohol, int toxins, int probabilityWeight, @Nullable String displayName, BreweryKey key) {
         this.steps = steps;
         this.alcohol = alcohol;
         this.toxins = toxins;
         this.probabilityWeight = probabilityWeight;
         this.displayName = displayName;
-        this.key = key;
     }
 
-    @Override
     public int alcoholRequirement() {
         return alcohol;
     }
 
-    @Override
     public int toxinsRequirement() {
         return toxins;
     }
 
-    @Override
-    public BreweryKey key() {
-        return key;
-    }
-
-    @Override
     public String displayName() {
         return displayName;
     }
 
-    @Override
     public int probabilityWeight() {
         return probabilityWeight;
     }
@@ -55,17 +45,45 @@ public final class CustomEvent implements DrunkEvent {
         return List.copyOf(steps);
     }
 
+    /**
+     * Due to a deserialization limitation with okaeri, this class has to exist
+     *
+     * @param event
+     * @param key
+     */
+    public record Keyed(CustomEvent event, BreweryKey key) implements DrunkEvent {
+
+        @Override
+        public int alcoholRequirement() {
+            return event.alcoholRequirement();
+        }
+
+        @Override
+        public int toxinsRequirement() {
+            return event.toxinsRequirement();
+        }
+
+        @Override
+        public String displayName() {
+            return event.displayName();
+        }
+
+        @Override
+        public int probabilityWeight() {
+            return event.probabilityWeight();
+        }
+
+        public List<EventStep> getSteps() {
+            return event.getSteps();
+        }
+    }
+
     public static class Builder {
-        private final BreweryKey key;
-        private List<EventStep> steps = new ArrayList<>();
+        private final ImmutableList.Builder<EventStep> steps = new ImmutableList.Builder<>();
         private int alcohol = 0;
         private int toxins = 0;
         private int probabilityWeight = 0;
         private String displayName;
-
-        public Builder(BreweryKey key) {
-            this.key = Preconditions.checkNotNull(key);
-        }
 
         public Builder addStep(EventStep step) {
             steps.add(step);
@@ -93,8 +111,13 @@ public final class CustomEvent implements DrunkEvent {
         }
 
         public CustomEvent build() {
-            Preconditions.checkArgument(!steps.isEmpty(), "Steps cannot be empty");
-            return new CustomEvent(List.copyOf(steps), alcohol, toxins, probabilityWeight, displayName == null ? key.key() : displayName, key);
+            List<EventStep> builtSteps = steps.build();
+            Preconditions.checkArgument(!builtSteps.isEmpty(), "Steps cannot be empty");
+            return new CustomEvent(builtSteps, alcohol, toxins, probabilityWeight, displayName);
+        }
+
+        public CustomEvent.Keyed build(BreweryKey key) {
+            return new Keyed(build(), key);
         }
     }
 }

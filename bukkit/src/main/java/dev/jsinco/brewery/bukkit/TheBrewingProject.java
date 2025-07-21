@@ -35,9 +35,7 @@ import dev.jsinco.brewery.bukkit.util.BreweryTimeDataType;
 import dev.jsinco.brewery.configuration.Config;
 import dev.jsinco.brewery.configuration.OkaeriSerdesPackBuilder;
 import dev.jsinco.brewery.configuration.locale.TranslationsConfig;
-import dev.jsinco.brewery.configuration.serializers.EventRegistrySerializer;
-import dev.jsinco.brewery.configuration.serializers.IntervalSerializer;
-import dev.jsinco.brewery.configuration.serializers.SoundDefinitionSerializer;
+import dev.jsinco.brewery.configuration.serializers.*;
 import dev.jsinco.brewery.database.PersistenceException;
 import dev.jsinco.brewery.database.sql.Database;
 import dev.jsinco.brewery.database.sql.DatabaseDriver;
@@ -127,6 +125,8 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
         return new OkaeriSerdesPackBuilder()
                 .add(new BreweryLocationSerializer())
                 .add(new EventRegistrySerializer())
+                .add(new EventStepSerializer())
+                .add(new CustomEventSerializer())
                 .add(new SoundDefinitionSerializer())
                 .add(new IntervalSerializer())
                 .add(new MaterialSerializer())

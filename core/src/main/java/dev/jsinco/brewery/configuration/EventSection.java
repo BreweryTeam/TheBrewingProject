@@ -18,7 +18,6 @@ import lombok.Getter;
 import lombok.experimental.Accessors;
 
 import java.util.List;
-import java.util.function.Supplier;
 
 @Getter
 @Accessors(fluent = true)
@@ -42,7 +41,7 @@ public class EventSection extends OkaeriConfig {
     @Comment("Make your own events, see the wiki at https://hangar.papermc.io/BreweryTeam/TheBrewingProject/pages/Wiki/Configuration#-events")
     @CustomKey("custom-events")
     private CustomEventRegistry customEvents = CustomEventRegistry.builder()
-            .addEvent(new CustomEvent.Builder(BreweryKey.parse("memory_loss"))
+            .addEvent(new CustomEvent.Builder()
                     .alcoholRequirement(60)
                     .toxinsRequirement(90)
                     .probabilityWeight(5)
@@ -53,14 +52,14 @@ public class EventSection extends OkaeriConfig {
                             .addProperty(new ConsumeStep(-30, -15))
                             .build()
                     )
-                    .build()
+                    .build(BreweryKey.parse("memory_loss"))
             ).addEvent(
-                    new CustomEvent.Builder(BreweryKey.parse("tunnel_vision"))
+                    new CustomEvent.Builder()
                             .addStep(new EventStep.Builder().addProperty(new ApplyPotionEffect("darkness",
                                             new Interval(1, 1), new Interval(20 * Moment.SECOND, 20 * Moment.SECOND)
                                     )).build()
                             )
-                            .build()
+                            .build(BreweryKey.parse("tunnel_vision"))
             ).build();
 
     @Comment("What events will be randomly chosen over time when the player is drunk")
@@ -69,7 +68,7 @@ public class EventSection extends OkaeriConfig {
 
     @Comment("Teleport destinations for the 'teleport' event")
     @CustomKey("teleport-destinations")
-    private List<Supplier<BreweryLocation>> teleportDestinations = List.of();
+    private List<BreweryLocation.Supplier> teleportDestinations =List.of();
 
     @Comment("Deny joining the server if too drunk")
     @CustomKey("drunken-join-deny")

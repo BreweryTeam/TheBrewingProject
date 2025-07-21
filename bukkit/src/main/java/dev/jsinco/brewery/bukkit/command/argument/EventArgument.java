@@ -36,7 +36,7 @@ public class EventArgument implements CustomArgumentType.Converted<DrunkEvent, S
         if (namedDrunkEvent != null) {
             return namedDrunkEvent;
         }
-        CustomEvent customEvent = TheBrewingProject.getInstance().getCustomDrunkEventRegistry().getCustomEvent(key);
+        CustomEvent.Keyed customEvent = TheBrewingProject.getInstance().getCustomDrunkEventRegistry().getCustomEvent(key);
         if (customEvent != null) {
             return customEvent;
         }
@@ -45,7 +45,7 @@ public class EventArgument implements CustomArgumentType.Converted<DrunkEvent, S
 
     @Override
     public <S> CompletableFuture<Suggestions> listSuggestions(@NotNull CommandContext<S> context, SuggestionsBuilder builder) {
-        Stream<CustomEvent> customEventStream = TheBrewingProject.getInstance().getCustomDrunkEventRegistry().events().stream();
+        Stream<CustomEvent.Keyed> customEventStream = TheBrewingProject.getInstance().getCustomDrunkEventRegistry().events().stream();
         Streams.concat(Registry.DRUNK_EVENT.values().stream(), customEventStream)
                 .map(DrunkEvent::key)
                 .map(BreweryKey::key)
