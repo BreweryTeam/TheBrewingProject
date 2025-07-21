@@ -12,5 +12,8 @@ public record BreweryLocation(int x, int y, int z, UUID worldUuid) {
         return new BreweryLocation(x + x(), y + y(), z + z(), worldUuid);
     }
 
+    public interface Supplier {
 
+        BreweryLocation get();
+    }
 }

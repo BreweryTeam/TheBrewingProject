@@ -1,26 +1,27 @@
 package dev.jsinco.brewery.configuration.serializers;
 
 import dev.jsinco.brewery.moment.Interval;
-import org.checkerframework.checker.nullness.qual.Nullable;
-import org.jetbrains.annotations.NotNull;
-import org.spongepowered.configurate.ConfigurationNode;
-import org.spongepowered.configurate.serialize.SerializationException;
-import org.spongepowered.configurate.serialize.TypeSerializer;
+import eu.okaeri.configs.schema.GenericsDeclaration;
+import eu.okaeri.configs.serdes.DeserializationData;
+import eu.okaeri.configs.serdes.ObjectSerializer;
+import eu.okaeri.configs.serdes.SerializationData;
+import lombok.NonNull;
 
-import java.lang.reflect.Type;
+public class IntervalSerializer implements ObjectSerializer<Interval> {
 
-public class IntervalSerializer implements TypeSerializer<Interval> {
     @Override
-    public Interval deserialize(@NotNull Type type, @NotNull ConfigurationNode node) throws SerializationException {
-        String aString = node.getString();
-        return aString == null ? null : Interval.parseString(aString);
+    public boolean supports(@NonNull Class<? super Interval> type) {
+        return Interval.class == type;
     }
 
     @Override
-    public void serialize(@NotNull Type type, @Nullable Interval obj, @NotNull ConfigurationNode node) throws SerializationException {
-        if (obj == null) {
-            return;
-        }
-        node.set(obj.asString());
+    public void serialize(@NonNull Interval object, @NonNull SerializationData data, @NonNull GenericsDeclaration generics) {
+        data.setValue(object.asString());
+    }
+
+    @Override
+    public Interval deserialize(@NonNull DeserializationData data, @NonNull GenericsDeclaration generics) {
+        String aString = data.getValue(String.class);
+        return aString == null ? null : Interval.parseString(aString);
     }
 }

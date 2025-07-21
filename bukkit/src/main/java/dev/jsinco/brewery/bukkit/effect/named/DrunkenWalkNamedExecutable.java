@@ -1,36 +1,38 @@
 package dev.jsinco.brewery.bukkit.effect.named;
 
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
+import dev.jsinco.brewery.event.EventPropertyExecutable;
 import dev.jsinco.brewery.event.EventStep;
-import dev.jsinco.brewery.event.ExecutableEventStep;
 import dev.jsinco.brewery.event.NamedDrunkEvent;
 import dev.jsinco.brewery.util.Pair;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.util.Vector;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 import java.util.UUID;
 
-public class DrunkenWalkNamedExecutable implements ExecutableEventStep {
+public class DrunkenWalkNamedExecutable implements EventPropertyExecutable {
 
     private static final int DRUNKEN_WALK_DURATION = 400;
 
 
     @Override
-    public void execute(UUID contextPlayer, List<EventStep> events, int index) {
+    public @NotNull ExecutionResult execute(UUID contextPlayer, List<? extends EventStep> events, int index) {
         Player player = Bukkit.getPlayer(contextPlayer);
         if (player == null) {
-            return;
+            return ExecutionResult.CONTINUE;
         }
 
         int duration = RANDOM.nextInt(DRUNKEN_WALK_DURATION / 2, DRUNKEN_WALK_DURATION * 3 / 2);
         DrunkenWalkHandler drunkenWalkHandler = new DrunkenWalkHandler(duration, player);
         Bukkit.getScheduler().runTaskTimer(TheBrewingProject.getInstance(), drunkenWalkHandler::tick, 0, 1);
         TheBrewingProject.getInstance().getActiveEventsRegistry().registerActiveEvent(player.getUniqueId(), NamedDrunkEvent.fromKey("drunken_walk"), duration);
+        return ExecutionResult.CONTINUE;
     }
 
     static class DrunkenWalkHandler {
@@ -99,6 +101,11 @@ public class DrunkenWalkNamedExecutable implements ExecutableEventStep {
             Vector newPush = currentPush.clone().multiply(interpolation).add(nextPush.clone().multiply(1D - interpolation));
             player.setVelocity(newPush);
         }
+    }
+
+    @Override
+    public int priority() {
+        return -1;
     }
 
 }

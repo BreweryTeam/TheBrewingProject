@@ -13,6 +13,7 @@ plugins {
 repositories {
     mavenCentral()
     maven("https://jitpack.io")
+    maven("https://storehouse.okaeri.eu/repository/maven-public/")
 }
 
 dependencies {
@@ -25,7 +26,7 @@ dependencies {
     compileOnly(libs.joml)
     compileOnly(libs.adventure.api)
     compileOnly(libs.adventure.text.minimessage)
-    compileOnly(libs.configurate)
+    api(libs.okaeri)
     implementation(libs.simple.yaml)
     implementation(libs.hikaricp)
 
@@ -42,7 +43,6 @@ dependencies {
     testImplementation(libs.joml)
     testImplementation(libs.guava)
     testImplementation(libs.sqlite.jdbc)
-    testImplementation(libs.configurate)
 
     testAnnotationProcessor(libs.lombok)
 }

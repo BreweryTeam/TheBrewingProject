@@ -1,40 +1,12 @@
 package dev.jsinco.brewery.bukkit.effect.event;
 
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
-import dev.jsinco.brewery.bukkit.effect.named.ChickenNamedExecutable;
-import dev.jsinco.brewery.bukkit.effect.named.DrunkMessageNamedExecutable;
-import dev.jsinco.brewery.bukkit.effect.named.DrunkenWalkNamedExecutable;
-import dev.jsinco.brewery.bukkit.effect.named.FeverNamedExecutable;
-import dev.jsinco.brewery.bukkit.effect.named.HallucinationNamedExecutable;
-import dev.jsinco.brewery.bukkit.effect.named.KaboomNamedExecutable;
-import dev.jsinco.brewery.bukkit.effect.named.NauseaNamedExecutable;
-import dev.jsinco.brewery.bukkit.effect.named.PassOutNamedExecutable;
-import dev.jsinco.brewery.bukkit.effect.named.PukeNamedExecutable;
-import dev.jsinco.brewery.bukkit.effect.named.StumbleNamedExecutable;
-import dev.jsinco.brewery.bukkit.effect.named.TeleportNamedExecutable;
-import dev.jsinco.brewery.bukkit.effect.step.ApplyPotionEffectExecutable;
-import dev.jsinco.brewery.bukkit.effect.step.ConditionalWaitStepExecutable;
-import dev.jsinco.brewery.bukkit.effect.step.ConsumeStepExecutable;
-import dev.jsinco.brewery.bukkit.effect.step.CustomEventExecutable;
-import dev.jsinco.brewery.bukkit.effect.step.SendCommandExecutable;
-import dev.jsinco.brewery.bukkit.effect.step.TeleportExecutable;
-import dev.jsinco.brewery.bukkit.effect.step.WaitStepExecutable;
-import dev.jsinco.brewery.event.EventStep;
-import dev.jsinco.brewery.event.EventStepRegistry;
-import dev.jsinco.brewery.event.ExecutableEventStep;
-import dev.jsinco.brewery.event.NamedDrunkEvent;
-import dev.jsinco.brewery.event.step.ApplyPotionEffect;
-import dev.jsinco.brewery.event.step.ConditionalWaitStep;
-import dev.jsinco.brewery.event.step.ConsumeStep;
-import dev.jsinco.brewery.event.step.CustomEvent;
-import dev.jsinco.brewery.event.step.SendCommand;
-import dev.jsinco.brewery.event.step.Teleport;
-import dev.jsinco.brewery.event.step.WaitStep;
+import dev.jsinco.brewery.bukkit.effect.named.*;
+import dev.jsinco.brewery.bukkit.effect.step.*;
+import dev.jsinco.brewery.event.*;
+import dev.jsinco.brewery.event.step.*;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 public class DrunkEventExecutor {
 
@@ -53,60 +25,43 @@ public class DrunkEventExecutor {
         registry.register(NamedDrunkEvent.fromKey("puke"), PukeNamedExecutable::new);
         registry.register(NamedDrunkEvent.fromKey("stumble"), StumbleNamedExecutable::new);
         registry.register(NamedDrunkEvent.fromKey("teleport"), TeleportNamedExecutable::new);
-        registry.register(ApplyPotionEffect.class, o -> {
-            ApplyPotionEffect e = (ApplyPotionEffect) o;
-            return new ApplyPotionEffectExecutable(e.potionEffectName(), e.amplifierBounds(), e.durationBounds());
-        });
-        registry.register(ConditionalWaitStep.class, o -> {
-            ConditionalWaitStep e = (ConditionalWaitStep) o;
-            return new ConditionalWaitStepExecutable(e.getCondition());
-        });
-        registry.register(ConsumeStep.class, o -> {
-            ConsumeStep e = (ConsumeStep) o;
-            return new ConsumeStepExecutable(e.alcohol(), e.toxins());
-        });
-        registry.register(SendCommand.class, o -> {
-            SendCommand e = (SendCommand) o;
-            return new SendCommandExecutable(e.command(), e.senderType());
-        });
-        registry.register(Teleport.class, o -> {
-            Teleport e = (Teleport) o;
-            return new TeleportExecutable(e.location());
-        });
-        registry.register(WaitStep.class, o -> {
-            WaitStep e = (WaitStep) o;
-            return new WaitStepExecutable(e.durationTicks());
-        });
-        registry.register(CustomEvent.class, o -> {
-            CustomEvent e = (CustomEvent) o;
-            return new CustomEventExecutable(e.getSteps());
-        });
+        registry.register(ApplyPotionEffect.class, stepProperty -> new ApplyPotionEffectExecutable(stepProperty.potionEffectName(), stepProperty.amplifierBounds(), stepProperty.durationBounds()));
+        registry.register(ConditionalWaitStep.class, stepProperty -> new ConditionalWaitStepExecutable(stepProperty.getCondition()));
+        registry.register(ConsumeStep.class, stepProperty -> new ConsumeStepExecutable(stepProperty.alcohol(), stepProperty.toxins()));
+        registry.register(SendCommand.class, stepProperty -> new SendCommandExecutable(stepProperty.command(), stepProperty.senderType()));
+        registry.register(Teleport.class, stepProperty -> new TeleportExecutable(stepProperty.location()));
+        registry.register(WaitStep.class, stepProperty -> new WaitStepExecutable(stepProperty.durationTicks()));
+        CustomEventRegistry eventRegistry = TheBrewingProject.getInstance().getCustomDrunkEventRegistry();
+        registry.register(CustomEventStep.class, stepProperty -> new CustomEventExecutable(
+                eventRegistry.getCustomEvent(stepProperty.customEventKey()).getSteps()
+        ));
     }
 
-    public void doDrunkEvent(UUID playerUuid, EventStep event) {
-        doDrunkEvents(playerUuid, List.of(event));
+    public void doDrunkEvent(UUID playerUuid, DrunkEvent event) {
+        if (event instanceof NamedDrunkEvent namedDrunkEvent) {
+            doDrunkEvents(playerUuid, List.of(
+                    new EventStep.Builder().addProperty(namedDrunkEvent).build()
+            ));
+        } else if (event instanceof CustomEvent customEvent) {
+            doDrunkEvents(playerUuid, customEvent.getSteps());
+        }
     }
 
-    public void doDrunkEvents(UUID playerUuid, List<EventStep> events) {
+    public void doDrunkEvents(UUID playerUuid, List<? extends EventStep> events) {
         EventStepRegistry registry = TheBrewingProject.getInstance().getEventStepRegistry();
 
         for (int i = 0; i < events.size(); i++) {
             final EventStep event = events.get(i);
-
-            ExecutableEventStep executableEventStep = registry.upgrade(event);
-            if (executableEventStep == null) {
-                throw new IllegalStateException("No ExecutableEventStep found for EventStep: " + event.getClass().getName());
+            List<EventPropertyExecutable> properties = event.properties().stream()
+                    .map(registry::toExecutable)
+                    .sorted(Comparator.comparing(EventPropertyExecutable::priority, Integer::compareTo))
+                    .toList();
+            for (EventPropertyExecutable eventPropertyExecutable : properties) {
+                if (eventPropertyExecutable.execute(playerUuid, events, i) == EventPropertyExecutable.ExecutionResult.STOP_EXECUTION) {
+                    return;
+                }
             }
-            executableEventStep.execute(playerUuid, events, i);
         }
-    }
-
-    public void onPlayerJoin(UUID playerUuid) {
-        List<EventStep> eventSteps = onJoinExecutions.get(playerUuid);
-        if (eventSteps == null) {
-            return;
-        }
-        doDrunkEvents(playerUuid, eventSteps);
     }
 
     public void add(UUID playerUuid, List<EventStep> events) {
@@ -119,5 +74,13 @@ public class DrunkEventExecutor {
 
     public void clear() {
         onJoinExecutions.clear();
+    }
+
+    public void onPlayerJoin(UUID playerUuid) {
+        List<EventStep> eventStepList = onJoinExecutions.get(playerUuid);
+        if (eventStepList == null) {
+            return;
+        }
+        doDrunkEvents(playerUuid, eventStepList);
     }
 }

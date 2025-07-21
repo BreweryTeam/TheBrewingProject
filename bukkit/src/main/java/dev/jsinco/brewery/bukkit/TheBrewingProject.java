@@ -33,6 +33,7 @@ import dev.jsinco.brewery.bukkit.structure.StructureReader;
 import dev.jsinco.brewery.bukkit.structure.StructureRegistry;
 import dev.jsinco.brewery.bukkit.util.BreweryTimeDataType;
 import dev.jsinco.brewery.configuration.Config;
+import dev.jsinco.brewery.configuration.OkaeriSerdesPackBuilder;
 import dev.jsinco.brewery.configuration.locale.TranslationsConfig;
 import dev.jsinco.brewery.configuration.serializers.EventRegistrySerializer;
 import dev.jsinco.brewery.configuration.serializers.IntervalSerializer;
@@ -44,19 +45,16 @@ import dev.jsinco.brewery.effect.DrunksManagerImpl;
 import dev.jsinco.brewery.effect.text.DrunkTextRegistry;
 import dev.jsinco.brewery.event.CustomEventRegistry;
 import dev.jsinco.brewery.event.EventStepRegistry;
-import dev.jsinco.brewery.moment.Interval;
 import dev.jsinco.brewery.recipes.RecipeReader;
 import dev.jsinco.brewery.recipes.RecipeRegistryImpl;
-import dev.jsinco.brewery.sound.SoundDefinition;
 import dev.jsinco.brewery.structure.MultiblockStructure;
 import dev.jsinco.brewery.structure.PlacedStructureRegistryImpl;
 import dev.jsinco.brewery.structure.StructureMeta;
 import dev.jsinco.brewery.structure.StructureType;
 import dev.jsinco.brewery.util.BreweryKey;
-import dev.jsinco.brewery.util.Holder;
 import dev.jsinco.brewery.util.Logger;
 import dev.jsinco.brewery.util.Util;
-import io.leangen.geantyref.TypeToken;
+import eu.okaeri.configs.serdes.OkaeriSerdesPack;
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
 import lombok.Getter;
 import org.bukkit.Bukkit;
@@ -64,7 +62,6 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.spongepowered.configurate.serialize.TypeSerializerCollection;
 
 import java.io.File;
 import java.io.IOException;
@@ -126,14 +123,13 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
         this.drunkEventExecutor = new DrunkEventExecutor();
     }
 
-    private TypeSerializerCollection serializers() {
-        return TypeSerializerCollection.builder()
-                .register(new TypeToken<>() {
-                }, new BreweryLocationSerializer())
-                .register(CustomEventRegistry.class, new EventRegistrySerializer())
-                .register(SoundDefinition.class, new SoundDefinitionSerializer())
-                .register(Interval.class, new IntervalSerializer())
-                .register(Holder.Material.class, new MaterialSerializer())
+    private OkaeriSerdesPack serializers() {
+        return new OkaeriSerdesPackBuilder()
+                .add(new BreweryLocationSerializer())
+                .add(new EventRegistrySerializer())
+                .add(new SoundDefinitionSerializer())
+                .add(new IntervalSerializer())
+                .add(new MaterialSerializer())
                 .build();
     }
 

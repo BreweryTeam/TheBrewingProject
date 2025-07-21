@@ -26,6 +26,7 @@ repositories {
     maven("https://repo.dmulloy2.net/repository/public/")
     maven("https://repo.extendedclip.com/releases/")
     maven("https://nexus.phoenixdevt.fr/repository/maven-public/")
+    maven("https://storehouse.okaeri.eu/repository/maven-public/")
 }
 
 dependencies {
@@ -36,7 +37,6 @@ dependencies {
 
     // libraries
     compileOnly(libs.protocolLib)
-    compileOnly(libs.configurate)
     implementation(libs.schem.reader)
     implementation(libs.simple.yaml)
 
@@ -70,7 +70,6 @@ dependencies {
     testImplementation(libs.adventure.nbt)
     testImplementation(libs.mockbukkit)
     testImplementation(libs.sqlite.jdbc)
-    testImplementation(libs.configurate)
 
     testAnnotationProcessor(libs.lombok)
 }
@@ -118,7 +117,8 @@ tasks {
             "net.kyori.adventure.nbt",
             "net.kyori.examination",
             "org.simpleyaml",
-            "org.yaml.snakeyaml"
+            "org.yaml.snakeyaml",
+            "eu.okaeri"
         ).forEach { relocate(it, "${project.group}.lib.$it") }
     }
 }

@@ -1,5 +1,8 @@
 package dev.jsinco.brewery.event;
 
+import com.google.common.base.Preconditions;
+import org.jetbrains.annotations.NotNull;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -11,45 +14,45 @@ import java.util.Map;
 public final class EventStepRegistry {
 
     @FunctionalInterface
-    public interface EventStepFactory<T extends EventStep> {
-        T create(EventStep original);
+    public interface EventStepFactory<T extends EventStepProperty> {
+        EventPropertyExecutable create(T step);
     }
 
-    public interface NamedEventStepFactory<T extends EventStep> {
-        T create();
+    public interface NamedEventStepFactory {
+        EventPropertyExecutable create();
     }
 
-    private final Map<Class<? extends EventStep>, EventStepFactory<? extends EventStep>> factories = new HashMap<>();
-    private final Map<NamedDrunkEvent, NamedEventStepFactory<? extends EventStep>> namedFactories = new HashMap<>();
+    private final Map<Class<? extends EventStepProperty>, EventStepFactory<?>> factories = new HashMap<>();
+    private final Map<NamedDrunkEvent, NamedEventStepFactory> namedFactories = new HashMap<>();
 
-    public <T extends EventStep, K extends EventStep> void register(Class<T> baseClass, EventStepFactory<K> factory) {
+    public <T extends EventStepProperty> void register(Class<T> baseClass, EventStepFactory<T> factory) {
         if (factories.containsKey(baseClass)) {
             throw new IllegalArgumentException("Factory for " + baseClass.getName() + " is already registered.");
         }
         factories.put(baseClass, factory);
     }
 
-    public <K extends EventStep> void register(NamedDrunkEvent key, NamedEventStepFactory<K> factory) {
+    public void register(NamedDrunkEvent key, NamedEventStepFactory factory) {
         if (namedFactories.containsKey(key)) {
             throw new IllegalArgumentException("Factory for " + key + " is already registered.");
         }
         namedFactories.put(key, factory);
     }
 
-    @SuppressWarnings("unchecked")
-    public <T extends ExecutableEventStep> T upgrade(EventStep original) {
-        if (original instanceof NamedDrunkEvent namedDrunkEvent) {
-            return upgrade(namedDrunkEvent);
+    public @NotNull <T extends EventStepProperty> EventPropertyExecutable toExecutable(T step) {
+        if (step instanceof NamedDrunkEvent namedDrunkEvent) {
+            return toExecutable(namedDrunkEvent);
         }
 
-        EventStepFactory<T> factory = (EventStepFactory<T>) factories.get(original.getClass());
-        return factory != null ? factory.create(original) : null;
+        EventStepFactory<T> factory = (EventStepFactory<T>) factories.get(step.getClass());
+        Preconditions.checkArgument(factory != null, "No ExecutableEventStep found for EventStep: " + step.getClass().getName());
+        return factory.create(step);
     }
 
-    @SuppressWarnings("unchecked")
-    public <T extends ExecutableEventStep> T upgrade(NamedDrunkEvent original) {
-        NamedEventStepFactory<T> factory = (NamedEventStepFactory<T>) namedFactories.get(original);
-        return factory != null ? factory.create() : null;
+    public @NotNull EventPropertyExecutable toExecutable(NamedDrunkEvent step) {
+        NamedEventStepFactory factory = namedFactories.get(step);
+        Preconditions.checkArgument(factory != null, "No ExecutableEventStep found for EventStep: " + step.getClass().getName());
+        return factory.create();
     }
 }
 

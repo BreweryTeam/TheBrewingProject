@@ -9,7 +9,7 @@ import dev.jsinco.brewery.util.Registry;
 
 import java.util.Locale;
 
-public class NamedDrunkEvent implements DrunkEvent, BreweryKeyed {
+public class NamedDrunkEvent implements DrunkEvent, BreweryKeyed, EventStepProperty {
 
 
     private final String name;
@@ -22,7 +22,6 @@ public class NamedDrunkEvent implements DrunkEvent, BreweryKeyed {
 
     @Expose(serialize = false, deserialize = false)
     private BreweryKey key;
-
 
 
     public NamedDrunkEvent(String name, int alcoholRequirement, int toxinsRequirement, int probabilityWeight) {

@@ -1,33 +1,35 @@
 package dev.jsinco.brewery.bukkit.effect.named;
 
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
+import dev.jsinco.brewery.event.EventPropertyExecutable;
 import dev.jsinco.brewery.event.EventStep;
-import dev.jsinco.brewery.event.ExecutableEventStep;
 import dev.jsinco.brewery.event.NamedDrunkEvent;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.util.Vector;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.Random;
 import java.util.UUID;
 
-public class StumbleNamedExecutable implements ExecutableEventStep {
+public class StumbleNamedExecutable implements EventPropertyExecutable {
 
     private static final int STUMBLE_DURATION = 10;
 
     @Override
-    public void execute(UUID contextPlayer, List<EventStep> events, int index) {
+    public @NotNull ExecutionResult execute(UUID contextPlayer, List<? extends EventStep> events, int index) {
         Player player = Bukkit.getPlayer(contextPlayer);
         if (player == null) {
-            return;
+            return ExecutionResult.CONTINUE;
         }
 
         int duration = RANDOM.nextInt(STUMBLE_DURATION / 2, STUMBLE_DURATION * 3 / 2 + 1);
         StumbleHandler stumbleHandler = new StumbleHandler(duration, player);
         TheBrewingProject.getInstance().getActiveEventsRegistry().registerActiveEvent(player.getUniqueId(), NamedDrunkEvent.fromKey("stumble"), duration);
         Bukkit.getScheduler().runTaskTimer(TheBrewingProject.getInstance(), stumbleHandler::doStumble, 0, 1);
+        return ExecutionResult.CONTINUE;
     }
 
     static class StumbleHandler {
@@ -71,5 +73,10 @@ public class StumbleNamedExecutable implements ExecutableEventStep {
                     .add(pushDirection1.clone().multiply(1 - progress));
             player.setVelocity(pushDirection);
         }
+    }
+
+    @Override
+    public int priority() {
+        return -1;
     }
 }
