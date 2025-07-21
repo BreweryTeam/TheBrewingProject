@@ -11,21 +11,22 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
+import java.util.Collections;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 public class RecipeRegistryImpl<I> implements RecipeRegistry<I> {
 
 
-    private Map<String, Recipe<I>> recipes = new HashMap<>();
+    private Map<String, Recipe<I>> recipes = new ConcurrentHashMap<>();
     private Map<String, RecipeResult<I>> defaultRecipes = new HashMap<>();
     private List<RecipeResult<I>> defaultRecipeList = new ArrayList<>();
-    private Set<Ingredient> allIngredients = new HashSet<>();
+    private Set<Ingredient> allIngredients = Collections.newSetFromMap(new ConcurrentHashMap<>());
 
     private static final Random RANDOM = new Random();
 

@@ -74,6 +74,7 @@ public class MmoItemsIntegration implements ItemIntegration, Listener {
     @Override
     public void initialize() {
         Bukkit.getPluginManager().registerEvents(this, TheBrewingProject.getInstance());
+        this.initialized = new CompletableFuture<>();
     }
 
     @EventHandler

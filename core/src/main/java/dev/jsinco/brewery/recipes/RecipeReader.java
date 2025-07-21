@@ -1,7 +1,6 @@
 package dev.jsinco.brewery.recipes;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableMap;
 import dev.jsinco.brewery.brew.AgeStepImpl;
 import dev.jsinco.brewery.brew.BrewingStep;
 import dev.jsinco.brewery.brew.CookStepImpl;
@@ -10,7 +9,6 @@ import dev.jsinco.brewery.brew.MixStepImpl;
 import dev.jsinco.brewery.configuration.Config;
 import dev.jsinco.brewery.ingredient.IngredientManager;
 import dev.jsinco.brewery.moment.PassedMoment;
-import dev.jsinco.brewery.recipe.Recipe;
 import dev.jsinco.brewery.util.BreweryKey;
 import dev.jsinco.brewery.util.FutureUtil;
 import dev.jsinco.brewery.util.Logger;
@@ -24,7 +22,6 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -43,7 +40,7 @@ public class RecipeReader<I> {
         this.ingredientManager = ingredientManager;
     }
 
-    public CompletableFuture<Map<String, Recipe<I>>> readRecipes() {
+    public List<CompletableFuture<RecipeImpl<I>>> readRecipes() {
         Path mainDir = folder.toPath();
         YamlFile recipesFile = new YamlFile(mainDir.resolve("recipes.yml").toFile());
 
@@ -54,7 +51,7 @@ public class RecipeReader<I> {
         }
 
         ConfigurationSection recipesSection = recipesFile.getConfigurationSection("recipes");
-        List<CompletableFuture<RecipeImpl<I>>> futures = recipesSection.getKeys(false)
+        return recipesSection.getKeys(false)
                 .stream()
                 .map(key -> getRecipe(recipesSection.getConfigurationSection(key), key).handleAsync((recipe, exception) -> {
                             if (exception != null) {
@@ -66,14 +63,6 @@ public class RecipeReader<I> {
                         }, executor) // Single thread executor to make reading stacktraces possible
                 )
                 .toList();
-        return FutureUtil.mergeFutures(futures)
-                .thenApplyAsync(recipes -> {
-                    ImmutableMap.Builder<String, Recipe<I>> recipesMap = new ImmutableMap.Builder<>();
-                    recipes.stream()
-                            .filter(Objects::nonNull)
-                            .forEach(recipe -> recipesMap.put(recipe.getRecipeName(), recipe));
-                    return recipesMap.build();
-                });
     }
 
     /**

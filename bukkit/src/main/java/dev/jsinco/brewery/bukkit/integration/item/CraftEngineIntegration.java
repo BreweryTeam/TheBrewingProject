@@ -57,7 +57,6 @@ public class CraftEngineIntegration implements ItemIntegration, Listener {
     public void initialize() {
         this.initializedFuture = new CompletableFuture<>();
         Bukkit.getPluginManager().registerEvents(this, TheBrewingProject.getInstance());
-        Bukkit.getScheduler().runTask(TheBrewingProject.getInstance(), () -> initializedFuture.completeExceptionally(new TimeoutException()));
     }
 
     @EventHandler

@@ -60,13 +60,6 @@ public class OraxenIntegration implements ItemIntegration, Listener {
     public void initialize() {
         Bukkit.getPluginManager().registerEvents(this, TheBrewingProject.getInstance());
         this.initializedFuture = new CompletableFuture<>();
-
-        //Bukkit.getScheduler().runTask(TheBrewingProject.getInstance(), () -> initializedFuture.completeExceptionally(new TimeoutException()));
-        CompletableFuture.delayedExecutor(60, TimeUnit.SECONDS).execute(() -> {
-            if (!initializedFuture.isDone()) {
-                initializedFuture.completeExceptionally(new TimeoutException("OraxenItemsLoadedEvent wasn't fired in time"));
-            }
-        });
     }
 
     @EventHandler
