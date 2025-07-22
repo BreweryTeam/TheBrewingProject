@@ -15,7 +15,6 @@ import dev.jsinco.brewery.util.MessageUtil;
 import dev.jsinco.brewery.util.Registry;
 import lombok.Getter;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.title.Title;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Entity;
@@ -159,7 +158,7 @@ public class RecipeEffects {
             player.sendActionBar(BukkitMessageUtil.compilePlayerMessage(actionBar, player, drunksManager, this.alcohol));
         } else {
             player.sendActionBar(
-                    MiniMessage.miniMessage().deserialize(TranslationsConfig.INFO_AFTER_DRINK,
+                    MessageUtil.mm(TranslationsConfig.INFO_AFTER_DRINK,
                             MessageUtil.getDrunkStateTagResolver(drunksManager.getDrunkState(player.getUniqueId()))
                     )
             );

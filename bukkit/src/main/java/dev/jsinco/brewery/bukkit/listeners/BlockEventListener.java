@@ -23,14 +23,15 @@ import dev.jsinco.brewery.structure.PlacedStructureRegistryImpl;
 import dev.jsinco.brewery.structure.StructureMeta;
 import dev.jsinco.brewery.structure.StructureType;
 import dev.jsinco.brewery.util.Logger;
+import dev.jsinco.brewery.util.MessageUtil;
 import dev.jsinco.brewery.util.Pair;
 import dev.jsinco.brewery.vector.BreweryLocation;
-import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.ExplosionResult;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.type.WallSign;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -86,10 +87,10 @@ public class BlockEventListener implements Listener {
             return;
         }
         if (!event.getPlayer().hasPermission("brewery.barrel.create")) {
-            event.getPlayer().sendMessage(MiniMessage.miniMessage().deserialize(TranslationsConfig.BARREL_CREATE_DENIED));
+            MessageUtil.msg(event.getPlayer(), TranslationsConfig.BARREL_CREATE_DENIED);
             return;
         }
-        event.getPlayer().sendMessage(MiniMessage.miniMessage().deserialize(TranslationsConfig.BARREL_CREATE));
+        MessageUtil.msg(event.getPlayer(), TranslationsConfig.BARREL_CREATE);
         BukkitBarrel barrel = new BukkitBarrel(BukkitAdapter.toLocation(placedBreweryStructure.getUnique()), placedBreweryStructure, placedBreweryStructure.getStructure().getMeta(StructureMeta.INVENTORY_SIZE), placedStructurePair.second());
         placedBreweryStructure.setHolder(barrel);
         placedStructureRegistry.registerStructure(placedBreweryStructure);
@@ -110,12 +111,14 @@ public class BlockEventListener implements Listener {
                 if (!placedStructureRegistry.getStructures(placedBreweryStructureOptional.get().first().positions()).isEmpty()) {
                     continue;
                 }
-                if (!placeEvent.getPlayer().hasPermission("brewery.distillery.create")) {
-                    placeEvent.getPlayer().sendMessage(MiniMessage.miniMessage().deserialize(TranslationsConfig.DISTILLERY_CREATE_DENIED));
+
+                Player player = placeEvent.getPlayer();
+                if (!player.hasPermission("brewery.distillery.create")) {
+                    MessageUtil.msg(player, TranslationsConfig.DISTILLERY_CREATE_DENIED);
                     return;
                 }
                 registerDistillery(placedBreweryStructureOptional.get().first());
-                placeEvent.getPlayer().sendMessage(MiniMessage.miniMessage().deserialize(TranslationsConfig.DISTILLERY_CREATE));
+                MessageUtil.msg(player, TranslationsConfig.DISTILLERY_CREATE);
                 return;
             }
         }

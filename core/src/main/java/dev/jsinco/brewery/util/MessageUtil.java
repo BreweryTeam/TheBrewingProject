@@ -1,12 +1,17 @@
 package dev.jsinco.brewery.util;
 
-import dev.jsinco.brewery.brew.*;
+import dev.jsinco.brewery.brew.Brew;
+import dev.jsinco.brewery.brew.BrewQuality;
+import dev.jsinco.brewery.brew.BrewScore;
+import dev.jsinco.brewery.brew.BrewingStep;
+import dev.jsinco.brewery.brew.PartialBrewScore;
 import dev.jsinco.brewery.configuration.Config;
 import dev.jsinco.brewery.configuration.locale.TranslationsConfig;
 import dev.jsinco.brewery.effect.DrunkState;
 import dev.jsinco.brewery.effect.DrunkStateImpl;
 import dev.jsinco.brewery.recipe.RecipeRegistry;
 import dev.jsinco.brewery.recipes.BrewScoreImpl;
+import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentLike;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -27,6 +32,22 @@ import java.util.stream.Stream;
 public class MessageUtil {
 
     private static final char SKULL = '\u2620';
+
+    public static Component mm(String msg) {
+        return MiniMessage.miniMessage().deserialize(msg);
+    }
+    
+    public static Component mm(String msg, TagResolver... resolvers) {
+        return MiniMessage.miniMessage().deserialize(msg, resolvers);
+    }
+
+    public static void msg(Audience audience, String msg) {
+        audience.sendMessage(mm(msg));
+    }
+
+    public static void msg(Audience audience, String msg, TagResolver... resolvers) {
+        audience.sendMessage(mm(msg, resolvers));
+    }
 
     public static TagResolver getScoreTagResolver(@NotNull BrewScore score) {
         BrewQuality quality = score.brewQuality();
@@ -84,7 +105,7 @@ public class MessageUtil {
         for (int i = 0; i < brewingSteps.size(); i++) {
             BrewingStep brewingStep = brewingSteps.get(i);
             String line = (detailed ? TranslationsConfig.DETAILED_BREW_TOOLTIP : TranslationsConfig.BREW_TOOLTIP_BREWING).get(brewingStep.stepType().name().toLowerCase(Locale.ROOT));
-            streamBuilder.add(MiniMessage.miniMessage().deserialize(line, MessageUtil.getBrewStepTagResolver(brewingStep, score.getPartialScores(i), score.brewDifficulty())));
+            streamBuilder.add(MessageUtil.mm(line, MessageUtil.getBrewStepTagResolver(brewingStep, score.getPartialScores(i), score.brewDifficulty())));
         }
         return streamBuilder.build();
     }

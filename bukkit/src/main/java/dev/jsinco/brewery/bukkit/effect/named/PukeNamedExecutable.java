@@ -5,13 +5,19 @@ import dev.jsinco.brewery.configuration.Config;
 import dev.jsinco.brewery.event.EventPropertyExecutable;
 import dev.jsinco.brewery.event.EventStep;
 import dev.jsinco.brewery.event.NamedDrunkEvent;
+import dev.jsinco.brewery.util.executor.BreweryTask;
+import dev.jsinco.brewery.util.executor.Executors;
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
+import org.bukkit.World;
 import org.bukkit.*;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
-import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
 
@@ -31,7 +37,7 @@ public class PukeNamedExecutable implements EventPropertyExecutable {
 
         PukeHandler pukeHandler = new PukeHandler(Config.config().puke().pukeTime(), player);
         TheBrewingProject.getInstance().getActiveEventsRegistry().registerActiveEvent(player.getUniqueId(), NamedDrunkEvent.fromKey("puke"), Config.config().puke().pukeTime());
-        Bukkit.getScheduler().runTaskTimer(TheBrewingProject.getInstance(), pukeHandler::tick, 0, 1);
+        Executors.getInstance().syncRepeating(0, 1, pukeHandler::tick);
         return ExecutionResult.CONTINUE;
     }
 
@@ -45,7 +51,7 @@ public class PukeNamedExecutable implements EventPropertyExecutable {
         }
 
 
-        public void tick(BukkitTask task) {
+        public void tick(BreweryTask task) {
             if (!player.isOnline() || countDown-- <= 0) {
                 task.cancel();
                 return;

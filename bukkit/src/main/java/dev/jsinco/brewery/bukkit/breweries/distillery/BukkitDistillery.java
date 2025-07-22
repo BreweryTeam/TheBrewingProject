@@ -17,11 +17,11 @@ import dev.jsinco.brewery.database.PersistenceException;
 import dev.jsinco.brewery.moment.Moment;
 import dev.jsinco.brewery.structure.StructureMeta;
 import dev.jsinco.brewery.util.Logger;
+import dev.jsinco.brewery.util.MessageUtil;
 import dev.jsinco.brewery.util.Pair;
 import dev.jsinco.brewery.vector.BreweryLocation;
 import lombok.Getter;
 import net.kyori.adventure.sound.Sound;
-import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.entity.HumanEntity;
@@ -96,7 +96,7 @@ public class BukkitDistillery implements Distillery<BukkitDistillery, ItemStack,
 
     private boolean openInventory(BrewInventory inventory, Player player) {
         if (!player.hasPermission("brewery.distillery.access")) {
-            player.sendMessage(MiniMessage.miniMessage().deserialize(TranslationsConfig.DISTILLERY_ACCESS_DENIED));
+            MessageUtil.msg(player, TranslationsConfig.DISTILLERY_ACCESS_DENIED);
             return false;
         }
         if (inventoryUnpopulated()) {
@@ -116,7 +116,7 @@ public class BukkitDistillery implements Distillery<BukkitDistillery, ItemStack,
             return false;
         }
         if (!player.hasPermission("brewery.distillery.access")) {
-            player.sendMessage(MiniMessage.miniMessage().deserialize(TranslationsConfig.DISTILLERY_ACCESS_DENIED));
+            MessageUtil.msg(player, TranslationsConfig.DISTILLERY_ACCESS_DENIED);
             return false;
         }
         return inventoryAllows(item);

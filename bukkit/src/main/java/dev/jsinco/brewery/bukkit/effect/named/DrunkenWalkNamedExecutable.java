@@ -5,9 +5,10 @@ import dev.jsinco.brewery.event.EventPropertyExecutable;
 import dev.jsinco.brewery.event.EventStep;
 import dev.jsinco.brewery.event.NamedDrunkEvent;
 import dev.jsinco.brewery.util.Pair;
+import dev.jsinco.brewery.util.executor.BreweryTask;
+import dev.jsinco.brewery.util.executor.Executors;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
-import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
 
@@ -30,7 +31,7 @@ public class DrunkenWalkNamedExecutable implements EventPropertyExecutable {
 
         int duration = RANDOM.nextInt(DRUNKEN_WALK_DURATION / 2, DRUNKEN_WALK_DURATION * 3 / 2);
         DrunkenWalkHandler drunkenWalkHandler = new DrunkenWalkHandler(duration, player);
-        Bukkit.getScheduler().runTaskTimer(TheBrewingProject.getInstance(), drunkenWalkHandler::tick, 0, 1);
+        Executors.getInstance().syncRepeating(0, 1, drunkenWalkHandler::tick);
         TheBrewingProject.getInstance().getActiveEventsRegistry().registerActiveEvent(player.getUniqueId(), NamedDrunkEvent.fromKey("drunken_walk"), duration);
         return ExecutionResult.CONTINUE;
     }
@@ -74,7 +75,7 @@ public class DrunkenWalkNamedExecutable implements EventPropertyExecutable {
             return output;
         }
 
-        public void tick(BukkitTask task) {
+        public void tick(BreweryTask task) {
             if (duration <= timestamp++ || currentPush == null) {
                 task.cancel();
                 return;

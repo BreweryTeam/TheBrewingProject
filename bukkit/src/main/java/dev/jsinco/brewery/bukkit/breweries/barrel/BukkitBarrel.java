@@ -16,11 +16,11 @@ import dev.jsinco.brewery.configuration.Config;
 import dev.jsinco.brewery.configuration.locale.TranslationsConfig;
 import dev.jsinco.brewery.moment.Interval;
 import dev.jsinco.brewery.moment.Moment;
+import dev.jsinco.brewery.util.MessageUtil;
 import dev.jsinco.brewery.util.Pair;
 import dev.jsinco.brewery.vector.BreweryLocation;
 import lombok.Getter;
 import net.kyori.adventure.sound.Sound;
-import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -57,7 +57,7 @@ public class BukkitBarrel implements Barrel<BukkitBarrel, ItemStack, Inventory> 
     public boolean open(@NotNull BreweryLocation location, @NotNull UUID playerUuid) {
         Player player = Bukkit.getPlayer(playerUuid);
         if (!player.hasPermission("brewery.barrel.access")) {
-            player.sendMessage(MiniMessage.miniMessage().deserialize(TranslationsConfig.BARREL_ACCESS_DENIED));
+            MessageUtil.msg(player, TranslationsConfig.BARREL_ACCESS_DENIED);
             return true;
         }
         if (inventoryUnpopulated()) {
@@ -78,7 +78,7 @@ public class BukkitBarrel implements Barrel<BukkitBarrel, ItemStack, Inventory> 
             return false;
         }
         if (!player.hasPermission("brewery.barrel.access")) {
-            player.sendMessage(MiniMessage.miniMessage().deserialize(TranslationsConfig.BARREL_ACCESS_DENIED));
+            MessageUtil.msg(player, TranslationsConfig.BARREL_ACCESS_DENIED);
             return false;
         }
         return inventoryAllows(item);

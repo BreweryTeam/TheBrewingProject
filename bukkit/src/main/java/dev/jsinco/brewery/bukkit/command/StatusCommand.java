@@ -9,11 +9,11 @@ import dev.jsinco.brewery.configuration.locale.TranslationsConfig;
 import dev.jsinco.brewery.effect.DrunkState;
 import dev.jsinco.brewery.effect.DrunksManager;
 import dev.jsinco.brewery.event.DrunkEvent;
+import dev.jsinco.brewery.util.MessageUtil;
 import dev.jsinco.brewery.util.Pair;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Formatter;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import org.bukkit.OfflinePlayer;
@@ -33,7 +33,7 @@ public class StatusCommand {
         OfflinePlayer target = BreweryCommand.getOfflinePlayer(context);
         CommandSender sender = context.getSource().getSender();
         TheBrewingProject.getInstance().getDrunksManager().clear(target.getUniqueId());
-        sender.sendMessage(MiniMessage.miniMessage().deserialize(TranslationsConfig.COMMAND_STATUS_CLEAR_MESSAGE, Placeholder.unparsed("player_name", target.getName())));
+        MessageUtil.msg(sender, TranslationsConfig.COMMAND_STATUS_CLEAR_MESSAGE, Placeholder.unparsed("player_name", target.getName()));
         return 1;
     }
 
@@ -61,7 +61,7 @@ public class StatusCommand {
         Pair<DrunkEvent, Long> nextEvent = drunksManager.getPlannedEvent(target.getUniqueId());
         drunksManager.getPlannedEvent(target.getUniqueId());
         String targetName = target.getName();
-        return MiniMessage.miniMessage().deserialize(
+        return MessageUtil.mm(
                 message,
                 Formatter.number("alcohol", drunkState == null ? 0 : drunkState.alcohol()),
                 Formatter.number("toxins", drunkState == null ? 0 : drunkState.toxins()),

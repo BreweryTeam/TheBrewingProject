@@ -1,26 +1,40 @@
 package dev.jsinco.brewery.bukkit.breweries;
 
-import dev.jsinco.brewery.brew.*;
+import dev.jsinco.brewery.brew.Brew;
+import dev.jsinco.brewery.brew.BrewImpl;
+import dev.jsinco.brewery.brew.BrewScore;
+import dev.jsinco.brewery.brew.BrewingStep;
+import dev.jsinco.brewery.brew.CookStepImpl;
+import dev.jsinco.brewery.brew.MixStepImpl;
 import dev.jsinco.brewery.breweries.CauldronType;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.bukkit.brew.BrewAdapter;
 import dev.jsinco.brewery.bukkit.ingredient.BukkitIngredientManager;
 import dev.jsinco.brewery.bukkit.listeners.ListenerUtil;
 import dev.jsinco.brewery.bukkit.recipe.BukkitRecipeResult;
-import dev.jsinco.brewery.bukkit.util.*;
+import dev.jsinco.brewery.bukkit.util.BlockUtil;
+import dev.jsinco.brewery.bukkit.util.BukkitAdapter;
+import dev.jsinco.brewery.bukkit.util.ColorUtil;
+import dev.jsinco.brewery.bukkit.util.IngredientUtil;
+import dev.jsinco.brewery.bukkit.util.SoundPlayer;
 import dev.jsinco.brewery.configuration.Config;
 import dev.jsinco.brewery.configuration.locale.TranslationsConfig;
 import dev.jsinco.brewery.ingredient.Ingredient;
 import dev.jsinco.brewery.moment.Interval;
 import dev.jsinco.brewery.recipe.Recipe;
 import dev.jsinco.brewery.sound.SoundDefinition;
+import dev.jsinco.brewery.util.MessageUtil;
 import dev.jsinco.brewery.util.Registry;
 import dev.jsinco.brewery.vector.BreweryLocation;
 import lombok.Getter;
 import lombok.Setter;
 import net.kyori.adventure.sound.Sound;
-import net.kyori.adventure.text.minimessage.MiniMessage;
-import org.bukkit.*;
+import org.bukkit.Color;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.Particle;
+import org.bukkit.Tag;
+import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockType;
@@ -30,7 +44,11 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Random;
 
 public class BukkitCauldron implements dev.jsinco.brewery.breweries.Cauldron {
 
@@ -135,7 +153,7 @@ public class BukkitCauldron implements dev.jsinco.brewery.breweries.Cauldron {
     public boolean addIngredient(@NotNull ItemStack item, Player player) {
         // TODO: Add API event
         if (!player.hasPermission("brewery.cauldron.access")) {
-            player.sendMessage(MiniMessage.miniMessage().deserialize(TranslationsConfig.CAULDRON_ACCESS_DENIED));
+            MessageUtil.msg(player, TranslationsConfig.CAULDRON_ACCESS_DENIED);
             return false;
         }
         if (!brewExtracted && item.getType() == Material.POTION) {

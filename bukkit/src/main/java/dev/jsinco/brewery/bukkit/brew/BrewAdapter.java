@@ -1,6 +1,10 @@
 package dev.jsinco.brewery.bukkit.brew;
 
-import dev.jsinco.brewery.brew.*;
+import dev.jsinco.brewery.brew.Brew;
+import dev.jsinco.brewery.brew.BrewImpl;
+import dev.jsinco.brewery.brew.BrewQuality;
+import dev.jsinco.brewery.brew.BrewScore;
+import dev.jsinco.brewery.brew.BrewingStep;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.bukkit.recipe.BukkitRecipeResult;
 import dev.jsinco.brewery.bukkit.util.BukkitAdapter;
@@ -14,10 +18,10 @@ import dev.jsinco.brewery.recipe.RecipeResult;
 import dev.jsinco.brewery.recipes.BrewScoreImpl;
 import dev.jsinco.brewery.recipes.RecipeRegistryImpl;
 import dev.jsinco.brewery.util.BreweryKey;
+import dev.jsinco.brewery.util.MessageUtil;
 import dev.jsinco.brewery.util.Pair;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextDecoration;
-import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -100,8 +104,8 @@ public class BrewAdapter {
 
         BrewingStep.StepType lastStep = brew.getCompletedSteps().getLast().stepType();
         Component displayName = topIngredient == null
-                ? MiniMessage.miniMessage().deserialize(displayNameByStep.get(lastStep))
-                : MiniMessage.miniMessage().deserialize(displayNameByStep.get(lastStep), Placeholder.component("ingredient", topIngredient.displayName()));
+                ? MessageUtil.mm(displayNameByStep.get(lastStep))
+                : MessageUtil.mm(displayNameByStep.get(lastStep), Placeholder.component("ingredient", topIngredient.displayName()));
 
         potionMeta.customName(displayName.decoration(TextDecoration.ITALIC, false));
         potionMeta.setColor(itemsInfo.first());

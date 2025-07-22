@@ -23,6 +23,7 @@ import dev.jsinco.brewery.bukkit.recipe.BukkitRecipeResultReader;
 import dev.jsinco.brewery.bukkit.recipe.DefaultRecipeReader;
 import dev.jsinco.brewery.bukkit.structure.*;
 import dev.jsinco.brewery.bukkit.util.BreweryTimeDataType;
+import dev.jsinco.brewery.bukkit.util.executor.BukkitExecutors;
 import dev.jsinco.brewery.configuration.Config;
 import dev.jsinco.brewery.configuration.OkaeriSerdesPackBuilder;
 import dev.jsinco.brewery.configuration.locale.TranslationsConfig;
@@ -43,6 +44,7 @@ import dev.jsinco.brewery.structure.StructureType;
 import dev.jsinco.brewery.util.BreweryKey;
 import dev.jsinco.brewery.util.Logger;
 import dev.jsinco.brewery.util.Util;
+import dev.jsinco.brewery.util.executor.Executors;
 import eu.okaeri.configs.serdes.OkaeriSerdesPack;
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
 import lombok.Getter;
@@ -99,6 +101,7 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
 
     public void initialize() {
         instance = this;
+        Executors.setInstance(new BukkitExecutors());
         Config.load(this.getDataFolder(), serializers());
         TranslationsConfig.reload(this.getDataFolder());
         this.structureRegistry = new StructureRegistry();
@@ -212,8 +215,8 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
         pluginManager.registerEvents(playerWalkListener, this);
         pluginManager.registerEvents(new EntityEventListener(), this);
 
-        Bukkit.getScheduler().runTaskTimer(this, this::updateStructures, 0, 1);
-        Bukkit.getScheduler().runTaskTimer(this, this::otherTicking, 0, 1);
+        Executors.getInstance().syncRepeating(0, 1, this::updateStructures);
+        Executors.getInstance().syncRepeating(0, 1, this::otherTicking);
         RecipeReader<ItemStack> recipeReader = new RecipeReader<>(this.getDataFolder(), new BukkitRecipeResultReader(), BukkitIngredientManager.INSTANCE);
 
         recipeReader.readRecipes().forEach(recipeFuture -> recipeFuture.thenAcceptAsync(recipe -> recipeRegistry.registerRecipe(recipe)));
