@@ -6,7 +6,7 @@ import dev.jsinco.brewery.event.NamedDrunkEvent;
 import dev.jsinco.brewery.event.step.ApplyPotionEffect;
 import dev.jsinco.brewery.event.step.ConditionalWaitStep;
 import dev.jsinco.brewery.event.step.ConsumeStep;
-import dev.jsinco.brewery.event.step.CustomEvent;
+import dev.jsinco.brewery.event.CustomEvent;
 import dev.jsinco.brewery.moment.Interval;
 import dev.jsinco.brewery.moment.Moment;
 import dev.jsinco.brewery.util.BreweryKey;

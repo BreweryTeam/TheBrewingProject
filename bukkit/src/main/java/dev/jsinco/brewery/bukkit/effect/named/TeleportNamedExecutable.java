@@ -15,7 +15,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.UUID;
-import java.util.function.Supplier;
 
 public class TeleportNamedExecutable implements EventPropertyExecutable {
 
@@ -27,7 +26,7 @@ public class TeleportNamedExecutable implements EventPropertyExecutable {
             return ExecutionResult.CONTINUE;
         }
 
-        List<BreweryLocation> locations = Config.config().events().teleportDestinations().stream().map(Supplier::get).toList();
+        List<BreweryLocation> locations = Config.config().events().teleportDestinations().stream().map(BreweryLocation.Supplier::get).toList();
         if (locations.isEmpty()) {
             return ExecutionResult.CONTINUE;
         }

@@ -1,7 +1,7 @@
 package dev.jsinco.brewery.configuration.serializers;
 
 import com.google.common.base.Preconditions;
-import dev.jsinco.brewery.event.CustomEventStep;
+import dev.jsinco.brewery.event.step.CustomEventStep;
 import dev.jsinco.brewery.event.EventStep;
 import dev.jsinco.brewery.event.EventStepProperty;
 import dev.jsinco.brewery.event.NamedDrunkEvent;

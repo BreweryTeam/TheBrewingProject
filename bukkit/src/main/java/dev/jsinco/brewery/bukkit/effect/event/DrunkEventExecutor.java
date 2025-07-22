@@ -42,7 +42,7 @@ public class DrunkEventExecutor {
             doDrunkEvents(playerUuid, List.of(
                     new EventStep.Builder().addProperty(namedDrunkEvent).build()
             ));
-        } else if (event instanceof CustomEvent customEvent) {
+        } else if (event instanceof CustomEvent.Keyed customEvent) {
             doDrunkEvents(playerUuid, customEvent.getSteps());
         }
     }

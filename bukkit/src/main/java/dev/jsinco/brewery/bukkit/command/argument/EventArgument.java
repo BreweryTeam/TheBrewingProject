@@ -12,7 +12,7 @@ import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.configuration.locale.TranslationsConfig;
 import dev.jsinco.brewery.event.DrunkEvent;
 import dev.jsinco.brewery.event.NamedDrunkEvent;
-import dev.jsinco.brewery.event.step.CustomEvent;
+import dev.jsinco.brewery.event.CustomEvent;
 import dev.jsinco.brewery.util.BreweryKey;
 import dev.jsinco.brewery.util.Registry;
 import io.papermc.paper.command.brigadier.MessageComponentSerializer;

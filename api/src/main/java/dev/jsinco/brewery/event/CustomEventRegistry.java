@@ -1,7 +1,6 @@
 package dev.jsinco.brewery.event;
 
 import com.google.common.base.Preconditions;
-import dev.jsinco.brewery.event.step.CustomEvent;
 import dev.jsinco.brewery.util.BreweryKey;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

@@ -1,9 +1,7 @@
-package dev.jsinco.brewery.event.step;
+package dev.jsinco.brewery.event;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
-import dev.jsinco.brewery.event.DrunkEvent;
-import dev.jsinco.brewery.event.EventStep;
 import dev.jsinco.brewery.util.BreweryKey;
 import org.jetbrains.annotations.Nullable;
 
@@ -17,7 +15,7 @@ public final class CustomEvent {
     private final int probabilityWeight;
     private final String displayName;
 
-    public CustomEvent(List<EventStep> steps, int alcohol, int toxins, int probabilityWeight, @Nullable String displayName, BreweryKey key) {
+    public CustomEvent(List<EventStep> steps, int alcohol, int toxins, int probabilityWeight, @Nullable String displayName) {
         this.steps = steps;
         this.alcohol = alcohol;
         this.toxins = toxins;
