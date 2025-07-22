@@ -4,6 +4,7 @@ import eu.okaeri.configs.ConfigManager;
 import eu.okaeri.configs.OkaeriConfig;
 import eu.okaeri.configs.annotation.Comment;
 import eu.okaeri.configs.annotation.CustomKey;
+import eu.okaeri.configs.annotation.Exclude;
 import eu.okaeri.configs.serdes.OkaeriSerdesPack;
 import eu.okaeri.configs.yaml.snakeyaml.YamlSnakeYamlConfigurer;
 import lombok.Getter;
@@ -62,6 +63,7 @@ public class Config extends OkaeriConfig {
     @CustomKey("sounds")
     private SoundSection sounds = new SoundSection();
 
+    @Exclude
     private static Config instance;
 
     public static void load(File dataFolder, OkaeriSerdesPack... packs) {
