@@ -4,7 +4,7 @@ import dev.jsinco.brewery.bukkit.util.BukkitMessageUtil;
 import dev.jsinco.brewery.configuration.locale.TranslationsConfig;
 import dev.jsinco.brewery.event.EventStep;
 import dev.jsinco.brewery.event.ExecutableEventStep;
-import net.kyori.adventure.text.minimessage.MiniMessage;
+import dev.jsinco.brewery.util.MessageUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Chicken;
@@ -32,7 +32,7 @@ public class ChickenNamedExecutable implements ExecutableEventStep {
             chicken.getPersistentDataContainer().set(NO_DROPS, PersistentDataType.BOOLEAN, true);
             chicken.setBreed(false);
         });
-        player.sendMessage(MiniMessage.miniMessage().deserialize(TranslationsConfig.CHICKEN_MESSAGE, BukkitMessageUtil.getPlayerTagResolver(player)));
+        MessageUtil.msg(player, TranslationsConfig.CHICKEN_MESSAGE, BukkitMessageUtil.getPlayerTagResolver(player));
     }
 
 }

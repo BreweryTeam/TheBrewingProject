@@ -32,6 +32,7 @@ import dev.jsinco.brewery.bukkit.structure.StructureReadException;
 import dev.jsinco.brewery.bukkit.structure.StructureReader;
 import dev.jsinco.brewery.bukkit.structure.StructureRegistry;
 import dev.jsinco.brewery.bukkit.util.BreweryTimeDataType;
+import dev.jsinco.brewery.bukkit.util.executor.BukkitExecutors;
 import dev.jsinco.brewery.configuration.Config;
 import dev.jsinco.brewery.configuration.locale.TranslationsConfig;
 import dev.jsinco.brewery.configuration.serializers.EventRegistrySerializer;
@@ -56,6 +57,7 @@ import dev.jsinco.brewery.util.BreweryKey;
 import dev.jsinco.brewery.util.Holder;
 import dev.jsinco.brewery.util.Logger;
 import dev.jsinco.brewery.util.Util;
+import dev.jsinco.brewery.util.executor.Executors;
 import io.leangen.geantyref.TypeToken;
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
 import lombok.Getter;
@@ -113,6 +115,7 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
 
     public void initialize() {
         instance = this;
+        Executors.setInstance(new BukkitExecutors());
         Config.load(this.getDataFolder(), serializers());
         TranslationsConfig.reload(this.getDataFolder());
         this.structureRegistry = new StructureRegistry();
@@ -223,8 +226,8 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
         pluginManager.registerEvents(playerWalkListener, this);
         pluginManager.registerEvents(new EntityEventListener(), this);
 
-        Bukkit.getScheduler().runTaskTimer(this, this::updateStructures, 0, 1);
-        Bukkit.getScheduler().runTaskTimer(this, this::otherTicking, 0, 1);
+        Executors.getInstance().syncRepeating(0, 1, this::updateStructures);
+        Executors.getInstance().syncRepeating(0, 1, this::otherTicking);
         RecipeReader<ItemStack> recipeReader = new RecipeReader<>(this.getDataFolder(), new BukkitRecipeResultReader(), BukkitIngredientManager.INSTANCE);
 
         recipeReader.readRecipes().thenAcceptAsync(this.recipeRegistry::registerRecipes);
