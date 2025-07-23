@@ -18,7 +18,7 @@ public class Config extends OkaeriConfig {
 
     @Comment("Config version. Don't change this")
     @CustomKey("config-version")
-    private int configVersion = 0;
+    private int configVersion = 1;
 
     @Comment("What language file should we use? See: /TheBrewingProject/locale")
     @CustomKey("language")

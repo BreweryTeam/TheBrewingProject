@@ -1,12 +1,12 @@
 package dev.jsinco.brewery.configuration;
 
+import dev.jsinco.brewery.event.CustomEvent;
 import dev.jsinco.brewery.event.CustomEventRegistry;
 import dev.jsinco.brewery.event.EventStep;
 import dev.jsinco.brewery.event.NamedDrunkEvent;
 import dev.jsinco.brewery.event.step.ApplyPotionEffect;
 import dev.jsinco.brewery.event.step.ConditionalWaitStep;
 import dev.jsinco.brewery.event.step.ConsumeStep;
-import dev.jsinco.brewery.event.CustomEvent;
 import dev.jsinco.brewery.moment.Interval;
 import dev.jsinco.brewery.moment.Moment;
 import dev.jsinco.brewery.util.BreweryKey;
@@ -46,8 +46,8 @@ public class EventSection extends OkaeriConfig {
                     .toxinsRequirement(90)
                     .probabilityWeight(5)
                     .addStep(new EventStep.Builder().addProperty(NamedDrunkEvent.fromKey("pass_out")).build())
-                    .addStep(new EventStep.Builder().addProperty(new ConditionalWaitStep(ConditionalWaitStep.Condition.JOIN)).build())
                     .addStep(new EventStep.Builder()
+                            .addProperty(new ConditionalWaitStep(ConditionalWaitStep.Condition.JOIN))
                             .addProperty(NamedDrunkEvent.fromKey("teleport"))
                             .addProperty(new ConsumeStep(-30, -15))
                             .build()
@@ -68,7 +68,7 @@ public class EventSection extends OkaeriConfig {
 
     @Comment("Teleport destinations for the 'teleport' event")
     @CustomKey("teleport-destinations")
-    private List<BreweryLocation.Supplier> teleportDestinations =List.of();
+    private List<BreweryLocation.Supplier> teleportDestinations = List.of();
 
     @Comment("Deny joining the server if too drunk")
     @CustomKey("drunken-join-deny")

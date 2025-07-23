@@ -18,19 +18,10 @@ import dev.jsinco.brewery.bukkit.effect.event.ActiveEventsRegistry;
 import dev.jsinco.brewery.bukkit.effect.event.DrunkEventExecutor;
 import dev.jsinco.brewery.bukkit.ingredient.BukkitIngredientManager;
 import dev.jsinco.brewery.bukkit.integration.IntegrationManager;
-import dev.jsinco.brewery.bukkit.listeners.BlockEventListener;
-import dev.jsinco.brewery.bukkit.listeners.EntityEventListener;
-import dev.jsinco.brewery.bukkit.listeners.InventoryEventListener;
-import dev.jsinco.brewery.bukkit.listeners.PlayerEventListener;
-import dev.jsinco.brewery.bukkit.listeners.PlayerWalkListener;
-import dev.jsinco.brewery.bukkit.listeners.WorldEventListener;
+import dev.jsinco.brewery.bukkit.listeners.*;
 import dev.jsinco.brewery.bukkit.recipe.BukkitRecipeResultReader;
 import dev.jsinco.brewery.bukkit.recipe.DefaultRecipeReader;
-import dev.jsinco.brewery.bukkit.structure.BarrelBlockDataMatcher;
-import dev.jsinco.brewery.bukkit.structure.StructureJsonFormatValidator;
-import dev.jsinco.brewery.bukkit.structure.StructureReadException;
-import dev.jsinco.brewery.bukkit.structure.StructureReader;
-import dev.jsinco.brewery.bukkit.structure.StructureRegistry;
+import dev.jsinco.brewery.bukkit.structure.*;
 import dev.jsinco.brewery.bukkit.util.BreweryTimeDataType;
 import dev.jsinco.brewery.configuration.Config;
 import dev.jsinco.brewery.configuration.OkaeriSerdesPackBuilder;
@@ -116,7 +107,7 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
         loadStructures();
         this.recipeRegistry = new RecipeRegistryImpl<>();
         this.drunkTextRegistry = new DrunkTextRegistry();
-        this.customDrunkEventRegistry = new CustomEventRegistry();
+        this.customDrunkEventRegistry = Config.config().events().customEvents();
         this.eventStepRegistry = new EventStepRegistry();
         this.drunkEventExecutor = new DrunkEventExecutor();
     }
@@ -142,6 +133,8 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
         loadStructures();
         this.drunkTextRegistry.clear();
         this.customDrunkEventRegistry.clear();
+        Config.config().events().customEvents().events()
+                .forEach(this.customDrunkEventRegistry::registerCustomEvent);
         this.drunkEventExecutor.clear();
         this.customDrunkEventRegistry = Config.config().events().customEvents();
         saveResources();

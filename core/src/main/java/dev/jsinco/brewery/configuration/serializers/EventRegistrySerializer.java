@@ -11,6 +11,8 @@ import eu.okaeri.configs.serdes.SerializationData;
 import lombok.NonNull;
 
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 public class EventRegistrySerializer implements ObjectSerializer<CustomEventRegistry> {
 
@@ -21,7 +23,12 @@ public class EventRegistrySerializer implements ObjectSerializer<CustomEventRegi
 
     @Override
     public void serialize(@NonNull CustomEventRegistry object, @NonNull SerializationData data, @NonNull GenericsDeclaration generics) {
-
+        Map<String, CustomEvent> output = new HashMap<>();
+        for (CustomEvent.Keyed event : object.events()) {
+            String key = event.key().namespace().equalsIgnoreCase("brewery") ? event.key().key() : event.key().toString();
+            output.put(key, event.event());
+        }
+        data.setValue(output);
     }
 
     @Override

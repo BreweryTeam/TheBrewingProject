@@ -41,9 +41,9 @@ public class CustomEventSerializer implements ObjectSerializer<CustomEvent> {
         Integer toxin = data.get("toxins", Integer.class);
         Integer probabilityWeight = data.get("probability-weight", Integer.class);
         CustomEvent.Builder builder = new CustomEvent.Builder()
-                .alcoholRequirement(alcohol)
-                .toxinsRequirement(toxin)
-                .probabilityWeight(probabilityWeight);
+                .alcoholRequirement(alcohol == null ? 0 : alcohol)
+                .toxinsRequirement(toxin == null ? 0 : toxin)
+                .probabilityWeight(probabilityWeight == null ? 0 : probabilityWeight);
         List<EventStep> steps = data.getAsList("steps", EventStep.class);
         Preconditions.checkArgument(steps != null, "Steps has to be a list");
         steps.forEach(builder::addStep);

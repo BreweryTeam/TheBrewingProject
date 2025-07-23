@@ -1,7 +1,6 @@
 package dev.jsinco.brewery.configuration.serializers;
 
 import com.google.common.base.Preconditions;
-import dev.jsinco.brewery.event.step.CustomEventStep;
 import dev.jsinco.brewery.event.EventStep;
 import dev.jsinco.brewery.event.EventStepProperty;
 import dev.jsinco.brewery.event.NamedDrunkEvent;
@@ -24,7 +23,7 @@ import java.util.Map;
 public class EventStepSerializer implements ObjectSerializer<EventStep> {
     @Override
     public boolean supports(@NonNull Class<? super EventStep> type) {
-        return EventStep.class == type;
+        return EventStep.class.isAssignableFrom(type);
     }
 
     @Override
@@ -67,6 +66,7 @@ public class EventStepSerializer implements ObjectSerializer<EventStep> {
     @Override
     public EventStep deserialize(@NonNull DeserializationData data, @NonNull GenericsDeclaration generics) {
         EventStep.Builder eventStepBuilder = new EventStep.Builder();
+        // Backwards compatibility
         if (data.containsKey("type")) {
             NamedDrunkEvent namedDrunkEvent = Registry.DRUNK_EVENT.get(BreweryKey.parse(data.get("type", String.class)));
             if (namedDrunkEvent != null) {
@@ -77,6 +77,7 @@ public class EventStepSerializer implements ObjectSerializer<EventStep> {
             String string = data.get("named-event", String.class);
             NamedDrunkEvent namedDrunkEvent = Registry.DRUNK_EVENT.get(BreweryKey.parse(string));
             Preconditions.checkArgument(namedDrunkEvent != null, "Unknown predefined drunk event: " + string);
+            eventStepBuilder.addProperty(namedDrunkEvent);
         }
         if (data.containsKey("event")) {
             NamedDrunkEvent namedDrunkEvent = Registry.DRUNK_EVENT.get(BreweryKey.parse(data.get("event", String.class)));
@@ -112,15 +113,10 @@ public class EventStepSerializer implements ObjectSerializer<EventStep> {
                     duration == null ? new Interval(10 * Moment.SECOND, 10 * Moment.SECOND) : duration
             ));
         }
-        if (data.containsKey("alcohol")) {
+        if (data.containsKey("alcohol") || data.containsKey("toxins")) {
             Integer alcohol = data.get("alcohol", Integer.class);
-            Preconditions.checkArgument(alcohol != null, "Alcohol can not be empty");
-            eventStepBuilder.addProperty(new ConsumeStep(alcohol, 0));
-        }
-        if (data.containsKey("toxins")) {
             Integer toxins = data.get("toxins", Integer.class);
-            Preconditions.checkArgument(toxins != null, "Alcohol can not be empty");
-            eventStepBuilder.addProperty(new ConsumeStep(0, toxins));
+            eventStepBuilder.addProperty(new ConsumeStep(alcohol == null ? 0 : alcohol, toxins == null ? 0 : toxins));
         }
         if (data.containsKey("location")) {
             BreweryLocation.Supplier breweryLocation = data.get("location", BreweryLocation.Supplier.class);
