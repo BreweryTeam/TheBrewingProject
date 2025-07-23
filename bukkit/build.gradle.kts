@@ -75,11 +75,18 @@ dependencies {
     testAnnotationProcessor(libs.lombok)
 }
 
+runPaper {
+    folia.registerTask {
+        runDirectory.set(File("run-folia"))
+
+        minecraftVersion(project.findProperty("folia.version")!! as String)
+    }
+}
+
 tasks {
     test {
         useJUnitPlatform()
     }
-
 
     runServer {
         minecraftVersion(project.findProperty("minecraft.version")!! as String)
