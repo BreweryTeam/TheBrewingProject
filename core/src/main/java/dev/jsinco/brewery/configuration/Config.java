@@ -25,7 +25,7 @@ public class Config extends OkaeriConfig {
     private String language = "en-us";
 
     @Comment("Allow hoppers to interact with distilleries and barrels")
-    @CustomKey("automation")
+    @CustomKey("automation-enabled")
     private boolean automation = true;
 
     @Comment("Whether an ingredient can be added into a brew regardless if it's not in any of the recipes")
@@ -48,7 +48,7 @@ public class Config extends OkaeriConfig {
     @CustomKey("events")
     private EventSection events = new EventSection();
 
-    @CustomKey("decay-rate")
+    @CustomKey("decay-rates")
     private DecayRateSection decayRate = new DecayRateSection();
 
     @Comment("This field accepts either a single sound definition or a list of definitions.")
