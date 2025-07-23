@@ -51,15 +51,16 @@ public class Config extends OkaeriConfig {
     @CustomKey("decay-rates")
     private DecayRateSection decayRate = new DecayRateSection();
 
-    @Comment("This field accepts either a single sound definition or a list of definitions.")
-    @Comment("If a list is provided, one sound will be chosen randomly.")
-    @Comment("")
-    @Comment("A single sound entry is a string with one of the following formats")
-    @Comment("- <sound_id>")
-    @Comment("- <sound_id>/<pitch>")
-    @Comment("- <sound_id>/<min_pitch>;<max_pitch>")
-    @Comment("")
-    @Comment("See the default values below for examples")
+    @Comment({"This field accepts either a single sound definition or a list of definitions.",
+            "If a list is provided, one sound will be chosen randomly.",
+            "",
+            "A single sound entry is a string with one of the following formats",
+            "- <sound_id>",
+            "- <sound_id>/<pitch>",
+            "- <sound_id>/<min_pitch>;<max_pitch>",
+            "",
+            "See the default values below for examples"
+    })
     @CustomKey("sounds")
     private SoundSection sounds = new SoundSection();
 
