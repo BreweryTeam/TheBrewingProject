@@ -26,7 +26,7 @@ public class SendCommandExecutable implements EventPropertyExecutable {
         if (player == null) {
             return ExecutionResult.CONTINUE;
         }
-
+        String command = this.command.replace("@player_name@", player.getName());
         switch (senderType) {
             case PLAYER -> player.performCommand(command);
             case SERVER -> Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), command);
