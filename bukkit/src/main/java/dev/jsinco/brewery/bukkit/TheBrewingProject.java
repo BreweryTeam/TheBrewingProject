@@ -2,7 +2,6 @@ package dev.jsinco.brewery.bukkit;
 
 import dev.jsinco.brewery.TheBrewingProjectApi;
 import dev.jsinco.brewery.brew.BrewManager;
-import dev.jsinco.brewery.breweries.Barrel;
 import dev.jsinco.brewery.breweries.BarrelType;
 import dev.jsinco.brewery.breweries.Distillery;
 import dev.jsinco.brewery.breweries.Tickable;
@@ -23,6 +22,7 @@ import dev.jsinco.brewery.bukkit.recipe.BukkitRecipeResultReader;
 import dev.jsinco.brewery.bukkit.recipe.DefaultRecipeReader;
 import dev.jsinco.brewery.bukkit.structure.*;
 import dev.jsinco.brewery.bukkit.util.BreweryTimeDataType;
+import dev.jsinco.brewery.bukkit.util.BukkitAdapter;
 import dev.jsinco.brewery.configuration.Config;
 import dev.jsinco.brewery.configuration.locale.TranslationsConfig;
 import dev.jsinco.brewery.configuration.serializers.EventRegistrySerializer;
@@ -40,6 +40,7 @@ import dev.jsinco.brewery.recipes.RecipeRegistryImpl;
 import dev.jsinco.brewery.sound.SoundDefinition;
 import dev.jsinco.brewery.structure.MultiblockStructure;
 import dev.jsinco.brewery.structure.PlacedStructureRegistryImpl;
+import dev.jsinco.brewery.structure.SinglePositionStructure;
 import dev.jsinco.brewery.structure.StructureMeta;
 import dev.jsinco.brewery.structure.StructureType;
 import dev.jsinco.brewery.util.BreweryKey;
@@ -50,6 +51,7 @@ import io.leangen.geantyref.TypeToken;
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
 import lombok.Getter;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.ServicePriority;
@@ -254,13 +256,29 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
         breweryRegistry.getActiveSinglePositionStructure().stream()
                 .filter(Tickable.class::isInstance)
                 .map(Tickable.class::cast)
-                .forEach(Tickable::tick);
+                .forEach(tickable -> {
+                    final Location loc = BukkitAdapter.toLocation(((SinglePositionStructure) tickable).position());
+                    Bukkit.getRegionScheduler().run(this, loc, task -> tickable.tick());
+                });
+
         placedStructureRegistry.getStructures(StructureType.DISTILLERY).stream()
                 .map(MultiblockStructure::getHolder)
                 .map(Distillery.class::cast)
-                .forEach(Distillery::tick);
-        List.copyOf(breweryRegistry.<BukkitBarrel>getOpened(StructureType.BARREL)).forEach(Barrel::tickInventory);
-        List.copyOf(breweryRegistry.<BukkitDistillery>getOpened(StructureType.DISTILLERY)).forEach(Distillery::tickInventory);
+                .forEach(distillery -> {
+                    final Location loc = BukkitAdapter.toLocation(distillery.getStructure().getUnique());
+                    Bukkit.getRegionScheduler().run(this, loc, task -> distillery.tick());
+                });
+
+        List.copyOf(breweryRegistry.<BukkitBarrel>getOpened(StructureType.BARREL)).forEach(barrel -> {
+            final Location loc = BukkitAdapter.toLocation(barrel.getStructure().getUnique());
+            Bukkit.getRegionScheduler().run(this, loc, task -> barrel.tickInventory());
+        });
+
+        List.copyOf(breweryRegistry.<BukkitDistillery>getOpened(StructureType.DISTILLERY)).forEach(distillery -> {
+            final Location loc = BukkitAdapter.toLocation(distillery.getStructure().getUnique());
+            Bukkit.getRegionScheduler().run(this, loc, task -> distillery.tickInventory());
+        });
+
     }
 
     private void otherTicking() {
