@@ -15,6 +15,7 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 public class TeleportNamedExecutable implements EventPropertyExecutable {
@@ -29,7 +30,7 @@ public class TeleportNamedExecutable implements EventPropertyExecutable {
         List<UUID> worldUuids = Bukkit.getWorlds().stream().map(World::getUID).toList();
         List<BreweryLocation> locations = Config.config().events().teleportDestinations().stream().map(uncompiledLocation ->
                 uncompiledLocation.get(worldUuids)
-        ).toList();
+        ).filter(Objects::nonNull).toList();
         if (locations.isEmpty()) {
             return ExecutionResult.CONTINUE;
         }

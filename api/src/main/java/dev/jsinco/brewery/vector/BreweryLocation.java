@@ -1,5 +1,7 @@
 package dev.jsinco.brewery.vector;
 
+import org.jetbrains.annotations.Nullable;
+
 import java.util.List;
 import java.util.UUID;
 
@@ -15,7 +17,7 @@ public record BreweryLocation(int x, int y, int z, UUID worldUuid) {
 
     public interface Uncompiled {
 
-        BreweryLocation get(List<UUID> worldUuids);
+        @Nullable BreweryLocation get(List<UUID> worldUuids);
 
     }
 }

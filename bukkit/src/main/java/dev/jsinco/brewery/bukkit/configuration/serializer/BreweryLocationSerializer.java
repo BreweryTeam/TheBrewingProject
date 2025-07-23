@@ -1,5 +1,6 @@
 package dev.jsinco.brewery.bukkit.configuration.serializer;
 
+import dev.jsinco.brewery.util.Logger;
 import dev.jsinco.brewery.vector.BreweryLocation;
 import eu.okaeri.configs.schema.GenericsDeclaration;
 import eu.okaeri.configs.serdes.DeserializationData;
@@ -22,7 +23,8 @@ public class BreweryLocationSerializer implements ObjectSerializer<BreweryLocati
             world = Bukkit.getWorld(worldString);
         }
         if (world == null) {
-            throw new IllegalArgumentException("Could not find world: " + worldString);
+            Logger.logErr("Could not find world: " + worldString);
+            return null;
         }
         return world.getUID();
     }
@@ -35,8 +37,12 @@ public class BreweryLocationSerializer implements ObjectSerializer<BreweryLocati
     @Override
     public void serialize(@NonNull BreweryLocation.Uncompiled object, @NonNull SerializationData data, @NonNull GenericsDeclaration generics) {
         BreweryLocation location = object.get(Bukkit.getWorlds().stream().map(World::getUID).toList());
+        if (location == null) {
+            location = new BreweryLocation(0, 0, 0, UUID.randomUUID());
+        }
+        World world = Bukkit.getWorld(location.worldUuid());
         data.setValue(
-                String.format("%s, %d, %d, %d", Bukkit.getWorld(location.worldUuid()).getName(), location.x(), location.y(), location.z())
+                String.format("%s, %d, %d, %d", world == null ? location.worldUuid() : world.getName(), location.x(), location.y(), location.z())
         );
     }
 
@@ -56,7 +62,7 @@ public class BreweryLocationSerializer implements ObjectSerializer<BreweryLocati
             int z = Integer.parseInt(split[3]);
             return ignored -> {
                 UUID worldUuid = parseWorld(split[0]);
-                return new BreweryLocation(x, y, z, worldUuid);
+                return worldUuid == null ? null : new BreweryLocation(x, y, z, worldUuid);
             };
         } catch (IllegalArgumentException e) {
             throw new IllegalStateException(e);

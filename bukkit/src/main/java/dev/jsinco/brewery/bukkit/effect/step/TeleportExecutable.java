@@ -27,7 +27,11 @@ public class TeleportExecutable implements EventPropertyExecutable {
             return ExecutionResult.CONTINUE;
         }
         List<UUID> worldUuids = Bukkit.getWorlds().stream().map(World::getUID).toList();
-        player.teleportAsync(BukkitAdapter.toLocation(location.get(worldUuids)));
+        BreweryLocation breweryLocation = location.get(worldUuids);
+        if (breweryLocation == null) {
+            return ExecutionResult.CONTINUE;
+        }
+        player.teleportAsync(BukkitAdapter.toLocation(breweryLocation));
         return ExecutionResult.CONTINUE;
     }
 

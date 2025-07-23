@@ -18,6 +18,7 @@ import lombok.Getter;
 import lombok.experimental.Accessors;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 @Getter
 @Accessors(fluent = true)
@@ -68,7 +69,9 @@ public class EventSection extends OkaeriConfig {
 
     @Comment("Teleport destinations for the 'teleport' event")
     @CustomKey("teleport-destinations")
-    private List<BreweryLocation.Uncompiled> teleportDestinations = List.of(worldUuids -> new BreweryLocation(0, 80, 0, worldUuids.get(0)));
+    private List<BreweryLocation.Uncompiled> teleportDestinations = Stream.<BreweryLocation.Uncompiled>of(
+            worldUuids -> worldUuids.isEmpty() ? null : new BreweryLocation(0, 80, 0, worldUuids.getFirst())
+    ).toList();
 
     @Comment("Deny joining the server if too drunk")
     @CustomKey("drunken-join-deny")
