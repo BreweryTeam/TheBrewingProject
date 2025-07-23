@@ -10,6 +10,7 @@ import dev.jsinco.brewery.vector.BreweryLocation;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
@@ -25,8 +26,10 @@ public class TeleportNamedExecutable implements EventPropertyExecutable {
         if (player == null) {
             return ExecutionResult.CONTINUE;
         }
-
-        List<BreweryLocation> locations = Config.config().events().teleportDestinations().stream().map(BreweryLocation.Supplier::get).toList();
+        List<UUID> worldUuids = Bukkit.getWorlds().stream().map(World::getUID).toList();
+        List<BreweryLocation> locations = Config.config().events().teleportDestinations().stream().map(uncompiledLocation ->
+                uncompiledLocation.get(worldUuids)
+        ).toList();
         if (locations.isEmpty()) {
             return ExecutionResult.CONTINUE;
         }

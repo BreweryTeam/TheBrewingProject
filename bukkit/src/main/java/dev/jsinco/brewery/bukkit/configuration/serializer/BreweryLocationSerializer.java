@@ -12,7 +12,7 @@ import org.bukkit.World;
 import java.util.Arrays;
 import java.util.UUID;
 
-public class BreweryLocationSerializer implements ObjectSerializer<BreweryLocation.Supplier> {
+public class BreweryLocationSerializer implements ObjectSerializer<BreweryLocation.Uncompiled> {
 
     private UUID parseWorld(String worldString) {
         World world;
@@ -28,20 +28,20 @@ public class BreweryLocationSerializer implements ObjectSerializer<BreweryLocati
     }
 
     @Override
-    public boolean supports(@NonNull Class<? super BreweryLocation.Supplier> type) {
-        return BreweryLocation.Supplier.class == type;
+    public boolean supports(@NonNull Class<? super BreweryLocation.Uncompiled> type) {
+        return BreweryLocation.Uncompiled.class == type;
     }
 
     @Override
-    public void serialize(@NonNull BreweryLocation.Supplier object, @NonNull SerializationData data, @NonNull GenericsDeclaration generics) {
-        BreweryLocation location = object.get();
+    public void serialize(@NonNull BreweryLocation.Uncompiled object, @NonNull SerializationData data, @NonNull GenericsDeclaration generics) {
+        BreweryLocation location = object.get(Bukkit.getWorlds().stream().map(World::getUID).toList());
         data.setValue(
                 String.format("%s, %d, %d, %d", Bukkit.getWorld(location.worldUuid()).getName(), location.x(), location.y(), location.z())
         );
     }
 
     @Override
-    public BreweryLocation.Supplier deserialize(@NonNull DeserializationData data, @NonNull GenericsDeclaration generics) {
+    public BreweryLocation.Uncompiled deserialize(@NonNull DeserializationData data, @NonNull GenericsDeclaration generics) {
         String string = data.getValue(String.class);
         if (string == null) {
             throw new IllegalArgumentException("Can not deserialize empty node");
@@ -54,7 +54,7 @@ public class BreweryLocationSerializer implements ObjectSerializer<BreweryLocati
             int x = Integer.parseInt(split[1]);
             int y = Integer.parseInt(split[2]);
             int z = Integer.parseInt(split[3]);
-            return () -> {
+            return ignored -> {
                 UUID worldUuid = parseWorld(split[0]);
                 return new BreweryLocation(x, y, z, worldUuid);
             };

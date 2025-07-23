@@ -119,7 +119,7 @@ public class EventStepSerializer implements ObjectSerializer<EventStep> {
             eventStepBuilder.addProperty(new ConsumeStep(alcohol == null ? 0 : alcohol, toxins == null ? 0 : toxins));
         }
         if (data.containsKey("location")) {
-            BreweryLocation.Supplier breweryLocation = data.get("location", BreweryLocation.Supplier.class);
+            BreweryLocation.Uncompiled breweryLocation = data.get("location", BreweryLocation.Uncompiled.class);
             Preconditions.checkArgument(breweryLocation != null, "Location can not be empty");
             eventStepBuilder.addProperty(new Teleport(breweryLocation));
         }

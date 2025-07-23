@@ -68,7 +68,7 @@ public class EventSection extends OkaeriConfig {
 
     @Comment("Teleport destinations for the 'teleport' event")
     @CustomKey("teleport-destinations")
-    private List<BreweryLocation.Supplier> teleportDestinations = List.of();
+    private List<BreweryLocation.Uncompiled> teleportDestinations = List.of(worldUuids -> new BreweryLocation(0, 80, 0, worldUuids.get(0)));
 
     @Comment("Deny joining the server if too drunk")
     @CustomKey("drunken-join-deny")

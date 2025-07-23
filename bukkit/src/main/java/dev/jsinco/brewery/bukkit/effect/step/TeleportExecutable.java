@@ -5,6 +5,7 @@ import dev.jsinco.brewery.event.EventPropertyExecutable;
 import dev.jsinco.brewery.event.EventStep;
 import dev.jsinco.brewery.vector.BreweryLocation;
 import org.bukkit.Bukkit;
+import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
@@ -13,9 +14,9 @@ import java.util.UUID;
 
 public class TeleportExecutable implements EventPropertyExecutable {
 
-    private final BreweryLocation.Supplier location;
+    private final BreweryLocation.Uncompiled location;
 
-    public TeleportExecutable(BreweryLocation.Supplier location) {
+    public TeleportExecutable(BreweryLocation.Uncompiled location) {
         this.location = location;
     }
 
@@ -25,8 +26,8 @@ public class TeleportExecutable implements EventPropertyExecutable {
         if (player == null) {
             return ExecutionResult.CONTINUE;
         }
-
-        player.teleportAsync(BukkitAdapter.toLocation(location.get()));
+        List<UUID> worldUuids = Bukkit.getWorlds().stream().map(World::getUID).toList();
+        player.teleportAsync(BukkitAdapter.toLocation(location.get(worldUuids)));
         return ExecutionResult.CONTINUE;
     }
 
