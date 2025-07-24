@@ -16,7 +16,7 @@ bolt = "1.1.66"
 craft-engine = "0.0.59"
 griefprevention = "17.0.0"
 huskclaims = "1.5.9"
-itemsadder = "master-SNAPSHOT"
+itemsadder = "4.0.10"
 landsapi = "7.15.20"
 miniplaceholders = "2.3.0"
 mmoitems-api = "6.10.1-SNAPSHOT"
@@ -59,7 +59,7 @@ craft-engine-bukkit = { group = "net.momirealms", name = "craft-engine-bukkit", 
 craft-engine-core = { group = "net.momirealms", name = "craft-engine-core", version.ref = "craft-engine" }
 griefprevention = { group = "com.github.GriefPrevention", name = "GriefPrevention", version.ref = "griefprevention" }
 huskclaims-bukkit = { group = "net.william278.huskclaims", name = "huskclaims-bukkit", version.ref = "huskclaims" }
-itemsadder = { group = "com.github.LoneDev6", name = "API-ItemsAdder", version.ref = "itemsadder" }
+itemsadder = { group = "dev.lone", name = "api-itemsadder", version.ref = "itemsadder" }
 landsapi = { group = "com.github.Angeschossen", name = "LandsAPI", version.ref = "landsapi" }
 miniplaceholders = { group = "io.github.miniplaceholders", name = "miniplaceholders-api", version.ref = "miniplaceholders" }
 mmoitems-api = { group = "net.Indyuce", name = "MMOItems-API", version.ref = "mmoitems-api" }
