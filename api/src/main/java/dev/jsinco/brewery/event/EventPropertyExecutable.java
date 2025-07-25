@@ -15,7 +15,7 @@ public interface EventPropertyExecutable {
     /**
      * Priority of the step, just used to make the execution order deterministic
      *
-     * @return
+     * @return the priority of the step, lower values are executed first
      */
     int priority();
 
