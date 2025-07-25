@@ -46,6 +46,7 @@ barrel.type:
   warped: warped
   cherry: cherry
   bamboo: bamboo
+  pale_oak: pale_oak
   copper: copper
   none: none
 cauldron.access-denied: <red>You don't have enough permissions to access a cauldron

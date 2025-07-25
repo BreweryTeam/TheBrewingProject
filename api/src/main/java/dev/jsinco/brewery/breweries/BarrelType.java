@@ -20,6 +20,7 @@ public enum BarrelType implements BreweryKeyed {
     WARPED,
     CHERRY,
     BAMBOO,
+    PALE_OAK,
     COPPER;
 
     public static final BarrelType[] PLACEABLE_TYPES = Arrays.stream(values()).filter(barrelType -> barrelType != ANY).toArray(BarrelType[]::new);
