@@ -125,7 +125,7 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
     }
 
     public void reload() {
-        Config.load(this.getDataFolder(), serializers());
+        Config.config().load(true);
         TranslationsConfig.reload(this.getDataFolder());
         this.structureRegistry.clear();
         this.placedStructureRegistry.clear();
