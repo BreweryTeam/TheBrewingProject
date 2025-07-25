@@ -54,7 +54,7 @@ barrel:
     cherry: вишня
     bamboo: бамбук
     copper: медь
-    pale_oak: pale_oak
+    pale_oak: Бледного дуба
     none: отсутствует
 cauldron:
   access-denied: <red>У вас недостаточно прав для использования котла!
