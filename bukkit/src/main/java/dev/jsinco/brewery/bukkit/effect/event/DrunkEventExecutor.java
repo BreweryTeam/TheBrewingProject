@@ -77,7 +77,7 @@ public class DrunkEventExecutor {
     }
 
     public void onPlayerJoin(UUID playerUuid) {
-        List<EventStep> eventStepList = onJoinExecutions.get(playerUuid);
+        List<EventStep> eventStepList = onJoinExecutions.remove(playerUuid);
         if (eventStepList == null) {
             return;
         }
