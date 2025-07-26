@@ -2,14 +2,10 @@ package dev.jsinco.brewery.bukkit.effect.named;
 
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.configuration.Config;
+import dev.jsinco.brewery.event.EventPropertyExecutable;
 import dev.jsinco.brewery.event.EventStep;
-import dev.jsinco.brewery.event.ExecutableEventStep;
 import dev.jsinco.brewery.event.NamedDrunkEvent;
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
-import org.bukkit.World;
+import org.bukkit.*;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
@@ -17,24 +13,26 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.util.Vector;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.UUID;
 
-public class PukeNamedExecutable implements ExecutableEventStep {
+public class PukeNamedExecutable implements EventPropertyExecutable {
 
     public static final NamespacedKey PUKE_ITEM = new NamespacedKey("brewery", "puke");
 
     @Override
-    public void execute(UUID contextPlayer, List<EventStep> events, int index) {
+    public @NotNull ExecutionResult execute(UUID contextPlayer, List<? extends EventStep> events, int index) {
         Player player = Bukkit.getPlayer(contextPlayer);
         if (player == null) {
-            return;
+            return ExecutionResult.CONTINUE;
         }
 
         PukeHandler pukeHandler = new PukeHandler(Config.config().puke().pukeTime(), player);
         TheBrewingProject.getInstance().getActiveEventsRegistry().registerActiveEvent(player.getUniqueId(), NamedDrunkEvent.fromKey("puke"), Config.config().puke().pukeTime());
         Bukkit.getScheduler().runTaskTimer(TheBrewingProject.getInstance(), pukeHandler::tick, 0, 1);
+        return ExecutionResult.CONTINUE;
     }
 
     static class PukeHandler {
@@ -77,5 +75,10 @@ public class PukeNamedExecutable implements ExecutableEventStep {
             int despawnRate = Math.max(Config.config().puke().pukeDespawnTime(), 4);
             item.setTicksLived(worldDespawnRate - despawnRate + RANDOM.nextInt(-despawnRate / 2, despawnRate / 2 + 1));
         }
+    }
+
+    @Override
+    public int priority() {
+        return -1;
     }
 }

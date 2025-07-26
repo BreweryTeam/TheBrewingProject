@@ -1,11 +1,11 @@
 package dev.jsinco.brewery.event.step;
 
-import dev.jsinco.brewery.event.EventStep;
+import dev.jsinco.brewery.event.EventStepProperty;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public record WaitStep(int durationTicks) implements EventStep {
+public record WaitStep(int durationTicks) implements EventStepProperty {
 
     private static final Pattern TICKS_PATTERN = Pattern.compile("(\\d+)t");
     private static final Pattern SECONDS_PATTERN = Pattern.compile("(\\d+)s");

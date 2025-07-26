@@ -1,43 +1,19 @@
 package dev.jsinco.brewery.bukkit.configuration.serializer;
 
+import dev.jsinco.brewery.util.Logger;
 import dev.jsinco.brewery.vector.BreweryLocation;
+import eu.okaeri.configs.schema.GenericsDeclaration;
+import eu.okaeri.configs.serdes.DeserializationData;
+import eu.okaeri.configs.serdes.ObjectSerializer;
+import eu.okaeri.configs.serdes.SerializationData;
+import lombok.NonNull;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
-import org.checkerframework.checker.nullness.qual.Nullable;
-import org.jetbrains.annotations.NotNull;
-import org.spongepowered.configurate.ConfigurationNode;
-import org.spongepowered.configurate.serialize.SerializationException;
-import org.spongepowered.configurate.serialize.TypeSerializer;
 
-import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.UUID;
-import java.util.function.Supplier;
 
-public class BreweryLocationSerializer implements TypeSerializer<Supplier<BreweryLocation>> {
-    @Override
-    public Supplier<BreweryLocation> deserialize(@NotNull Type type, ConfigurationNode node) throws SerializationException {
-        String string = node.getString();
-        if (string == null) {
-            throw new SerializationException("Can not deserialize empty node");
-        }
-        String[] split = Arrays.stream(string.split(",")).map(String::trim).toArray(String[]::new);
-        if (split.length != 4) {
-            throw new SerializationException("Expected location of format world, x, y, z");
-        }
-        try {
-            int x = Integer.parseInt(split[1]);
-            int y = Integer.parseInt(split[2]);
-            int z = Integer.parseInt(split[3]);
-            return () -> {
-                UUID worldUuid = parseWorld(split[0]);
-                return new BreweryLocation(x, y, z, worldUuid);
-            };
-        } catch (IllegalArgumentException e) {
-            throw new SerializationException(e);
-        }
-
-    }
+public class BreweryLocationSerializer implements ObjectSerializer<BreweryLocation.Uncompiled> {
 
     private UUID parseWorld(String worldString) {
         World world;
@@ -47,19 +23,49 @@ public class BreweryLocationSerializer implements TypeSerializer<Supplier<Brewer
             world = Bukkit.getWorld(worldString);
         }
         if (world == null) {
-            throw new IllegalArgumentException("Could not find world: " + worldString);
+            Logger.logErr("Could not find world: " + worldString);
+            return null;
         }
         return world.getUID();
     }
 
     @Override
-    public void serialize(@NotNull Type type, @Nullable Supplier<BreweryLocation> obj, ConfigurationNode node) throws SerializationException {
-        if (obj == null) {
-            return;
+    public boolean supports(@NonNull Class<? super BreweryLocation.Uncompiled> type) {
+        return BreweryLocation.Uncompiled.class == type;
+    }
+
+    @Override
+    public void serialize(@NonNull BreweryLocation.Uncompiled object, @NonNull SerializationData data, @NonNull GenericsDeclaration generics) {
+        BreweryLocation location = object.get(Bukkit.getWorlds().stream().map(World::getUID).toList());
+        if (location == null) {
+            location = new BreweryLocation(0, 0, 0, UUID.randomUUID());
         }
-        BreweryLocation location = obj.get();
-        node.set(
-                String.format("%s, %d, %d, %d", Bukkit.getWorld(location.worldUuid()).getName(), location.x(), location.y(), location.z())
+        World world = Bukkit.getWorld(location.worldUuid());
+        data.setValue(
+                String.format("%s, %d, %d, %d", world == null ? location.worldUuid() : world.getName(), location.x(), location.y(), location.z())
         );
+    }
+
+    @Override
+    public BreweryLocation.Uncompiled deserialize(@NonNull DeserializationData data, @NonNull GenericsDeclaration generics) {
+        String string = data.getValue(String.class);
+        if (string == null) {
+            throw new IllegalArgumentException("Can not deserialize empty node");
+        }
+        String[] split = Arrays.stream(string.split(",")).map(String::trim).toArray(String[]::new);
+        if (split.length != 4) {
+            throw new IllegalArgumentException("Expected location of format world, x, y, z");
+        }
+        try {
+            int x = Integer.parseInt(split[1]);
+            int y = Integer.parseInt(split[2]);
+            int z = Integer.parseInt(split[3]);
+            return ignored -> {
+                UUID worldUuid = parseWorld(split[0]);
+                return worldUuid == null ? null : new BreweryLocation(x, y, z, worldUuid);
+            };
+        } catch (IllegalArgumentException e) {
+            throw new IllegalStateException(e);
+        }
     }
 }

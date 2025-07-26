@@ -2,12 +2,13 @@ package dev.jsinco.brewery.bukkit.effect.step;
 
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.event.EventStep;
-import dev.jsinco.brewery.event.ExecutableEventStep;
+import dev.jsinco.brewery.event.EventPropertyExecutable;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.UUID;
 
-public class ConsumeStepExecutable implements ExecutableEventStep {
+public class ConsumeStepExecutable implements EventPropertyExecutable {
 
     private final int alcohol;
     private final int toxins;
@@ -18,8 +19,14 @@ public class ConsumeStepExecutable implements ExecutableEventStep {
     }
 
     @Override
-    public void execute(UUID contextPlayer, List<EventStep> events, int index) {
+    public @NotNull ExecutionResult execute(UUID contextPlayer, List<? extends EventStep> events, int index) {
         TheBrewingProject.getInstance().getDrunksManager().consume(contextPlayer, alcohol, toxins);
+        return ExecutionResult.CONTINUE;
+    }
+
+    @Override
+    public int priority() {
+        return 2;
     }
 
 }
