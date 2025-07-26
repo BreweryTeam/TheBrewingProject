@@ -98,20 +98,28 @@ public abstract class AbstractConfig {
     }
 
     protected @Nullable Object get(@NotNull String path, @Nullable Object def) {
-        Object val = get(path);
+        Object val = get(path, getConfig());
         return val == null ? def : val;
     }
 
-    protected @Nullable Object get(@NotNull String path) {
-        Object value = getConfig().get(path);
-        if (!(value instanceof ConfigurationSection section)) {
+    protected @Nullable Object get(@NotNull String path, YamlConfiguration configuration) {
+        Object value = configuration.get(path);
+        if (!(value instanceof ConfigurationSection)) {
             return value;
         }
+        if (!(backup.get(path) instanceof ConfigurationSection backupSection)) {
+            throw new IllegalArgumentException("Expected '" + path + "' to be a configuration section");
+        }
         Map<String, Object> map = new LinkedHashMap<>();
-        for (String key : section.getKeys(false)) {
-            Object rawValue = get(path + "." + key);
-            if (rawValue == null) {
-                continue;
+        for (String key : backupSection.getKeys(false)) {
+            String keyPath = path + "." + key;
+            Object rawValue = get(keyPath, configuration);
+            if (rawValue == null && configuration != backup) {
+                rawValue = get(keyPath, backup);
+                if (rawValue == null) {
+                    continue;
+                }
+                set(keyPath, rawValue);
             }
             map.put(key, rawValue);
         }
