@@ -3,6 +3,7 @@ package dev.jsinco.brewery.bukkit.integration.item;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.bukkit.integration.ItemIntegration;
 import dev.jsinco.brewery.util.ClassUtil;
+import dev.jsinco.brewery.util.executor.Executors;
 import net.kyori.adventure.text.Component;
 import net.momirealms.craftengine.bukkit.api.event.CraftEngineReloadEvent;
 import net.momirealms.craftengine.bukkit.plugin.BukkitCraftEngine;
@@ -57,7 +58,9 @@ public class CraftEngineIntegration implements ItemIntegration, Listener {
     public void initialize() {
         this.initializedFuture = new CompletableFuture<>();
         Bukkit.getPluginManager().registerEvents(this, TheBrewingProject.getInstance());
-        Bukkit.getScheduler().runTask(TheBrewingProject.getInstance(), () -> initializedFuture.completeExceptionally(new TimeoutException()));
+        Executors.getInstance().sync(() -> {
+            initializedFuture.completeExceptionally(new TimeoutException());
+        });
     }
 
     @EventHandler

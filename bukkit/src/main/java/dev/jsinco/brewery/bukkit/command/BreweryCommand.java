@@ -10,11 +10,11 @@ import dev.jsinco.brewery.bukkit.command.argument.OfflinePlayerArgument;
 import dev.jsinco.brewery.bukkit.command.argument.OnlinePlayerArgument;
 import dev.jsinco.brewery.configuration.locale.TranslationsConfig;
 import dev.jsinco.brewery.event.DrunkEvent;
+import dev.jsinco.brewery.util.MessageUtil;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
 import io.papermc.paper.command.brigadier.MessageComponentSerializer;
 import io.papermc.paper.plugin.lifecycle.event.registrar.ReloadableRegistrarEvent;
-import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -25,7 +25,7 @@ import java.util.function.Consumer;
 public class BreweryCommand {
 
     private static final SimpleCommandExceptionType ERROR_UNDEFINED_PLAYER = new SimpleCommandExceptionType(
-            MessageComponentSerializer.message().serialize(MiniMessage.miniMessage().deserialize(TranslationsConfig.COMMAND_UNDEFINED_PLAYER))
+            MessageComponentSerializer.message().serialize(MessageUtil.mm(TranslationsConfig.COMMAND_UNDEFINED_PLAYER))
     );
 
     public static void register(ReloadableRegistrarEvent<Commands> commands) {
@@ -49,10 +49,10 @@ public class BreweryCommand {
                         .executes(context -> {
                             CommandSender sender = context.getSource().getSender();
                             if (!sender.hasPermission("brewery.command.reload")) {
-                                sender.sendMessage(MiniMessage.miniMessage().deserialize(TranslationsConfig.COMMAND_NOT_ENOUGH_PERMISSIONS));
+                                MessageUtil.msg(sender, TranslationsConfig.COMMAND_NOT_ENOUGH_PERMISSIONS);
                             } else {
                                 TheBrewingProject.getInstance().reload();
-                                sender.sendMessage(MiniMessage.miniMessage().deserialize(TranslationsConfig.COMMAND_RELOAD_MESSAGE));
+                                MessageUtil.msg(sender, TranslationsConfig.COMMAND_RELOAD_MESSAGE);
                             }
                             return com.mojang.brigadier.Command.SINGLE_SUCCESS;
                         })

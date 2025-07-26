@@ -6,8 +6,8 @@ import dev.jsinco.brewery.configuration.Config;
 import dev.jsinco.brewery.configuration.locale.TranslationsConfig;
 import dev.jsinco.brewery.event.EventStep;
 import dev.jsinco.brewery.event.ExecutableEventStep;
+import dev.jsinco.brewery.util.MessageUtil;
 import dev.jsinco.brewery.vector.BreweryLocation;
-import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
@@ -33,7 +33,7 @@ public class TeleportNamedExecutable implements ExecutableEventStep {
         BreweryLocation teleport = locations.get(RANDOM.nextInt(locations.size()));
         Location location = BukkitAdapter.toLocation(teleport);
         player.teleportAsync(location);
-        player.sendMessage(MiniMessage.miniMessage().deserialize(TranslationsConfig.TELEPORT_MESSAGE, BukkitMessageUtil.getPlayerTagResolver(player)));
+        MessageUtil.msg(player, TranslationsConfig.TELEPORT_MESSAGE, BukkitMessageUtil.getPlayerTagResolver(player));
     }
 
 }

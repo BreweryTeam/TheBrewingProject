@@ -16,7 +16,6 @@ import dev.jsinco.brewery.util.MessageUtil;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -66,27 +65,26 @@ public class InfoCommand {
 
     private static void showInfo(@Nullable ItemStack itemStack, CommandSender sender) {
         if (itemStack == null) {
-            sender.sendMessage(MiniMessage.miniMessage().deserialize(TranslationsConfig.COMMAND_INFO_NOT_A_BREW));
+            MessageUtil.msg(sender, TranslationsConfig.COMMAND_INFO_NOT_A_BREW);
             return;
         }
         Optional<Brew> brewOptional = BrewAdapter.fromItem(itemStack);
         brewOptional
-                .ifPresent(brew -> sender.sendMessage(
-                        MiniMessage.miniMessage().deserialize(TranslationsConfig.COMMAND_INFO_BREW_MESSAGE,
-                                MessageUtil.getScoreTagResolver(brew.closestRecipe(TheBrewingProject.getInstance().getRecipeRegistry())
-                                        .map(brew::score)
-                                        .orElse(BrewScoreImpl.failed(brew))),
-                                Placeholder.component("brewing_step_info", MessageUtil.compileBrewInfo(brew, true, TheBrewingProject.getInstance().getRecipeRegistry())
-                                        .collect(Component.toComponent(Component.text("\n")))
-                                )
-                        )
-                ));
+                .ifPresent(brew -> MessageUtil.msg(sender,
+                        TranslationsConfig.COMMAND_INFO_BREW_MESSAGE,
+                        MessageUtil.getScoreTagResolver(brew.closestRecipe(TheBrewingProject.getInstance().getRecipeRegistry())
+                                .map(brew::score)
+                                .orElse(BrewScoreImpl.failed(brew))),
+                        Placeholder.component("brewing_step_info", MessageUtil.compileBrewInfo(brew, true, TheBrewingProject.getInstance().getRecipeRegistry())
+                                .collect(Component.toComponent(Component.text("\n")))
+                        ))
+                );
         Optional<RecipeEffects> recipeEffectsOptional = RecipeEffects.fromItem(itemStack);
         recipeEffectsOptional.ifPresent(effects -> {
-            sender.sendMessage(MiniMessage.miniMessage().deserialize(TranslationsConfig.COMMAND_INFO_EFFECT_MESSAGE, BukkitMessageUtil.recipeEffectResolver(effects)));
+            MessageUtil.msg(sender, TranslationsConfig.COMMAND_INFO_EFFECT_MESSAGE, BukkitMessageUtil.recipeEffectResolver(effects));
         });
         if (brewOptional.isEmpty() && recipeEffectsOptional.isEmpty()) {
-            sender.sendMessage(MiniMessage.miniMessage().deserialize(TranslationsConfig.COMMAND_INFO_NOT_A_BREW));
+            MessageUtil.msg(sender, TranslationsConfig.COMMAND_INFO_NOT_A_BREW);
         }
     }
 }

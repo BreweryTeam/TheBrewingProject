@@ -8,8 +8,8 @@ import dev.jsinco.brewery.configuration.locale.TranslationsConfig;
 import dev.jsinco.brewery.effect.DrunkStateImpl;
 import dev.jsinco.brewery.effect.DrunksManagerImpl;
 import dev.jsinco.brewery.event.NamedDrunkEvent;
+import dev.jsinco.brewery.util.MessageUtil;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Formatter;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
@@ -48,7 +48,7 @@ public class BukkitMessageUtil {
 
     public static Component compilePlayerMessage(String message, Player player, DrunksManagerImpl<?> drunksManager, int alcohol) {
         DrunkStateImpl drunkState = drunksManager.getDrunkState(player.getUniqueId());
-        return MiniMessage.miniMessage().deserialize(
+        return MessageUtil.mm(
                 preProcessPlayerMessage(message, player),
                 Placeholder.parsed("alcohol", String.valueOf(alcohol)),
                 Placeholder.parsed("player_alcohol", String.valueOf(drunkState == null ? "0" : drunkState.alcohol())),

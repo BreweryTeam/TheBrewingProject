@@ -18,7 +18,6 @@ import lombok.Getter;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
-import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Formatter;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
@@ -157,7 +156,7 @@ public class BukkitRecipeResult implements RecipeResult<ItemStack> {
                 MessageUtil.compileBrewInfo(brew, score, false).forEach(streamBuilder::add);
                 int alcohol = recipeEffects.getAlcohol();
                 if (alcohol > 0) {
-                    streamBuilder.add(MiniMessage.miniMessage().deserialize(TranslationsConfig.DETAILED_ALCOHOLIC, Formatter.number("alcohol", alcohol)));
+                    streamBuilder.add(MessageUtil.mm(TranslationsConfig.DETAILED_ALCOHOLIC, Formatter.number("alcohol", alcohol)));
                 }
             }
             case Brew.State.Other ignored -> {
@@ -166,9 +165,9 @@ public class BukkitRecipeResult implements RecipeResult<ItemStack> {
             }
             case Brew.State.Seal seal -> {
                 if (seal.message() != null) {
-                    streamBuilder.add(MiniMessage.miniMessage().deserialize(TranslationsConfig.BREW_TOOLTIP_VOLUME, Placeholder.parsed("volume", seal.message())));
+                    streamBuilder.add(MessageUtil.mm(TranslationsConfig.BREW_TOOLTIP_VOLUME, Placeholder.parsed("volume", seal.message())));
                 }
-                streamBuilder.add(MiniMessage.miniMessage().deserialize(TranslationsConfig.BREW_TOOLTIP_QUALITY_SEALED, MessageUtil.getScoreTagResolver(score)));
+                streamBuilder.add(MessageUtil.mm(TranslationsConfig.BREW_TOOLTIP_QUALITY_SEALED, MessageUtil.getScoreTagResolver(score)));
                 addLastStepLore(brew, streamBuilder, score, true);
             }
         }
@@ -178,17 +177,17 @@ public class BukkitRecipeResult implements RecipeResult<ItemStack> {
     private void addLastStepLore(Brew brew, Stream.Builder<Component> streamBuilder, BrewScore score, boolean sealed) {
         Map<String, String> lore = sealed ? TranslationsConfig.BREW_TOOLTIP_SEALED : TranslationsConfig.BREW_TOOLTIP;
         BrewingStep brewingStep = brew.lastCompletedStep();
-        streamBuilder.add(MiniMessage.miniMessage().deserialize(
+        streamBuilder.add(MessageUtil.mm(
                 lore.get(brewingStep.stepType().name().toLowerCase(Locale.ROOT)),
                 MessageUtil.getBrewStepTagResolver(brewingStep, score.getPartialScores(brew.getCompletedSteps().size() - 1), score.brewDifficulty()))
         );
         if (recipeEffects.getAlcohol() > 0) {
-            streamBuilder.add(MiniMessage.miniMessage().deserialize(TranslationsConfig.ALCOHOLIC));
+            streamBuilder.add(MessageUtil.mm(TranslationsConfig.ALCOHOLIC));
         }
     }
 
     private Component compileMessage(BrewScore score, Brew brew, String serializedMiniMessage, boolean isBrewName) {
-        return MiniMessage.miniMessage().deserialize(serializedMiniMessage, getResolver(score, brew, isBrewName));
+        return MessageUtil.mm(serializedMiniMessage, getResolver(score, brew, isBrewName));
     }
 
     private @NotNull TagResolver getResolver(BrewScore score, Brew brew, boolean isBrewName) {
