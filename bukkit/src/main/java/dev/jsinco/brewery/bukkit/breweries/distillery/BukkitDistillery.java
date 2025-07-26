@@ -199,17 +199,22 @@ public class BukkitDistillery implements Distillery<BukkitDistillery, ItemStack,
         if (!mixture.getInventory().getViewers().isEmpty() || !distillate.getInventory().getViewers().isEmpty()) {
             this.recentlyAccessed = TheBrewingProject.getInstance().getTime();
         }
-        long diff = getTimeProcessed();
+        long timeProcessed = getTimeProcessed();
         long processTime = getProcessTime();
-        if (diff < processTime || mixture.isEmpty()) {
+        // Process has changed one extra tick, to avoid running a sound if the mixture inventory changed
+        if (timeProcessed < processTime - 1 || mixture.getInventory().isEmpty()) {
             return;
         }
         boolean hasChanged = mixture.updateBrewsFromInventory();
         distillate.updateBrewsFromInventory();
         if (hasChanged) {
             resetStartTime();
+            return;
         }
-        transferItems(mixture, distillate, (int) (getStructure().getStructure().getMeta(StructureMeta.PROCESS_AMOUNT) * (diff / processTime)));
+        if (timeProcessed < processTime) {
+            return;
+        }
+        transferItems(mixture, distillate, (int) (getStructure().getStructure().getMeta(StructureMeta.PROCESS_AMOUNT) * (timeProcessed / processTime)));
         distillate.updateInventoryFromBrews();
         mixture.updateInventoryFromBrews();
         resetStartTime();
