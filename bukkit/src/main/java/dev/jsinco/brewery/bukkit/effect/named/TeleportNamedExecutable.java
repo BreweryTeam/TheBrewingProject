@@ -6,7 +6,6 @@ import dev.jsinco.brewery.configuration.Config;
 import dev.jsinco.brewery.configuration.locale.TranslationsConfig;
 import dev.jsinco.brewery.event.EventPropertyExecutable;
 import dev.jsinco.brewery.event.EventStep;
-import dev.jsinco.brewery.event.ExecutableEventStep;
 import dev.jsinco.brewery.util.MessageUtil;
 import dev.jsinco.brewery.vector.BreweryLocation;
 import org.bukkit.Bukkit;

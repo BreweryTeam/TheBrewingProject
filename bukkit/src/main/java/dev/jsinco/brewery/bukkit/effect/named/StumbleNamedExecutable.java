@@ -4,8 +4,7 @@ import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.event.EventPropertyExecutable;
 import dev.jsinco.brewery.event.EventStep;
 import dev.jsinco.brewery.event.NamedDrunkEvent;
-import dev.jsinco.brewery.util.executor.BreweryTask;
-import dev.jsinco.brewery.util.executor.Executors;
+import io.papermc.paper.threadedregions.scheduler.ScheduledTask;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;
@@ -29,7 +28,8 @@ public class StumbleNamedExecutable implements EventPropertyExecutable {
         int duration = RANDOM.nextInt(STUMBLE_DURATION / 2, STUMBLE_DURATION * 3 / 2 + 1);
         StumbleHandler stumbleHandler = new StumbleHandler(duration, player);
         TheBrewingProject.getInstance().getActiveEventsRegistry().registerActiveEvent(player.getUniqueId(), NamedDrunkEvent.fromKey("stumble"), duration);
-        Executors.getInstance().syncRepeating(0, 1, stumbleHandler::doStumble);
+        player.getScheduler().runAtFixedRate(TheBrewingProject.getInstance(), stumbleHandler::tick, () -> {
+        }, 1, 1);
         return ExecutionResult.CONTINUE;
     }
 
@@ -60,7 +60,7 @@ public class StumbleNamedExecutable implements EventPropertyExecutable {
                     .multiply(RANDOM.nextDouble(maxMagnitude));
         }
 
-        public void doStumble(BreweryTask task) {
+        public void tick(ScheduledTask task) {
             if (!player.isOnline() || countDown-- < 0) {
                 task.cancel();
                 return;

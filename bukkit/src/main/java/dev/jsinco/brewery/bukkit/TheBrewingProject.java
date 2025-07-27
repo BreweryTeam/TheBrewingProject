@@ -23,7 +23,6 @@ import dev.jsinco.brewery.bukkit.recipe.BukkitRecipeResultReader;
 import dev.jsinco.brewery.bukkit.recipe.DefaultRecipeReader;
 import dev.jsinco.brewery.bukkit.structure.*;
 import dev.jsinco.brewery.bukkit.util.BreweryTimeDataType;
-import dev.jsinco.brewery.bukkit.util.executor.BukkitExecutors;
 import dev.jsinco.brewery.configuration.Config;
 import dev.jsinco.brewery.configuration.OkaeriSerdesPackBuilder;
 import dev.jsinco.brewery.configuration.locale.TranslationsConfig;
@@ -44,9 +43,9 @@ import dev.jsinco.brewery.structure.StructureType;
 import dev.jsinco.brewery.util.BreweryKey;
 import dev.jsinco.brewery.util.Logger;
 import dev.jsinco.brewery.util.Util;
-import dev.jsinco.brewery.util.executor.Executors;
 import eu.okaeri.configs.serdes.OkaeriSerdesPack;
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
+import io.papermc.paper.threadedregions.scheduler.ScheduledTask;
 import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.inventory.ItemStack;
@@ -101,7 +100,6 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
 
     public void initialize() {
         instance = this;
-        Executors.setInstance(new BukkitExecutors());
         Config.load(this.getDataFolder(), serializers());
         TranslationsConfig.reload(this.getDataFolder());
         this.structureRegistry = new StructureRegistry();
@@ -215,8 +213,8 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
         pluginManager.registerEvents(playerWalkListener, this);
         pluginManager.registerEvents(new EntityEventListener(), this);
 
-        Executors.getInstance().syncRepeating(0, 1, this::updateStructures);
-        Executors.getInstance().syncRepeating(0, 1, this::otherTicking);
+        Bukkit.getGlobalRegionScheduler().runAtFixedRate(this, this::updateStructures, 1, 1);
+        Bukkit.getGlobalRegionScheduler().runAtFixedRate(this, this::otherTicking, 1, 1);
         RecipeReader<ItemStack> recipeReader = new RecipeReader<>(this.getDataFolder(), new BukkitRecipeResultReader(), BukkitIngredientManager.INSTANCE);
 
         recipeReader.readRecipes().forEach(recipeFuture -> recipeFuture.thenAcceptAsync(recipe -> recipeRegistry.registerRecipe(recipe)));
@@ -257,7 +255,7 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
         super.saveResource(resource, false);
     }
 
-    private void updateStructures() {
+    private void updateStructures(ScheduledTask ignored) {
         breweryRegistry.getActiveSinglePositionStructure().stream()
                 .filter(Tickable.class::isInstance)
                 .map(Tickable.class::cast)
@@ -270,7 +268,7 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
         List.copyOf(breweryRegistry.<BukkitDistillery>getOpened(StructureType.DISTILLERY)).forEach(Distillery::tickInventory);
     }
 
-    private void otherTicking() {
+    private void otherTicking(ScheduledTask ignored) {
         drunksManager.tick(drunkEventExecutor::doDrunkEvent, uuid -> Bukkit.getPlayer(uuid) != null);
         try {
             if (++time % 200 == 0) {
