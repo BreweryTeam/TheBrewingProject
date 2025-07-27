@@ -61,9 +61,9 @@ public class SealCommand {
             }
         }
         if (oneFound) {
-            MessageUtil.msg(sender, TranslationsConfig.COMMAND_SEAL_SUCCESS, Placeholder.unparsed("player_name", target.getName()));
+            MessageUtil.message(sender, TranslationsConfig.COMMAND_SEAL_SUCCESS, Placeholder.unparsed("player_name", target.getName()));
         } else {
-            MessageUtil.msg(sender, TranslationsConfig.COMMAND_SEAL_FAILURE);
+            MessageUtil.message(sender, TranslationsConfig.COMMAND_SEAL_FAILURE);
         }
         return 1;
     }
@@ -78,9 +78,9 @@ public class SealCommand {
                 .map(brew -> BrewAdapter.toItem(brew, new BrewImpl.State.Seal(volumeMessage)))
                 .ifPresentOrElse(itemStack -> {
                     targetInventory.setItemInMainHand(itemStack);
-                    MessageUtil.msg(sender, TranslationsConfig.COMMAND_SEAL_SUCCESS, Placeholder.unparsed("player_name", target.getName()));
+                    MessageUtil.message(sender, TranslationsConfig.COMMAND_SEAL_SUCCESS, Placeholder.unparsed("player_name", target.getName()));
                 }, () -> {
-                    MessageUtil.msg(sender, TranslationsConfig.COMMAND_SEAL_FAILURE);
+                    MessageUtil.message(sender, TranslationsConfig.COMMAND_SEAL_FAILURE);
                 });
         return 1;
     }

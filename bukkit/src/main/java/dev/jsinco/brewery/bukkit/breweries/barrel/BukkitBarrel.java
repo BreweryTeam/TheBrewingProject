@@ -57,7 +57,7 @@ public class BukkitBarrel implements Barrel<BukkitBarrel, ItemStack, Inventory> 
     public boolean open(@NotNull BreweryLocation location, @NotNull UUID playerUuid) {
         Player player = Bukkit.getPlayer(playerUuid);
         if (!player.hasPermission("brewery.barrel.access")) {
-            MessageUtil.msg(player, TranslationsConfig.BARREL_ACCESS_DENIED);
+            MessageUtil.message(player, TranslationsConfig.BARREL_ACCESS_DENIED);
             return true;
         }
         if (inventoryUnpopulated()) {
@@ -78,7 +78,7 @@ public class BukkitBarrel implements Barrel<BukkitBarrel, ItemStack, Inventory> 
             return false;
         }
         if (!player.hasPermission("brewery.barrel.access")) {
-            MessageUtil.msg(player, TranslationsConfig.BARREL_ACCESS_DENIED);
+            MessageUtil.message(player, TranslationsConfig.BARREL_ACCESS_DENIED);
             return false;
         }
         return inventoryAllows(item);

@@ -153,7 +153,7 @@ public class BukkitCauldron implements dev.jsinco.brewery.breweries.Cauldron {
     public boolean addIngredient(@NotNull ItemStack item, Player player) {
         // TODO: Add API event
         if (!player.hasPermission("brewery.cauldron.access")) {
-            MessageUtil.msg(player, TranslationsConfig.CAULDRON_ACCESS_DENIED);
+            MessageUtil.message(player, TranslationsConfig.CAULDRON_ACCESS_DENIED);
             return false;
         }
         if (!brewExtracted && item.getType() == Material.POTION) {

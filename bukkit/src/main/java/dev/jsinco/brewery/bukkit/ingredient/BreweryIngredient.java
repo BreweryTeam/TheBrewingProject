@@ -30,7 +30,7 @@ public class BreweryIngredient implements Ingredient {
 
     @Override
     public @NotNull Component displayName() {
-        return MessageUtil.mm(displayName);
+        return MessageUtil.miniMessage(displayName);
     }
 
     @Override

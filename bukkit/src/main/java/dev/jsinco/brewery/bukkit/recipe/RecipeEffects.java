@@ -158,7 +158,7 @@ public class RecipeEffects {
             player.sendActionBar(BukkitMessageUtil.compilePlayerMessage(actionBar, player, drunksManager, this.alcohol));
         } else {
             player.sendActionBar(
-                    MessageUtil.mm(TranslationsConfig.INFO_AFTER_DRINK,
+                    MessageUtil.miniMessage(TranslationsConfig.INFO_AFTER_DRINK,
                             MessageUtil.getDrunkStateTagResolver(drunksManager.getDrunkState(player.getUniqueId()))
                     )
             );

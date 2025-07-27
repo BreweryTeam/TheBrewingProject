@@ -25,7 +25,7 @@ import java.util.function.Consumer;
 public class BreweryCommand {
 
     private static final SimpleCommandExceptionType ERROR_UNDEFINED_PLAYER = new SimpleCommandExceptionType(
-            MessageComponentSerializer.message().serialize(MessageUtil.mm(TranslationsConfig.COMMAND_UNDEFINED_PLAYER))
+            MessageComponentSerializer.message().serialize(MessageUtil.miniMessage(TranslationsConfig.COMMAND_UNDEFINED_PLAYER))
     );
 
     public static void register(ReloadableRegistrarEvent<Commands> commands) {
@@ -49,10 +49,10 @@ public class BreweryCommand {
                         .executes(context -> {
                             CommandSender sender = context.getSource().getSender();
                             if (!sender.hasPermission("brewery.command.reload")) {
-                                MessageUtil.msg(sender, TranslationsConfig.COMMAND_NOT_ENOUGH_PERMISSIONS);
+                                MessageUtil.message(sender, TranslationsConfig.COMMAND_NOT_ENOUGH_PERMISSIONS);
                             } else {
                                 TheBrewingProject.getInstance().reload();
-                                MessageUtil.msg(sender, TranslationsConfig.COMMAND_RELOAD_MESSAGE);
+                                MessageUtil.message(sender, TranslationsConfig.COMMAND_RELOAD_MESSAGE);
                             }
                             return com.mojang.brigadier.Command.SINGLE_SUCCESS;
                         })

@@ -8,7 +8,6 @@ import dev.jsinco.brewery.brew.PartialBrewScore;
 import dev.jsinco.brewery.configuration.Config;
 import dev.jsinco.brewery.configuration.locale.TranslationsConfig;
 import dev.jsinco.brewery.effect.DrunkState;
-import dev.jsinco.brewery.effect.DrunkStateImpl;
 import dev.jsinco.brewery.recipe.RecipeRegistry;
 import dev.jsinco.brewery.recipes.BrewScoreImpl;
 import net.kyori.adventure.audience.Audience;
@@ -32,21 +31,13 @@ import java.util.stream.Stream;
 public class MessageUtil {
 
     private static final char SKULL = '\u2620';
-
-    public static Component mm(String msg) {
-        return MiniMessage.miniMessage().deserialize(msg);
-    }
     
-    public static Component mm(String msg, TagResolver... resolvers) {
+    public static Component miniMessage(String msg, TagResolver... resolvers) {
         return MiniMessage.miniMessage().deserialize(msg, resolvers);
     }
 
-    public static void msg(Audience audience, String msg) {
-        audience.sendMessage(mm(msg));
-    }
-
-    public static void msg(Audience audience, String msg, TagResolver... resolvers) {
-        audience.sendMessage(mm(msg, resolvers));
+    public static void message(Audience audience, String msg, TagResolver... resolvers) {
+        audience.sendMessage(miniMessage(msg, resolvers));
     }
 
     public static TagResolver getScoreTagResolver(@NotNull BrewScore score) {
@@ -105,7 +96,7 @@ public class MessageUtil {
         for (int i = 0; i < brewingSteps.size(); i++) {
             BrewingStep brewingStep = brewingSteps.get(i);
             String line = (detailed ? TranslationsConfig.DETAILED_BREW_TOOLTIP : TranslationsConfig.BREW_TOOLTIP_BREWING).get(brewingStep.stepType().name().toLowerCase(Locale.ROOT));
-            streamBuilder.add(MessageUtil.mm(line, MessageUtil.getBrewStepTagResolver(brewingStep, score.getPartialScores(i), score.brewDifficulty())));
+            streamBuilder.add(MessageUtil.miniMessage(line, MessageUtil.getBrewStepTagResolver(brewingStep, score.getPartialScores(i), score.brewDifficulty())));
         }
         return streamBuilder.build();
     }

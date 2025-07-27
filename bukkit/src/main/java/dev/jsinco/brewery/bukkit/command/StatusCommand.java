@@ -33,7 +33,7 @@ public class StatusCommand {
         OfflinePlayer target = BreweryCommand.getOfflinePlayer(context);
         CommandSender sender = context.getSource().getSender();
         TheBrewingProject.getInstance().getDrunksManager().clear(target.getUniqueId());
-        MessageUtil.msg(sender, TranslationsConfig.COMMAND_STATUS_CLEAR_MESSAGE, Placeholder.unparsed("player_name", target.getName()));
+        MessageUtil.message(sender, TranslationsConfig.COMMAND_STATUS_CLEAR_MESSAGE, Placeholder.unparsed("player_name", target.getName()));
         return 1;
     }
 
@@ -61,7 +61,7 @@ public class StatusCommand {
         Pair<DrunkEvent, Long> nextEvent = drunksManager.getPlannedEvent(target.getUniqueId());
         drunksManager.getPlannedEvent(target.getUniqueId());
         String targetName = target.getName();
-        return MessageUtil.mm(
+        return MessageUtil.miniMessage(
                 message,
                 Formatter.number("alcohol", drunkState == null ? 0 : drunkState.alcohol()),
                 Formatter.number("toxins", drunkState == null ? 0 : drunkState.toxins()),

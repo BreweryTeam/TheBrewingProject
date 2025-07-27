@@ -74,7 +74,7 @@ public class CreateCommand {
                 target.getWorld().dropItem(target.getLocation(), brewItem);
             }
             ItemMeta brewItemMeta = brewItem.getItemMeta();
-            MessageUtil.msg(context.getSource().getSender(), TranslationsConfig.COMMAND_CREATE_SUCCESS, Placeholder.component("brew_name", brewItemMeta.hasCustomName() ? brewItemMeta.customName() : brewItemMeta.itemName()));
+            MessageUtil.message(context.getSource().getSender(), TranslationsConfig.COMMAND_CREATE_SUCCESS, Placeholder.component("brew_name", brewItemMeta.hasCustomName() ? brewItemMeta.customName() : brewItemMeta.itemName()));
         }).build();
         ArgumentBuilder<CommandSourceStack, ?> root = Commands.literal("create");
         tree.forEach(root::then);

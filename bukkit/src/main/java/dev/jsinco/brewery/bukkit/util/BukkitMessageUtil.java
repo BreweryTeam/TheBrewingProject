@@ -48,7 +48,7 @@ public class BukkitMessageUtil {
 
     public static Component compilePlayerMessage(String message, Player player, DrunksManagerImpl<?> drunksManager, int alcohol) {
         DrunkStateImpl drunkState = drunksManager.getDrunkState(player.getUniqueId());
-        return MessageUtil.mm(
+        return MessageUtil.miniMessage(
                 preProcessPlayerMessage(message, player),
                 Placeholder.parsed("alcohol", String.valueOf(alcohol)),
                 Placeholder.parsed("player_alcohol", String.valueOf(drunkState == null ? "0" : drunkState.alcohol())),

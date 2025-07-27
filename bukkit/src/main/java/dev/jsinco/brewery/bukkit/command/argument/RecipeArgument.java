@@ -22,7 +22,7 @@ import java.util.concurrent.CompletableFuture;
 
 public class RecipeArgument implements CustomArgumentType.Converted<Recipe<ItemStack>, String> {
     private static final DynamicCommandExceptionType ERROR_INVALID_RECIPE = new DynamicCommandExceptionType(event ->
-            MessageComponentSerializer.message().serialize(MessageUtil.mm(TranslationsConfig.COMMAND_ILLEGAL_ARGUMENT_DETAILED, Placeholder.unparsed("argument", event.toString())))
+            MessageComponentSerializer.message().serialize(MessageUtil.miniMessage(TranslationsConfig.COMMAND_ILLEGAL_ARGUMENT_DETAILED, Placeholder.unparsed("argument", event.toString())))
     );
 
     @Override

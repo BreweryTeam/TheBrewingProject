@@ -33,7 +33,7 @@ public class ChickenNamedExecutable implements EventPropertyExecutable {
             chicken.getPersistentDataContainer().set(NO_DROPS, PersistentDataType.BOOLEAN, true);
             chicken.setBreed(false);
         });
-        MessageUtil.msg(player, TranslationsConfig.CHICKEN_MESSAGE, BukkitMessageUtil.getPlayerTagResolver(player));
+        MessageUtil.message(player, TranslationsConfig.CHICKEN_MESSAGE, BukkitMessageUtil.getPlayerTagResolver(player));
         return ExecutionResult.CONTINUE;
     }
 

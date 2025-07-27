@@ -104,8 +104,8 @@ public class BrewAdapter {
 
         BrewingStep.StepType lastStep = brew.getCompletedSteps().getLast().stepType();
         Component displayName = topIngredient == null
-                ? MessageUtil.mm(displayNameByStep.get(lastStep))
-                : MessageUtil.mm(displayNameByStep.get(lastStep), Placeholder.component("ingredient", topIngredient.displayName()));
+                ? MessageUtil.miniMessage(displayNameByStep.get(lastStep))
+                : MessageUtil.miniMessage(displayNameByStep.get(lastStep), Placeholder.component("ingredient", topIngredient.displayName()));
 
         potionMeta.customName(displayName.decoration(TextDecoration.ITALIC, false));
         potionMeta.setColor(itemsInfo.first());

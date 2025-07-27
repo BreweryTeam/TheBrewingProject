@@ -27,7 +27,7 @@ public class ReplicateCommand {
                     if (!target.getInventory().addItem(brewItem).isEmpty()) {
                         target.getLocation().getWorld().dropItem(target.getLocation(), brewItem);
                     }
-                    MessageUtil.msg(context.getSource().getSender(), TranslationsConfig.COMMAND_CREATE_SUCCESS, Placeholder.component("brew_name", brewItem.effectiveName()));
+                    MessageUtil.message(context.getSource().getSender(), TranslationsConfig.COMMAND_CREATE_SUCCESS, Placeholder.component("brew_name", brewItem.effectiveName()));
                     return 1;
                 });
     }

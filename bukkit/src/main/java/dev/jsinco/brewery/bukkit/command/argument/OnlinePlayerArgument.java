@@ -22,7 +22,7 @@ import java.util.concurrent.CompletableFuture;
 public class OnlinePlayerArgument implements CustomArgumentType.Converted<Player, String> {
 
     private static final DynamicCommandExceptionType ERROR_INVALID_PLAYER = new DynamicCommandExceptionType(invalidPlayer ->
-            MessageComponentSerializer.message().serialize(MessageUtil.mm(TranslationsConfig.COMMAND_UNKNOWN_PLAYER, Placeholder.unparsed("player_name", invalidPlayer.toString())))
+            MessageComponentSerializer.message().serialize(MessageUtil.miniMessage(TranslationsConfig.COMMAND_UNKNOWN_PLAYER, Placeholder.unparsed("player_name", invalidPlayer.toString())))
     );
 
     @Override

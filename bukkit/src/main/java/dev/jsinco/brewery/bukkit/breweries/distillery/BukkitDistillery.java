@@ -96,7 +96,7 @@ public class BukkitDistillery implements Distillery<BukkitDistillery, ItemStack,
 
     private boolean openInventory(BrewInventory inventory, Player player) {
         if (!player.hasPermission("brewery.distillery.access")) {
-            MessageUtil.msg(player, TranslationsConfig.DISTILLERY_ACCESS_DENIED);
+            MessageUtil.message(player, TranslationsConfig.DISTILLERY_ACCESS_DENIED);
             return false;
         }
         if (inventoryUnpopulated()) {
@@ -116,7 +116,7 @@ public class BukkitDistillery implements Distillery<BukkitDistillery, ItemStack,
             return false;
         }
         if (!player.hasPermission("brewery.distillery.access")) {
-            MessageUtil.msg(player, TranslationsConfig.DISTILLERY_ACCESS_DENIED);
+            MessageUtil.message(player, TranslationsConfig.DISTILLERY_ACCESS_DENIED);
             return false;
         }
         return inventoryAllows(item);

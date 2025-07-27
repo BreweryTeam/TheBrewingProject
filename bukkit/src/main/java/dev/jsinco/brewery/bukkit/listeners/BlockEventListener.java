@@ -87,10 +87,10 @@ public class BlockEventListener implements Listener {
             return;
         }
         if (!event.getPlayer().hasPermission("brewery.barrel.create")) {
-            MessageUtil.msg(event.getPlayer(), TranslationsConfig.BARREL_CREATE_DENIED);
+            MessageUtil.message(event.getPlayer(), TranslationsConfig.BARREL_CREATE_DENIED);
             return;
         }
-        MessageUtil.msg(event.getPlayer(), TranslationsConfig.BARREL_CREATE);
+        MessageUtil.message(event.getPlayer(), TranslationsConfig.BARREL_CREATE);
         BukkitBarrel barrel = new BukkitBarrel(BukkitAdapter.toLocation(placedBreweryStructure.getUnique()), placedBreweryStructure, placedBreweryStructure.getStructure().getMeta(StructureMeta.INVENTORY_SIZE), placedStructurePair.second());
         placedBreweryStructure.setHolder(barrel);
         placedStructureRegistry.registerStructure(placedBreweryStructure);
@@ -114,11 +114,11 @@ public class BlockEventListener implements Listener {
 
                 Player player = placeEvent.getPlayer();
                 if (!player.hasPermission("brewery.distillery.create")) {
-                    MessageUtil.msg(player, TranslationsConfig.DISTILLERY_CREATE_DENIED);
+                    MessageUtil.message(player, TranslationsConfig.DISTILLERY_CREATE_DENIED);
                     return;
                 }
                 registerDistillery(placedBreweryStructureOptional.get().first());
-                MessageUtil.msg(player, TranslationsConfig.DISTILLERY_CREATE);
+                MessageUtil.message(player, TranslationsConfig.DISTILLERY_CREATE);
                 return;
             }
         }

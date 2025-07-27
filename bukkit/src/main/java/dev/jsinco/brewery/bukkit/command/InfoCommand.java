@@ -65,12 +65,12 @@ public class InfoCommand {
 
     private static void showInfo(@Nullable ItemStack itemStack, CommandSender sender) {
         if (itemStack == null) {
-            MessageUtil.msg(sender, TranslationsConfig.COMMAND_INFO_NOT_A_BREW);
+            MessageUtil.message(sender, TranslationsConfig.COMMAND_INFO_NOT_A_BREW);
             return;
         }
         Optional<Brew> brewOptional = BrewAdapter.fromItem(itemStack);
         brewOptional
-                .ifPresent(brew -> MessageUtil.msg(sender,
+                .ifPresent(brew -> MessageUtil.message(sender,
                         TranslationsConfig.COMMAND_INFO_BREW_MESSAGE,
                         MessageUtil.getScoreTagResolver(brew.closestRecipe(TheBrewingProject.getInstance().getRecipeRegistry())
                                 .map(brew::score)
@@ -81,10 +81,10 @@ public class InfoCommand {
                 );
         Optional<RecipeEffects> recipeEffectsOptional = RecipeEffects.fromItem(itemStack);
         recipeEffectsOptional.ifPresent(effects -> {
-            MessageUtil.msg(sender, TranslationsConfig.COMMAND_INFO_EFFECT_MESSAGE, BukkitMessageUtil.recipeEffectResolver(effects));
+            MessageUtil.message(sender, TranslationsConfig.COMMAND_INFO_EFFECT_MESSAGE, BukkitMessageUtil.recipeEffectResolver(effects));
         });
         if (brewOptional.isEmpty() && recipeEffectsOptional.isEmpty()) {
-            MessageUtil.msg(sender, TranslationsConfig.COMMAND_INFO_NOT_A_BREW);
+            MessageUtil.message(sender, TranslationsConfig.COMMAND_INFO_NOT_A_BREW);
         }
     }
 }

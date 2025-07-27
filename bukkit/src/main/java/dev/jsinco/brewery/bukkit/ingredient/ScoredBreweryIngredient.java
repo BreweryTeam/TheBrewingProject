@@ -28,7 +28,7 @@ public class ScoredBreweryIngredient implements ScoredIngredient {
 
     @Override
     public @NotNull Component displayName() {
-        return MessageUtil.mm(displayName)
+        return MessageUtil.miniMessage(displayName)
                 .append(Component.text("-"))
                 .append(Component.text(score));
     }
