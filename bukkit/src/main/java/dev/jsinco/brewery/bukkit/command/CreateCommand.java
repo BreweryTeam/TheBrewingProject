@@ -4,12 +4,7 @@ import com.mojang.brigadier.arguments.DoubleArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
-import dev.jsinco.brewery.brew.AgeStepImpl;
-import dev.jsinco.brewery.brew.BrewImpl;
-import dev.jsinco.brewery.brew.BrewingStep;
-import dev.jsinco.brewery.brew.CookStepImpl;
-import dev.jsinco.brewery.brew.DistillStepImpl;
-import dev.jsinco.brewery.brew.MixStepImpl;
+import dev.jsinco.brewery.brew.*;
 import dev.jsinco.brewery.breweries.BarrelType;
 import dev.jsinco.brewery.breweries.CauldronType;
 import dev.jsinco.brewery.bukkit.brew.BrewAdapter;
@@ -25,7 +20,6 @@ import dev.jsinco.brewery.util.Pair;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
 import io.papermc.paper.datacomponent.DataComponentTypes;
-import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -74,7 +68,9 @@ public class CreateCommand {
             if (!inventory.addItem(brewItem).isEmpty()) {
                 target.getWorld().dropItem(target.getLocation(), brewItem);
             }
-            MessageUtil.message(context.getSource().getSender(), TranslationsConfig.COMMAND_CREATE_SUCCESS, Placeholder.component("brew_name", brewItemMeta.hasCustomName() ? brewItemMeta.customName() : brewItemMeta.itemName()));
+            MessageUtil.message(context.getSource().getSender(), TranslationsConfig.COMMAND_CREATE_SUCCESS,
+                    Placeholder.component("brew_name", brewItem.effectiveName())
+            );
         }).build();
         ArgumentBuilder<CommandSourceStack, ?> root = Commands.literal("create");
         tree.forEach(root::then);
