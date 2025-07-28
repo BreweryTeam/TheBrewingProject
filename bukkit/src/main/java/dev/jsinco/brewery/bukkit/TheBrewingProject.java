@@ -25,7 +25,7 @@ import dev.jsinco.brewery.bukkit.structure.*;
 import dev.jsinco.brewery.bukkit.util.BreweryTimeDataType;
 import dev.jsinco.brewery.configuration.Config;
 import dev.jsinco.brewery.configuration.OkaeriSerdesPackBuilder;
-import dev.jsinco.brewery.configuration.locale.TranslationsConfig;
+import dev.jsinco.brewery.configuration.locale.BreweryTranslator;
 import dev.jsinco.brewery.configuration.serializers.*;
 import dev.jsinco.brewery.database.PersistenceException;
 import dev.jsinco.brewery.database.sql.Database;
@@ -48,6 +48,7 @@ import eu.okaeri.configs.serdes.OkaeriSerdesPack;
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
 import io.papermc.paper.threadedregions.scheduler.ScheduledTask;
 import lombok.Getter;
+import net.kyori.adventure.translation.GlobalTranslator;
 import org.bukkit.Bukkit;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.PluginManager;
@@ -98,11 +99,13 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
     private final ActiveEventsRegistry activeEventsRegistry = new ActiveEventsRegistry();
     @Getter
     private PlayerWalkListener playerWalkListener;
+    private BreweryTranslator translator;
 
     public void initialize() {
         instance = this;
         Config.load(this.getDataFolder(), serializers());
-        TranslationsConfig.reload(this.getDataFolder());
+        this.translator = new BreweryTranslator(new File(this.getDataFolder(), "locale"));
+        GlobalTranslator.translator().addSource(translator);
         this.structureRegistry = new StructureRegistry();
         this.placedStructureRegistry = new PlacedStructureRegistryImpl();
         this.breweryRegistry = new BreweryRegistry();
@@ -129,7 +132,7 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
 
     public void reload() {
         Config.config().load(true);
-        TranslationsConfig.reload(this.getDataFolder());
+        translator.load(new File(this.getDataFolder(), "locale"));
         this.structureRegistry.clear();
         this.placedStructureRegistry.clear();
         this.breweryRegistry.clear();
@@ -219,7 +222,6 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
         } else {
             pluginManager.registerEvents(new LegacyPlayerJoinListener(), this);
         }
-
         Bukkit.getGlobalRegionScheduler().runAtFixedRate(this, this::updateStructures, 1, 1);
         Bukkit.getGlobalRegionScheduler().runAtFixedRate(this, this::otherTicking, 1, 1);
         RecipeReader<ItemStack> recipeReader = new RecipeReader<>(this.getDataFolder(), new BukkitRecipeResultReader(), BukkitIngredientManager.INSTANCE);
