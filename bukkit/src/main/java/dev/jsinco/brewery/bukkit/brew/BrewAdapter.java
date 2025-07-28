@@ -14,6 +14,7 @@ import dev.jsinco.brewery.recipe.RecipeResult;
 import dev.jsinco.brewery.recipes.BrewScoreImpl;
 import dev.jsinco.brewery.recipes.RecipeRegistryImpl;
 import dev.jsinco.brewery.util.BreweryKey;
+import dev.jsinco.brewery.util.ClassUtil;
 import dev.jsinco.brewery.util.MessageUtil;
 import dev.jsinco.brewery.util.Pair;
 import io.papermc.paper.datacomponent.DataComponentTypes;
@@ -80,10 +81,7 @@ public class BrewAdapter {
 
     private static ItemStack incompletePotion(Brew brew) {
         ItemStack itemStack = new ItemStack(Material.POTION);
-        itemStack.setData(DataComponentTypes.TOOLTIP_DISPLAY, TooltipDisplay.tooltipDisplay().hiddenComponents(Registry.DATA_COMPONENT_TYPE.stream()
-                .filter(dataComponentType -> dataComponentType != DataComponentTypes.LORE)
-                .collect(Collectors.toSet())
-        ).build());
+        hideTooltips(itemStack);
         Map<Ingredient, Integer> ingredients = new HashMap<>();
         for (BrewingStep brewingStep : brew.getCompletedSteps()) {
             if (brewingStep instanceof BrewingStep.Cook cook) {
@@ -127,5 +125,17 @@ public class BrewAdapter {
         }
         return Optional.ofNullable(data.get(BREWING_STEPS, ListPersistentDataType.BREWING_STEP_LIST))
                 .map(BrewImpl::new);
+    }
+
+    public static void hideTooltips(ItemStack itemStack) {
+        if (ClassUtil.exists("io.papermc.paper.datacomponent.item.TooltipDisplay")) {
+            itemStack.setData(DataComponentTypes.TOOLTIP_DISPLAY, TooltipDisplay.tooltipDisplay().hiddenComponents(Registry.DATA_COMPONENT_TYPE.stream()
+                            .filter(dataComponentType -> dataComponentType != DataComponentTypes.LORE)
+                            .collect(Collectors.toSet())
+                    ).build()
+            );
+        } else {
+            itemStack.editMeta(meta -> meta.setHideTooltip(true));
+        }
     }
 }

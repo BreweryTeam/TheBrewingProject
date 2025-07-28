@@ -4,6 +4,7 @@ import dev.jsinco.brewery.brew.Brew;
 import dev.jsinco.brewery.brew.BrewScore;
 import dev.jsinco.brewery.brew.BrewingStep;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
+import dev.jsinco.brewery.bukkit.brew.BrewAdapter;
 import dev.jsinco.brewery.bukkit.integration.Integration;
 import dev.jsinco.brewery.bukkit.integration.IntegrationType;
 import dev.jsinco.brewery.bukkit.integration.ItemIntegration;
@@ -14,7 +15,10 @@ import dev.jsinco.brewery.util.BreweryKey;
 import dev.jsinco.brewery.util.Logger;
 import dev.jsinco.brewery.util.MessageUtil;
 import io.papermc.paper.datacomponent.DataComponentTypes;
-import io.papermc.paper.datacomponent.item.*;
+import io.papermc.paper.datacomponent.item.CustomModelData;
+import io.papermc.paper.datacomponent.item.ItemEnchantments;
+import io.papermc.paper.datacomponent.item.ItemLore;
+import io.papermc.paper.datacomponent.item.PotionContents;
 import lombok.Getter;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -36,7 +40,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class BukkitRecipeResult implements RecipeResult<ItemStack> {
@@ -111,11 +114,7 @@ public class BukkitRecipeResult implements RecipeResult<ItemStack> {
     }
 
     private void applyData(ItemStack itemStack, BrewScore score, Brew brew, Brew.State state) {
-        itemStack.setData(DataComponentTypes.TOOLTIP_DISPLAY, TooltipDisplay.tooltipDisplay().hiddenComponents(
-                Registry.DATA_COMPONENT_TYPE.stream()
-                        .filter(dataComponentType -> dataComponentType != DataComponentTypes.LORE)
-                        .collect(Collectors.toSet())
-        ));
+        BrewAdapter.hideTooltips(itemStack);
         itemStack.setData(DataComponentTypes.CUSTOM_NAME, compileMessage(score, brew, name, true).decoration(TextDecoration.ITALIC, false));
         itemStack.setData(DataComponentTypes.LORE, ItemLore.lore(
                 Stream.concat(lore.stream()
