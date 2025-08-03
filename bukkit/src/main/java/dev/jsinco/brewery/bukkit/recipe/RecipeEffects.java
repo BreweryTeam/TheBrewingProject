@@ -5,7 +5,6 @@ import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.bukkit.util.BukkitAdapter;
 import dev.jsinco.brewery.bukkit.util.BukkitMessageUtil;
 import dev.jsinco.brewery.bukkit.util.ListPersistentDataType;
-import dev.jsinco.brewery.configuration.locale.TranslationsConfig;
 import dev.jsinco.brewery.effect.DrunksManagerImpl;
 import dev.jsinco.brewery.event.CustomEventRegistry;
 import dev.jsinco.brewery.event.DrunkEvent;
@@ -17,6 +16,8 @@ import io.papermc.paper.datacomponent.item.PotionContents;
 import io.papermc.paper.persistence.PersistentDataContainerView;
 import lombok.Getter;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.tag.resolver.Formatter;
+import net.kyori.adventure.text.minimessage.translation.Argument;
 import net.kyori.adventure.title.Title;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Entity;
@@ -143,17 +144,29 @@ public class RecipeEffects {
             drunksManager.consume(player.getUniqueId(), alcohol, toxins);
         }
         if (title != null) {
-            player.showTitle(Title.title(BukkitMessageUtil.compilePlayerMessage(title, player, drunksManager, this.alcohol), Component.empty()));
+            player.showTitle(Title.title(
+                    MessageUtil.miniMessage(title,
+                            BukkitMessageUtil.getPlayerTagResolver(player),
+                            Formatter.number("alcohol", this.alcohol)
+                    ),
+                    Component.empty())
+            );
         }
         if (message != null) {
-            player.sendMessage(BukkitMessageUtil.compilePlayerMessage(message, player, drunksManager, this.alcohol));
+            player.sendMessage(MessageUtil.miniMessage(message,
+                    BukkitMessageUtil.getPlayerTagResolver(player),
+                    Formatter.number("alcohol", this.alcohol)
+            ));
         }
         if (actionBar != null) {
-            player.sendActionBar(BukkitMessageUtil.compilePlayerMessage(actionBar, player, drunksManager, this.alcohol));
+            player.sendActionBar(MessageUtil.miniMessage(actionBar,
+                    BukkitMessageUtil.getPlayerTagResolver(player),
+                    Formatter.number("alcohol", this.alcohol))
+            );
         } else {
             player.sendActionBar(
-                    MessageUtil.miniMessage(TranslationsConfig.INFO_AFTER_DRINK,
-                            MessageUtil.getDrunkStateTagResolver(drunksManager.getDrunkState(player.getUniqueId()))
+                    Component.translatable("tbp.info.after-drink",
+                            Argument.tagResolver(MessageUtil.getDrunkStateTagResolver(drunksManager.getDrunkState(player.getUniqueId())))
                     )
             );
         }

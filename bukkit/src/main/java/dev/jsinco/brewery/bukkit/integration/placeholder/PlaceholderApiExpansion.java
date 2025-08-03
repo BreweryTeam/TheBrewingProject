@@ -1,13 +1,14 @@
 package dev.jsinco.brewery.bukkit.integration.placeholder;
 
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
-import dev.jsinco.brewery.configuration.locale.TranslationsConfig;
 import dev.jsinco.brewery.effect.DrunkState;
 import dev.jsinco.brewery.effect.DrunkStateImpl;
 import dev.jsinco.brewery.effect.DrunksManager;
 import dev.jsinco.brewery.event.DrunkEvent;
 import dev.jsinco.brewery.util.Pair;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -55,9 +56,9 @@ public class PlaceholderApiExpansion extends PlaceholderExpansion {
             case "next_event" -> {
                 Pair<DrunkEvent, Long> event = drunksManager.getPlannedEvent(player.getUniqueId());
                 if (event == null) {
-                    yield TranslationsConfig.NO_EVENT_PLANNED;
+                    yield PlainTextComponentSerializer.plainText().serialize(Component.translatable("tbp.events.nothing-planned"));
                 }
-                yield event.first().displayName();
+                yield PlainTextComponentSerializer.plainText().serialize(event.first().displayName());
             }
             default -> null;
         };

@@ -2,7 +2,6 @@ package dev.jsinco.brewery.bukkit.integration.placeholder;
 
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.bukkit.integration.PlaceholderIntegration;
-import dev.jsinco.brewery.configuration.locale.TranslationsConfig;
 import dev.jsinco.brewery.effect.DrunkState;
 import dev.jsinco.brewery.event.DrunkEvent;
 import dev.jsinco.brewery.util.ClassUtil;
@@ -17,10 +16,6 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
 public class MiniPlaceholdersIntegration implements PlaceholderIntegration {
-    @Override
-    public String process(String input, OfflinePlayer player) {
-        return input;
-    }
 
     @Override
     public TagResolver resolve(OfflinePlayer player) {
@@ -60,8 +55,8 @@ public class MiniPlaceholdersIntegration implements PlaceholderIntegration {
                         return TagsUtils.EMPTY_TAG;
                     }
                     Pair<DrunkEvent, Long> event = TheBrewingProject.getInstance().getDrunksManager().getPlannedEvent(player.getUniqueId());
-                    String eventString = event == null ? TranslationsConfig.NO_EVENT_PLANNED : event.first().displayName();
-                    return Tag.selfClosingInserting(Component.text(eventString));
+                    Component eventComponent = event == null ? Component.translatable("tbp.events.nothing-planned") : event.first().displayName();
+                    return Tag.selfClosingInserting(eventComponent);
                 }).filter(Player.class)
                 .build().register();
     }

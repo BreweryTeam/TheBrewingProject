@@ -4,8 +4,12 @@ import dev.jsinco.brewery.breweries.BarrelType;
 import dev.jsinco.brewery.breweries.CauldronType;
 import dev.jsinco.brewery.ingredient.Ingredient;
 import dev.jsinco.brewery.moment.Moment;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
+import net.kyori.adventure.text.minimessage.translation.Argument;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 public interface BrewingStep {
@@ -23,6 +27,14 @@ public interface BrewingStep {
     List<PartialBrewScore> maximumScores(BrewingStep other);
 
     List<PartialBrewScore> failedScores();
+
+    default Component infoDisplay(Brew.State state, TagResolver resolver) {
+        return Component.translatable(switch (state) {
+            case Brew.State.Other ignored -> "tbp.brew.tooltip." + stepType().name().toLowerCase(Locale.ROOT);
+            case Brew.State.Seal ignored -> "tbp.brew.tooltip-sealed." + stepType().name().toLowerCase(Locale.ROOT);
+            case Brew.State.Brewing ignored -> "tbp.brew.tooltip-brewing." + stepType().name().toLowerCase(Locale.ROOT);
+        }, Argument.tagResolver(resolver));
+    }
 
     interface TimedStep {
         Moment time();

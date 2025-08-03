@@ -15,7 +15,6 @@ import dev.jsinco.brewery.bukkit.structure.PlacedBreweryStructure;
 import dev.jsinco.brewery.bukkit.structure.StructureRegistry;
 import dev.jsinco.brewery.bukkit.util.BukkitAdapter;
 import dev.jsinco.brewery.configuration.Config;
-import dev.jsinco.brewery.configuration.locale.TranslationsConfig;
 import dev.jsinco.brewery.database.PersistenceException;
 import dev.jsinco.brewery.database.sql.Database;
 import dev.jsinco.brewery.structure.MultiblockStructure;
@@ -89,10 +88,10 @@ public class BlockEventListener implements Listener {
             return;
         }
         if (!event.getPlayer().hasPermission("brewery.barrel.create")) {
-            MessageUtil.message(event.getPlayer(), TranslationsConfig.BARREL_CREATE_DENIED);
+            MessageUtil.message(event.getPlayer(), "tbp.barrel.create-denied");
             return;
         }
-        MessageUtil.message(event.getPlayer(), TranslationsConfig.BARREL_CREATE);
+        MessageUtil.message(event.getPlayer(), "tbp.barrel.create");
         BukkitBarrel barrel = new BukkitBarrel(BukkitAdapter.toLocation(placedBreweryStructure.getUnique()), placedBreweryStructure, placedBreweryStructure.getStructure().getMeta(StructureMeta.INVENTORY_SIZE), placedStructurePair.second());
         placedBreweryStructure.setHolder(barrel);
         placedStructureRegistry.registerStructure(placedBreweryStructure);
@@ -116,11 +115,11 @@ public class BlockEventListener implements Listener {
 
                 Player player = placeEvent.getPlayer();
                 if (!player.hasPermission("brewery.distillery.create")) {
-                    MessageUtil.message(player, TranslationsConfig.DISTILLERY_CREATE_DENIED);
+                    MessageUtil.message(player, "tbp.distillery.create-denied");
                     return;
                 }
                 registerDistillery(placedBreweryStructureOptional.get().first());
-                MessageUtil.message(player, TranslationsConfig.DISTILLERY_CREATE);
+                MessageUtil.message(player, "tbp.distillery.create");
                 return;
             }
         }

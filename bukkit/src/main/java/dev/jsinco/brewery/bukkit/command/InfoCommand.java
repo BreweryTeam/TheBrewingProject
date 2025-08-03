@@ -10,7 +10,6 @@ import dev.jsinco.brewery.bukkit.brew.BrewAdapter;
 import dev.jsinco.brewery.bukkit.command.argument.EnumArgument;
 import dev.jsinco.brewery.bukkit.recipe.RecipeEffects;
 import dev.jsinco.brewery.bukkit.util.BukkitMessageUtil;
-import dev.jsinco.brewery.configuration.locale.TranslationsConfig;
 import dev.jsinco.brewery.recipes.BrewScoreImpl;
 import dev.jsinco.brewery.util.MessageUtil;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
@@ -65,13 +64,13 @@ public class InfoCommand {
 
     private static void showInfo(@Nullable ItemStack itemStack, CommandSender sender) {
         if (itemStack == null) {
-            MessageUtil.message(sender, TranslationsConfig.COMMAND_INFO_NOT_A_BREW);
+            MessageUtil.message(sender, "tbp.command.info.not-a-brew");
             return;
         }
         Optional<Brew> brewOptional = BrewAdapter.fromItem(itemStack);
         brewOptional
                 .ifPresent(brew -> MessageUtil.message(sender,
-                        TranslationsConfig.COMMAND_INFO_BREW_MESSAGE,
+                        "tbp.command.info.message",
                         MessageUtil.getScoreTagResolver(brew.closestRecipe(TheBrewingProject.getInstance().getRecipeRegistry())
                                 .map(brew::score)
                                 .orElse(BrewScoreImpl.failed(brew))),
@@ -81,10 +80,10 @@ public class InfoCommand {
                 );
         Optional<RecipeEffects> recipeEffectsOptional = RecipeEffects.fromItem(itemStack);
         recipeEffectsOptional.ifPresent(effects -> {
-            MessageUtil.message(sender, TranslationsConfig.COMMAND_INFO_EFFECT_MESSAGE, BukkitMessageUtil.recipeEffectResolver(effects));
+            MessageUtil.message(sender, "tbp.command.info.effect-message", BukkitMessageUtil.recipeEffectResolver(effects));
         });
         if (brewOptional.isEmpty() && recipeEffectsOptional.isEmpty()) {
-            MessageUtil.message(sender, TranslationsConfig.COMMAND_INFO_NOT_A_BREW);
+            MessageUtil.message(sender, "tbp.command.info.not-a-brew");
         }
     }
 }

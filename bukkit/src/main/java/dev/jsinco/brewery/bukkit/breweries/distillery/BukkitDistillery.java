@@ -12,7 +12,6 @@ import dev.jsinco.brewery.bukkit.util.BlockUtil;
 import dev.jsinco.brewery.bukkit.util.BukkitAdapter;
 import dev.jsinco.brewery.bukkit.util.SoundPlayer;
 import dev.jsinco.brewery.configuration.Config;
-import dev.jsinco.brewery.configuration.locale.TranslationsConfig;
 import dev.jsinco.brewery.database.PersistenceException;
 import dev.jsinco.brewery.moment.Moment;
 import dev.jsinco.brewery.structure.StructureMeta;
@@ -22,6 +21,7 @@ import dev.jsinco.brewery.util.Pair;
 import dev.jsinco.brewery.vector.BreweryLocation;
 import lombok.Getter;
 import net.kyori.adventure.sound.Sound;
+import net.kyori.adventure.text.Component;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.entity.HumanEntity;
@@ -57,8 +57,8 @@ public class BukkitDistillery implements Distillery<BukkitDistillery, ItemStack,
         this.structure = structure;
         this.startTime = startTime;
         BreweryLocation unique = structure.getUnique();
-        this.mixture = new BrewInventory(MessageUtil.miniMessage(TranslationsConfig.DISTILLERY_GUI_TITLE_MIXTURE), structure.getStructure().getMeta(StructureMeta.INVENTORY_SIZE), new DistilleryBrewPersistenceHandler(unique, false));
-        this.distillate = new BrewInventory(MessageUtil.miniMessage(TranslationsConfig.DISTILLERY_GUI_TITLE_DISTILLATE), structure.getStructure().getMeta(StructureMeta.INVENTORY_SIZE), new DistilleryBrewPersistenceHandler(unique, true));
+        this.mixture = new BrewInventory(Component.translatable("tbp.distillery.gui-title.distillate"), structure.getStructure().getMeta(StructureMeta.INVENTORY_SIZE), new DistilleryBrewPersistenceHandler(unique, false));
+        this.distillate = new BrewInventory(Component.translatable("tbp.distillery.gui-title.mixture"), structure.getStructure().getMeta(StructureMeta.INVENTORY_SIZE), new DistilleryBrewPersistenceHandler(unique, true));
     }
 
     public boolean open(@NotNull BreweryLocation location, @NotNull UUID playerUuid) {
@@ -96,7 +96,7 @@ public class BukkitDistillery implements Distillery<BukkitDistillery, ItemStack,
 
     private boolean openInventory(BrewInventory inventory, Player player) {
         if (!player.hasPermission("brewery.distillery.access")) {
-            MessageUtil.message(player, TranslationsConfig.DISTILLERY_ACCESS_DENIED);
+            MessageUtil.message(player, "tbp.distillery.access-denied");
             return false;
         }
         if (inventoryUnpopulated()) {
@@ -116,7 +116,7 @@ public class BukkitDistillery implements Distillery<BukkitDistillery, ItemStack,
             return false;
         }
         if (!player.hasPermission("brewery.distillery.access")) {
-            MessageUtil.message(player, TranslationsConfig.DISTILLERY_ACCESS_DENIED);
+            MessageUtil.message(player, "tbp.distillery.access-denied");
             return false;
         }
         return inventoryAllows(item);

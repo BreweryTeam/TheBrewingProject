@@ -2,16 +2,19 @@ package dev.jsinco.brewery.bukkit.listeners;
 
 import com.destroystokyo.paper.profile.PlayerProfile;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
+import dev.jsinco.brewery.bukkit.util.BukkitMessageUtil;
 import dev.jsinco.brewery.configuration.Config;
-import dev.jsinco.brewery.configuration.locale.TranslationsConfig;
 import dev.jsinco.brewery.effect.DrunkState;
 import dev.jsinco.brewery.effect.DrunksManager;
 import dev.jsinco.brewery.util.MessageUtil;
 import io.papermc.paper.connection.PlayerConfigurationConnection;
 import io.papermc.paper.connection.PlayerLoginConnection;
 import io.papermc.paper.event.connection.PlayerConnectionValidateLoginEvent;
-import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
+import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
+import net.kyori.adventure.text.minimessage.translation.Argument;
+import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 
@@ -42,18 +45,16 @@ public class PlayerJoinListener implements Listener {
         String playerName = profile.getName();
         if (drunksManager.isPassedOut(playerUuid)) {
             String kickEventMessage = Config.config().events().kickEvent().kickEventMessage();
-            event.kickMessage(
-                    MiniMessage.miniMessage().deserialize(kickEventMessage == null ? TranslationsConfig.KICK_EVENT_MESSAGE : kickEventMessage,
-                            MessageUtil.getDrunkStateTagResolver(drunkState), Placeholder.unparsed("player_name", playerName == null ? "" : playerName)
-                    )
-            );
+            TagResolver tagResolver = BukkitMessageUtil.getPlayerTagResolver(Bukkit.getOfflinePlayer(profile.getId()));
+            Component playerKickMessage = kickEventMessage == null ?
+                    Component.translatable("tbp.events.default-kick-event-message", Argument.tagResolver(tagResolver))
+                    : MessageUtil.miniMessage(kickEventMessage, tagResolver);
+            event.kickMessage(playerKickMessage);
             return;
         }
         if (Config.config().events().drunkenJoinDeny() && drunkState != null && drunkState.alcohol() >= 85 && RANDOM.nextInt(15) <= drunkState.alcohol() - 85) {
             event.kickMessage(
-                    MiniMessage.miniMessage().deserialize(TranslationsConfig.DRUNKEN_JOIN_DENY_MESSAGE,
-                            MessageUtil.getDrunkStateTagResolver(drunkState), Placeholder.unparsed("player_name", playerName == null ? "" : playerName)
-                    )
+                    Component.translatable("tbp.events.drunken-join-deny-message", Argument.tagResolver(Placeholder.unparsed("player_name", playerName == null ? "" : playerName)))
             );
         }
     }

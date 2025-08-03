@@ -8,13 +8,12 @@ import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.bukkit.command.argument.EventArgument;
 import dev.jsinco.brewery.bukkit.command.argument.OfflinePlayerArgument;
 import dev.jsinco.brewery.bukkit.command.argument.OnlinePlayerArgument;
+import dev.jsinco.brewery.bukkit.util.BukkitMessageUtil;
 import dev.jsinco.brewery.configuration.Config;
-import dev.jsinco.brewery.configuration.locale.TranslationsConfig;
 import dev.jsinco.brewery.event.DrunkEvent;
 import dev.jsinco.brewery.util.MessageUtil;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
-import io.papermc.paper.command.brigadier.MessageComponentSerializer;
 import io.papermc.paper.plugin.lifecycle.event.registrar.ReloadableRegistrarEvent;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import org.bukkit.OfflinePlayer;
@@ -26,7 +25,7 @@ import java.util.function.Consumer;
 public class BreweryCommand {
 
     private static final SimpleCommandExceptionType ERROR_UNDEFINED_PLAYER = new SimpleCommandExceptionType(
-            MessageComponentSerializer.message().serialize(MessageUtil.miniMessage(TranslationsConfig.COMMAND_UNDEFINED_PLAYER))
+            BukkitMessageUtil.toBrigadier("tbp.command.undefined-player")
     );
 
     public static void register(ReloadableRegistrarEvent<Commands> commands) {
@@ -49,12 +48,7 @@ public class BreweryCommand {
                 .then(Commands.literal("reload")
                         .executes(context -> {
                             CommandSender sender = context.getSource().getSender();
-                            if (!sender.hasPermission("brewery.command.reload")) {
-                                MessageUtil.message(sender, TranslationsConfig.COMMAND_NOT_ENOUGH_PERMISSIONS);
-                            } else {
-                                TheBrewingProject.getInstance().reload();
-                                MessageUtil.message(sender, TranslationsConfig.COMMAND_RELOAD_MESSAGE);
-                            }
+                            MessageUtil.message(sender, "tbp.command.reload-message");
                             return com.mojang.brigadier.Command.SINGLE_SUCCESS;
                         })
                         .requires(commandSourceStack -> commandSourceStack.getSender().hasPermission("brewery.command.reload"))
@@ -70,8 +64,7 @@ public class BreweryCommand {
                 ).then(Commands.literal("version")
                         .requires(commandSourceStack -> commandSourceStack.getSender().hasPermission("brewery.command.version"))
                         .executes(commandContext -> {
-                            commandContext.getSource().getSender().sendMessage(MessageUtil.miniMessage(TranslationsConfig.COMMAND_VERSION,
-                                    Placeholder.unparsed("version", TheBrewingProject.getInstance().getPluginMeta().getVersion())));
+                            MessageUtil.message(commandContext.getSource().getSender(), "tbp.command.version", Placeholder.unparsed("version", TheBrewingProject.getInstance().getPluginMeta().getVersion()));
                             return com.mojang.brigadier.Command.SINGLE_SUCCESS;
                         })
                 )

@@ -6,6 +6,7 @@ import com.google.gson.annotations.SerializedName;
 import dev.jsinco.brewery.util.BreweryKey;
 import dev.jsinco.brewery.util.BreweryKeyed;
 import dev.jsinco.brewery.util.Registry;
+import net.kyori.adventure.text.Component;
 
 import java.util.Locale;
 
@@ -54,8 +55,8 @@ public class NamedDrunkEvent implements DrunkEvent, BreweryKeyed, EventStepPrope
     }
 
     @Override
-    public String displayName() {
-        return this.name.toLowerCase(Locale.ROOT);
+    public Component displayName() {
+        return Component.translatable("tbp.events.types" + name.toLowerCase(Locale.ROOT));
     }
 
     @Override

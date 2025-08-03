@@ -11,6 +11,7 @@ import lombok.Getter;
 import lombok.experimental.Accessors;
 
 import java.io.File;
+import java.util.Locale;
 import java.util.List;
 
 @Getter
@@ -23,7 +24,7 @@ public class Config extends OkaeriConfig {
 
     @Comment("What language file should we use? See: /TheBrewingProject/locale")
     @CustomKey("language")
-    private String language = "en-us";
+    private Locale language = Locale.US;
 
     @Comment("Allow hoppers to interact with distilleries and barrels")
     @CustomKey("automation-enabled")
@@ -36,6 +37,10 @@ public class Config extends OkaeriConfig {
     @Comment("Whether items should be consumed when in creative mode when using it on tbp structures")
     @CustomKey("consume-items-in-creative")
     private boolean consumeItemsInCreative = false;
+
+    @Comment("Whether everything non-item related should be translated to the players locale")
+    @CustomKey("client-side-translations")
+    private boolean clientSideTranslations = false;
 
     @CustomKey("cauldrons")
     private CauldronSection cauldrons = new CauldronSection();

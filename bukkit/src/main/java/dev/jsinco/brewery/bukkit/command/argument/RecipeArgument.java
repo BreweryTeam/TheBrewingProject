@@ -8,7 +8,7 @@ import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
-import dev.jsinco.brewery.configuration.locale.TranslationsConfig;
+import dev.jsinco.brewery.bukkit.util.BukkitMessageUtil;
 import dev.jsinco.brewery.recipe.Recipe;
 import dev.jsinco.brewery.recipe.RecipeRegistry;
 import dev.jsinco.brewery.util.MessageUtil;
@@ -22,7 +22,7 @@ import java.util.concurrent.CompletableFuture;
 
 public class RecipeArgument implements CustomArgumentType.Converted<Recipe<ItemStack>, String> {
     private static final DynamicCommandExceptionType ERROR_INVALID_RECIPE = new DynamicCommandExceptionType(event ->
-            MessageComponentSerializer.message().serialize(MessageUtil.miniMessage(TranslationsConfig.COMMAND_ILLEGAL_ARGUMENT_DETAILED, Placeholder.unparsed("argument", event.toString())))
+            BukkitMessageUtil.toBrigadier("tbp.command.illegal-argument-detailed", Placeholder.unparsed("argument", event.toString()))
     );
 
     @Override

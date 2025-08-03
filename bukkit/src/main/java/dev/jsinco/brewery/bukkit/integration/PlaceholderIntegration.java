@@ -5,7 +5,5 @@ import org.bukkit.OfflinePlayer;
 
 public interface PlaceholderIntegration extends Integration {
 
-    String process(String input, OfflinePlayer player);
-
     TagResolver resolve(OfflinePlayer player);
 }

@@ -9,14 +9,12 @@ import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
-import dev.jsinco.brewery.configuration.locale.TranslationsConfig;
+import dev.jsinco.brewery.bukkit.util.BukkitMessageUtil;
+import dev.jsinco.brewery.event.CustomEvent;
 import dev.jsinco.brewery.event.DrunkEvent;
 import dev.jsinco.brewery.event.NamedDrunkEvent;
-import dev.jsinco.brewery.event.CustomEvent;
 import dev.jsinco.brewery.util.BreweryKey;
-import dev.jsinco.brewery.util.MessageUtil;
 import dev.jsinco.brewery.util.Registry;
-import io.papermc.paper.command.brigadier.MessageComponentSerializer;
 import io.papermc.paper.command.brigadier.argument.CustomArgumentType;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import org.jetbrains.annotations.NotNull;
@@ -26,7 +24,7 @@ import java.util.stream.Stream;
 
 public class EventArgument implements CustomArgumentType.Converted<DrunkEvent, String> {
     private static final DynamicCommandExceptionType ERROR_INVALID_EVENT = new DynamicCommandExceptionType(event ->
-            MessageComponentSerializer.message().serialize(MessageUtil.miniMessage(TranslationsConfig.COMMAND_ILLEGAL_ARGUMENT_DETAILED, Placeholder.unparsed("argument", event.toString())))
+            BukkitMessageUtil.toBrigadier("tbp.command.illegal-argument-detailed", Placeholder.unparsed("argument", event.toString()))
     );
 
     @Override

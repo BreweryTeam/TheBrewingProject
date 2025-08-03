@@ -5,7 +5,6 @@ import dev.jsinco.brewery.brew.Brew;
 import dev.jsinco.brewery.brew.BrewImpl;
 import dev.jsinco.brewery.bukkit.brew.BrewAdapter;
 import dev.jsinco.brewery.bukkit.command.argument.RecipeArgument;
-import dev.jsinco.brewery.configuration.locale.TranslationsConfig;
 import dev.jsinco.brewery.recipe.Recipe;
 import dev.jsinco.brewery.util.MessageUtil;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
@@ -27,7 +26,7 @@ public class ReplicateCommand {
                     if (!target.getInventory().addItem(brewItem).isEmpty()) {
                         target.getLocation().getWorld().dropItem(target.getLocation(), brewItem);
                     }
-                    MessageUtil.message(context.getSource().getSender(), TranslationsConfig.COMMAND_CREATE_SUCCESS, Placeholder.component("brew_name", brewItem.effectiveName()));
+                    MessageUtil.message(context.getSource().getSender(), "tbp.command.create.success", Placeholder.component("brew_name", brewItem.effectiveName()));
                     return 1;
                 });
     }

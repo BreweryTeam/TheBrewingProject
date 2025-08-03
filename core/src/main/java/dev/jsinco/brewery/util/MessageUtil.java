@@ -1,12 +1,7 @@
 package dev.jsinco.brewery.util;
 
-import dev.jsinco.brewery.brew.Brew;
-import dev.jsinco.brewery.brew.BrewQuality;
-import dev.jsinco.brewery.brew.BrewScore;
-import dev.jsinco.brewery.brew.BrewingStep;
-import dev.jsinco.brewery.brew.PartialBrewScore;
+import dev.jsinco.brewery.brew.*;
 import dev.jsinco.brewery.configuration.Config;
-import dev.jsinco.brewery.configuration.locale.TranslationsConfig;
 import dev.jsinco.brewery.effect.DrunkState;
 import dev.jsinco.brewery.recipe.RecipeRegistry;
 import dev.jsinco.brewery.recipes.BrewScoreImpl;
@@ -21,6 +16,8 @@ import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Formatter;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
+import net.kyori.adventure.text.minimessage.translation.Argument;
+import net.kyori.adventure.translation.GlobalTranslator;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -31,13 +28,20 @@ import java.util.stream.Stream;
 public class MessageUtil {
 
     private static final char SKULL = '\u2620';
-    
-    public static Component miniMessage(String msg, TagResolver... resolvers) {
-        return MiniMessage.miniMessage().deserialize(msg, resolvers);
+
+    public static Component miniMessage(String miniMessage, TagResolver... resolvers) {
+        return MiniMessage.miniMessage().deserialize(miniMessage, resolvers);
     }
 
-    public static void message(Audience audience, String msg, TagResolver... resolvers) {
-        audience.sendMessage(miniMessage(msg, resolvers));
+    public static void message(Audience audience, String translationKey, TagResolver... resolvers) {
+        audience.sendMessage(Component.translatable(translationKey, Argument.tagResolver(resolvers)));
+    }
+
+    public static Component translated(String translationKey, TagResolver... resolvers) {
+        return GlobalTranslator.render(
+                Component.translatable(translationKey, Argument.tagResolver(resolvers)),
+                Config.config().language()
+        );
     }
 
     public static TagResolver getScoreTagResolver(@NotNull BrewScore score) {
@@ -51,7 +55,7 @@ public class MessageUtil {
     public static @NotNull TagResolver getBrewStepTagResolver(BrewingStep brewingStep, List<PartialBrewScore> scores, double difficulty) {
         TagResolver resolver = switch (brewingStep) {
             case BrewingStep.Age age -> TagResolver.resolver(
-                    Placeholder.parsed("barrel_type", TranslationsConfig.BARREL_TYPE.get(age.barrelType().name().toLowerCase(Locale.ROOT))),
+                    Placeholder.component("barrel_type", Component.translatable("barrel.type." + age.barrelType().name().toLowerCase(Locale.ROOT))),
                     Formatter.number("aging_years", age.time().moment() / Config.config().barrels().agingYearTicks())
             );
             case BrewingStep.Cook cook -> TagResolver.resolver(
@@ -63,7 +67,7 @@ public class MessageUtil {
                             )
                             .collect(Component.toComponent(Component.text(", ")))
                     ),
-                    Placeholder.parsed("cauldron_type", TranslationsConfig.CAULDRON_TYPE.get(cook.cauldronType().name().toLowerCase(Locale.ROOT)))
+                    Placeholder.component("cauldron_type", Component.translatable("cauldron.type." + cook.cauldronType().name().toLowerCase(Locale.ROOT)))
             );
             case BrewingStep.Distill distill -> Formatter.number("distill_runs", distill.runs());
             case BrewingStep.Mix mix -> TagResolver.resolver(
@@ -95,8 +99,8 @@ public class MessageUtil {
         Stream.Builder<Component> streamBuilder = Stream.builder();
         for (int i = 0; i < brewingSteps.size(); i++) {
             BrewingStep brewingStep = brewingSteps.get(i);
-            String line = (detailed ? TranslationsConfig.DETAILED_BREW_TOOLTIP : TranslationsConfig.BREW_TOOLTIP_BREWING).get(brewingStep.stepType().name().toLowerCase(Locale.ROOT));
-            streamBuilder.add(MessageUtil.miniMessage(line, MessageUtil.getBrewStepTagResolver(brewingStep, score.getPartialScores(i), score.brewDifficulty())));
+            String translationKey = (detailed ? "tbp.brew.detailed-tooltip." : "tbp.brew.tooltip-brewing.") + brewingStep.stepType().name().toLowerCase(Locale.ROOT);
+            streamBuilder.add(Component.translatable(translationKey, Argument.tagResolver(MessageUtil.getBrewStepTagResolver(brewingStep, score.getPartialScores(i), score.brewDifficulty()))));
         }
         return streamBuilder.build();
     }

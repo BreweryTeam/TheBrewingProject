@@ -13,7 +13,6 @@ import dev.jsinco.brewery.bukkit.structure.PlacedBreweryStructure;
 import dev.jsinco.brewery.bukkit.util.BukkitAdapter;
 import dev.jsinco.brewery.bukkit.util.SoundPlayer;
 import dev.jsinco.brewery.configuration.Config;
-import dev.jsinco.brewery.configuration.locale.TranslationsConfig;
 import dev.jsinco.brewery.moment.Interval;
 import dev.jsinco.brewery.moment.Moment;
 import dev.jsinco.brewery.util.MessageUtil;
@@ -21,6 +20,7 @@ import dev.jsinco.brewery.util.Pair;
 import dev.jsinco.brewery.vector.BreweryLocation;
 import lombok.Getter;
 import net.kyori.adventure.sound.Sound;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -50,14 +50,14 @@ public class BukkitBarrel implements Barrel<BukkitBarrel, ItemStack, Inventory> 
         this.size = size;
         this.type = Preconditions.checkNotNull(type);
         this.uniqueLocation = Preconditions.checkNotNull(uniqueLocation);
-        this.inventory = new BrewInventory(MessageUtil.miniMessage(TranslationsConfig.BARREL_GUI_TITLE), size, new BarrelBrewPersistenceHandler(BukkitAdapter.toBreweryLocation(uniqueLocation)));
+        this.inventory = new BrewInventory(Component.translatable("tbp.barrel.gui-title"), size, new BarrelBrewPersistenceHandler(BukkitAdapter.toBreweryLocation(uniqueLocation)));
     }
 
     @Override
     public boolean open(@NotNull BreweryLocation location, @NotNull UUID playerUuid) {
         Player player = Bukkit.getPlayer(playerUuid);
         if (!player.hasPermission("brewery.barrel.access")) {
-            MessageUtil.message(player, TranslationsConfig.BARREL_ACCESS_DENIED);
+            MessageUtil.message(player, "tbp.barrel.access-denied");
             return true;
         }
         if (inventoryUnpopulated()) {
@@ -78,7 +78,7 @@ public class BukkitBarrel implements Barrel<BukkitBarrel, ItemStack, Inventory> 
             return false;
         }
         if (!player.hasPermission("brewery.barrel.access")) {
-            MessageUtil.message(player, TranslationsConfig.BARREL_ACCESS_DENIED);
+            MessageUtil.message(player, "tbp.barrel.access-denied");
             return false;
         }
         return inventoryAllows(item);

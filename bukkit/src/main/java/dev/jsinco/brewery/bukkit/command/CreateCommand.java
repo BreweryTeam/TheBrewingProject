@@ -12,14 +12,12 @@ import dev.jsinco.brewery.bukkit.command.argument.EnumArgument;
 import dev.jsinco.brewery.bukkit.command.argument.FlaggedArgumentBuilder;
 import dev.jsinco.brewery.bukkit.command.argument.IngredientsArgument;
 import dev.jsinco.brewery.configuration.Config;
-import dev.jsinco.brewery.configuration.locale.TranslationsConfig;
 import dev.jsinco.brewery.ingredient.Ingredient;
 import dev.jsinco.brewery.moment.PassedMoment;
 import dev.jsinco.brewery.util.MessageUtil;
 import dev.jsinco.brewery.util.Pair;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
-import io.papermc.paper.datacomponent.DataComponentTypes;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -68,7 +66,7 @@ public class CreateCommand {
             if (!inventory.addItem(brewItem).isEmpty()) {
                 target.getWorld().dropItem(target.getLocation(), brewItem);
             }
-            MessageUtil.message(context.getSource().getSender(), TranslationsConfig.COMMAND_CREATE_SUCCESS,
+            MessageUtil.message(context.getSource().getSender(), "tbp.command.create.success",
                     Placeholder.component("brew_name", brewItem.effectiveName())
             );
         }).build();

@@ -3,7 +3,6 @@ package dev.jsinco.brewery.bukkit.effect.named;
 import dev.jsinco.brewery.bukkit.util.BukkitAdapter;
 import dev.jsinco.brewery.bukkit.util.BukkitMessageUtil;
 import dev.jsinco.brewery.configuration.Config;
-import dev.jsinco.brewery.configuration.locale.TranslationsConfig;
 import dev.jsinco.brewery.event.EventPropertyExecutable;
 import dev.jsinco.brewery.event.EventStep;
 import dev.jsinco.brewery.util.MessageUtil;
@@ -37,7 +36,7 @@ public class TeleportNamedExecutable implements EventPropertyExecutable {
         BreweryLocation teleport = locations.get(RANDOM.nextInt(locations.size()));
         Location location = BukkitAdapter.toLocation(teleport);
         player.teleportAsync(location);
-        MessageUtil.message(player, TranslationsConfig.TELEPORT_MESSAGE, BukkitMessageUtil.getPlayerTagResolver(player));
+        MessageUtil.message(player, "tbp.events.teleport-message", BukkitMessageUtil.getPlayerTagResolver(player));
         return ExecutionResult.CONTINUE;
     }
 

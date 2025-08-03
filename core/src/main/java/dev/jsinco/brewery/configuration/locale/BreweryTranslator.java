@@ -39,7 +39,7 @@ public class BreweryTranslator extends MiniMessageTranslator {
             }
         }
         this.translations = translationsBuilder.build();
-        Preconditions.checkArgument(translations.containsKey(Locale.of(Config.config().language())));
+        Preconditions.checkArgument(translations.containsKey(Config.config().language()));
     }
 
     @Override
@@ -54,7 +54,7 @@ public class BreweryTranslator extends MiniMessageTranslator {
             translations = this.translations.get(locale);
         }
         if (translations == null) {
-            translations = this.translations.get(Locale.of(Config.config().language()));
+            translations = this.translations.get(Config.config().language());
         }
         Preconditions.checkState(translations != null, "Should have found a translation!");
         return translations.getProperty(key);

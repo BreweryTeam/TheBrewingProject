@@ -3,6 +3,7 @@ package dev.jsinco.brewery.event;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import dev.jsinco.brewery.util.BreweryKey;
+import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -13,14 +14,14 @@ public final class CustomEvent {
     private final int alcohol;
     private final int toxins;
     private final int probabilityWeight;
-    private final String displayName;
+    private final Component displayName;
 
     public CustomEvent(List<EventStep> steps, int alcohol, int toxins, int probabilityWeight, @Nullable String displayName) {
         this.steps = steps;
         this.alcohol = alcohol;
         this.toxins = toxins;
         this.probabilityWeight = probabilityWeight;
-        this.displayName = displayName;
+        this.displayName = Component.text(displayName == null ? "Unknown" : displayName);
     }
 
     public int alcoholRequirement() {
@@ -31,7 +32,7 @@ public final class CustomEvent {
         return toxins;
     }
 
-    public String displayName() {
+    public Component displayName() {
         return displayName;
     }
 
@@ -62,7 +63,7 @@ public final class CustomEvent {
         }
 
         @Override
-        public String displayName() {
+        public Component displayName() {
             return event.displayName();
         }
 

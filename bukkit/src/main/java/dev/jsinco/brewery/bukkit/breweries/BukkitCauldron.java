@@ -9,7 +9,6 @@ import dev.jsinco.brewery.bukkit.listeners.ListenerUtil;
 import dev.jsinco.brewery.bukkit.recipe.BukkitRecipeResult;
 import dev.jsinco.brewery.bukkit.util.*;
 import dev.jsinco.brewery.configuration.Config;
-import dev.jsinco.brewery.configuration.locale.TranslationsConfig;
 import dev.jsinco.brewery.ingredient.Ingredient;
 import dev.jsinco.brewery.moment.Interval;
 import dev.jsinco.brewery.recipe.Recipe;
@@ -136,7 +135,7 @@ public class BukkitCauldron implements dev.jsinco.brewery.breweries.Cauldron {
     public boolean addIngredient(@NotNull ItemStack item, Player player) {
         // TODO: Add API event
         if (!player.hasPermission("brewery.cauldron.access")) {
-            MessageUtil.message(player, TranslationsConfig.CAULDRON_ACCESS_DENIED);
+            MessageUtil.message(player, "tbp.cauldron.access-denied");
             return false;
         }
         if (!brewExtracted && item.getType() == Material.POTION) {

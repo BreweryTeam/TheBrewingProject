@@ -7,7 +7,6 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import dev.jsinco.brewery.brew.Brew;
 import dev.jsinco.brewery.brew.BrewImpl;
 import dev.jsinco.brewery.bukkit.brew.BrewAdapter;
-import dev.jsinco.brewery.configuration.locale.TranslationsConfig;
 import dev.jsinco.brewery.util.MessageUtil;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
@@ -61,9 +60,9 @@ public class SealCommand {
             }
         }
         if (oneFound) {
-            MessageUtil.message(sender, TranslationsConfig.COMMAND_SEAL_SUCCESS, Placeholder.unparsed("player_name", target.getName()));
+            MessageUtil.message(sender, "tbp.command.seal-success", Placeholder.unparsed("player_name", target.getName()));
         } else {
-            MessageUtil.message(sender, TranslationsConfig.COMMAND_SEAL_FAILURE);
+            MessageUtil.message(sender, "tbp.command.seal-failure");
         }
         return 1;
     }
@@ -78,9 +77,9 @@ public class SealCommand {
                 .map(brew -> BrewAdapter.toItem(brew, new BrewImpl.State.Seal(volumeMessage)))
                 .ifPresentOrElse(itemStack -> {
                     targetInventory.setItemInMainHand(itemStack);
-                    MessageUtil.message(sender, TranslationsConfig.COMMAND_SEAL_SUCCESS, Placeholder.unparsed("player_name", target.getName()));
+                    MessageUtil.message(sender, "tbp.command.seal-success", Placeholder.unparsed("player_name", target.getName()));
                 }, () -> {
-                    MessageUtil.message(sender, TranslationsConfig.COMMAND_SEAL_FAILURE);
+                    MessageUtil.message(sender, "tbp.command.seal-failure");
                 });
         return 1;
     }

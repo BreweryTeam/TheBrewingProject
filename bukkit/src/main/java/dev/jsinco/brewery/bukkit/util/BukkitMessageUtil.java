@@ -1,27 +1,29 @@
 package dev.jsinco.brewery.bukkit.util;
 
+import com.mojang.brigadier.Message;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.bukkit.integration.IntegrationType;
-import dev.jsinco.brewery.bukkit.integration.PlaceholderIntegration;
 import dev.jsinco.brewery.bukkit.recipe.RecipeEffects;
-import dev.jsinco.brewery.configuration.locale.TranslationsConfig;
-import dev.jsinco.brewery.effect.DrunkStateImpl;
-import dev.jsinco.brewery.effect.DrunksManagerImpl;
-import dev.jsinco.brewery.event.NamedDrunkEvent;
-import dev.jsinco.brewery.util.MessageUtil;
+import dev.jsinco.brewery.event.DrunkEvent;
+import io.papermc.paper.command.brigadier.MessageComponentSerializer;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.tag.resolver.Formatter;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
+import net.kyori.adventure.text.minimessage.translation.Argument;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
-
-import java.util.Locale;
-import java.util.stream.Collectors;
+import org.jetbrains.annotations.Nullable;
 
 public class BukkitMessageUtil {
 
     private BukkitMessageUtil() {
         throw new IllegalStateException("Utility class");
+    }
+
+
+    public static Message toBrigadier(String translation, TagResolver... resolvers) {
+        return MessageComponentSerializer.message().serialize(Component.translatable(translation, Argument.tagResolver(resolvers)));
     }
 
     public static TagResolver recipeEffectResolver(RecipeEffects effects) {
@@ -30,50 +32,37 @@ public class BukkitMessageUtil {
                         .map(effect ->
                                 Component.translatable(effect.type().translationKey())
                                         .append(Component.text("/" + effect.durationRange() + "/" + effect.amplifierRange()))
-                        ).collect(Component.toComponent(Component.text(",")))
+                        )
+                        .collect(Component.toComponent(Component.text(",")))
                 ),
                 Formatter.number("effect_alcohol", effects.getAlcohol()),
                 Formatter.number("effect_toxins", effects.getToxins()),
                 Placeholder.parsed("effect_title_message", effects.getTitle() == null ? "" : effects.getTitle()),
                 Placeholder.parsed("effect_message", effects.getMessage() == null ? "" : effects.getMessage()),
                 Placeholder.parsed("effect_action_bar", effects.getActionBar() == null ? "" : effects.getActionBar()),
-                Placeholder.parsed("effect_events", effects.getEvents().stream().map(drunkEvent -> {
-                    if (drunkEvent instanceof NamedDrunkEvent namedDrunkEvent) {
-                        return TranslationsConfig.EVENT_TYPES.get(namedDrunkEvent.displayName().toLowerCase(Locale.ROOT));
-                    }
-                    return drunkEvent.displayName();
-                }).collect(Collectors.joining(",")))
-        );
-    }
-
-    public static Component compilePlayerMessage(String message, Player player, DrunksManagerImpl<?> drunksManager, int alcohol) {
-        DrunkStateImpl drunkState = drunksManager.getDrunkState(player.getUniqueId());
-        return MessageUtil.miniMessage(
-                preProcessPlayerMessage(message, player),
-                Placeholder.parsed("alcohol", String.valueOf(alcohol)),
-                Placeholder.parsed("player_alcohol", String.valueOf(drunkState == null ? "0" : drunkState.alcohol())),
-                getPlayerTagResolver(player)
-        );
-    }
-
-    public static TagResolver getPlayerTagResolver(Player player) {
-        return TagResolver.resolver(
-                Placeholder.component("player_name", player.name()),
-                Placeholder.component("team_name", player.teamDisplayName()),
-                Placeholder.unparsed("world", player.getWorld().getName()),
-                TagResolver.resolver(
-                        TheBrewingProject.getInstance().getIntegrationManager().retrieve(IntegrationType.PLACEHOLDER).stream()
-                                .map(placeholderIntegration -> placeholderIntegration.resolve(player))
-                                .toArray(TagResolver[]::new)
+                Placeholder.component("effect_events", effects.getEvents().stream()
+                        .map(DrunkEvent::displayName)
+                        .collect(Component.toComponent(Component.text(", ")))
                 )
         );
     }
 
-    private static String preProcessPlayerMessage(String message, Player player) {
-        String modifiedMessage = message;
-        for (PlaceholderIntegration placeholderIntegration : TheBrewingProject.getInstance().getIntegrationManager().retrieve(IntegrationType.PLACEHOLDER)) {
-            modifiedMessage = placeholderIntegration.process(modifiedMessage, player);
+    public static TagResolver getPlayerTagResolver(@Nullable OfflinePlayer offlinePlayer) {
+        TagResolver.Builder output = TagResolver.builder();
+        if (offlinePlayer instanceof Player player) {
+            output.resolver(Placeholder.component("player_name", player.name()));
+        } else {
+            String offlineName = offlinePlayer == null ? null : offlinePlayer.getName();
+            output.resolver(Placeholder.unparsed("player_name", offlineName != null ? offlineName : "unknown_player"));
         }
-        return modifiedMessage;
+        if (offlinePlayer == null) {
+            return output.build();
+        }
+        output.resolver(TagResolver.resolver(
+                TheBrewingProject.getInstance().getIntegrationManager().retrieve(IntegrationType.PLACEHOLDER).stream()
+                        .map(placeholderIntegration -> placeholderIntegration.resolve(offlinePlayer))
+                        .toArray(TagResolver[]::new)
+        ));
+        return output.build();
     }
 }

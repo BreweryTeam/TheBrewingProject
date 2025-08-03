@@ -9,7 +9,6 @@ import dev.jsinco.brewery.bukkit.integration.Integration;
 import dev.jsinco.brewery.bukkit.integration.IntegrationType;
 import dev.jsinco.brewery.bukkit.integration.ItemIntegration;
 import dev.jsinco.brewery.bukkit.util.BukkitAdapter;
-import dev.jsinco.brewery.configuration.locale.TranslationsConfig;
 import dev.jsinco.brewery.recipe.RecipeResult;
 import dev.jsinco.brewery.util.BreweryKey;
 import dev.jsinco.brewery.util.Logger;
@@ -26,6 +25,7 @@ import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.minimessage.tag.resolver.Formatter;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
+import net.kyori.adventure.text.minimessage.translation.Argument;
 import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -38,7 +38,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Stream;
 
@@ -77,7 +76,6 @@ public class BukkitRecipeResult implements RecipeResult<ItemStack> {
         this.customId = customId;
     }
 
-    @SuppressWarnings("UnstableApiUsage")
     @Override
     public ItemStack newBrewItem(@NotNull BrewScore score, @NotNull Brew brew, @NotNull Brew.State state) {
         if (customId != null) {
@@ -115,10 +113,10 @@ public class BukkitRecipeResult implements RecipeResult<ItemStack> {
 
     private void applyData(ItemStack itemStack, BrewScore score, Brew brew, Brew.State state) {
         BrewAdapter.hideTooltips(itemStack);
-        itemStack.setData(DataComponentTypes.CUSTOM_NAME, compileMessage(score, brew, name, true).decoration(TextDecoration.ITALIC, false));
+        itemStack.setData(DataComponentTypes.CUSTOM_NAME, MessageUtil.miniMessage(name));
         itemStack.setData(DataComponentTypes.LORE, ItemLore.lore(
                 Stream.concat(lore.stream()
-                                        .map(line -> compileMessage(score, brew, line, false)),
+                                        .map(line -> MessageUtil.miniMessage(line, MessageUtil.getScoreTagResolver(score))),
                                 compileExtraLore(score, brew, state)
                         )
                         .map(component -> component.decoration(TextDecoration.ITALIC, false))
@@ -148,51 +146,44 @@ public class BukkitRecipeResult implements RecipeResult<ItemStack> {
         }
         Stream.Builder<Component> streamBuilder = Stream.builder();
         streamBuilder.add(Component.empty());
+        TagResolver resolver = getResolver(score);
         switch (state) {
             case Brew.State.Brewing ignored -> {
-                streamBuilder.add(compileMessage(score, brew, TranslationsConfig.BREW_TOOLTIP_QUALITY_BREWING, false));
+                streamBuilder.add(Component.translatable("tbp.brew.tooltip.quality-brewing", Argument.tagResolver(resolver)));
                 MessageUtil.compileBrewInfo(brew, score, false).forEach(streamBuilder::add);
                 int alcohol = recipeEffects.getAlcohol();
                 if (alcohol > 0) {
-                    streamBuilder.add(MessageUtil.miniMessage(TranslationsConfig.DETAILED_ALCOHOLIC, Formatter.number("alcohol", alcohol)));
+                    streamBuilder.add(Component.translatable("tbp.brew.tooltip.detailed-alcoholic", Argument.tagResolver(resolver)));
                 }
             }
             case Brew.State.Other ignored -> {
-                streamBuilder.add(compileMessage(score, brew, TranslationsConfig.BREW_TOOLTIP_QUALITY, false));
-                addLastStepLore(brew, streamBuilder, score, false);
+                streamBuilder.add(Component.translatable("tbp.brew.tooltip.quality", Argument.tagResolver(resolver)));
+                addLastStepLore(brew, streamBuilder, score, state);
             }
             case Brew.State.Seal seal -> {
                 if (seal.message() != null) {
-                    streamBuilder.add(MessageUtil.miniMessage(TranslationsConfig.BREW_TOOLTIP_VOLUME, Placeholder.parsed("volume", seal.message())));
+                    streamBuilder.add(Component.translatable("tbp.brew.tooltip.volume", Argument.tagResolver(
+                            TagResolver.resolver(resolver, Placeholder.parsed("volume", seal.message())))
+                    ));
                 }
-                streamBuilder.add(MessageUtil.miniMessage(TranslationsConfig.BREW_TOOLTIP_QUALITY_SEALED, MessageUtil.getScoreTagResolver(score)));
-                addLastStepLore(brew, streamBuilder, score, true);
+                streamBuilder.add(Component.translatable("tbp.brew.tooltip.quality-sealed", Argument.tagResolver(resolver)));
+                addLastStepLore(brew, streamBuilder, score, state);
             }
         }
         return streamBuilder.build();
     }
 
-    private void addLastStepLore(Brew brew, Stream.Builder<Component> streamBuilder, BrewScore score, boolean sealed) {
-        Map<String, String> lore = sealed ? TranslationsConfig.BREW_TOOLTIP_SEALED : TranslationsConfig.BREW_TOOLTIP;
-        BrewingStep brewingStep = brew.lastCompletedStep();
-        streamBuilder.add(MessageUtil.miniMessage(
-                lore.get(brewingStep.stepType().name().toLowerCase(Locale.ROOT)),
-                MessageUtil.getBrewStepTagResolver(brewingStep, score.getPartialScores(brew.getCompletedSteps().size() - 1), score.brewDifficulty()))
-        );
+    private void addLastStepLore(Brew brew, Stream.Builder<Component> streamBuilder, BrewScore score, Brew.State state) {
+        int lastIndex = brew.getCompletedSteps().size() - 1;
+        BrewingStep lastCompleted = brew.lastCompletedStep();
+        streamBuilder.add(lastCompleted.infoDisplay(state, MessageUtil.getBrewStepTagResolver(lastCompleted, score.getPartialScores(lastIndex), score.brewDifficulty())));
         if (recipeEffects.getAlcohol() > 0) {
-            streamBuilder.add(MessageUtil.miniMessage(TranslationsConfig.ALCOHOLIC));
+            streamBuilder.add(Component.translatable("tbp.brew.tooltip.alcoholic", Argument.tagResolver()));
         }
     }
 
-    private Component compileMessage(BrewScore score, Brew brew, String serializedMiniMessage, boolean isBrewName) {
-        return MessageUtil.miniMessage(serializedMiniMessage, getResolver(score, brew, isBrewName));
-    }
-
-    private @NotNull TagResolver getResolver(BrewScore score, Brew brew, boolean isBrewName) {
+    private @NotNull TagResolver getResolver(BrewScore score) {
         TagResolver.Builder output = TagResolver.builder();
-        if (!isBrewName) {
-            output.resolver(Placeholder.component("brew_name", compileMessage(score, brew, this.name, true)));
-        }
         output.resolvers(
                 Formatter.number("alcohol", this.getRecipeEffects().getAlcohol()),
                 MessageUtil.getScoreTagResolver(score)
