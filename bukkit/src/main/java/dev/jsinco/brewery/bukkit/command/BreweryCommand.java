@@ -49,6 +49,7 @@ public class BreweryCommand {
                         .executes(context -> {
                             CommandSender sender = context.getSource().getSender();
                             MessageUtil.message(sender, "tbp.command.reload-message");
+                            TheBrewingProject.getInstance().reload();
                             return com.mojang.brigadier.Command.SINGLE_SUCCESS;
                         })
                         .requires(commandSourceStack -> commandSourceStack.getSender().hasPermission("brewery.command.reload"))

@@ -8,10 +8,8 @@ import net.kyori.adventure.text.minimessage.translation.MiniMessageTranslator;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
@@ -32,14 +30,14 @@ public class BreweryTranslator extends MiniMessageTranslator {
         for (File translationFile : localeDirectory.listFiles(file -> file.getName().endsWith(".lang"))) {
             try (InputStream inputStream = new FileInputStream(translationFile)) {
                 Properties translation = new Properties();
-                translation.load(inputStream);
-                translationsBuilder.put(Locale.of(translationFile.getName().replaceAll(".lang$", "")), translation);
+                translation.load(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
+                translationsBuilder.put(Locale.forLanguageTag(translationFile.getName().replaceAll(".lang$", "")), translation);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
         }
         this.translations = translationsBuilder.build();
-        Preconditions.checkArgument(translations.containsKey(Config.config().language()));
+        Preconditions.checkArgument(translations.containsKey(Config.config().language()), "Unknown translation: " + Config.config().language());
     }
 
     @Override

@@ -197,9 +197,9 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
 
     @Override
     public void onEnable() {
+        saveResources();
         initialize();
         integrationManager.init();
-        saveResources();
         this.database = new Database(DatabaseDriver.SQLITE);
         try {
             database.init(this.getDataFolder());
@@ -255,7 +255,8 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
     }
 
     private void saveResources() {
-        this.saveResourceIfNotExists("recipes.yml");
+        Stream.of("recipes.yml", "locale/en-US.lang", "locale/ru.lang")
+                .forEach(this::saveResourceIfNotExists);
     }
 
     private void saveResourceIfNotExists(String resource) {
