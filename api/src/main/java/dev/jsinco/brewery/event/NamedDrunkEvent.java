@@ -56,7 +56,7 @@ public class NamedDrunkEvent implements DrunkEvent, BreweryKeyed, EventStepPrope
 
     @Override
     public Component displayName() {
-        return Component.translatable("tbp.events.types" + name.toLowerCase(Locale.ROOT));
+        return Component.translatable("tbp.events.types." + name.toLowerCase(Locale.ROOT));
     }
 
     @Override
