@@ -9,6 +9,7 @@ import dev.jsinco.brewery.bukkit.integration.Integration;
 import dev.jsinco.brewery.bukkit.integration.IntegrationType;
 import dev.jsinco.brewery.bukkit.integration.ItemIntegration;
 import dev.jsinco.brewery.bukkit.util.BukkitAdapter;
+import dev.jsinco.brewery.configuration.Config;
 import dev.jsinco.brewery.recipe.RecipeResult;
 import dev.jsinco.brewery.util.BreweryKey;
 import dev.jsinco.brewery.util.Logger;
@@ -26,6 +27,7 @@ import net.kyori.adventure.text.minimessage.tag.resolver.Formatter;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import net.kyori.adventure.text.minimessage.translation.Argument;
+import net.kyori.adventure.translation.GlobalTranslator;
 import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -121,6 +123,7 @@ public class BukkitRecipeResult implements RecipeResult<ItemStack> {
                         )
                         .map(component -> component.decoration(TextDecoration.ITALIC, false))
                         .map(component -> component.colorIfAbsent(NamedTextColor.GRAY))
+                        .map(component -> GlobalTranslator.render(component, Config.config().language()))
                         .toList()
         ));
         if (glint) {
