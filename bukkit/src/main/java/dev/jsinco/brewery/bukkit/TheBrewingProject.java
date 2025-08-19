@@ -43,7 +43,6 @@ import dev.jsinco.brewery.structure.StructureType;
 import dev.jsinco.brewery.util.BreweryKey;
 import dev.jsinco.brewery.util.ClassUtil;
 import dev.jsinco.brewery.util.Logger;
-import dev.jsinco.brewery.util.Util;
 import eu.okaeri.configs.serdes.OkaeriSerdesPack;
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
 import io.papermc.paper.threadedregions.scheduler.ScheduledTask;
@@ -56,6 +55,7 @@ import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Connection;
@@ -157,7 +157,16 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
 
         recipeReader.readRecipes().forEach(recipeFuture -> recipeFuture.thenAcceptAsync(recipe -> recipeRegistry.registerRecipe(recipe)));
         this.recipeRegistry.registerDefaultRecipes(DefaultRecipeReader.readDefaultRecipes(this.getDataFolder()));
-        try (InputStream inputStream = Util.class.getResourceAsStream("/drunk_text.json")) {
+        loadDrunkenReplacements();
+    }
+
+    private void loadDrunkenReplacements() {
+        File file = new File(getDataFolder(), "/locale/drunk_text_" + Config.config().language().toLanguageTag() + ".json");
+        if (!file.exists()) {
+            Logger.log("Could not find drunken text replacements for your language, using en-US");
+            file = new File(getDataFolder(), "/locale/drunk_text_en-US.json");
+        }
+        try (InputStream inputStream = new FileInputStream(file)) {
             drunkTextRegistry.load(inputStream);
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -230,11 +239,7 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
         recipeReader.readRecipes().forEach(recipeFuture -> recipeFuture.thenAcceptAsync(recipe -> recipeRegistry.registerRecipe(recipe)));
         this.recipeRegistry.registerDefaultRecipes(DefaultRecipeReader.readDefaultRecipes(this.getDataFolder()));
         this.getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS, BreweryCommand::register);
-        try (InputStream inputStream = Util.class.getResourceAsStream("/drunk_text.json")) {
-            drunkTextRegistry.load(inputStream);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        loadDrunkenReplacements();
         Bukkit.getServicesManager().register(TheBrewingProjectApi.class, this, this, ServicePriority.Normal);
     }
 
@@ -255,7 +260,7 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
     }
 
     private void saveResources() {
-        Stream.of("recipes.yml", "locale/en-US.lang", "locale/ru.lang")
+        Stream.of("recipes.yml", "locale/en-US.lang", "locale/ru.lang", "locale/drunk_text_en-US.json")
                 .forEach(this::saveResourceIfNotExists);
     }
 
