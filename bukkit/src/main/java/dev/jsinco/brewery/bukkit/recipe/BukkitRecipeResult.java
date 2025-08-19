@@ -115,7 +115,10 @@ public class BukkitRecipeResult implements RecipeResult<ItemStack> {
 
     private void applyData(ItemStack itemStack, BrewScore score, Brew brew, Brew.State state) {
         BrewAdapter.hideTooltips(itemStack);
-        itemStack.setData(DataComponentTypes.CUSTOM_NAME, MessageUtil.miniMessage(name));
+        itemStack.setData(DataComponentTypes.CUSTOM_NAME, MessageUtil.miniMessage(name)
+                .decoration(TextDecoration.ITALIC, false)
+                .colorIfAbsent(NamedTextColor.WHITE)
+        );
         itemStack.setData(DataComponentTypes.LORE, ItemLore.lore(
                 Stream.concat(lore.stream()
                                         .map(line -> MessageUtil.miniMessage(line, MessageUtil.getScoreTagResolver(score))),
