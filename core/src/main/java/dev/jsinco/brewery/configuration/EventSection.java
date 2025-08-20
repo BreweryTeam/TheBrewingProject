@@ -121,7 +121,11 @@ public class EventSection extends OkaeriConfig {
     public static void migrateEvents(File dataFolder) {
         Yaml yaml = new Yaml();
         Object output;
-        try (InputStream inputStream = new FileInputStream(new File(dataFolder, "config.yml"))) {
+        File configFile = new File(dataFolder, "config.yml");
+        if (!configFile.exists()) {
+            return;
+        }
+        try (InputStream inputStream = new FileInputStream(configFile)) {
             Map<String, Object> config = yaml.load(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
             output = config.get("events");
         } catch (IOException e) {
