@@ -90,6 +90,10 @@ public class EventSection extends OkaeriConfig {
     @CustomKey("blurred-speech")
     private boolean blurredSpeech = true;
 
+    @Comment("What upwards velocity the player will get in kaboom event")
+    @CustomKey("kaboom-velocity")
+    private double kaboomVelocity = 0.2;
+
     @Comment("Change the properties of premade events")
     @CustomKey("named-drunk-event-overrides")
     private List<NamedDrunkEvent> namedDrunkEventsOverride = Registry.DRUNK_EVENT.values().stream().toList();

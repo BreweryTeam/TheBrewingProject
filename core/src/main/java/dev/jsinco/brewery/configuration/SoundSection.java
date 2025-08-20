@@ -34,6 +34,9 @@ public class SoundSection extends OkaeriConfig {
     @CustomKey("distillery-process")
     private SoundDefinition distilleryProcess = parseSoundSetting("minecraft:block.brewing_stand.brew");
 
+    @CustomKey("kaboom")
+    private SoundDefinition kaboom = parseSoundSetting("minecraft:entity.generic.explode/1.0;1.0");
+
     private static SoundDefinition parseSoundSetting(String string) {
         return new SoundDefinition(List.of(SoundDefinitionSerializer.parseSoundSetting(string)));
     }
