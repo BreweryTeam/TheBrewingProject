@@ -51,9 +51,6 @@ public class Config extends OkaeriConfig {
     @CustomKey("puke")
     private PukeSection puke = new PukeSection();
 
-    @CustomKey("events")
-    private EventSection events = new EventSection();
-
     @CustomKey("decay-rates")
     private DecayRateSection decayRate = new DecayRateSection();
 

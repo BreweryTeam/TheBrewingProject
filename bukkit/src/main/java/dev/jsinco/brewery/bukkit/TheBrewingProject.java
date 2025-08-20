@@ -24,6 +24,7 @@ import dev.jsinco.brewery.bukkit.recipe.DefaultRecipeReader;
 import dev.jsinco.brewery.bukkit.structure.*;
 import dev.jsinco.brewery.bukkit.util.BreweryTimeDataType;
 import dev.jsinco.brewery.configuration.Config;
+import dev.jsinco.brewery.configuration.EventSection;
 import dev.jsinco.brewery.configuration.OkaeriSerdesPackBuilder;
 import dev.jsinco.brewery.configuration.locale.BreweryTranslator;
 import dev.jsinco.brewery.configuration.serializers.*;
@@ -103,7 +104,9 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
 
     public void initialize() {
         instance = this;
+        EventSection.migrateEvents(getDataFolder());
         Config.load(this.getDataFolder(), serializers());
+        EventSection.load(getDataFolder(), serializers());
         this.translator = new BreweryTranslator(new File(this.getDataFolder(), "locale"));
         GlobalTranslator.translator().addSource(translator);
         this.structureRegistry = new StructureRegistry();
@@ -112,9 +115,14 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
         loadStructures();
         this.recipeRegistry = new RecipeRegistryImpl<>();
         this.drunkTextRegistry = new DrunkTextRegistry();
-        this.customDrunkEventRegistry = Config.config().events().customEvents();
+        this.customDrunkEventRegistry = EventSection.events().customEvents();
         this.eventStepRegistry = new EventStepRegistry();
         this.drunkEventExecutor = new DrunkEventExecutor();
+    }
+
+    @Override
+    public void onLoad() {
+        Bukkit.getServicesManager().register(TheBrewingProjectApi.class, this, this, ServicePriority.Normal);
     }
 
     private OkaeriSerdesPack serializers() {
@@ -140,10 +148,10 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
         loadStructures();
         this.drunkTextRegistry.clear();
         this.customDrunkEventRegistry.clear();
-        Config.config().events().customEvents().events()
+        EventSection.events().customEvents().events()
                 .forEach(this.customDrunkEventRegistry::registerCustomEvent);
         this.drunkEventExecutor.clear();
-        this.customDrunkEventRegistry = Config.config().events().customEvents();
+        this.customDrunkEventRegistry = EventSection.events().customEvents();
         saveResources();
         this.database = new Database(DatabaseDriver.SQLITE);
         try {
@@ -151,7 +159,7 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
         } catch (IOException | SQLException e) {
             throw new RuntimeException(e); // Hard exit if any issues here
         }
-        this.drunksManager.reset(Config.config().events().enabledRandomEvents().stream().map(BreweryKey::parse).collect(Collectors.toSet()));
+        this.drunksManager.reset(EventSection.events().enabledRandomEvents().stream().map(BreweryKey::parse).collect(Collectors.toSet()));
         worldEventListener.init();
         RecipeReader<ItemStack> recipeReader = new RecipeReader<>(this.getDataFolder(), new BukkitRecipeResultReader(), BukkitIngredientManager.INSTANCE);
 
@@ -216,7 +224,7 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
         } catch (IOException | PersistenceException | SQLException e) {
             throw new RuntimeException(e); // Hard exit if any issues here
         }
-        this.drunksManager = new DrunksManagerImpl<>(customDrunkEventRegistry, Config.config().events().enabledRandomEvents().stream().map(BreweryKey::parse).collect(Collectors.toSet()), () -> this.time, database, SqlDrunkStateDataType.INSTANCE);
+        this.drunksManager = new DrunksManagerImpl<>(customDrunkEventRegistry, EventSection.events().enabledRandomEvents().stream().map(BreweryKey::parse).collect(Collectors.toSet()), () -> this.time, database, SqlDrunkStateDataType.INSTANCE);
         PluginManager pluginManager = Bukkit.getPluginManager();
         pluginManager.registerEvents(new BlockEventListener(this.structureRegistry, placedStructureRegistry, this.database, this.breweryRegistry), this);
         pluginManager.registerEvents(new PlayerEventListener(this.placedStructureRegistry, this.breweryRegistry, this.database, this.drunksManager, this.drunkTextRegistry, recipeRegistry, drunkEventExecutor), this);
@@ -240,7 +248,6 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
         this.recipeRegistry.registerDefaultRecipes(DefaultRecipeReader.readDefaultRecipes(this.getDataFolder()));
         this.getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS, BreweryCommand::register);
         loadDrunkenReplacements();
-        Bukkit.getServicesManager().register(TheBrewingProjectApi.class, this, this, ServicePriority.Normal);
     }
 
     @Override

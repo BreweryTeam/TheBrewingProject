@@ -1,6 +1,7 @@
 package dev.jsinco.brewery.effect;
 
 import dev.jsinco.brewery.configuration.Config;
+import dev.jsinco.brewery.configuration.EventSection;
 import dev.jsinco.brewery.database.PersistenceException;
 import dev.jsinco.brewery.database.PersistenceHandler;
 import dev.jsinco.brewery.event.CustomEventRegistry;
@@ -191,7 +192,7 @@ public class DrunksManagerImpl<C> implements DrunksManager {
         if (passOutTimeStamp == -1) {
             return false;
         }
-        return passOutTimeStamp + (long) Config.config().events().passOutTime() * Moment.MINUTE > timeSupplier.getAsLong();
+        return passOutTimeStamp + (long) EventSection.events().passOutTime() * Moment.MINUTE > timeSupplier.getAsLong();
     }
 
     @Override

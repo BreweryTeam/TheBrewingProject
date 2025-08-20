@@ -11,13 +11,21 @@ import dev.jsinco.brewery.moment.Interval;
 import dev.jsinco.brewery.moment.Moment;
 import dev.jsinco.brewery.util.BreweryKey;
 import dev.jsinco.brewery.vector.BreweryLocation;
+import eu.okaeri.configs.ConfigManager;
 import eu.okaeri.configs.OkaeriConfig;
 import eu.okaeri.configs.annotation.Comment;
 import eu.okaeri.configs.annotation.CustomKey;
+import eu.okaeri.configs.annotation.Exclude;
+import eu.okaeri.configs.serdes.OkaeriSerdesPack;
+import eu.okaeri.configs.yaml.snakeyaml.YamlSnakeYamlConfigurer;
 import lombok.Getter;
 import lombok.experimental.Accessors;
+import org.yaml.snakeyaml.Yaml;
 
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Stream;
 
 @Getter
@@ -81,10 +89,54 @@ public class EventSection extends OkaeriConfig {
     @CustomKey("blurred-speech")
     private boolean blurredSpeech = true;
 
+    @Comment("Configuration of named events")
+    private List<NamedDrunkEvent> namedDrunkEvents = loadNamedEventsDefaults();
+
     @Getter
     @Accessors(fluent = true)
+
     public static class KickEventSection extends OkaeriConfig {
         private String kickEventMessage = null;
         private String kickServerMessage = null;
+    }
+
+    @Exclude
+    private static EventSection instance;
+
+    public static EventSection events() {
+        return instance;
+    }
+
+    public static void load(File dataFolder, OkaeriSerdesPack... packs) {
+        EventSection.instance = ConfigManager.create(EventSection.class, it -> {
+            it.withConfigurer(new YamlSnakeYamlConfigurer(), packs);
+            it.withBindFile(new File(dataFolder, "events.yml"));
+            it.withRemoveOrphans(true);
+            it.saveDefaults();
+            it.load(true);
+        });
+    }
+
+    public static void migrateEvents(File dataFolder) {
+        Yaml yaml = new Yaml();
+        Object output;
+        try (InputStream inputStream = new FileInputStream(new File(dataFolder, "config.yml"))) {
+            Map<String, Object> config = yaml.load(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
+            output = config.get("events");
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        if (output == null) {
+            return;
+        }
+        try (OutputStream outputStream = new FileOutputStream(new File(dataFolder, "events.yml"))) {
+            yaml.dump(output, new OutputStreamWriter(outputStream, StandardCharsets.UTF_8));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private static List<NamedDrunkEvent> loadNamedEventsDefaults() {
+
     }
 }

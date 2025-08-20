@@ -27,7 +27,7 @@ public class PassOutNamedExecutable implements EventPropertyExecutable {
         }
 
         DrunksManagerImpl<?> drunksManager = TheBrewingProject.getInstance().getDrunksManager();
-        EventSection.KickEventSection kickEventSection = Config.config().events().kickEvent();
+        EventSection.KickEventSection kickEventSection = EventSection.events().kickEvent();
         Component playerKickMessage = kickEventSection.kickEventMessage() == null ?
                 Component.translatable("tbp.events.default-kick-event-message")
                 : MessageUtil.miniMessage(kickEventSection.kickEventMessage(), BukkitMessageUtil.getPlayerTagResolver(player));

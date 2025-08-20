@@ -4,6 +4,7 @@ import com.destroystokyo.paper.profile.PlayerProfile;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.bukkit.util.BukkitMessageUtil;
 import dev.jsinco.brewery.configuration.Config;
+import dev.jsinco.brewery.configuration.EventSection;
 import dev.jsinco.brewery.effect.DrunkState;
 import dev.jsinco.brewery.effect.DrunksManager;
 import dev.jsinco.brewery.util.MessageUtil;
@@ -45,7 +46,7 @@ public class PlayerJoinListener implements Listener {
         DrunkState drunkState = drunksManager.getDrunkState(playerUuid);
         String playerName = profile.getName();
         if (drunksManager.isPassedOut(playerUuid)) {
-            String kickEventMessage = Config.config().events().kickEvent().kickEventMessage();
+            String kickEventMessage = EventSection.events().kickEvent().kickEventMessage();
             TagResolver tagResolver = BukkitMessageUtil.getPlayerTagResolver(Bukkit.getOfflinePlayer(profile.getId()));
             Component playerKickMessage = kickEventMessage == null ?
                     Component.translatable("tbp.events.default-kick-event-message", Argument.tagResolver(tagResolver))
@@ -53,7 +54,7 @@ public class PlayerJoinListener implements Listener {
             event.kickMessage(GlobalTranslator.render(playerKickMessage, Config.config().language()));
             return;
         }
-        if (Config.config().events().drunkenJoinDeny() && drunkState != null && drunkState.alcohol() >= 85 && RANDOM.nextInt(15) <= drunkState.alcohol() - 85) {
+        if (EventSection.events().drunkenJoinDeny() && drunkState != null && drunkState.alcohol() >= 85 && RANDOM.nextInt(15) <= drunkState.alcohol() - 85) {
             event.kickMessage(
                     GlobalTranslator.render(
                             Component.translatable("tbp.events.drunken-join-deny-message", Argument.tagResolver(Placeholder.unparsed("player_name", playerName == null ? "" : playerName))),

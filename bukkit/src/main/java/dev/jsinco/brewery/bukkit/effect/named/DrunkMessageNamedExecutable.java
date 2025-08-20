@@ -1,6 +1,7 @@
 package dev.jsinco.brewery.bukkit.effect.named;
 
 import dev.jsinco.brewery.configuration.Config;
+import dev.jsinco.brewery.configuration.EventSection;
 import dev.jsinco.brewery.event.EventPropertyExecutable;
 import dev.jsinco.brewery.event.EventStep;
 import org.bukkit.Bukkit;
@@ -19,7 +20,7 @@ public class DrunkMessageNamedExecutable implements EventPropertyExecutable {
             return ExecutionResult.CONTINUE;
         }
 
-        List<String> drunkMessages = Config.config().events().drunkMessages();
+        List<String> drunkMessages = EventSection.events().drunkMessages();
         if (drunkMessages.isEmpty()) {
             return ExecutionResult.CONTINUE;
         }
