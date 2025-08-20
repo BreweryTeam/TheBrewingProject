@@ -69,4 +69,20 @@ public class NamedDrunkEvent implements DrunkEvent, BreweryKeyed, EventStepPrope
         Preconditions.checkNotNull(key, "Key cannot be null");
         return Registry.DRUNK_EVENT.get(BreweryKey.parse(key));
     }
+
+    @Override
+    public boolean equals(Object other) {
+        if (other == this) {
+            return true;
+        }
+        if (!(other instanceof NamedDrunkEvent namedOther)) {
+            return false;
+        }
+        return this.key.equals(namedOther.key);
+    }
+
+    @Override
+    public int hashCode() {
+        return this.key.hashCode();
+    }
 }

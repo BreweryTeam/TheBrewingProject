@@ -10,6 +10,7 @@ import dev.jsinco.brewery.event.step.ConsumeStep;
 import dev.jsinco.brewery.moment.Interval;
 import dev.jsinco.brewery.moment.Moment;
 import dev.jsinco.brewery.util.BreweryKey;
+import dev.jsinco.brewery.util.Registry;
 import dev.jsinco.brewery.vector.BreweryLocation;
 import eu.okaeri.configs.ConfigManager;
 import eu.okaeri.configs.OkaeriConfig;
@@ -89,12 +90,12 @@ public class EventSection extends OkaeriConfig {
     @CustomKey("blurred-speech")
     private boolean blurredSpeech = true;
 
-    @Comment("Configuration of named events")
-    private List<NamedDrunkEvent> namedDrunkEvents = loadNamedEventsDefaults();
+    @Comment("Change the properties of premade events")
+    @CustomKey("named-drunk-event-overrides")
+    private List<NamedDrunkEvent> namedDrunkEventsOverride = Registry.DRUNK_EVENT.values().stream().toList();
 
     @Getter
     @Accessors(fluent = true)
-
     public static class KickEventSection extends OkaeriConfig {
         private String kickEventMessage = null;
         private String kickServerMessage = null;
@@ -134,9 +135,5 @@ public class EventSection extends OkaeriConfig {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    private static List<NamedDrunkEvent> loadNamedEventsDefaults() {
-
     }
 }

@@ -136,11 +136,13 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
                 .add(new MaterialSerializer())
                 .add(new LocaleSerializer())
                 .add(new ConsumableSerializer())
+                .add(new NamedDrunkEventSerializer())
                 .build();
     }
 
     public void reload() {
         Config.config().load(true);
+        EventSection.events().load(true);
         translator.load(new File(this.getDataFolder(), "locale"));
         this.structureRegistry.clear();
         this.placedStructureRegistry.clear();

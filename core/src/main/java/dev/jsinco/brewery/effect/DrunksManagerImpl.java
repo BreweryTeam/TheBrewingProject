@@ -1,28 +1,19 @@
 package dev.jsinco.brewery.effect;
 
-import dev.jsinco.brewery.configuration.Config;
+import com.google.common.collect.ImmutableList;
 import dev.jsinco.brewery.configuration.EventSection;
 import dev.jsinco.brewery.database.PersistenceException;
 import dev.jsinco.brewery.database.PersistenceHandler;
 import dev.jsinco.brewery.event.CustomEventRegistry;
 import dev.jsinco.brewery.event.DrunkEvent;
+import dev.jsinco.brewery.event.NamedDrunkEvent;
 import dev.jsinco.brewery.moment.Moment;
-import dev.jsinco.brewery.util.BreweryKey;
-import dev.jsinco.brewery.util.Logger;
-import dev.jsinco.brewery.util.Pair;
-import dev.jsinco.brewery.util.RandomUtil;
-import dev.jsinco.brewery.util.Registry;
+import dev.jsinco.brewery.util.*;
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.LongSupplier;
 import java.util.function.Predicate;
@@ -34,6 +25,7 @@ public class DrunksManagerImpl<C> implements DrunksManager {
     private final PersistenceHandler<C> persistenceHandler;
     private final DrunkStateDataType<C> drunkStateDataType;
     private Set<BreweryKey> allowedEvents;
+    private List<NamedDrunkEvent> namedDrunkEvents = initializeDrunkEventsWithOverrides();
     private Map<UUID, DrunkStateImpl> drunks = new HashMap<>();
     @Getter
     private LongSupplier timeSupplier;
@@ -114,6 +106,19 @@ public class DrunksManagerImpl<C> implements DrunksManager {
         events.clear();
         loadDrunkStates();
         drunks.keySet().forEach(this::planEvent);
+        namedDrunkEvents = initializeDrunkEventsWithOverrides();
+    }
+
+    private List<NamedDrunkEvent> initializeDrunkEventsWithOverrides() {
+        ImmutableList.Builder<NamedDrunkEvent> output = new ImmutableList.Builder<>();
+        for (NamedDrunkEvent namedDrunkEvent : Registry.DRUNK_EVENT.values()) {
+            EventSection.events().namedDrunkEventsOverride()
+                    .stream()
+                    .filter(namedDrunkEvent::equals)
+                    .findAny()
+                    .ifPresentOrElse(output::add, () -> output.add(namedDrunkEvent));
+        }
+        return output.build();
     }
 
     public void clear(UUID playerUuid) {
@@ -161,7 +166,7 @@ public class DrunksManagerImpl<C> implements DrunksManager {
             return;
         }
         List<DrunkEvent> drunkEvents = Stream.concat(
-                        Registry.DRUNK_EVENT.values().stream(),
+                        namedDrunkEvents.stream(),
                         eventRegistry.events().stream())
                 .filter(event -> allowedEvents.contains(event.key()))
                 .filter(drunkEvent -> drunkEvent.alcoholRequirement() <= drunkState.alcohol())
