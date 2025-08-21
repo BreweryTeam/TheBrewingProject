@@ -5,6 +5,7 @@ import dev.jsinco.brewery.effect.DrunkStateImpl;
 import dev.jsinco.brewery.effect.DrunksManagerImpl;
 import dev.jsinco.brewery.event.CustomEventRegistry;
 import dev.jsinco.brewery.event.NamedDrunkEvent;
+import dev.jsinco.brewery.util.Registry;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -12,13 +13,15 @@ import org.mockbukkit.mockbukkit.MockBukkit;
 import org.mockbukkit.mockbukkit.MockBukkitExtension;
 
 import java.sql.Connection;
-import java.util.Arrays;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(MockBukkitExtension.class)
 class DrunksManagerTest {
@@ -29,7 +32,7 @@ class DrunksManagerTest {
 
     @BeforeEach
     void setup() {
-        this.drunksManager = new DrunksManagerImpl<>(new CustomEventRegistry(), Arrays.stream(NamedDrunkEvent.values())
+        this.drunksManager = new DrunksManagerImpl<>(new CustomEventRegistry(), Registry.DRUNK_EVENT.values().stream()
                 .map(NamedDrunkEvent::key)
                 .collect(Collectors.toSet()),
                 time::get,
@@ -41,9 +44,9 @@ class DrunksManagerTest {
     @Test
     void consume() {
         drunksManager.consume(playerUuid, 10, 0, 0);
-        assertEquals(new DrunkStateImpl(10, 0, 0, 0, -1), drunksManager.getDrunkState(playerUuid));
+        assertEquals(new DrunkStateImpl(10, 0, 0, -1), drunksManager.getDrunkState(playerUuid));
         drunksManager.consume(playerUuid, 0, 0, 400);
-        assertEquals(new DrunkStateImpl(8, 0, 0, 400, -1), drunksManager.getDrunkState(playerUuid));
+        assertEquals(new DrunkStateImpl(8, 0, 400, -1), drunksManager.getDrunkState(playerUuid));
         drunksManager.consume(playerUuid, -9, 0, 0);
         assertNull(drunksManager.getDrunkState(playerUuid));
         drunksManager.consume(playerUuid, -10, 20, 0);
@@ -64,7 +67,7 @@ class DrunksManagerTest {
             time.incrementAndGet();
             drunksManager.tick((uuid, event) -> {
                 atomicBoolean.set(true);
-            });
+            }, uuid -> true);
         }
         assertTrue(atomicBoolean.get());
     }
@@ -77,7 +80,7 @@ class DrunksManagerTest {
             time.incrementAndGet();
             drunksManager.tick((uuid, event) -> {
                 atomicBoolean.set(true);
-            });
+            }, uuid -> true);
         }
         assertFalse(atomicBoolean.get());
     }
@@ -92,7 +95,7 @@ class DrunksManagerTest {
             time.incrementAndGet();
             drunksManager.tick((uuid, event) -> {
                 atomicBoolean.set(true);
-            });
+            }, uuid -> true);
         }
         assertFalse(atomicBoolean.get());
 

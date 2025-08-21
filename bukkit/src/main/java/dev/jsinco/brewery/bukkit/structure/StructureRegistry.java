@@ -29,12 +29,12 @@ public class StructureRegistry {
         Preconditions.checkNotNull(structure);
         structureNames.put(structure.getName(), structure);
         structures.computeIfAbsent(structure.getMeta(StructureMeta.TYPE), ignored -> new HashSet<>()).add(structure);
-        for (BlockData blockData : structure.getPalette()) {
-            for (T matcherType : matcherTypes) {
-                structuresWithMaterials.computeIfAbsent(structure.getMeta(StructureMeta.TYPE), ignored -> new HashMap<>())
-                        .computeIfAbsent(blockDataMatcher.findSubstitution(blockData, matcherType), ignored -> new HashSet<>()).add(structure);
-            }
+        for (T matcherType : matcherTypes) {
+            Set<Material> possibleMaterials = blockDataMatcher.findStructureMaterials(matcherType, structure);
+            Map<Material, Set<BreweryStructure>> materialStructureMap = structuresWithMaterials.computeIfAbsent(structure.getMeta(StructureMeta.TYPE), ignored -> new HashMap<>());
+            possibleMaterials.forEach(material -> materialStructureMap.computeIfAbsent(material, ignored -> new HashSet<>()).add(structure));
         }
+
     }
 
     public void addStructure(@NotNull BreweryStructure structure) {

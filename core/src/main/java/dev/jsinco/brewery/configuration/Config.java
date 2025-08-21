@@ -1,112 +1,90 @@
 package dev.jsinco.brewery.configuration;
 
-import dev.jsinco.brewery.util.FileUtil;
-import dev.jsinco.brewery.moment.Moment;
-import org.simpleyaml.configuration.file.YamlFile;
+import eu.okaeri.configs.ConfigManager;
+import eu.okaeri.configs.OkaeriConfig;
+import eu.okaeri.configs.annotation.Comment;
+import eu.okaeri.configs.annotation.CustomKey;
+import eu.okaeri.configs.annotation.Exclude;
+import eu.okaeri.configs.serdes.OkaeriSerdesPack;
+import eu.okaeri.configs.yaml.snakeyaml.YamlSnakeYamlConfigurer;
+import lombok.Getter;
+import lombok.experimental.Accessors;
 
 import java.io.File;
-import java.nio.file.Path;
 import java.util.List;
-import java.util.Map;
+import java.util.Locale;
 
-public final class Config extends AbstractConfig {
-    @Key("config-version")
-    @Comment("""
-            Config version. Don't change this""")
-    public static int CONFIG_VERSION = 0;
+@Getter
+@Accessors(fluent = true)
+public class Config extends OkaeriConfig {
 
-    @Key("language")
-    @Comment("""
-            What language file should we use? See: /TheBrewingProject/languages""")
-    public static String LANGUAGE = "en-us";
+    @Comment("Config version. Don't change this")
+    @CustomKey("config-version")
+    private int configVersion = 1;
+
+    @Comment("What language file should we use? See: /TheBrewingProject/locale")
+    @CustomKey("language")
+    private Locale language = Locale.US;
+
+    @Comment("Allow hoppers to interact with distilleries and barrels")
+    @CustomKey("automation-enabled")
+    private boolean automation = true;
+
+    @Comment("Whether an ingredient can be added into a brew regardless if it's not in any of the recipes")
+    @CustomKey("allow-unregistered-ingredients")
+    private boolean allowUnregisteredIngredients = false;
+
+    @Comment("Whether items should be consumed when in creative mode when using it on tbp structures")
+    @CustomKey("consume-items-in-creative")
+    private boolean consumeItemsInCreative = false;
+
+    @Comment("Whether everything non-item related should be translated to the players locale")
+    @CustomKey("client-side-translations")
+    private boolean clientSideTranslations = false;
+
+    @CustomKey("cauldrons")
+    private CauldronSection cauldrons = new CauldronSection();
+
+    @CustomKey("barrels")
+    private BarrelSection barrels = new BarrelSection();
+
+    @CustomKey("puke")
+    private PukeSection puke = new PukeSection();
+
+    @CustomKey("decay-rates")
+    private DecayRateSection decayRate = new DecayRateSection();
+
+    @Comment({"This field accepts either a single sound definition or a list of definitions.",
+            "If a list is provided, one sound will be chosen randomly.",
+            "",
+            "A single sound entry is a string with one of the following formats",
+            "- <sound_id>",
+            "- <sound_id>/<pitch>",
+            "- <sound_id>/<min_pitch>;<max_pitch>",
+            "",
+            "See the default values below for examples"
+    })
+    @CustomKey("sounds")
+    private SoundSection sounds = new SoundSection();
 
 
-    // Brewing Settings
+    @CustomKey("command-aliases")
+    private List<String> commandAliases = List.of("brewery", "brew");
 
+    @Exclude
+    private static Config instance;
 
-    // Storage Settings
-
-
-    // Cauldron Settings
-    @Key("cauldrons.minimal-particles")
-    @Comment("""
-            Reduce the number of particles that spawn while cauldrons brew.
-            This won't affect performance, but it will make the particles less obtrusive.""")
-    public static boolean MINIMAL_PARTICLES = false;
-
-    @Key("cauldrons.heat-sources")
-    @Comment("""
-            What blocks cauldrons must have below them to be able to brew.
-            If this list is empty, cauldrons will brew regardless of the block below them.
-            Campfires must be lit and lava must be a source block.""")
-    public static List<String> HEAT_SOURCES = List.of("campfire", "soul_campfire", "lava", "fire", "soul_fire", "magma_block");
-
-    @Key("puke.despawn-rate")
-    @Comment("""
-            How many ticks should the puke items live
-            """)
-    public static int PUKE_DESPAWN_RATE = 6 * Moment.SECOND;
-
-    @Key("puke.puke-time")
-    @Comment("""
-            How many ticks the player will puke
-            """)
-    public static int PUKE_TIME = 4 * Moment.SECOND;
-
-    @Key("events.kick-event.message")
-    public static String KICK_EVENT_MESSAGE;
-
-    @Key("events.kick-event.server-message")
-    public static String KICK_EVENT_SERVER_MESSAGE;
-
-    @Key("events.pass-out-time")
-    public static int PASS_OUT_TIME = 5;
-
-    @Key("events.messages")
-    public static List<String> DRUNK_MESSAGES = List.of();
-
-    @Key("events.custom-events")
-    public static Map<String, Object> CUSTOM_EVENTS = Map.of();
-
-    @Key("events.enabled-random-events")
-    public static List<String> ENABLED_RANDOM_EVENTS = List.of();
-
-    @Key("events.teleport-destinations")
-    public static List<String> TELEPORT_DESTINATIONS = List.of();
-
-    @Key("events.default")
-    public static Map<String, Object> DEFAULT_EVENTS = Map.of();
-
-    @Key("decay-rates.alcohol")
-    @Comment("How many ticks until alcohol level decays by 1%")
-    public static int ALCOHOL_DECAY_RATE = 200;
-
-    @Key("decay-rates.toxin")
-    @Comment("How many ticks until toxin level decays by 1%")
-    public static int TOXIN_DECAY_RATE = 400;
-
-    private static final Config CONFIG = new Config();
-
-    public static void reload(File dataFolder) {
-        Path mainDir = dataFolder.toPath();
-
-        // extract default config from jar
-        FileUtil.extractFile(Config.class, "config.yml", mainDir, false);
-
-        CONFIG.reload(mainDir.resolve("config.yml"), "config.yml", Config.class);
+    public static void load(File dataFolder, OkaeriSerdesPack... packs) {
+        Config.instance = ConfigManager.create(Config.class, it -> {
+            it.withConfigurer(new YamlSnakeYamlConfigurer(), packs);
+            it.withBindFile(new File(dataFolder, "config.yml"));
+            it.withRemoveOrphans(true);
+            it.saveDefaults();
+            it.load(true);
+        });
     }
 
-    private static void tryRenamePath(String oldPath, String newPath) {
-        YamlFile config = CONFIG.getConfig();
-        Object oldValue = config.get(oldPath);
-        if (oldValue == null) {
-            return; // old default doesn't exist; do nothing
-        }
-        if (config.get(newPath) != null) {
-            return; // new default already set; do nothing
-        }
-        config.set(newPath, oldValue);
-        config.set(oldPath, null);
-        CONFIG.save();
+    public static Config config() {
+        return instance;
     }
 }

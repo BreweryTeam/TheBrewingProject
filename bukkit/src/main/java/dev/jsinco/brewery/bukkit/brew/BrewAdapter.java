@@ -6,26 +6,36 @@ import dev.jsinco.brewery.bukkit.recipe.BukkitRecipeResult;
 import dev.jsinco.brewery.bukkit.util.BukkitAdapter;
 import dev.jsinco.brewery.bukkit.util.IngredientUtil;
 import dev.jsinco.brewery.bukkit.util.ListPersistentDataType;
-import dev.jsinco.brewery.configuration.locale.TranslationsConfig;
-import dev.jsinco.brewery.recipe.Recipe;
-import dev.jsinco.brewery.recipe.RecipeResult;
-import dev.jsinco.brewery.recipes.*;
 import dev.jsinco.brewery.ingredient.Ingredient;
 import dev.jsinco.brewery.ingredient.IngredientManager;
+import dev.jsinco.brewery.recipe.Recipe;
+import dev.jsinco.brewery.recipe.RecipeResult;
+import dev.jsinco.brewery.recipes.BrewScoreImpl;
+import dev.jsinco.brewery.recipes.RecipeRegistryImpl;
 import dev.jsinco.brewery.util.BreweryKey;
+import dev.jsinco.brewery.util.ClassUtil;
 import dev.jsinco.brewery.util.Pair;
+import io.papermc.paper.datacomponent.DataComponentTypes;
+import io.papermc.paper.datacomponent.item.PotionContents;
+import io.papermc.paper.datacomponent.item.TooltipDisplay;
+import io.papermc.paper.persistence.PersistentDataContainerView;
+import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextDecoration;
-import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
+import net.kyori.adventure.text.minimessage.translation.Argument;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
+import org.bukkit.Registry;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class BrewAdapter {
 
@@ -51,29 +61,29 @@ public class BrewAdapter {
         } else if (!score.map(BrewScore::completed).get()) {
             itemStack = incompletePotion(brew);
         } else {
-            itemStack = recipe.get().getRecipeResult().newBrewItem(score.get(), brew, state);
-            ItemMeta meta = itemStack.getItemMeta();
-            meta.getPersistentDataContainer().set(BREWERY_TAG, PersistentDataType.STRING, BreweryKey.parse(recipe.get().getRecipeName()).toString());
-            meta.getPersistentDataContainer().set(BREWERY_SCORE, PersistentDataType.DOUBLE, score.get().score());
-            if (recipe.get().getRecipeResult() instanceof BukkitRecipeResult recipeResult) {
-                meta.getPersistentDataContainer().set(BREWERY_DISPLAY_NAME, PersistentDataType.STRING, recipeResult.getNames().get(quality.get()));
-            }
-            itemStack.setItemMeta(meta);
+            RecipeResult<ItemStack> recipeResult = recipe.get().getRecipeResult(quality.get());
+            itemStack = recipeResult.newBrewItem(score.get(), brew, state);
+            itemStack.editPersistentDataContainer(pdc -> {
+                pdc.set(BREWERY_TAG, PersistentDataType.STRING, BreweryKey.parse(recipe.get().getRecipeName()).toString());
+                pdc.set(BREWERY_SCORE, PersistentDataType.DOUBLE, score.get().score());
+                if (recipeResult instanceof BukkitRecipeResult bukkitRecipeResult) {
+                    pdc.set(BREWERY_DISPLAY_NAME, PersistentDataType.STRING, bukkitRecipeResult.getName());
+                }
+            });
         }
         if (!(state instanceof BrewImpl.State.Seal)) {
-            ItemMeta itemMeta = itemStack.getItemMeta();
-            fillPersistentData(itemMeta, brew);
-            itemStack.setItemMeta(itemMeta);
+            itemStack.editPersistentDataContainer(pdc ->
+                    fillPersistentData(pdc, brew)
+            );
         }
         return itemStack;
     }
 
     private static ItemStack incompletePotion(Brew brew) {
         ItemStack itemStack = new ItemStack(Material.POTION);
-        PotionMeta potionMeta = (PotionMeta) itemStack.getItemMeta();
-        potionMeta.addItemFlags(ItemFlag.HIDE_ENCHANTS, ItemFlag.HIDE_ATTRIBUTES, ItemFlag.HIDE_ADDITIONAL_TOOLTIP);
+        hideTooltips(itemStack);
         Map<Ingredient, Integer> ingredients = new HashMap<>();
-        for (BrewingStep brewingStep : brew.getSteps()) {
+        for (BrewingStep brewingStep : brew.getCompletedSteps()) {
             if (brewingStep instanceof BrewingStep.Cook cook) {
                 IngredientManager.merge(ingredients, (Map<Ingredient, Integer>) cook.ingredients());
             }
@@ -83,42 +93,51 @@ public class BrewAdapter {
         }
         Pair<org.bukkit.Color, Ingredient> itemsInfo = IngredientUtil.ingredientData(ingredients);
         Ingredient topIngredient = itemsInfo.second();
-        String displayName = switch (brew.getSteps().getLast().stepType()) {
-            case COOK ->
-                    topIngredient == null ? TranslationsConfig.BREW_DISPLAY_NAME_UNFINISHED_FERMENTED_UNKNOWN : TranslationsConfig.BREW_DISPLAY_NAME_UNFINISHED_FERMENTED.replace("<ingredient>", topIngredient.displayName().toLowerCase());
-            case DISTILL ->
-                    topIngredient == null ? TranslationsConfig.BREW_DISPLAY_NAME_UNFINISHED_DISTILLED_UNKNOWN : TranslationsConfig.BREW_DISPLAY_NAME_UNFINISHED_DISTILLED.replace("<ingredient>", topIngredient.displayName());
-            case AGE ->
-                    topIngredient == null ? TranslationsConfig.BREW_DISPLAY_NAME_UNFINISHED_AGED_UNKNOWN : TranslationsConfig.BREW_DISPLAY_NAME_UNFINISHED_AGED.replace("<ingredient>", topIngredient.displayName().toLowerCase());
-            case MIX ->
-                    topIngredient == null ? TranslationsConfig.BREW_DISPLAY_NAME_UNFINISHED_MIXED_UNKNOWN : TranslationsConfig.BREW_DISPLAY_NAME_UNFINISHED_MIXED.replace("<ingredient>", topIngredient.displayName());
-        };
-        potionMeta.displayName(MiniMessage.miniMessage().deserialize(displayName).decoration(TextDecoration.ITALIC, false));
-        potionMeta.setColor(itemsInfo.first());
-        itemStack.setItemMeta(potionMeta);
+        final Map<BrewingStep.StepType, String> displayNameByStep = Map.of(
+                BrewingStep.StepType.COOK, "unfinished-fermented",
+                BrewingStep.StepType.DISTILL, "unfinished-distilled",
+                BrewingStep.StepType.AGE, "unfinished-aged",
+                BrewingStep.StepType.MIX, "unfinished-mixed"
+        );
+
+        BrewingStep.StepType lastStep = brew.getCompletedSteps().getLast().stepType();
+        String translationKey = "tbp.brew.display-name." + displayNameByStep.get(lastStep);
+        Component displayName = topIngredient == null
+                ? Component.translatable(translationKey + "-unknown")
+                : Component.translatable(translationKey, Argument.tagResolver(Placeholder.component("ingredient", topIngredient.displayName())));
+
+        itemStack.setData(DataComponentTypes.CUSTOM_NAME, displayName.decoration(TextDecoration.ITALIC, false));
+        itemStack.setData(DataComponentTypes.POTION_CONTENTS, PotionContents.potionContents()
+                .customColor(itemsInfo.first()).build());
         return itemStack;
     }
 
-    private static boolean fillPersistentData(ItemMeta itemMeta, Brew brew) {
-        PersistentDataContainer data = itemMeta.getPersistentDataContainer();
-        Integer dataVersion = data.get(BREWERY_DATA_VERSION, PersistentDataType.INTEGER);
-        boolean previouslyStored = dataVersion != null;
-        data.set(BREWING_STEPS, ListPersistentDataType.BREWING_STEP_LIST, brew.getSteps());
-        data.set(BREWERY_DATA_VERSION, PersistentDataType.INTEGER, DATA_VERSION);
-        return previouslyStored;
+    private static void fillPersistentData(PersistentDataContainer pdc, Brew brew) {
+        pdc.set(BREWING_STEPS, ListPersistentDataType.BREWING_STEP_LIST, brew.getSteps());
+        pdc.set(BREWERY_DATA_VERSION, PersistentDataType.INTEGER, DATA_VERSION);
     }
 
     public static Optional<Brew> fromItem(ItemStack itemStack) {
-        ItemMeta meta = itemStack.getItemMeta();
-        if (meta == null) {
-            return Optional.empty();
-        }
-        PersistentDataContainer data = meta.getPersistentDataContainer();
+        PersistentDataContainerView data = itemStack.getPersistentDataContainer();
         Integer dataVersion = data.get(BREWERY_DATA_VERSION, PersistentDataType.INTEGER);
         if (!Objects.equals(dataVersion, DATA_VERSION)) {
             return Optional.empty();
         }
         return Optional.ofNullable(data.get(BREWING_STEPS, ListPersistentDataType.BREWING_STEP_LIST))
                 .map(BrewImpl::new);
+    }
+
+    public static void hideTooltips(ItemStack itemStack) {
+        if (ClassUtil.exists("io.papermc.paper.datacomponent.item.TooltipDisplay")) {
+            itemStack.setData(DataComponentTypes.TOOLTIP_DISPLAY, TooltipDisplay.tooltipDisplay().hiddenComponents(Registry.DATA_COMPONENT_TYPE.stream()
+                            .filter(dataComponentType -> dataComponentType != DataComponentTypes.LORE)
+                            .collect(Collectors.toSet())
+                    ).build()
+            );
+        } else {
+            itemStack.editMeta(meta -> meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES, ItemFlag.HIDE_ARMOR_TRIM,
+                    ItemFlag.HIDE_DYE, ItemFlag.HIDE_DESTROYS, ItemFlag.HIDE_ENCHANTS, ItemFlag.HIDE_STORED_ENCHANTS,
+                    ItemFlag.HIDE_UNBREAKABLE, ItemFlag.HIDE_ADDITIONAL_TOOLTIP));
+        }
     }
 }

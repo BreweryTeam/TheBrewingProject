@@ -7,46 +7,48 @@ buildscript {
 }
 
 plugins {
-    `java-library`
-    id("org.ajoberstar.grgit") version "5.3.0"
+    `tbp-module`
 }
-
-group = "dev.jsinco.brewery"
-version = "1.3.0-" + grgit.head().abbreviatedId
 
 repositories {
     mavenCentral()
     maven("https://jitpack.io")
+    maven("https://storehouse.okaeri.eu/repository/maven-public/")
 }
 
 dependencies {
-    implementation("com.github.Carleslc.Simple-YAML:Simple-Yaml:1.8.4")
-    implementation("com.zaxxer:HikariCP:6.2.1")
     api(project(":api"))
-    compileOnly("org.xerial:sqlite-jdbc:3.47.2.0")
 
-    compileOnly("org.jetbrains:annotations:24.0.0")
-    compileOnly("com.google.guava:guava:33.4.0-jre")
-    compileOnly("com.google.code.gson:gson:2.12.1")
-    compileOnly("org.joml:joml:1.10.8")
-    compileOnly("org.projectlombok:lombok:1.18.30")
+    // libraries
+    compileOnly(libs.sqlite.jdbc)
+    compileOnly(libs.guava)
+    compileOnly(libs.gson)
+    compileOnly(libs.joml)
+    compileOnly(libs.adventure.api)
+    compileOnly(libs.adventure.text.minimessage)
+    api(libs.okaeri)
+    implementation(libs.simple.yaml)
+    implementation(libs.hikaricp)
 
-    annotationProcessor("org.projectlombok:lombok:1.18.30")
-    testAnnotationProcessor("org.projectlombok:lombok:1.18.30")
+    // other
+    compileOnly(libs.jetbrains.annotations)
+    compileOnly(libs.lombok)
+    annotationProcessor(libs.lombok)
 
-    testImplementation("org.junit.jupiter:junit-jupiter:5.11.3")
-    testImplementation("com.google.code.gson:gson:2.12.1")
-    testImplementation("org.joml:joml:1.10.8")
-    testImplementation("com.google.guava:guava:33.4.0-jre")
-    testImplementation("org.xerial:sqlite-jdbc:3.47.2.0")
-}
+    // test
+    testImplementation(libs.junit.jupiter)
+    testRuntimeOnly(libs.junit.platform.launcher)
 
-java {
-    toolchain.languageVersion = JavaLanguageVersion.of(21)
+    testImplementation(libs.gson)
+    testImplementation(libs.joml)
+    testImplementation(libs.guava)
+    testImplementation(libs.sqlite.jdbc)
+
+    testAnnotationProcessor(libs.lombok)
 }
 
 tasks {
-    jar {
+    processResources {
         dependsOn(project(":datagenerator").getTasksByName("run", false))
     }
 

@@ -1,30 +1,37 @@
 package dev.jsinco.brewery.bukkit.listeners;
 
+import com.destroystokyo.paper.event.player.PlayerLaunchProjectileEvent;
 import dev.jsinco.brewery.brew.BrewImpl;
 import dev.jsinco.brewery.breweries.InventoryAccessible;
 import dev.jsinco.brewery.breweries.StructureHolder;
+import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.bukkit.brew.BrewAdapter;
 import dev.jsinco.brewery.bukkit.breweries.BreweryRegistry;
 import dev.jsinco.brewery.bukkit.breweries.BukkitCauldron;
 import dev.jsinco.brewery.bukkit.breweries.BukkitCauldronDataType;
 import dev.jsinco.brewery.bukkit.effect.event.DrunkEventExecutor;
 import dev.jsinco.brewery.bukkit.ingredient.BukkitIngredientManager;
-import dev.jsinco.brewery.bukkit.ingredient.SimpleIngredient;
-import dev.jsinco.brewery.bukkit.integration.structure.StructureAccessHook;
+import dev.jsinco.brewery.bukkit.integration.IntegrationType;
 import dev.jsinco.brewery.bukkit.recipe.RecipeEffects;
 import dev.jsinco.brewery.bukkit.util.BukkitAdapter;
-import dev.jsinco.brewery.bukkit.util.MessageUtil;
 import dev.jsinco.brewery.configuration.Config;
-import dev.jsinco.brewery.configuration.locale.TranslationsConfig;
+import dev.jsinco.brewery.configuration.serializers.ConsumableSerializer;
 import dev.jsinco.brewery.database.PersistenceException;
 import dev.jsinco.brewery.database.sql.Database;
 import dev.jsinco.brewery.effect.DrunkStateImpl;
 import dev.jsinco.brewery.effect.DrunksManagerImpl;
 import dev.jsinco.brewery.effect.text.DrunkTextRegistry;
 import dev.jsinco.brewery.effect.text.DrunkTextTransformer;
+import dev.jsinco.brewery.ingredient.Ingredient;
+import dev.jsinco.brewery.ingredient.ScoredIngredient;
 import dev.jsinco.brewery.recipes.RecipeRegistryImpl;
 import dev.jsinco.brewery.structure.PlacedStructureRegistryImpl;
+import dev.jsinco.brewery.util.Logger;
+import dev.jsinco.brewery.util.MessageUtil;
+import io.papermc.paper.datacomponent.DataComponentTypes;
+import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.minimessage.translation.Argument;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.Tag;
@@ -36,21 +43,25 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
-import org.bukkit.event.player.*;
+import org.bukkit.event.player.AsyncPlayerChatEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerItemConsumeEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
-import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
+import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
 
 public class PlayerEventListener implements Listener {
-    public static final Set<Material> DISALLOWED_INGREDIENT_MATERIALS = Set.of(Material.CLOCK, Material.BUCKET, Material.POTION, Material.GLASS_BOTTLE);
+    public static final Set<Material> DISALLOWED_INGREDIENT_MATERIALS = Set.of(Material.CLOCK, Material.BUCKET, Material.GLASS_BOTTLE);
+    private static final Random RANDOM = new Random();
 
     private final PlacedStructureRegistryImpl placedStructureRegistry;
     private final BreweryRegistry breweryRegistry;
@@ -72,8 +83,8 @@ public class PlayerEventListener implements Listener {
 
 
     @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
-    public void onPLayerInteract(PlayerInteractEvent playerInteractEvent) {
-        if (playerInteractEvent.getAction() != Action.RIGHT_CLICK_BLOCK || playerInteractEvent.getPlayer().isSneaking()) {
+    public void onPlayerInteractStructure(PlayerInteractEvent playerInteractEvent) {
+        if (playerInteractEvent.getAction() != Action.RIGHT_CLICK_BLOCK || playerInteractEvent.getPlayer().isSneaking() || playerInteractEvent.getHand() != EquipmentSlot.HAND) {
             return;
         }
         Optional<StructureHolder<?>> possibleStructureHolder = placedStructureRegistry.getHolder(BukkitAdapter.toBreweryLocation(playerInteractEvent.getClickedBlock().getLocation()));
@@ -97,19 +108,24 @@ public class PlayerEventListener implements Listener {
         if (block == null) {
             return;
         }
-        if (!StructureAccessHook.hasAccess(event.getClickedBlock(), event.getPlayer())) {
+        if (!TheBrewingProject.getInstance().getIntegrationManager().retrieve(IntegrationType.STRUCTURE)
+                .stream()
+                .map(structureIntegration -> structureIntegration.hasAccess(event.getClickedBlock(), event.getPlayer()))
+                .reduce(true, Boolean::logicalAnd)) {
             return;
         }
         if (Tag.CAULDRONS.isTagged(block.getType())) {
             handleCauldron(event, block);
         }
+
         PlayerInventory inventory = event.getPlayer().getInventory();
         ItemStack offHand = inventory.getItemInOffHand();
-        if (block.getType() == Material.CRAFTING_TABLE && offHand.getType() == Material.PAPER && event.getPlayer().isSneaking() && event.getAction() == Action.RIGHT_CLICK_BLOCK) {
-            ItemMeta offHandMeta = offHand.getItemMeta();
+        if (block.getType() == Material.CRAFTING_TABLE && offHand.getType() == Material.PAPER && event.getPlayer().
+
+                isSneaking() && event.getAction() == Action.RIGHT_CLICK_BLOCK) {
             ItemStack mainHand = inventory.getItemInMainHand();
             ItemStack sealed = BrewAdapter.fromItem(mainHand)
-                    .map(brew -> BrewAdapter.toItem(brew, new BrewImpl.State.Seal(offHandMeta.hasCustomName() ? MiniMessage.miniMessage().serialize(offHandMeta.customName()) : null)))
+                    .map(brew -> BrewAdapter.toItem(brew, new BrewImpl.State.Seal(offHand.hasData(DataComponentTypes.CUSTOM_NAME) ? MiniMessage.miniMessage().serialize(offHand.getData(DataComponentTypes.CUSTOM_NAME)) : null)))
                     .orElse(mainHand);
             inventory.setItemInMainHand(sealed);
             event.setUseItemInHand(Event.Result.DENY);
@@ -120,7 +136,7 @@ public class PlayerEventListener implements Listener {
     }
 
     private ItemStack decreaseItem(ItemStack itemStack, Player player) {
-        if (player.getGameMode() == GameMode.CREATIVE) {
+        if (player.getGameMode() == GameMode.CREATIVE && !Config.config().consumeItemsInCreative()) {
             return itemStack;
         }
         if (itemStack.getType() == Material.POTION) {
@@ -162,7 +178,7 @@ public class PlayerEventListener implements Listener {
         cauldronOptional
                 .filter(cauldron -> itemStack.getType() == Material.CLOCK)
                 .filter(cauldron -> event.getPlayer().hasPermission("brewery.cauldron.time"))
-                .ifPresent(cauldron -> event.getPlayer().sendMessage(MiniMessage.miniMessage().deserialize(TranslationsConfig.CAULDRON_CLOCK_MESSAGE, MessageUtil.getTimeTagResolver(cauldron.getTime()))));
+                .ifPresent(cauldron -> Component.translatable("tbp.cauldron.clock-message", Argument.tagResolver(MessageUtil.getTimeTagResolver(cauldron.getTime()))));
         cauldronOptional.ifPresent(ignored -> {
             event.setUseInteractedBlock(Event.Result.DENY);
             event.setUseItemInHand(Event.Result.DENY);
@@ -182,7 +198,7 @@ public class PlayerEventListener implements Listener {
             try {
                 database.updateValue(BukkitCauldronDataType.INSTANCE, cauldron);
             } catch (PersistenceException e) {
-                e.printStackTrace();
+                Logger.logErr(e);
             }
         }
         return addedIngredient;
@@ -203,7 +219,7 @@ public class PlayerEventListener implements Listener {
         try {
             database.insertValue(BukkitCauldronDataType.INSTANCE, newCauldron);
         } catch (PersistenceException e) {
-            e.printStackTrace();
+            Logger.logErr(e);
         }
         breweryRegistry.addActiveSinglePositionStructure(newCauldron);
         return newCauldron;
@@ -215,17 +231,17 @@ public class PlayerEventListener implements Listener {
             return false;
         }
         Material type = itemStack.getType();
-        if (type == Material.MILK_BUCKET) {
-            return true;
-        }
-        if (!(BukkitIngredientManager.INSTANCE.getIngredient(itemStack) instanceof SimpleIngredient)) {
-            return true;
-        }
-        if (1 == itemStack.getMaxStackSize()) {
-            // Probably equipment
+        if (DISALLOWED_INGREDIENT_MATERIALS.contains(type)) {
             return false;
         }
-        return !DISALLOWED_INGREDIENT_MATERIALS.contains(type);
+        if (Config.config().allowUnregisteredIngredients()) {
+            return true;
+        }
+        Ingredient ingredient = BukkitIngredientManager.INSTANCE.getIngredient(itemStack);
+        if (ingredient instanceof ScoredIngredient scoredIngredient) {
+            ingredient = scoredIngredient.baseIngredient();
+        }
+        return recipeRegistry.isRegisteredIngredient(ingredient);
     }
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.LOW)
@@ -243,24 +259,26 @@ public class PlayerEventListener implements Listener {
     @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
     public void onPlayerItemConsume(PlayerItemConsumeEvent event) {
         RecipeEffects.fromItem(event.getItem())
-                .ifPresent(effect -> effect.applyTo(event.getPlayer(), drunksManager));
-    }
-
-    @EventHandler(ignoreCancelled = true)
-    public void onPlayerLogin(PlayerLoginEvent event) {
-        if (drunksManager.isPassedOut(event.getPlayer().getUniqueId())) {
-            event.setResult(PlayerLoginEvent.Result.KICK_FULL);
-            event.kickMessage(MessageUtil.compilePlayerMessage(Config.KICK_EVENT_MESSAGE == null ? TranslationsConfig.KICK_EVENT_MESSAGE : Config.KICK_EVENT_MESSAGE, event.getPlayer(), drunksManager, 0));
+                .ifPresent(effect -> effect.applyTo(event.getPlayer()));
+        Ingredient ingredient = BukkitIngredientManager.INSTANCE.getIngredient(event.getItem());
+        for (ConsumableSerializer.Consumable consumable : Config.config().decayRate().consumables()) {
+            String key = consumable.type().contains(":") ? consumable.type() : "minecraft:" + consumable.type();
+            if (ingredient.getKey().equalsIgnoreCase(key)) {
+                TheBrewingProject.getInstance().getDrunksManager()
+                        .consume(event.getPlayer().getUniqueId(), consumable.alcohol(), consumable.toxins());
+            }
         }
     }
 
     @EventHandler(ignoreCancelled = true)
     public void onPlayerJoin(PlayerJoinEvent event) {
         drunkEventExecutor.onPlayerJoin(event.getPlayer().getUniqueId());
+        drunksManager.planEvent(event.getPlayer().getUniqueId());
     }
 
     @EventHandler(ignoreCancelled = true)
-    public void onPlayerMove(PlayerMoveEvent event) {
-        drunksManager.registerMovement(event.getPlayer().getUniqueId(), event.getTo().clone().subtract(event.getFrom()).lengthSquared());
+    public void onPlayerProjectileLaunch(PlayerLaunchProjectileEvent event) {
+        RecipeEffects.fromItem(event.getItemStack())
+                .ifPresent(recipeEffects -> recipeEffects.applyTo(event.getProjectile()));
     }
 }

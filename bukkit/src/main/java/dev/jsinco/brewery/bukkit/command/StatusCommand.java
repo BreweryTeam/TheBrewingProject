@@ -1,109 +1,102 @@
 package dev.jsinco.brewery.bukkit.command;
 
+import com.mojang.brigadier.arguments.IntegerArgumentType;
+import com.mojang.brigadier.builder.ArgumentBuilder;
+import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
-import dev.jsinco.brewery.configuration.locale.TranslationsConfig;
-import dev.jsinco.brewery.effect.DrunkStateImpl;
-import dev.jsinco.brewery.effect.DrunksManagerImpl;
+import dev.jsinco.brewery.effect.DrunkState;
+import dev.jsinco.brewery.effect.DrunksManager;
 import dev.jsinco.brewery.event.DrunkEvent;
+import dev.jsinco.brewery.util.MessageUtil;
 import dev.jsinco.brewery.util.Pair;
+import io.papermc.paper.command.brigadier.CommandSourceStack;
+import io.papermc.paper.command.brigadier.Commands;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Formatter;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
+import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
-import org.jetbrains.annotations.NotNull;
 
-import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Stream;
 
 public class StatusCommand {
-    public static boolean onCommand(OfflinePlayer player, CommandSender sender, @NotNull String[] args) {
-        DrunksManagerImpl<?> drunksManager = TheBrewingProject.getInstance().getDrunksManager();
-        return switch (args[0]) {
-            case "info" -> StatusCommand.info(player, sender, drunksManager, Arrays.copyOfRange(args, 1, args.length));
-            case "consume" ->
-                    StatusCommand.consume(player, sender, drunksManager, Arrays.copyOfRange(args, 1, args.length));
-            case "clear" ->
-                    StatusCommand.clear(player, sender, drunksManager, Arrays.copyOfRange(args, 1, args.length));
-            case "set" -> StatusCommand.set(player, sender, drunksManager, Arrays.copyOfRange(args, 1, args.length));
-            default -> false;
-        };
+
+    private static int set(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+        OfflinePlayer target = BreweryCommand.getOfflinePlayer(context);
+        TheBrewingProject.getInstance().getDrunksManager().clear(target.getUniqueId());
+        consumeInternal(context, "tbp.command.status.set.message");
+        return 1;
     }
 
-    private static boolean set(OfflinePlayer target, CommandSender sender, DrunksManagerImpl<?> drunksManager, @NotNull String[] args) {
-        if (args.length < 1) {
-            sender.sendMessage(MiniMessage.miniMessage().deserialize(TranslationsConfig.COMMAND_MISSING_ARGUMENT, Placeholder.unparsed("argument_type", "<alcohol>")));
-            return true;
-        }
-        drunksManager.clear(target.getUniqueId());
-        return consume(target, sender, drunksManager, args);
+    private static int clear(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+        OfflinePlayer target = BreweryCommand.getOfflinePlayer(context);
+        CommandSender sender = context.getSource().getSender();
+        TheBrewingProject.getInstance().getDrunksManager().clear(target.getUniqueId());
+        MessageUtil.message(sender, "tbp.command.status.clear.message", Placeholder.unparsed("player_name", target.getName()));
+        return 1;
     }
 
-    private static boolean clear(@NotNull OfflinePlayer target, CommandSender sender, DrunksManagerImpl<?> drunksManager, @NotNull String[] args) {
-        drunksManager.clear(target.getUniqueId());
-        sender.sendMessage(MiniMessage.miniMessage().deserialize(TranslationsConfig.COMMAND_STATUS_CLEAR_MESSAGE, Placeholder.unparsed("player_name", target.getName())));
-        return true;
+    private static int consume(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+        consumeInternal(context, "tbp.command.status.consume.message");
+        return 1;
     }
 
-    private static boolean consume(OfflinePlayer target, CommandSender sender, DrunksManagerImpl<?> drunksManager, @NotNull String[] args) {
-        if (args.length < 1) {
-            sender.sendMessage(MiniMessage.miniMessage().deserialize(TranslationsConfig.COMMAND_MISSING_ARGUMENT, Placeholder.unparsed("argument_type", "<alcohol>")));
-            return true;
-        }
-        drunksManager.clear(target.getUniqueId());
-        int alcohol = Integer.parseInt(args[0]);
-        int toxins;
-        if (args.length == 2) {
-            toxins = Integer.parseInt(args[1]);
-        } else {
-            toxins = 0;
-        }
+    private static void consumeInternal(CommandContext<CommandSourceStack> context, String translationMessage) throws CommandSyntaxException {
+        OfflinePlayer target = BreweryCommand.getOfflinePlayer(context);
+        int alcohol = context.getArgument("alcohol", int.class);
+        int toxins = context.getArgument("toxins", int.class);
+        DrunksManager drunksManager = TheBrewingProject.getInstance().getDrunksManager();
         drunksManager.consume(target.getUniqueId(), alcohol, toxins);
-        sender.sendMessage(compileStatusMessage(target, drunksManager, TranslationsConfig.COMMAND_STATUS_SET_MESSAGE));
-        return true;
+        CommandSender sender = context.getSource().getSender();
+        MessageUtil.message(sender, translationMessage, compileStatusTagResolvers(target, drunksManager));
     }
 
-    private static boolean info(OfflinePlayer target, CommandSender sender, DrunksManagerImpl<?> drunksManager, @NotNull String[] args) {
-        if (target == null) {
-            sender.sendMessage(MiniMessage.miniMessage().deserialize(TranslationsConfig.COMMAND_UNKNOWN_PLAYER, Placeholder.unparsed("player_name", args[0])));
-            return true;
-        }
-        sender.sendMessage(compileStatusMessage(target, drunksManager, TranslationsConfig.COMMAND_STATUS_INFO_MESSAGE));
-        return true;
+    private static int info(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+        OfflinePlayer target = BreweryCommand.getOfflinePlayer(context);
+        CommandSender sender = context.getSource().getSender();
+        DrunksManager drunksManager = TheBrewingProject.getInstance().getDrunksManager();
+        MessageUtil.message(sender, "tbp.command.status.info.message", compileStatusTagResolvers(target, drunksManager));
+        return 1;
     }
 
-    private static Component compileStatusMessage(OfflinePlayer target, DrunksManagerImpl<?> drunksManager, String message) {
-        DrunkStateImpl drunkState = drunksManager.getDrunkState(target.getUniqueId());
+    private static TagResolver[] compileStatusTagResolvers(OfflinePlayer target, DrunksManager drunksManager) {
+        DrunkState drunkState = drunksManager.getDrunkState(target.getUniqueId());
         Pair<DrunkEvent, Long> nextEvent = drunksManager.getPlannedEvent(target.getUniqueId());
         drunksManager.getPlannedEvent(target.getUniqueId());
         String targetName = target.getName();
-        return MiniMessage.miniMessage().deserialize(
-                message,
+        return new TagResolver[]{
                 Formatter.number("alcohol", drunkState == null ? 0 : drunkState.alcohol()),
                 Formatter.number("toxins", drunkState == null ? 0 : drunkState.toxins()),
                 Placeholder.unparsed("player_name", targetName == null ? "null" : targetName),
                 Formatter.number("next_event_time", nextEvent == null ? 0 : nextEvent.second() - TheBrewingProject.getInstance().getTime()),
-                Placeholder.unparsed("next_event", nextEvent == null ? TranslationsConfig.NO_EVENT_PLANNED : nextEvent.first().displayName())
-        );
+                Placeholder.component("next_event", nextEvent == null ? Component.translatable("tbp.events.nothing-planned") : nextEvent.first().displayName())
+        };
     }
 
-    public static List<String> tabComplete(@NotNull String[] args) {
-        if (args.length == 1) {
-            return Stream.of("info", "consume", "set", "clear")
-                    .toList();
-        }
-        return switch (args[0]) {
-            case "consume", "set" -> {
-                if (args.length == 2) {
-                    yield BreweryCommand.INTEGER_TAB_COMPLETIONS;
-                } else if (args.length == 3) {
-                    yield BreweryCommand.INTEGER_TAB_COMPLETIONS;
-                }
-                yield List.of();
-            }
-            default -> List.of();
-        };
+    public static ArgumentBuilder<CommandSourceStack, ?> command() {
+        ArgumentBuilder<CommandSourceStack, ?> root = Commands.literal("status");
+        List<ArgumentBuilder<CommandSourceStack, ?>> subArguments = List.of(
+                Commands.literal("info")
+                        .executes(StatusCommand::info),
+                Commands.literal("clear")
+                        .executes(StatusCommand::clear),
+                Commands.literal("consume")
+                        .then(Commands.argument("alcohol", IntegerArgumentType.integer(-100, 100))
+                                .then(Commands.argument("toxins", IntegerArgumentType.integer(-100, 100))
+                                        .executes(StatusCommand::consume)
+                                )
+                        ),
+                Commands.literal("set")
+                        .then(Commands.argument("alcohol", IntegerArgumentType.integer(-100, 100))
+                                .then(Commands.argument("toxins", IntegerArgumentType.integer(-100, 100))
+                                        .executes(StatusCommand::set)
+                                )
+                        )
+        );
+        subArguments.forEach(root::then);
+        root.then(BreweryCommand.offlinePlayerBranch(argument -> subArguments.forEach(argument::then)));
+        return root;
     }
 }

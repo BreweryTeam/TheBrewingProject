@@ -19,7 +19,7 @@ public class IngredientUtil {
         int topIngredientAmount = 0;
         for (Map.Entry<? extends Ingredient, Integer> ingredient : ingredients.entrySet()) {
             if (topIngredientAmount < ingredient.getValue()) {
-                topIngredient = (Ingredient) ingredient.getKey();
+                topIngredient = ingredient.getKey();
                 topIngredientAmount = ingredient.getValue();
             }
             String key = ingredient.getKey().getKey();

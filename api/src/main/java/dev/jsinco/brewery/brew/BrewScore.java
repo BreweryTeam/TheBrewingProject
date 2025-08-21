@@ -2,11 +2,13 @@ package dev.jsinco.brewery.brew;
 
 import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
+
 public interface BrewScore {
 
     @Nullable BrewQuality brewQuality();
 
-    double getPartialScore(int stepIndex) throws IndexOutOfBoundsException;
+    List<PartialBrewScore> getPartialScores(int stepIndex) throws IndexOutOfBoundsException;
 
     double score();
 
@@ -15,4 +17,6 @@ public interface BrewScore {
     boolean completed();
 
     String displayName();
+
+    double brewDifficulty();
 }

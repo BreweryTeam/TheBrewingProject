@@ -3,7 +3,9 @@ package dev.jsinco.brewery.bukkit.structure;
 import org.bukkit.Material;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.MultipleFacing;
-import org.jetbrains.annotations.Nullable;
+
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class GenericBlockDataMatcher implements BlockDataMatcher<Void> {
 
@@ -22,7 +24,9 @@ public class GenericBlockDataMatcher implements BlockDataMatcher<Void> {
     }
 
     @Override
-    public @Nullable Material findSubstitution(BlockData expected, Void ignored) {
-        return expected.getMaterial();
+    public Set<Material> findStructureMaterials(Void matcherType, BreweryStructure structure) {
+        return structure.getPalette().stream()
+                .map(BlockData::getMaterial)
+                .collect(Collectors.toSet());
     }
 }

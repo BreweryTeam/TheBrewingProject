@@ -2,11 +2,12 @@ package dev.jsinco.brewery.breweries;
 
 
 import dev.jsinco.brewery.util.BreweryKey;
+import dev.jsinco.brewery.util.BreweryKeyed;
 
 import java.util.Arrays;
 import java.util.Locale;
 
-public enum BarrelType {
+public enum BarrelType implements BreweryKeyed {
 
     ANY,
     OAK,
@@ -19,6 +20,8 @@ public enum BarrelType {
     WARPED,
     CHERRY,
     BAMBOO,
+    MANGROVE,
+    PALE_OAK,
     COPPER;
 
     public static final BarrelType[] PLACEABLE_TYPES = Arrays.stream(values()).filter(barrelType -> barrelType != ANY).toArray(BarrelType[]::new);

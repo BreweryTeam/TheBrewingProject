@@ -1,12 +1,14 @@
 package dev.jsinco.brewery.ingredient;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
-import dev.jsinco.brewery.util.Logging;
+import dev.jsinco.brewery.util.FutureUtil;
+import dev.jsinco.brewery.util.Pair;
 
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 public class IngredientUtil {
 
@@ -14,14 +16,22 @@ public class IngredientUtil {
         throw new IllegalStateException("Utility class");
     }
 
-    public static Map<Ingredient, Integer> ingredientsFromJson(JsonObject json, IngredientManager<?> ingredientManager) {
-        ImmutableMap.Builder<Ingredient, Integer> output = new ImmutableMap.Builder<>();
-        for (Map.Entry<String, JsonElement> entry : json.entrySet()) {
-            ingredientManager.getIngredient(entry.getKey())
-                    .ifPresentOrElse(ingredient -> output.put(ingredient, entry.getValue().getAsInt()),
-                            () -> Logging.warning("Could not find ingredient for stored brew: " + entry.getKey()));
-        }
-        return output.build();
+    public static CompletableFuture<Map<Ingredient, Integer>> ingredientsFromJson(JsonObject json, IngredientManager<?> ingredientManager) {
+
+        List<CompletableFuture<Pair<Ingredient, Integer>>> ingredientsFuture = json.entrySet()
+                .stream()
+                .map(jsonEntry -> ingredientManager.getIngredient(jsonEntry.getKey())
+                        .thenApplyAsync(optionalIngredient -> optionalIngredient
+                                .map(ingredient -> new Pair<>(ingredient, jsonEntry.getValue().getAsInt()))
+                                .orElseThrow(() -> new IllegalArgumentException(jsonEntry.getKey() + " is not a valid ingredient"))
+                        )
+                ).toList();
+        return FutureUtil.mergeFutures(ingredientsFuture)
+                .thenApplyAsync(ingredientPairs -> {
+                    ImmutableMap.Builder<Ingredient, Integer> output = new ImmutableMap.Builder<>();
+                    ingredientPairs.forEach(ingredientPair -> output.put(ingredientPair.first(), ingredientPair.second()));
+                    return output.build();
+                });
     }
 
     public static JsonObject ingredientsToJson(Map<Ingredient, Integer> ingredients) {

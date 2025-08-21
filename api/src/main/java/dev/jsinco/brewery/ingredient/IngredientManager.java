@@ -6,6 +6,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Get an instance of an ingredient from an ItemStack or a string.
@@ -16,15 +17,20 @@ public interface IngredientManager<I> {
 
     Ingredient getIngredient(@NotNull I itemStack);
 
-
-    Optional<Ingredient> getIngredient(@NotNull String ingredientStr);
+    /**
+     * Pretty much all items plugins initialize items on a delay. This is therefore a necessary measure to use on enable
+     *
+     * @param ingredientStr
+     * @return
+     */
+    CompletableFuture<Optional<Ingredient>> getIngredient(@NotNull String ingredientStr);
 
     /**
      * @param ingredientStr A string with the format [ingredient-name]/[runs]. Allows not specifying runs, where it will default to 1
      * @return An ingredient/runs pair
      * @throws IllegalArgumentException if the ingredients string is invalid
      */
-    Pair<@NotNull Ingredient, @NotNull Integer> getIngredientWithAmount(String ingredientStr) throws IllegalArgumentException;
+    CompletableFuture<Pair<Ingredient, Integer>> getIngredientWithAmount(String ingredientStr) throws IllegalArgumentException;
 
     /**
      * Parse a list of strings into a map of ingredients with runs
@@ -33,7 +39,7 @@ public interface IngredientManager<I> {
      * @return A map representing ingredients with runs
      * @throws IllegalArgumentException if there's any invalid ingredient string
      */
-    Map<Ingredient, Integer> getIngredientsWithAmount(List<String> stringList) throws IllegalArgumentException;
+    CompletableFuture<Map<Ingredient, Integer>> getIngredientsWithAmount(List<String> stringList) throws IllegalArgumentException;
 
     static void merge(Map<Ingredient, Integer> mutableIngredientsMap, Map<Ingredient, Integer> ingredients) {
         for (Map.Entry<Ingredient, Integer> ingredient : ingredients.entrySet()) {

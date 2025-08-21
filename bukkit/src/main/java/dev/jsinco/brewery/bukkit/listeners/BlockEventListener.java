@@ -3,29 +3,50 @@ package dev.jsinco.brewery.bukkit.listeners;
 import dev.jsinco.brewery.breweries.BarrelType;
 import dev.jsinco.brewery.breweries.InventoryAccessible;
 import dev.jsinco.brewery.breweries.StructureHolder;
-import dev.jsinco.brewery.bukkit.breweries.*;
-import dev.jsinco.brewery.bukkit.structure.*;
+import dev.jsinco.brewery.bukkit.breweries.BreweryRegistry;
+import dev.jsinco.brewery.bukkit.breweries.barrel.BukkitBarrel;
+import dev.jsinco.brewery.bukkit.breweries.barrel.BukkitBarrelDataType;
+import dev.jsinco.brewery.bukkit.breweries.distillery.BukkitDistillery;
+import dev.jsinco.brewery.bukkit.breweries.distillery.BukkitDistilleryDataType;
+import dev.jsinco.brewery.bukkit.structure.BarrelBlockDataMatcher;
+import dev.jsinco.brewery.bukkit.structure.BreweryStructure;
+import dev.jsinco.brewery.bukkit.structure.GenericBlockDataMatcher;
+import dev.jsinco.brewery.bukkit.structure.PlacedBreweryStructure;
+import dev.jsinco.brewery.bukkit.structure.StructureRegistry;
 import dev.jsinco.brewery.bukkit.util.BukkitAdapter;
-import dev.jsinco.brewery.configuration.locale.TranslationsConfig;
+import dev.jsinco.brewery.configuration.Config;
 import dev.jsinco.brewery.database.PersistenceException;
 import dev.jsinco.brewery.database.sql.Database;
 import dev.jsinco.brewery.structure.MultiblockStructure;
 import dev.jsinco.brewery.structure.PlacedStructureRegistryImpl;
 import dev.jsinco.brewery.structure.StructureMeta;
 import dev.jsinco.brewery.structure.StructureType;
+import dev.jsinco.brewery.util.Logger;
+import dev.jsinco.brewery.util.MessageUtil;
 import dev.jsinco.brewery.util.Pair;
 import dev.jsinco.brewery.vector.BreweryLocation;
-import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
+import org.bukkit.ExplosionResult;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.type.WallSign;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.block.*;
+import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockBurnEvent;
+import org.bukkit.event.block.BlockExplodeEvent;
+import org.bukkit.event.block.BlockPistonExtendEvent;
+import org.bukkit.event.block.BlockPistonRetractEvent;
+import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.entity.EntityChangeBlockEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
+import org.bukkit.event.inventory.HopperInventorySearchEvent;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -36,27 +57,23 @@ public class BlockEventListener implements Listener {
     private final PlacedStructureRegistryImpl placedStructureRegistry;
     private final Database database;
     private final BreweryRegistry breweryRegistry;
-    private final Set<Material> trackedDistilleryBlocks;
 
     public BlockEventListener(StructureRegistry structureRegistry, PlacedStructureRegistryImpl placedStructureRegistry, Database database, BreweryRegistry breweryRegistry) {
         this.structureRegistry = structureRegistry;
         this.placedStructureRegistry = placedStructureRegistry;
         this.database = database;
         this.breweryRegistry = breweryRegistry;
-        this.trackedDistilleryBlocks = structureRegistry.getStructures(StructureType.DISTILLERY)
-                .stream()
-                .map(structure -> structure.getMeta(StructureMeta.TAGGED_MATERIAL))
-                .map(string -> string.toUpperCase(Locale.ROOT))
-                .map(Material::valueOf)
-                .collect(Collectors.toSet());
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onSignChangeEvent(SignChangeEvent event) {
-        String[] lines = event.getLines();
-        if (!"barrel".equalsIgnoreCase(lines[0]) || !lines[1].isEmpty() || !lines[2].isEmpty() || !lines[3].isEmpty()) {
+
+        Set<String> keywords = Config.config().barrels().signKeywords().stream().map(String::toLowerCase).collect(Collectors.toSet());
+        String firstLine = PlainTextComponentSerializer.plainText().serialize(event.lines().getFirst()).toLowerCase();
+        if (Config.config().barrels().requireSignKeyword() && !keywords.contains(firstLine)) {
             return;
         }
+
         if (!(event.getBlock().getBlockData() instanceof WallSign wallSign)) {
             return;
         }
@@ -71,39 +88,39 @@ public class BlockEventListener implements Listener {
             return;
         }
         if (!event.getPlayer().hasPermission("brewery.barrel.create")) {
-            event.getPlayer().sendMessage(MiniMessage.miniMessage().deserialize(TranslationsConfig.BARREL_CREATE_DENIED));
+            MessageUtil.message(event.getPlayer(), "tbp.barrel.create-denied");
             return;
         }
-        event.getPlayer().sendMessage(MiniMessage.miniMessage().deserialize(TranslationsConfig.BARREL_CREATE));
-        BukkitBarrel barrel = new BukkitBarrel(event.getBlock().getLocation(), placedBreweryStructure, placedBreweryStructure.getStructure().getMeta(StructureMeta.INVENTORY_SIZE), placedStructurePair.second());
+        MessageUtil.message(event.getPlayer(), "tbp.barrel.create");
+        BukkitBarrel barrel = new BukkitBarrel(BukkitAdapter.toLocation(placedBreweryStructure.getUnique()), placedBreweryStructure, placedBreweryStructure.getStructure().getMeta(StructureMeta.INVENTORY_SIZE), placedStructurePair.second());
         placedBreweryStructure.setHolder(barrel);
         placedStructureRegistry.registerStructure(placedBreweryStructure);
         breweryRegistry.registerInventory(barrel);
         try {
             database.insertValue(BukkitBarrelDataType.INSTANCE, barrel);
         } catch (PersistenceException e) {
-            e.printStackTrace();
+            Logger.logErr(e);
         }
     }
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
     public void onBlockPlace(BlockPlaceEvent placeEvent) {
         Block placed = placeEvent.getBlockPlaced();
-        if (trackedDistilleryBlocks.contains(placed.getType())) {
-            for (BreweryStructure breweryStructure : structureRegistry.getPossibleStructures(placed.getType(), StructureType.DISTILLERY)) {
-                Optional<Pair<PlacedBreweryStructure<BukkitDistillery>, Void>> placedBreweryStructureOptional = PlacedBreweryStructure.findValid(breweryStructure, placed.getLocation(), GenericBlockDataMatcher.INSTANCE, new Void[1]);
-                if (placedBreweryStructureOptional.isPresent()) {
-                    if (!placedStructureRegistry.getStructures(placedBreweryStructureOptional.get().first().positions()).isEmpty()) {
-                        continue;
-                    }
-                    if (!placeEvent.getPlayer().hasPermission("brewery.distillery.create")) {
-                        placeEvent.getPlayer().sendMessage(MiniMessage.miniMessage().deserialize(TranslationsConfig.DISTILLERY_CREATE_DENIED));
-                        return;
-                    }
-                    registerDistillery(placedBreweryStructureOptional.get().first());
-                    placeEvent.getPlayer().sendMessage(MiniMessage.miniMessage().deserialize(TranslationsConfig.DISTILLERY_CREATE));
+        for (BreweryStructure breweryStructure : structureRegistry.getPossibleStructures(placed.getType(), StructureType.DISTILLERY)) {
+            Optional<Pair<PlacedBreweryStructure<BukkitDistillery>, Void>> placedBreweryStructureOptional = PlacedBreweryStructure.findValid(breweryStructure, placed.getLocation(), GenericBlockDataMatcher.INSTANCE, new Void[1]);
+            if (placedBreweryStructureOptional.isPresent()) {
+                if (!placedStructureRegistry.getStructures(placedBreweryStructureOptional.get().first().positions()).isEmpty()) {
+                    continue;
+                }
+
+                Player player = placeEvent.getPlayer();
+                if (!player.hasPermission("brewery.distillery.create")) {
+                    MessageUtil.message(player, "tbp.distillery.create-denied");
                     return;
                 }
+                registerDistillery(placedBreweryStructureOptional.get().first());
+                MessageUtil.message(player, "tbp.distillery.create");
+                return;
             }
         }
     }
@@ -116,7 +133,7 @@ public class BlockEventListener implements Listener {
             database.insertValue(BukkitDistilleryDataType.INSTANCE, bukkitDistillery);
             breweryRegistry.registerInventory(bukkitDistillery);
         } catch (PersistenceException e) {
-            e.printStackTrace();
+            Logger.logErr(e);
         }
     }
 
@@ -155,6 +172,9 @@ public class BlockEventListener implements Listener {
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onEntityExplode(EntityExplodeEvent event) {
+        if (event.getExplosionResult() == ExplosionResult.TRIGGER_BLOCK) {
+            return;
+        }
         onMultiBlockRemove(event.blockList().stream()
                 .map(Block::getLocation)
                 .toList()
@@ -163,6 +183,9 @@ public class BlockEventListener implements Listener {
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onBlockExplode(BlockExplodeEvent event) {
+        if (event.getExplosionResult() == ExplosionResult.TRIGGER_BLOCK) {
+            return;
+        }
         onMultiBlockRemove(event.blockList().stream()
                 .map(Block::getLocation)
                 .toList()
@@ -200,6 +223,23 @@ public class BlockEventListener implements Listener {
         destroyFromBlock(event.getBlock());
     }
 
+    @EventHandler(ignoreCancelled = true)
+    public void onHopperInventorySearch(HopperInventorySearchEvent event) {
+        Block searchBlock = event.getSearchBlock();
+        BreweryLocation breweryLocation = BukkitAdapter.toBreweryLocation(searchBlock);
+        Optional<InventoryAccessible<ItemStack, Inventory>> inventoryAccessibleOptional = placedStructureRegistry.getStructure(breweryLocation)
+                .map(MultiblockStructure::getHolder)
+                .filter(InventoryAccessible.class::isInstance)
+                .map(inventoryAccessible -> (InventoryAccessible<ItemStack, Inventory>) inventoryAccessible);
+        if (!Config.config().automation()) {
+            inventoryAccessibleOptional.ifPresent(ignored -> event.setInventory(null));
+            return;
+        }
+        inventoryAccessibleOptional
+                .flatMap(inventoryAccessible -> inventoryAccessible.access(breweryLocation))
+                .ifPresent(event::setInventory);
+    }
+
     /**
      * Assumes only one block has changed in the event, is not safe to use in multi-block changes
      *
@@ -214,8 +254,8 @@ public class BlockEventListener implements Listener {
                 .ifPresent(holder -> {
                     holder.destroy(breweryLocation);
                     remove(holder);
-                    if (holder instanceof InventoryAccessible inventoryAccessible) {
-                        breweryRegistry.unregisterInventory(inventoryAccessible);
+                    if (holder instanceof InventoryAccessible<?, ?> inventoryAccessible) {
+                        breweryRegistry.unregisterInventory((InventoryAccessible<ItemStack, Inventory>) inventoryAccessible);
                     }
                 });
         breweryRegistry.getActiveSinglePositionStructure(breweryLocation).ifPresent(cauldron -> ListenerUtil.removeActiveSinglePositionStructure(cauldron, breweryRegistry, database));
@@ -230,7 +270,7 @@ public class BlockEventListener implements Listener {
                 database.remove(BukkitDistilleryDataType.INSTANCE, distillery);
             }
         } catch (PersistenceException e) {
-            e.printStackTrace();
+            Logger.logErr(e);
         }
     }
 }

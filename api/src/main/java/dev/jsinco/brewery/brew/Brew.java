@@ -20,6 +20,8 @@ public interface Brew {
 
     Optional<BrewQuality> quality(Recipe<?> recipe);
 
+    BrewingStep lastCompletedStep();
+
     BrewingStep lastStep();
 
     Brew withStep(BrewingStep step);
@@ -27,6 +29,8 @@ public interface Brew {
     Brew witModifiedLastStep(Function<BrewingStep, BrewingStep> modifier);
 
     <B extends BrewingStep> Brew withLastStep(Class<B> bClass, Function<B, B> modifier, Supplier<B> stepSupplier);
+
+    List<BrewingStep> getCompletedSteps();
 
     List<BrewingStep> getSteps();
 
@@ -38,7 +42,7 @@ public interface Brew {
         record Other() implements State {
         }
 
-        record Seal(@Nullable String volumeMessage) implements State {
+        record Seal(@Nullable String message) implements State {
         }
     }
 }

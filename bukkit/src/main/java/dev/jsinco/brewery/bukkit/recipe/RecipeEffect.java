@@ -14,7 +14,7 @@ public record RecipeEffect(PotionEffectType type, Interval durationRange, Interv
     public PotionEffect newPotionEffect() {
         return new PotionEffect(type,
                 RANDOM.nextInt((int) durationRange.start(), (int) (durationRange.stop() + 1)) * Moment.SECOND,
-                RANDOM.nextInt((int) amplifierRange.start(), (int) (amplifierRange.stop() + 1)) * Moment.SECOND
+                RANDOM.nextInt((int) amplifierRange.start(), (int) (amplifierRange.stop() + 1))
         );
     }
 }

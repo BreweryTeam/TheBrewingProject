@@ -1,11 +1,14 @@
 package dev.jsinco.brewery.ingredient;
 
+import net.kyori.adventure.text.Component;
+import org.jetbrains.annotations.NotNull;
+
 /**
  * Represents an ingredient in a recipe.
  */
 public interface Ingredient {
 
-    String getKey();
+    @NotNull String getKey();
 
-    String displayName();
+    @NotNull Component displayName();
 }

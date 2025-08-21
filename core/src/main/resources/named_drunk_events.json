@@ -1,0 +1,68 @@
+[
+  {
+    "name" : "chicken",
+    "alcohol_requirement" : 99,
+    "toxins_requirement" : 99,
+    "probability_weight" : 1
+  },
+  {
+    "name": "drunk_message",
+    "alcohol_requirement" : 25,
+    "toxins_requirement" : 0,
+    "probability_weight" : 5
+  },
+  {
+    "name": "drunken_walk",
+    "alcohol_requirement" : 60,
+    "toxins_requirement" : 20,
+    "probability_weight" : 20
+  },
+  {
+    "name": "fever",
+    "alcohol_requirement" : 60,
+    "toxins_requirement" : 20,
+    "probability_weight" : 5
+  },
+  {
+    "name": "hallucination",
+    "alcohol_requirement" : 70,
+    "toxins_requirement" : 25,
+    "probability_weight" : 35
+  },
+  {
+    "name": "kaboom",
+    "alcohol_requirement" : 99,
+    "toxins_requirement" : 60,
+    "probability_weight" : 1
+  },
+  {
+    "name": "nausea",
+    "alcohol_requirement" : 60,
+    "toxins_requirement" : 50,
+    "probability_weight" : 50
+  },
+  {
+    "name" : "pass_out",
+    "alcohol_requirement" : 80,
+    "toxins_requirement" : 80,
+    "probability_weight" : 10
+  },
+  {
+    "name": "puke",
+    "alcohol_requirement" : 45,
+    "toxins_requirement" : 45,
+    "probability_weight" : 20
+  },
+  {
+    "name": "stumble",
+    "alcohol_requirement" : 90,
+    "toxins_requirement" : 40,
+    "probability_weight" : 2
+  },
+  {
+    "name" : "teleport",
+    "alcohol_requirement" : 90,
+    "toxins_requirement" : 40,
+    "probability_weight" : 2
+  }
+]

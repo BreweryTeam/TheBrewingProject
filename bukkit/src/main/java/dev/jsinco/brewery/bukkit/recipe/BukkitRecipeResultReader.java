@@ -2,11 +2,13 @@ package dev.jsinco.brewery.bukkit.recipe;
 
 import com.google.common.base.Preconditions;
 import dev.jsinco.brewery.bukkit.util.ColorUtil;
-import dev.jsinco.brewery.recipes.QualityData;
+import dev.jsinco.brewery.moment.Interval;
+import dev.jsinco.brewery.recipe.QualityData;
+import dev.jsinco.brewery.recipe.RecipeResult;
 import dev.jsinco.brewery.recipes.RecipeReader;
 import dev.jsinco.brewery.recipes.RecipeResultReader;
 import dev.jsinco.brewery.util.BreweryKey;
-import dev.jsinco.brewery.moment.Interval;
+import org.bukkit.Color;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Registry;
 import org.bukkit.inventory.ItemStack;
@@ -18,18 +20,34 @@ import java.util.Locale;
 
 public class BukkitRecipeResultReader implements RecipeResultReader<ItemStack> {
     @Override
-    public BukkitRecipeResult readRecipeResult(ConfigurationSection configurationSection) {
-        return new BukkitRecipeResult.Builder()
-                .recipeEffects(getRecipeEffects(configurationSection))
-                .customModelData(configurationSection.getInt("potion-attributes.custom-model-data", -1))
-                .itemModel(configurationSection.getString("potion-attributes.item-model", null))
-                .lore(QualityData.readQualityFactoredStringList(configurationSection.getStringList("potion-attributes.lore")))
-                .glint(configurationSection.getBoolean("potion-attributes.glint", false))
-                .names(QualityData.readQualityFactoredString(configurationSection.getString("potion-attributes.name")))
-                .color(ColorUtil.parseColorString(configurationSection.getString("potion-attributes.color")))
-                .appendBrewInfoLore(configurationSection.getBoolean("potion-attributes.append-brew-info-lore", true))
-                .customId(configurationSection.getString("potion-attributes.custom-id", null))
-                .build();
+    public QualityData<RecipeResult<ItemStack>> readRecipeResults(ConfigurationSection configurationSection) {
+        QualityData<RecipeEffects> recipeEffects = getRecipeEffects(configurationSection);
+        QualityData<Integer> customModelData = QualityData.readQualityFactoredString(configurationSection.getString("potion-attributes.custom-model-data"))
+                .map(Integer::parseInt);
+        QualityData<String> itemModel = QualityData.readQualityFactoredString(configurationSection.getString("potion-attributes.item-model"));
+        QualityData<List<String>> lore = QualityData.readQualityFactoredStringList(configurationSection.getStringList("potion-attributes.lore"));
+        QualityData<Boolean> glint = QualityData.readQualityFactoredString(configurationSection.getString("potion-attributes.glint"))
+                .map(Boolean::parseBoolean);
+        QualityData<String> names = QualityData.readQualityFactoredString(configurationSection.getString("potion-attributes.name"));
+        QualityData<Color> colors = QualityData.readQualityFactoredString(configurationSection.getString("potion-attributes.color"))
+                .map(ColorUtil::parseColorString);
+        QualityData<Boolean> appendBrewInfoLore = QualityData.readQualityFactoredString(configurationSection.getString("potion-attributes.append-brew-info-lore"))
+                .map(Boolean::parseBoolean);
+        QualityData<String> customId = QualityData.readQualityFactoredString(configurationSection.getString("potion-attributes.custom-id"));
+
+        return QualityData.fromValueMapper(brewQuality ->
+                new BukkitRecipeResult.Builder()
+                        .name(names.get(brewQuality))
+                        .recipeEffects(recipeEffects.getOrDefault(brewQuality, RecipeEffects.GENERIC))
+                        .lore(lore.getOrDefault(brewQuality, List.of()))
+                        .glint(glint.getOrDefault(brewQuality, false))
+                        .color(Preconditions.checkNotNull(colors.get(brewQuality)))
+                        .appendBrewInfoLore(appendBrewInfoLore.getOrDefault(brewQuality, true))
+                        .customId(customId.get(brewQuality))
+                        .customModelData(customModelData.getOrDefault(brewQuality, -1))
+                        .itemModel(itemModel.get(brewQuality))
+                        .build()
+        );
     }
 
     private static QualityData<RecipeEffects> getRecipeEffects(ConfigurationSection configurationSection) {
@@ -71,11 +89,13 @@ public class BukkitRecipeResultReader implements RecipeResultReader<ItemStack> {
         String[] parts = string.split("/");
         PotionEffectType type = PotionEffectType.getByName(parts[0]);
         Preconditions.checkNotNull(type, "invalid effect type: " + parts[0]);
-        Interval durationBounds = Interval.parse(parts[1]);
+        Interval durationBounds;
         Interval amplifierBounds;
-        if (parts.length >= 3) {
-            amplifierBounds = Interval.parse(parts[2]);
+        if (parts.length == 3) {
+            durationBounds = Interval.parse(parts[2]);
+            amplifierBounds = Interval.parse(parts[1]);
         } else {
+            durationBounds = Interval.parse(parts[1]);
             amplifierBounds = new Interval(1, 1);
         }
         return new RecipeEffect(type, durationBounds, amplifierBounds);

@@ -4,7 +4,7 @@
  */
 package dev.jsinco.brewery.configuration;
 
-import dev.jsinco.brewery.util.Logging;
+import dev.jsinco.brewery.util.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.simpleyaml.configuration.ConfigurationSection;
@@ -43,12 +43,15 @@ public abstract class AbstractConfig {
         try {
             getConfig().createOrLoadWithComments();
         } catch (InvalidConfigurationException e) {
-            Logging.error("Could not load " + path.getFileName() + ", please correct your syntax errors");
+            Logger.logErr("Could not load " + path.getFileName() + ", please correct your syntax errors");
             throw new RuntimeException(e);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-
+        @Nullable Header header = clazz.getDeclaredAnnotation(Header.class);
+        if (header != null) {
+            config.setHeader(header.value());
+        }
         // load data from yaml
         Arrays.stream(clazz.getDeclaredFields()).forEach(field -> {
             Key key = field.getDeclaredAnnotation(Key.class);
@@ -63,8 +66,8 @@ public abstract class AbstractConfig {
                     setComment(key.value(), comment.value());
                 }
             } catch (Throwable e) {
-                Logging.error("Failed to load " + key.value() + " from " + path.getFileName().toString());
-                e.printStackTrace();
+                Logger.logErr("Failed to load " + key.value() + " from " + path.getFileName().toString());
+                Logger.logErr(e);
             }
         });
 
@@ -95,20 +98,28 @@ public abstract class AbstractConfig {
     }
 
     protected @Nullable Object get(@NotNull String path, @Nullable Object def) {
-        Object val = get(path);
+        Object val = get(path, getConfig());
         return val == null ? def : val;
     }
 
-    protected @Nullable Object get(@NotNull String path) {
-        Object value = getConfig().get(path);
-        if (!(value instanceof ConfigurationSection section)) {
+    protected @Nullable Object get(@NotNull String path, YamlConfiguration configuration) {
+        Object value = configuration.get(path);
+        if (!(value instanceof ConfigurationSection)) {
             return value;
         }
+        if (!(backup.get(path) instanceof ConfigurationSection backupSection)) {
+            throw new IllegalArgumentException("Expected '" + path + "' to be a configuration section");
+        }
         Map<String, Object> map = new LinkedHashMap<>();
-        for (String key : section.getKeys(false)) {
-            Object rawValue = get(path + "." + key);
-            if (rawValue == null) {
-                continue;
+        for (String key : backupSection.getKeys(false)) {
+            String keyPath = path + "." + key;
+            Object rawValue = get(keyPath, configuration);
+            if (rawValue == null && configuration != backup) {
+                rawValue = get(keyPath, backup);
+                if (rawValue == null) {
+                    continue;
+                }
+                set(keyPath, rawValue);
             }
             map.put(key, rawValue);
         }
@@ -128,6 +139,12 @@ public abstract class AbstractConfig {
     @Target(ElementType.FIELD)
     @Retention(RetentionPolicy.RUNTIME)
     public @interface Comment {
+        @NotNull String value();
+    }
+
+    @Target(ElementType.TYPE)
+    @Retention(RetentionPolicy.RUNTIME)
+    public @interface Header {
         @NotNull String value();
     }
 }

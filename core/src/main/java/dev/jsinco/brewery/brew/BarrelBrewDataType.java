@@ -2,10 +2,10 @@ package dev.jsinco.brewery.brew;
 
 import com.google.gson.JsonParser;
 import dev.jsinco.brewery.database.PersistenceException;
+import dev.jsinco.brewery.database.sql.SqlStatements;
 import dev.jsinco.brewery.database.sql.SqlStoredData;
 import dev.jsinco.brewery.ingredient.IngredientManager;
 import dev.jsinco.brewery.util.DecoderEncoder;
-import dev.jsinco.brewery.util.FileUtil;
 import dev.jsinco.brewery.util.Pair;
 import dev.jsinco.brewery.vector.BreweryLocation;
 
@@ -16,17 +16,19 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 public abstract class BarrelBrewDataType<I> implements
         SqlStoredData.Insertable<Pair<Brew, BarrelBrewDataType.BarrelContext>>, SqlStoredData.Removable<Pair<Brew, BarrelBrewDataType.BarrelContext>>,
-        SqlStoredData.Findable<Pair<Brew, Integer>, BreweryLocation>, SqlStoredData.Updateable<Pair<Brew, BarrelBrewDataType.BarrelContext>> {
+        SqlStoredData.Findable<CompletableFuture<Pair<Brew, Integer>>, BreweryLocation>, SqlStoredData.Updateable<Pair<Brew, BarrelBrewDataType.BarrelContext>> {
+    private final SqlStatements statements = new SqlStatements("/database/generic/barrel_brews");
+
     protected BarrelBrewDataType() {
     }
 
     @Override
     public void insert(Pair<Brew, BarrelContext> value, Connection connection) throws PersistenceException {
-        String statementString = FileUtil.readInternalResource("/database/generic/barrel_brews_insert.sql");
-        try (PreparedStatement preparedStatement = connection.prepareStatement(statementString)) {
+        try (PreparedStatement preparedStatement = connection.prepareStatement(statements.get(SqlStatements.Type.INSERT))) {
             BarrelContext context = value.second();
             Brew brew = value.first();
             preparedStatement.setInt(1, context.uniqueX);
@@ -43,7 +45,7 @@ public abstract class BarrelBrewDataType<I> implements
 
     @Override
     public void remove(Pair<Brew, BarrelContext> toRemove, Connection connection) throws PersistenceException {
-        try (PreparedStatement preparedStatement = connection.prepareStatement(FileUtil.readInternalResource("/database/generic/barrel_brews_remove.sql"))) {
+        try (PreparedStatement preparedStatement = connection.prepareStatement(statements.get(SqlStatements.Type.DELETE))) {
             BarrelContext context = toRemove.second();
             preparedStatement.setInt(1, context.uniqueX);
             preparedStatement.setInt(2, context.uniqueY);
@@ -56,7 +58,7 @@ public abstract class BarrelBrewDataType<I> implements
         }
     }
 
-    private BrewImpl brewFromResultSet(ResultSet resultSet) throws SQLException {
+    private CompletableFuture<Brew> brewFromResultSet(ResultSet resultSet) throws SQLException {
         return BrewImpl.SERIALIZER.deserialize(JsonParser.parseString(resultSet.getString("brew")).getAsJsonArray(), getIngredientManager());
     }
 
@@ -67,16 +69,17 @@ public abstract class BarrelBrewDataType<I> implements
     }
 
     @Override
-    public List<Pair<Brew, Integer>> find(BreweryLocation signLocation, Connection connection) throws PersistenceException {
-        try (PreparedStatement preparedStatement = connection.prepareStatement(FileUtil.readInternalResource("/database/generic/barrel_brews_find.sql"))) {
+    public List<CompletableFuture<Pair<Brew, Integer>>> find(BreweryLocation signLocation, Connection connection) throws PersistenceException {
+        try (PreparedStatement preparedStatement = connection.prepareStatement(statements.get(SqlStatements.Type.FIND))) {
             preparedStatement.setInt(1, signLocation.x());
             preparedStatement.setInt(2, signLocation.y());
             preparedStatement.setInt(3, signLocation.z());
             preparedStatement.setBytes(4, DecoderEncoder.asBytes(signLocation.worldUuid()));
             ResultSet resultSet = preparedStatement.executeQuery();
-            List<Pair<Brew, Integer>> output = new ArrayList<>();
+            List<CompletableFuture<Pair<Brew, Integer>>>  output = new ArrayList<>();
             while (resultSet.next()) {
-                output.add(new Pair<>(brewFromResultSet(resultSet), resultSet.getInt("pos")));
+                final int pos = resultSet.getInt("pos");
+                output.add(brewFromResultSet(resultSet).thenApplyAsync(brew -> new Pair<>(brew, pos)));
             }
             return output;
         } catch (SQLException e) {
@@ -86,8 +89,7 @@ public abstract class BarrelBrewDataType<I> implements
 
     @Override
     public void update(Pair<Brew, BarrelContext> newValue, Connection connection) throws PersistenceException {
-        String statementString = FileUtil.readInternalResource("/database/generic/barrel_brews_update.sql");
-        try (PreparedStatement preparedStatement = connection.prepareStatement(statementString)) {
+        try (PreparedStatement preparedStatement = connection.prepareStatement(statements.get(SqlStatements.Type.UPDATE))) {
             BarrelContext context = newValue.second();
             Brew brew = newValue.first();
             preparedStatement.setString(1, BrewImpl.SERIALIZER.serialize(brew).toString());

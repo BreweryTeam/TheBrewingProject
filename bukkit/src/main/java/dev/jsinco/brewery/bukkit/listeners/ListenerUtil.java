@@ -1,9 +1,12 @@
 package dev.jsinco.brewery.bukkit.listeners;
 
-import dev.jsinco.brewery.bukkit.breweries.*;
+import dev.jsinco.brewery.bukkit.breweries.BreweryRegistry;
+import dev.jsinco.brewery.bukkit.breweries.BukkitCauldron;
+import dev.jsinco.brewery.bukkit.breweries.BukkitCauldronDataType;
 import dev.jsinco.brewery.database.PersistenceException;
 import dev.jsinco.brewery.database.sql.Database;
 import dev.jsinco.brewery.structure.SinglePositionStructure;
+import dev.jsinco.brewery.util.Logger;
 import org.jetbrains.annotations.NotNull;
 
 public class ListenerUtil {
@@ -14,7 +17,7 @@ public class ListenerUtil {
             try {
                 database.remove(BukkitCauldronDataType.INSTANCE, cauldron);
             } catch (PersistenceException e) {
-                e.printStackTrace();
+                Logger.logErr(e);
             }
         }
     }

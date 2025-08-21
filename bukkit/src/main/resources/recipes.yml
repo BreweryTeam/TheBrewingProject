@@ -1,3 +1,63 @@
+# An example with all the parameters:
+# my_example_brew:
+#   alcohol: 3/6/10 # bad/good/excellent qualities
+#   brew-difficulty: 101010101010 # Any positive number is allowed. Lower value is easier difficulty
+#   effects:
+#    - speed/1/20 # minecraft potion effect/amplifier/duration in seconds
+#    - +slowness/2/20 # Will only affect poor quality brews
+#    - ++regeneration/2/10 # Will only affect good quality brews
+#    - +++haste/1/20 # will only affect excellent quality brews
+#    - blindness/1-2/20-40 # minecraft potion effect/amplifier-range/duration-range (will pick random value from that)
+#  events:
+#    - puke
+#    - my_custom_event # See config
+#  potion-attributes:
+#    color: red/green/gold # Also supports hex strings
+#    lore:
+#      - This lore will show up regardless of quality, formatted in minimessage
+#      - +This lore will only show up for poor brews
+#      - ++This lore will only show up for good brews
+#      - +++This lore will only show up for excellent brews
+#    name: Poor quality/Good quality/Excellent quality # Formatted in minimessage
+#    custom-model-data: 1/2/3 # poor/good/excellent A number that is used for item models in the legacy model format
+#    item-model: my_namespace:poor/my_namespace:good/my_namespace:excellent # Modern model format introduced in mc 1.21.4
+#    append-brew-info-lore: true/true/false # poor/good/excellent Whether to hide extra lore completely
+#    custom-id: minecraft:splash_potion/minecraft:splash_potion/minecraft:splash_potion # poor/good/excellent What should the resulting material be for the brew? Supports all item integrations
+#  messages:
+#    # Message in the action bar after drinking
+#    action-bar:
+#      - Will apply to all qualities
+#      - +Poor quality
+#      - ++Good quality
+#      - +++Excellent quality
+#    # Message in the middle of the screen
+#    title:
+#      - Will apply to all qualities
+#      - +Poor quality
+#      - ++Good quality
+#      - +++Excellent quality
+#    # Message to the player
+#    message:
+#      - Will apply to all qualities
+#      - +Poor quality
+#      - ++Good quality
+#      - +++Excellent quality
+#  steps:
+#    # There's also the mix step, which has a similar pattern
+#    - type: cook
+#      cook-time: 35
+#      cauldron-type: water
+#      ingredients:
+#        - wheat/6 # key/amount
+#        - brewery:absinthe/10 # Link to another brew
+#        - craftengine:my_namespace:my_apple_juice/6 # See supported item plugins in our integrations list
+#    - type: distill
+#      runs: 256 # Distill 256 times
+#    - type: age
+#      age-years: 13 # Age for 13 years (one aging year is defined in the config)
+#      barrel-type: oak # Supports most wood types and copper barrels.
+#
+
 recipes:
   absinthe:
     alcohol: 42
@@ -273,7 +333,7 @@ recipes:
     brew-difficulty: 6
     effects:
       - FIRE_RESISTANCE/1/20-100
-      - POISON/1-0/30-0
+      - +POISON/0-1/0-30
     potion-attributes.color: DARK_RED
     potion-attributes.lore:
       - +<dark_gray>Too bitter to drink
@@ -298,8 +358,8 @@ recipes:
       - WEAKNESS/80
       - nausea/27
       - NIGHT_VISION/50-80
-      - BLINDNESS/12-2
-      - slowness/10-3
+      - BLINDNESS/2-12
+      - slowness/3-10
     potion-attributes.color: ff9999
     potion-attributes.lore:
       - +++<green>Glows in the dark
@@ -470,9 +530,9 @@ recipes:
       - type: mix
         mix-time: 3
         ingredients:
-         - brewery:apple_juice/1
-         - brewery:gin/2
-         - sugar/4
+          - brewery:apple_juice/1
+          - brewery:gin/2
+          - sugar/4
 
 
 

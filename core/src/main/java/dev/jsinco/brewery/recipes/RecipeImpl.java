@@ -2,6 +2,7 @@ package dev.jsinco.brewery.recipes;
 
 import com.google.common.base.Preconditions;
 import dev.jsinco.brewery.brew.BrewingStep;
+import dev.jsinco.brewery.recipe.QualityData;
 import dev.jsinco.brewery.recipe.Recipe;
 import dev.jsinco.brewery.recipe.RecipeResult;
 import lombok.Getter;
@@ -15,39 +16,37 @@ public class RecipeImpl<I> implements Recipe<I> {
     @Getter
     private final String recipeName;
     @Getter
-    private final int brewDifficulty;
+    private final double brewDifficulty;
     @NotNull
     private final List<BrewingStep> steps;
-
-    // End product
     @NotNull
-    private final RecipeResult<I> recipeResult;
+    private final QualityData<RecipeResult<I>> recipeResults;
 
 
-    private RecipeImpl(String recipeName, int brewDifficulty, List<BrewingStep> steps,
-                       @NotNull RecipeResult<I> recipeResult) {
+    private RecipeImpl(String recipeName, double brewDifficulty, List<BrewingStep> steps,
+                       @NotNull QualityData<RecipeResult<I>> recipeResults) {
         this.recipeName = recipeName;
         this.brewDifficulty = brewDifficulty;
         this.steps = steps;
-        this.recipeResult = recipeResult;
+        this.recipeResults = recipeResults;
     }
 
     public static class Builder<I> {
         private final String recipeName;
-        private int brewDifficulty = 1;
-        private RecipeResult<I> recipeResult;
+        private double brewDifficulty = 1;
+        private QualityData<RecipeResult<I>> recipeResult;
         private List<BrewingStep> steps;
 
         public Builder(String recipeName) {
             this.recipeName = recipeName;
         }
 
-        public Builder<I> brewDifficulty(int brewDifficulty) {
+        public Builder<I> brewDifficulty(double brewDifficulty) {
             this.brewDifficulty = brewDifficulty;
             return this;
         }
 
-        public Builder<I> recipeResult(@NotNull RecipeResult<I> recipeResult) {
+        public Builder<I> recipeResults(@NotNull QualityData<RecipeResult<I>> recipeResult) {
             this.recipeResult = Preconditions.checkNotNull(recipeResult);
             return this;
         }

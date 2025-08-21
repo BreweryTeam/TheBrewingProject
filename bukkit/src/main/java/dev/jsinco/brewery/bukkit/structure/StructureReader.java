@@ -20,6 +20,7 @@ import java.io.Reader;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -49,7 +50,7 @@ public class StructureReader {
     }
 
     public static BreweryStructure fromJson(Path path) throws IOException, StructureReadException {
-        try (Reader reader = new InputStreamReader(new BufferedInputStream(Files.newInputStream(path)))) {
+        try (Reader reader = new InputStreamReader(new BufferedInputStream(Files.newInputStream(path)), StandardCharsets.UTF_8)) {
             JsonObject jsonObject = JsonParser.parseReader(reader).getAsJsonObject();
             String schemFileName = jsonObject.get("schem_file").getAsString();
             Optional<Vector3i> origin = Optional.ofNullable(jsonObject.get("origin"))

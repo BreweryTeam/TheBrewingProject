@@ -1,7 +1,5 @@
 package dev.jsinco.brewery.bukkit.structure;
 
-import dev.jsinco.brewery.util.Util;
-import org.bukkit.block.data.BlockData;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -13,15 +11,9 @@ import org.mockbukkit.mockbukkit.ServerMock;
 import org.mockbukkit.mockbukkit.world.WorldMock;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
-import java.nio.file.*;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith(MockBukkitExtension.class)
 class StructureReaderTest {

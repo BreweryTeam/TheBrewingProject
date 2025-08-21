@@ -5,11 +5,12 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import dev.jsinco.brewery.util.Logging;
+import dev.jsinco.brewery.util.Logger;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -24,7 +25,7 @@ public class DrunkTextRegistry {
 
 
     public void load(InputStream inputStream) throws IOException {
-        try (InputStreamReader reader = new InputStreamReader(inputStream)) {
+        try (InputStreamReader reader = new InputStreamReader(inputStream, StandardCharsets.UTF_8)) {
             JsonArray jsonArray = JsonParser.parseReader(reader).getAsJsonArray();
             for (JsonElement element : jsonArray) {
                 JsonObject jsonObject = element.getAsJsonObject();
@@ -33,11 +34,11 @@ public class DrunkTextRegistry {
                 int percentage = jsonObject.get("percentage").getAsInt();
                 int alcohol = jsonObject.has("alcohol") ? jsonObject.get("alcohol").getAsInt() : 0;
                 if (alcohol < 0 || alcohol > 100) {
-                    Logging.warning("Alcohol outside range for element: " + jsonObject);
+                    Logger.logErr("Alcohol outside range for element: " + jsonObject);
                     continue;
                 }
                 if (percentage < 0 || percentage > 100) {
-                    Logging.warning("Percentage outside range for element: " + jsonObject);
+                    Logger.logErr("Percentage outside range for element: " + jsonObject);
                     continue;
                 }
                 DrunkTextElement drunkTextElement = replace != null ?

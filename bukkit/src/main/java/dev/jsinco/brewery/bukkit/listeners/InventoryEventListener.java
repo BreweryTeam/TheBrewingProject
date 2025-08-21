@@ -1,9 +1,12 @@
 package dev.jsinco.brewery.bukkit.listeners;
 
+import dev.jsinco.brewery.brew.Brew;
 import dev.jsinco.brewery.brew.BrewImpl;
 import dev.jsinco.brewery.breweries.InventoryAccessible;
 import dev.jsinco.brewery.bukkit.brew.BrewAdapter;
 import dev.jsinco.brewery.bukkit.breweries.BreweryRegistry;
+import dev.jsinco.brewery.bukkit.effect.named.PukeNamedExecutable;
+import dev.jsinco.brewery.configuration.Config;
 import dev.jsinco.brewery.database.sql.Database;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
@@ -12,12 +15,15 @@ import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
+import org.bukkit.event.inventory.InventoryMoveItemEvent;
+import org.bukkit.event.inventory.InventoryPickupItemEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
 
@@ -61,8 +67,7 @@ public class InventoryEventListener implements Listener {
         if (upperInventoryIsClicked && hoveredItem != null) {
             BrewAdapter.fromItem(hoveredItem)
                     .map(brew -> BrewAdapter.toItem(brew, new BrewImpl.State.Other()))
-                    .map(ItemStack::getItemMeta)
-                    .ifPresent(hoveredItem::setItemMeta);
+                    .ifPresent(event::setCurrentItem);
         }
         if (action == InventoryAction.MOVE_TO_OTHER_INVENTORY) {
             // player takes something out
@@ -100,6 +105,30 @@ public class InventoryEventListener implements Listener {
                 .map(Map.Entry::getValue)
                 .allMatch(itemStack -> inventoryAccessible.inventoryAllows(dragEvent.getWhoClicked().getUniqueId(), itemStack))) {
             dragEvent.setResult(Event.Result.DENY);
+        }
+    }
+
+    @EventHandler(ignoreCancelled = true)
+    public void onInventoryMoveItem(InventoryMoveItemEvent event) {
+        Optional<InventoryAccessible<ItemStack, Inventory>> source = Optional.ofNullable(registry.getFromInventory(event.getSource()));
+        Optional<InventoryAccessible<ItemStack, Inventory>> destination = Optional.ofNullable(registry.getFromInventory(event.getDestination()));
+        Optional<InventoryAccessible<ItemStack, Inventory>> both = destination.or(() -> source);
+        if (!Config.config().automation()) {
+            both.ifPresent(ignored -> event.setCancelled(true));
+            return;
+        }
+        both.filter(inventoryAccessible -> !inventoryAccessible.inventoryAllows(event.getItem()))
+                .ifPresent(ignored -> event.setCancelled(true));
+        source.flatMap(ignored -> BrewAdapter.fromItem(event.getItem())
+                        .map(brew -> BrewAdapter.toItem(brew, new Brew.State.Other())))
+                .ifPresent(event::setItem);
+
+    }
+
+    @EventHandler(ignoreCancelled = true)
+    public void onInventoryPickupItem(InventoryPickupItemEvent event) {
+        if (event.getItem().getPersistentDataContainer().has(PukeNamedExecutable.PUKE_ITEM)) {
+            event.setCancelled(true);
         }
     }
 }

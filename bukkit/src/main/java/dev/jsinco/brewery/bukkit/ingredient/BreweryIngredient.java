@@ -3,10 +3,12 @@ package dev.jsinco.brewery.bukkit.ingredient;
 import dev.jsinco.brewery.bukkit.brew.BrewAdapter;
 import dev.jsinco.brewery.ingredient.Ingredient;
 import dev.jsinco.brewery.util.BreweryKey;
+import io.papermc.paper.persistence.PersistentDataContainerView;
+import dev.jsinco.brewery.util.MessageUtil;
+import net.kyori.adventure.text.Component;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -21,13 +23,13 @@ public class BreweryIngredient implements Ingredient {
     }
 
     @Override
-    public String getKey() {
+    public @NotNull String getKey() {
         return ingredientKey.toString();
     }
 
     @Override
-    public String displayName() {
-        return displayName;
+    public @NotNull Component displayName() {
+        return MessageUtil.miniMessage(displayName);
     }
 
     @Override
@@ -48,11 +50,7 @@ public class BreweryIngredient implements Ingredient {
     }
 
     public static Optional<Ingredient> from(ItemStack itemStack) {
-        ItemMeta itemMeta = itemStack.getItemMeta();
-        if (itemMeta == null) {
-            return Optional.empty();
-        }
-        PersistentDataContainer dataContainer = itemMeta.getPersistentDataContainer();
+        PersistentDataContainerView dataContainer = itemStack.getPersistentDataContainer();
         String key = dataContainer.get(BrewAdapter.BREWERY_TAG, PersistentDataType.STRING);
         if (key == null) {
             return Optional.empty();
