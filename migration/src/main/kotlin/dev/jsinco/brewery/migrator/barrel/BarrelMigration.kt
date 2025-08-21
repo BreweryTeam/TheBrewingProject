@@ -3,8 +3,8 @@ package dev.jsinco.brewery.migrator.barrel
 import com.dre.brewery.Barrel
 import dev.jsinco.brewery.breweries.BarrelType
 import dev.jsinco.brewery.bukkit.TheBrewingProject
-import dev.jsinco.brewery.bukkit.breweries.BukkitBarrel
-import dev.jsinco.brewery.bukkit.breweries.BukkitBarrelDataType
+import dev.jsinco.brewery.bukkit.breweries.barrel.BukkitBarrel
+import dev.jsinco.brewery.bukkit.breweries.barrel.BukkitBarrelDataType
 import dev.jsinco.brewery.bukkit.structure.BarrelBlockDataMatcher
 import dev.jsinco.brewery.bukkit.structure.PlacedBreweryStructure
 import dev.jsinco.brewery.bukkit.util.BukkitAdapter
@@ -18,12 +18,9 @@ import kotlin.jvm.optionals.getOrNull
 
 object BarrelMigration {
     fun migrateWorld(world: World) {
-        Barrel.barrels.asSequence()
-            .filter {
-                it.spigot.world == world
-            }
-            .map { convertFormat(it) }
-            .filterNotNull()
+        Barrel.getBarrels(world.uid)
+            .asSequence()
+            .mapNotNull { convertFormat(it) }
             .filter {
                 TheBrewingProject.getInstance().placedStructureRegistry.getStructures(it.structure.positions())
                     .isEmpty()
@@ -57,17 +54,13 @@ object BarrelMigration {
             barrelType
         )
         structure.holder = bukkitBarrel
-        val brews = legacyBarrel.inventory.contents.withIndex().asSequence()
-            .map {
+        legacyBarrel.inventory.contents.withIndex().asSequence()
+            .forEach {
                 val index = it.index
                 it.value?.let {
-                    IndexedValue(index, BrewMigration.migrateLegacyBrew(it))
+                    bukkitBarrel.inventory.brews[index] = BrewMigration.migrateLegacyBrew(it)
                 }
             }
-            .filterNotNull()
-            .map { Pair(it.value, it.index) }
-            .toList()
-        bukkitBarrel.brews = brews
         return bukkitBarrel
     }
 
@@ -81,7 +74,7 @@ object BarrelMigration {
                     it,
                     pos,
                     BarrelBlockDataMatcher.INSTANCE,
-                    BarrelType.entries.toTypedArray()
+                    BarrelType.PLACEABLE_TYPES
                 )
             }
             .flatMap { it.stream() }
