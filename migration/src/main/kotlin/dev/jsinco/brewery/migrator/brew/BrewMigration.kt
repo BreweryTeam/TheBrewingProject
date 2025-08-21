@@ -3,12 +3,17 @@ package dev.jsinco.brewery.migrator.brew
 import com.dre.brewery.BIngredients
 import com.dre.brewery.recipe.PluginItem
 import com.dre.brewery.recipe.SimpleItem
+import dev.jsinco.brewery.brew.AgeStepImpl
 import dev.jsinco.brewery.brew.Brew
 import dev.jsinco.brewery.brew.BrewImpl
 import dev.jsinco.brewery.brew.BrewingStep
+import dev.jsinco.brewery.brew.CookStepImpl
+import dev.jsinco.brewery.brew.DistillStepImpl
 import dev.jsinco.brewery.breweries.BarrelType
 import dev.jsinco.brewery.breweries.CauldronType
+import dev.jsinco.brewery.bukkit.TheBrewingProject
 import dev.jsinco.brewery.bukkit.ingredient.BukkitIngredientManager
+import dev.jsinco.brewery.configuration.Config
 import dev.jsinco.brewery.ingredient.Ingredient
 import dev.jsinco.brewery.moment.Moment
 import dev.jsinco.brewery.moment.PassedMoment
@@ -28,19 +33,19 @@ object BrewMigration {
         val distillRuns = legacyBrew.distillRuns
         val brewingSteps = mutableListOf<BrewingStep>()
         brewingSteps.add(
-            BrewingStep.Cook(
-                PassedMoment(cookTime.toLong()),
+            CookStepImpl(
+                PassedMoment(cookTime.toLong() * Config.config().cauldrons().cookingMinuteTicks()),
                 convertIngredients(cookIngredients),
                 CauldronType.WATER
             )
         )
         if (distillRuns > 0) {
-            brewingSteps.add(BrewingStep.Distill(distillRuns.toInt()))
+            brewingSteps.add(DistillStepImpl(distillRuns.toInt()))
         }
         if (age > 0) {
             brewingSteps.add(
-                BrewingStep.Age(
-                    PassedMoment((age * Moment.AGING_YEAR).toLong()),
+                AgeStepImpl(
+                    PassedMoment((age * Config.config().barrels().agingYearTicks()).toLong()),
                     BarrelType.valueOf(barrelType.name)
                 )
             )
@@ -60,7 +65,7 @@ object BrewMigration {
                 // Custom items are not supported
                 continue
             }
-            ingredientManager.getIngredient(id).ifPresent {
+            ingredientManager.getIngredient(id).join().ifPresent {
                 output[it] = legacyIngredient.amount
             }
         }

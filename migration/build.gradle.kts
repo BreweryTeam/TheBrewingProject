@@ -11,17 +11,16 @@ repositories {
     mavenCentral()
     maven("https://repo.jsinco.dev/releases")
     maven("https://repo.papermc.io/repository/maven-public/")
+    maven("https://storehouse.okaeri.eu/repository/maven-public/")
 }
 
 dependencies {
-    testImplementation(platform("org.junit:junit-bom:5.10.0"))
-    testImplementation("org.junit.jupiter:junit-jupiter")
-    compileOnly("io.papermc.paper:paper-api:1.21.4-R0.1-SNAPSHOT")
+    compileOnly("io.papermc.paper:paper-api:1.21.8-R0.1-SNAPSHOT")
 
     compileOnly(project(":bukkit"))
     compileOnly(project(":api"))
     compileOnly(project(":core"))
-    compileOnly("com.dre.brewery:BreweryX:3.4.10-SNAPSHOT")
+    compileOnly("com.dre.brewery:BreweryX:3.6.0")
 }
 
 bukkit {
@@ -31,8 +30,4 @@ bukkit {
     authors = listOf("Thorinwasher")
     name = "TBPMigratorPlugin"
     depend = listOf("TheBrewingProject", "BreweryX")
-}
-
-tasks.test {
-    useJUnitPlatform()
 }
