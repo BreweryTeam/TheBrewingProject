@@ -105,6 +105,7 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
     private BreweryTranslator translator;
 
     public void initialize() {
+        instance = this;
         EventSection.migrateEvents(getDataFolder());
         Config.load(this.getDataFolder(), serializers());
         EventSection.load(getDataFolder(), serializers());
@@ -113,7 +114,6 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
         this.structureRegistry = new StructureRegistry();
         this.placedStructureRegistry = new PlacedStructureRegistryImpl();
         this.breweryRegistry = new BreweryRegistry();
-        loadStructures();
         this.recipeRegistry = new RecipeRegistryImpl<>();
         this.drunkTextRegistry = new DrunkTextRegistry();
         this.customDrunkEventRegistry = EventSection.events().customEvents();
@@ -123,9 +123,11 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
 
     @Override
     public void onLoad() {
-        instance = this;
+        saveResources();
+        initialize();
         Bukkit.getServicesManager().register(TheBrewingProjectApi.class, this, this, ServicePriority.Normal);
-        LandsIntegration.registerBarrelAccessFlag(); // This needs to be done onLoad
+        integrationManager.registerIntegrations();
+        integrationManager.loadIntegrations();
     }
 
     private OkaeriSerdesPack serializers() {
@@ -144,6 +146,7 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
     }
 
     public void reload() {
+        saveResources();
         Config.config().load(true);
         EventSection.events().load(true);
         translator.load(new File(this.getDataFolder(), "locale"));
@@ -219,9 +222,8 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
 
     @Override
     public void onEnable() {
-        saveResources();
-        initialize();
-        integrationManager.init();
+        loadStructures();
+        integrationManager.enableIntegrations();
         this.database = new Database(DatabaseDriver.SQLITE);
         try {
             database.init(this.getDataFolder());

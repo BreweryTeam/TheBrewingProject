@@ -21,7 +21,10 @@ public class PlaceholderApiIntegration implements PlaceholderIntegration {
     }
 
     @Override
-    public void initialize() {
+    public void load() {}
+
+    @Override
+    public void enable() {
         new PlaceholderApiExpansion().register();
     }
 

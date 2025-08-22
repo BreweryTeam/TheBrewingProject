@@ -36,7 +36,10 @@ public class MiniPlaceholdersIntegration implements PlaceholderIntegration {
     }
 
     @Override
-    public void initialize() {
+    public void load() {}
+
+    @Override
+    public void enable() {
         Expansion.builder("tbp")
                 .audiencePlaceholder("alcohol", (audience, argumentQueue, context) -> {
                     if (!(audience instanceof Player player)) {

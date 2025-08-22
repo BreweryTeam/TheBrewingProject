@@ -47,11 +47,7 @@ public class LandsIntegration implements StructureIntegration {
     }
 
     @Override
-    public void initialize() {}
-
-    // This is done onLoad, not when initialized by the IntegrationManager
-    // We could add a preInitialize or load method to all integrations for things like this
-    public static void registerBarrelAccessFlag() {
+    public void load() {
         if (!ENABLED) {
             return;
         }
@@ -60,7 +56,7 @@ public class LandsIntegration implements StructureIntegration {
         String name = serializer.serialize(GlobalTranslator.render(Component
                 .translatable("tbp.integration.lands.flag.barrel-access.name"), Config.config().language()));
         String[] description = serializer.serialize(GlobalTranslator.render(Component
-                .translatable("tbp.integration.lands.flag.barrel-access.description"), Config.config().language()))
+                        .translatable("tbp.integration.lands.flag.barrel-access.description"), Config.config().language()))
                 .split("\\\\n");
         barrelAccessFlag = RoleFlag.of(landsIntegration, FlagTarget.PLAYER, RoleFlagCategory.ACTION, "barrel_access")
                 .setDisplayName(name)
@@ -68,4 +64,8 @@ public class LandsIntegration implements StructureIntegration {
                 .setIcon(new ItemStack(Material.BARREL))
                 .setDisplay(true);
     }
+
+    @Override
+    public void enable() {}
+
 }

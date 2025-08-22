@@ -29,7 +29,9 @@ public class TownyIntegration implements StructureIntegration {
     }
 
     @Override
-    public void initialize() {
+    public void load() {}
 
-    }
+    @Override
+    public void enable() {}
+
 }

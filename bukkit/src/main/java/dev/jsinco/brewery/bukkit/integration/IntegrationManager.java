@@ -13,7 +13,7 @@ public class IntegrationManager {
     @Getter
     private final IntegrationRegistry integrationRegistry = new IntegrationRegistry();
 
-    public void init() {
+    public void registerIntegrations() {
         register(IntegrationType.STRUCTURE, new WorldGuardIntegration());
         register(IntegrationType.STRUCTURE, new BoltIntegration());
         register(IntegrationType.STRUCTURE, new GriefPreventionIntegration());
@@ -27,9 +27,18 @@ public class IntegrationManager {
         register(IntegrationType.ITEM, new MmoItemsIntegration());
         register(IntegrationType.PLACEHOLDER, new PlaceholderApiIntegration());
         register(IntegrationType.PLACEHOLDER, new MiniPlaceholdersIntegration());
-        integrationRegistry.getIntegrations(IntegrationType.ITEM).forEach(Integration::initialize);
-        integrationRegistry.getIntegrations(IntegrationType.STRUCTURE).forEach(Integration::initialize);
-        integrationRegistry.getIntegrations(IntegrationType.PLACEHOLDER).forEach(Integration::initialize);
+    }
+
+    public void loadIntegrations() {
+        integrationRegistry.getIntegrations(IntegrationType.ITEM).forEach(Integration::load);
+        integrationRegistry.getIntegrations(IntegrationType.STRUCTURE).forEach(Integration::load);
+        integrationRegistry.getIntegrations(IntegrationType.PLACEHOLDER).forEach(Integration::load);
+    }
+
+    public void enableIntegrations() {
+        integrationRegistry.getIntegrations(IntegrationType.ITEM).forEach(Integration::enable);
+        integrationRegistry.getIntegrations(IntegrationType.STRUCTURE).forEach(Integration::enable);
+        integrationRegistry.getIntegrations(IntegrationType.PLACEHOLDER).forEach(Integration::enable);
     }
 
     public void register(IntegrationType<?> type, Integration integration) {

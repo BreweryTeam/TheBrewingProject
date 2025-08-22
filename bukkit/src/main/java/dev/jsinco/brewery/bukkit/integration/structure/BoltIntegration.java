@@ -18,7 +18,6 @@ public class BoltIntegration implements StructureIntegration {
     private static final boolean ENABLED = ClassUtil.exists("org.popcraft.bolt.BoltAPI");
     private static BoltAPI boltAPI;
 
-
     public boolean hasAccess(Block block, Player player) {
         if (!ENABLED) {
             return true;
@@ -47,10 +46,14 @@ public class BoltIntegration implements StructureIntegration {
     }
 
     @Override
-    public void initialize() {
+    public void load() {}
+
+    @Override
+    public void enable() {
         if (!ENABLED) {
             return;
         }
         boltAPI = Bukkit.getServer().getServicesManager().load(BoltAPI.class);
     }
+
 }
