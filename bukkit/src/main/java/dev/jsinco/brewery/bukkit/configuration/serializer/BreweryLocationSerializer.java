@@ -1,6 +1,6 @@
 package dev.jsinco.brewery.bukkit.configuration.serializer;
 
-import dev.jsinco.brewery.util.Logger;
+import dev.jsinco.brewery.bukkit.util.LocationUtil;
 import dev.jsinco.brewery.vector.BreweryLocation;
 import eu.okaeri.configs.schema.GenericsDeclaration;
 import eu.okaeri.configs.serdes.DeserializationData;
@@ -15,20 +15,6 @@ import java.util.UUID;
 
 public class BreweryLocationSerializer implements ObjectSerializer<BreweryLocation.Uncompiled> {
 
-    private UUID parseWorld(String worldString) {
-        World world;
-        try {
-            world = Bukkit.getWorld(UUID.fromString(worldString));
-        } catch (IllegalArgumentException e) {
-            world = Bukkit.getWorld(worldString);
-        }
-        if (world == null) {
-            Logger.logErr("Could not find world: " + worldString);
-            return null;
-        }
-        return world.getUID();
-    }
-
     @Override
     public boolean supports(@NonNull Class<? super BreweryLocation.Uncompiled> type) {
         return BreweryLocation.Uncompiled.class == type;
@@ -40,9 +26,9 @@ public class BreweryLocationSerializer implements ObjectSerializer<BreweryLocati
         if (location == null) {
             location = new BreweryLocation(0, 0, 0, UUID.randomUUID());
         }
-        World world = Bukkit.getWorld(location.worldUuid());
+        World world = Bukkit.getWorld(LocationUtil.resolveWorld(location.worldUuid().toString()));
         data.setValue(
-                String.format("%s, %d, %d, %d", world == null ? location.worldUuid() : world.getName(), location.x(), location.y(), location.z())
+                String.format("%s, %d, %d, %d", world == null ? LocationUtil.resolveWorld(location.worldUuid().toString()) : world.getName(), location.x(), location.y(), location.z())
         );
     }
 
@@ -60,10 +46,7 @@ public class BreweryLocationSerializer implements ObjectSerializer<BreweryLocati
             int x = Integer.parseInt(split[1]);
             int y = Integer.parseInt(split[2]);
             int z = Integer.parseInt(split[3]);
-            return ignored -> {
-                UUID worldUuid = parseWorld(split[0]);
-                return worldUuid == null ? null : new BreweryLocation(x, y, z, worldUuid);
-            };
+            return ignored -> new BreweryLocation(x, y, z, UUID.fromString(split[0]));
         } catch (IllegalArgumentException e) {
             throw new IllegalStateException(e);
         }

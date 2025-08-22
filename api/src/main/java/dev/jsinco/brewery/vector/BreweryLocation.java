@@ -20,4 +20,13 @@ public record BreweryLocation(int x, int y, int z, UUID worldUuid) {
         @Nullable BreweryLocation get(List<UUID> worldUuids);
 
     }
+
+    @Override
+    public UUID worldUuid() {
+
+        // Would be neat if it was possible to verify worlds here
+
+        return worldUuid;
+    }
+
 }
