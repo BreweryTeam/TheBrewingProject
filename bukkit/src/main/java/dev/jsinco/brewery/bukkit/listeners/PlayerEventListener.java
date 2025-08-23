@@ -26,6 +26,7 @@ import dev.jsinco.brewery.ingredient.Ingredient;
 import dev.jsinco.brewery.ingredient.ScoredIngredient;
 import dev.jsinco.brewery.recipes.RecipeRegistryImpl;
 import dev.jsinco.brewery.structure.PlacedStructureRegistryImpl;
+import dev.jsinco.brewery.util.BreweryKey;
 import dev.jsinco.brewery.util.Logger;
 import dev.jsinco.brewery.util.MessageUtil;
 import io.papermc.paper.datacomponent.DataComponentTypes;
@@ -92,16 +93,13 @@ public class PlayerEventListener implements Listener {
         if (possibleStructureHolder.isEmpty()) {
             return;
         }
-
         if (!TheBrewingProject.getInstance().getIntegrationManager().retrieve(IntegrationType.STRUCTURE)
                 .stream()
-                .map(structureIntegration -> structureIntegration.hasAccess(playerInteractEvent.getClickedBlock(), playerInteractEvent.getPlayer()))
+                .map(structureIntegration -> structureIntegration.hasAccess(playerInteractEvent.getClickedBlock(), playerInteractEvent.getPlayer(), possibleStructureHolder.get().getStructureType().key()))
                 .reduce(true, Boolean::logicalAnd)) {
-            String structureType = possibleStructureHolder.get().getStructureType().key().key().toLowerCase();
-            MessageUtil.message(playerInteractEvent.getPlayer(), "tbp." + structureType + ".access-denied");
+            MessageUtil.message(playerInteractEvent.getPlayer(), "tbp." + possibleStructureHolder.get().getStructureType().key().key().toLowerCase() + ".access-denied");
             return;
         }
-
         if (possibleStructureHolder.get() instanceof InventoryAccessible<?, ?> inventoryAccessible
                 && inventoryAccessible.open(BukkitAdapter.toBreweryLocation(playerInteractEvent.getClickedBlock()), playerInteractEvent.getPlayer().getUniqueId())) {
             breweryRegistry.registerOpened((InventoryAccessible<ItemStack, Inventory>) inventoryAccessible);
@@ -119,14 +117,26 @@ public class PlayerEventListener implements Listener {
         if (block == null) {
             return;
         }
+
+        boolean cauldron = Tag.CAULDRONS.isTagged(block.getType());
         if (!TheBrewingProject.getInstance().getIntegrationManager().retrieve(IntegrationType.STRUCTURE)
                 .stream()
-                .map(structureIntegration -> structureIntegration.hasAccess(event.getClickedBlock(), event.getPlayer()))
+                .map(structureIntegration -> structureIntegration.hasAccess(event.getClickedBlock(), event.getPlayer(),
+                        cauldron ? BreweryKey.parse("cauldron") : BreweryKey.parse("sealing_table")))
                 .reduce(true, Boolean::logicalAnd)) {
-            // send something to the player here?
+            if (cauldron && breweryRegistry
+                    .getActiveSinglePositionStructure(BukkitAdapter.toBreweryLocation(block))
+                    .filter(BukkitCauldron.class::isInstance)
+                    .map(BukkitCauldron.class::cast)
+                    .isPresent() // still allow accessing vanilla cauldrons
+            ) {
+                MessageUtil.message(event.getPlayer(), "tbp.cauldron.access-denied");
+                event.setCancelled(true);
+            }
             return;
         }
-        if (Tag.CAULDRONS.isTagged(block.getType())) {
+
+        if (cauldron) {
             handleCauldron(event, block);
         }
 

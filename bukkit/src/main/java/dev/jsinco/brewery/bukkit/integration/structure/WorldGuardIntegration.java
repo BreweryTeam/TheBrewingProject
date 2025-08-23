@@ -7,6 +7,7 @@ import com.sk89q.worldguard.internal.platform.WorldGuardPlatform;
 import com.sk89q.worldguard.protection.flags.Flags;
 import com.sk89q.worldguard.protection.regions.RegionQuery;
 import dev.jsinco.brewery.bukkit.integration.StructureIntegration;
+import dev.jsinco.brewery.util.BreweryKey;
 import dev.jsinco.brewery.util.ClassUtil;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
@@ -24,7 +25,7 @@ public class WorldGuardIntegration implements StructureIntegration {
     }
 
     @Override
-    public boolean hasAccess(Block block, Player player) {
+    public boolean hasAccess(Block block, Player player, BreweryKey type) {
         WorldGuard worldGuard = WorldGuard.getInstance();
         WorldGuardPlugin instance = WorldGuardPlugin.inst();
         if (worldGuard == null || instance == null || !instance.isEnabled()) {
@@ -32,6 +33,7 @@ public class WorldGuardIntegration implements StructureIntegration {
         }
         WorldGuardPlatform platform = worldGuard.getPlatform();
         RegionQuery query = platform.getRegionContainer().createQuery();
+
         return query.testBuild(BukkitAdapter.adapt(block.getLocation()), instance.wrapPlayer(player), Flags.USE, Flags.CHEST_ACCESS);
     }
 

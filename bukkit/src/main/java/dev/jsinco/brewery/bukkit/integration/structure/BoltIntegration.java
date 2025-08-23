@@ -4,6 +4,7 @@ import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.bukkit.integration.StructureIntegration;
 import dev.jsinco.brewery.bukkit.util.BukkitAdapter;
 import dev.jsinco.brewery.structure.MultiblockStructure;
+import dev.jsinco.brewery.util.BreweryKey;
 import dev.jsinco.brewery.util.ClassUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.block.Block;
@@ -18,7 +19,8 @@ public class BoltIntegration implements StructureIntegration {
     private static final boolean ENABLED = ClassUtil.exists("org.popcraft.bolt.BoltAPI");
     private static BoltAPI boltAPI;
 
-    public boolean hasAccess(Block block, Player player) {
+    @Override
+    public boolean hasAccess(Block block, Player player, BreweryKey type) {
         if (!ENABLED) {
             return true;
         }

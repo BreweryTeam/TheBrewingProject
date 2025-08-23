@@ -2,30 +2,34 @@ package dev.jsinco.brewery.bukkit.integration.structure;
 
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.bukkit.integration.StructureIntegration;
+import dev.jsinco.brewery.bukkit.util.ComponentUtil;
 import dev.jsinco.brewery.configuration.Config;
+import dev.jsinco.brewery.util.BreweryKey;
 import dev.jsinco.brewery.util.ClassUtil;
 import me.angeschossen.lands.api.flags.enums.FlagTarget;
 import me.angeschossen.lands.api.flags.enums.RoleFlagCategory;
 import me.angeschossen.lands.api.flags.type.RoleFlag;
 import me.angeschossen.lands.api.land.LandWorld;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.translation.GlobalTranslator;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.Arrays;
+import java.util.List;
 
 public class LandsIntegration implements StructureIntegration {
 
     private static final boolean ENABLED = ClassUtil.exists("me.angeschossen.lands.api.LandsIntegration");
     private static me.angeschossen.lands.api.LandsIntegration landsIntegration;
     private static RoleFlag barrelAccessFlag;
+    private static RoleFlag distilleryAccessFlag;
+    private static RoleFlag cauldronAccessFlag;
 
-
-    public boolean hasAccess(Block block, Player player) {
+    @Override
+    public boolean hasAccess(Block block, Player player, BreweryKey type) {
         if (!ENABLED) {
             return true;
         }
@@ -33,7 +37,12 @@ public class LandsIntegration implements StructureIntegration {
         if (lWorld == null) {
             return true;
         }
-        return lWorld.hasRoleFlag(player.getUniqueId(), block.getLocation(), barrelAccessFlag);
+        return switch (type.key()) {
+            case "barrel" -> lWorld.hasRoleFlag(player.getUniqueId(), block.getLocation(), barrelAccessFlag);
+            case "distillery" -> lWorld.hasRoleFlag(player.getUniqueId(), block.getLocation(), distilleryAccessFlag);
+            case "cauldron" -> lWorld.hasRoleFlag(player.getUniqueId(), block.getLocation(), cauldronAccessFlag);
+            default -> true;
+        };
     }
 
     @Override
@@ -52,16 +61,31 @@ public class LandsIntegration implements StructureIntegration {
             return;
         }
         landsIntegration = me.angeschossen.lands.api.LandsIntegration.of(TheBrewingProject.getInstance());
-        PlainTextComponentSerializer serializer = PlainTextComponentSerializer.plainText();
-        String name = serializer.serialize(GlobalTranslator.render(Component
-                .translatable("tbp.integration.lands.flag.barrel-access.name"), Config.config().language()));
-        String[] description = serializer.serialize(GlobalTranslator.render(Component
-                        .translatable("tbp.integration.lands.flag.barrel-access.description"), Config.config().language()))
-                .split("\\\\n");
-        barrelAccessFlag = RoleFlag.of(landsIntegration, FlagTarget.PLAYER, RoleFlagCategory.ACTION, "barrel_access")
-                .setDisplayName(name)
-                .setDescription(Arrays.stream(description).toList())
-                .setIcon(new ItemStack(Material.BARREL))
+        barrelAccessFlag = registerFlag("barrel_access", Material.BARREL, "barrel-access");
+        distilleryAccessFlag = registerFlag("distillery_access", Material.BREWING_STAND, "distillery-access");
+        cauldronAccessFlag = registerFlag("cauldron_access", Material.CAULDRON, "cauldron-access");
+    }
+
+    private RoleFlag registerFlag(String id, Material icon, String translationKey) {
+        MiniMessage mini = MiniMessage.miniMessage();
+
+        String serializedName = mini.serialize(GlobalTranslator.render(
+                Component.translatable("tbp.integration.lands.flag." + translationKey + ".name"),
+                Config.config().language()
+        ));
+
+        Component description = GlobalTranslator.render(
+                Component.translatable("tbp.integration.lands.flag." + translationKey + ".description"),
+                Config.config().language()
+        );
+        List<Component> descriptionLines = ComponentUtil.splitIntoLines(description);
+        List<String> serializedDescriptionLines = descriptionLines.stream()
+                .map(mini::serialize).map(s -> "§r" + s).toList();
+
+        return RoleFlag.of(landsIntegration, FlagTarget.PLAYER, RoleFlagCategory.ACTION, id)
+                .setDisplayName(serializedName)
+                .setDescription(serializedDescriptionLines)
+                .setIcon(new ItemStack(icon))
                 .setDisplay(true);
     }
 

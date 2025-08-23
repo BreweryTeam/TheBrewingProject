@@ -1,6 +1,7 @@
 package dev.jsinco.brewery.bukkit.integration.structure;
 
 import dev.jsinco.brewery.bukkit.integration.StructureIntegration;
+import dev.jsinco.brewery.util.BreweryKey;
 import dev.jsinco.brewery.util.ClassUtil;
 import me.ryanhamshire.GriefPrevention.Claim;
 import me.ryanhamshire.GriefPrevention.ClaimPermission;
@@ -15,7 +16,8 @@ public class GriefPreventionIntegration implements StructureIntegration {
 
     private static final boolean ENABLED = ClassUtil.exists("me.ryanhamshire.GriefPrevention.GriefPrevention");
 
-    public boolean hasAccess(Block block, Player player) {
+    @Override
+    public boolean hasAccess(Block block, Player player, BreweryKey type) {
         if (!ENABLED) {
             return true;
         }

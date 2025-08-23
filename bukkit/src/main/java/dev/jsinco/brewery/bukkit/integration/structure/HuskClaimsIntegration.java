@@ -1,6 +1,7 @@
 package dev.jsinco.brewery.bukkit.integration.structure;
 
 import dev.jsinco.brewery.bukkit.integration.StructureIntegration;
+import dev.jsinco.brewery.util.BreweryKey;
 import dev.jsinco.brewery.util.ClassUtil;
 import net.william278.huskclaims.api.BukkitHuskClaimsAPI;
 import net.william278.huskclaims.libraries.cloplib.operation.OperationType;
@@ -11,7 +12,8 @@ public class HuskClaimsIntegration implements StructureIntegration {
 
     private static final boolean ENABLED = ClassUtil.exists("net.william278.huskclaims.api.BukkitHuskClaimsAPI");
 
-    public boolean hasAccess(Block block, Player player) {
+    @Override
+    public boolean hasAccess(Block block, Player player, BreweryKey type) {
         if (!ENABLED) {
             return true;
         }
