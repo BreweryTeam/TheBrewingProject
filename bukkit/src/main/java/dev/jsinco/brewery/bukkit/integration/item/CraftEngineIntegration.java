@@ -55,9 +55,6 @@ public class CraftEngineIntegration implements ItemIntegration, Listener {
     }
 
     @Override
-    public void load() {}
-
-    @Override
     public void enable() {
         this.initializedFuture = new CompletableFuture<>();
         Bukkit.getPluginManager().registerEvents(this, TheBrewingProject.getInstance());

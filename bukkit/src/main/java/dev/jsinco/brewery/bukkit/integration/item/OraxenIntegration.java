@@ -57,9 +57,6 @@ public class OraxenIntegration implements ItemIntegration, Listener {
     }
 
     @Override
-    public void load() {}
-
-    @Override
     public void enable() {
         Bukkit.getPluginManager().registerEvents(this, TheBrewingProject.getInstance());
         this.initializedFuture = new CompletableFuture<>();

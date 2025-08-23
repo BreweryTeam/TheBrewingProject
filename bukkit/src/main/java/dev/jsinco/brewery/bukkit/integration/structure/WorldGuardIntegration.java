@@ -24,9 +24,6 @@ public class WorldGuardIntegration implements StructureIntegration {
     }
 
     @Override
-    public void load() {}
-
-    @Override
     public void enable() {
         // NO-OP
     }

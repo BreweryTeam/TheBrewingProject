@@ -5,7 +5,8 @@ public interface Integration {
 
     String getId();
 
-    void load();
+    default void load() {
+    }
 
     void enable();
 }

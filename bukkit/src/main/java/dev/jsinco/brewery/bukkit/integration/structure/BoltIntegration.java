@@ -46,9 +46,6 @@ public class BoltIntegration implements StructureIntegration {
     }
 
     @Override
-    public void load() {}
-
-    @Override
     public void enable() {
         if (!ENABLED) {
             return;

@@ -36,9 +36,6 @@ public class MiniPlaceholdersIntegration implements PlaceholderIntegration {
     }
 
     @Override
-    public void load() {}
-
-    @Override
     public void enable() {
         Expansion.builder("tbp")
                 .audiencePlaceholder("alcohol", (audience, argumentQueue, context) -> {
