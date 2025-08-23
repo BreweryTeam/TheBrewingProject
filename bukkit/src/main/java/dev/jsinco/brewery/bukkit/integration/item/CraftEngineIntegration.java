@@ -22,7 +22,7 @@ public class CraftEngineIntegration implements ItemIntegration, Listener {
     private static final boolean ENABLED = ClassUtil.exists("net.momirealms.craftengine.bukkit.plugin.BukkitCraftEngine");
     private CompletableFuture<Void> initializedFuture;
 
-    public @Nullable String itemId(ItemStack itemStack) {
+    public @Nullable String getItemId(ItemStack itemStack) {
         Item<ItemStack> customItem = BukkitCraftEngine.instance().itemManager().wrap(itemStack);
         return customItem.customId()
                 .map(Key::toString)
@@ -45,7 +45,7 @@ public class CraftEngineIntegration implements ItemIntegration, Listener {
     }
 
     @Override
-    public boolean enabled() {
+    public boolean isEnabled() {
         return ENABLED;
     }
 
@@ -55,7 +55,7 @@ public class CraftEngineIntegration implements ItemIntegration, Listener {
     }
 
     @Override
-    public void enable() {
+    public void onEnable() {
         this.initializedFuture = new CompletableFuture<>();
         Bukkit.getPluginManager().registerEvents(this, TheBrewingProject.getInstance());
     }

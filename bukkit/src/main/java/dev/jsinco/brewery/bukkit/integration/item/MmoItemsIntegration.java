@@ -48,7 +48,7 @@ public class MmoItemsIntegration implements ItemIntegration, Listener {
     }
 
     @Override
-    public @Nullable String itemId(ItemStack itemStack) {
+    public @Nullable String getItemId(ItemStack itemStack) {
         NBTItem nbtItem = NBTItem.get(itemStack);
         if (!nbtItem.hasType()) {
             return null;
@@ -62,7 +62,7 @@ public class MmoItemsIntegration implements ItemIntegration, Listener {
     }
 
     @Override
-    public boolean enabled() {
+    public boolean isEnabled() {
         return ClassUtil.exists("net.Indyuce.mmoitems.MMOItems");
     }
 
@@ -72,7 +72,7 @@ public class MmoItemsIntegration implements ItemIntegration, Listener {
     }
 
     @Override
-    public void enable() {
+    public void onEnable() {
         Bukkit.getPluginManager().registerEvents(this, TheBrewingProject.getInstance());
         this.initialized = new CompletableFuture<>();
     }

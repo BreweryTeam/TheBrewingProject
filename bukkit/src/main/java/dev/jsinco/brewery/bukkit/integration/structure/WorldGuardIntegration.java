@@ -14,7 +14,7 @@ import org.bukkit.entity.Player;
 public class WorldGuardIntegration implements StructureIntegration {
 
     @Override
-    public boolean enabled() {
+    public boolean isEnabled() {
         return ClassUtil.exists("com.sk89q.worldguard.WorldGuard");
     }
 
@@ -24,7 +24,7 @@ public class WorldGuardIntegration implements StructureIntegration {
     }
 
     @Override
-    public void enable() {
+    public void onEnable() {
         // NO-OP
     }
 

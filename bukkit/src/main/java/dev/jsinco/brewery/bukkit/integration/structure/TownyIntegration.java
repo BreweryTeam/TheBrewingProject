@@ -19,7 +19,7 @@ public class TownyIntegration implements StructureIntegration {
     }
 
     @Override
-    public boolean enabled() {
+    public boolean isEnabled() {
         return ENABLED;
     }
 
@@ -29,6 +29,6 @@ public class TownyIntegration implements StructureIntegration {
     }
 
     @Override
-    public void enable() {}
+    public void onEnable() {}
 
 }

@@ -34,7 +34,7 @@ public class ItemsAdderIntegration implements ItemIntegration, Listener {
     }
 
     @Override
-    public @Nullable String itemId(ItemStack itemStack) {
+    public @Nullable String getItemId(ItemStack itemStack) {
         CustomStack customStack = CustomStack.byItemStack(itemStack);
         return customStack == null ? null : customStack.getId();
     }
@@ -45,7 +45,7 @@ public class ItemsAdderIntegration implements ItemIntegration, Listener {
     }
 
     @Override
-    public boolean enabled() {
+    public boolean isEnabled() {
         return ENABLED;
     }
 
@@ -55,7 +55,7 @@ public class ItemsAdderIntegration implements ItemIntegration, Listener {
     }
 
     @Override
-    public void enable() {
+    public void onEnable() {
         Bukkit.getPluginManager().registerEvents(this, TheBrewingProject.getInstance());
         this.initializedFuture = new CompletableFuture<>();
     }

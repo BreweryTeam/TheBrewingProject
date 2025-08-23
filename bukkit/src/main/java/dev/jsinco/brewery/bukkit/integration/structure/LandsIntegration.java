@@ -37,7 +37,7 @@ public class LandsIntegration implements StructureIntegration {
     }
 
     @Override
-    public boolean enabled() {
+    public boolean isEnabled() {
         return ENABLED;
     }
 
@@ -47,7 +47,7 @@ public class LandsIntegration implements StructureIntegration {
     }
 
     @Override
-    public void load() {
+    public void onLoad() {
         if (!ENABLED) {
             return;
         }
@@ -64,8 +64,5 @@ public class LandsIntegration implements StructureIntegration {
                 .setIcon(new ItemStack(Material.BARREL))
                 .setDisplay(true);
     }
-
-    @Override
-    public void enable() {}
 
 }

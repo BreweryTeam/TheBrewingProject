@@ -30,19 +30,19 @@ public class IntegrationManager {
     }
 
     public void loadIntegrations() {
-        integrationRegistry.getIntegrations(IntegrationType.ITEM).forEach(Integration::load);
-        integrationRegistry.getIntegrations(IntegrationType.STRUCTURE).forEach(Integration::load);
-        integrationRegistry.getIntegrations(IntegrationType.PLACEHOLDER).forEach(Integration::load);
+        integrationRegistry.getIntegrations(IntegrationType.ITEM).forEach(Integration::onLoad);
+        integrationRegistry.getIntegrations(IntegrationType.STRUCTURE).forEach(Integration::onLoad);
+        integrationRegistry.getIntegrations(IntegrationType.PLACEHOLDER).forEach(Integration::onLoad);
     }
 
     public void enableIntegrations() {
-        integrationRegistry.getIntegrations(IntegrationType.ITEM).forEach(Integration::enable);
-        integrationRegistry.getIntegrations(IntegrationType.STRUCTURE).forEach(Integration::enable);
-        integrationRegistry.getIntegrations(IntegrationType.PLACEHOLDER).forEach(Integration::enable);
+        integrationRegistry.getIntegrations(IntegrationType.ITEM).forEach(Integration::onEnable);
+        integrationRegistry.getIntegrations(IntegrationType.STRUCTURE).forEach(Integration::onEnable);
+        integrationRegistry.getIntegrations(IntegrationType.PLACEHOLDER).forEach(Integration::onEnable);
     }
 
     public void register(IntegrationType<?> type, Integration integration) {
-        if (!integration.enabled()) {
+        if (!integration.isEnabled()) {
             return;
         }
 

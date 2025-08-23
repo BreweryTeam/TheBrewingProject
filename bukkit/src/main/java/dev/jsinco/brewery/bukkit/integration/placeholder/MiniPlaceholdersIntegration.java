@@ -26,7 +26,7 @@ public class MiniPlaceholdersIntegration implements PlaceholderIntegration {
     }
 
     @Override
-    public boolean enabled() {
+    public boolean isEnabled() {
         return ClassUtil.exists("io.github.miniplaceholders.api.utils.TagsUtils");
     }
 
@@ -36,7 +36,7 @@ public class MiniPlaceholdersIntegration implements PlaceholderIntegration {
     }
 
     @Override
-    public void enable() {
+    public void onEnable() {
         Expansion.builder("tbp")
                 .audiencePlaceholder("alcohol", (audience, argumentQueue, context) -> {
                     if (!(audience instanceof Player player)) {

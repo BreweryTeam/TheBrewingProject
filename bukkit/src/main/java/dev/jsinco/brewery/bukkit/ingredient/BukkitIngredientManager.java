@@ -24,7 +24,7 @@ public class BukkitIngredientManager implements IngredientManager<ItemStack> {
         IntegrationManager integrationManager = TheBrewingProject.getInstance().getIntegrationManager();
         return integrationManager.getIntegrationRegistry().getIntegrations(IntegrationType.ITEM)
                 .stream()
-                .filter(Integration::enabled)
+                .filter(Integration::isEnabled)
                 .map(integration -> integration.getIngredient(itemStack))
                 .flatMap(Optional::stream)
                 .findAny()
@@ -40,7 +40,7 @@ public class BukkitIngredientManager implements IngredientManager<ItemStack> {
         IntegrationManager integrationManager = TheBrewingProject.getInstance().getIntegrationManager();
         return integrationManager.getIntegrationRegistry().getIntegrations(IntegrationType.ITEM)
                 .stream()
-                .filter(Integration::enabled)
+                .filter(Integration::isEnabled)
                 .filter(itemIntegration -> itemIntegration.getId().equals(breweryKey.namespace()))
                 .findAny()
                 .map(itemIntegration -> itemIntegration.createIngredient(breweryKey.key()))

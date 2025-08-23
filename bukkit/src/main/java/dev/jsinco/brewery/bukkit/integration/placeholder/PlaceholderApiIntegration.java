@@ -11,7 +11,7 @@ import org.bukkit.entity.Player;
 
 public class PlaceholderApiIntegration implements PlaceholderIntegration {
     @Override
-    public boolean enabled() {
+    public boolean isEnabled() {
         return ClassUtil.exists("me.clip.placeholderapi.expansion.PlaceholderExpansion");
     }
 
@@ -21,7 +21,7 @@ public class PlaceholderApiIntegration implements PlaceholderIntegration {
     }
 
     @Override
-    public void enable() {
+    public void onEnable() {
         new PlaceholderApiExpansion().register();
     }
 

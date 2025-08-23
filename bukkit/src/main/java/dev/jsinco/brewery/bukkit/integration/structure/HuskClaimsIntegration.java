@@ -20,7 +20,7 @@ public class HuskClaimsIntegration implements StructureIntegration {
     }
 
     @Override
-    public boolean enabled() {
+    public boolean isEnabled() {
         return ENABLED;
     }
 
@@ -30,6 +30,6 @@ public class HuskClaimsIntegration implements StructureIntegration {
     }
 
     @Override
-    public void enable() {}
+    public void onEnable() {}
 
 }

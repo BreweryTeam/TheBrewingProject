@@ -14,8 +14,14 @@ import java.util.concurrent.CompletableFuture;
 
 public interface ItemIntegration extends Integration {
 
+    /**
+     * Creates an ItemStack from the given item identifier
+     */
     Optional<ItemStack> createItem(String id);
 
+    /**
+     * Creates an Ingredient from the given item identifier
+     */
     default CompletableFuture<Optional<Ingredient>> createIngredient(String id) {
         return initialized()
                 .handleAsync((ignored1, exception) -> {
@@ -29,14 +35,26 @@ public interface ItemIntegration extends Integration {
                 );
     }
 
+    /**
+     * Returns the display name of the item with the given identifier
+     */
     @Nullable Component displayName(String id);
 
-    @Nullable String itemId(ItemStack itemStack);
+    /**
+     * Returns the identifier of the given ItemStack, or null if unknown
+     */
+    @Nullable String getItemId(ItemStack itemStack);
 
+    /**
+     * Completes when the integration has finished initializing
+     */
     CompletableFuture<Void> initialized();
 
+    /**
+     * Gets the Ingredient representation of the given ItemStack
+     */
     default Optional<Ingredient> getIngredient(@NotNull ItemStack itemStack) {
-        return Optional.ofNullable(itemId(itemStack))
+        return Optional.ofNullable(getItemId(itemStack))
                 .map(id -> new PluginIngredient(new BreweryKey(getId(), id), this));
     }
 }

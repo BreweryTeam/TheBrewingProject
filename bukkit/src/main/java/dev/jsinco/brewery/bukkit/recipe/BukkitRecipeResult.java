@@ -104,7 +104,7 @@ public class BukkitRecipeResult implements RecipeResult<ItemStack> {
             return TheBrewingProject.getInstance().getIntegrationManager().getIntegrationRegistry()
                     .getIntegrations(IntegrationType.ITEM)
                     .stream()
-                    .filter(Integration::enabled)
+                    .filter(Integration::isEnabled)
                     .filter(integration -> customId.namespace().equals(integration.getId()))
                     .findAny()
                     .orElseThrow(() -> new IllegalStateException("Namespace should be within the supported items plugins"))

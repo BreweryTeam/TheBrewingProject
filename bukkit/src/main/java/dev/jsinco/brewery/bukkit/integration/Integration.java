@@ -1,12 +1,27 @@
 package dev.jsinco.brewery.bukkit.integration;
 
 public interface Integration {
-    boolean enabled();
 
+    /**
+     * Lowercase integration identifier
+     */
     String getId();
 
-    default void load() {
+    /**
+     * Whether the integration is currently enabled
+     * Usually determined by a class existing or not
+     */
+    boolean isEnabled();
+
+    /**
+     * Allows an integration to execute code onLoad
+     */
+    default void onLoad() {
     }
 
-    void enable();
+    /**
+     * Allows an integration to execute code onEnable
+     */
+    default void onEnable() {
+    }
 }

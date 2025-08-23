@@ -44,7 +44,7 @@ public class NexoIntegration implements ItemIntegration, Listener {
     }
 
     @Override
-    public @Nullable String itemId(ItemStack itemStack) {
+    public @Nullable String getItemId(ItemStack itemStack) {
         return NexoItems.idFromItem(itemStack);
     }
 
@@ -54,7 +54,7 @@ public class NexoIntegration implements ItemIntegration, Listener {
     }
 
     @Override
-    public boolean enabled() {
+    public boolean isEnabled() {
         return ENABLED;
     }
 
@@ -64,7 +64,7 @@ public class NexoIntegration implements ItemIntegration, Listener {
     }
 
     @Override
-    public void enable() {
+    public void onEnable() {
         Bukkit.getPluginManager().registerEvents(this, TheBrewingProject.getInstance());
         this.initializedFuture = new CompletableFuture<>();
     }
