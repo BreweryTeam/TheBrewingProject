@@ -200,7 +200,8 @@ public class PlayerEventListener implements Listener {
         cauldronOptional
                 .filter(cauldron -> itemStack.getType() == Material.CLOCK)
                 .filter(cauldron -> event.getPlayer().hasPermission("brewery.cauldron.time"))
-                .ifPresent(cauldron -> Component.translatable("tbp.cauldron.clock-message", Argument.tagResolver(MessageUtil.getTimeTagResolver(cauldron.getTime()))));
+                .ifPresent(cauldron -> event.getPlayer().sendMessage(Component.translatable("tbp.cauldron.clock-message",
+                        Argument.tagResolver(MessageUtil.getTimeTagResolver(cauldron.getTime())))));
         cauldronOptional.ifPresent(ignored -> {
             event.setUseInteractedBlock(Event.Result.DENY);
             event.setUseItemInHand(Event.Result.DENY);
