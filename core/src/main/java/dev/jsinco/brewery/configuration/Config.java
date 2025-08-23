@@ -26,6 +26,15 @@ public class Config extends OkaeriConfig {
     @CustomKey("language")
     private Locale language = Locale.US;
 
+    @Comment({"Configure how time intervals should be displayed:",
+            " - Can use <ticks>, <seconds>, <minutes>, <hours>",
+            " - <if-unit>...</if-unit> is removed when that unit is 0",
+            " - Content inside square brackets ([]) is added only when",
+            "   the last number before it is not 1 (for pluralization)"
+    })
+    @CustomKey("time-format")
+    private String timeFormat = "<if-hours><hours> hour[s], </if-hours><minutes> minute[s] and <seconds> second[s]";
+
     @Comment("Allow hoppers to interact with distilleries and barrels")
     @CustomKey("automation-enabled")
     private boolean automation = true;

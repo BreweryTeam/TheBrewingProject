@@ -14,6 +14,7 @@ import dev.jsinco.brewery.bukkit.ingredient.BukkitIngredientManager;
 import dev.jsinco.brewery.bukkit.integration.IntegrationType;
 import dev.jsinco.brewery.bukkit.recipe.RecipeEffects;
 import dev.jsinco.brewery.bukkit.util.BukkitAdapter;
+import dev.jsinco.brewery.bukkit.util.TimeUtil;
 import dev.jsinco.brewery.configuration.Config;
 import dev.jsinco.brewery.configuration.serializers.ConsumableSerializer;
 import dev.jsinco.brewery.database.PersistenceException;
@@ -32,8 +33,10 @@ import dev.jsinco.brewery.util.MessageUtil;
 import io.papermc.paper.datacomponent.DataComponentTypes;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.minimessage.tag.resolver.Formatter;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.translation.Argument;
+import net.kyori.adventure.translation.GlobalTranslator;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.Tag;
@@ -200,8 +203,11 @@ public class PlayerEventListener implements Listener {
         cauldronOptional
                 .filter(cauldron -> itemStack.getType() == Material.CLOCK)
                 .filter(cauldron -> event.getPlayer().hasPermission("brewery.cauldron.time"))
-                .ifPresent(cauldron -> event.getPlayer().sendMessage(Component.translatable("tbp.cauldron.clock-message",
-                        Argument.tagResolver(MessageUtil.getTimeTagResolver(cauldron.getTime())))));
+                .ifPresent(cauldron -> event.getPlayer().sendMessage(
+                        GlobalTranslator.render(Component.translatable("tbp.cauldron.clock-message"), Config.config().language())
+                                .replaceText(builder -> builder.matchLiteral("<time>").replacement(TimeUtil.formatTime(cauldron.getTime())))
+                ));
+
         cauldronOptional.ifPresent(ignored -> {
             event.setUseInteractedBlock(Event.Result.DENY);
             event.setUseItemInHand(Event.Result.DENY);
