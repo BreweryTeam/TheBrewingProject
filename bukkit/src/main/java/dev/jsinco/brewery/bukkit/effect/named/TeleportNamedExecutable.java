@@ -2,7 +2,7 @@ package dev.jsinco.brewery.bukkit.effect.named;
 
 import dev.jsinco.brewery.bukkit.util.BukkitAdapter;
 import dev.jsinco.brewery.bukkit.util.BukkitMessageUtil;
-import dev.jsinco.brewery.configuration.Config;
+import dev.jsinco.brewery.bukkit.util.LocationUtil;
 import dev.jsinco.brewery.configuration.EventSection;
 import dev.jsinco.brewery.event.EventPropertyExecutable;
 import dev.jsinco.brewery.event.EventStep;
@@ -27,9 +27,8 @@ public class TeleportNamedExecutable implements EventPropertyExecutable {
         if (player == null) {
             return ExecutionResult.CONTINUE;
         }
-        List<UUID> worldUuids = Bukkit.getWorlds().stream().map(World::getUID).toList();
-        List<BreweryLocation> locations = EventSection.events().teleportDestinations().stream().map(uncompiledLocation ->
-                uncompiledLocation.get(worldUuids)
+        List<BreweryLocation> locations = EventSection.events().teleportDestinations().stream().flatMap(uncompiledLocation ->
+                uncompiledLocation.stream(LocationUtil::resolveWorld)
         ).filter(Objects::nonNull).toList();
         if (locations.isEmpty()) {
             return ExecutionResult.CONTINUE;

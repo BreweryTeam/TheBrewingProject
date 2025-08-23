@@ -2,8 +2,10 @@ package dev.jsinco.brewery.vector;
 
 import org.jetbrains.annotations.Nullable;
 
-import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Function;
+import java.util.stream.Stream;
 
 public record BreweryLocation(int x, int y, int z, UUID worldUuid) {
 
@@ -15,18 +17,23 @@ public record BreweryLocation(int x, int y, int z, UUID worldUuid) {
         return new BreweryLocation(x + x(), y + y(), z + z(), worldUuid);
     }
 
-    public interface Uncompiled {
+    public record Uncompiled(int x, int y, int z, String worldIdentifier) {
 
-        @Nullable BreweryLocation get(List<UUID> worldUuids);
+        public Optional<BreweryLocation> get(Function<String, @Nullable UUID> worldUuidFunction) {
+            return Optional.ofNullable(worldUuidFunction.apply(worldIdentifier))
+                    .map(worldUuid -> new BreweryLocation(x, y, z, worldUuid));
+        }
 
-    }
+        /**
+         * Utility method if you want to convert the object in a stream (Stream#flatMap)
+         *
+         * @param worldUuidFunction
+         * @return
+         */
+        public Stream<BreweryLocation> stream(Function<String, @Nullable UUID> worldUuidFunction) {
+            return get(worldUuidFunction).stream();
+        }
 
-    @Override
-    public UUID worldUuid() {
-
-        // Would be neat if it was possible to verify worlds here
-
-        return worldUuid;
     }
 
 }
