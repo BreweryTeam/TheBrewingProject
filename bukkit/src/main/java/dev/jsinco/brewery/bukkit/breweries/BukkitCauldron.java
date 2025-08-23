@@ -209,15 +209,19 @@ public class BukkitCauldron implements dev.jsinco.brewery.breweries.Cauldron {
     }
 
     public void playIngredientAddedEffects(ItemStack item) {
-        Location bukkitLocation = BukkitAdapter.toLocation(this.location).toCenterLocation();
-        World world = bukkitLocation.getWorld();
+        BukkitAdapter.toLocation(this.location)
+                .map(Location::toCenterLocation)
+                .filter(Location::isChunkLoaded)
+                .ifPresent(bukkitLocation -> {
+                    World world = bukkitLocation.getWorld();
 
-        SoundDefinition sound = item.getType() == Material.POTION ? Config.config().sounds().cauldronIngredientAddBrew() : Config.config().sounds().cauldronIngredientAdd();
-        SoundPlayer.playSoundEffect(sound, Sound.Source.BLOCK, bukkitLocation);
+                    SoundDefinition sound = item.getType() == Material.POTION ? Config.config().sounds().cauldronIngredientAddBrew() : Config.config().sounds().cauldronIngredientAdd();
+                    SoundPlayer.playSoundEffect(sound, Sound.Source.BLOCK, bukkitLocation);
 
-        if (getBlock().getType() == Material.WATER_CAULDRON) {
-            world.spawnParticle(Particle.SPLASH, bukkitLocation.add(0.0, 0.5, 0.0), 50, 0.1, 0.05, 0.1, 1.0);
-        }
+                    if (bukkitLocation.getBlock().getType() == Material.WATER_CAULDRON) {
+                        world.spawnParticle(Particle.SPLASH, bukkitLocation.add(0.0, 0.5, 0.0), 50, 0.1, 0.05, 0.1, 1.0);
+                    }
+                });
     }
 
     public void playBrewExtractedEffects() {
@@ -271,7 +275,7 @@ public class BukkitCauldron implements dev.jsinco.brewery.breweries.Cauldron {
     }
 
     private Block getBlock() {
-        return BukkitAdapter.toBlock(location);
+        return BukkitAdapter.toBlock(location).orElseThrow(() -> new IllegalStateException("Could not find world for cauldron"));
     }
 
     public static void incrementLevel(Block block) {

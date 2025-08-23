@@ -6,6 +6,7 @@ import com.comphenix.protocol.events.PacketContainer;
 import com.comphenix.protocol.wrappers.BlockPosition;
 import dev.jsinco.brewery.util.ClassUtil;
 import dev.jsinco.brewery.vector.BreweryLocation;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.Levelled;
@@ -16,7 +17,9 @@ public class BlockUtil {
     private static final boolean PROTOCOL_LIB_ENABLED = ClassUtil.exists("com.comphenix.protocol.events.PacketContainer");
 
     public static boolean isChunkLoaded(BreweryLocation block) {
-        return BukkitAdapter.toLocation(block).isChunkLoaded();
+        return BukkitAdapter.toLocation(block)
+                .map(Location::isChunkLoaded)
+                .orElse(false);
     }
 
     public static boolean isLitCampfire(Block block) {

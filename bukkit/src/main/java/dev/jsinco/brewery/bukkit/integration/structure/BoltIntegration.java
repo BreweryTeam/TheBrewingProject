@@ -31,6 +31,7 @@ public class BoltIntegration implements StructureIntegration {
                 .map(MultiblockStructure::positions)
                 .flatMap(List::stream)
                 .map(BukkitAdapter::toBlock)
+                .flatMap(Optional::stream)
                 .allMatch(position -> boltAPI.canAccess(position, player))
                 && boltAPI.canAccess(block, player);
     }

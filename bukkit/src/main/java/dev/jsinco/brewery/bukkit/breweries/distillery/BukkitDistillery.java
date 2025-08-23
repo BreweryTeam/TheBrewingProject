@@ -22,7 +22,10 @@ import dev.jsinco.brewery.vector.BreweryLocation;
 import lombok.Getter;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
-import org.bukkit.*;
+import org.bukkit.Bukkit;
+import org.bukkit.Color;
+import org.bukkit.Material;
+import org.bukkit.Particle;
 import org.bukkit.block.Block;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
@@ -143,7 +146,7 @@ public class BukkitDistillery implements Distillery<BukkitDistillery, ItemStack,
         Set<BreweryLocation> potLocations = new HashSet<>();
         Material taggedMaterial = Material.valueOf(structure.getStructure().getMeta(StructureMeta.TAGGED_MATERIAL).toUpperCase(Locale.ROOT));
         for (BreweryLocation location : structure.positions()) {
-            Block block = BukkitAdapter.toBlock(location);
+            Block block = BukkitAdapter.toBlock(location).orElseThrow();
             if (taggedMaterial == block.getType()) {
                 potLocations.add(location);
             }
@@ -183,6 +186,7 @@ public class BukkitDistillery implements Distillery<BukkitDistillery, ItemStack,
         if (timeProcessed % (processTime / 4) < processTime / 16 && mixture.brewAmount() > processedBrews) {
             distillateContainerLocations.stream()
                     .map(BukkitAdapter::toLocation)
+                    .flatMap(Optional::stream)
                     .map(location -> location.add(0.5, 1.3, 0.5))
                     .forEach(location -> location.getWorld().spawnParticle(Particle.ENTITY_EFFECT, location, 2, Color.WHITE));
         }
@@ -286,17 +290,21 @@ public class BukkitDistillery implements Distillery<BukkitDistillery, ItemStack,
 
     @Override
     public void destroy(BreweryLocation breweryLocation) {
-        Location location = BukkitAdapter.toLocation(breweryLocation).add(0.5, 0, 0.5);
-        for (BrewInventory distilleryInventory : List.of(distillate, mixture)) {
-            List.copyOf(distilleryInventory.getInventory().getViewers()).forEach(HumanEntity::closeInventory);
-            distilleryInventory.getInventory().clear();
-            for (Brew brew : distilleryInventory.getBrews()) {
-                if (brew == null) {
-                    continue;
-                }
-                location.getWorld().dropItem(location, BrewAdapter.toItem(brew, new Brew.State.Other()));
-            }
-        }
+        BukkitAdapter.toLocation(breweryLocation)
+                .map(location -> location.add(0.5, 0, 0.5))
+                .ifPresent(location -> {
+                    for (BrewInventory distilleryInventory : List.of(distillate, mixture)) {
+                        List.copyOf(distilleryInventory.getInventory().getViewers()).forEach(HumanEntity::closeInventory);
+                        distilleryInventory.getInventory().clear();
+                        for (Brew brew : distilleryInventory.getBrews()) {
+                            if (brew == null) {
+                                continue;
+                            }
+                            location.getWorld().dropItem(location, BrewAdapter.toItem(brew, new Brew.State.Other()));
+                        }
+                    }
+                });
+
     }
 
 }

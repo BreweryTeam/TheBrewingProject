@@ -168,9 +168,12 @@ public class BukkitBarrel implements Barrel<BukkitBarrel, ItemStack, Inventory> 
 
     @Override
     public void destroy(BreweryLocation breweryLocation) {
-        Location location = BukkitAdapter.toLocation(breweryLocation).add(0.5, 0, 0.5);
-        List<ItemStack> contents = inventory.destroy();
-        contents.forEach(itemStack -> location.getWorld().dropItem(location, itemStack));
+        BukkitAdapter.toLocation(breweryLocation)
+                .map(location -> location.add(0.5, 0, 0.5))
+                .ifPresent(location -> {
+                    List<ItemStack> contents = inventory.destroy();
+                    contents.forEach(itemStack -> location.getWorld().dropItem(location, itemStack));
+                });
     }
 
     @Override

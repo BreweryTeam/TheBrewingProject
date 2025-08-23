@@ -9,8 +9,6 @@ import dev.jsinco.brewery.event.EventStep;
 import dev.jsinco.brewery.util.MessageUtil;
 import dev.jsinco.brewery.vector.BreweryLocation;
 import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
@@ -34,9 +32,11 @@ public class TeleportNamedExecutable implements EventPropertyExecutable {
             return ExecutionResult.CONTINUE;
         }
         BreweryLocation teleport = locations.get(RANDOM.nextInt(locations.size()));
-        Location location = BukkitAdapter.toLocation(teleport);
-        player.teleportAsync(location);
-        MessageUtil.message(player, "tbp.events.teleport-message", BukkitMessageUtil.getPlayerTagResolver(player));
+        BukkitAdapter.toLocation(teleport)
+                .ifPresent(location -> {
+                    player.teleportAsync(location);
+                    MessageUtil.message(player, "tbp.events.teleport-message", BukkitMessageUtil.getPlayerTagResolver(player));
+                });
         return ExecutionResult.CONTINUE;
     }
 

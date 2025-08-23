@@ -6,7 +6,6 @@ import dev.jsinco.brewery.event.EventPropertyExecutable;
 import dev.jsinco.brewery.event.EventStep;
 import dev.jsinco.brewery.vector.BreweryLocation;
 import org.bukkit.Bukkit;
-import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
@@ -28,7 +27,7 @@ public class TeleportExecutable implements EventPropertyExecutable {
             return ExecutionResult.CONTINUE;
         }
         location.get(LocationUtil::resolveWorld)
-                .map(BukkitAdapter::toLocation)
+                .flatMap(BukkitAdapter::toLocation)
                 .ifPresent(player::teleportAsync);
         return ExecutionResult.CONTINUE;
     }

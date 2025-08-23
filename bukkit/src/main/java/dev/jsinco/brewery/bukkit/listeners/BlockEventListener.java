@@ -8,11 +8,7 @@ import dev.jsinco.brewery.bukkit.breweries.barrel.BukkitBarrel;
 import dev.jsinco.brewery.bukkit.breweries.barrel.BukkitBarrelDataType;
 import dev.jsinco.brewery.bukkit.breweries.distillery.BukkitDistillery;
 import dev.jsinco.brewery.bukkit.breweries.distillery.BukkitDistilleryDataType;
-import dev.jsinco.brewery.bukkit.structure.BarrelBlockDataMatcher;
-import dev.jsinco.brewery.bukkit.structure.BreweryStructure;
-import dev.jsinco.brewery.bukkit.structure.GenericBlockDataMatcher;
-import dev.jsinco.brewery.bukkit.structure.PlacedBreweryStructure;
-import dev.jsinco.brewery.bukkit.structure.StructureRegistry;
+import dev.jsinco.brewery.bukkit.structure.*;
 import dev.jsinco.brewery.bukkit.util.BukkitAdapter;
 import dev.jsinco.brewery.configuration.Config;
 import dev.jsinco.brewery.database.PersistenceException;
@@ -35,20 +31,17 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.block.BlockBreakEvent;
-import org.bukkit.event.block.BlockBurnEvent;
-import org.bukkit.event.block.BlockExplodeEvent;
-import org.bukkit.event.block.BlockPistonExtendEvent;
-import org.bukkit.event.block.BlockPistonRetractEvent;
-import org.bukkit.event.block.BlockPlaceEvent;
-import org.bukkit.event.block.SignChangeEvent;
+import org.bukkit.event.block.*;
 import org.bukkit.event.entity.EntityChangeBlockEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.inventory.HopperInventorySearchEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class BlockEventListener implements Listener {
@@ -92,7 +85,7 @@ public class BlockEventListener implements Listener {
             return;
         }
         MessageUtil.message(event.getPlayer(), "tbp.barrel.create");
-        BukkitBarrel barrel = new BukkitBarrel(BukkitAdapter.toLocation(placedBreweryStructure.getUnique()), placedBreweryStructure, placedBreweryStructure.getStructure().getMeta(StructureMeta.INVENTORY_SIZE), placedStructurePair.second());
+        BukkitBarrel barrel = new BukkitBarrel(BukkitAdapter.toLocation(placedBreweryStructure.getUnique()).orElseThrow(), placedBreweryStructure, placedBreweryStructure.getStructure().getMeta(StructureMeta.INVENTORY_SIZE), placedStructurePair.second());
         placedBreweryStructure.setHolder(barrel);
         placedStructureRegistry.registerStructure(placedBreweryStructure);
         breweryRegistry.registerInventory(barrel);

@@ -12,8 +12,9 @@ import java.util.Optional;
 
 public class BukkitAdapter {
 
-    public static Location toLocation(BreweryLocation location) {
-        return new Location(Bukkit.getWorld(location.worldUuid()), location.x(), location.y(), location.z());
+    public static Optional<Location> toLocation(BreweryLocation location) {
+        return Optional.ofNullable(Bukkit.getWorld(location.worldUuid()))
+                .map(world -> new Location(world, location.x(), location.y(), location.z()));
     }
 
     public static BreweryLocation toBreweryLocation(Location location) {
@@ -24,8 +25,9 @@ public class BukkitAdapter {
         return new BreweryLocation(block.getX(), block.getY(), block.getZ(), block.getWorld().getUID());
     }
 
-    public static Block toBlock(BreweryLocation location) {
-        return Bukkit.getWorld(location.worldUuid()).getBlockAt(location.x(), location.y(), location.z());
+    public static Optional<Block> toBlock(BreweryLocation location) {
+        return Optional.ofNullable(Bukkit.getWorld(location.worldUuid()))
+                .map(world -> world.getBlockAt(location.x(), location.y(), location.z()));
     }
 
     public static NamespacedKey toNamespacedKey(BreweryKey breweryKey) {
@@ -38,18 +40,6 @@ public class BukkitAdapter {
 
     public static Optional<World> toWorld(BreweryLocation location) {
         return Optional.ofNullable(Bukkit.getWorld(location.worldUuid()));
-    }
-
-    public static @Nullable Location parseLocation(String teleport) {
-        String[] split = teleport.split(",");
-        World world = Bukkit.getWorld(split[0]);
-        if (world == null) {
-            return null;
-        }
-        int x = Integer.parseInt(split[1].strip());
-        int y = Integer.parseInt(split[2].strip());
-        int z = Integer.parseInt(split[3].strip());
-        return new Location(world, x, y, z);
     }
 
     public static @Nullable Material toMaterial(Holder.Material material) {
