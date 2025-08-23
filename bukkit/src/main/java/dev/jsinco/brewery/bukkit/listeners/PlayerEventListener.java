@@ -31,6 +31,7 @@ import dev.jsinco.brewery.util.MessageUtil;
 import io.papermc.paper.datacomponent.DataComponentTypes;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.translation.Argument;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
@@ -91,6 +92,16 @@ public class PlayerEventListener implements Listener {
         if (possibleStructureHolder.isEmpty()) {
             return;
         }
+
+        if (!TheBrewingProject.getInstance().getIntegrationManager().retrieve(IntegrationType.STRUCTURE)
+                .stream()
+                .map(structureIntegration -> structureIntegration.hasAccess(playerInteractEvent.getClickedBlock(), playerInteractEvent.getPlayer()))
+                .reduce(true, Boolean::logicalAnd)) {
+            String structureType = possibleStructureHolder.get().getStructureType().key().key().toLowerCase();
+            MessageUtil.message(playerInteractEvent.getPlayer(), "tbp." + structureType + ".access-denied");
+            return;
+        }
+
         if (possibleStructureHolder.get() instanceof InventoryAccessible<?, ?> inventoryAccessible
                 && inventoryAccessible.open(BukkitAdapter.toBreweryLocation(playerInteractEvent.getClickedBlock()), playerInteractEvent.getPlayer().getUniqueId())) {
             breweryRegistry.registerOpened((InventoryAccessible<ItemStack, Inventory>) inventoryAccessible);
@@ -112,6 +123,7 @@ public class PlayerEventListener implements Listener {
                 .stream()
                 .map(structureIntegration -> structureIntegration.hasAccess(event.getClickedBlock(), event.getPlayer()))
                 .reduce(true, Boolean::logicalAnd)) {
+            // send something to the player here?
             return;
         }
         if (Tag.CAULDRONS.isTagged(block.getType())) {

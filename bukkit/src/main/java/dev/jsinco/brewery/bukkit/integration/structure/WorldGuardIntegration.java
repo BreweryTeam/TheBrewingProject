@@ -24,11 +24,6 @@ public class WorldGuardIntegration implements StructureIntegration {
     }
 
     @Override
-    public void onEnable() {
-        // NO-OP
-    }
-
-    @Override
     public boolean hasAccess(Block block, Player player) {
         WorldGuard worldGuard = WorldGuard.getInstance();
         WorldGuardPlugin instance = WorldGuardPlugin.inst();
