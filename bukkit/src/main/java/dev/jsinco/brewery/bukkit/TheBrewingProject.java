@@ -1,5 +1,6 @@
 package dev.jsinco.brewery.bukkit;
 
+import com.google.common.base.Preconditions;
 import dev.jsinco.brewery.TheBrewingProjectApi;
 import dev.jsinco.brewery.brew.BrewManager;
 import dev.jsinco.brewery.breweries.Barrel;
@@ -18,7 +19,6 @@ import dev.jsinco.brewery.bukkit.effect.event.ActiveEventsRegistry;
 import dev.jsinco.brewery.bukkit.effect.event.DrunkEventExecutor;
 import dev.jsinco.brewery.bukkit.ingredient.BukkitIngredientManager;
 import dev.jsinco.brewery.bukkit.integration.IntegrationManager;
-import dev.jsinco.brewery.bukkit.integration.structure.LandsIntegration;
 import dev.jsinco.brewery.bukkit.listeners.*;
 import dev.jsinco.brewery.bukkit.recipe.BukkitRecipeResultReader;
 import dev.jsinco.brewery.bukkit.recipe.DefaultRecipeReader;
@@ -103,6 +103,7 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
     @Getter
     private PlayerWalkListener playerWalkListener;
     private BreweryTranslator translator;
+    private boolean successfullLoad = false;
 
     public void initialize() {
         instance = this;
@@ -128,6 +129,7 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
         Bukkit.getServicesManager().register(TheBrewingProjectApi.class, this, this, ServicePriority.Normal);
         integrationManager.registerIntegrations();
         integrationManager.loadIntegrations();
+        this.successfullLoad = true;
     }
 
     private OkaeriSerdesPack serializers() {
@@ -222,6 +224,7 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
 
     @Override
     public void onEnable() {
+        Preconditions.checkState(successfullLoad, "Plugin loading failed, see above exception in load stage");
         loadStructures();
         integrationManager.enableIntegrations();
         this.database = new Database(DatabaseDriver.SQLITE);
