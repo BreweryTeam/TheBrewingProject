@@ -1,4 +1,4 @@
-package dev.jsinco.brewery.bukkit.listeners;
+package dev.jsinco.brewery.bukkit.event;
 
 import com.destroystokyo.paper.event.player.PlayerLaunchProjectileEvent;
 import dev.jsinco.brewery.brew.BrewImpl;
