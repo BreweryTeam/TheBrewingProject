@@ -15,15 +15,15 @@ public interface DrunksManager {
 
     @Nullable DrunkState getDrunkState(UUID playerUuid);
 
-    void reset(Set<BreweryKey> allowedEvents);
+    void reset(@NotNull Set<BreweryKey> allowedEvents);
 
-    void clear(UUID playerUuid);
+    void clear(@NotNull UUID playerUuid);
 
-    void planEvent(UUID playerUuid);
+    void planEvent(@NotNull UUID playerUuid);
 
     void registerPassedOut(@NotNull UUID playerUUID);
 
     boolean isPassedOut(@NotNull UUID playerUUID);
 
-    @Nullable Pair<DrunkEvent, Long> getPlannedEvent(UUID playerUUID);
+    @Nullable Pair<DrunkEvent, Long> getPlannedEvent(@NotNull UUID playerUUID);
 }

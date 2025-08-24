@@ -99,7 +99,7 @@ public class DrunksManagerImpl<C> implements DrunksManager {
 
     }
 
-    public void reset(Set<BreweryKey> allowedEvents) {
+    public void reset(@NotNull Set<BreweryKey> allowedEvents) {
         plannedEvents.clear();
         drunks.clear();
         this.allowedEvents = allowedEvents;
@@ -121,7 +121,7 @@ public class DrunksManagerImpl<C> implements DrunksManager {
         return output.build();
     }
 
-    public void clear(UUID playerUuid) {
+    public void clear(@NotNull UUID playerUuid) {
         Long plannedEventTime = plannedEvents.remove(playerUuid);
         drunks.remove(playerUuid);
         try {
@@ -157,7 +157,7 @@ public class DrunksManagerImpl<C> implements DrunksManager {
                 .forEach(this::planEvent);
     }
 
-    public void planEvent(UUID playerUuid) {
+    public void planEvent(@NotNull UUID playerUuid) {
         if (plannedEvents.containsKey(playerUuid)) {
             return;
         }
@@ -201,7 +201,7 @@ public class DrunksManagerImpl<C> implements DrunksManager {
     }
 
     @Override
-    public @Nullable Pair<DrunkEvent, Long> getPlannedEvent(UUID playerUUID) {
+    public @Nullable Pair<DrunkEvent, Long> getPlannedEvent(@NotNull UUID playerUUID) {
         Long time = plannedEvents.get(playerUUID);
         if (time == null) {
             return null;
