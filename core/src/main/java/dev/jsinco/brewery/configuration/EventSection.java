@@ -88,7 +88,7 @@ public class EventSection extends OkaeriConfig {
     @CustomKey("blurred-speech")
     private boolean blurredSpeech = true;
 
-    @Comment("What upwards velocity the player will get in kaboom event")
+    @Comment("What upwards velocity the player will get in the kaboom event")
     @CustomKey("kaboom-velocity")
     private double kaboomVelocity = 0.2;
 
