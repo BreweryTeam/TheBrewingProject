@@ -52,6 +52,7 @@ You can download the latest release on [Hangar](https://hangar.papermc.io/Brewer
 
 ### Developers
 **API**
+Importing the API
 ```kts
 repositories {
     maven("https://jitpack.io")
@@ -61,9 +62,7 @@ dependencies {
     compileOnly("com.github.BreweryTeam.TheBrewingProject:api-bukkit:v2.0.0")
 }
 ```
-
-
-
+Simple use of the API
 ```java
 
 public void onLoad() {
