@@ -18,7 +18,7 @@ import dev.jsinco.brewery.bukkit.effect.event.ActiveEventsRegistry;
 import dev.jsinco.brewery.bukkit.effect.event.DrunkEventExecutor;
 import dev.jsinco.brewery.bukkit.ingredient.BukkitIngredientManager;
 import dev.jsinco.brewery.bukkit.integration.IntegrationManagerImpl;
-import dev.jsinco.brewery.bukkit.listeners.*;
+import dev.jsinco.brewery.bukkit.event.*;
 import dev.jsinco.brewery.bukkit.recipe.BukkitRecipeResultReader;
 import dev.jsinco.brewery.bukkit.recipe.DefaultRecipeReader;
 import dev.jsinco.brewery.bukkit.structure.*;

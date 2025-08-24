@@ -5,7 +5,7 @@ import dev.jsinco.brewery.breweries.CauldronType;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.bukkit.brew.BrewAdapter;
 import dev.jsinco.brewery.bukkit.ingredient.BukkitIngredientManager;
-import dev.jsinco.brewery.bukkit.listeners.ListenerUtil;
+import dev.jsinco.brewery.bukkit.event.ListenerUtil;
 import dev.jsinco.brewery.bukkit.recipe.BukkitRecipeResult;
 import dev.jsinco.brewery.bukkit.util.*;
 import dev.jsinco.brewery.bukkit.adapter.BukkitAdapter;

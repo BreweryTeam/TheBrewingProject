@@ -1,4 +1,4 @@
-package dev.jsinco.brewery.bukkit.listeners;
+package dev.jsinco.brewery.bukkit.event;
 
 import dev.jsinco.brewery.bukkit.breweries.BreweryRegistry;
 import dev.jsinco.brewery.bukkit.breweries.BukkitCauldron;
