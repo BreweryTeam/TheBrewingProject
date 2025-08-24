@@ -1,7 +1,6 @@
 package dev.jsinco.brewery.bukkit;
 
 import com.google.common.base.Preconditions;
-import dev.jsinco.brewery.TheBrewingProjectApi;
 import dev.jsinco.brewery.brew.BrewManager;
 import dev.jsinco.brewery.breweries.Barrel;
 import dev.jsinco.brewery.breweries.BarrelType;
@@ -18,7 +17,7 @@ import dev.jsinco.brewery.bukkit.effect.SqlDrunkStateDataType;
 import dev.jsinco.brewery.bukkit.effect.event.ActiveEventsRegistry;
 import dev.jsinco.brewery.bukkit.effect.event.DrunkEventExecutor;
 import dev.jsinco.brewery.bukkit.ingredient.BukkitIngredientManager;
-import dev.jsinco.brewery.bukkit.integration.IntegrationManager;
+import dev.jsinco.brewery.bukkit.integration.IntegrationManagerImpl;
 import dev.jsinco.brewery.bukkit.listeners.*;
 import dev.jsinco.brewery.bukkit.recipe.BukkitRecipeResultReader;
 import dev.jsinco.brewery.bukkit.recipe.DefaultRecipeReader;
@@ -97,7 +96,7 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
     @Getter
     private BrewManager<ItemStack> brewManager = new BukkitBrewManager();
     @Getter
-    private final IntegrationManager integrationManager = new IntegrationManager();
+    private final IntegrationManagerImpl integrationManager = new IntegrationManagerImpl();
     @Getter
     private final ActiveEventsRegistry activeEventsRegistry = new ActiveEventsRegistry();
     @Getter
