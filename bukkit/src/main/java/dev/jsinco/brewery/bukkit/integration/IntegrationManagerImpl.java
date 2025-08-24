@@ -5,13 +5,14 @@ import dev.jsinco.brewery.bukkit.integration.placeholder.MiniPlaceholdersIntegra
 import dev.jsinco.brewery.bukkit.integration.placeholder.PlaceholderApiIntegration;
 import dev.jsinco.brewery.bukkit.integration.structure.*;
 import dev.jsinco.brewery.integration.Integration;
+import dev.jsinco.brewery.integration.IntegrationManager;
 import dev.jsinco.brewery.integration.IntegrationType;
 import dev.jsinco.brewery.util.Logger;
 import lombok.Getter;
 
 import java.util.Set;
 
-public class IntegrationManager {
+public class IntegrationManagerImpl implements IntegrationManager {
     @Getter
     private final IntegrationRegistry integrationRegistry = new IntegrationRegistry();
 
@@ -43,6 +44,7 @@ public class IntegrationManager {
         integrationRegistry.getIntegrations(IntegrationTypes.PLACEHOLDER).forEach(Integration::onEnable);
     }
 
+    @Override
     public <T extends Integration> void register(IntegrationType<? extends T> type, T integration) {
         if (!integration.isEnabled()) {
             return;
