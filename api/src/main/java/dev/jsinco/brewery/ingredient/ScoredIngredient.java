@@ -1,8 +1,19 @@
 package dev.jsinco.brewery.ingredient;
 
-public interface ScoredIngredient extends Ingredient {
+import net.kyori.adventure.text.Component;
+import org.jetbrains.annotations.NotNull;
 
-    double score();
+public record ScoredIngredient(Ingredient baseIngredient, double score) implements Ingredient {
 
-    Ingredient baseIngredient();
+    @Override
+    public @NotNull String getKey() {
+        return baseIngredient.getKey();
+    }
+
+    @Override
+    public @NotNull Component displayName() {
+        return baseIngredient.displayName()
+                .append(Component.text("-"))
+                .append(Component.text(score));
+    }
 }

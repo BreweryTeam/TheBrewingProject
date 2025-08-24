@@ -2,9 +2,10 @@ package dev.jsinco.brewery.bukkit.ingredient;
 
 import dev.jsinco.brewery.bukkit.brew.BrewAdapter;
 import dev.jsinco.brewery.ingredient.Ingredient;
+import dev.jsinco.brewery.ingredient.ScoredIngredient;
 import dev.jsinco.brewery.util.BreweryKey;
-import io.papermc.paper.persistence.PersistentDataContainerView;
 import dev.jsinco.brewery.util.MessageUtil;
+import io.papermc.paper.persistence.PersistentDataContainerView;
 import net.kyori.adventure.text.Component;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
@@ -60,7 +61,7 @@ public class BreweryIngredient implements Ingredient {
         BreweryKey breweryKey = BreweryKey.parse(key);
         displayName = displayName == null ? breweryKey.key() : displayName;
         if (score != null) {
-            return Optional.of(new ScoredBreweryIngredient(breweryKey, score, displayName));
+            return Optional.of(new ScoredIngredient(new BreweryIngredient(breweryKey, displayName), score));
         }
         return Optional.of(new BreweryIngredient(breweryKey, displayName));
     }
