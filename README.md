@@ -58,7 +58,7 @@ repositories {
 }
 
 dependencies {
-    compileOnly("com.github.BreweryTeam.TheBrewingProject:api-bukkit:2.0.0")
+    compileOnly("com.github.BreweryTeam.TheBrewingProject:api-bukkit:v2.0.0")
 }
 ```
 
