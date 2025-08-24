@@ -22,8 +22,15 @@ public interface BrewingStep {
      */
     List<PartialBrewScore> proximityScores(BrewingStep other);
 
+    /**
+     * @return The type of the step
+     */
     StepType stepType();
 
+    /**
+     * @param other Another brewing step
+     * @return The maximum scores "other" can get for this brewing step
+     */
     List<PartialBrewScore> maximumScores(BrewingStep other);
 
     List<PartialBrewScore> failedScores();
