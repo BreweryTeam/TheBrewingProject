@@ -1,5 +1,7 @@
 package dev.jsinco.brewery.bukkit.integration;
 
+import dev.jsinco.brewery.integration.Integration;
+import dev.jsinco.brewery.integration.IntegrationType;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.*;
@@ -7,7 +9,7 @@ import java.util.*;
 public class IntegrationRegistry {
     private final Map<IntegrationType<?>, Set<? extends Integration>> integrations = new HashMap<>();
 
-    public <T extends Integration> void register(IntegrationType<?> type, T integration) {
+    public <T extends Integration> void register(IntegrationType<? extends T> type, T integration) {
         Set<? extends Integration> integrationSet = integrations.computeIfAbsent(type, k -> new HashSet<>());
 
         if (!type.integrationClass().isInstance(integration)) {

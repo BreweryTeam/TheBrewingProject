@@ -5,10 +5,10 @@ import dev.jsinco.brewery.brew.BrewScore;
 import dev.jsinco.brewery.brew.BrewingStep;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.bukkit.brew.BrewAdapter;
-import dev.jsinco.brewery.bukkit.integration.Integration;
-import dev.jsinco.brewery.bukkit.integration.IntegrationType;
+import dev.jsinco.brewery.bukkit.integration.IntegrationTypes;
+import dev.jsinco.brewery.integration.Integration;
 import dev.jsinco.brewery.bukkit.integration.ItemIntegration;
-import dev.jsinco.brewery.bukkit.util.BukkitAdapter;
+import dev.jsinco.brewery.bukkit.adapter.BukkitAdapter;
 import dev.jsinco.brewery.configuration.Config;
 import dev.jsinco.brewery.recipe.RecipeResult;
 import dev.jsinco.brewery.util.BreweryKey;
@@ -102,7 +102,7 @@ public class BukkitRecipeResult implements RecipeResult<ItemStack> {
             return itemType.createItemStack();
         } else {
             return TheBrewingProject.getInstance().getIntegrationManager().getIntegrationRegistry()
-                    .getIntegrations(IntegrationType.ITEM)
+                    .getIntegrations(IntegrationTypes.ITEM)
                     .stream()
                     .filter(Integration::isEnabled)
                     .filter(integration -> customId.namespace().equals(integration.getId()))
@@ -251,7 +251,7 @@ public class BukkitRecipeResult implements RecipeResult<ItemStack> {
                 return this;
             }
             BreweryKey namespacedKey = BreweryKey.parse(customId.toLowerCase(Locale.ROOT), "minecraft");
-            List<String> ids = TheBrewingProject.getInstance().getIntegrationManager().retrieve(IntegrationType.ITEM)
+            List<String> ids = TheBrewingProject.getInstance().getIntegrationManager().retrieve(IntegrationTypes.ITEM)
                     .stream().map(ItemIntegration::getId)
                     .toList();
             if (ids.contains(namespacedKey.namespace()) || "minecraft".equals(namespacedKey.namespace())) {

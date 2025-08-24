@@ -5,15 +5,15 @@ import dev.jsinco.brewery.brew.BrewImpl;
 import dev.jsinco.brewery.breweries.InventoryAccessible;
 import dev.jsinco.brewery.breweries.StructureHolder;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
+import dev.jsinco.brewery.bukkit.adapter.BukkitAdapter;
 import dev.jsinco.brewery.bukkit.brew.BrewAdapter;
 import dev.jsinco.brewery.bukkit.breweries.BreweryRegistry;
 import dev.jsinco.brewery.bukkit.breweries.BukkitCauldron;
 import dev.jsinco.brewery.bukkit.breweries.BukkitCauldronDataType;
 import dev.jsinco.brewery.bukkit.effect.event.DrunkEventExecutor;
 import dev.jsinco.brewery.bukkit.ingredient.BukkitIngredientManager;
-import dev.jsinco.brewery.bukkit.integration.IntegrationType;
+import dev.jsinco.brewery.bukkit.integration.IntegrationTypes;
 import dev.jsinco.brewery.bukkit.recipe.RecipeEffects;
-import dev.jsinco.brewery.bukkit.util.BukkitAdapter;
 import dev.jsinco.brewery.bukkit.util.TimeUtil;
 import dev.jsinco.brewery.configuration.Config;
 import dev.jsinco.brewery.configuration.serializers.ConsumableSerializer;
@@ -30,12 +30,10 @@ import dev.jsinco.brewery.structure.PlacedStructureRegistryImpl;
 import dev.jsinco.brewery.util.BreweryKey;
 import dev.jsinco.brewery.util.Logger;
 import dev.jsinco.brewery.util.MessageUtil;
+import dev.jsinco.brewery.vector.BreweryLocation;
 import io.papermc.paper.datacomponent.DataComponentTypes;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
-import net.kyori.adventure.text.minimessage.tag.resolver.Formatter;
-import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
-import net.kyori.adventure.text.minimessage.translation.Argument;
 import net.kyori.adventure.translation.GlobalTranslator;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
@@ -92,11 +90,12 @@ public class PlayerEventListener implements Listener {
         if (playerInteractEvent.getAction() != Action.RIGHT_CLICK_BLOCK || playerInteractEvent.getPlayer().isSneaking() || playerInteractEvent.getHand() != EquipmentSlot.HAND) {
             return;
         }
-        Optional<StructureHolder<?>> possibleStructureHolder = placedStructureRegistry.getHolder(BukkitAdapter.toBreweryLocation(playerInteractEvent.getClickedBlock().getLocation()));
+        BreweryLocation location = BukkitAdapter.toBreweryLocation(playerInteractEvent.getClickedBlock().getLocation());
+        Optional<StructureHolder<?>> possibleStructureHolder = placedStructureRegistry.getHolder(location);
         if (possibleStructureHolder.isEmpty()) {
             return;
         }
-        if (!TheBrewingProject.getInstance().getIntegrationManager().retrieve(IntegrationType.STRUCTURE)
+        if (!TheBrewingProject.getInstance().getIntegrationManager().retrieve(IntegrationTypes.STRUCTURE)
                 .stream()
                 .map(structureIntegration -> structureIntegration.hasAccess(playerInteractEvent.getClickedBlock(), playerInteractEvent.getPlayer(), possibleStructureHolder.get().getStructureType().key()))
                 .reduce(true, Boolean::logicalAnd)) {
@@ -122,7 +121,7 @@ public class PlayerEventListener implements Listener {
         }
 
         boolean cauldron = Tag.CAULDRONS.isTagged(block.getType());
-        if (!TheBrewingProject.getInstance().getIntegrationManager().retrieve(IntegrationType.STRUCTURE)
+        if (!TheBrewingProject.getInstance().getIntegrationManager().retrieve(IntegrationTypes.STRUCTURE)
                 .stream()
                 .map(structureIntegration -> structureIntegration.hasAccess(event.getClickedBlock(), event.getPlayer(),
                         cauldron ? BreweryKey.parse("cauldron") : BreweryKey.parse("sealing_table")))

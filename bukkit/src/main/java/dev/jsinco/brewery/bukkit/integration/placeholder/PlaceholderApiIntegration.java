@@ -7,7 +7,6 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.tag.Tag;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import org.bukkit.OfflinePlayer;
-import org.bukkit.entity.Player;
 
 public class PlaceholderApiIntegration implements PlaceholderIntegration {
     @Override
