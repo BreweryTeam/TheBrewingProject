@@ -23,6 +23,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.stream.Stream;
 
 public class MessageUtil {
@@ -52,7 +53,7 @@ public class MessageUtil {
         );
     }
 
-    public static @NotNull TagResolver getBrewStepTagResolver(BrewingStep brewingStep, List<PartialBrewScore> scores, double difficulty) {
+    public static @NotNull TagResolver getBrewStepTagResolver(BrewingStep brewingStep, Map<PartialBrewScore.Type, PartialBrewScore> scores, double difficulty) {
         TagResolver resolver = switch (brewingStep) {
             case BrewingStep.Age age -> TagResolver.resolver(
                     Placeholder.component("barrel_type", Component.translatable("tbp.barrel.type." + age.barrelType().name().toLowerCase(Locale.ROOT))),
@@ -81,7 +82,7 @@ public class MessageUtil {
             );
             default -> throw new IllegalStateException("Unexpected value: " + brewingStep);
         };
-        return TagResolver.resolver(resolver, TagResolver.resolver(scores.stream()
+        return TagResolver.resolver(resolver, TagResolver.resolver(scores.values().stream()
                 .map(partialBrewScore ->
                         Placeholder.styling(partialBrewScore.type().colorKey(), resolveQualityColor(
                                 BrewScoreImpl.quality(BrewScoreImpl.applyDifficulty(partialBrewScore.score(), difficulty))
@@ -100,7 +101,11 @@ public class MessageUtil {
         for (int i = 0; i < brewingSteps.size(); i++) {
             BrewingStep brewingStep = brewingSteps.get(i);
             String translationKey = (detailed ? "tbp.brew.detailed-tooltip." : "tbp.brew.tooltip-brewing.") + brewingStep.stepType().name().toLowerCase(Locale.ROOT);
-            streamBuilder.add(Component.translatable(translationKey, Argument.tagResolver(MessageUtil.getBrewStepTagResolver(brewingStep, score.getPartialScores(i), score.brewDifficulty()))));
+            streamBuilder.add(
+                    Component.translatable(translationKey,
+                            Argument.tagResolver(MessageUtil.getBrewStepTagResolver(brewingStep, score.getPartialScores(i), score.brewDifficulty()))
+                    )
+            );
         }
         return streamBuilder.build();
     }

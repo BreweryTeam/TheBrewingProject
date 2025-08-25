@@ -3,7 +3,9 @@ package dev.jsinco.brewery.recipes;
 import dev.jsinco.brewery.brew.*;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 public class BrewScoreImpl implements BrewScore {
 
@@ -12,18 +14,18 @@ public class BrewScoreImpl implements BrewScore {
     private static final char HALF_STAR = '\u2BEA';
     private static final char EMPTY_STAR = '\u2606';
 
-    private final List<List<PartialBrewScore>> scores;
+    private final List<Map<PartialBrewScore.Type, PartialBrewScore>> scores;
     private final boolean completed;
     private final double brewDifficulty;
 
     public BrewScoreImpl(double score) {
-        this.scores = List.of(List.of(new PartialBrewScore(score, PartialBrewScore.Type.TIME)));
+        this.scores = List.of(Map.of(PartialBrewScore.Type.TIME, new PartialBrewScore(score, PartialBrewScore.Type.TIME)));
         completed = true;
         brewDifficulty = 1;
     }
 
     public static BrewScoreImpl failed(Brew brew) {
-        List<List<PartialBrewScore>> scores = brew.getCompletedSteps()
+        List<Map<PartialBrewScore.Type, PartialBrewScore>> scores = brew.getCompletedSteps()
                 .stream().map(BrewingStep::failedScores)
                 .toList();
         return new BrewScoreImpl(scores, true, 1);
@@ -33,14 +35,14 @@ public class BrewScoreImpl implements BrewScore {
         return quality(score());
     }
 
-    public BrewScoreImpl(List<List<PartialBrewScore>> scores, boolean completed, double brewDifficulty) {
+    public BrewScoreImpl(List<Map<PartialBrewScore.Type, PartialBrewScore>> scores, boolean completed, double brewDifficulty) {
         this.scores = scores;
         this.completed = completed;
         this.brewDifficulty = brewDifficulty / 2;
     }
 
     @Override
-    public List<PartialBrewScore> getPartialScores(int stepIndex) {
+    public Map<PartialBrewScore.Type, PartialBrewScore> getPartialScores(int stepIndex) {
         return scores.get(stepIndex);
     }
 
@@ -84,11 +86,12 @@ public class BrewScoreImpl implements BrewScore {
     @Override
     public double rawScore() {
         return this.scores.stream()
+                .map(Map::values)
                 .map(this::rawPartialScore)
                 .reduce(1D, (aDouble, aDouble2) -> aDouble * aDouble2);
     }
 
-    private double rawPartialScore(List<PartialBrewScore> partialBrewScores) {
+    private double rawPartialScore(Collection<PartialBrewScore> partialBrewScores) {
         return partialBrewScores.stream()
                 .map(PartialBrewScore::score)
                 .map(score -> partialBrewScores.size() == 1 ? score : Math.sqrt(score))
