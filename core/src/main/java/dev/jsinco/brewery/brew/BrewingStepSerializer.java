@@ -9,7 +9,7 @@ import dev.jsinco.brewery.ingredient.IngredientManager;
 import dev.jsinco.brewery.ingredient.IngredientUtil;
 import dev.jsinco.brewery.moment.Moment;
 import dev.jsinco.brewery.util.BreweryKey;
-import dev.jsinco.brewery.util.Registry;
+import dev.jsinco.brewery.util.BreweryRegistry;
 
 import java.util.Locale;
 import java.util.Map;
@@ -56,11 +56,11 @@ public class BrewingStepSerializer {
                             .thenApplyAsync(ingredients -> new CookStepImpl(
                                     Moment.SERIALIZER.deserialize(object.get("brew_time")),
                                     ingredients,
-                                    Registry.CAULDRON_TYPE.get(BreweryKey.parse(object.get("cauldron_type").getAsString()))
+                                    BreweryRegistry.CAULDRON_TYPE.get(BreweryKey.parse(object.get("cauldron_type").getAsString()))
                             ));
             case DISTILL -> CompletableFuture.completedFuture(new DistillStepImpl(object.get("runs").getAsInt()));
             case AGE ->
-                    CompletableFuture.completedFuture(new AgeStepImpl(Moment.SERIALIZER.deserialize(object.get("age")), Registry.BARREL_TYPE.get(BreweryKey.parse(object.get("barrel_type").getAsString()))));
+                    CompletableFuture.completedFuture(new AgeStepImpl(Moment.SERIALIZER.deserialize(object.get("age")), BreweryRegistry.BARREL_TYPE.get(BreweryKey.parse(object.get("barrel_type").getAsString()))));
             case MIX ->
                     IngredientUtil.ingredientsFromJson(object.get("ingredients").getAsJsonObject(), ingredientManager)
                             .thenApplyAsync(ingredients -> new MixStepImpl(

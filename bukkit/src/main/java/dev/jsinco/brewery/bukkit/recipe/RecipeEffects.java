@@ -9,7 +9,7 @@ import dev.jsinco.brewery.event.CustomEventRegistry;
 import dev.jsinco.brewery.event.DrunkEvent;
 import dev.jsinco.brewery.util.BreweryKey;
 import dev.jsinco.brewery.util.MessageUtil;
-import dev.jsinco.brewery.util.Registry;
+import dev.jsinco.brewery.util.BreweryRegistry;
 import io.papermc.paper.persistence.PersistentDataContainerView;
 import lombok.Getter;
 import net.kyori.adventure.text.Component;
@@ -71,8 +71,8 @@ public class RecipeEffects {
         return events
                 .stream()
                 .map(eventKey -> {
-                    if (Registry.DRUNK_EVENT.containsKey(eventKey)) {
-                        return Registry.DRUNK_EVENT.get(eventKey);
+                    if (BreweryRegistry.DRUNK_EVENT.containsKey(eventKey)) {
+                        return BreweryRegistry.DRUNK_EVENT.get(eventKey);
                     } else {
                         return customEventRegistry.getCustomEvent(eventKey);
                     }

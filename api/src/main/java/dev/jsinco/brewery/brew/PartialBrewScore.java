@@ -2,6 +2,10 @@ package dev.jsinco.brewery.brew;
 
 import java.util.Locale;
 
+/**
+ * @param score The partial score
+ * @param type  The type of the partial score
+ */
 public record PartialBrewScore(double score, Type type) {
 
     public enum Type {

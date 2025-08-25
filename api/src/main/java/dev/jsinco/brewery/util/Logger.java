@@ -1,7 +1,10 @@
 package dev.jsinco.brewery.util;
 
+import org.jetbrains.annotations.ApiStatus;
+
 import java.util.logging.Level;
 
+@ApiStatus.Internal
 public final class Logger {
 
     public static void log(String message) {

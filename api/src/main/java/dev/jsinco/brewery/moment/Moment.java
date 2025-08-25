@@ -12,10 +12,25 @@ public sealed interface Moment permits Interval, PassedMoment {
 
     Serializer SERIALIZER = new Serializer();
 
+    /**
+     * @return A time representing this moment instance
+     */
     long moment();
 
+    /**
+     * Can change the result of {@link #moment()}
+     *
+     * @param lastStep A last step time
+     * @return A new interval with a new last step property
+     */
     Interval withLastStep(long lastStep);
 
+    /**
+     * Does not change the result of {@link #moment()}
+     *
+     * @param newStart A new start time
+     * @return A new interval with a moved ending
+     */
     Interval withMovedEnding(long newStart);
 
     class Serializer {

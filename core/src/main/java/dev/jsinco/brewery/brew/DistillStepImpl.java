@@ -11,7 +11,7 @@ public record DistillStepImpl(int runs) implements BrewingStep.Distill {
     ).collect(Collectors.toUnmodifiableMap(PartialBrewScore::type, partial -> partial));
 
     @Override
-    public DistillStepImpl incrementAmount() {
+    public DistillStepImpl incrementRuns() {
         return new DistillStepImpl(this.runs + 1);
     }
 

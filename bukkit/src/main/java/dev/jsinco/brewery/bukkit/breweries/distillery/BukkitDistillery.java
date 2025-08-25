@@ -282,7 +282,7 @@ public class BukkitDistillery implements Distillery<BukkitDistillery, ItemStack,
             inventory1.store(null, nextBrewToTransfer.second());
             inventory2.store(mixtureBrew.withLastStep(
                             BrewingStep.Distill.class,
-                            BrewingStep.Distill::incrementAmount,
+                            BrewingStep.Distill::incrementRuns,
                             () -> new DistillStepImpl(1))
                     , i);
         }

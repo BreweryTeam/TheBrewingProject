@@ -6,6 +6,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import dev.jsinco.brewery.structure.StructureMeta;
 import dev.jsinco.brewery.util.BreweryKey;
+import dev.jsinco.brewery.util.BreweryRegistry;
 import dev.jsinco.brewery.util.Pair;
 import dev.jsinco.brewery.util.Util;
 import dev.thorinwasher.schem.Schematic;
@@ -63,7 +64,7 @@ public class StructureReader {
                     .entrySet()
                     .stream()
                     .map(entry -> {
-                        StructureMeta<?> meta = dev.jsinco.brewery.util.Registry.STRUCTURE_META.get(BreweryKey.parse(entry.getKey()));
+                        StructureMeta<?> meta = BreweryRegistry.STRUCTURE_META.get(BreweryKey.parse(entry.getKey()));
                         if (meta == null) {
                             throw new StructureReadException("Unknown meta: " + entry.getKey());
                         }

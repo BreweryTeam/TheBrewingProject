@@ -7,6 +7,11 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+/**
+ * Utility for handling quality data
+ *
+ * @param <T> The type of the data
+ */
 public class QualityData<T> {
 
     private final Map<BrewQuality, T> backing;
@@ -28,6 +33,10 @@ public class QualityData<T> {
         return new QualityData<>(newBacking);
     }
 
+    /**
+     * @param brewQuality Quality data
+     * @return The data for specified
+     */
     public @Nullable T get(BrewQuality brewQuality) {
         return backing.get(brewQuality);
     }

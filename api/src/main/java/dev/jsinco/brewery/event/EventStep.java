@@ -9,6 +9,9 @@ import java.util.Set;
 
 public interface EventStep {
 
+    /**
+     * @return The properties of this event step
+     */
     Set<EventStepProperty> properties();
 
     class Builder {

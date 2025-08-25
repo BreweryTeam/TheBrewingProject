@@ -15,7 +15,7 @@ import dev.jsinco.brewery.moment.Interval;
 import dev.jsinco.brewery.recipe.Recipe;
 import dev.jsinco.brewery.sound.SoundDefinition;
 import dev.jsinco.brewery.util.MessageUtil;
-import dev.jsinco.brewery.util.Registry;
+import dev.jsinco.brewery.util.BreweryRegistry;
 import dev.jsinco.brewery.vector.BreweryLocation;
 import lombok.Getter;
 import lombok.Setter;
@@ -63,7 +63,7 @@ public class BukkitCauldron implements dev.jsinco.brewery.breweries.Cauldron {
     }
 
     private static CauldronType findCauldronType(Block block) {
-        return Registry.CAULDRON_TYPE.values()
+        return BreweryRegistry.CAULDRON_TYPE.values()
                 .stream()
                 .filter(cauldronType -> block.getType().getKey().toString().equals(cauldronType.materialKey()))
                 .findAny()

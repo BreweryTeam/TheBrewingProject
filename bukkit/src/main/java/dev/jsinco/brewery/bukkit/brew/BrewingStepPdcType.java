@@ -9,7 +9,7 @@ import dev.jsinco.brewery.moment.Moment;
 import dev.jsinco.brewery.moment.PassedMoment;
 import dev.jsinco.brewery.util.BreweryKey;
 import dev.jsinco.brewery.util.DecoderEncoder;
-import dev.jsinco.brewery.util.Registry;
+import dev.jsinco.brewery.util.BreweryRegistry;
 import org.bukkit.persistence.PersistentDataAdapterContext;
 import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
@@ -70,14 +70,14 @@ public class BrewingStepPdcType implements PersistentDataType<byte[], BrewingSte
                 case COOK -> new CookStepImpl(
                         decodeMoment(dataInputStream),
                         decodeIngredients(dataInputStream),
-                        Registry.CAULDRON_TYPE.get(BreweryKey.parse(dataInputStream.readUTF()))
+                        BreweryRegistry.CAULDRON_TYPE.get(BreweryKey.parse(dataInputStream.readUTF()))
                 );
                 case DISTILL -> new DistillStepImpl(
                         dataInputStream.readInt()
                 );
                 case AGE -> new AgeStepImpl(
                         decodeMoment(dataInputStream),
-                        Registry.BARREL_TYPE.get(BreweryKey.parse(dataInputStream.readUTF()))
+                        BreweryRegistry.BARREL_TYPE.get(BreweryKey.parse(dataInputStream.readUTF()))
                 );
                 case MIX -> new MixStepImpl(
                         decodeMoment(dataInputStream),

@@ -14,7 +14,7 @@ import dev.jsinco.brewery.event.CustomEvent;
 import dev.jsinco.brewery.event.DrunkEvent;
 import dev.jsinco.brewery.event.NamedDrunkEvent;
 import dev.jsinco.brewery.util.BreweryKey;
-import dev.jsinco.brewery.util.Registry;
+import dev.jsinco.brewery.util.BreweryRegistry;
 import io.papermc.paper.command.brigadier.argument.CustomArgumentType;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import org.jetbrains.annotations.NotNull;
@@ -30,7 +30,7 @@ public class EventArgument implements CustomArgumentType.Converted<DrunkEvent, S
     @Override
     public DrunkEvent convert(String nativeType) throws CommandSyntaxException {
         BreweryKey key = BreweryKey.parse(nativeType);
-        NamedDrunkEvent namedDrunkEvent = Registry.DRUNK_EVENT.get(key);
+        NamedDrunkEvent namedDrunkEvent = BreweryRegistry.DRUNK_EVENT.get(key);
         if (namedDrunkEvent != null) {
             return namedDrunkEvent;
         }
@@ -44,7 +44,7 @@ public class EventArgument implements CustomArgumentType.Converted<DrunkEvent, S
     @Override
     public <S> CompletableFuture<Suggestions> listSuggestions(@NotNull CommandContext<S> context, SuggestionsBuilder builder) {
         Stream<CustomEvent.Keyed> customEventStream = TheBrewingProject.getInstance().getCustomDrunkEventRegistry().events().stream();
-        Streams.concat(Registry.DRUNK_EVENT.values().stream(), customEventStream)
+        Streams.concat(BreweryRegistry.DRUNK_EVENT.values().stream(), customEventStream)
                 .map(DrunkEvent::key)
                 .map(BreweryKey::key)
                 .filter(event -> event.startsWith(builder.getRemainingLowerCase()))

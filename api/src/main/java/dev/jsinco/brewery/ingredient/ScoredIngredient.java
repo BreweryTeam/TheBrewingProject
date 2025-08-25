@@ -3,6 +3,10 @@ package dev.jsinco.brewery.ingredient;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 
+/**
+ * @param baseIngredient The underlying ingredient for this
+ * @param score          The score of the ingredient
+ */
 public record ScoredIngredient(Ingredient baseIngredient, double score) implements Ingredient {
 
     @Override

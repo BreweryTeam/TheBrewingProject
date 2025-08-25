@@ -111,7 +111,7 @@ public class DrunksManagerImpl<C> implements DrunksManager {
 
     private List<NamedDrunkEvent> initializeDrunkEventsWithOverrides() {
         ImmutableList.Builder<NamedDrunkEvent> output = new ImmutableList.Builder<>();
-        for (NamedDrunkEvent namedDrunkEvent : Registry.DRUNK_EVENT.values()) {
+        for (NamedDrunkEvent namedDrunkEvent : BreweryRegistry.DRUNK_EVENT.values()) {
             EventSection.events().namedDrunkEventsOverride()
                     .stream()
                     .filter(namedDrunkEvent::equals)
@@ -184,8 +184,8 @@ public class DrunksManagerImpl<C> implements DrunksManager {
         plannedEvents.put(playerUuid, time);
     }
 
-    public void registerPassedOut(@NotNull UUID playerUUID) {
-        drunks.computeIfPresent(playerUUID, (ignored, drunkState) -> drunkState.withPassOut(timeSupplier.getAsLong()));
+    public void registerPassedOut(@NotNull UUID playerUuid) {
+        drunks.computeIfPresent(playerUuid, (ignored, drunkState) -> drunkState.withPassOut(timeSupplier.getAsLong()));
     }
 
     public boolean isPassedOut(@NotNull UUID playerUUID) {

@@ -10,6 +10,12 @@ public interface EventPropertyExecutable {
 
     Random RANDOM = new Random();
 
+    /**
+     * @param contextPlayer A UUID of the player
+     * @param events        The events to run for the player
+     * @param index         Current index of the run events
+     * @return Information whether further execution should occur
+     */
     @NotNull ExecutionResult execute(UUID contextPlayer, List<? extends EventStep> events, int index);
 
     /**

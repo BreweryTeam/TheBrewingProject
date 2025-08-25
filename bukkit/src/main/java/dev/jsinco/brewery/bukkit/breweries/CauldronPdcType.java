@@ -2,7 +2,7 @@ package dev.jsinco.brewery.bukkit.breweries;
 
 import dev.jsinco.brewery.breweries.CauldronType;
 import dev.jsinco.brewery.util.BreweryKey;
-import dev.jsinco.brewery.util.Registry;
+import dev.jsinco.brewery.util.BreweryRegistry;
 import org.bukkit.persistence.PersistentDataAdapterContext;
 import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
@@ -32,6 +32,6 @@ public class CauldronPdcType implements PersistentDataType<String, CauldronType>
     @NotNull
     @Override
     public CauldronType fromPrimitive(@NotNull String primitive, @NotNull PersistentDataAdapterContext context) {
-        return Registry.CAULDRON_TYPE.get(BreweryKey.parse(primitive));
+        return BreweryRegistry.CAULDRON_TYPE.get(BreweryKey.parse(primitive));
     }
 }
