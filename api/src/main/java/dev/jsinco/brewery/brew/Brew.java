@@ -23,7 +23,7 @@ public interface Brew {
 
     /**
      * @param recipe The recipe to calculate the score on
-     * @return The score on this brew for the spcecified score
+     * @return The score on this brew for the specified score
      */
     @NotNull BrewScore score(Recipe<?> recipe);
 
