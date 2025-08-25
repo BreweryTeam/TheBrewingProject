@@ -8,7 +8,7 @@ import dev.jsinco.brewery.event.step.*;
 import dev.jsinco.brewery.moment.Interval;
 import dev.jsinco.brewery.moment.Moment;
 import dev.jsinco.brewery.util.BreweryKey;
-import dev.jsinco.brewery.util.Registry;
+import dev.jsinco.brewery.util.BreweryRegistry;
 import dev.jsinco.brewery.vector.BreweryLocation;
 import eu.okaeri.configs.schema.GenericsDeclaration;
 import eu.okaeri.configs.serdes.DeserializationData;
@@ -68,19 +68,19 @@ public class EventStepSerializer implements ObjectSerializer<EventStep> {
         EventStep.Builder eventStepBuilder = new EventStep.Builder();
         // Backwards compatibility
         if (data.containsKey("type")) {
-            NamedDrunkEvent namedDrunkEvent = Registry.DRUNK_EVENT.get(BreweryKey.parse(data.get("type", String.class)));
+            NamedDrunkEvent namedDrunkEvent = BreweryRegistry.DRUNK_EVENT.get(BreweryKey.parse(data.get("type", String.class)));
             if (namedDrunkEvent != null) {
                 eventStepBuilder.addProperty(namedDrunkEvent);
             }
         }
         if (data.containsKey("named-event")) {
             String string = data.get("named-event", String.class);
-            NamedDrunkEvent namedDrunkEvent = Registry.DRUNK_EVENT.get(BreweryKey.parse(string));
+            NamedDrunkEvent namedDrunkEvent = BreweryRegistry.DRUNK_EVENT.get(BreweryKey.parse(string));
             Preconditions.checkArgument(namedDrunkEvent != null, "Unknown predefined drunk event: " + string);
             eventStepBuilder.addProperty(namedDrunkEvent);
         }
         if (data.containsKey("event")) {
-            NamedDrunkEvent namedDrunkEvent = Registry.DRUNK_EVENT.get(BreweryKey.parse(data.get("event", String.class)));
+            NamedDrunkEvent namedDrunkEvent = BreweryRegistry.DRUNK_EVENT.get(BreweryKey.parse(data.get("event", String.class)));
             eventStepBuilder.addProperty(namedDrunkEvent != null ? namedDrunkEvent : new CustomEventStep(BreweryKey.parse(data.get("event", String.class))));
         }
         if (data.containsKey("command")) {

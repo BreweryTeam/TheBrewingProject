@@ -13,7 +13,7 @@ import dev.jsinco.brewery.util.BreweryKey;
 import dev.jsinco.brewery.util.BreweryKeyed;
 import dev.jsinco.brewery.util.Logger;
 import dev.jsinco.brewery.util.Pair;
-import dev.jsinco.brewery.util.Registry;
+import dev.jsinco.brewery.util.BreweryRegistry;
 
 import java.io.BufferedInputStream;
 import java.io.FileOutputStream;
@@ -46,7 +46,7 @@ public class StructureJsonFormatValidator {
             Map<StructureMeta<?>, Object> structureMeta = metaJson.entrySet()
                     .stream()
                     .map(entry -> {
-                        StructureMeta<?> meta = Registry.STRUCTURE_META.get(BreweryKey.parse(entry.getKey()));
+                        StructureMeta<?> meta = BreweryRegistry.STRUCTURE_META.get(BreweryKey.parse(entry.getKey()));
                         if (meta == null) {
                             Logger.logErr("Unknown meta key in structure '" + fileName + "': " + entry.getKey());
                             return null;

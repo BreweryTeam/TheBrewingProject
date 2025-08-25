@@ -3,12 +3,19 @@ package dev.jsinco.brewery.structure;
 import com.google.gson.JsonElement;
 import dev.jsinco.brewery.util.BreweryKey;
 import dev.jsinco.brewery.util.BreweryKeyed;
-import dev.jsinco.brewery.util.Registry;
+import dev.jsinco.brewery.util.BreweryRegistry;
 
 import java.util.Locale;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
+/**
+ * @param key          The key of the meta
+ * @param validator    The validator of the metadata
+ * @param deserializer A deserializer for the metadata
+ * @param defaultValue The default value for this meta
+ * @param <V>          The metadata type
+ */
 public record StructureMeta<V>(BreweryKey key, Predicate<Object> validator, Function<JsonElement, V> deserializer,
                                V defaultValue) implements BreweryKeyed {
 
@@ -21,7 +28,7 @@ public record StructureMeta<V>(BreweryKey key, Predicate<Object> validator, Func
     public static final StructureMeta<Long> PROCESS_TIME = new StructureMeta<>(BreweryKey.parse("process_time"), Long.class::isInstance, JsonElement::getAsLong, 80L);
     public static final StructureMeta<Integer> PROCESS_AMOUNT = new StructureMeta<>(BreweryKey.parse("process_amount"), Integer.class::isInstance, JsonElement::getAsInt, 1);
     // Keep this at the bottom, going to cause issues because of class initialization order otherwise
-    public static final StructureMeta<StructureType> TYPE = new StructureMeta<>(BreweryKey.parse("type"), StructureType.class::isInstance, jsonElement -> Registry.STRUCTURE_TYPE.get(BreweryKey.parse(jsonElement.getAsString().toLowerCase(Locale.ROOT))), StructureType.BARREL);
+    public static final StructureMeta<StructureType> TYPE = new StructureMeta<>(BreweryKey.parse("type"), StructureType.class::isInstance, jsonElement -> BreweryRegistry.STRUCTURE_TYPE.get(BreweryKey.parse(jsonElement.getAsString().toLowerCase(Locale.ROOT))), StructureType.BARREL);
 
     @Override
     public String toString() {

@@ -39,6 +39,11 @@ public final class EventStepRegistry {
         namedFactories.put(key, factory);
     }
 
+    /**
+     * @param step The event step property to convert
+     * @param <T>  Event step property type
+     * @return An executable for the event step property
+     */
     public @NotNull <T extends EventStepProperty> EventPropertyExecutable toExecutable(T step) {
         if (step instanceof NamedDrunkEvent namedDrunkEvent) {
             return toExecutable(namedDrunkEvent);
@@ -49,6 +54,10 @@ public final class EventStepRegistry {
         return factory.create(step);
     }
 
+    /**
+     * @param step A preset drunken event
+     * @return an executable for the preset drunken event
+     */
     public @NotNull EventPropertyExecutable toExecutable(NamedDrunkEvent step) {
         NamedEventStepFactory factory = namedFactories.get(step);
         Preconditions.checkArgument(factory != null, "No ExecutableEventStep found for EventStep: " + step.getClass().getName());

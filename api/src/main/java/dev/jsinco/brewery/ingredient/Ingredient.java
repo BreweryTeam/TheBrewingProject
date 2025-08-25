@@ -8,7 +8,13 @@ import org.jetbrains.annotations.NotNull;
  */
 public interface Ingredient {
 
+    /**
+     * @return Key of the ingredient
+     */
     @NotNull String getKey();
 
+    /**
+     * @return A component with a display name
+     */
     @NotNull Component displayName();
 }

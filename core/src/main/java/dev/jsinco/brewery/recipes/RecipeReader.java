@@ -12,7 +12,7 @@ import dev.jsinco.brewery.moment.PassedMoment;
 import dev.jsinco.brewery.util.BreweryKey;
 import dev.jsinco.brewery.util.FutureUtil;
 import dev.jsinco.brewery.util.Logger;
-import dev.jsinco.brewery.util.Registry;
+import dev.jsinco.brewery.util.BreweryRegistry;
 import org.jetbrains.annotations.NotNull;
 import org.simpleyaml.configuration.ConfigurationSection;
 import org.simpleyaml.configuration.file.YamlFile;
@@ -98,14 +98,14 @@ public class RecipeReader<I> {
                     .thenApplyAsync(ingredients -> new CookStepImpl(
                             new PassedMoment((long) (((Number) map.get("cook-time")).doubleValue() * Config.config().cauldrons().cookingMinuteTicks())),
                             ingredients,
-                            Registry.CAULDRON_TYPE.get(BreweryKey.parse(map.containsKey("cauldron-type") ? map.get("cauldron-type").toString().toLowerCase(Locale.ROOT) : "water"))
+                            BreweryRegistry.CAULDRON_TYPE.get(BreweryKey.parse(map.containsKey("cauldron-type") ? map.get("cauldron-type").toString().toLowerCase(Locale.ROOT) : "water"))
                     ));
             case DISTILL -> CompletableFuture.completedFuture(new DistillStepImpl(
                     (int) map.get("runs")
             ));
             case AGE -> CompletableFuture.completedFuture(new AgeStepImpl(
                     new PassedMoment((long) (((Number) map.get("age-years")).doubleValue() * Config.config().barrels().agingYearTicks())),
-                    Registry.BARREL_TYPE.get(BreweryKey.parse(map.get("barrel-type").toString().toLowerCase(Locale.ROOT)))
+                    BreweryRegistry.BARREL_TYPE.get(BreweryKey.parse(map.get("barrel-type").toString().toLowerCase(Locale.ROOT)))
             ));
             case MIX -> ingredientManager.getIngredientsWithAmount((List<String>) map.get("ingredients"))
                     .thenApplyAsync(ingredients -> new MixStepImpl(
@@ -122,7 +122,7 @@ public class RecipeReader<I> {
                 Preconditions.checkArgument(map.get("ingredients") instanceof List, "Expected string list value for 'ingredients' in cook step!");
                 Preconditions.checkArgument(!map.containsKey("cauldron-type") || map.get("cauldron-type") instanceof String, "Expected string value for 'cauldron-type' in cook step!");
                 String cauldronType = map.containsKey("cauldron-type") ? (String) map.get("cauldron-type") : "water";
-                Preconditions.checkArgument(Registry.CAULDRON_TYPE.containsKey(BreweryKey.parse(cauldronType)), "Expected a valid cauldron type for 'cauldron-type' in cook step!");
+                Preconditions.checkArgument(BreweryRegistry.CAULDRON_TYPE.containsKey(BreweryKey.parse(cauldronType)), "Expected a valid cauldron type for 'cauldron-type' in cook step!");
             }
             case DISTILL ->
                     Preconditions.checkArgument(map.get("runs") instanceof Integer, "Expected integer value for 'runs' in distill step!");
@@ -130,7 +130,7 @@ public class RecipeReader<I> {
                 Preconditions.checkArgument(map.get("age-years") instanceof Number doubleValue && doubleValue.doubleValue() > 0.5, "Expected number larger than 0.5 for 'age-years' in age step!");
                 Preconditions.checkArgument(!map.containsKey("barrel-type") || map.get("barrel-type") instanceof String, "Expected string value for 'barrel-type' in age step!");
                 String barrelType = map.containsKey("barrel-type") ? (String) map.get("barrel-type") : "any";
-                Preconditions.checkArgument(Registry.BARREL_TYPE.containsKey(BreweryKey.parse(barrelType)), "Expected a valid barrel type for 'barrel-type' in age step!");
+                Preconditions.checkArgument(BreweryRegistry.BARREL_TYPE.containsKey(BreweryKey.parse(barrelType)), "Expected a valid barrel type for 'barrel-type' in age step!");
             }
             case MIX -> {
                 Preconditions.checkArgument(map.get("mix-time") instanceof Number doubleValue && doubleValue.doubleValue() > 0, "Expected positive number value for 'mix-time' in mix step!");

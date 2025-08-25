@@ -2,6 +2,10 @@ package dev.jsinco.brewery.math;
 
 import java.util.Random;
 
+/**
+ * @param min The minimum value of the range
+ * @param max The maximum value of the range
+ */
 public record RangeF(float min, float max) {
     private static final Random RANDOM = new Random();
 
@@ -38,8 +42,8 @@ public record RangeF(float min, float max) {
         }
 
         return new RangeF(
-            Float.parseFloat(parts[0]),
-            parts.length == 2 ? Float.parseFloat(parts[1]) : Float.parseFloat(parts[0])
+                Float.parseFloat(parts[0]),
+                parts.length == 2 ? Float.parseFloat(parts[1]) : Float.parseFloat(parts[0])
         );
     }
 }

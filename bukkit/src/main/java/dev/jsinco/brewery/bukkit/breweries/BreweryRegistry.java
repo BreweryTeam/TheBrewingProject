@@ -3,7 +3,6 @@ package dev.jsinco.brewery.bukkit.breweries;
 import dev.jsinco.brewery.breweries.InventoryAccessible;
 import dev.jsinco.brewery.structure.SinglePositionStructure;
 import dev.jsinco.brewery.structure.StructureType;
-import dev.jsinco.brewery.util.Registry;
 import dev.jsinco.brewery.vector.BreweryLocation;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -49,7 +48,7 @@ public final class BreweryRegistry {
     }
 
     private <H> StructureType getStructureType(H holder) {
-        for (StructureType structureType : Registry.STRUCTURE_TYPE.values()) {
+        for (StructureType structureType : dev.jsinco.brewery.util.BreweryRegistry.STRUCTURE_TYPE.values()) {
             if (structureType.tClass().isInstance(holder)) {
                 return structureType;
             }

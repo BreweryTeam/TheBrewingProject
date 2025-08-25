@@ -5,11 +5,14 @@ import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import dev.jsinco.brewery.util.BreweryKey;
 import dev.jsinco.brewery.util.BreweryKeyed;
-import dev.jsinco.brewery.util.Registry;
+import dev.jsinco.brewery.util.BreweryRegistry;
 import net.kyori.adventure.text.Component;
 
 import java.util.Locale;
 
+/**
+ * Preset drunken event
+ */
 public class NamedDrunkEvent implements DrunkEvent, BreweryKeyed, EventStepProperty {
 
 
@@ -67,7 +70,7 @@ public class NamedDrunkEvent implements DrunkEvent, BreweryKeyed, EventStepPrope
 
     public static NamedDrunkEvent fromKey(String key) {
         Preconditions.checkNotNull(key, "Key cannot be null");
-        return Registry.DRUNK_EVENT.get(BreweryKey.parse(key));
+        return BreweryRegistry.DRUNK_EVENT.get(BreweryKey.parse(key));
     }
 
     @Override

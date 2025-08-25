@@ -4,6 +4,9 @@ import java.util.UUID;
 
 public interface Holder<T> {
 
+    /**
+     * @return The value contained in this holder
+     */
     T value();
 
     record Material(BreweryKey value) implements Holder<BreweryKey> {

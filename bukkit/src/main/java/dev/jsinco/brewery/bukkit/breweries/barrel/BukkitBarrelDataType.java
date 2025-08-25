@@ -17,7 +17,7 @@ import dev.jsinco.brewery.util.DecoderEncoder;
 import dev.jsinco.brewery.util.FutureUtil;
 import dev.jsinco.brewery.util.Logger;
 import dev.jsinco.brewery.util.Pair;
-import dev.jsinco.brewery.util.Registry;
+import dev.jsinco.brewery.util.BreweryRegistry;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.joml.Matrix3d;
@@ -92,7 +92,7 @@ public class BukkitBarrelDataType implements SqlStoredData.Findable<BukkitBarrel
                 Location uniqueLocation = new Location(Bukkit.getWorld(world), resultSet.getInt("unique_x"), resultSet.getInt("unique_y"), resultSet.getInt("unique_z"));
                 Matrix3d transform = DecoderEncoder.deserializeTransformation(resultSet.getString("transformation"));
                 String format = resultSet.getString("format");
-                BarrelType type = Registry.BARREL_TYPE.get(BreweryKey.parse(resultSet.getString("barrel_type")));
+                BarrelType type = BreweryRegistry.BARREL_TYPE.get(BreweryKey.parse(resultSet.getString("barrel_type")));
                 if (type == null) {
                     Logger.logErr("Unknown barrel type '" + resultSet.getString("barrel_type") + "' for structure at: " + uniqueLocation);
                     continue;
