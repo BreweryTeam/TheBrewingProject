@@ -9,6 +9,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -81,7 +82,7 @@ public class BrewImpl implements Brew {
 
     public @NotNull BrewScore score(Recipe<?> recipe) {
         List<BrewingStep> recipeSteps = recipe.getSteps();
-        List<List<PartialBrewScore>> scores = new ArrayList<>();
+        List<Map<PartialBrewScore.Type, PartialBrewScore>> scores = new ArrayList<>();
         List<BrewingStep> completedSteps = getCompletedSteps();
         if (completedSteps.size() > recipeSteps.size()) {
             return BrewScoreImpl.failed(this);

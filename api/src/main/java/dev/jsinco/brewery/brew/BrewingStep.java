@@ -8,7 +8,6 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import net.kyori.adventure.text.minimessage.translation.Argument;
 
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -20,7 +19,7 @@ public interface BrewingStep {
      * @param other The other step to compare to
      * @return A proximity index in the range [0, 1], where 1 is 100% match
      */
-    List<PartialBrewScore> proximityScores(BrewingStep other);
+    Map<PartialBrewScore.Type, PartialBrewScore> proximityScores(BrewingStep other);
 
     /**
      * @return The type of the step
@@ -31,9 +30,9 @@ public interface BrewingStep {
      * @param other Another brewing step
      * @return The maximum scores "other" can get for this brewing step
      */
-    List<PartialBrewScore> maximumScores(BrewingStep other);
+    Map<PartialBrewScore.Type, PartialBrewScore> maximumScores(BrewingStep other);
 
-    List<PartialBrewScore> failedScores();
+    Map<PartialBrewScore.Type, PartialBrewScore> failedScores();
 
     default Component infoDisplay(Brew.State state, TagResolver resolver) {
         return Component.translatable(switch (state) {
