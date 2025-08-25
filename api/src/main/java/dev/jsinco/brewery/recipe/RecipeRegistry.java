@@ -21,9 +21,7 @@ public interface RecipeRegistry<I> {
     Optional<Recipe<I>> getRecipe(@NotNull String recipeName);
 
     /**
-     * Get all recipes registered at the moment
-     *
-     * @return
+     * @return All recipes registered at the moment
      */
     Collection<Recipe<I>> getRecipes();
 
