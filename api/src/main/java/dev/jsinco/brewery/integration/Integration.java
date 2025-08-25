@@ -1,4 +1,4 @@
-package dev.jsinco.brewery.bukkit.integration;
+package dev.jsinco.brewery.integration;
 
 public interface Integration {
 

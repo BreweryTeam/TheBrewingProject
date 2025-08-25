@@ -10,7 +10,7 @@ import dev.jsinco.brewery.event.step.ConsumeStep;
 import dev.jsinco.brewery.moment.Interval;
 import dev.jsinco.brewery.moment.Moment;
 import dev.jsinco.brewery.util.BreweryKey;
-import dev.jsinco.brewery.util.Registry;
+import dev.jsinco.brewery.util.BreweryRegistry;
 import dev.jsinco.brewery.vector.BreweryLocation;
 import eu.okaeri.configs.ConfigManager;
 import eu.okaeri.configs.OkaeriConfig;
@@ -27,7 +27,6 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Stream;
 
 @Getter
 @Accessors(fluent = true)
@@ -94,7 +93,7 @@ public class EventSection extends OkaeriConfig {
 
     @Comment("Change the properties of premade events")
     @CustomKey("named-drunk-event-overrides")
-    private List<NamedDrunkEvent> namedDrunkEventsOverride = Registry.DRUNK_EVENT.values().stream().toList();
+    private List<NamedDrunkEvent> namedDrunkEventsOverride = BreweryRegistry.DRUNK_EVENT.values().stream().toList();
 
     @Getter
     @Accessors(fluent = true)

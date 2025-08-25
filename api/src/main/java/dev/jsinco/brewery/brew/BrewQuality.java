@@ -1,5 +1,6 @@
 package dev.jsinco.brewery.brew;
 
+
 public enum BrewQuality {
     BAD(0xFF0000),
     GOOD(0xFFA500),
@@ -11,6 +12,9 @@ public enum BrewQuality {
         this.color = color;
     }
 
+    /**
+     * @return An integer with RGB color representing this quality
+     */
     public int getColor() {
         return color;
     }

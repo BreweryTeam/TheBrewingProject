@@ -99,7 +99,7 @@ public class DrunksManagerImpl<C> implements DrunksManager {
 
     }
 
-    public void reset(Set<BreweryKey> allowedEvents) {
+    public void reset(@NotNull Set<BreweryKey> allowedEvents) {
         plannedEvents.clear();
         drunks.clear();
         this.allowedEvents = allowedEvents;
@@ -111,7 +111,7 @@ public class DrunksManagerImpl<C> implements DrunksManager {
 
     private List<NamedDrunkEvent> initializeDrunkEventsWithOverrides() {
         ImmutableList.Builder<NamedDrunkEvent> output = new ImmutableList.Builder<>();
-        for (NamedDrunkEvent namedDrunkEvent : Registry.DRUNK_EVENT.values()) {
+        for (NamedDrunkEvent namedDrunkEvent : BreweryRegistry.DRUNK_EVENT.values()) {
             EventSection.events().namedDrunkEventsOverride()
                     .stream()
                     .filter(namedDrunkEvent::equals)
@@ -121,7 +121,7 @@ public class DrunksManagerImpl<C> implements DrunksManager {
         return output.build();
     }
 
-    public void clear(UUID playerUuid) {
+    public void clear(@NotNull UUID playerUuid) {
         Long plannedEventTime = plannedEvents.remove(playerUuid);
         drunks.remove(playerUuid);
         try {
@@ -157,7 +157,7 @@ public class DrunksManagerImpl<C> implements DrunksManager {
                 .forEach(this::planEvent);
     }
 
-    public void planEvent(UUID playerUuid) {
+    public void planEvent(@NotNull UUID playerUuid) {
         if (plannedEvents.containsKey(playerUuid)) {
             return;
         }
@@ -184,8 +184,8 @@ public class DrunksManagerImpl<C> implements DrunksManager {
         plannedEvents.put(playerUuid, time);
     }
 
-    public void registerPassedOut(@NotNull UUID playerUUID) {
-        drunks.computeIfPresent(playerUUID, (ignored, drunkState) -> drunkState.withPassOut(timeSupplier.getAsLong()));
+    public void registerPassedOut(@NotNull UUID playerUuid) {
+        drunks.computeIfPresent(playerUuid, (ignored, drunkState) -> drunkState.withPassOut(timeSupplier.getAsLong()));
     }
 
     public boolean isPassedOut(@NotNull UUID playerUUID) {
@@ -201,7 +201,7 @@ public class DrunksManagerImpl<C> implements DrunksManager {
     }
 
     @Override
-    public @Nullable Pair<DrunkEvent, Long> getPlannedEvent(UUID playerUUID) {
+    public @Nullable Pair<DrunkEvent, Long> getPlannedEvent(@NotNull UUID playerUUID) {
         Long time = plannedEvents.get(playerUUID);
         if (time == null) {
             return null;

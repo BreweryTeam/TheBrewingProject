@@ -3,22 +3,11 @@ package dev.jsinco.brewery.util;
 import org.jetbrains.annotations.Contract;
 
 
-public class Pair<A, B> {
-
-    /**
-     * The first value in the tuple
-     */
-    private final A a;
-
-    /**
-     * The second value in the tuple
-     */
-    private final B b;
-
-    public Pair(A a, B b) {
-        this.a = a;
-        this.b = b;
-    }
+/**
+ * @param a The first value in the tuple
+ * @param b The second value in the tuple
+ */
+public record Pair<A, B>(A a, B b) {
 
     /**
      * Gets the first value in the tuple
@@ -37,26 +26,11 @@ public class Pair<A, B> {
     }
 
     /**
-     * Gets the first value in the tuple, Synonym for first()
-     */
-    @Contract(pure = true)
-    public A a() {
-        return a;
-    }
-
-    /**
-     * Gets the second value in the tuple, Synonym for second()
-     */
-    @Contract(pure = true)
-    public B b() {
-        return b;
-    }
-
-    /**
      * Returns a pair with the same value for both a and b
+     *
      * @param val The value to set a and b to
-     * @return A pair with the same value for both a and b
      * @param <K> The type of the value
+     * @return A pair with the same value for both a and b
      */
     public static <K> Pair<K, K> singleValue(K val) {
         return new Pair<>(val, val);

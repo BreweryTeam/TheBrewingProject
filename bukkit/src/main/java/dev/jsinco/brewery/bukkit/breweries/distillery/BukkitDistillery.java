@@ -9,7 +9,7 @@ import dev.jsinco.brewery.bukkit.brew.BrewAdapter;
 import dev.jsinco.brewery.bukkit.breweries.BrewInventory;
 import dev.jsinco.brewery.bukkit.structure.PlacedBreweryStructure;
 import dev.jsinco.brewery.bukkit.util.BlockUtil;
-import dev.jsinco.brewery.bukkit.util.BukkitAdapter;
+import dev.jsinco.brewery.bukkit.adapter.BukkitAdapter;
 import dev.jsinco.brewery.bukkit.util.SoundPlayer;
 import dev.jsinco.brewery.configuration.Config;
 import dev.jsinco.brewery.database.PersistenceException;
@@ -282,7 +282,7 @@ public class BukkitDistillery implements Distillery<BukkitDistillery, ItemStack,
             inventory1.store(null, nextBrewToTransfer.second());
             inventory2.store(mixtureBrew.withLastStep(
                             BrewingStep.Distill.class,
-                            BrewingStep.Distill::incrementAmount,
+                            BrewingStep.Distill::incrementRuns,
                             () -> new DistillStepImpl(1))
                     , i);
         }

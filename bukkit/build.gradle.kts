@@ -31,7 +31,7 @@ repositories {
 
 dependencies {
     implementation(project(":core"))
-    api(project(":api"))
+    implementation(project(":api-bukkit"))
 
     compileOnly(libs.paper.api)
 

@@ -1,10 +1,11 @@
-package dev.jsinco.brewery.bukkit.util;
+package dev.jsinco.brewery.bukkit.adapter;
 
 import dev.jsinco.brewery.util.BreweryKey;
 import dev.jsinco.brewery.util.Holder;
 import dev.jsinco.brewery.vector.BreweryLocation;
 import org.bukkit.*;
 import org.bukkit.block.Block;
+import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -48,5 +49,21 @@ public class BukkitAdapter {
 
     public static @NotNull Holder.Material toMaterialHolder(Material material) {
         return new Holder.Material(toBreweryKey(material.getKey()));
+    }
+
+    public static Holder.Player toPlayerHolder(@NotNull Player player) {
+        return new Holder.Player(player.getUniqueId());
+    }
+
+    public static Optional<Player> toPlayer(@NotNull Holder.Player player) {
+        return Optional.ofNullable(Bukkit.getPlayer(player.value()));
+    }
+
+    public static Holder.World toWorldHolder(@NotNull World world) {
+        return new Holder.World(world.getUID());
+    }
+
+    public static Optional<World> toWorldHolder(@NotNull Holder.World world) {
+        return Optional.ofNullable(Bukkit.getWorld(world.value()));
     }
 }

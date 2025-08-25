@@ -4,5 +4,8 @@ import dev.jsinco.brewery.vector.BreweryLocation;
 
 public interface SinglePositionStructure{
 
+    /**
+     * @return The position
+     */
     BreweryLocation position();
 }

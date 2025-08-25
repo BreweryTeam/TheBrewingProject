@@ -1,9 +1,9 @@
 package dev.jsinco.brewery.bukkit.ingredient;
 
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
-import dev.jsinco.brewery.bukkit.integration.Integration;
-import dev.jsinco.brewery.bukkit.integration.IntegrationManager;
-import dev.jsinco.brewery.bukkit.integration.IntegrationType;
+import dev.jsinco.brewery.bukkit.integration.IntegrationTypes;
+import dev.jsinco.brewery.integration.Integration;
+import dev.jsinco.brewery.bukkit.integration.IntegrationManagerImpl;
 import dev.jsinco.brewery.ingredient.Ingredient;
 import dev.jsinco.brewery.ingredient.IngredientManager;
 import dev.jsinco.brewery.util.BreweryKey;
@@ -21,8 +21,8 @@ public class BukkitIngredientManager implements IngredientManager<ItemStack> {
 
     @Override
     public Ingredient getIngredient(@NotNull ItemStack itemStack) {
-        IntegrationManager integrationManager = TheBrewingProject.getInstance().getIntegrationManager();
-        return integrationManager.getIntegrationRegistry().getIntegrations(IntegrationType.ITEM)
+        IntegrationManagerImpl integrationManager = TheBrewingProject.getInstance().getIntegrationManager();
+        return integrationManager.getIntegrationRegistry().getIntegrations(IntegrationTypes.ITEM)
                 .stream()
                 .filter(Integration::isEnabled)
                 .map(integration -> integration.getIngredient(itemStack))
@@ -37,8 +37,8 @@ public class BukkitIngredientManager implements IngredientManager<ItemStack> {
     public CompletableFuture<Optional<Ingredient>> getIngredient(@NotNull String ingredientStr) {
         String id = ingredientStr.toLowerCase(Locale.ROOT);
         BreweryKey breweryKey = BreweryKey.parse(id);
-        IntegrationManager integrationManager = TheBrewingProject.getInstance().getIntegrationManager();
-        return integrationManager.getIntegrationRegistry().getIntegrations(IntegrationType.ITEM)
+        IntegrationManagerImpl integrationManager = TheBrewingProject.getInstance().getIntegrationManager();
+        return integrationManager.getIntegrationRegistry().getIntegrations(IntegrationTypes.ITEM)
                 .stream()
                 .filter(Integration::isEnabled)
                 .filter(itemIntegration -> itemIntegration.getId().equals(breweryKey.namespace()))
