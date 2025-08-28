@@ -1,13 +1,16 @@
 # <p align="center">TheBrewingProject<br>[![Typing SVG](https://readme-typing-svg.demolab.com?font=system-ui&pause=1000&color=F7F7F7&center=true&random=true&width=435&lines=Age+your+brews+to+perfection.;Discover+the+art+of+fermentation.;Where+patience+creates+flavor.;Barrels+hold+what+miners+forget.;Distill+what+villagers+fear+to+taste.;Ferment+dreams%2C+one+barrel+at+a+time.;Distill+stories+from+every+harvest.;Every+brew+a+memory.+Every+sip+a+story.;Brew+stories+deeper+than+bedrock.;Flavor+sleeps+where+torches+fade.)](https://git.io/typing-svg)</p>
 
-**What if you could get drunk in Minecraft? Like, actually experience nausea, stumbling, puking, tunnel vision... heck, even memory loss?**
-You're in luck! You can simply install this plugin and find out today! Experience what's listed above and much more with TheBrewingProject.
+**What if you could get drunk in Minecraft? Like, actually experience nausea, stumbling, puking, tunnel vision... heck,
+even memory loss?**
+You're in luck! You can simply install this plugin and find out today! Experience what's listed above and much more with
+TheBrewingProject.
 
 ***
 
 ### Get the Plugin
 
-You can download the latest release on [Hangar](https://hangar.papermc.io/BreweryTeam/TheBrewingProject) and [Modrinth](https://modrinth.com/plugin/thebrewingproject).
+You can download the latest release on [Hangar](https://hangar.papermc.io/BreweryTeam/TheBrewingProject)
+and [Modrinth](https://modrinth.com/plugin/thebrewingproject).
 > [!IMPORTANT]
 > TheBrewingProject only works on PaperMC and its forks!
 
@@ -16,13 +19,14 @@ You can download the latest release on [Hangar](https://hangar.papermc.io/Brewer
 ***
 
 ### Commands and Permissions
+
 | Command                                    | Permission               | Description                                     |
 |:-------------------------------------------|:-------------------------|:------------------------------------------------|
 | `/tbp reload`                              | `brewery.command.reload` | **Reloads the plugin.**                         |
 | `/tbp info [slot]`                         | `brewery.command.info`   | **Displays information about a given brew.**    |
 | `/tbp create --cook/--distill/--age/--mix` | `brewery.command.create` | **Create a new brew with the given arguments.** |
 | `/tbp status info/set/clear/consume`       | `brewery.command.status` | **Inspect or modify your drunkenness status.**  |
-| `/tbp event <event_name>`                  | `brewery.command.event`  | **Simulate an event, such as `stumble`.**      |
+| `/tbp event <event_name>`                  | `brewery.command.event`  | **Simulate an event, such as `stumble`.**       |
 | `/tbp seal [slot]/all`                     | `brewery.command.seal`   | **Seal the given brew(s).**                     |
 
 | Permission                  | Description                                              |
@@ -51,18 +55,22 @@ You can download the latest release on [Hangar](https://hangar.papermc.io/Brewer
 ***
 
 ### Developers
+
 **API**
 Importing the API
+
 ```kts
 repositories {
     maven("https://jitpack.io")
 }
 
 dependencies {
-    compileOnly("com.github.BreweryTeam.TheBrewingProject:api-bukkit:v2.0.0")
+    compileOnly("com.github.BreweryTeam.TheBrewingProject:bukkit:v2.0.0")
 }
 ```
-Simple use of the API
+
+Simple use of the API, your plugin needs to be loaded after TBP.
+
 ```java
 
 public void onLoad() {
@@ -76,7 +84,9 @@ public void onLoad() {
     }
 }
 ```
+
 **Build**
+
 ```
 gradlew bukkit:shadowJar
 ```
