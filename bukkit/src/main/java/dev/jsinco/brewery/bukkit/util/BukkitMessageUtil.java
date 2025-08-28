@@ -2,7 +2,7 @@ package dev.jsinco.brewery.bukkit.util;
 
 import com.mojang.brigadier.Message;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
-import dev.jsinco.brewery.bukkit.integration.IntegrationTypes;
+import dev.jsinco.brewery.bukkit.api.integration.IntegrationTypes;
 import dev.jsinco.brewery.bukkit.recipe.RecipeEffects;
 import dev.jsinco.brewery.event.DrunkEvent;
 import io.papermc.paper.command.brigadier.MessageComponentSerializer;

@@ -8,7 +8,7 @@ import dev.jsinco.brewery.bukkit.brew.BukkitBarrelBrewDataType;
 import dev.jsinco.brewery.bukkit.breweries.BrewInventory;
 import dev.jsinco.brewery.bukkit.structure.BreweryStructure;
 import dev.jsinco.brewery.bukkit.structure.PlacedBreweryStructure;
-import dev.jsinco.brewery.bukkit.adapter.BukkitAdapter;
+import dev.jsinco.brewery.bukkit.api.BukkitAdapter;
 import dev.jsinco.brewery.database.PersistenceException;
 import dev.jsinco.brewery.database.sql.SqlStatements;
 import dev.jsinco.brewery.database.sql.SqlStoredData;

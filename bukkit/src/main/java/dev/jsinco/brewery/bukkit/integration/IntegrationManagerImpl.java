@@ -1,5 +1,6 @@
 package dev.jsinco.brewery.bukkit.integration;
 
+import dev.jsinco.brewery.bukkit.api.integration.IntegrationTypes;
 import dev.jsinco.brewery.bukkit.integration.item.*;
 import dev.jsinco.brewery.bukkit.integration.placeholder.MiniPlaceholdersIntegration;
 import dev.jsinco.brewery.bukkit.integration.placeholder.PlaceholderApiIntegration;

@@ -1,4 +1,4 @@
-package dev.jsinco.brewery.bukkit.integration;
+package dev.jsinco.brewery.bukkit.api.integration;
 
 import dev.jsinco.brewery.integration.Integration;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;

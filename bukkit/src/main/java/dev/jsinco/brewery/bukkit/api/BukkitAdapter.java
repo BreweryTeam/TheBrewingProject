@@ -1,4 +1,4 @@
-package dev.jsinco.brewery.bukkit.adapter;
+package dev.jsinco.brewery.bukkit.api;
 
 import dev.jsinco.brewery.util.BreweryKey;
 import dev.jsinco.brewery.util.Holder;

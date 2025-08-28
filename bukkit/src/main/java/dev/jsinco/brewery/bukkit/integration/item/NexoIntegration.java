@@ -4,7 +4,7 @@ import com.nexomc.nexo.api.NexoItems;
 import com.nexomc.nexo.api.events.NexoItemsLoadedEvent;
 import com.nexomc.nexo.items.ItemBuilder;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
-import dev.jsinco.brewery.bukkit.integration.ItemIntegration;
+import dev.jsinco.brewery.bukkit.api.integration.ItemIntegration;
 import dev.jsinco.brewery.util.ClassUtil;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;

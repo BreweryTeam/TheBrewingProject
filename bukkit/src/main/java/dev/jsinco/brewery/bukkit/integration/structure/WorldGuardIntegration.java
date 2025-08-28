@@ -6,7 +6,7 @@ import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 import com.sk89q.worldguard.internal.platform.WorldGuardPlatform;
 import com.sk89q.worldguard.protection.flags.Flags;
 import com.sk89q.worldguard.protection.regions.RegionQuery;
-import dev.jsinco.brewery.bukkit.integration.StructureIntegration;
+import dev.jsinco.brewery.bukkit.api.integration.StructureIntegration;
 import dev.jsinco.brewery.util.BreweryKey;
 import dev.jsinco.brewery.util.ClassUtil;
 import org.bukkit.block.Block;

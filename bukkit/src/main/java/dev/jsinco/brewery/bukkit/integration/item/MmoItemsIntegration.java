@@ -2,7 +2,7 @@ package dev.jsinco.brewery.bukkit.integration.item;
 
 import com.google.common.base.Preconditions;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
-import dev.jsinco.brewery.bukkit.integration.ItemIntegration;
+import dev.jsinco.brewery.bukkit.api.integration.ItemIntegration;
 import dev.jsinco.brewery.util.ClassUtil;
 import io.lumine.mythic.lib.api.item.NBTItem;
 import net.Indyuce.mmoitems.MMOItems;

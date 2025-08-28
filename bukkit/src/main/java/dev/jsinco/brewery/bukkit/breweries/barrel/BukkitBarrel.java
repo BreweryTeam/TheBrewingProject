@@ -10,7 +10,7 @@ import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.bukkit.brew.BrewAdapter;
 import dev.jsinco.brewery.bukkit.breweries.BrewInventory;
 import dev.jsinco.brewery.bukkit.structure.PlacedBreweryStructure;
-import dev.jsinco.brewery.bukkit.adapter.BukkitAdapter;
+import dev.jsinco.brewery.bukkit.api.BukkitAdapter;
 import dev.jsinco.brewery.bukkit.util.SoundPlayer;
 import dev.jsinco.brewery.configuration.Config;
 import dev.jsinco.brewery.moment.Interval;

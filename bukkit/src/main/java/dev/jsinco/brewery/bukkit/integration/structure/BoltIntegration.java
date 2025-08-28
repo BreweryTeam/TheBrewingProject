@@ -1,8 +1,8 @@
 package dev.jsinco.brewery.bukkit.integration.structure;
 
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
-import dev.jsinco.brewery.bukkit.integration.StructureIntegration;
-import dev.jsinco.brewery.bukkit.adapter.BukkitAdapter;
+import dev.jsinco.brewery.bukkit.api.integration.StructureIntegration;
+import dev.jsinco.brewery.bukkit.api.BukkitAdapter;
 import dev.jsinco.brewery.structure.MultiblockStructure;
 import dev.jsinco.brewery.util.BreweryKey;
 import dev.jsinco.brewery.util.ClassUtil;

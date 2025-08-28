@@ -1,6 +1,6 @@
 package dev.jsinco.brewery.bukkit.integration.placeholder;
 
-import dev.jsinco.brewery.bukkit.integration.PlaceholderIntegration;
+import dev.jsinco.brewery.bukkit.api.integration.PlaceholderIntegration;
 import dev.jsinco.brewery.util.ClassUtil;
 import me.clip.placeholderapi.PlaceholderAPI;
 import net.kyori.adventure.text.Component;

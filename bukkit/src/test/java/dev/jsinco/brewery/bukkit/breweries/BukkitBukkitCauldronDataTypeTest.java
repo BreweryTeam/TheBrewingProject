@@ -1,7 +1,7 @@
 package dev.jsinco.brewery.bukkit.breweries;
 
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
-import dev.jsinco.brewery.bukkit.adapter.BukkitAdapter;
+import dev.jsinco.brewery.bukkit.api.BukkitAdapter;
 import dev.jsinco.brewery.database.PersistenceException;
 import dev.jsinco.brewery.database.sql.Database;
 import dev.jsinco.brewery.util.FutureUtil;

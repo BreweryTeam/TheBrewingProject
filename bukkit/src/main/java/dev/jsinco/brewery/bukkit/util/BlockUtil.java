@@ -4,7 +4,7 @@ import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.events.PacketContainer;
 import com.comphenix.protocol.wrappers.BlockPosition;
-import dev.jsinco.brewery.bukkit.adapter.BukkitAdapter;
+import dev.jsinco.brewery.bukkit.api.BukkitAdapter;
 import dev.jsinco.brewery.util.ClassUtil;
 import dev.jsinco.brewery.vector.BreweryLocation;
 import org.bukkit.Location;

@@ -1,6 +1,6 @@
 package dev.jsinco.brewery.bukkit.effect.step;
 
-import dev.jsinco.brewery.bukkit.adapter.BukkitAdapter;
+import dev.jsinco.brewery.bukkit.api.BukkitAdapter;
 import dev.jsinco.brewery.bukkit.util.LocationUtil;
 import dev.jsinco.brewery.event.EventPropertyExecutable;
 import dev.jsinco.brewery.event.EventStep;

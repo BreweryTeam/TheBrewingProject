@@ -1,7 +1,7 @@
 package dev.jsinco.brewery.bukkit.integration.placeholder;
 
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
-import dev.jsinco.brewery.bukkit.integration.PlaceholderIntegration;
+import dev.jsinco.brewery.bukkit.api.integration.PlaceholderIntegration;
 import dev.jsinco.brewery.effect.DrunkState;
 import dev.jsinco.brewery.event.DrunkEvent;
 import dev.jsinco.brewery.util.ClassUtil;

@@ -1,7 +1,7 @@
 package dev.jsinco.brewery.bukkit.integration.item;
 
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
-import dev.jsinco.brewery.bukkit.integration.ItemIntegration;
+import dev.jsinco.brewery.bukkit.api.integration.ItemIntegration;
 import dev.jsinco.brewery.util.ClassUtil;
 import net.kyori.adventure.text.Component;
 import net.momirealms.craftengine.bukkit.api.event.CraftEngineReloadEvent;

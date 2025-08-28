@@ -6,6 +6,7 @@ import dev.jsinco.brewery.breweries.Barrel;
 import dev.jsinco.brewery.breweries.BarrelType;
 import dev.jsinco.brewery.breweries.Distillery;
 import dev.jsinco.brewery.breweries.Tickable;
+import dev.jsinco.brewery.bukkit.api.TheBrewingProjectApi;
 import dev.jsinco.brewery.bukkit.brew.BukkitBrewManager;
 import dev.jsinco.brewery.bukkit.breweries.BreweryRegistry;
 import dev.jsinco.brewery.bukkit.breweries.barrel.BukkitBarrel;

@@ -2,7 +2,7 @@ package dev.jsinco.brewery.bukkit.integration.structure;
 
 import com.palmergames.bukkit.towny.object.TownyPermission;
 import com.palmergames.bukkit.towny.utils.PlayerCacheUtil;
-import dev.jsinco.brewery.bukkit.integration.StructureIntegration;
+import dev.jsinco.brewery.bukkit.api.integration.StructureIntegration;
 import dev.jsinco.brewery.util.BreweryKey;
 import dev.jsinco.brewery.util.ClassUtil;
 import org.bukkit.block.Block;

@@ -1,6 +1,6 @@
-package dev.jsinco.brewery.bukkit.integration;
+package dev.jsinco.brewery.bukkit.api.integration;
 
-import dev.jsinco.brewery.bukkit.ingredient.PluginIngredient;
+import dev.jsinco.brewery.bukkit.api.ingredient.PluginIngredient;
 import dev.jsinco.brewery.ingredient.Ingredient;
 import dev.jsinco.brewery.integration.Integration;
 import dev.jsinco.brewery.util.BreweryKey;

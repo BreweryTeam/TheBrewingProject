@@ -1,7 +1,7 @@
 package dev.jsinco.brewery.bukkit.ingredient;
 
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
-import dev.jsinco.brewery.bukkit.integration.IntegrationTypes;
+import dev.jsinco.brewery.bukkit.api.integration.IntegrationTypes;
 import dev.jsinco.brewery.integration.Integration;
 import dev.jsinco.brewery.bukkit.integration.IntegrationManagerImpl;
 import dev.jsinco.brewery.ingredient.Ingredient;

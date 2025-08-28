@@ -1,7 +1,7 @@
 package dev.jsinco.brewery.bukkit.integration.structure;
 
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
-import dev.jsinco.brewery.bukkit.integration.StructureIntegration;
+import dev.jsinco.brewery.bukkit.api.integration.StructureIntegration;
 import dev.jsinco.brewery.bukkit.util.ComponentUtil;
 import dev.jsinco.brewery.configuration.Config;
 import dev.jsinco.brewery.util.BreweryKey;

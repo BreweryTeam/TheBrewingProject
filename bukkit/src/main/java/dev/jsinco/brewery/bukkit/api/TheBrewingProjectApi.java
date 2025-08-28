@@ -1,4 +1,4 @@
-package dev.jsinco.brewery.bukkit;
+package dev.jsinco.brewery.bukkit.api;
 
 import dev.jsinco.brewery.brew.BrewManager;
 import dev.jsinco.brewery.integration.IntegrationManager;
