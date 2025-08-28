@@ -1,9 +1,11 @@
 package dev.jsinco.brewery.util;
 
 import dev.jsinco.brewery.api.brew.*;
-import dev.jsinco.brewery.configuration.Config;
 import dev.jsinco.brewery.api.effect.DrunkState;
+import dev.jsinco.brewery.api.effect.modifier.ModifierDisplay;
 import dev.jsinco.brewery.api.recipe.RecipeRegistry;
+import dev.jsinco.brewery.configuration.Config;
+import dev.jsinco.brewery.configuration.DrunkenModifierSection;
 import dev.jsinco.brewery.format.TimeFormat;
 import dev.jsinco.brewery.format.TimeFormatter;
 import dev.jsinco.brewery.format.TimeModifier;
@@ -11,6 +13,7 @@ import dev.jsinco.brewery.recipes.BrewScoreImpl;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentLike;
+import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.StyleBuilderApplicable;
 import net.kyori.adventure.text.format.TextColor;
@@ -121,13 +124,18 @@ public class MessageUtil {
     }
 
     public static @NotNull TagResolver getDrunkStateTagResolver(@Nullable DrunkState drunkState) {
-        return TagResolver.resolver(
-                Placeholder.component("alcohol_level", compileAlcoholLevel(drunkState == null ? 0 : drunkState.alcohol())),
-                Placeholder.component("toxins_level", compileToxinsLevel(drunkState == null ? 0 : drunkState.toxins()))
-        );
+        TextComponent.Builder output = Component.text();
+        for (ModifierDisplay modifier : DrunkenModifierSection.modifiers().drunkenDisplays()) {
+            output.append(switch (modifier.type()) {
+                case SKULLS -> Component.translatable("tbp.info.after-drink.skulls");
+                case BARS -> Component.translatable("tbp.info.after-drink.bars");
+                case STARS -> Component.translatable("tbp.info.after-drink.stars");
+            });
+        }
+        return Placeholder.component("modifiers", output.build());
     }
 
-    private static @NotNull ComponentLike compileToxinsLevel(int level) {
+    private static @NotNull ComponentLike compileSkulls(int level) {
         int partition = level / 20;
         StringBuilder skulls = new StringBuilder();
         skulls.repeat(SKULL, partition);
@@ -135,7 +143,7 @@ public class MessageUtil {
         return Component.text(skulls.toString()).color(NamedTextColor.GREEN);
     }
 
-    private static @NotNull ComponentLike compileAlcoholLevel(int level) {
+    private static @NotNull ComponentLike compileBars(int level) {
         int partitionedLevel = level / 5;
         StringBuilder okLevel = new StringBuilder();
         okLevel.repeat("|", Math.min(partitionedLevel, 4));

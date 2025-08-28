@@ -1,68 +1,156 @@
 [
   {
-    "name" : "chicken",
-    "alcohol_requirement" : 99,
-    "toxins_requirement" : 99,
-    "probability_weight" : 1
+    "name": "chicken",
+    "probability": {
+      "probability_weight": {
+        "function": "1"
+      },
+      "allowed_ranges": {
+        "blood_alcohol": {
+          "min": 99,
+          "max": 100
+        }
+      }
+    }
   },
   {
     "name": "drunk_message",
-    "alcohol_requirement" : 25,
-    "toxins_requirement" : 0,
-    "probability_weight" : 5
+    "probability": {
+      "probability_weight": {
+        "function": "1 / (110 - blood_alcohol)"
+      },
+      "allowed_ranges": {
+        "blood_alcohol": {
+          "min": 25,
+          "max": 100
+        }
+      }
+    }
   },
   {
     "name": "drunken_walk",
-    "alcohol_requirement" : 60,
-    "toxins_requirement" : 20,
-    "probability_weight" : 20
+    "probability": {
+      "probability_weight": {
+        "function": "4 / (110 - blood_alcohol)"
+      },
+      "allowed_ranges": {
+        "blood_alcohol": {
+          "min": 60,
+          "max": 100
+        }
+      }
+    }
   },
   {
     "name": "fever",
-    "alcohol_requirement" : 60,
-    "toxins_requirement" : 20,
-    "probability_weight" : 5
+    "probability": {
+      "probability_weight": {
+        "function": "1 / (110 - blood_alcohol)"
+      },
+      "allowed_ranges": {
+        "blood_alcohol": {
+          "min": 60,
+          "max": 100
+        }
+      }
+    }
   },
   {
     "name": "hallucination",
-    "alcohol_requirement" : 70,
-    "toxins_requirement" : 25,
-    "probability_weight" : 35
+    "probability": {
+      "probability_weight": {
+        "function": "7 / (110 - blood_alcohol)"
+      },
+      "allowed_ranges": {
+        "blood_alcohol": {
+          "min": 70,
+          "max": 100
+        }
+      }
+    }
   },
   {
     "name": "kaboom",
-    "alcohol_requirement" : 99,
-    "toxins_requirement" : 60,
-    "probability_weight" : 1
+    "probability": {
+      "probability_weight": {
+        "function": "0.2 / (110 - blood_alcohol)"
+      },
+      "allowed_ranges": {
+        "blood_alcohol": {
+          "min": 60,
+          "max": 100
+        }
+      }
+    }
   },
   {
     "name": "nausea",
-    "alcohol_requirement" : 60,
-    "toxins_requirement" : 50,
-    "probability_weight" : 50
+    "probability": {
+      "probability_weight": {
+        "function": "10 / (110 - blood_alcohol)"
+      },
+      "allowed_ranges": {
+        "blood_alcohol": {
+          "min": 99,
+          "max": 100
+        }
+      }
+    }
   },
   {
-    "name" : "pass_out",
-    "alcohol_requirement" : 80,
-    "toxins_requirement" : 80,
-    "probability_weight" : 10
+    "name": "pass_out",
+    "probability": {
+      "probability_weight": {
+        "function": "2 / (110 - blood_alcohol)"
+      },
+      "allowed_ranges": {
+        "blood_alcohol": {
+          "min": 80,
+          "max": 100
+        }
+      }
+    }
   },
   {
     "name": "puke",
-    "alcohol_requirement" : 45,
-    "toxins_requirement" : 45,
-    "probability_weight" : 20
+    "probability": {
+      "probability_weight": {
+        "function": "4 / (110 - blood_alcohol)"
+      },
+      "allowed_ranges": {
+        "blood_alcohol": {
+          "min": 45,
+          "max": 100
+        }
+      }
+    }
   },
   {
     "name": "stumble",
-    "alcohol_requirement" : 90,
-    "toxins_requirement" : 40,
-    "probability_weight" : 2
+    "probability": {
+      "probability_weight": {
+        "function": "0.4 / (110 - blood_alcohol)"
+      },
+      "allowed_ranges": {
+        "blood_alcohol": {
+          "min": 90,
+          "max": 100
+        }
+      }
+    }
   },
   {
-    "name" : "teleport",
-    "alcohol_requirement" : 90,
-    "toxins_requirement" : 40,
-    "probability_weight" : 2
+    "name": "teleport",
+    "probability": {
+      "probability_weight": {
+        "function": "0.4 / (110 - blood_alcohol)"
+      },
+      "allowed_ranges": {
+        "blood_alcohol": {
+          "min": 90,
+          "max": 100
+        }
+      }
+    }
   }
 ]

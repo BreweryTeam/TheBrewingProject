@@ -32,6 +32,7 @@ import dev.jsinco.brewery.bukkit.recipe.DefaultRecipeReader;
 import dev.jsinco.brewery.bukkit.structure.*;
 import dev.jsinco.brewery.bukkit.util.BreweryTimeDataType;
 import dev.jsinco.brewery.configuration.Config;
+import dev.jsinco.brewery.configuration.DrunkenModifierSection;
 import dev.jsinco.brewery.configuration.EventSection;
 import dev.jsinco.brewery.configuration.OkaeriSerdesPackBuilder;
 import dev.jsinco.brewery.configuration.locale.BreweryTranslator;
@@ -112,6 +113,7 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
         instance = this;
         EventSection.migrateEvents(getDataFolder());
         Config.load(this.getDataFolder(), serializers());
+        DrunkenModifierSection.load(this.getDataFolder(), serializers());
         EventSection.load(getDataFolder(), serializers());
         this.translator = new BreweryTranslator(new File(this.getDataFolder(), "locale"));
         translator.reload();
@@ -149,6 +151,10 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
                 .add(new LocaleSerializer())
                 .add(new ConsumableSerializer())
                 .add(new NamedDrunkEventSerializer())
+                .add(new DrunkenModifierSerializer())
+                .add(new ModifierExpressionSerializer())
+                .add(new ModifierDisplaySerializer())
+                .add(new ComponentSerializer())
                 .build();
     }
 

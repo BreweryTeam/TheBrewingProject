@@ -29,6 +29,7 @@ dependencies {
     api(libs.okaeri)
     implementation(libs.simple.yaml)
     implementation(libs.hikaricp)
+    implementation(libs.exp4j)
 
     // other
     compileOnly(libs.jetbrains.annotations)
