@@ -1,9 +1,9 @@
 package dev.jsinco.brewery.bukkit.breweries;
 
-import dev.jsinco.brewery.breweries.InventoryAccessible;
-import dev.jsinco.brewery.structure.SinglePositionStructure;
-import dev.jsinco.brewery.structure.StructureType;
-import dev.jsinco.brewery.vector.BreweryLocation;
+import dev.jsinco.brewery.api.breweries.InventoryAccessible;
+import dev.jsinco.brewery.api.structure.SinglePositionStructure;
+import dev.jsinco.brewery.api.structure.StructureType;
+import dev.jsinco.brewery.api.vector.BreweryLocation;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Nullable;
@@ -48,7 +48,7 @@ public final class BreweryRegistry {
     }
 
     private <H> StructureType getStructureType(H holder) {
-        for (StructureType structureType : dev.jsinco.brewery.util.BreweryRegistry.STRUCTURE_TYPE.values()) {
+        for (StructureType structureType : dev.jsinco.brewery.api.util.BreweryRegistry.STRUCTURE_TYPE.values()) {
             if (structureType.tClass().isInstance(holder)) {
                 return structureType;
             }

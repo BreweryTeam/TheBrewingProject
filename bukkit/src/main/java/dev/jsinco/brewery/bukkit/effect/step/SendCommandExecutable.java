@@ -1,8 +1,8 @@
 package dev.jsinco.brewery.bukkit.effect.step;
 
-import dev.jsinco.brewery.event.EventPropertyExecutable;
-import dev.jsinco.brewery.event.EventStep;
-import dev.jsinco.brewery.event.step.SendCommand.CommandSenderType;
+import dev.jsinco.brewery.api.event.EventPropertyExecutable;
+import dev.jsinco.brewery.api.event.EventStep;
+import dev.jsinco.brewery.api.event.step.SendCommand.CommandSenderType;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;

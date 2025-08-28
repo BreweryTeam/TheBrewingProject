@@ -1,7 +1,7 @@
 package dev.jsinco.brewery.bukkit.integration;
 
-import dev.jsinco.brewery.integration.Integration;
-import dev.jsinco.brewery.integration.IntegrationType;
+import dev.jsinco.brewery.api.integration.Integration;
+import dev.jsinco.brewery.api.integration.IntegrationType;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.*;

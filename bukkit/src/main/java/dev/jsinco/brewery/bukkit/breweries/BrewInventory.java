@@ -1,6 +1,6 @@
 package dev.jsinco.brewery.bukkit.breweries;
 
-import dev.jsinco.brewery.brew.Brew;
+import dev.jsinco.brewery.api.brew.Brew;
 import dev.jsinco.brewery.bukkit.brew.BrewAdapter;
 import lombok.Getter;
 import net.kyori.adventure.text.Component;

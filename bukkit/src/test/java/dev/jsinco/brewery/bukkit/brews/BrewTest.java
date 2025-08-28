@@ -1,16 +1,18 @@
 package dev.jsinco.brewery.bukkit.brews;
 
+import dev.jsinco.brewery.api.brew.Brew;
+import dev.jsinco.brewery.api.brew.BrewQuality;
 import dev.jsinco.brewery.brew.*;
-import dev.jsinco.brewery.breweries.BarrelType;
-import dev.jsinco.brewery.breweries.CauldronType;
+import dev.jsinco.brewery.api.breweries.BarrelType;
+import dev.jsinco.brewery.api.breweries.CauldronType;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.bukkit.ingredient.SimpleIngredient;
 import dev.jsinco.brewery.bukkit.recipe.BukkitRecipeResult;
-import dev.jsinco.brewery.moment.Interval;
-import dev.jsinco.brewery.moment.Moment;
-import dev.jsinco.brewery.moment.PassedMoment;
-import dev.jsinco.brewery.recipe.QualityData;
-import dev.jsinco.brewery.recipe.Recipe;
+import dev.jsinco.brewery.api.moment.Interval;
+import dev.jsinco.brewery.api.moment.Moment;
+import dev.jsinco.brewery.api.moment.PassedMoment;
+import dev.jsinco.brewery.api.recipe.QualityData;
+import dev.jsinco.brewery.api.recipe.Recipe;
 import dev.jsinco.brewery.recipes.RecipeImpl;
 import dev.jsinco.brewery.recipes.RecipeRegistryImpl;
 import org.bukkit.Material;

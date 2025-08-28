@@ -1,13 +1,14 @@
 package dev.jsinco.brewery.brew;
 
 import com.google.gson.JsonParser;
+import dev.jsinco.brewery.api.brew.Brew;
 import dev.jsinco.brewery.database.PersistenceException;
 import dev.jsinco.brewery.database.sql.SqlStatements;
 import dev.jsinco.brewery.database.sql.SqlStoredData;
-import dev.jsinco.brewery.ingredient.IngredientManager;
+import dev.jsinco.brewery.api.ingredient.IngredientManager;
 import dev.jsinco.brewery.util.DecoderEncoder;
-import dev.jsinco.brewery.util.Pair;
-import dev.jsinco.brewery.vector.BreweryLocation;
+import dev.jsinco.brewery.api.util.Pair;
+import dev.jsinco.brewery.api.vector.BreweryLocation;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;

@@ -1,6 +1,6 @@
 package dev.jsinco.brewery.bukkit.breweries.distillery;
 
-import dev.jsinco.brewery.brew.Brew;
+import dev.jsinco.brewery.api.brew.Brew;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.bukkit.brew.BukkitDistilleryBrewDataType;
 import dev.jsinco.brewery.bukkit.breweries.BrewInventory;
@@ -12,9 +12,9 @@ import dev.jsinco.brewery.database.sql.SqlStatements;
 import dev.jsinco.brewery.database.sql.SqlStoredData;
 import dev.jsinco.brewery.util.DecoderEncoder;
 import dev.jsinco.brewery.util.FutureUtil;
-import dev.jsinco.brewery.util.Logger;
-import dev.jsinco.brewery.util.Pair;
-import dev.jsinco.brewery.vector.BreweryLocation;
+import dev.jsinco.brewery.api.util.Logger;
+import dev.jsinco.brewery.api.util.Pair;
+import dev.jsinco.brewery.api.vector.BreweryLocation;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;

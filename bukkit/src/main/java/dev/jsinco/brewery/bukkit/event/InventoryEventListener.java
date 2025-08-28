@@ -1,8 +1,8 @@
 package dev.jsinco.brewery.bukkit.event;
 
-import dev.jsinco.brewery.brew.Brew;
+import dev.jsinco.brewery.api.brew.Brew;
 import dev.jsinco.brewery.brew.BrewImpl;
-import dev.jsinco.brewery.breweries.InventoryAccessible;
+import dev.jsinco.brewery.api.breweries.InventoryAccessible;
 import dev.jsinco.brewery.bukkit.brew.BrewAdapter;
 import dev.jsinco.brewery.bukkit.breweries.BreweryRegistry;
 import dev.jsinco.brewery.bukkit.effect.named.PukeNamedExecutable;

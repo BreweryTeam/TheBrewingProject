@@ -1,15 +1,15 @@
 package dev.jsinco.brewery.configuration.serializers;
 
 import com.google.common.base.Preconditions;
-import dev.jsinco.brewery.event.EventStep;
-import dev.jsinco.brewery.event.EventStepProperty;
-import dev.jsinco.brewery.event.NamedDrunkEvent;
-import dev.jsinco.brewery.event.step.*;
-import dev.jsinco.brewery.moment.Interval;
-import dev.jsinco.brewery.moment.Moment;
-import dev.jsinco.brewery.util.BreweryKey;
-import dev.jsinco.brewery.util.BreweryRegistry;
-import dev.jsinco.brewery.vector.BreweryLocation;
+import dev.jsinco.brewery.api.event.EventStep;
+import dev.jsinco.brewery.api.event.EventStepProperty;
+import dev.jsinco.brewery.api.event.NamedDrunkEvent;
+import dev.jsinco.brewery.api.event.step.*;
+import dev.jsinco.brewery.api.moment.Interval;
+import dev.jsinco.brewery.api.moment.Moment;
+import dev.jsinco.brewery.api.util.BreweryKey;
+import dev.jsinco.brewery.api.util.BreweryRegistry;
+import dev.jsinco.brewery.api.vector.BreweryLocation;
 import eu.okaeri.configs.schema.GenericsDeclaration;
 import eu.okaeri.configs.serdes.DeserializationData;
 import eu.okaeri.configs.serdes.ObjectSerializer;

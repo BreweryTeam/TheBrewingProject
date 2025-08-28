@@ -1,6 +1,6 @@
 package dev.jsinco.brewery.bukkit.breweries;
 
-import dev.jsinco.brewery.brew.Brew;
+import dev.jsinco.brewery.api.brew.Brew;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

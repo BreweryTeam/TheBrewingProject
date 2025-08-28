@@ -1,7 +1,7 @@
 package dev.jsinco.brewery.bukkit.api.integration;
 
-import dev.jsinco.brewery.integration.Integration;
-import dev.jsinco.brewery.util.BreweryKey;
+import dev.jsinco.brewery.api.integration.Integration;
+import dev.jsinco.brewery.api.util.BreweryKey;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 

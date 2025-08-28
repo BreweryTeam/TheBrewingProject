@@ -1,8 +1,8 @@
 package dev.jsinco.brewery.bukkit.api.ingredient;
 
 import dev.jsinco.brewery.bukkit.api.integration.ItemIntegration;
-import dev.jsinco.brewery.ingredient.Ingredient;
-import dev.jsinco.brewery.util.BreweryKey;
+import dev.jsinco.brewery.api.ingredient.Ingredient;
+import dev.jsinco.brewery.api.util.BreweryKey;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 

@@ -1,9 +1,9 @@
 package dev.jsinco.brewery.bukkit.brew;
 
-import dev.jsinco.brewery.brew.Brew;
+import dev.jsinco.brewery.api.brew.Brew;
 import dev.jsinco.brewery.brew.BrewImpl;
-import dev.jsinco.brewery.brew.BrewManager;
-import dev.jsinco.brewery.brew.BrewingStep;
+import dev.jsinco.brewery.api.brew.BrewManager;
+import dev.jsinco.brewery.api.brew.BrewingStep;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.List;

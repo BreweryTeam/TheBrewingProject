@@ -1,7 +1,9 @@
 package dev.jsinco.brewery.brew;
 
-import dev.jsinco.brewery.ingredient.Ingredient;
-import dev.jsinco.brewery.moment.Moment;
+import dev.jsinco.brewery.api.brew.BrewingStep;
+import dev.jsinco.brewery.api.brew.PartialBrewScore;
+import dev.jsinco.brewery.api.ingredient.Ingredient;
+import dev.jsinco.brewery.api.moment.Moment;
 
 import java.util.Map;
 import java.util.stream.Collectors;

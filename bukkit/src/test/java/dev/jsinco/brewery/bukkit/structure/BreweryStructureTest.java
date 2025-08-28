@@ -1,8 +1,8 @@
 package dev.jsinco.brewery.bukkit.structure;
 
-import dev.jsinco.brewery.breweries.BarrelType;
-import dev.jsinco.brewery.structure.StructureMeta;
-import dev.jsinco.brewery.structure.StructureType;
+import dev.jsinco.brewery.api.breweries.BarrelType;
+import dev.jsinco.brewery.api.structure.StructureMeta;
+import dev.jsinco.brewery.api.structure.StructureType;
 import dev.thorinwasher.schem.Schematic;
 import dev.thorinwasher.schem.SchematicReader;
 import org.bukkit.Location;

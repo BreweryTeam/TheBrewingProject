@@ -1,18 +1,18 @@
 package dev.jsinco.brewery.bukkit.recipe;
 
-import dev.jsinco.brewery.brew.Brew;
-import dev.jsinco.brewery.brew.BrewScore;
-import dev.jsinco.brewery.brew.BrewingStep;
+import dev.jsinco.brewery.api.brew.Brew;
+import dev.jsinco.brewery.api.brew.BrewScore;
+import dev.jsinco.brewery.api.brew.BrewingStep;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.bukkit.brew.BrewAdapter;
 import dev.jsinco.brewery.bukkit.api.integration.IntegrationTypes;
-import dev.jsinco.brewery.integration.Integration;
+import dev.jsinco.brewery.api.integration.Integration;
 import dev.jsinco.brewery.bukkit.api.integration.ItemIntegration;
 import dev.jsinco.brewery.bukkit.api.BukkitAdapter;
 import dev.jsinco.brewery.configuration.Config;
-import dev.jsinco.brewery.recipe.RecipeResult;
-import dev.jsinco.brewery.util.BreweryKey;
-import dev.jsinco.brewery.util.Logger;
+import dev.jsinco.brewery.api.recipe.RecipeResult;
+import dev.jsinco.brewery.api.util.BreweryKey;
+import dev.jsinco.brewery.api.util.Logger;
 import dev.jsinco.brewery.util.MessageUtil;
 import io.papermc.paper.datacomponent.DataComponentTypes;
 import io.papermc.paper.datacomponent.item.CustomModelData;

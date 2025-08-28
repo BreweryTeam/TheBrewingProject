@@ -2,14 +2,15 @@ package dev.jsinco.brewery.brew;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import dev.jsinco.brewery.breweries.BarrelType;
-import dev.jsinco.brewery.breweries.CauldronType;
-import dev.jsinco.brewery.ingredient.Ingredient;
-import dev.jsinco.brewery.ingredient.IngredientManager;
+import dev.jsinco.brewery.api.brew.BrewingStep;
+import dev.jsinco.brewery.api.breweries.BarrelType;
+import dev.jsinco.brewery.api.breweries.CauldronType;
+import dev.jsinco.brewery.api.ingredient.Ingredient;
+import dev.jsinco.brewery.api.ingredient.IngredientManager;
 import dev.jsinco.brewery.ingredient.IngredientUtil;
-import dev.jsinco.brewery.moment.Moment;
-import dev.jsinco.brewery.util.BreweryKey;
-import dev.jsinco.brewery.util.BreweryRegistry;
+import dev.jsinco.brewery.api.moment.Moment;
+import dev.jsinco.brewery.api.util.BreweryKey;
+import dev.jsinco.brewery.api.util.BreweryRegistry;
 
 import java.util.Locale;
 import java.util.Map;

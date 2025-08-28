@@ -3,8 +3,10 @@ package dev.jsinco.brewery.ingredient;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
+import dev.jsinco.brewery.api.ingredient.Ingredient;
+import dev.jsinco.brewery.api.ingredient.IngredientManager;
 import dev.jsinco.brewery.util.FutureUtil;
-import dev.jsinco.brewery.util.Pair;
+import dev.jsinco.brewery.api.util.Pair;
 
 import java.util.List;
 import java.util.Map;

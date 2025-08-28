@@ -1,8 +1,8 @@
 package dev.jsinco.brewery.bukkit.api;
 
-import dev.jsinco.brewery.util.BreweryKey;
-import dev.jsinco.brewery.util.Holder;
-import dev.jsinco.brewery.vector.BreweryLocation;
+import dev.jsinco.brewery.api.util.BreweryKey;
+import dev.jsinco.brewery.api.util.Holder;
+import dev.jsinco.brewery.api.vector.BreweryLocation;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;

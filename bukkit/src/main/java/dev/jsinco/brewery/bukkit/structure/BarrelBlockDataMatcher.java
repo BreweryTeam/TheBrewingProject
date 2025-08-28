@@ -2,7 +2,7 @@ package dev.jsinco.brewery.bukkit.structure;
 
 import com.destroystokyo.paper.MaterialTags;
 import com.google.common.collect.ImmutableSet;
-import dev.jsinco.brewery.breweries.BarrelType;
+import dev.jsinco.brewery.api.breweries.BarrelType;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Registry;

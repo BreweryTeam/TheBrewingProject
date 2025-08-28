@@ -1,10 +1,10 @@
 package dev.jsinco.brewery.recipes;
 
 import com.google.common.base.Preconditions;
-import dev.jsinco.brewery.brew.BrewingStep;
-import dev.jsinco.brewery.recipe.QualityData;
-import dev.jsinco.brewery.recipe.Recipe;
-import dev.jsinco.brewery.recipe.RecipeResult;
+import dev.jsinco.brewery.api.brew.BrewingStep;
+import dev.jsinco.brewery.api.recipe.QualityData;
+import dev.jsinco.brewery.api.recipe.Recipe;
+import dev.jsinco.brewery.api.recipe.RecipeResult;
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 

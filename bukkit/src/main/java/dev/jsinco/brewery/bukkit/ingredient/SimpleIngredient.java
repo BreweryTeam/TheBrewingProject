@@ -1,6 +1,6 @@
 package dev.jsinco.brewery.bukkit.ingredient;
 
-import dev.jsinco.brewery.ingredient.Ingredient;
+import dev.jsinco.brewery.api.ingredient.Ingredient;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;

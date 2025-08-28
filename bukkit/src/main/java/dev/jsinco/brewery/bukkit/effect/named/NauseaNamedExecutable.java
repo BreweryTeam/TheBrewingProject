@@ -1,8 +1,8 @@
 package dev.jsinco.brewery.bukkit.effect.named;
 
-import dev.jsinco.brewery.event.EventPropertyExecutable;
-import dev.jsinco.brewery.event.EventStep;
-import dev.jsinco.brewery.moment.Moment;
+import dev.jsinco.brewery.api.event.EventPropertyExecutable;
+import dev.jsinco.brewery.api.event.EventStep;
+import dev.jsinco.brewery.api.moment.Moment;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;

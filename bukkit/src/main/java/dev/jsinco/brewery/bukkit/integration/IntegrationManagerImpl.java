@@ -5,10 +5,10 @@ import dev.jsinco.brewery.bukkit.integration.item.*;
 import dev.jsinco.brewery.bukkit.integration.placeholder.MiniPlaceholdersIntegration;
 import dev.jsinco.brewery.bukkit.integration.placeholder.PlaceholderApiIntegration;
 import dev.jsinco.brewery.bukkit.integration.structure.*;
-import dev.jsinco.brewery.integration.Integration;
-import dev.jsinco.brewery.integration.IntegrationManager;
-import dev.jsinco.brewery.integration.IntegrationType;
-import dev.jsinco.brewery.util.Logger;
+import dev.jsinco.brewery.api.integration.Integration;
+import dev.jsinco.brewery.api.integration.IntegrationManager;
+import dev.jsinco.brewery.api.integration.IntegrationType;
+import dev.jsinco.brewery.api.util.Logger;
 import lombok.Getter;
 
 import java.util.Set;

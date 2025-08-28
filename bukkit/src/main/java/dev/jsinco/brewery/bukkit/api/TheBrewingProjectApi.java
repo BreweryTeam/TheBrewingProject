@@ -1,10 +1,10 @@
 package dev.jsinco.brewery.bukkit.api;
 
-import dev.jsinco.brewery.brew.BrewManager;
-import dev.jsinco.brewery.integration.IntegrationManager;
-import dev.jsinco.brewery.effect.DrunksManager;
-import dev.jsinco.brewery.recipe.RecipeRegistry;
-import dev.jsinco.brewery.structure.PlacedStructureRegistry;
+import dev.jsinco.brewery.api.brew.BrewManager;
+import dev.jsinco.brewery.api.integration.IntegrationManager;
+import dev.jsinco.brewery.api.effect.DrunksManager;
+import dev.jsinco.brewery.api.recipe.RecipeRegistry;
+import dev.jsinco.brewery.api.structure.PlacedStructureRegistry;
 import org.bukkit.inventory.ItemStack;
 
 public interface TheBrewingProjectApi {

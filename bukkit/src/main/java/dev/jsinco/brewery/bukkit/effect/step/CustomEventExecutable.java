@@ -1,8 +1,8 @@
 package dev.jsinco.brewery.bukkit.effect.step;
 
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
-import dev.jsinco.brewery.event.EventPropertyExecutable;
-import dev.jsinco.brewery.event.EventStep;
+import dev.jsinco.brewery.api.event.EventPropertyExecutable;
+import dev.jsinco.brewery.api.event.EventStep;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;

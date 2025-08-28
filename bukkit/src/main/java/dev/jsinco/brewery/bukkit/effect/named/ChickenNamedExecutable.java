@@ -1,8 +1,8 @@
 package dev.jsinco.brewery.bukkit.effect.named;
 
 import dev.jsinco.brewery.bukkit.util.BukkitMessageUtil;
-import dev.jsinco.brewery.event.EventPropertyExecutable;
-import dev.jsinco.brewery.event.EventStep;
+import dev.jsinco.brewery.api.event.EventPropertyExecutable;
+import dev.jsinco.brewery.api.event.EventStep;
 import dev.jsinco.brewery.util.MessageUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;

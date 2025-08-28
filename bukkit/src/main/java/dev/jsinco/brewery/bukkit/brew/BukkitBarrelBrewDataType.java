@@ -2,7 +2,7 @@ package dev.jsinco.brewery.bukkit.brew;
 
 import dev.jsinco.brewery.brew.BarrelBrewDataType;
 import dev.jsinco.brewery.bukkit.ingredient.BukkitIngredientManager;
-import dev.jsinco.brewery.ingredient.IngredientManager;
+import dev.jsinco.brewery.api.ingredient.IngredientManager;
 import org.bukkit.inventory.ItemStack;
 
 public class BukkitBarrelBrewDataType extends BarrelBrewDataType<ItemStack> {

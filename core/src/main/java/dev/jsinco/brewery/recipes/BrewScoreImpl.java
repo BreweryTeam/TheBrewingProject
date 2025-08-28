@@ -1,6 +1,6 @@
 package dev.jsinco.brewery.recipes;
 
-import dev.jsinco.brewery.brew.*;
+import dev.jsinco.brewery.api.brew.*;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;

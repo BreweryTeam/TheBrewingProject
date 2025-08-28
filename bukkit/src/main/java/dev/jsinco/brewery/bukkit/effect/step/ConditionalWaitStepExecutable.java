@@ -1,10 +1,10 @@
 package dev.jsinco.brewery.bukkit.effect.step;
 
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
-import dev.jsinco.brewery.event.EventPropertyExecutable;
-import dev.jsinco.brewery.event.EventStep;
-import dev.jsinco.brewery.event.step.ConditionalWaitStep;
-import dev.jsinco.brewery.event.step.ConditionalWaitStep.Condition;
+import dev.jsinco.brewery.api.event.EventPropertyExecutable;
+import dev.jsinco.brewery.api.event.EventStep;
+import dev.jsinco.brewery.api.event.step.ConditionalWaitStep;
+import dev.jsinco.brewery.api.event.step.ConditionalWaitStep.Condition;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;

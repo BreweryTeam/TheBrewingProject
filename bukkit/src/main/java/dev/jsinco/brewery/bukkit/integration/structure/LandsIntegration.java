@@ -4,7 +4,7 @@ import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.bukkit.api.integration.StructureIntegration;
 import dev.jsinco.brewery.bukkit.util.ComponentUtil;
 import dev.jsinco.brewery.configuration.Config;
-import dev.jsinco.brewery.util.BreweryKey;
+import dev.jsinco.brewery.api.util.BreweryKey;
 import dev.jsinco.brewery.util.ClassUtil;
 import me.angeschossen.lands.api.flags.enums.FlagTarget;
 import me.angeschossen.lands.api.flags.enums.RoleFlagCategory;

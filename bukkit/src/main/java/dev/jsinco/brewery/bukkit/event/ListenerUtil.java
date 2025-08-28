@@ -5,8 +5,8 @@ import dev.jsinco.brewery.bukkit.breweries.BukkitCauldron;
 import dev.jsinco.brewery.bukkit.breweries.BukkitCauldronDataType;
 import dev.jsinco.brewery.database.PersistenceException;
 import dev.jsinco.brewery.database.sql.Database;
-import dev.jsinco.brewery.structure.SinglePositionStructure;
-import dev.jsinco.brewery.util.Logger;
+import dev.jsinco.brewery.api.structure.SinglePositionStructure;
+import dev.jsinco.brewery.api.util.Logger;
 import org.jetbrains.annotations.NotNull;
 
 public class ListenerUtil {

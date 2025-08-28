@@ -4,7 +4,7 @@ import com.mojang.brigadier.Message;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.bukkit.api.integration.IntegrationTypes;
 import dev.jsinco.brewery.bukkit.recipe.RecipeEffects;
-import dev.jsinco.brewery.event.DrunkEvent;
+import dev.jsinco.brewery.api.event.DrunkEvent;
 import io.papermc.paper.command.brigadier.MessageComponentSerializer;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.tag.resolver.Formatter;

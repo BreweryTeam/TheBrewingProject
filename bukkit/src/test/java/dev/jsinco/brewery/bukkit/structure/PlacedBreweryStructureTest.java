@@ -1,6 +1,6 @@
 package dev.jsinco.brewery.bukkit.structure;
 
-import dev.jsinco.brewery.breweries.BarrelType;
+import dev.jsinco.brewery.api.breweries.BarrelType;
 import org.bukkit.Location;
 import org.bukkit.util.BlockVector;
 import org.junit.jupiter.api.BeforeEach;

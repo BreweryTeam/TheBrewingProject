@@ -10,7 +10,7 @@ import dev.jsinco.brewery.bukkit.command.argument.OfflinePlayerArgument;
 import dev.jsinco.brewery.bukkit.command.argument.OnlinePlayerArgument;
 import dev.jsinco.brewery.bukkit.util.BukkitMessageUtil;
 import dev.jsinco.brewery.configuration.Config;
-import dev.jsinco.brewery.event.DrunkEvent;
+import dev.jsinco.brewery.api.event.DrunkEvent;
 import dev.jsinco.brewery.util.MessageUtil;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;

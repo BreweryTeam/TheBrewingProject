@@ -1,6 +1,6 @@
 package dev.jsinco.brewery.sound;
 
-import dev.jsinco.brewery.math.RangeF;
+import dev.jsinco.brewery.api.math.RangeF;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
 

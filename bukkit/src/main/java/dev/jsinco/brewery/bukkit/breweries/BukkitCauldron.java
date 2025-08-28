@@ -1,7 +1,11 @@
 package dev.jsinco.brewery.bukkit.breweries;
 
+import dev.jsinco.brewery.api.brew.Brew;
+import dev.jsinco.brewery.api.brew.BrewScore;
+import dev.jsinco.brewery.api.brew.BrewingStep;
+import dev.jsinco.brewery.api.breweries.Cauldron;
 import dev.jsinco.brewery.brew.*;
-import dev.jsinco.brewery.breweries.CauldronType;
+import dev.jsinco.brewery.api.breweries.CauldronType;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.bukkit.brew.BrewAdapter;
 import dev.jsinco.brewery.bukkit.ingredient.BukkitIngredientManager;
@@ -10,13 +14,13 @@ import dev.jsinco.brewery.bukkit.recipe.BukkitRecipeResult;
 import dev.jsinco.brewery.bukkit.util.*;
 import dev.jsinco.brewery.bukkit.api.BukkitAdapter;
 import dev.jsinco.brewery.configuration.Config;
-import dev.jsinco.brewery.ingredient.Ingredient;
-import dev.jsinco.brewery.moment.Interval;
-import dev.jsinco.brewery.recipe.Recipe;
+import dev.jsinco.brewery.api.ingredient.Ingredient;
+import dev.jsinco.brewery.api.moment.Interval;
+import dev.jsinco.brewery.api.recipe.Recipe;
 import dev.jsinco.brewery.sound.SoundDefinition;
 import dev.jsinco.brewery.util.MessageUtil;
-import dev.jsinco.brewery.util.BreweryRegistry;
-import dev.jsinco.brewery.vector.BreweryLocation;
+import dev.jsinco.brewery.api.util.BreweryRegistry;
+import dev.jsinco.brewery.api.vector.BreweryLocation;
 import lombok.Getter;
 import lombok.Setter;
 import net.kyori.adventure.sound.Sound;
@@ -33,7 +37,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
-public class BukkitCauldron implements dev.jsinco.brewery.breweries.Cauldron {
+public class BukkitCauldron implements Cauldron {
 
     private static final Random RANDOM = new Random();
 

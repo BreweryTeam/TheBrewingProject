@@ -1,6 +1,6 @@
 package dev.jsinco.brewery.database.sql;
 
-import dev.jsinco.brewery.util.Logger;
+import dev.jsinco.brewery.api.util.Logger;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;

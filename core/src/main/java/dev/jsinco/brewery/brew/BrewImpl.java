@@ -1,8 +1,9 @@
 package dev.jsinco.brewery.brew;
 
+import dev.jsinco.brewery.api.brew.*;
 import dev.jsinco.brewery.configuration.Config;
-import dev.jsinco.brewery.recipe.Recipe;
-import dev.jsinco.brewery.recipe.RecipeRegistry;
+import dev.jsinco.brewery.api.recipe.Recipe;
+import dev.jsinco.brewery.api.recipe.RecipeRegistry;
 import dev.jsinco.brewery.recipes.BrewScoreImpl;
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;

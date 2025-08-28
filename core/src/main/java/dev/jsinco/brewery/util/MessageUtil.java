@@ -1,9 +1,9 @@
 package dev.jsinco.brewery.util;
 
-import dev.jsinco.brewery.brew.*;
+import dev.jsinco.brewery.api.brew.*;
 import dev.jsinco.brewery.configuration.Config;
-import dev.jsinco.brewery.effect.DrunkState;
-import dev.jsinco.brewery.recipe.RecipeRegistry;
+import dev.jsinco.brewery.api.effect.DrunkState;
+import dev.jsinco.brewery.api.recipe.RecipeRegistry;
 import dev.jsinco.brewery.recipes.BrewScoreImpl;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;

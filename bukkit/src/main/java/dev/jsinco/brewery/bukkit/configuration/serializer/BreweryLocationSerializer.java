@@ -1,6 +1,6 @@
 package dev.jsinco.brewery.bukkit.configuration.serializer;
 
-import dev.jsinco.brewery.vector.BreweryLocation;
+import dev.jsinco.brewery.api.vector.BreweryLocation;
 import eu.okaeri.configs.schema.GenericsDeclaration;
 import eu.okaeri.configs.serdes.DeserializationData;
 import eu.okaeri.configs.serdes.ObjectSerializer;

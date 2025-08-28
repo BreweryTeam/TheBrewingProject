@@ -1,8 +1,8 @@
 package dev.jsinco.brewery.configuration.serializers;
 
 import com.google.common.base.Preconditions;
-import dev.jsinco.brewery.event.CustomEvent;
-import dev.jsinco.brewery.event.EventStep;
+import dev.jsinco.brewery.api.event.CustomEvent;
+import dev.jsinco.brewery.api.event.EventStep;
 import eu.okaeri.configs.schema.GenericsDeclaration;
 import eu.okaeri.configs.serdes.DeserializationData;
 import eu.okaeri.configs.serdes.ObjectSerializer;

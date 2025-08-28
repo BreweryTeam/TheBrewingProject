@@ -2,9 +2,9 @@ package dev.jsinco.brewery.bukkit.effect.named;
 
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.configuration.Config;
-import dev.jsinco.brewery.event.EventPropertyExecutable;
-import dev.jsinco.brewery.event.EventStep;
-import dev.jsinco.brewery.event.NamedDrunkEvent;
+import dev.jsinco.brewery.api.event.EventPropertyExecutable;
+import dev.jsinco.brewery.api.event.EventStep;
+import dev.jsinco.brewery.api.event.NamedDrunkEvent;
 import io.papermc.paper.threadedregions.scheduler.ScheduledTask;
 import org.bukkit.*;
 import org.bukkit.configuration.file.YamlConfiguration;

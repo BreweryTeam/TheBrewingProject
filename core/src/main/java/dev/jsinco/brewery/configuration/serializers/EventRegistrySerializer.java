@@ -1,9 +1,9 @@
 package dev.jsinco.brewery.configuration.serializers;
 
-import dev.jsinco.brewery.event.CustomEvent;
-import dev.jsinco.brewery.event.CustomEventRegistry;
-import dev.jsinco.brewery.util.BreweryKey;
-import dev.jsinco.brewery.util.Logger;
+import dev.jsinco.brewery.api.event.CustomEvent;
+import dev.jsinco.brewery.api.event.CustomEventRegistry;
+import dev.jsinco.brewery.api.util.BreweryKey;
+import dev.jsinco.brewery.api.util.Logger;
 import eu.okaeri.configs.schema.GenericsDeclaration;
 import eu.okaeri.configs.serdes.DeserializationData;
 import eu.okaeri.configs.serdes.ObjectSerializer;

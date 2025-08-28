@@ -1,9 +1,9 @@
 package dev.jsinco.brewery.bukkit.ingredient;
 
 import dev.jsinco.brewery.bukkit.brew.BrewAdapter;
-import dev.jsinco.brewery.ingredient.Ingredient;
-import dev.jsinco.brewery.ingredient.ScoredIngredient;
-import dev.jsinco.brewery.util.BreweryKey;
+import dev.jsinco.brewery.api.ingredient.Ingredient;
+import dev.jsinco.brewery.api.ingredient.ScoredIngredient;
+import dev.jsinco.brewery.api.util.BreweryKey;
 import dev.jsinco.brewery.util.MessageUtil;
 import io.papermc.paper.persistence.PersistentDataContainerView;
 import net.kyori.adventure.text.Component;

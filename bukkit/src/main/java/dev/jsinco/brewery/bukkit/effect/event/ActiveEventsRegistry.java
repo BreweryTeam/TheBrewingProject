@@ -1,8 +1,8 @@
 package dev.jsinco.brewery.bukkit.effect.event;
 
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
-import dev.jsinco.brewery.event.NamedDrunkEvent;
-import dev.jsinco.brewery.util.BreweryKey;
+import dev.jsinco.brewery.api.event.NamedDrunkEvent;
+import dev.jsinco.brewery.api.util.BreweryKey;
 
 import java.util.HashMap;
 import java.util.Map;

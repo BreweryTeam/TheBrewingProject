@@ -1,10 +1,10 @@
 package dev.jsinco.brewery.bukkit.brew;
 
-import dev.jsinco.brewery.brew.Brew;
+import dev.jsinco.brewery.api.brew.Brew;
 import dev.jsinco.brewery.brew.BrewImpl;
 import dev.jsinco.brewery.brew.CookStepImpl;
 import dev.jsinco.brewery.brew.DistillStepImpl;
-import dev.jsinco.brewery.breweries.CauldronType;
+import dev.jsinco.brewery.api.breweries.CauldronType;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.bukkit.breweries.distillery.BukkitDistillery;
 import dev.jsinco.brewery.bukkit.breweries.distillery.BukkitDistilleryDataType;
@@ -12,10 +12,10 @@ import dev.jsinco.brewery.bukkit.ingredient.SimpleIngredient;
 import dev.jsinco.brewery.bukkit.structure.PlacedBreweryStructure;
 import dev.jsinco.brewery.database.PersistenceException;
 import dev.jsinco.brewery.database.sql.Database;
-import dev.jsinco.brewery.moment.PassedMoment;
+import dev.jsinco.brewery.api.moment.PassedMoment;
 import dev.jsinco.brewery.util.FutureUtil;
-import dev.jsinco.brewery.util.Pair;
-import dev.jsinco.brewery.vector.BreweryLocation;
+import dev.jsinco.brewery.api.util.Pair;
+import dev.jsinco.brewery.api.vector.BreweryLocation;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;

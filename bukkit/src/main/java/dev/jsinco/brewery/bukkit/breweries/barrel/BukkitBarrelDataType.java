@@ -1,8 +1,8 @@
 package dev.jsinco.brewery.bukkit.breweries.barrel;
 
 import dev.jsinco.brewery.brew.BarrelBrewDataType;
-import dev.jsinco.brewery.brew.Brew;
-import dev.jsinco.brewery.breweries.BarrelType;
+import dev.jsinco.brewery.api.brew.Brew;
+import dev.jsinco.brewery.api.breweries.BarrelType;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.bukkit.brew.BukkitBarrelBrewDataType;
 import dev.jsinco.brewery.bukkit.breweries.BrewInventory;
@@ -12,12 +12,12 @@ import dev.jsinco.brewery.bukkit.api.BukkitAdapter;
 import dev.jsinco.brewery.database.PersistenceException;
 import dev.jsinco.brewery.database.sql.SqlStatements;
 import dev.jsinco.brewery.database.sql.SqlStoredData;
-import dev.jsinco.brewery.util.BreweryKey;
+import dev.jsinco.brewery.api.util.BreweryKey;
 import dev.jsinco.brewery.util.DecoderEncoder;
 import dev.jsinco.brewery.util.FutureUtil;
-import dev.jsinco.brewery.util.Logger;
-import dev.jsinco.brewery.util.Pair;
-import dev.jsinco.brewery.util.BreweryRegistry;
+import dev.jsinco.brewery.api.util.Logger;
+import dev.jsinco.brewery.api.util.Pair;
+import dev.jsinco.brewery.api.util.BreweryRegistry;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.joml.Matrix3d;

@@ -1,5 +1,7 @@
 package dev.jsinco.brewery.util;
 
+import dev.jsinco.brewery.api.util.WeightedProbabilityElement;
+
 import java.util.List;
 import java.util.Random;
 

@@ -1,7 +1,7 @@
 package dev.jsinco.brewery.configuration.serializers;
 
 import com.google.common.base.Preconditions;
-import dev.jsinco.brewery.math.RangeF;
+import dev.jsinco.brewery.api.math.RangeF;
 import dev.jsinco.brewery.sound.SoundDefinition;
 import eu.okaeri.configs.schema.GenericsDeclaration;
 import eu.okaeri.configs.serdes.DeserializationData;

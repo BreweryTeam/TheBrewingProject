@@ -1,9 +1,9 @@
 package dev.jsinco.brewery.bukkit.structure;
 
-import dev.jsinco.brewery.breweries.StructureHolder;
-import dev.jsinco.brewery.structure.MultiblockStructure;
-import dev.jsinco.brewery.util.Pair;
-import dev.jsinco.brewery.vector.BreweryLocation;
+import dev.jsinco.brewery.api.breweries.StructureHolder;
+import dev.jsinco.brewery.api.structure.MultiblockStructure;
+import dev.jsinco.brewery.api.util.Pair;
+import dev.jsinco.brewery.api.vector.BreweryLocation;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.Location;

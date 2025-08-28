@@ -1,8 +1,8 @@
 package dev.jsinco.brewery.bukkit.breweries;
 
-import dev.jsinco.brewery.breweries.CauldronType;
-import dev.jsinco.brewery.util.BreweryKey;
-import dev.jsinco.brewery.util.BreweryRegistry;
+import dev.jsinco.brewery.api.breweries.CauldronType;
+import dev.jsinco.brewery.api.util.BreweryKey;
+import dev.jsinco.brewery.api.util.BreweryRegistry;
 import org.bukkit.persistence.PersistentDataAdapterContext;
 import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;

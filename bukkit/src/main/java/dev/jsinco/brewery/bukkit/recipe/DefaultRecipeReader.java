@@ -2,7 +2,7 @@ package dev.jsinco.brewery.bukkit.recipe;
 
 import com.google.common.collect.ImmutableMap;
 import dev.jsinco.brewery.bukkit.util.ColorUtil;
-import dev.jsinco.brewery.recipe.RecipeResult;
+import dev.jsinco.brewery.api.recipe.RecipeResult;
 import org.bukkit.inventory.ItemStack;
 import org.simpleyaml.configuration.ConfigurationSection;
 import org.simpleyaml.configuration.file.YamlFile;

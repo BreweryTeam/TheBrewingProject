@@ -1,6 +1,8 @@
 package dev.jsinco.brewery.brew;
 
-import java.util.List;
+import dev.jsinco.brewery.api.brew.BrewingStep;
+import dev.jsinco.brewery.api.brew.PartialBrewScore;
+
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;

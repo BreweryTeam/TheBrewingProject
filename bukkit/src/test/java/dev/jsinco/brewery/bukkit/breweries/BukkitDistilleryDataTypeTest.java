@@ -8,7 +8,7 @@ import dev.jsinco.brewery.bukkit.structure.PlacedBreweryStructure;
 import dev.jsinco.brewery.bukkit.structure.StructurePlacerUtils;
 import dev.jsinco.brewery.database.PersistenceException;
 import dev.jsinco.brewery.database.sql.Database;
-import dev.jsinco.brewery.util.Pair;
+import dev.jsinco.brewery.api.util.Pair;
 import org.bukkit.block.Block;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

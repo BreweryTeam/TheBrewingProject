@@ -1,11 +1,11 @@
 package dev.jsinco.brewery.bukkit.integration.placeholder;
 
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
-import dev.jsinco.brewery.effect.DrunkState;
+import dev.jsinco.brewery.api.effect.DrunkState;
 import dev.jsinco.brewery.effect.DrunkStateImpl;
-import dev.jsinco.brewery.effect.DrunksManager;
-import dev.jsinco.brewery.event.DrunkEvent;
-import dev.jsinco.brewery.util.Pair;
+import dev.jsinco.brewery.api.effect.DrunksManager;
+import dev.jsinco.brewery.api.event.DrunkEvent;
+import dev.jsinco.brewery.api.util.Pair;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;

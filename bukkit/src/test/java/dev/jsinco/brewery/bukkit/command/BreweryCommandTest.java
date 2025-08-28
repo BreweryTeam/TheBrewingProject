@@ -1,7 +1,7 @@
 package dev.jsinco.brewery.bukkit.command;
 
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
-import dev.jsinco.brewery.effect.DrunkState;
+import dev.jsinco.brewery.api.effect.DrunkState;
 import org.bukkit.Material;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

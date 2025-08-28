@@ -2,12 +2,12 @@ package dev.jsinco.brewery.bukkit.ingredient;
 
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.bukkit.api.integration.IntegrationTypes;
-import dev.jsinco.brewery.integration.Integration;
+import dev.jsinco.brewery.api.integration.Integration;
 import dev.jsinco.brewery.bukkit.integration.IntegrationManagerImpl;
-import dev.jsinco.brewery.ingredient.Ingredient;
-import dev.jsinco.brewery.ingredient.IngredientManager;
-import dev.jsinco.brewery.util.BreweryKey;
-import dev.jsinco.brewery.util.Pair;
+import dev.jsinco.brewery.api.ingredient.Ingredient;
+import dev.jsinco.brewery.api.ingredient.IngredientManager;
+import dev.jsinco.brewery.api.util.BreweryKey;
+import dev.jsinco.brewery.api.util.Pair;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 

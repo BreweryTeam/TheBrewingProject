@@ -1,7 +1,7 @@
 package dev.jsinco.brewery.bukkit.configuration.serializer;
 
 import dev.jsinco.brewery.bukkit.api.BukkitAdapter;
-import dev.jsinco.brewery.util.Holder;
+import dev.jsinco.brewery.api.util.Holder;
 import eu.okaeri.configs.schema.GenericsDeclaration;
 import eu.okaeri.configs.serdes.DeserializationData;
 import eu.okaeri.configs.serdes.ObjectSerializer;

@@ -1,6 +1,6 @@
 package dev.jsinco.brewery.bukkit.api.integration;
 
-import dev.jsinco.brewery.integration.IntegrationType;
+import dev.jsinco.brewery.api.integration.IntegrationType;
 
 public class IntegrationTypes {
 

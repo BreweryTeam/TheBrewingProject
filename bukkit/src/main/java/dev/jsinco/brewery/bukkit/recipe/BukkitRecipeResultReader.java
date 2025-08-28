@@ -2,12 +2,12 @@ package dev.jsinco.brewery.bukkit.recipe;
 
 import com.google.common.base.Preconditions;
 import dev.jsinco.brewery.bukkit.util.ColorUtil;
-import dev.jsinco.brewery.moment.Interval;
-import dev.jsinco.brewery.recipe.QualityData;
-import dev.jsinco.brewery.recipe.RecipeResult;
+import dev.jsinco.brewery.api.moment.Interval;
+import dev.jsinco.brewery.api.recipe.QualityData;
+import dev.jsinco.brewery.api.recipe.RecipeResult;
 import dev.jsinco.brewery.recipes.RecipeReader;
 import dev.jsinco.brewery.recipes.RecipeResultReader;
-import dev.jsinco.brewery.util.BreweryKey;
+import dev.jsinco.brewery.api.util.BreweryKey;
 import org.bukkit.Color;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Registry;

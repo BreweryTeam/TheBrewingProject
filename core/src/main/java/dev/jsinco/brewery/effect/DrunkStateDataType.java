@@ -4,7 +4,7 @@ import dev.jsinco.brewery.database.InsertableStoredData;
 import dev.jsinco.brewery.database.RemovableStoredData;
 import dev.jsinco.brewery.database.RetrievableStoredData;
 import dev.jsinco.brewery.database.UpdateableStoredData;
-import dev.jsinco.brewery.util.Pair;
+import dev.jsinco.brewery.api.util.Pair;
 
 import java.util.UUID;
 

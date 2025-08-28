@@ -1,7 +1,7 @@
 package dev.jsinco.brewery.bukkit.integration.structure;
 
 import dev.jsinco.brewery.bukkit.api.integration.StructureIntegration;
-import dev.jsinco.brewery.util.BreweryKey;
+import dev.jsinco.brewery.api.util.BreweryKey;
 import dev.jsinco.brewery.util.ClassUtil;
 import net.william278.huskclaims.api.BukkitHuskClaimsAPI;
 import net.william278.huskclaims.libraries.cloplib.operation.OperationType;

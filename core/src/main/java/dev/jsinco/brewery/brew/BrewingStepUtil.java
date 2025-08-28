@@ -1,9 +1,9 @@
 package dev.jsinco.brewery.brew;
 
-import dev.jsinco.brewery.ingredient.Ingredient;
-import dev.jsinco.brewery.ingredient.IngredientManager;
-import dev.jsinco.brewery.ingredient.ScoredIngredient;
-import dev.jsinco.brewery.util.Pair;
+import dev.jsinco.brewery.api.ingredient.Ingredient;
+import dev.jsinco.brewery.api.ingredient.IngredientManager;
+import dev.jsinco.brewery.api.ingredient.ScoredIngredient;
+import dev.jsinco.brewery.api.util.Pair;
 
 import java.util.HashMap;
 import java.util.List;

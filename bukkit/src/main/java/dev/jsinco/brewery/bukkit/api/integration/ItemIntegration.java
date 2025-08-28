@@ -1,10 +1,10 @@
 package dev.jsinco.brewery.bukkit.api.integration;
 
 import dev.jsinco.brewery.bukkit.api.ingredient.PluginIngredient;
-import dev.jsinco.brewery.ingredient.Ingredient;
-import dev.jsinco.brewery.integration.Integration;
-import dev.jsinco.brewery.util.BreweryKey;
-import dev.jsinco.brewery.util.Logger;
+import dev.jsinco.brewery.api.ingredient.Ingredient;
+import dev.jsinco.brewery.api.integration.Integration;
+import dev.jsinco.brewery.api.util.BreweryKey;
+import dev.jsinco.brewery.api.util.Logger;
 import net.kyori.adventure.text.Component;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;

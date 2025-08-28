@@ -1,6 +1,6 @@
 package dev.jsinco.brewery.effect.text;
 
-import dev.jsinco.brewery.util.Pair;
+import dev.jsinco.brewery.api.util.Pair;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;

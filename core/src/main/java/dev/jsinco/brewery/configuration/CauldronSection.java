@@ -1,7 +1,7 @@
 package dev.jsinco.brewery.configuration;
 
-import dev.jsinco.brewery.moment.Moment;
-import dev.jsinco.brewery.util.Holder;
+import dev.jsinco.brewery.api.moment.Moment;
+import dev.jsinco.brewery.api.util.Holder;
 import eu.okaeri.configs.OkaeriConfig;
 import eu.okaeri.configs.annotation.Comment;
 import eu.okaeri.configs.annotation.CustomKey;

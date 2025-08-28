@@ -1,11 +1,11 @@
 package dev.jsinco.brewery.recipes;
 
 import com.google.common.base.Preconditions;
-import dev.jsinco.brewery.brew.BrewingStep;
-import dev.jsinco.brewery.ingredient.Ingredient;
-import dev.jsinco.brewery.recipe.Recipe;
-import dev.jsinco.brewery.recipe.RecipeRegistry;
-import dev.jsinco.brewery.recipe.RecipeResult;
+import dev.jsinco.brewery.api.brew.BrewingStep;
+import dev.jsinco.brewery.api.ingredient.Ingredient;
+import dev.jsinco.brewery.api.recipe.Recipe;
+import dev.jsinco.brewery.api.recipe.RecipeRegistry;
+import dev.jsinco.brewery.api.recipe.RecipeResult;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;

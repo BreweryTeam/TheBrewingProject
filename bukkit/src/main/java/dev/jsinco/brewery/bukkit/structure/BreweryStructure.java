@@ -1,8 +1,8 @@
 package dev.jsinco.brewery.bukkit.structure;
 
 import com.google.common.base.Preconditions;
-import dev.jsinco.brewery.structure.StructureMeta;
-import dev.jsinco.brewery.structure.StructureType;
+import dev.jsinco.brewery.api.structure.StructureMeta;
+import dev.jsinco.brewery.api.structure.StructureType;
 import dev.thorinwasher.schem.Schematic;
 import lombok.Getter;
 import org.bukkit.Location;

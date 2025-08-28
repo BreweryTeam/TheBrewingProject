@@ -1,6 +1,6 @@
 package dev.jsinco.brewery.bukkit.util;
 
-import dev.jsinco.brewery.brew.BrewingStep;
+import dev.jsinco.brewery.api.brew.BrewingStep;
 import dev.jsinco.brewery.bukkit.brew.BrewingStepPdcType;
 import dev.jsinco.brewery.util.DecoderEncoder;
 import org.bukkit.persistence.PersistentDataAdapterContext;

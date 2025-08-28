@@ -1,6 +1,6 @@
 package dev.jsinco.brewery.configuration.serializers;
 
-import dev.jsinco.brewery.moment.Interval;
+import dev.jsinco.brewery.api.moment.Interval;
 import eu.okaeri.configs.schema.GenericsDeclaration;
 import eu.okaeri.configs.serdes.DeserializationData;
 import eu.okaeri.configs.serdes.ObjectSerializer;

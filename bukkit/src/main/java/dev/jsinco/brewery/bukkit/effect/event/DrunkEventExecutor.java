@@ -1,10 +1,10 @@
 package dev.jsinco.brewery.bukkit.effect.event;
 
+import dev.jsinco.brewery.api.event.*;
+import dev.jsinco.brewery.api.event.step.*;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.bukkit.effect.named.*;
 import dev.jsinco.brewery.bukkit.effect.step.*;
-import dev.jsinco.brewery.event.*;
-import dev.jsinco.brewery.event.step.*;
 
 import java.util.*;
 

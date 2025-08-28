@@ -1,5 +1,6 @@
 package dev.jsinco.brewery.effect;
 
+import dev.jsinco.brewery.api.effect.DrunkState;
 import dev.jsinco.brewery.configuration.Config;
 import dev.jsinco.brewery.configuration.DecayRateSection;
 

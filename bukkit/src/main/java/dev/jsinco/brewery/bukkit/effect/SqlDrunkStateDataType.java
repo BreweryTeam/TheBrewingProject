@@ -5,7 +5,7 @@ import dev.jsinco.brewery.database.sql.SqlStatements;
 import dev.jsinco.brewery.effect.DrunkStateDataType;
 import dev.jsinco.brewery.effect.DrunkStateImpl;
 import dev.jsinco.brewery.util.DecoderEncoder;
-import dev.jsinco.brewery.util.Pair;
+import dev.jsinco.brewery.api.util.Pair;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;

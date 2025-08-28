@@ -1,7 +1,7 @@
 package dev.jsinco.brewery.bukkit.recipe;
 
 import com.google.common.base.Preconditions;
-import dev.jsinco.brewery.moment.Interval;
+import dev.jsinco.brewery.api.moment.Interval;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Registry;
 import org.bukkit.persistence.ListPersistentDataType;

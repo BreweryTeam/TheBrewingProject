@@ -1,9 +1,9 @@
 package dev.jsinco.brewery.bukkit.effect.step;
 
 import dev.jsinco.brewery.bukkit.recipe.RecipeEffect;
-import dev.jsinco.brewery.event.EventPropertyExecutable;
-import dev.jsinco.brewery.event.EventStep;
-import dev.jsinco.brewery.moment.Interval;
+import dev.jsinco.brewery.api.event.EventPropertyExecutable;
+import dev.jsinco.brewery.api.event.EventStep;
+import dev.jsinco.brewery.api.moment.Interval;
 import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Registry;

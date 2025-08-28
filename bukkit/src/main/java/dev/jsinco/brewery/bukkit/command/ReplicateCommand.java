@@ -1,11 +1,11 @@
 package dev.jsinco.brewery.bukkit.command;
 
 import com.mojang.brigadier.builder.ArgumentBuilder;
-import dev.jsinco.brewery.brew.Brew;
+import dev.jsinco.brewery.api.brew.Brew;
 import dev.jsinco.brewery.brew.BrewImpl;
 import dev.jsinco.brewery.bukkit.brew.BrewAdapter;
 import dev.jsinco.brewery.bukkit.command.argument.RecipeArgument;
-import dev.jsinco.brewery.recipe.Recipe;
+import dev.jsinco.brewery.api.recipe.Recipe;
 import dev.jsinco.brewery.util.MessageUtil;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;

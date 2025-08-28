@@ -1,7 +1,7 @@
 package dev.jsinco.brewery.configuration.serializers;
 
 import com.google.common.base.Preconditions;
-import dev.jsinco.brewery.event.NamedDrunkEvent;
+import dev.jsinco.brewery.api.event.NamedDrunkEvent;
 import eu.okaeri.configs.schema.GenericsDeclaration;
 import eu.okaeri.configs.serdes.DeserializationData;
 import eu.okaeri.configs.serdes.ObjectSerializer;

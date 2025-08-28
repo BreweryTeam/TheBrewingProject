@@ -4,7 +4,7 @@ import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import dev.jsinco.brewery.database.*;
 import dev.jsinco.brewery.util.FileUtil;
-import dev.jsinco.brewery.util.Logger;
+import dev.jsinco.brewery.api.util.Logger;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;

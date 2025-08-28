@@ -1,7 +1,9 @@
 package dev.jsinco.brewery.brew;
 
 import com.google.gson.JsonArray;
-import dev.jsinco.brewery.ingredient.IngredientManager;
+import dev.jsinco.brewery.api.brew.Brew;
+import dev.jsinco.brewery.api.brew.BrewingStep;
+import dev.jsinco.brewery.api.ingredient.IngredientManager;
 import dev.jsinco.brewery.util.FutureUtil;
 
 import java.util.List;
