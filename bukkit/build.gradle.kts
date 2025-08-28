@@ -2,6 +2,7 @@ import net.minecrell.pluginyml.bukkit.BukkitPluginDescription
 
 plugins {
     `tbp-module`
+    `maven-publish`
 
     alias(libs.plugins.shadow)
     alias(libs.plugins.run.paper)
