@@ -128,7 +128,8 @@ tasks {
             "net.kyori.examination",
             "org.simpleyaml",
             "org.yaml.snakeyaml",
-            "eu.okaeri"
+            "eu.okaeri",
+            "net.objecthunter.exp4j"
         ).forEach { relocate(it, "${project.group}.lib.$it") }
     }
 }
