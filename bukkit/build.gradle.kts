@@ -95,6 +95,11 @@ tasks {
         }
     }
 
+    jar {
+        archiveBaseName.set(rootProject.name)
+        archiveClassifier.set("incomplete")
+    }
+
     shadowJar {
         archiveBaseName.set(rootProject.name)
         archiveClassifier.unset()
@@ -213,4 +218,13 @@ bukkit {
         "MMOItems",
         "MiniPlaceholders"
     )
+}
+
+publishing {
+    publications {
+        create<MavenPublication>("maven") {
+            artifactId = "thebrewingproject"
+            artifact(tasks["jar"])
+        }
+    }
 }
