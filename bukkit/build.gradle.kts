@@ -31,7 +31,7 @@ repositories {
 
 dependencies {
     implementation(project(":core"))
-    implementation(project(":api"))
+    api(project(":api"))
 
     compileOnly(libs.paper.api)
 
