@@ -12,6 +12,8 @@ import java.util.UUID;
 
 public interface DrunksManager {
 
+    @Nullable DrunkState consume(UUID playerUuid, String modifierName, double value);
+
     @Nullable DrunkState consume(UUID playerUuid, DrunkenModifier modifier, double value);
 
     @Nullable DrunkState getDrunkState(UUID playerUuid);
