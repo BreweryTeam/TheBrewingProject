@@ -38,7 +38,8 @@ public class LegacyPlayerJoinListener implements Listener {
             event.setResult(PlayerLoginEvent.Result.KICK_OTHER);
             return;
         }
-        if (EventSection.events().drunkenJoinDeny() && drunkState != null && drunkState.alcohol() >= 85 && RANDOM.nextInt(15) <= drunkState.alcohol() - 85) {
+        EventSection.DrunkenJoinEvent joinEvent = EventSection.events().drunkenJoinDeny();
+        if (joinEvent.enabled() && drunkState != null && joinEvent.probability().evaluate(drunkState.modifiers()).probability() > RANDOM.nextDouble(100)) {
             event.kickMessage(
                     GlobalTranslator.render(
                             Component.translatable("tbp.events.drunken-join-deny-message", Argument.tagResolver(Placeholder.unparsed("player_name", playerName == null ? "" : playerName))),

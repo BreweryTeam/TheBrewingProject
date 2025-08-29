@@ -188,22 +188,25 @@ public class DrunksManagerImpl<C> implements DrunksManager {
         if (drunkState == null) {
             return;
         }
-        List<DrunkEvent.Compiled> drunkEvents = Stream.concat(
+        List<Pair<DrunkEvent, Double>> drunkEvents = Stream.concat(
                         namedDrunkEvents.stream(),
                         eventRegistry.events().stream())
                 .filter(event -> allowedEvents.contains(event.key()))
-                .map(drunkEvent -> drunkEvent.compile(drunkState.modifiers()))
-                .filter(DrunkEvent.Compiled::enabled)
-                .filter(drunkEvent -> drunkEvent.probabilityWeight() > 0)
+                .map(drunkEvent -> new Pair<>(drunkEvent, drunkEvent.probability().evaluate(drunkState.modifiers())))
+                .filter(drunkEvent -> drunkEvent.second().enabled())
+                .map(drunkEvent -> new Pair<>(drunkEvent.first(), drunkEvent.second().probability()))
+                .filter(drunkEvent -> drunkEvent.second() > 0)
                 .toList();
         if (drunkEvents.isEmpty()) {
             return;
         }
-        int cumulativeSum = RandomUtil.cumulativeSum(drunkEvents);
-        DrunkEvent.Compiled drunkEvent = RandomUtil.randomWeighted(drunkEvents);
+        double cumulativeSum = drunkEvents.stream()
+                .map(Pair::second)
+                .reduce(0D, Double::sum);
+        DrunkEvent drunkEvent = RandomUtil.randomWeighted(drunkEvents, Pair::second).first();
         double value = (double) 500 / cumulativeSum;
         long time = (long) (timeSupplier.getAsLong() + Math.max(1, RANDOM.nextGaussian(value, value / 2)));
-        events.computeIfAbsent(time, ignored -> new HashMap<>()).put(playerUuid, drunkEvent.drunkEvent());
+        events.computeIfAbsent(time, ignored -> new HashMap<>()).put(playerUuid, drunkEvent);
         plannedEvents.put(playerUuid, time);
     }
 
