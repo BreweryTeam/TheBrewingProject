@@ -73,14 +73,23 @@ CREATE TABLE IF NOT EXISTS version
     PRIMARY KEY (singleton_value)
 );
 
-CREATE TABLE IF NOT EXISTS drunk_states
+CREATE TABLE IF NOT EXISTS drunk_states_v2
 (
     player_uuid      BINARY(16),
-    alcohol_level    INTEGER,
-    toxin_level      INTEGER,
     kicked_timestamp INTEGER DEFAULT -1,
     time_stamp       INTEGER,
     PRIMARY KEY (player_uuid)
+);
+
+CREATE TABLE IF NOT EXISTS modifiers
+(
+    player_uuid   BINARY(16),
+    modifier_name TEXT,
+    value         DOUBLE,
+    PRIMARY KEY (player_uuid, modifier_name),
+    FOREIGN KEY (player_uuid)
+        REFERENCES drunk_states_v2 (player_uuid)
+        ON UPDATE CASCADE ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS time

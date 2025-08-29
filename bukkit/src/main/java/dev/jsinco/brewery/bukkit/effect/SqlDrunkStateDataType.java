@@ -1,11 +1,11 @@
 package dev.jsinco.brewery.bukkit.effect;
 
+import dev.jsinco.brewery.api.util.Pair;
 import dev.jsinco.brewery.database.PersistenceException;
 import dev.jsinco.brewery.database.sql.SqlStatements;
 import dev.jsinco.brewery.effect.DrunkStateDataType;
 import dev.jsinco.brewery.effect.DrunkStateImpl;
 import dev.jsinco.brewery.util.DecoderEncoder;
-import dev.jsinco.brewery.api.util.Pair;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -24,11 +24,9 @@ public class SqlDrunkStateDataType implements DrunkStateDataType<Connection> {
     public void update(Pair<DrunkStateImpl, UUID> newValue, Connection connection) throws PersistenceException {
         try (PreparedStatement preparedStatement = connection.prepareStatement(statements.get(SqlStatements.Type.UPDATE))) {
             DrunkStateImpl drunkState = newValue.first();
-            preparedStatement.setInt(1, drunkState.alcohol());
-            preparedStatement.setInt(2, drunkState.toxins());
-            preparedStatement.setLong(3, drunkState.kickedTimestamp());
-            preparedStatement.setLong(4, drunkState.timestamp());
-            preparedStatement.setBytes(5, DecoderEncoder.asBytes(newValue.second()));
+            preparedStatement.setLong(1, drunkState.kickedTimestamp());
+            preparedStatement.setLong(2, drunkState.timestamp());
+            preparedStatement.setBytes(3, DecoderEncoder.asBytes(newValue.second()));
             preparedStatement.execute();
         } catch (SQLException e) {
             throw new PersistenceException(e);
@@ -40,10 +38,8 @@ public class SqlDrunkStateDataType implements DrunkStateDataType<Connection> {
         try (PreparedStatement preparedStatement = connection.prepareStatement(statements.get(SqlStatements.Type.INSERT))) {
             DrunkStateImpl drunkState = value.first();
             preparedStatement.setBytes(1, DecoderEncoder.asBytes(value.second()));
-            preparedStatement.setInt(2, drunkState.alcohol());
-            preparedStatement.setInt(3, drunkState.toxins());
-            preparedStatement.setLong(4, drunkState.kickedTimestamp());
-            preparedStatement.setLong(5, drunkState.timestamp());
+            preparedStatement.setLong(2, drunkState.kickedTimestamp());
+            preparedStatement.setLong(3, drunkState.timestamp());
             preparedStatement.execute();
         } catch (SQLException e) {
             throw new PersistenceException(e);
@@ -67,10 +63,10 @@ public class SqlDrunkStateDataType implements DrunkStateDataType<Connection> {
             ResultSet resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
                 drunks.add(new Pair<>(
-                        new DrunkStateImpl(resultSet.getInt("alcohol_level"),
-                                resultSet.getInt("toxin_level"),
-                                resultSet.getLong("time_stamp"),
-                                resultSet.getLong("kicked_timestamp")),
+                        new DrunkStateImpl(resultSet.getLong("time_stamp"),
+                                resultSet.getLong("kicked_timestamp"),
+
+                                ),
                         DecoderEncoder.asUuid(resultSet.getBytes("player_uuid"))
                 ));
             }
