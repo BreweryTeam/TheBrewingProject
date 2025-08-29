@@ -1,12 +1,11 @@
 package dev.jsinco.brewery.configuration;
 
-import dev.jsinco.brewery.api.event.CustomEvent;
-import dev.jsinco.brewery.api.event.CustomEventRegistry;
-import dev.jsinco.brewery.api.event.EventStep;
-import dev.jsinco.brewery.api.event.NamedDrunkEvent;
+import dev.jsinco.brewery.api.effect.modifier.ModifierExpression;
+import dev.jsinco.brewery.api.event.*;
 import dev.jsinco.brewery.api.event.step.ApplyPotionEffect;
 import dev.jsinco.brewery.api.event.step.ConditionalWaitStep;
 import dev.jsinco.brewery.api.event.step.ConsumeStep;
+import dev.jsinco.brewery.api.math.RangeD;
 import dev.jsinco.brewery.api.moment.Interval;
 import dev.jsinco.brewery.api.moment.Moment;
 import dev.jsinco.brewery.api.util.BreweryKey;
@@ -51,9 +50,7 @@ public class EventSection extends OkaeriConfig {
     @CustomKey("custom-events")
     private CustomEventRegistry customEvents = CustomEventRegistry.builder()
             .addEvent(new CustomEvent.Builder()
-                    .alcoholRequirement(60)
-                    .toxinsRequirement(90)
-                    .probabilityWeight(5)
+                    .probability(new EventProbability(new ModifierExpression("1 / (110 - blood_alcohol)"), Map.of("blood_alcohol", new RangeD(60D, null))))
                     .addStep(new EventStep.Builder().addProperty(NamedDrunkEvent.fromKey("pass_out")).build())
                     .addStep(new EventStep.Builder()
                             .addProperty(new ConditionalWaitStep(ConditionalWaitStep.Condition.JOIN))
@@ -64,6 +61,7 @@ public class EventSection extends OkaeriConfig {
                     .build(BreweryKey.parse("memory_loss"))
             ).addEvent(
                     new CustomEvent.Builder()
+                            .probability(new EventProbability(new ModifierExpression("1 / (110 - blood_alcohol)"), Map.of("blood_alcohol", new RangeD(40D, null))))
                             .addStep(new EventStep.Builder().addProperty(new ApplyPotionEffect("darkness",
                                             new Interval(1, 1), new Interval(20 * Moment.SECOND, 20 * Moment.SECOND)
                                     )).build()
@@ -80,8 +78,8 @@ public class EventSection extends OkaeriConfig {
     private List<BreweryLocation.Uncompiled> teleportDestinations = List.of(new BreweryLocation.Uncompiled(0, 70, 0, "world"));
 
     @Comment("Deny joining the server if too drunk")
-    @CustomKey("drunken-join-deny")
-    private boolean drunkenJoinDeny = true;
+    @CustomKey("drunken-join-deny-event")
+    private DrunkenJoinEvent drunkenJoinDeny = new DrunkenJoinEvent();
 
     @Comment("Transform text with blurred speech if the player is drunk enough")
     @CustomKey("blurred-speech")
@@ -101,6 +99,14 @@ public class EventSection extends OkaeriConfig {
         private String kickEventMessage = null;
         private String kickServerMessage = null;
     }
+
+    @Getter
+    @Accessors(fluent = true)
+    public static class DrunkenJoinEvent extends OkaeriConfig {
+        private boolean enabled = true;
+        private EventProbability probability = new EventProbability(new ModifierExpression("85 - blood_alcohol"), Map.of("blood_alcohol", new RangeD(85D, null)));
+    }
+
 
     @Exclude
     private static EventSection instance;

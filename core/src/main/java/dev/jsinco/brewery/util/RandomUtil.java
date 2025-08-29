@@ -1,37 +1,27 @@
 package dev.jsinco.brewery.util;
 
-import dev.jsinco.brewery.api.util.WeightedProbabilityElement;
-
 import java.util.List;
 import java.util.Random;
+import java.util.function.Function;
 
 public class RandomUtil {
     private static final Random RANDOM = new Random();
 
-    public static <T extends WeightedProbabilityElement> T randomWeighted(List<T> tList) {
-        int[] cumulativeSums = new int[tList.size()];
-        int cumulativeSum = 0;
+    public static <T> T randomWeighted(List<T> tList, Function<T, Double> toWeight) {
+        double[] cumulativeSums = new double[tList.size()];
+        double cumulativeSum = 0;
         for (int i = 0; i < tList.size(); i++) {
-            T drunkEvent = tList.get(i);
-            cumulativeSum += drunkEvent.probabilityWeight();
+            T t = tList.get(i);
+            cumulativeSum += toWeight.apply(t);
             cumulativeSums[i] = cumulativeSum;
         }
-        int randomInt = RANDOM.nextInt(cumulativeSum);
+        double randomInt = RANDOM.nextDouble(cumulativeSum);
         for (int i = 0; i < tList.size(); i++) {
             if (cumulativeSums[i] > randomInt) {
                 return tList.get(i);
             }
         }
         return tList.getLast();
-    }
-
-    public static int cumulativeSum(List<? extends WeightedProbabilityElement> tList) {
-        int cumulativeSum = 0;
-        for (int i = 0; i < tList.size(); i++) {
-            WeightedProbabilityElement drunkEvent = tList.get(i);
-            cumulativeSum += drunkEvent.probabilityWeight();
-        }
-        return cumulativeSum;
     }
 
 }

@@ -1,11 +1,13 @@
 package dev.jsinco.brewery.bukkit.integration.placeholder;
 
-import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.api.effect.DrunkState;
-import dev.jsinco.brewery.effect.DrunkStateImpl;
 import dev.jsinco.brewery.api.effect.DrunksManager;
+import dev.jsinco.brewery.api.effect.modifier.DrunkenModifier;
 import dev.jsinco.brewery.api.event.DrunkEvent;
 import dev.jsinco.brewery.api.util.Pair;
+import dev.jsinco.brewery.bukkit.TheBrewingProject;
+import dev.jsinco.brewery.configuration.DrunkenModifierSection;
+import dev.jsinco.brewery.effect.DrunkStateImpl;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
@@ -13,6 +15,8 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.stream.Collectors;
 
 public class PlaceholderApiExpansion extends PlaceholderExpansion {
 
@@ -48,19 +52,22 @@ public class PlaceholderApiExpansion extends PlaceholderExpansion {
         DrunksManager drunksManager = TheBrewingProject.getInstance().getDrunksManager();
         DrunkState drunkState = drunksManager.getDrunkState(player.getUniqueId());
         if (drunkState == null) {
-            drunkState = new DrunkStateImpl(0, 0, TheBrewingProject.getInstance().getTime(), -1);
+            drunkState = new DrunkStateImpl(TheBrewingProject.getInstance().getTime(), -1, DrunkenModifierSection.modifiers()
+                    .drunkenModifiers().stream()
+                    .collect(Collectors.toUnmodifiableMap(modifier -> modifier, DrunkenModifier::defaultValue)));
         }
-        return switch (params) {
-            case "alcohol" -> String.valueOf(drunkState.alcohol());
-            case "toxins" -> String.valueOf(drunkState.toxins());
-            case "next_event" -> {
-                Pair<DrunkEvent, Long> event = drunksManager.getPlannedEvent(player.getUniqueId());
-                if (event == null) {
-                    yield PlainTextComponentSerializer.plainText().serialize(Component.translatable("tbp.events.nothing-planned"));
-                }
-                yield PlainTextComponentSerializer.plainText().serialize(event.first().displayName());
+        for (DrunkenModifier modifier : DrunkenModifierSection.modifiers().drunkenModifiers()) {
+            if (params.equals(modifier.name())) {
+                return String.valueOf(drunkState.modifierValue(modifier.name()));
             }
-            default -> null;
-        };
+        }
+        if (params.equals("next_event")) {
+            Pair<DrunkEvent, Long> event = drunksManager.getPlannedEvent(player.getUniqueId());
+            if (event == null) {
+                return PlainTextComponentSerializer.plainText().serialize(Component.translatable("tbp.events.nothing-planned"));
+            }
+            return PlainTextComponentSerializer.plainText().serialize(event.first().displayName());
+        }
+        return null;
     }
 }

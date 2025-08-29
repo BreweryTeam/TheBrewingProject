@@ -12,6 +12,7 @@ dependencies {
     compileOnly(libs.guava)
     compileOnly(libs.adventure.api)
     compileOnly(libs.adventure.text.minimessage)
+    compileOnly(libs.exp4j)
 
     // test
     testImplementation(platform(libs.junit.bom))

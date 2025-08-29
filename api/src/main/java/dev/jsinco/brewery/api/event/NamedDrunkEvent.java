@@ -17,35 +17,18 @@ public class NamedDrunkEvent implements DrunkEvent, BreweryKeyed, EventStepPrope
 
 
     private final String name;
-    @SerializedName("alcohol_requirement")
-    private final int alcoholRequirement;
-    @SerializedName("toxins_requirement")
-    private final int toxinsRequirement;
-    @SerializedName("probability_weight")
-    private final int probabilityWeight;
+    @SerializedName("probability")
+    private final EventProbability eventProbability;
 
     @Expose(serialize = false, deserialize = false)
     private BreweryKey key;
 
 
-    public NamedDrunkEvent(String name, int alcoholRequirement, int toxinsRequirement, int probabilityWeight) {
+    public NamedDrunkEvent(String name, EventProbability eventProbability) {
         this.name = name;
-        this.alcoholRequirement = alcoholRequirement;
-        this.toxinsRequirement = toxinsRequirement;
-        this.probabilityWeight = probabilityWeight;
+        this.eventProbability = eventProbability;
 
         this.key = BreweryKey.parse(name.toLowerCase(Locale.ROOT));
-    }
-
-
-    @Override
-    public int alcoholRequirement() {
-        return alcoholRequirement;
-    }
-
-    @Override
-    public int toxinsRequirement() {
-        return toxinsRequirement;
     }
 
     @Override
@@ -63,10 +46,9 @@ public class NamedDrunkEvent implements DrunkEvent, BreweryKeyed, EventStepPrope
     }
 
     @Override
-    public int probabilityWeight() {
-        return probabilityWeight;
+    public EventProbability probability() {
+        return eventProbability;
     }
-
 
     public static NamedDrunkEvent fromKey(String key) {
         Preconditions.checkNotNull(key, "Key cannot be null");
