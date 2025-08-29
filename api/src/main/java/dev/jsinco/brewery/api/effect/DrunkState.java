@@ -4,6 +4,7 @@ import dev.jsinco.brewery.api.effect.modifier.DrunkenModifier;
 import dev.jsinco.brewery.api.util.Pair;
 
 import java.util.List;
+import java.util.Map;
 
 public interface DrunkState {
 
@@ -20,4 +21,6 @@ public interface DrunkState {
     long timestamp();
 
     long kickedTimestamp();
+
+    Map<DrunkenModifier, Double> modifiers();
 }

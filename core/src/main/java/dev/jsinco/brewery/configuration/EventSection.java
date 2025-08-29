@@ -78,8 +78,8 @@ public class EventSection extends OkaeriConfig {
     private List<BreweryLocation.Uncompiled> teleportDestinations = List.of(new BreweryLocation.Uncompiled(0, 70, 0, "world"));
 
     @Comment("Deny joining the server if too drunk")
-    @CustomKey("drunken-join-deny")
-    private boolean drunkenJoinDeny = true;
+    @CustomKey("drunken-join-deny-event")
+    private DrunkenJoinEvent drunkenJoinDeny = new DrunkenJoinEvent();
 
     @Comment("Transform text with blurred speech if the player is drunk enough")
     @CustomKey("blurred-speech")
@@ -99,6 +99,14 @@ public class EventSection extends OkaeriConfig {
         private String kickEventMessage = null;
         private String kickServerMessage = null;
     }
+
+    @Getter
+    @Accessors(fluent = true)
+    public static class DrunkenJoinEvent extends OkaeriConfig {
+        private boolean enabled = true;
+        private EventProbability probability = new EventProbability(new ModifierExpression("85 - blood_alcohol"), Map.of("blood_alcohol", new RangeD(85D, null)));
+    }
+
 
     @Exclude
     private static EventSection instance;
