@@ -1,9 +1,9 @@
 package dev.jsinco.brewery.effect;
 
 import com.google.common.collect.ImmutableMap;
+import dev.jsinco.brewery.api.effect.DrunkState;
 import dev.jsinco.brewery.api.effect.modifier.DrunkenModifier;
 import dev.jsinco.brewery.api.util.Pair;
-import dev.jsinco.brewery.api.effect.DrunkState;
 
 import java.util.List;
 import java.util.Map;
@@ -32,6 +32,7 @@ public record DrunkStateImpl(long timestamp,
         return new DrunkStateImpl(timestamp, this.kickedTimestamp, newDrunkenModifiers.build());
     }
 
+    @Override
     public DrunkStateImpl addModifier(DrunkenModifier modifier, double value) {
         ImmutableMap.Builder<DrunkenModifier, Double> newModifiers = new ImmutableMap.Builder<>();
         for (Map.Entry<DrunkenModifier, Double> entry : modifiers.entrySet()) {
@@ -42,6 +43,11 @@ public record DrunkStateImpl(long timestamp,
                 this.kickedTimestamp,
                 newModifiers.build()
         );
+    }
+
+    @Override
+    public DrunkStateImpl withModifiers(Map<DrunkenModifier, Double> modifiers) {
+        return new DrunkStateImpl(timestamp, kickedTimestamp, modifiers);
     }
 
     @Override

@@ -12,6 +12,8 @@ public interface DrunkState {
 
     DrunkState addModifier(DrunkenModifier modifier, double value);
 
+    DrunkState withModifiers(Map<DrunkenModifier, Double> modifiers);
+
     double modifierValue(String modifierName);
 
     List<Pair<DrunkenModifier, Double>> additionalModifierData();

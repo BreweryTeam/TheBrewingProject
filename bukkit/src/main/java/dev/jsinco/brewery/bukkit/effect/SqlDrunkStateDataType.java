@@ -1,5 +1,6 @@
 package dev.jsinco.brewery.bukkit.effect;
 
+import dev.jsinco.brewery.api.effect.modifier.DrunkenModifier;
 import dev.jsinco.brewery.api.util.Pair;
 import dev.jsinco.brewery.database.PersistenceException;
 import dev.jsinco.brewery.database.sql.SqlStatements;
@@ -13,7 +14,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 public class SqlDrunkStateDataType implements DrunkStateDataType<Connection> {
 
@@ -65,14 +68,21 @@ public class SqlDrunkStateDataType implements DrunkStateDataType<Connection> {
                 drunks.add(new Pair<>(
                         new DrunkStateImpl(resultSet.getLong("time_stamp"),
                                 resultSet.getLong("kicked_timestamp"),
-
-                                ),
+                                Map.of()
+                        ),
                         DecoderEncoder.asUuid(resultSet.getBytes("player_uuid"))
                 ));
             }
         } catch (SQLException e) {
             throw new PersistenceException(e);
         }
-        return drunks;
+        List<Pair<DrunkStateImpl, UUID>> output = new ArrayList<>();
+        for (Pair<DrunkStateImpl, UUID> drunk : drunks) {
+            Map<DrunkenModifier, Double> modifiers = SqlDrunkenModifierDataType.INSTANCE.find(drunk.second(), connection)
+                    .stream()
+                    .collect(Collectors.toUnmodifiableMap(Pair::first, Pair::second));
+            output.add(new Pair<>(drunk.first().withModifiers(modifiers), drunk.second()));
+        }
+        return output;
     }
 }
