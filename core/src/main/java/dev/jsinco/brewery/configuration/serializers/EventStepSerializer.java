@@ -10,6 +10,7 @@ import dev.jsinco.brewery.api.moment.Moment;
 import dev.jsinco.brewery.api.util.BreweryKey;
 import dev.jsinco.brewery.api.util.BreweryRegistry;
 import dev.jsinco.brewery.api.vector.BreweryLocation;
+import dev.jsinco.brewery.configuration.DrunkenModifierSection;
 import eu.okaeri.configs.schema.GenericsDeclaration;
 import eu.okaeri.configs.serdes.DeserializationData;
 import eu.okaeri.configs.serdes.ObjectSerializer;
@@ -40,8 +41,7 @@ public class EventStepSerializer implements ObjectSerializer<EventStep> {
                         "condition", conditionalWaitStep.condition().toString().toLowerCase(Locale.ROOT)
                 );
                 case ConsumeStep consumeStep -> Map.of(
-                        "alcohol", consumeStep.alcohol(),
-                        "toxins", consumeStep.toxins()
+                        consumeStep.modifier().name(), consumeStep.incrementValue()
                 );
                 case CustomEventStep customEvent -> Map.of(
                         "event", customEvent.customEventKey().key()
@@ -113,16 +113,16 @@ public class EventStepSerializer implements ObjectSerializer<EventStep> {
                     duration == null ? new Interval(10 * Moment.SECOND, 10 * Moment.SECOND) : duration
             ));
         }
-        if (data.containsKey("alcohol") || data.containsKey("toxins")) {
-            Integer alcohol = data.get("alcohol", Integer.class);
-            Integer toxins = data.get("toxins", Integer.class);
-            eventStepBuilder.addProperty(new ConsumeStep(alcohol == null ? 0 : alcohol, toxins == null ? 0 : toxins));
-        }
         if (data.containsKey("location")) {
             BreweryLocation.Uncompiled breweryLocation = data.get("location", BreweryLocation.Uncompiled.class);
             Preconditions.checkArgument(breweryLocation != null, "Location can not be empty");
             eventStepBuilder.addProperty(new Teleport(breweryLocation));
         }
+        DrunkenModifierSection.modifiers().drunkenModifiers()
+                .stream()
+                .filter(modifier -> data.containsKey(modifier.name()))
+                .map(modifier -> new ConsumeStep(modifier, data.get(modifier.name(), Integer.class)))
+                .forEach(eventStepBuilder::addProperty);
         EventStep eventStep = eventStepBuilder.build();
         if (eventStep.properties().isEmpty()) {
             throw new IllegalArgumentException("Unknown step type");

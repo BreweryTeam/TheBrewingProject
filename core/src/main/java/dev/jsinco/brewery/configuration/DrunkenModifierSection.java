@@ -17,6 +17,7 @@ import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.io.File;
 import java.util.List;
+import java.util.Optional;
 
 @Getter
 @Accessors(fluent = true)
@@ -56,5 +57,15 @@ public class DrunkenModifierSection extends OkaeriConfig {
             it.saveDefaults();
             it.load(true);
         });
+    }
+
+    public DrunkenModifier modifier(String modifierName) {
+        return optionalModifier(modifierName).orElseThrow(() -> new IllegalArgumentException("Unknown modifier: " + modifierName));
+    }
+
+    public Optional<DrunkenModifier> optionalModifier(String modifierName) {
+        return drunkenModifiers.stream()
+                .filter(modifier -> modifier.name().equals(modifierName))
+                .findFirst();
     }
 }

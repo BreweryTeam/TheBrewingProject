@@ -27,7 +27,7 @@ public class DrunkEventExecutor {
         registry.register(NamedDrunkEvent.fromKey("teleport"), TeleportNamedExecutable::new);
         registry.register(ApplyPotionEffect.class, stepProperty -> new ApplyPotionEffectExecutable(stepProperty.potionEffectName(), stepProperty.amplifierBounds(), stepProperty.durationBounds()));
         registry.register(ConditionalWaitStep.class, stepProperty -> new ConditionalWaitStepExecutable(stepProperty.getCondition()));
-        registry.register(ConsumeStep.class, stepProperty -> new ConsumeStepExecutable(stepProperty.alcohol(), stepProperty.toxins()));
+        registry.register(ConsumeStep.class, stepProperty -> new ConsumeStepExecutable(stepProperty.modifier(), stepProperty.incrementValue()));
         registry.register(SendCommand.class, stepProperty -> new SendCommandExecutable(stepProperty.command(), stepProperty.senderType()));
         registry.register(Teleport.class, stepProperty -> new TeleportExecutable(stepProperty.location()));
         registry.register(WaitStep.class, stepProperty -> new WaitStepExecutable(stepProperty.durationTicks()));
