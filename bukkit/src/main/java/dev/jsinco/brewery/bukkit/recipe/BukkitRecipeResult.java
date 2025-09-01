@@ -14,6 +14,7 @@ import dev.jsinco.brewery.bukkit.api.integration.ItemIntegration;
 import dev.jsinco.brewery.bukkit.brew.BrewAdapter;
 import dev.jsinco.brewery.configuration.Config;
 import dev.jsinco.brewery.configuration.DrunkenModifierSection;
+import dev.jsinco.brewery.effect.DrunkStateImpl;
 import dev.jsinco.brewery.util.MessageUtil;
 import io.papermc.paper.datacomponent.DataComponentTypes;
 import io.papermc.paper.datacomponent.item.CustomModelData;
@@ -185,7 +186,7 @@ public class BukkitRecipeResult implements RecipeResult<ItemStack> {
     private void applyDrunkenTooltips(Brew.State state, Stream.Builder<Component> streamBuilder, TagResolver resolver) {
         DrunkenModifierSection.modifiers().drunkenTooltips()
                 .stream()
-                .filter(modifierTooltip -> modifierTooltip.expression().evaluate(recipeEffects.getModifiers()) > 0)
+                .filter(modifierTooltip -> modifierTooltip.expression().evaluate(DrunkStateImpl.compileVariables(recipeEffects.getModifiers(), null, 0D)) > 0)
                 .map(modifierTooltip -> modifierTooltip.getTooltip(state))
                 .filter(Objects::nonNull)
                 .map(miniMessage -> MessageUtil.miniMessage(miniMessage, resolver))

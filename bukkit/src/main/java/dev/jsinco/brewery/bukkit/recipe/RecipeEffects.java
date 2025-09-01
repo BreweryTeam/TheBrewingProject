@@ -2,6 +2,7 @@ package dev.jsinco.brewery.bukkit.recipe;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
+import dev.jsinco.brewery.api.effect.ModifierConsume;
 import dev.jsinco.brewery.api.effect.modifier.DrunkenModifier;
 import dev.jsinco.brewery.api.event.CustomEventRegistry;
 import dev.jsinco.brewery.api.event.DrunkEvent;
@@ -13,7 +14,6 @@ import dev.jsinco.brewery.bukkit.util.BukkitMessageUtil;
 import dev.jsinco.brewery.bukkit.util.ListPersistentDataType;
 import dev.jsinco.brewery.configuration.DrunkenModifierSection;
 import dev.jsinco.brewery.effect.DrunksManagerImpl;
-import dev.jsinco.brewery.api.effect.ModifierConsume;
 import dev.jsinco.brewery.util.MessageUtil;
 import io.papermc.paper.persistence.PersistentDataContainerView;
 import lombok.Getter;
@@ -151,9 +151,11 @@ public class RecipeEffects {
     public void applyTo(Player player) {
         DrunksManagerImpl<?> drunksManager = TheBrewingProject.getInstance().getDrunksManager();
         if (!player.hasPermission("brewery.override.drunk")) {
-            modifiers.forEach((modifier, value) -> drunksManager.consume(
-                    player.getUniqueId(), modifier, value
-            ));
+            drunksManager.consume(player.getUniqueId(),
+                    modifiers.entrySet().stream()
+                            .map(entry -> new ModifierConsume(entry.getKey(), entry.getValue(), true))
+                            .toList()
+            );
         }
         if (title != null) {
             player.showTitle(Title.title(

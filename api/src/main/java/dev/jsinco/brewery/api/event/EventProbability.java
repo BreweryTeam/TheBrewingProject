@@ -1,7 +1,6 @@
 package dev.jsinco.brewery.api.event;
 
 import com.google.gson.annotations.SerializedName;
-import dev.jsinco.brewery.api.effect.modifier.DrunkenModifier;
 import dev.jsinco.brewery.api.effect.modifier.ModifierExpression;
 import dev.jsinco.brewery.api.math.RangeD;
 
@@ -12,19 +11,19 @@ public record EventProbability(@SerializedName("probability_weight") ModifierExp
 
     public static EventProbability NONE = new EventProbability(new ModifierExpression("0"), Map.of());
 
-    public Calculated evaluate(Map<DrunkenModifier, Double> modifiers) {
+    public Calculated evaluate(Map<String, Double> variables) {
         for (Map.Entry<String, RangeD> entry : allowedRanges().entrySet()) {
-            boolean cancelled = modifiers.keySet().stream().filter(modifier -> modifier.name().equals(entry.getKey()))
+            boolean cancelled = variables.keySet().stream().filter(modifier -> modifier.equals(entry.getKey()))
                     .findFirst()
-                    .filter(modifiers::containsKey)
-                    .map(modifiers::get)
+                    .filter(variables::containsKey)
+                    .map(variables::get)
                     .map(entry.getValue()::isOutside)
                     .orElse(false);
             if (cancelled) {
                 return new Calculated(false, 0D);
             }
         }
-        return new Calculated(true, probabilityWeight().evaluate(modifiers));
+        return new Calculated(true, probabilityWeight().evaluate(variables));
     }
 
     public record Calculated(boolean enabled, double probability) {

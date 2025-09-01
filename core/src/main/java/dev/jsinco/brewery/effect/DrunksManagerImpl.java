@@ -84,10 +84,7 @@ public class DrunksManagerImpl<C> implements DrunksManager {
     }
 
     /**
-     * @param playerUuid
-     * @param modifier
-     * @param value
-     * @param timestamp  Should be in relation to the internal clock in drunk manager
+     * @param timestamp Should be in relation to the internal clock in drunk manager
      */
     public @Nullable DrunkState consume(UUID playerUuid, List<ModifierConsume> modifiers, long timestamp) {
         boolean alreadyDrunk = drunks.containsKey(playerUuid);
@@ -97,11 +94,21 @@ public class DrunksManagerImpl<C> implements DrunksManager {
                 .collect(Collectors.toUnmodifiableMap(temp -> temp, DrunkenModifier::defaultValue))
         ));
         DrunkState newState = initialState;
-        for (ModifierConsume modifierConsume : modifiers) {
-            newState = newState.addModifier(modifierConsume.modifier(), modifierConsume.value());
+        // Behave exactly the same when a modifier is changing
+        List<ModifierConsume> sortedModifiers = new ArrayList<>(modifiers);
+        sortedModifiers.sort(
+                Comparator.comparing(modifierConsume -> modifierConsume.modifier().name(), String::compareTo)
+        );
+        for (ModifierConsume modifierConsume : sortedModifiers) {
             if (modifierConsume.cascade()) {
-
+                Pair<DrunkState, Boolean> drunkStateChange = newState.cascadeModifier(modifierConsume.modifier(), modifierConsume.value());
+                newState = drunkStateChange.first();
+                if (drunkStateChange.second()) {
+                    continue;
+                }
             }
+            newState = newState.addModifier(modifierConsume.modifier(), modifierConsume.value());
+
         }
         if (newState.additionalModifierData().isEmpty() && !isPassedOut(newState)) {
             drunks.remove(playerUuid);
@@ -140,13 +147,16 @@ public class DrunksManagerImpl<C> implements DrunksManager {
         return newState;
     }
 
-    public @Nullable DrunkStateImpl getDrunkState(UUID playerUuid) {
+    @Override
+    public @Nullable DrunkState getDrunkState(UUID playerUuid) {
         boolean alreadyDrunk = drunks.containsKey(playerUuid);
-        return alreadyDrunk ?
-                drunks.get(playerUuid).recalculate(timeSupplier.getAsLong()) : null;
+        return Optional.ofNullable(alreadyDrunk ? drunks.get(playerUuid).recalculate(timeSupplier.getAsLong()) : null)
+                .filter(drunkState -> !drunkState.additionalModifierData().isEmpty())
+                .orElse(null);
 
     }
 
+    @Override
     public void reset(@NotNull Set<BreweryKey> allowedEvents) {
         plannedEvents.clear();
         drunks.clear();
@@ -169,6 +179,7 @@ public class DrunksManagerImpl<C> implements DrunksManager {
         return output.build();
     }
 
+    @Override
     public void clear(@NotNull UUID playerUuid) {
         Long plannedEventTime = plannedEvents.remove(playerUuid);
         drunks.remove(playerUuid);
@@ -205,11 +216,12 @@ public class DrunksManagerImpl<C> implements DrunksManager {
                 .forEach(this::planEvent);
     }
 
+    @Override
     public void planEvent(@NotNull UUID playerUuid) {
         if (plannedEvents.containsKey(playerUuid)) {
             return;
         }
-        DrunkStateImpl drunkState = getDrunkState(playerUuid);
+        DrunkState drunkState = getDrunkState(playerUuid);
         if (drunkState == null) {
             return;
         }
@@ -217,7 +229,7 @@ public class DrunksManagerImpl<C> implements DrunksManager {
                         namedDrunkEvents.stream(),
                         eventRegistry.events().stream())
                 .filter(event -> allowedEvents.contains(event.key()))
-                .map(drunkEvent -> new Pair<>(drunkEvent, drunkEvent.probability().evaluate(drunkState.modifiers())))
+                .map(drunkEvent -> new Pair<>(drunkEvent, drunkEvent.probability().evaluate(DrunkStateImpl.compileVariables(drunkState.modifiers(), null, 0D))))
                 .filter(drunkEvent -> drunkEvent.second().enabled())
                 .map(drunkEvent -> new Pair<>(drunkEvent.first(), drunkEvent.second().probability()))
                 .filter(drunkEvent -> drunkEvent.second() > 0)
@@ -235,10 +247,12 @@ public class DrunksManagerImpl<C> implements DrunksManager {
         plannedEvents.put(playerUuid, time);
     }
 
+    @Override
     public void registerPassedOut(@NotNull UUID playerUuid) {
         drunks.computeIfPresent(playerUuid, (ignored, drunkState) -> drunkState.withPassOut(timeSupplier.getAsLong()));
     }
 
+    @Override
     public boolean isPassedOut(@NotNull UUID playerUUID) {
         return drunks.containsKey(playerUUID) && isPassedOut(drunks.get(playerUUID));
     }

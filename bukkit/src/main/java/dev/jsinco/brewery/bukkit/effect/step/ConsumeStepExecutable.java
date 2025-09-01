@@ -1,5 +1,6 @@
 package dev.jsinco.brewery.bukkit.effect.step;
 
+import dev.jsinco.brewery.api.effect.ModifierConsume;
 import dev.jsinco.brewery.api.effect.modifier.DrunkenModifier;
 import dev.jsinco.brewery.api.event.EventPropertyExecutable;
 import dev.jsinco.brewery.api.event.EventStep;
@@ -21,7 +22,7 @@ public class ConsumeStepExecutable implements EventPropertyExecutable {
 
     @Override
     public @NotNull ExecutionResult execute(UUID contextPlayer, List<? extends EventStep> events, int index) {
-        TheBrewingProject.getInstance().getDrunksManager().consume(contextPlayer, modifier, incrementValue);
+        TheBrewingProject.getInstance().getDrunksManager().consume(contextPlayer, new ModifierConsume(modifier, incrementValue));
         return ExecutionResult.CONTINUE;
     }
 

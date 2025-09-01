@@ -1,5 +1,6 @@
 package dev.jsinco.brewery.bukkit.effect;
 
+import dev.jsinco.brewery.api.effect.DrunkState;
 import dev.jsinco.brewery.api.effect.modifier.DrunkenModifier;
 import dev.jsinco.brewery.api.util.Pair;
 import dev.jsinco.brewery.database.PersistenceException;
@@ -24,9 +25,9 @@ public class SqlDrunkStateDataType implements DrunkStateDataType<Connection> {
     private final SqlStatements statements = new SqlStatements("/database/generic/drunk_states");
 
     @Override
-    public void update(Pair<DrunkStateImpl, UUID> newValue, Connection connection) throws PersistenceException {
+    public void update(Pair<DrunkState, UUID> newValue, Connection connection) throws PersistenceException {
         try (PreparedStatement preparedStatement = connection.prepareStatement(statements.get(SqlStatements.Type.UPDATE))) {
-            DrunkStateImpl drunkState = newValue.first();
+            DrunkState drunkState = newValue.first();
             preparedStatement.setLong(1, drunkState.kickedTimestamp());
             preparedStatement.setLong(2, drunkState.timestamp());
             preparedStatement.setBytes(3, DecoderEncoder.asBytes(newValue.second()));
@@ -37,9 +38,9 @@ public class SqlDrunkStateDataType implements DrunkStateDataType<Connection> {
     }
 
     @Override
-    public void insert(Pair<DrunkStateImpl, UUID> value, Connection connection) throws PersistenceException {
+    public void insert(Pair<DrunkState, UUID> value, Connection connection) throws PersistenceException {
         try (PreparedStatement preparedStatement = connection.prepareStatement(statements.get(SqlStatements.Type.INSERT))) {
-            DrunkStateImpl drunkState = value.first();
+            DrunkState drunkState = value.first();
             preparedStatement.setBytes(1, DecoderEncoder.asBytes(value.second()));
             preparedStatement.setLong(2, drunkState.kickedTimestamp());
             preparedStatement.setLong(3, drunkState.timestamp());
@@ -60,8 +61,8 @@ public class SqlDrunkStateDataType implements DrunkStateDataType<Connection> {
     }
 
     @Override
-    public List<Pair<DrunkStateImpl, UUID>> retrieveAll(Connection connection) throws PersistenceException {
-        List<Pair<DrunkStateImpl, UUID>> drunks = new ArrayList<>();
+    public List<Pair<DrunkState, UUID>> retrieveAll(Connection connection) throws PersistenceException {
+        List<Pair<DrunkState, UUID>> drunks = new ArrayList<>();
         try (PreparedStatement preparedStatement = connection.prepareStatement(statements.get(SqlStatements.Type.SELECT_ALL))) {
             ResultSet resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
@@ -76,8 +77,8 @@ public class SqlDrunkStateDataType implements DrunkStateDataType<Connection> {
         } catch (SQLException e) {
             throw new PersistenceException(e);
         }
-        List<Pair<DrunkStateImpl, UUID>> output = new ArrayList<>();
-        for (Pair<DrunkStateImpl, UUID> drunk : drunks) {
+        List<Pair<DrunkState, UUID>> output = new ArrayList<>();
+        for (Pair<DrunkState, UUID> drunk : drunks) {
             Map<DrunkenModifier, Double> modifiers = SqlDrunkenModifierDataType.INSTANCE.find(drunk.second(), connection)
                     .stream()
                     .collect(Collectors.toUnmodifiableMap(Pair::first, Pair::second));

@@ -1,11 +1,12 @@
 package dev.jsinco.brewery.bukkit.event;
 
+import dev.jsinco.brewery.api.effect.DrunkState;
+import dev.jsinco.brewery.api.effect.DrunksManager;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.bukkit.util.BukkitMessageUtil;
 import dev.jsinco.brewery.configuration.Config;
 import dev.jsinco.brewery.configuration.EventSection;
-import dev.jsinco.brewery.api.effect.DrunkState;
-import dev.jsinco.brewery.api.effect.DrunksManager;
+import dev.jsinco.brewery.effect.DrunkStateImpl;
 import dev.jsinco.brewery.util.MessageUtil;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
@@ -39,7 +40,7 @@ public class LegacyPlayerJoinListener implements Listener {
             return;
         }
         EventSection.DrunkenJoinEvent joinEvent = EventSection.events().drunkenJoinDeny();
-        if (joinEvent.enabled() && drunkState != null && joinEvent.probability().evaluate(drunkState.modifiers()).probability() > RANDOM.nextDouble(100)) {
+        if (joinEvent.enabled() && drunkState != null && joinEvent.probability().evaluate(DrunkStateImpl.compileVariables(drunkState.modifiers(), null, 0D)).probability() > RANDOM.nextDouble(100)) {
             event.kickMessage(
                     GlobalTranslator.render(
                             Component.translatable("tbp.events.drunken-join-deny-message", Argument.tagResolver(Placeholder.unparsed("player_name", playerName == null ? "" : playerName))),

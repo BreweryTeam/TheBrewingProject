@@ -25,4 +25,6 @@ public interface DrunkState {
     long kickedTimestamp();
 
     Map<DrunkenModifier, Double> modifiers();
+
+    Pair<DrunkState, Boolean> cascadeModifier(DrunkenModifier modifier, double value);
 }
