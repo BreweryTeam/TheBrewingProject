@@ -139,7 +139,7 @@ public class BukkitRecipeResult implements RecipeResult<ItemStack> {
         if (itemModel != null) {
             itemStack.setData(DataComponentTypes.ITEM_MODEL, itemModel);
         }
-        // After recipe effects, as both might modify potion contents
+        recipeEffects.applyTo(itemStack);
         itemStack.setData(DataComponentTypes.POTION_CONTENTS, PotionContents.potionContents()
                 .customColor(color)
         );

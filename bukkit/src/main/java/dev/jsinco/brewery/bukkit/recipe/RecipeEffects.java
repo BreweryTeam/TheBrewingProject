@@ -98,8 +98,19 @@ public class RecipeEffects {
         if (actionBar != null) {
             container.set(ACTION_BAR, PersistentDataType.STRING, actionBar);
         }
-        container.set(EVENTS, ListPersistentDataType.STRING_LIST, events.stream().map(BreweryKey::toString).toList());
-        container.set(EFFECTS, RecipeEffectPersistentDataType.INSTANCE, effects);
+        if (!modifiers.isEmpty()) {
+            container.set(MODIFIERS, ModifierConsumePdcType.LIST_INSTANCE, modifiers.entrySet()
+                    .stream()
+                    .map(entry -> new ModifierConsume(entry.getKey(), entry.getValue()))
+                    .toList()
+            );
+        }
+        if (!events.isEmpty()) {
+            container.set(EVENTS, ListPersistentDataType.STRING_LIST, events.stream().map(BreweryKey::toString).toList());
+        }
+        if (!effects.isEmpty()) {
+            container.set(EFFECTS, RecipeEffectPersistentDataType.INSTANCE, effects);
+        }
     }
 
     public static Optional<RecipeEffects> fromEntity(Entity entity) {
