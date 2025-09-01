@@ -1,7 +1,6 @@
 package dev.jsinco.brewery.bukkit.recipe;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableMap;
 import dev.jsinco.brewery.api.effect.modifier.DrunkenModifier;
 import dev.jsinco.brewery.api.moment.Interval;
 import dev.jsinco.brewery.api.recipe.QualityData;
@@ -96,9 +95,9 @@ public class BukkitRecipeResultReader implements RecipeResultReader<ItemStack> {
         legacyAlcohol.ifPresent(
                 alcoholQuality -> modifierQualityMap.put(DrunkenModifierSection.modifiers().modifier("alcohol"), alcoholQuality.map(Integer::doubleValue))
         );
-        QualityData<ImmutableMap.Builder<DrunkenModifier, Double>> output = QualityData.equalValued(new ImmutableMap.Builder<>());
+        QualityData<HashMap<DrunkenModifier, Double>> output = QualityData.fromValueMapper(ignored -> new HashMap<>());
         modifierQualityMap.forEach((modifier, qualityData) -> qualityData.forEach(((quality, aDouble) -> output.get(quality).put(modifier, aDouble))));
-        return output.map(ImmutableMap.Builder::build);
+        return output.map(Map::copyOf);
     }
 
     private static RecipeEffect getEffect(String string) {

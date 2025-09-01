@@ -156,6 +156,9 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
                 .add(new ModifierExpressionSerializer())
                 .add(new ModifierDisplaySerializer())
                 .add(new ComponentSerializer())
+                .add(new ModifierTooltipSerializer())
+                .add(new EventProbabilitySerializer())
+                .add(new RangeDSerializer())
                 .build();
     }
 
