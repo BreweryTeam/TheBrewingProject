@@ -108,7 +108,7 @@ public class DrunksManagerImpl<C> implements DrunksManager {
                     continue;
                 }
             }
-            newState = newState.addModifier(modifierConsume.modifier(), modifierConsume.value());
+            newState = newState.setModifier(modifierConsume.modifier(), modifierConsume.value());
 
         }
         if (newState.additionalModifierData().isEmpty() && !isPassedOut(newState)) {

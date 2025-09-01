@@ -10,7 +10,7 @@ public interface DrunkState {
 
     DrunkState recalculate(long timeStamp);
 
-    DrunkState addModifier(DrunkenModifier modifier, double value);
+    DrunkState setModifier(DrunkenModifier modifier, double value);
 
     DrunkState withModifiers(Map<DrunkenModifier, Double> modifiers);
 

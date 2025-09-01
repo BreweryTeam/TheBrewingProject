@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import dev.jsinco.brewery.api.effect.DrunkState;
 import dev.jsinco.brewery.api.effect.modifier.DrunkenModifier;
 import dev.jsinco.brewery.api.util.Pair;
+import dev.jsinco.brewery.configuration.DrunkenModifierSection;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
@@ -12,6 +13,14 @@ import java.util.Map;
 
 public record DrunkStateImpl(long timestamp,
                              long kickedTimestamp, Map<DrunkenModifier, Double> modifiers) implements DrunkState {
+
+    public DrunkStateImpl {
+        ImmutableMap.Builder<DrunkenModifier, Double> builder = new ImmutableMap.Builder<>();
+        for (DrunkenModifier drunkenModifier : DrunkenModifierSection.modifiers().drunkenModifiers()) {
+            builder.put(drunkenModifier, modifiers.getOrDefault(drunkenModifier, drunkenModifier.defaultValue()));
+        }
+        modifiers = builder.build();
+    }
 
     public DrunkStateImpl recalculate(long timestamp) {
         if (timestamp < this.timestamp) {
@@ -36,7 +45,7 @@ public record DrunkStateImpl(long timestamp,
     }
 
     @Override
-    public DrunkStateImpl addModifier(DrunkenModifier modifier, double value) {
+    public DrunkStateImpl setModifier(DrunkenModifier modifier, double value) {
         ImmutableMap.Builder<DrunkenModifier, Double> newModifiers = new ImmutableMap.Builder<>();
         for (Map.Entry<DrunkenModifier, Double> entry : modifiers.entrySet()) {
             newModifiers.put(entry.getKey(), entry.getKey().equals(modifier) ? value : entry.getValue());
@@ -50,6 +59,7 @@ public record DrunkStateImpl(long timestamp,
 
     @Override
     public DrunkStateImpl withModifiers(Map<DrunkenModifier, Double> modifiers) {
+
         return new DrunkStateImpl(timestamp, kickedTimestamp, modifiers);
     }
 
@@ -98,9 +108,9 @@ public record DrunkStateImpl(long timestamp,
         for (Map.Entry<DrunkenModifier, Double> entry : modifiers.entrySet()) {
             output.put(entry.getKey().name(), entry.getValue());
             if (entry.getKey().equals(modifierToAdd)) {
-                output.put("d" + modifierToAdd.name(), value);
+                output.put("consumed_" + modifierToAdd.name(), value);
             } else {
-                output.put("d" + entry.getKey().name(), entry.getValue());
+                output.put("consumed_" + entry.getKey().name(), entry.getValue());
             }
         }
         return output;
