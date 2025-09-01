@@ -51,9 +51,6 @@ public class Config extends OkaeriConfig {
     @CustomKey("puke")
     private PukeSection puke = new PukeSection();
 
-    @CustomKey("decay-rates")
-    private DecayRateSection decayRate = new DecayRateSection();
-
     @Comment({"This field accepts either a single sound definition or a list of definitions.",
             "If a list is provided, one sound will be chosen randomly.",
             "",

@@ -3,6 +3,7 @@ package dev.jsinco.brewery.bukkit.event;
 import com.destroystokyo.paper.event.player.PlayerLaunchProjectileEvent;
 import dev.jsinco.brewery.api.breweries.InventoryAccessible;
 import dev.jsinco.brewery.api.breweries.StructureHolder;
+import dev.jsinco.brewery.api.effect.DrunksManager;
 import dev.jsinco.brewery.api.ingredient.Ingredient;
 import dev.jsinco.brewery.api.ingredient.ScoredIngredient;
 import dev.jsinco.brewery.api.util.BreweryKey;
@@ -20,6 +21,7 @@ import dev.jsinco.brewery.bukkit.effect.event.DrunkEventExecutor;
 import dev.jsinco.brewery.bukkit.ingredient.BukkitIngredientManager;
 import dev.jsinco.brewery.bukkit.recipe.RecipeEffects;
 import dev.jsinco.brewery.configuration.Config;
+import dev.jsinco.brewery.configuration.DrunkenModifierSection;
 import dev.jsinco.brewery.configuration.serializers.ConsumableSerializer;
 import dev.jsinco.brewery.database.PersistenceException;
 import dev.jsinco.brewery.database.sql.Database;
@@ -293,11 +295,12 @@ public class PlayerEventListener implements Listener {
         RecipeEffects.fromItem(event.getItem())
                 .ifPresent(effect -> effect.applyTo(event.getPlayer()));
         Ingredient ingredient = BukkitIngredientManager.INSTANCE.getIngredient(event.getItem());
-        for (ConsumableSerializer.Consumable consumable : Config.config().decayRate().consumables()) {
+        for (ConsumableSerializer.Consumable consumable : DrunkenModifierSection.modifiers().consumables()) {
             String key = consumable.type().contains(":") ? consumable.type() : "minecraft:" + consumable.type();
             if (ingredient.getKey().equalsIgnoreCase(key)) {
-                TheBrewingProject.getInstance().getDrunksManager()
-                        .consume(event.getPlayer().getUniqueId(), consumable.alcohol(), consumable.toxins());
+                DrunksManager manager = TheBrewingProject.getInstance().getDrunksManager();
+                consumable.modifiers()
+                        .forEach((key1, value) -> manager.consume(event.getPlayer().getUniqueId(), key1, value));
             }
         }
     }
