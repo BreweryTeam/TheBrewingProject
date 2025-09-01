@@ -16,7 +16,7 @@ class SingleDrunkTextElementTest {
     @Test
     void findTransform_empty() {
         SingleDrunkTextElement singleDrunkTextElement = new SingleDrunkTextElement("*hic*", 100, new DrunkenModifier(
-                "blood_alcohol",
+                "alcohol",
                 ModifierExpression.ZERO,
                 ModifierExpression.ZERO,
                 0D), 0D);
@@ -26,7 +26,7 @@ class SingleDrunkTextElementTest {
     @Test
     void findTransform() {
         SingleDrunkTextElement singleDrunkTextElement = new SingleDrunkTextElement("*hic*", 100, new DrunkenModifier(
-                "blood_alcohol",
+                "alcohol",
                 ModifierExpression.ZERO,
                 ModifierExpression.ZERO,
                 0D), 0D);

@@ -10,6 +10,7 @@ import eu.okaeri.configs.OkaeriConfig;
 import eu.okaeri.configs.annotation.Comment;
 import eu.okaeri.configs.annotation.CustomKey;
 import eu.okaeri.configs.annotation.Exclude;
+import eu.okaeri.configs.annotation.Header;
 import eu.okaeri.configs.serdes.OkaeriSerdesPack;
 import eu.okaeri.configs.yaml.snakeyaml.YamlSnakeYamlConfigurer;
 import lombok.Getter;
@@ -24,13 +25,21 @@ import java.util.Optional;
 
 @Getter
 @Accessors(fluent = true)
+@Header({
+        "A drunken modifier represents the state of a player.",
+        "Depending on the state of the player, it will experience different effects, see ''./events.yml''.",
+        "This configuration file allows full customization with how to represent the state, and how it changes over time.",
+        "d<modifier-name> is the difference for a modifier most probably caused by the consumption of a drink",
+        "There is also a quality variable called quality, which will be a value in the range [0, 1] and defaults to 1 if none could be found"
+})
 public class DrunkenModifierSection extends OkaeriConfig {
 
     @CustomKey("drunken-modifiers")
-    @Comment("This is where you define all modifiers that can affect the player, used in drunken events. Names including arithmetic operators are forbidden")
+    @Comment({"This is where you define all modifiers that can affect the player, used in drunken events.",
+            "Avoid names with arithmetic operators included and names that clashes with other configuration keys,",
+            "MODIFY AT YOUR OWN RISK!"})
     private List<DrunkenModifier> drunkenModifiers = List.of(
-            new DrunkenModifier("alcohol", new ModifierExpression("0"), new ModifierExpression("0"), 0D),
-            new DrunkenModifier("blood_alcohol", new ModifierExpression("dalcohol * (110 - alcohol_addiction) / 110"), new ModifierExpression("200"), 0D),
+            new DrunkenModifier("alcohol", new ModifierExpression("dalcohol * (110 - alcohol_addiction) / 110"), new ModifierExpression("200"), 0D),
             new DrunkenModifier("alcohol_addiction", new ModifierExpression("0.001 * dalcohol"), new ModifierExpression("10000"), 0D),
             new DrunkenModifier("toxins", new ModifierExpression("0"), new ModifierExpression("-1"), 0D)
     );
@@ -42,7 +51,7 @@ public class DrunkenModifierSection extends OkaeriConfig {
             "display-window can have the values [chat, bar title]"
     })
     private List<ModifierDisplay> drunkenDisplays = List.of(
-            new ModifierDisplay(Component.text("Alcohol").color(NamedTextColor.GRAY), new ModifierExpression("blood_alcohol"), ModifierDisplay.DisplayType.BARS, ModifierDisplay.DisplayWindow.BAR)
+            new ModifierDisplay(Component.text("Alcohol").color(NamedTextColor.GRAY), new ModifierExpression("alcohol"), ModifierDisplay.DisplayType.BARS, ModifierDisplay.DisplayWindow.BAR)
     );
 
     @CustomKey("drunken-tooltips")
@@ -67,10 +76,10 @@ public class DrunkenModifierSection extends OkaeriConfig {
                     modifier("toxins"), 2D
             )),
             new ConsumableSerializer.Consumable("MILK_BUCKET", Map.of(
-                    modifier("blood_alcohol"), -3D
+                    modifier("alcohol"), -3D
             )),
             new ConsumableSerializer.Consumable("BREAD", Map.of(
-                    modifier("blood_alcohol"), -2D,
+                    modifier("alcohol"), -2D,
                     modifier("toxins"), -1D
             ))
     );

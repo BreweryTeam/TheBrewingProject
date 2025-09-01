@@ -113,7 +113,7 @@ public class RecipeEffects {
         RecipeEffects.Builder builder = new RecipeEffects.Builder();
         Map<DrunkenModifier, Double> modifiers = new HashMap<>();
         DrunkenModifierSection.modifiers()
-                .optionalModifier("blood_alcohol")
+                .optionalModifier("alcohol")
                 .filter(modifier -> persistentDataContainer.has(ALCOHOL, PersistentDataType.INTEGER))
                 .ifPresent(modifier -> modifiers.put(modifier, (double) persistentDataContainer.get(ALCOHOL, PersistentDataType.INTEGER)));
         DrunkenModifierSection.modifiers()

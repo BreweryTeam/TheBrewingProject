@@ -2,31 +2,31 @@
   {
     "from": "s",
     "to": "sh",
-    "blood_alcohol": 30,
+    "alcohol": 30,
     "percentage": 90
   },
   {
     "from": "([usoa])ch",
     "to": "sh",
-    "blood_alcohol": 10,
+    "alcohol": 10,
     "percentage": 70
   },
   {
     "from": "(sch|t)h",
     "to": "hh",
-    "blood_alcohol": 20,
+    "alcohol": 20,
     "percentage": 60
   },
   {
     "from": "th",
     "to": "thl",
-    "blood_alcohol": 30,
+    "alcohol": 30,
     "percentage": 40
   },
   {
     "from": "sch",
     "to": "shk",
-    "blood_alcohol": 40,
+    "alcohol": 40,
     "percentage": 60
   },
   {
@@ -37,13 +37,13 @@
   {
     "from": "y",
     "to": "yy",
-    "blood_alcohol": 15,
+    "alcohol": 15,
     "percentage": 60
   },
   {
     "from": "e",
     "to": "ee",
-    "blood_alcohol": 15,
+    "alcohol": 15,
     "percentage": 40
   },
   {
@@ -59,7 +59,7 @@
   {
     "from": "that",
     "to": "taht",
-    "blood_alcohol": 40,
+    "alcohol": 40,
     "percentage": 20
   },
   {
@@ -70,13 +70,13 @@
   {
     "from": "p",
     "to": "b",
-    "blood_alcohol": 60,
+    "alcohol": 60,
     "percentage": 70
   },
   {
     "from": "up",
     "to": "ubb",
-    "blood_alcohol": 25,
+    "alcohol": 25,
     "percentage": 80
   },
   {
@@ -87,19 +87,19 @@
   {
     "from": "ei",
     "to": "i",
-    "blood_alcohol": 15,
+    "alcohol": 15,
     "percentage": 30
   },
   {
     "from": "b",
     "to": "bb",
-    "blood_alcohol": 40,
+    "alcohol": 40,
     "percentage": 80
   },
   {
     "from": "!!!!",
     "to": "!!!!111!!!eleven!1!",
-    "blood_alcohol": 70,
+    "alcohol": 70,
     "percentage": 20
   },
   {
@@ -110,55 +110,55 @@
   {
     "from": "drunk",
     "to": "dhrkunn",
-    "blood_alcohol": 65,
+    "alcohol": 65,
     "percentage": 70
   },
   {
     "from": "walk",
     "to": "whhealhk",
-    "blood_alcohol": 30,
+    "alcohol": 30,
     "percentage": 80
   },
   {
     "from": "wtf",
     "to": "wft",
-    "blood_alcohol": 40,
+    "alcohol": 40,
     "percentage": 20
   },
   {
     "from": "lol",
     "to": "loool",
-    "blood_alcohol": 10,
+    "alcohol": 10,
     "percentage": 80
   },
   {
     "from": "afk",
     "to": "aafkayyy",
-    "blood_alcohol": 30,
+    "alcohol": 30,
     "percentage": 30
   },
   {
     "from": "write",
     "to": "wreitt",
-    "blood_alcohol": 50,
+    "alcohol": 50,
     "percentage": 80
   },
   {
     "from": "drink",
     "to": "booze",
-    "blood_alcohol": 70,
+    "alcohol": 70,
     "percentage": 80
   },
   {
     "from": "\\?\\?",
     "to": "\\?\\?\\?\\?\\?",
-    "blood_alcohol": 40,
+    "alcohol": 40,
     "percentage": 80
   },
   {
     "from": " ",
     "to": "",
-    "blood_alcohol": 35,
+    "alcohol": 35,
     "percentage": 30
   },
   {
@@ -169,13 +169,13 @@
   {
     "from": "^",
     "to": "dho",
-    "blood_alcohol": 50,
+    "alcohol": 50,
     "percentage": 15
   },
   {
     "from": "^",
     "to": "hhn",
-    "blood_alcohol": 50,
+    "alcohol": 50,
     "percentage": 10
   },
   {
@@ -184,77 +184,77 @@
   },
   {
     "to": "lug",
-    "blood_alcohol": 50,
+    "alcohol": 50,
     "percentage": 10
   },
   {
     "to": "blub",
-    "blood_alcohol": 80,
+    "alcohol": 80,
     "percentage": 20
   },
   {
     "to": "lerg",
-    "blood_alcohol": 85,
+    "alcohol": 85,
     "percentage": 40
   },
   {
     "to": "gul",
-    "blood_alcohol": 80,
+    "alcohol": 80,
     "percentage": 40
   },
   {
     "to": " ",
-    "blood_alcohol": 70,
+    "alcohol": 70,
     "percentage": 100
   },
   {
     "to": " ",
-    "blood_alcohol": 40,
+    "alcohol": 40,
     "percentage": 60
   },
   {
     "to": " ",
-    "blood_alcohol": 30,
+    "alcohol": 30,
     "percentage": 50
   },
   {
     "from": "$",
     "to": "!",
-    "blood_alcohol": 30,
+    "alcohol": 30,
     "percentage": 40
   },
   {
     "to": " *hic* ",
-    "blood_alcohol": 70,
+    "alcohol": 70,
     "percentage": 80
   },
   {
     "to": " *hic* ",
-    "blood_alcohol": 40,
+    "alcohol": 40,
     "percentage": 15
   },
   {
     "from": " ",
     "to": " *hic* ",
-    "blood_alcohol": 20,
+    "alcohol": 20,
     "percentage": 5
   },
   {
     "from": "$",
     "to": " *hic*",
-    "blood_alcohol": 50,
+    "alcohol": 50,
     "percentage": 70
   },
   {
     "from": ".{1}",
     "to": "*burp*",
-    "blood_alcohol": 60,
+    "alcohol": 60,
     "percentage": 3
   },
   {
     "from": ".{1}",
     "to": "*burp*",
-    "blood_alcohol": 80,
+    "alcohol": 80,
     "percentage": 6
   }
 ]

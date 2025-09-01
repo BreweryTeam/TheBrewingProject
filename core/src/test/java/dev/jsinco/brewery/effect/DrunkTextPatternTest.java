@@ -32,7 +32,7 @@ class DrunkTextPatternTest {
         String text = data.get("text").getAsString();
         String expected = data.get("expected").getAsString();
         DrunkTextPattern drunkTextPattern = new DrunkTextPattern(from, to, 100, new DrunkenModifier(
-                "blood_alcohol",
+                "alcohol",
                 ModifierExpression.ZERO,
                 ModifierExpression.ZERO,
                 0D), 0D);

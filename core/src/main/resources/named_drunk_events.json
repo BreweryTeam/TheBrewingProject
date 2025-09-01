@@ -6,7 +6,7 @@
         "function": "1"
       },
       "allowed_ranges": {
-        "blood_alcohol": {
+        "alcohol": {
           "min": 99,
           "max": 100
         }
@@ -17,10 +17,10 @@
     "name": "drunk_message",
     "probability": {
       "probability_weight": {
-        "function": "1 / (110 - blood_alcohol)"
+        "function": "1 / (110 - alcohol)"
       },
       "allowed_ranges": {
-        "blood_alcohol": {
+        "alcohol": {
           "min": 25,
           "max": 100
         }
@@ -31,10 +31,10 @@
     "name": "drunken_walk",
     "probability": {
       "probability_weight": {
-        "function": "4 / (110 - blood_alcohol)"
+        "function": "4 / (110 - alcohol)"
       },
       "allowed_ranges": {
-        "blood_alcohol": {
+        "alcohol": {
           "min": 60,
           "max": 100
         }
@@ -45,10 +45,10 @@
     "name": "fever",
     "probability": {
       "probability_weight": {
-        "function": "1 / (110 - blood_alcohol)"
+        "function": "1 / (110 - alcohol)"
       },
       "allowed_ranges": {
-        "blood_alcohol": {
+        "alcohol": {
           "min": 60,
           "max": 100
         }
@@ -59,10 +59,10 @@
     "name": "hallucination",
     "probability": {
       "probability_weight": {
-        "function": "7 / (110 - blood_alcohol)"
+        "function": "7 / (110 - alcohol)"
       },
       "allowed_ranges": {
-        "blood_alcohol": {
+        "alcohol": {
           "min": 70,
           "max": 100
         }
@@ -73,10 +73,10 @@
     "name": "kaboom",
     "probability": {
       "probability_weight": {
-        "function": "0.2 / (110 - blood_alcohol)"
+        "function": "0.2 / (110 - alcohol)"
       },
       "allowed_ranges": {
-        "blood_alcohol": {
+        "alcohol": {
           "min": 60,
           "max": 100
         }
@@ -87,10 +87,10 @@
     "name": "nausea",
     "probability": {
       "probability_weight": {
-        "function": "10 / (110 - blood_alcohol)"
+        "function": "10 / (110 - alcohol)"
       },
       "allowed_ranges": {
-        "blood_alcohol": {
+        "alcohol": {
           "min": 99,
           "max": 100
         }
@@ -101,10 +101,10 @@
     "name": "pass_out",
     "probability": {
       "probability_weight": {
-        "function": "2 / (110 - blood_alcohol)"
+        "function": "2 / (110 - alcohol)"
       },
       "allowed_ranges": {
-        "blood_alcohol": {
+        "alcohol": {
           "min": 80,
           "max": 100
         }
@@ -115,10 +115,10 @@
     "name": "puke",
     "probability": {
       "probability_weight": {
-        "function": "4 / (110 - blood_alcohol)"
+        "function": "4 / (110 - alcohol)"
       },
       "allowed_ranges": {
-        "blood_alcohol": {
+        "alcohol": {
           "min": 45,
           "max": 100
         }
@@ -129,10 +129,10 @@
     "name": "stumble",
     "probability": {
       "probability_weight": {
-        "function": "0.4 / (110 - blood_alcohol)"
+        "function": "0.4 / (110 - alcohol)"
       },
       "allowed_ranges": {
-        "blood_alcohol": {
+        "alcohol": {
           "min": 90,
           "max": 100
         }
@@ -143,10 +143,10 @@
     "name": "teleport",
     "probability": {
       "probability_weight": {
-        "function": "0.4 / (110 - blood_alcohol)"
+        "function": "0.4 / (110 - alcohol)"
       },
       "allowed_ranges": {
-        "blood_alcohol": {
+        "alcohol": {
           "min": 90,
           "max": 100
         }

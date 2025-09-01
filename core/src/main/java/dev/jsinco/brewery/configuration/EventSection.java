@@ -50,18 +50,18 @@ public class EventSection extends OkaeriConfig {
     @CustomKey("custom-events")
     private CustomEventRegistry customEvents = CustomEventRegistry.builder()
             .addEvent(new CustomEvent.Builder()
-                    .probability(new EventProbability(new ModifierExpression("1 / (110 - blood_alcohol)"), Map.of("blood_alcohol", new RangeD(60D, null))))
+                    .probability(new EventProbability(new ModifierExpression("1 / (110 - alcohol)"), Map.of("alcohol", new RangeD(60D, null))))
                     .addStep(new EventStep.Builder().addProperty(NamedDrunkEvent.fromKey("pass_out")).build())
                     .addStep(new EventStep.Builder()
                             .addProperty(new ConditionalWaitStep(ConditionalWaitStep.Condition.JOIN))
                             .addProperty(NamedDrunkEvent.fromKey("teleport"))
-                            .addProperty(new ConsumeStep(DrunkenModifierSection.modifiers().modifier("blood_alcohol"), -30D))
+                            .addProperty(new ConsumeStep(DrunkenModifierSection.modifiers().modifier("alcohol"), -30D))
                             .build()
                     )
                     .build(BreweryKey.parse("memory_loss"))
             ).addEvent(
                     new CustomEvent.Builder()
-                            .probability(new EventProbability(new ModifierExpression("1 / (110 - blood_alcohol)"), Map.of("blood_alcohol", new RangeD(40D, null))))
+                            .probability(new EventProbability(new ModifierExpression("1 / (110 - alcohol)"), Map.of("alcohol", new RangeD(40D, null))))
                             .addStep(new EventStep.Builder().addProperty(new ApplyPotionEffect("darkness",
                                             new Interval(1, 1), new Interval(20 * Moment.SECOND, 20 * Moment.SECOND)
                                     )).build()
@@ -104,7 +104,7 @@ public class EventSection extends OkaeriConfig {
     @Accessors(fluent = true)
     public static class DrunkenJoinEvent extends OkaeriConfig {
         private boolean enabled = true;
-        private EventProbability probability = new EventProbability(new ModifierExpression("85 - blood_alcohol"), Map.of("blood_alcohol", new RangeD(85D, null)));
+        private EventProbability probability = new EventProbability(new ModifierExpression("85 - alcohol"), Map.of("alcohol", new RangeD(85D, null)));
     }
 
 
