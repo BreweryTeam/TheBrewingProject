@@ -1,7 +1,7 @@
 package dev.jsinco.brewery.bukkit.effect;
 
 import dev.jsinco.brewery.configuration.DrunkenModifierSection;
-import dev.jsinco.brewery.effect.ModifierConsume;
+import dev.jsinco.brewery.api.effect.ModifierConsume;
 import org.bukkit.persistence.ListPersistentDataType;
 import org.bukkit.persistence.PersistentDataAdapterContext;
 import org.bukkit.persistence.PersistentDataType;

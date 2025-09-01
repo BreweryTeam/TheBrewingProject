@@ -5,7 +5,7 @@ import dev.jsinco.brewery.api.util.Pair;
 import dev.jsinco.brewery.configuration.DrunkenModifierSection;
 import dev.jsinco.brewery.database.PersistenceException;
 import dev.jsinco.brewery.database.sql.SqlStatements;
-import dev.jsinco.brewery.database.sql.SqlStoredData;
+import dev.jsinco.brewery.effect.DrunkenModifierDataType;
 import dev.jsinco.brewery.util.DecoderEncoder;
 
 import java.sql.Connection;
@@ -16,8 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-public class SqlDrunkenModifierDataType implements SqlStoredData.Insertable<Pair<SqlDrunkenModifierDataType.Data, Double>>, SqlStoredData.Removable<SqlDrunkenModifierDataType.Data>
-        , SqlStoredData.Findable<Pair<DrunkenModifier, Double>, UUID> {
+public class SqlDrunkenModifierDataType implements DrunkenModifierDataType<Connection> {
 
     public static final SqlDrunkenModifierDataType INSTANCE = new SqlDrunkenModifierDataType();
     private final SqlStatements statements = new SqlStatements("/database/generic/modifiers");
@@ -63,8 +62,5 @@ public class SqlDrunkenModifierDataType implements SqlStoredData.Insertable<Pair
         } catch (SQLException e) {
             throw new PersistenceException(e);
         }
-    }
-
-    public record Data(DrunkenModifier modifier, UUID playerUuid) {
     }
 }

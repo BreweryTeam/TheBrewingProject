@@ -1,7 +1,9 @@
 package dev.jsinco.brewery.effect;
 
 import com.google.common.collect.ImmutableList;
+import dev.jsinco.brewery.api.effect.DrunkState;
 import dev.jsinco.brewery.api.effect.DrunksManager;
+import dev.jsinco.brewery.api.effect.ModifierConsume;
 import dev.jsinco.brewery.api.effect.modifier.DrunkenModifier;
 import dev.jsinco.brewery.api.event.CustomEventRegistry;
 import dev.jsinco.brewery.api.event.DrunkEvent;
@@ -32,9 +34,10 @@ public class DrunksManagerImpl<C> implements DrunksManager {
     private final CustomEventRegistry eventRegistry;
     private final PersistenceHandler<C> persistenceHandler;
     private final DrunkStateDataType<C> drunkStateDataType;
+    private final DrunkenModifierDataType<C> drunkenModifierDataType;
     private Set<BreweryKey> allowedEvents;
     private List<NamedDrunkEvent> namedDrunkEvents = initializeDrunkEventsWithOverrides();
-    private Map<UUID, DrunkStateImpl> drunks = new HashMap<>();
+    private Map<UUID, DrunkState> drunks = new HashMap<>();
     @Getter
     private LongSupplier timeSupplier;
     private Map<Long, Map<UUID, DrunkEvent>> events = new HashMap<>();
@@ -43,12 +46,13 @@ public class DrunksManagerImpl<C> implements DrunksManager {
     private static final Random RANDOM = new Random();
 
     public DrunksManagerImpl(CustomEventRegistry registry, Set<BreweryKey> allowedEvents, LongSupplier timeSupplier,
-                             PersistenceHandler<C> persistenceHandler, DrunkStateDataType<C> drunkStateDataType) {
+                             PersistenceHandler<C> persistenceHandler, DrunkStateDataType<C> drunkStateDataType, DrunkenModifierDataType<C> drunkenModifierDataType) {
         this.eventRegistry = registry;
         this.allowedEvents = allowedEvents;
         this.timeSupplier = timeSupplier;
         this.persistenceHandler = persistenceHandler;
         this.drunkStateDataType = drunkStateDataType;
+        this.drunkenModifierDataType = drunkenModifierDataType;
         loadDrunkStates();
     }
 
@@ -62,18 +66,21 @@ public class DrunksManagerImpl<C> implements DrunksManager {
     }
 
     @Override
-    public @Nullable DrunkStateImpl consume(UUID playerUuid, String modifierName, double value) {
+    public @Nullable DrunkState consume(UUID playerUuid, String modifierName, double value) {
         return consume(playerUuid,
-                DrunkenModifierSection.modifiers().drunkenModifiers()
-                        .stream()
-                        .filter(modifier -> modifier.name().equals(modifierName))
-                        .findAny().orElseThrow(() -> new IllegalArgumentException("Unknown modifier: " + modifierName)),
-                value);
+                new ModifierConsume(
+                        DrunkenModifierSection.modifiers().modifier(modifierName),
+                        value
+                ));
+    }
+
+    public @Nullable DrunkState consume(UUID playerUuid, List<ModifierConsume> consumptions) {
+        return this.consume(playerUuid, consumptions, timeSupplier.getAsLong());
     }
 
     @Override
-    public @Nullable DrunkStateImpl consume(UUID playerUuid, DrunkenModifier modifier, double value) {
-        return this.consume(playerUuid, modifier, value, timeSupplier.getAsLong());
+    public @Nullable DrunkState consume(UUID playerUuid, ModifierConsume modifier) {
+        return this.consume(playerUuid, List.of(modifier));
     }
 
     /**
@@ -82,15 +89,21 @@ public class DrunksManagerImpl<C> implements DrunksManager {
      * @param value
      * @param timestamp  Should be in relation to the internal clock in drunk manager
      */
-    public @Nullable DrunkStateImpl consume(UUID playerUuid, DrunkenModifier modifier, double value, long timestamp) {
+    public @Nullable DrunkState consume(UUID playerUuid, List<ModifierConsume> modifiers, long timestamp) {
         boolean alreadyDrunk = drunks.containsKey(playerUuid);
-        DrunkStateImpl drunkState = (alreadyDrunk ? drunks.get(playerUuid).recalculate(timestamp) : new DrunkStateImpl(
+        DrunkState initialState = (alreadyDrunk ? drunks.get(playerUuid).recalculate(timestamp) : new DrunkStateImpl(
                 timestamp, -1, DrunkenModifierSection.modifiers()
                 .drunkenModifiers().stream()
                 .collect(Collectors.toUnmodifiableMap(temp -> temp, DrunkenModifier::defaultValue))
-        )).addModifier(modifier, value);
+        ));
+        DrunkState newState = initialState;
+        for (ModifierConsume modifierConsume : modifiers) {
+            newState = newState.addModifier(modifierConsume.modifier(), modifierConsume.value());
+            if (modifierConsume.cascade()) {
 
-        if (drunkState.additionalModifierData().isEmpty() && !isPassedOut(drunkState)) {
+            }
+        }
+        if (newState.additionalModifierData().isEmpty() && !isPassedOut(newState)) {
             drunks.remove(playerUuid);
             if (alreadyDrunk) {
                 try {
@@ -101,18 +114,30 @@ public class DrunksManagerImpl<C> implements DrunksManager {
             }
             return null;
         }
-        drunks.put(playerUuid, drunkState);
+        drunks.put(playerUuid, newState);
         planEvent(playerUuid);
         try {
             if (alreadyDrunk) {
-                persistenceHandler.updateValue(drunkStateDataType, new Pair<>(drunkState, playerUuid));
+                persistenceHandler.updateValue(drunkStateDataType, new Pair<>(newState, playerUuid));
             } else {
-                persistenceHandler.insertValue(drunkStateDataType, new Pair<>(drunkState, playerUuid));
+                persistenceHandler.insertValue(drunkStateDataType, new Pair<>(newState, playerUuid));
+            }
+            Set<DrunkenModifier> allModifiers = Stream.concat(initialState.additionalModifierData().stream(), newState.additionalModifierData().stream())
+                    .map(Pair::first)
+                    .collect(Collectors.toSet());
+            Map<DrunkenModifier, Double> newModifiers = newState.modifiers();
+            for (DrunkenModifier modifier : allModifiers) {
+                if (newModifiers.get(modifier) != modifier.defaultValue()) {
+                    persistenceHandler.insertValue(drunkenModifierDataType, new Pair<>(new DrunkenModifierDataType.Data(modifier, playerUuid), newModifiers.get(modifier)));
+                }
+                if (newModifiers.get(modifier) == modifier.defaultValue()) {
+                    persistenceHandler.remove(drunkenModifierDataType, new DrunkenModifierDataType.Data(modifier, playerUuid));
+                }
             }
         } catch (PersistenceException e) {
             Logger.logErr(e);
         }
-        return drunkState;
+        return newState;
     }
 
     public @Nullable DrunkStateImpl getDrunkState(UUID playerUuid) {
@@ -218,7 +243,7 @@ public class DrunksManagerImpl<C> implements DrunksManager {
         return drunks.containsKey(playerUUID) && isPassedOut(drunks.get(playerUUID));
     }
 
-    private boolean isPassedOut(DrunkStateImpl drunkState) {
+    private boolean isPassedOut(DrunkState drunkState) {
         long passOutTimeStamp = drunkState.kickedTimestamp();
         if (passOutTimeStamp == -1) {
             return false;

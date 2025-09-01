@@ -13,7 +13,7 @@ import dev.jsinco.brewery.bukkit.util.BukkitMessageUtil;
 import dev.jsinco.brewery.bukkit.util.ListPersistentDataType;
 import dev.jsinco.brewery.configuration.DrunkenModifierSection;
 import dev.jsinco.brewery.effect.DrunksManagerImpl;
-import dev.jsinco.brewery.effect.ModifierConsume;
+import dev.jsinco.brewery.api.effect.ModifierConsume;
 import dev.jsinco.brewery.util.MessageUtil;
 import io.papermc.paper.persistence.PersistentDataContainerView;
 import lombok.Getter;

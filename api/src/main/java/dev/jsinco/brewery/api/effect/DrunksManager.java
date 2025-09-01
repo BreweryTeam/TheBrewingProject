@@ -1,6 +1,5 @@
 package dev.jsinco.brewery.api.effect;
 
-import dev.jsinco.brewery.api.effect.modifier.DrunkenModifier;
 import dev.jsinco.brewery.api.event.DrunkEvent;
 import dev.jsinco.brewery.api.util.BreweryKey;
 import dev.jsinco.brewery.api.util.Pair;
@@ -14,7 +13,7 @@ public interface DrunksManager {
 
     @Nullable DrunkState consume(UUID playerUuid, String modifierName, double value);
 
-    @Nullable DrunkState consume(UUID playerUuid, DrunkenModifier modifier, double value);
+    @Nullable DrunkState consume(UUID playerUuid, ModifierConsume modifier);
 
     @Nullable DrunkState getDrunkState(UUID playerUuid);
 
