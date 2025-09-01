@@ -28,7 +28,6 @@ public class DrunkTextTransformer {
         int lastIndex = 0;
         for (int i = 0; i < transformations.size(); i++) {
             if (!clashingTextTransforms.isEmpty() && !clashesWithTransforms(transformations.get(i), clashingTextTransforms)) {
-                clashingTextTransforms.sort(Comparator.comparing(DrunkTextElement.TextTransformation::alcohol));
                 DrunkTextElement.TextTransformation chosenTransform = clashingTextTransforms.getLast();
                 output.append(text, lastIndex, chosenTransform.from())
                         .append(chosenTransform.replacement());
@@ -37,7 +36,6 @@ public class DrunkTextTransformer {
             }
             clashingTextTransforms.add(transformations.get(i));
         }
-        clashingTextTransforms.sort(Comparator.comparing(DrunkTextElement.TextTransformation::alcohol));
         if (!clashingTextTransforms.isEmpty()) {
             DrunkTextElement.TextTransformation chosenTransform = clashingTextTransforms.getLast();
             output.append(text, lastIndex, chosenTransform.from())
