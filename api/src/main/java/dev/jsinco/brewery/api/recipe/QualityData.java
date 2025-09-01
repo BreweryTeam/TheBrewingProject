@@ -4,6 +4,7 @@ import dev.jsinco.brewery.api.brew.BrewQuality;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -92,5 +93,15 @@ public class QualityData<T> {
 
     public T getOrDefault(BrewQuality quality, T t) {
         return backing.getOrDefault(quality, t);
+    }
+
+    public void forEach(BiConsumer<BrewQuality, T> consumer) {
+        for (BrewQuality brewQuality : BrewQuality.values()) {
+            T value = get(brewQuality);
+            if (value == null) {
+                continue;
+            }
+            consumer.accept(brewQuality, value);
+        }
     }
 }

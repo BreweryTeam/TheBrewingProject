@@ -1,13 +1,16 @@
 package dev.jsinco.brewery.bukkit.recipe;
 
 import com.google.common.base.Preconditions;
-import dev.jsinco.brewery.bukkit.util.ColorUtil;
+import com.google.common.collect.ImmutableMap;
+import dev.jsinco.brewery.api.effect.modifier.DrunkenModifier;
 import dev.jsinco.brewery.api.moment.Interval;
 import dev.jsinco.brewery.api.recipe.QualityData;
 import dev.jsinco.brewery.api.recipe.RecipeResult;
+import dev.jsinco.brewery.api.util.BreweryKey;
+import dev.jsinco.brewery.bukkit.util.ColorUtil;
+import dev.jsinco.brewery.configuration.DrunkenModifierSection;
 import dev.jsinco.brewery.recipes.RecipeReader;
 import dev.jsinco.brewery.recipes.RecipeResultReader;
-import dev.jsinco.brewery.api.util.BreweryKey;
 import org.bukkit.Color;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Registry;
@@ -15,8 +18,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffectType;
 import org.simpleyaml.configuration.ConfigurationSection;
 
-import java.util.List;
-import java.util.Locale;
+import java.util.*;
 
 public class BukkitRecipeResultReader implements RecipeResultReader<ItemStack> {
     @Override
@@ -66,17 +68,37 @@ public class BukkitRecipeResultReader implements RecipeResultReader<ItemStack> {
                         .map(BreweryKey::parse)
                         .toList()
                 );
-        QualityData<Integer> alcohol = QualityData.readQualityFactoredString(configurationSection.getString("alcohol", "0%"))
-                .map(RecipeReader::parseAlcoholString);
+        QualityData<Map<DrunkenModifier, Double>> modifiers = parseModifiers(configurationSection);
         return QualityData.fromValueMapper(quality -> new RecipeEffects.Builder()
                 .actionBar(actionBar.get(quality))
                 .title(title.get(quality))
                 .message(message.get(quality))
-                .alcohol(alcohol.getOrDefault(quality, 0))
+                .addModifiers(modifiers.get(quality))
                 .effects(effects.getOrDefault(quality, List.of()))
                 .events(events.getOrDefault(quality, List.of()))
                 .build()
         );
+    }
+
+    private static QualityData<Map<DrunkenModifier, Double>> parseModifiers(ConfigurationSection configurationSection) {
+        Optional<QualityData<Integer>> legacyAlcohol = Optional.ofNullable(configurationSection.getString("alcohol"))
+                .map(QualityData::readQualityFactoredString)
+                .map(stringQualityData -> stringQualityData.map(RecipeReader::parseAlcoholString));
+        Map<DrunkenModifier, QualityData<Double>> modifierQualityMap = new HashMap<>();
+        if (configurationSection.isConfigurationSection("modifiers")) {
+            ConfigurationSection qualityDataSection = configurationSection.getConfigurationSection("modifiers");
+            for (String modifier : qualityDataSection.getKeys(false)) {
+                modifierQualityMap.put(DrunkenModifierSection.modifiers().modifier(modifier), QualityData.readQualityFactoredString(qualityDataSection.getString(modifier))
+                        .map(Double::parseDouble)
+                );
+            }
+        }
+        legacyAlcohol.ifPresent(
+                alcoholQuality -> modifierQualityMap.put(DrunkenModifierSection.modifiers().modifier("alcohol"), alcoholQuality.map(Integer::doubleValue))
+        );
+        QualityData<ImmutableMap.Builder<DrunkenModifier, Double>> output = QualityData.equalValued(new ImmutableMap.Builder<>());
+        modifierQualityMap.forEach((modifier, qualityData) -> qualityData.forEach(((quality, aDouble) -> output.get(quality).put(modifier, aDouble))));
+        return output.map(ImmutableMap.Builder::build);
     }
 
     private static RecipeEffect getEffect(String string) {

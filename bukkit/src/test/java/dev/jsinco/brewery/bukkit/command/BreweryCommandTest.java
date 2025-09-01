@@ -55,13 +55,13 @@ class BreweryCommandTest {
         assertDoesNotThrow(() -> target.performCommand("tbp status info"));
         target.performCommand("tbp status consume 30 40");
         DrunkState drunkState = TheBrewingProject.getInstance().getDrunksManager().getDrunkState(target.getUniqueId());
-        assertEquals(30, drunkState.alcohol());
-        assertEquals(40, drunkState.toxins());
+        assertEquals(30, drunkState.modifierValue("alcohol"));
+        assertEquals(40, drunkState.modifierValue("toxins"));
         target.performCommand("tbp status set 10 20");
         assertDoesNotThrow(() -> target.performCommand("tbp status info"));
         drunkState = TheBrewingProject.getInstance().getDrunksManager().getDrunkState(target.getUniqueId());
-        assertEquals(10, drunkState.alcohol());
-        assertEquals(20, drunkState.toxins());
+        assertEquals(10, drunkState.modifierValue("alcohol"));
+        assertEquals(20, drunkState.modifierValue("toxins"));
         target.performCommand("tbp status clear");
         drunkState = TheBrewingProject.getInstance().getDrunksManager().getDrunkState(target.getUniqueId());
         assertNull(drunkState);
