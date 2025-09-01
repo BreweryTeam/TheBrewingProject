@@ -94,14 +94,14 @@ public class StatusCommand {
                 .map(drunkenModifier -> new FlaggedArgumentBuilder.Flag(
                                 drunkenModifier.name(),
                                 null,
-                                List.of(new Pair<>("value", DoubleArgumentType.doubleArg(0, 100))),
+                                List.of(new Pair<>(drunkenModifier.name(), DoubleArgumentType.doubleArg(0, 100))),
                                 Set.of()
                         )
                 )
                 .collect(Collectors.toSet());
 
         ArgumentBuilder<CommandSourceStack, ?> root = Commands.literal("status");
-
+        registerBranches(root, flags);
         root.then(BreweryCommand.offlinePlayerBranch(argument -> registerBranches(argument, flags)));
         return root;
     }
@@ -112,9 +112,11 @@ public class StatusCommand {
         root.then(Commands.literal("clear")
                 .executes(StatusCommand::clear));
         ArgumentBuilder<CommandSourceStack, ?> consume = Commands.literal("consume");
-        ArgumentBuilder<CommandSourceStack, ?> set = Commands.literal("consume");
+        ArgumentBuilder<CommandSourceStack, ?> set = Commands.literal("set");
         new FlaggedArgumentBuilder(flags, StatusCommand::consume).build().forEach(consume::then);
         new FlaggedArgumentBuilder(flags, StatusCommand::set).build().forEach(set::then);
+        root.then(consume);
+        root.then(set);
     }
 
     private static void set(CommandContext<CommandSourceStack> context, List<FlaggedArgumentBuilder.Flag> flags) throws CommandSyntaxException {
