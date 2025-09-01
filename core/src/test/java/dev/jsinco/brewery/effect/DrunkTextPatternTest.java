@@ -3,6 +3,8 @@ package dev.jsinco.brewery.effect;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import dev.jsinco.brewery.api.effect.modifier.DrunkenModifier;
+import dev.jsinco.brewery.api.effect.modifier.ModifierExpression;
 import dev.jsinco.brewery.effect.text.DrunkTextPattern;
 import dev.jsinco.brewery.effect.text.DrunkTextTransformer;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -29,7 +31,11 @@ class DrunkTextPatternTest {
         String to = data.get("to").getAsString();
         String text = data.get("text").getAsString();
         String expected = data.get("expected").getAsString();
-        DrunkTextPattern drunkTextPattern = new DrunkTextPattern(from, to, 100, 0);
+        DrunkTextPattern drunkTextPattern = new DrunkTextPattern(from, to, 100, new DrunkenModifier(
+                "blood_alcohol",
+                ModifierExpression.ZERO,
+                ModifierExpression.ZERO,
+                0D), 0D);
         assertEquals(expected, DrunkTextTransformer.transform(text, List.of(drunkTextPattern)));
     }
 
