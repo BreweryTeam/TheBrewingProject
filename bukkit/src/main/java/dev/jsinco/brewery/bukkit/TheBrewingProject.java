@@ -166,6 +166,7 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
         saveResources();
         closeDatabase();
         Config.config().load(true);
+        DrunkenModifierSection.modifiers().load(true);
         EventSection.events().load(true);
         translator.reload();
         this.structureRegistry.clear();

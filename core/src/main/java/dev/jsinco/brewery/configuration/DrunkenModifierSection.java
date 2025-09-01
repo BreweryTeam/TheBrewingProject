@@ -95,7 +95,7 @@ public class DrunkenModifierSection extends OkaeriConfig {
     public static void load(File dataFolder, OkaeriSerdesPack... packs) {
         DrunkenModifierSection.instance = ConfigManager.create(DrunkenModifierSection.class, it -> {
             it.withConfigurer(new YamlSnakeYamlConfigurer(), packs);
-            it.withBindFile(new File(dataFolder, "events.yml"));
+            it.withBindFile(new File(dataFolder, "modifiers.yml"));
             it.withRemoveOrphans(true);
             it.saveDefaults();
             it.load(true);
