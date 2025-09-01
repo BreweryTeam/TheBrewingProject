@@ -1,7 +1,5 @@
 package dev.jsinco.brewery.configuration.serializers;
 
-import dev.jsinco.brewery.api.effect.modifier.DrunkenModifier;
-import dev.jsinco.brewery.configuration.DrunkenModifierSection;
 import eu.okaeri.configs.schema.GenericsDeclaration;
 import eu.okaeri.configs.serdes.DeserializationData;
 import eu.okaeri.configs.serdes.ObjectSerializer;
@@ -14,7 +12,7 @@ import java.util.stream.Collectors;
 
 public class ConsumableSerializer implements ObjectSerializer<ConsumableSerializer.Consumable> {
 
-    public record Consumable(String type, Map<DrunkenModifier, Double> modifiers) {
+    public record Consumable(String type, Map<String, Double> modifiers) {
     }
 
     @Override
@@ -26,20 +24,18 @@ public class ConsumableSerializer implements ObjectSerializer<ConsumableSerializ
     public void serialize(@NonNull Consumable object, @NonNull SerializationData data, @NonNull GenericsDeclaration generics) {
         Map<String, Object> eventData = new HashMap<>();
         eventData.put("type", object.type);
-        object.modifiers.forEach((key, value) -> eventData.put(key.name(), value));
+        eventData.putAll(object.modifiers);
         data.setValue(eventData);
     }
 
     @Override
     public Consumable deserialize(@NonNull DeserializationData data, @NonNull GenericsDeclaration generics) {
         String type = data.get("type", String.class);
-        Map<DrunkenModifier, Double> modifiers = DrunkenModifierSection.modifiers().drunkenModifiers()
+        return new Consumable(type, data.asMap().keySet()
                 .stream()
-                .filter(modifier -> data.containsKey(modifier.name()))
-                .collect(Collectors.toUnmodifiableMap(modifier -> modifier,
-                        modifier -> data.get(modifier.name(), Double.class))
-                );
-        return new Consumable(type, modifiers);
+                .filter(key -> !key.equals("type"))
+                .collect(Collectors.toUnmodifiableMap(key -> key, key -> data.get(key, Double.class)))
+        );
     }
 
 }

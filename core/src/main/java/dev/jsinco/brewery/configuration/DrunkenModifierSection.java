@@ -39,8 +39,8 @@ public class DrunkenModifierSection extends OkaeriConfig {
             "Avoid names with arithmetic operators included and names that clashes with other configuration keys,",
             "MODIFY AT YOUR OWN RISK!"})
     private List<DrunkenModifier> drunkenModifiers = List.of(
-            new DrunkenModifier("alcohol", new ModifierExpression("dalcohol * (110 - alcohol_addiction) / 110"), new ModifierExpression("200"), 0D),
-            new DrunkenModifier("alcohol_addiction", new ModifierExpression("0.001 * dalcohol"), new ModifierExpression("10000"), 0D),
+            new DrunkenModifier("alcohol", new ModifierExpression("consumed_alcohol * (110 - alcohol_addiction) / 110"), new ModifierExpression("200"), 0D),
+            new DrunkenModifier("alcohol_addiction", new ModifierExpression("0.001 * consumed_alcohol"), new ModifierExpression("10000"), 0D),
             new DrunkenModifier("toxins", new ModifierExpression("0"), new ModifierExpression("-1"), 0D)
     );
 
@@ -70,17 +70,17 @@ public class DrunkenModifierSection extends OkaeriConfig {
     @CustomKey("consumables")
     private List<ConsumableSerializer.Consumable> consumables = List.of(
             new ConsumableSerializer.Consumable("ROTTEN_FLESH", Map.of(
-                    modifier("toxins"), 3D
+                    "toxins", 3D
             )),
             new ConsumableSerializer.Consumable("SPIDER_EYE", Map.of(
-                    modifier("toxins"), 2D
+                    "toxins", 2D
             )),
             new ConsumableSerializer.Consumable("MILK_BUCKET", Map.of(
-                    modifier("alcohol"), -3D
+                   "alcohol", -3D
             )),
             new ConsumableSerializer.Consumable("BREAD", Map.of(
-                    modifier("alcohol"), -2D,
-                    modifier("toxins"), -1D
+                   "alcohol", -2D,
+                    "toxins", -1D
             ))
     );
 

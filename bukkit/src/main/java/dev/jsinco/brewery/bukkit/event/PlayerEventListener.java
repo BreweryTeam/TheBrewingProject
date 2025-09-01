@@ -300,7 +300,7 @@ public class PlayerEventListener implements Listener {
             if (ingredient.getKey().equalsIgnoreCase(key)) {
                 drunksManager.consume(event.getPlayer().getUniqueId(),
                         consumable.modifiers().entrySet().stream()
-                                .map(entry -> new ModifierConsume(entry.getKey(), entry.getValue(), true))
+                                .map(entry -> new ModifierConsume(DrunkenModifierSection.modifiers().modifier(entry.getKey()), entry.getValue(), true))
                                 .toList()
                 );
             }
