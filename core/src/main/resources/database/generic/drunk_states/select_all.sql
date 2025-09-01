@@ -1,1 +1,1 @@
-SELECT * FROM drunk_states;
+SELECT * FROM drunk_states_v2;
