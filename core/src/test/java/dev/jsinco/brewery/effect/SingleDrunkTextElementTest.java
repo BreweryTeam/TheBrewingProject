@@ -19,7 +19,7 @@ class SingleDrunkTextElementTest {
                 "alcohol",
                 ModifierExpression.ZERO,
                 ModifierExpression.ZERO,
-                0D), 0D);
+                0D, 100D), 0D);
         assertFalse(singleDrunkTextElement.findTransform("").isEmpty(), "Did not insert any drunk text");
     }
 
@@ -29,7 +29,7 @@ class SingleDrunkTextElementTest {
                 "alcohol",
                 ModifierExpression.ZERO,
                 ModifierExpression.ZERO,
-                0D), 0D);
+                0D, 100D), 0D);
         List<DrunkTextElement.TextTransformation> transformed = singleDrunkTextElement.findTransform(" ");
         assertFalse(transformed.isEmpty(), "Did not insert any drunk text");
     }

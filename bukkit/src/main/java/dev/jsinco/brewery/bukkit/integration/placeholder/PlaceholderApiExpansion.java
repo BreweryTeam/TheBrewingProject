@@ -54,7 +54,7 @@ public class PlaceholderApiExpansion extends PlaceholderExpansion {
         if (drunkState == null) {
             drunkState = new DrunkStateImpl(TheBrewingProject.getInstance().getTime(), -1, DrunkenModifierSection.modifiers()
                     .drunkenModifiers().stream()
-                    .collect(Collectors.toUnmodifiableMap(modifier -> modifier, DrunkenModifier::defaultValue)));
+                    .collect(Collectors.toUnmodifiableMap(modifier -> modifier, DrunkenModifier::minValue)));
         }
         for (DrunkenModifier modifier : DrunkenModifierSection.modifiers().drunkenModifiers()) {
             if (params.equals(modifier.name())) {

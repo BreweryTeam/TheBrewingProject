@@ -92,7 +92,7 @@ public class DrunksManagerImpl<C> implements DrunksManager {
         DrunkState initialState = (alreadyDrunk ? drunks.get(playerUuid).recalculate(timestamp) : new DrunkStateImpl(
                 timestamp, -1, DrunkenModifierSection.modifiers()
                 .drunkenModifiers().stream()
-                .collect(Collectors.toUnmodifiableMap(temp -> temp, DrunkenModifier::defaultValue))
+                .collect(Collectors.toUnmodifiableMap(temp -> temp, DrunkenModifier::minValue))
         ));
         DrunkState newState = initialState;
         // Behave exactly the same when a modifier is changing
@@ -138,10 +138,10 @@ public class DrunksManagerImpl<C> implements DrunksManager {
             future.thenAcceptAsync(ignored -> {
                 try {
                     for (DrunkenModifier modifier : allModifiers) {
-                        if (newModifiers.get(modifier) != modifier.defaultValue()) {
+                        if (newModifiers.get(modifier) != modifier.minValue()) {
                             persistenceHandler.insertValue(drunkenModifierDataType, new Pair<>(new DrunkenModifierDataType.Data(modifier, playerUuid), newModifiers.get(modifier)));
                         }
-                        if (newModifiers.get(modifier) == modifier.defaultValue()) {
+                        if (newModifiers.get(modifier) == modifier.minValue()) {
                             persistenceHandler.remove(drunkenModifierDataType, new DrunkenModifierDataType.Data(modifier, playerUuid));
                         }
                     }

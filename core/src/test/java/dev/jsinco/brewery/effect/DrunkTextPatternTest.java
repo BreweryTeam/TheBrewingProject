@@ -35,7 +35,7 @@ class DrunkTextPatternTest {
                 "alcohol",
                 ModifierExpression.ZERO,
                 ModifierExpression.ZERO,
-                0D), 0D);
+                0D, 100D), 0D);
         assertEquals(expected, DrunkTextTransformer.transform(text, List.of(drunkTextPattern)));
     }
 

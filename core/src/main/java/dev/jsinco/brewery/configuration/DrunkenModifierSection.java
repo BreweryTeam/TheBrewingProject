@@ -29,8 +29,7 @@ import java.util.Optional;
         "A drunken modifier represents the state of a player.",
         "Depending on the state of the player, it will experience different effects, see ''./events.yml''.",
         "This configuration file allows full customization with how to represent the state, and how it changes over time.",
-        "d<modifier-name> is the difference for a modifier most probably caused by the consumption of a drink",
-        "There is also a quality variable called quality, which will be a value in the range [0, 1] and defaults to 1 if none could be found"
+        "consumed_<modifier-name> is only a non zero variable when something is consumed"
 })
 public class DrunkenModifierSection extends OkaeriConfig {
 
@@ -39,9 +38,9 @@ public class DrunkenModifierSection extends OkaeriConfig {
             "Avoid names with arithmetic operators included and names that clashes with other configuration keys,",
             "MODIFY AT YOUR OWN RISK!"})
     private List<DrunkenModifier> drunkenModifiers = List.of(
-            new DrunkenModifier("alcohol", new ModifierExpression("consumed_alcohol * (110 - alcohol_addiction) / 110"), new ModifierExpression("200"), 0D),
-            new DrunkenModifier("alcohol_addiction", new ModifierExpression("0.001 * consumed_alcohol"), new ModifierExpression("10000"), 0D),
-            new DrunkenModifier("toxins", new ModifierExpression("0"), new ModifierExpression("-1"), 0D)
+            new DrunkenModifier("alcohol", new ModifierExpression("consumed_alcohol * (110 - alcohol_addiction) / 110"), new ModifierExpression("200"), 0D, 100D),
+            new DrunkenModifier("alcohol_addiction", new ModifierExpression("0.001 * consumed_alcohol"), new ModifierExpression("10000"), 0D, 100D),
+            new DrunkenModifier("toxins", new ModifierExpression("0"), new ModifierExpression("-1"), 0D, 100D)
     );
 
     @CustomKey("drunken-displays")
@@ -76,10 +75,10 @@ public class DrunkenModifierSection extends OkaeriConfig {
                     "toxins", 2D
             )),
             new ConsumableSerializer.Consumable("MILK_BUCKET", Map.of(
-                   "alcohol", -3D
+                    "alcohol", -3D
             )),
             new ConsumableSerializer.Consumable("BREAD", Map.of(
-                   "alcohol", -2D,
+                    "alcohol", -2D,
                     "toxins", -1D
             ))
     );

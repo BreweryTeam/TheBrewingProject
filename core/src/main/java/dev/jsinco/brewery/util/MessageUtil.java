@@ -170,7 +170,7 @@ public class MessageUtil {
     public static TagResolver numberedModifierTagResolver(@NotNull Map<DrunkenModifier, Double> modifiers, @Nullable String prefix) {
         TagResolver.Builder builder = TagResolver.builder();
         for (DrunkenModifier modifier : DrunkenModifierSection.modifiers().drunkenModifiers()) {
-            double value = modifiers.getOrDefault(modifier, modifier.defaultValue());
+            double value = modifiers.getOrDefault(modifier, modifier.minValue());
             builder.resolver(Formatter.number((prefix == null ? "" : prefix + "_") + modifier.name(), value));
         }
         return builder.build();

@@ -94,7 +94,7 @@ public class StatusCommand {
                 .map(drunkenModifier -> new FlaggedArgumentBuilder.Flag(
                                 drunkenModifier.name(),
                                 null,
-                                List.of(new Pair<>(drunkenModifier.name(), DoubleArgumentType.doubleArg(0, 100))),
+                                List.of(new Pair<>(drunkenModifier.name(), DoubleArgumentType.doubleArg(drunkenModifier.minValue(), drunkenModifier.maxValue()))),
                                 Set.of()
                         )
                 )

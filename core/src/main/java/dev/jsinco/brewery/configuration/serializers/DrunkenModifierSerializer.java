@@ -18,7 +18,8 @@ public class DrunkenModifierSerializer implements ObjectSerializer<DrunkenModifi
     @Override
     public void serialize(@NonNull DrunkenModifier object, @NonNull SerializationData data, @NonNull GenericsDeclaration generics) {
         data.add("name", object.name());
-        data.add("default", object.defaultValue());
+        data.add("min-value", object.minValue());
+        data.add("max-value", object.maxValue());
         data.add("decrement_time", object.decrementTime());
         data.add("increment_dependency", object.dependency());
     }
@@ -26,7 +27,8 @@ public class DrunkenModifierSerializer implements ObjectSerializer<DrunkenModifi
     @Override
     public DrunkenModifier deserialize(@NonNull DeserializationData data, @NonNull GenericsDeclaration generics) {
         String name = data.get("name", String.class);
-        Double defaultValue = data.get("default", Double.class);
+        Double minValue = data.get("min-value", Double.class);
+        Double maxValue = data.get("max-value", Double.class);
         ModifierExpression decrementTime = data.get("decrement_time", ModifierExpression.class);
         ModifierExpression incrementDependency = data.get("increment_dependency", ModifierExpression.class);
         Preconditions.checkArgument(name != null, "Missing drunken modifier name");
@@ -34,7 +36,8 @@ public class DrunkenModifierSerializer implements ObjectSerializer<DrunkenModifi
                 name,
                 incrementDependency == null ? new ModifierExpression("0") : incrementDependency,
                 decrementTime == null ? new ModifierExpression("-1") : decrementTime,
-                defaultValue == null ? 0D : defaultValue
+                minValue == null ? 0D : minValue,
+                maxValue == null ? 0D : maxValue
         );
     }
 }

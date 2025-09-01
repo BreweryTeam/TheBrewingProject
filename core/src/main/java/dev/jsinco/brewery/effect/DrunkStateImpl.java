@@ -17,7 +17,7 @@ public record DrunkStateImpl(long timestamp,
     public DrunkStateImpl {
         ImmutableMap.Builder<DrunkenModifier, Double> builder = new ImmutableMap.Builder<>();
         for (DrunkenModifier drunkenModifier : DrunkenModifierSection.modifiers().drunkenModifiers()) {
-            builder.put(drunkenModifier, modifiers.getOrDefault(drunkenModifier, drunkenModifier.defaultValue()));
+            builder.put(drunkenModifier, drunkenModifier.sanitize(modifiers.getOrDefault(drunkenModifier, drunkenModifier.minValue())));
         }
         modifiers = builder.build();
     }
@@ -39,7 +39,7 @@ public record DrunkStateImpl(long timestamp,
             } else {
                 value = entry.getValue() - diff / decrementTime;
             }
-            newDrunkenModifiers.put(entry.getKey(), sanitize(value));
+            newDrunkenModifiers.put(entry.getKey(), value);
         }
         return new DrunkStateImpl(timestamp, this.kickedTimestamp, newDrunkenModifiers.build());
     }
@@ -78,7 +78,7 @@ public record DrunkStateImpl(long timestamp,
         return modifiers.entrySet()
                 .stream()
                 .map(entry -> new Pair<>(entry.getKey(), entry.getValue()))
-                .filter(pair -> pair.first().defaultValue() != pair.second())
+                .filter(pair -> pair.first().minValue() != pair.second())
                 .toList();
     }
 
@@ -94,7 +94,7 @@ public record DrunkStateImpl(long timestamp,
         for (Map.Entry<DrunkenModifier, Double> entry : modifiers.entrySet()) {
             double diff = entry.getKey().dependency().evaluate(variables);
             if (diff != 0D) {
-                newModifiers.put(entry.getKey(), sanitize(entry.getValue() + diff));
+                newModifiers.put(entry.getKey(), entry.getValue() + diff);
                 if (modifierToAdd.equals(entry.getKey())) {
                     cascadedOnSelf = true;
                 }
@@ -114,9 +114,5 @@ public record DrunkStateImpl(long timestamp,
             }
         }
         return output;
-    }
-
-    private double sanitize(double value) {
-        return Math.max(0, Math.min(value, 100));
     }
 }
