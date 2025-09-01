@@ -3,16 +3,17 @@ package dev.jsinco.brewery.bukkit.recipe;
 import dev.jsinco.brewery.api.brew.Brew;
 import dev.jsinco.brewery.api.brew.BrewScore;
 import dev.jsinco.brewery.api.brew.BrewingStep;
-import dev.jsinco.brewery.bukkit.TheBrewingProject;
-import dev.jsinco.brewery.bukkit.brew.BrewAdapter;
-import dev.jsinco.brewery.bukkit.api.integration.IntegrationTypes;
 import dev.jsinco.brewery.api.integration.Integration;
-import dev.jsinco.brewery.bukkit.api.integration.ItemIntegration;
-import dev.jsinco.brewery.bukkit.api.BukkitAdapter;
-import dev.jsinco.brewery.configuration.Config;
 import dev.jsinco.brewery.api.recipe.RecipeResult;
 import dev.jsinco.brewery.api.util.BreweryKey;
 import dev.jsinco.brewery.api.util.Logger;
+import dev.jsinco.brewery.bukkit.TheBrewingProject;
+import dev.jsinco.brewery.bukkit.api.BukkitAdapter;
+import dev.jsinco.brewery.bukkit.api.integration.IntegrationTypes;
+import dev.jsinco.brewery.bukkit.api.integration.ItemIntegration;
+import dev.jsinco.brewery.bukkit.brew.BrewAdapter;
+import dev.jsinco.brewery.configuration.Config;
+import dev.jsinco.brewery.configuration.DrunkenModifierSection;
 import dev.jsinco.brewery.util.MessageUtil;
 import io.papermc.paper.datacomponent.DataComponentTypes;
 import io.papermc.paper.datacomponent.item.CustomModelData;
@@ -23,7 +24,6 @@ import lombok.Getter;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
-import net.kyori.adventure.text.minimessage.tag.resolver.Formatter;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import net.kyori.adventure.text.minimessage.translation.Argument;
@@ -138,7 +138,6 @@ public class BukkitRecipeResult implements RecipeResult<ItemStack> {
         if (itemModel != null) {
             itemStack.setData(DataComponentTypes.ITEM_MODEL, itemModel);
         }
-        recipeEffects.withToxins(recipeEffects, (int) (recipeEffects.getAlcohol() * (1.5D - score.score()))).applyTo(itemStack);
         // After recipe effects, as both might modify potion contents
         itemStack.setData(DataComponentTypes.POTION_CONTENTS, PotionContents.potionContents()
                 .customColor(color)
@@ -156,14 +155,12 @@ public class BukkitRecipeResult implements RecipeResult<ItemStack> {
             case Brew.State.Brewing ignored -> {
                 streamBuilder.add(Component.translatable("tbp.brew.tooltip.quality-brewing", Argument.tagResolver(resolver)));
                 MessageUtil.compileBrewInfo(brew, score, false).forEach(streamBuilder::add);
-                int alcohol = recipeEffects.getAlcohol();
-                if (alcohol > 0) {
-                    streamBuilder.add(Component.translatable("tbp.brew.tooltip.detailed-alcoholic", Argument.tagResolver(resolver)));
-                }
+                applyDrunkenTooltips(state, streamBuilder, resolver);
             }
             case Brew.State.Other ignored -> {
                 streamBuilder.add(Component.translatable("tbp.brew.tooltip.quality", Argument.tagResolver(resolver)));
                 addLastStepLore(brew, streamBuilder, score, state);
+                applyDrunkenTooltips(state, streamBuilder, resolver);
             }
             case Brew.State.Seal seal -> {
                 if (seal.message() != null) {
@@ -173,6 +170,7 @@ public class BukkitRecipeResult implements RecipeResult<ItemStack> {
                 }
                 streamBuilder.add(Component.translatable("tbp.brew.tooltip.quality-sealed", Argument.tagResolver(resolver)));
                 addLastStepLore(brew, streamBuilder, score, state);
+                applyDrunkenTooltips(state, streamBuilder, resolver);
             }
         }
         return streamBuilder.build();
@@ -182,18 +180,24 @@ public class BukkitRecipeResult implements RecipeResult<ItemStack> {
         int lastIndex = brew.getCompletedSteps().size() - 1;
         BrewingStep lastCompleted = brew.lastCompletedStep();
         streamBuilder.add(lastCompleted.infoDisplay(state, MessageUtil.getBrewStepTagResolver(lastCompleted, score.getPartialScores(lastIndex), score.brewDifficulty())));
-        if (recipeEffects.getAlcohol() > 0) {
-            streamBuilder.add(Component.translatable("tbp.brew.tooltip.alcoholic", Argument.tagResolver()));
-        }
+    }
+
+    private void applyDrunkenTooltips(Brew.State state, Stream.Builder<Component> streamBuilder, TagResolver resolver) {
+        DrunkenModifierSection.modifiers().drunkenTooltips()
+                .stream()
+                .filter(modifierTooltip -> modifierTooltip.expression().evaluate(recipeEffects.getModifiers()) > 0)
+                .map(modifierTooltip -> modifierTooltip.getTooltip(state))
+                .filter(Objects::nonNull)
+                .map(miniMessage -> MessageUtil.miniMessage(miniMessage, resolver))
+                .forEach(streamBuilder::add);
     }
 
     private @NotNull TagResolver getResolver(BrewScore score) {
         TagResolver.Builder output = TagResolver.builder();
         output.resolvers(
-                Formatter.number("alcohol", this.getRecipeEffects().getAlcohol()),
+                MessageUtil.numberedModifierTagResolver(recipeEffects.getModifiers(), null),
                 MessageUtil.getScoreTagResolver(score)
         );
-
         return output.build();
     }
 

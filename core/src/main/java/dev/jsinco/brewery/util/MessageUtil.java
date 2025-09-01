@@ -2,6 +2,7 @@ package dev.jsinco.brewery.util;
 
 import dev.jsinco.brewery.api.brew.*;
 import dev.jsinco.brewery.api.effect.DrunkState;
+import dev.jsinco.brewery.api.effect.modifier.DrunkenModifier;
 import dev.jsinco.brewery.api.effect.modifier.ModifierDisplay;
 import dev.jsinco.brewery.api.recipe.RecipeRegistry;
 import dev.jsinco.brewery.configuration.Config;
@@ -164,5 +165,14 @@ public class MessageUtil {
         long seconds = (timeTicks % cookingMinuteTicks) * 60 / cookingMinuteTicks;
         long minutes = timeTicks / cookingMinuteTicks;
         return Placeholder.parsed("time", String.format("%d:%02d", minutes, seconds));
+    }
+
+    public static TagResolver numberedModifierTagResolver(@NotNull Map<DrunkenModifier, Double> modifiers, @Nullable String prefix) {
+        TagResolver.Builder builder = TagResolver.builder();
+        for (DrunkenModifier modifier : DrunkenModifierSection.modifiers().drunkenModifiers()) {
+            double value = modifiers.getOrDefault(modifier, modifier.defaultValue());
+            builder.resolver(Formatter.number((prefix == null ? "" : prefix + "_") + modifier.name(), value));
+        }
+        return builder.build();
     }
 }

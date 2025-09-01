@@ -1,19 +1,23 @@
 package dev.jsinco.brewery.bukkit.recipe;
 
 import com.google.common.base.Preconditions;
-import dev.jsinco.brewery.bukkit.TheBrewingProject;
-import dev.jsinco.brewery.bukkit.util.BukkitMessageUtil;
-import dev.jsinco.brewery.bukkit.util.ListPersistentDataType;
-import dev.jsinco.brewery.effect.DrunksManagerImpl;
+import com.google.common.collect.ImmutableMap;
+import dev.jsinco.brewery.api.effect.modifier.DrunkenModifier;
 import dev.jsinco.brewery.api.event.CustomEventRegistry;
 import dev.jsinco.brewery.api.event.DrunkEvent;
 import dev.jsinco.brewery.api.util.BreweryKey;
-import dev.jsinco.brewery.util.MessageUtil;
 import dev.jsinco.brewery.api.util.BreweryRegistry;
+import dev.jsinco.brewery.bukkit.TheBrewingProject;
+import dev.jsinco.brewery.bukkit.effect.ModifierConsumePdcType;
+import dev.jsinco.brewery.bukkit.util.BukkitMessageUtil;
+import dev.jsinco.brewery.bukkit.util.ListPersistentDataType;
+import dev.jsinco.brewery.configuration.DrunkenModifierSection;
+import dev.jsinco.brewery.effect.DrunksManagerImpl;
+import dev.jsinco.brewery.effect.ModifierConsume;
+import dev.jsinco.brewery.util.MessageUtil;
 import io.papermc.paper.persistence.PersistentDataContainerView;
 import lombok.Getter;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.minimessage.tag.resolver.Formatter;
 import net.kyori.adventure.text.minimessage.translation.Argument;
 import net.kyori.adventure.title.Title;
 import org.bukkit.NamespacedKey;
@@ -26,9 +30,7 @@ import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Getter
@@ -40,6 +42,7 @@ public class RecipeEffects {
     public static final NamespacedKey TITLE = TheBrewingProject.key("titles");
     public static final NamespacedKey ALCOHOL = TheBrewingProject.key("alcohol");
     public static final NamespacedKey TOXINS = TheBrewingProject.key("toxins");
+    public static final NamespacedKey MODIFIERS = TheBrewingProject.key("modifiers");
     public static final NamespacedKey EVENTS = TheBrewingProject.key("events");
     public static final NamespacedKey EFFECTS = TheBrewingProject.key("effects");
     private static final List<NamespacedKey> PDC_TYPES = List.of(COMMANDS, MESSAGE, ACTION_BAR, TITLE, ALCOHOL, TOXINS, EVENTS);
@@ -52,18 +55,17 @@ public class RecipeEffects {
     private final @Nullable String title;
     private final @Nullable String message;
     private final @Nullable String actionBar;
-    private final int alcohol;
+    private final @NotNull Map<DrunkenModifier, Double> modifiers;
     private final @NotNull List<@NotNull BreweryKey> events;
-    private final int toxins;
 
-    private RecipeEffects(@NotNull List<RecipeEffect> effects, @Nullable String title, @Nullable String message, @Nullable String actionBar, int alcohol, @NotNull List<@NotNull BreweryKey> events, int toxins) {
+    private RecipeEffects(@NotNull List<RecipeEffect> effects, @Nullable String title, @Nullable String message,
+                          @Nullable String actionBar, @NotNull List<@NotNull BreweryKey> events, Map<DrunkenModifier, Double> modifiers) {
         this.effects = effects;
         this.title = title;
         this.message = message;
         this.actionBar = actionBar;
-        this.alcohol = alcohol;
+        this.modifiers = modifiers;
         this.events = events;
-        this.toxins = toxins;
     }
 
     public List<DrunkEvent> getEvents() {
@@ -96,8 +98,6 @@ public class RecipeEffects {
         if (actionBar != null) {
             container.set(ACTION_BAR, PersistentDataType.STRING, actionBar);
         }
-        container.set(ALCOHOL, PersistentDataType.INTEGER, alcohol);
-        container.set(TOXINS, PersistentDataType.INTEGER, toxins);
         container.set(EVENTS, ListPersistentDataType.STRING_LIST, events.stream().map(BreweryKey::toString).toList());
         container.set(EFFECTS, RecipeEffectPersistentDataType.INSTANCE, effects);
     }
@@ -111,8 +111,15 @@ public class RecipeEffects {
             return Optional.empty();
         }
         RecipeEffects.Builder builder = new RecipeEffects.Builder();
-        builder.alcohol(persistentDataContainer.getOrDefault(ALCOHOL, PersistentDataType.INTEGER, 0));
-        builder.toxins(persistentDataContainer.getOrDefault(TOXINS, PersistentDataType.INTEGER, 0));
+        Map<DrunkenModifier, Double> modifiers = new HashMap<>();
+        DrunkenModifierSection.modifiers()
+                .optionalModifier("blood_alcohol")
+                .filter(modifier -> persistentDataContainer.has(ALCOHOL, PersistentDataType.INTEGER))
+                .ifPresent(modifier -> modifiers.put(modifier, (double) persistentDataContainer.get(ALCOHOL, PersistentDataType.INTEGER)));
+        DrunkenModifierSection.modifiers()
+                .optionalModifier("toxins")
+                .filter(modifier -> persistentDataContainer.has(TOXINS, PersistentDataType.INTEGER))
+                .ifPresent(modifier -> modifiers.put(modifier, (double) persistentDataContainer.get(TOXINS, PersistentDataType.INTEGER)));
         if (persistentDataContainer.has(TITLE)) {
             builder.title(persistentDataContainer.get(TITLE, PersistentDataType.STRING));
         }
@@ -121,6 +128,10 @@ public class RecipeEffects {
         }
         if (persistentDataContainer.has(ACTION_BAR)) {
             builder.actionBar(persistentDataContainer.get(ACTION_BAR, PersistentDataType.STRING));
+        }
+        List<ModifierConsume> consumeModifiers = persistentDataContainer.get(MODIFIERS, ModifierConsumePdcType.LIST_INSTANCE);
+        if (consumeModifiers != null) {
+            consumeModifiers.forEach(modifierConsume -> modifiers.put(modifierConsume.modifier(), modifierConsume.value()));
         }
         builder.events(persistentDataContainer.getOrDefault(EVENTS, ListPersistentDataType.STRING_LIST, List.of())
                 .stream()
@@ -140,13 +151,15 @@ public class RecipeEffects {
     public void applyTo(Player player) {
         DrunksManagerImpl<?> drunksManager = TheBrewingProject.getInstance().getDrunksManager();
         if (!player.hasPermission("brewery.override.drunk")) {
-            drunksManager.consume(player.getUniqueId(), alcohol, toxins);
+            modifiers.forEach((modifier, value) -> drunksManager.consume(
+                    player.getUniqueId(), modifier, value
+            ));
         }
         if (title != null) {
             player.showTitle(Title.title(
                     MessageUtil.miniMessage(title,
                             BukkitMessageUtil.getPlayerTagResolver(player),
-                            Formatter.number("alcohol", this.alcohol)
+                            MessageUtil.numberedModifierTagResolver(modifiers, "consumed")
                     ),
                     Component.empty())
             );
@@ -154,14 +167,14 @@ public class RecipeEffects {
         if (message != null) {
             player.sendMessage(MessageUtil.miniMessage(message,
                     BukkitMessageUtil.getPlayerTagResolver(player),
-                    Formatter.number("alcohol", this.alcohol)
+                    MessageUtil.numberedModifierTagResolver(modifiers, "consumed")
             ));
         }
         if (actionBar != null) {
             player.sendActionBar(MessageUtil.miniMessage(actionBar,
                     BukkitMessageUtil.getPlayerTagResolver(player),
-                    Formatter.number("alcohol", this.alcohol))
-            );
+                    MessageUtil.numberedModifierTagResolver(modifiers, "consumed")
+            ));
         } else {
             player.sendActionBar(
                     Component.translatable("tbp.info.after-drink",
@@ -183,11 +196,6 @@ public class RecipeEffects {
         applyTo(persistentDataContainer);
     }
 
-    public RecipeEffects withToxins(RecipeEffects recipeEffects, int toxins) {
-        return new RecipeEffects(recipeEffects.effects, recipeEffects.title, recipeEffects.message,
-                recipeEffects.actionBar, recipeEffects.alcohol, recipeEffects.events, toxins);
-    }
-
     public static class Builder {
 
         private List<RecipeEffect> effects = List.of();
@@ -195,16 +203,17 @@ public class RecipeEffects {
         private @Nullable String message;
         private @Nullable String actionBar;
         private @NotNull List<@NotNull BreweryKey> events = List.of();
-        private int alcohol;
-        private int toxins;
+        private ImmutableMap.Builder<DrunkenModifier, Double> modifiers = new ImmutableMap.Builder<>();
 
         public Builder effects(@NotNull List<@NotNull RecipeEffect> effects) {
+            Preconditions.checkNotNull(effects);
             this.effects = effects;
             return this;
         }
 
         public Builder events(@NotNull List<@NotNull BreweryKey> events) {
-            this.events = events;
+            Preconditions.checkNotNull(events);
+            this.events = List.copyOf(events);
             return this;
         }
 
@@ -223,20 +232,13 @@ public class RecipeEffects {
             return this;
         }
 
-        public Builder alcohol(int alcohol) {
-            this.alcohol = alcohol;
-            return this;
-        }
-
-        public Builder toxins(int toxins) {
-            this.toxins = toxins;
+        public Builder addModifiers(Map<DrunkenModifier, Double> modifiers) {
+            this.modifiers.putAll(modifiers);
             return this;
         }
 
         public RecipeEffects build() {
-            Preconditions.checkNotNull(effects);
-            Preconditions.checkNotNull(events);
-            return new RecipeEffects(effects, title, message, actionBar, alcohol, events, toxins);
+            return new RecipeEffects(effects, title, message, actionBar, events, modifiers.build());
         }
 
     }

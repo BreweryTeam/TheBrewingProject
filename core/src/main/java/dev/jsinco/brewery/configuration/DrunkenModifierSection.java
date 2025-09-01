@@ -3,6 +3,7 @@ package dev.jsinco.brewery.configuration;
 import dev.jsinco.brewery.api.effect.modifier.DrunkenModifier;
 import dev.jsinco.brewery.api.effect.modifier.ModifierDisplay;
 import dev.jsinco.brewery.api.effect.modifier.ModifierExpression;
+import dev.jsinco.brewery.api.effect.modifier.ModifierTooltip;
 import dev.jsinco.brewery.configuration.serializers.ConsumableSerializer;
 import eu.okaeri.configs.ConfigManager;
 import eu.okaeri.configs.OkaeriConfig;
@@ -42,6 +43,19 @@ public class DrunkenModifierSection extends OkaeriConfig {
     })
     private List<ModifierDisplay> drunkenDisplays = List.of(
             new ModifierDisplay(Component.text("Alcohol").color(NamedTextColor.GRAY), new ModifierExpression("blood_alcohol"), ModifierDisplay.DisplayType.BARS, ModifierDisplay.DisplayWindow.BAR)
+    );
+
+    @CustomKey("drunken-tooltips")
+    @Comment({
+            "Change how modifiers will display for brew effects",
+            "a drunken modifier with an expression larger than 0 will display on an item"
+    })
+    private List<ModifierTooltip> drunkenTooltips = List.of(
+            new ModifierTooltip(new ModifierExpression("alcohol"),
+                    "<lang:tbp.brew.tooltip.detailed-alcoholic>",
+                    "<lang:tbp.brew.tooltip.alcoholic>",
+                    "<lang:tbp.brew.tooltip.alcoholic>"
+            )
     );
 
     @CustomKey("consumables")
