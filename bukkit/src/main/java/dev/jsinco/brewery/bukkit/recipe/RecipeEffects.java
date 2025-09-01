@@ -118,9 +118,6 @@ public class RecipeEffects {
     }
 
     private static Optional<RecipeEffects> fromPdc(PersistentDataContainerView persistentDataContainer) {
-        if (!persistentDataContainer.has(ALCOHOL)) {
-            return Optional.empty();
-        }
         RecipeEffects.Builder builder = new RecipeEffects.Builder();
         Map<DrunkenModifier, Double> modifiers = new HashMap<>();
         DrunkenModifierSection.modifiers()
@@ -144,6 +141,7 @@ public class RecipeEffects {
         if (consumeModifiers != null) {
             consumeModifiers.forEach(modifierConsume -> modifiers.put(modifierConsume.modifier(), modifierConsume.value()));
         }
+        builder.addModifiers(modifiers);
         builder.events(persistentDataContainer.getOrDefault(EVENTS, ListPersistentDataType.STRING_LIST, List.of())
                 .stream()
                 .map(BreweryKey::parse)
@@ -151,6 +149,11 @@ public class RecipeEffects {
         );
         if (persistentDataContainer.has(EFFECTS, RecipeEffectPersistentDataType.INSTANCE)) {
             builder.effects(persistentDataContainer.get(EFFECTS, RecipeEffectPersistentDataType.INSTANCE));
+        }
+        RecipeEffects output = builder.build();
+        if (output.effects.isEmpty() && output.modifiers.isEmpty() && output.events.isEmpty()
+                && output.actionBar == null && output.message == null && output.title == null) {
+            return Optional.empty();
         }
         return Optional.of(builder.build());
     }

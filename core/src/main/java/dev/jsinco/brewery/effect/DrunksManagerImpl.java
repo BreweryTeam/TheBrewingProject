@@ -23,6 +23,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.BiConsumer;
 import java.util.function.LongSupplier;
 import java.util.function.Predicate;
@@ -124,23 +125,31 @@ public class DrunksManagerImpl<C> implements DrunksManager {
         drunks.put(playerUuid, newState);
         planEvent(playerUuid);
         try {
+            CompletableFuture<Void> future;
             if (alreadyDrunk) {
-                persistenceHandler.updateValue(drunkStateDataType, new Pair<>(newState, playerUuid));
+                future = persistenceHandler.updateValue(drunkStateDataType, new Pair<>(newState, playerUuid));
             } else {
-                persistenceHandler.insertValue(drunkStateDataType, new Pair<>(newState, playerUuid));
+                future = persistenceHandler.insertValue(drunkStateDataType, new Pair<>(newState, playerUuid));
             }
             Set<DrunkenModifier> allModifiers = Stream.concat(initialState.additionalModifierData().stream(), newState.additionalModifierData().stream())
                     .map(Pair::first)
                     .collect(Collectors.toSet());
             Map<DrunkenModifier, Double> newModifiers = newState.modifiers();
-            for (DrunkenModifier modifier : allModifiers) {
-                if (newModifiers.get(modifier) != modifier.defaultValue()) {
-                    persistenceHandler.insertValue(drunkenModifierDataType, new Pair<>(new DrunkenModifierDataType.Data(modifier, playerUuid), newModifiers.get(modifier)));
+            future.thenAcceptAsync(ignored -> {
+                try {
+                    for (DrunkenModifier modifier : allModifiers) {
+                        if (newModifiers.get(modifier) != modifier.defaultValue()) {
+                            persistenceHandler.insertValue(drunkenModifierDataType, new Pair<>(new DrunkenModifierDataType.Data(modifier, playerUuid), newModifiers.get(modifier)));
+                        }
+                        if (newModifiers.get(modifier) == modifier.defaultValue()) {
+                            persistenceHandler.remove(drunkenModifierDataType, new DrunkenModifierDataType.Data(modifier, playerUuid));
+                        }
+                    }
+                } catch (PersistenceException e) {
+                    Logger.logErr(e);
                 }
-                if (newModifiers.get(modifier) == modifier.defaultValue()) {
-                    persistenceHandler.remove(drunkenModifierDataType, new DrunkenModifierDataType.Data(modifier, playerUuid));
-                }
-            }
+            });
+
         } catch (PersistenceException e) {
             Logger.logErr(e);
         }

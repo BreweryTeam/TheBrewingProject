@@ -98,7 +98,7 @@ public record DrunkStateImpl(long timestamp,
         for (Map.Entry<DrunkenModifier, Double> entry : modifiers.entrySet()) {
             output.put(entry.getKey().name(), entry.getValue());
             if (entry.getKey().equals(modifierToAdd)) {
-                output.put(modifierToAdd.name(), value);
+                output.put("d" + modifierToAdd.name(), value);
             } else {
                 output.put("d" + entry.getKey().name(), entry.getValue());
             }

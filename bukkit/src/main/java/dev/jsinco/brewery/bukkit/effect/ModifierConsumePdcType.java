@@ -1,7 +1,7 @@
 package dev.jsinco.brewery.bukkit.effect;
 
-import dev.jsinco.brewery.configuration.DrunkenModifierSection;
 import dev.jsinco.brewery.api.effect.ModifierConsume;
+import dev.jsinco.brewery.configuration.DrunkenModifierSection;
 import org.bukkit.persistence.ListPersistentDataType;
 import org.bukkit.persistence.PersistentDataAdapterContext;
 import org.bukkit.persistence.PersistentDataType;
@@ -31,6 +31,6 @@ public class ModifierConsumePdcType implements PersistentDataType<String, Modifi
         String[] split = primitive.split(";");
         String modifier = split[0];
         double value = Double.parseDouble(split[1]);
-        return new ModifierConsume(DrunkenModifierSection.modifiers().modifier(modifier), value);
+        return new ModifierConsume(DrunkenModifierSection.modifiers().modifier(modifier), value, true);
     }
 }
