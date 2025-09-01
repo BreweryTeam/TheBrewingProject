@@ -1,5 +1,6 @@
 package dev.jsinco.brewery.effect.text;
 
+import dev.jsinco.brewery.api.effect.modifier.DrunkenModifier;
 import dev.jsinco.brewery.api.util.Pair;
 import org.jetbrains.annotations.NotNull;
 
@@ -11,7 +12,8 @@ import java.util.regex.MatchResult;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public record DrunkTextPattern(Pattern pattern, String text, int percentage, int alcohol) implements DrunkTextElement {
+public record DrunkTextPattern(Pattern pattern, String text, int percentage, DrunkenModifier modifier,
+                               double minValue) implements DrunkTextElement {
 
     private static final Random RANDOM = new Random();
 
@@ -35,9 +37,9 @@ public record DrunkTextPattern(Pattern pattern, String text, int percentage, int
         if (matchResult.groupCount() > 0) {
             Pair<Integer, Integer> range = findRange(matchResult);
             int start = matchResult.start();
-            return new TextTransformation(text, range.first() + start, range.second() + start, alcohol());
+            return new TextTransformation(text, range.first() + start, range.second() + start);
         }
-        return new TextTransformation(text, matchResult.start(), matchResult.end(), alcohol());
+        return new TextTransformation(text, matchResult.start(), matchResult.end());
     }
 
     private Pair<Integer, Integer> findRange(MatchResult matchResult) {

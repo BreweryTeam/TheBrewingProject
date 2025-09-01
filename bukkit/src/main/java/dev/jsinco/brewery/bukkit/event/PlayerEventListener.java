@@ -1,18 +1,23 @@
 package dev.jsinco.brewery.bukkit.event;
 
 import com.destroystokyo.paper.event.player.PlayerLaunchProjectileEvent;
-import dev.jsinco.brewery.brew.BrewImpl;
 import dev.jsinco.brewery.api.breweries.InventoryAccessible;
 import dev.jsinco.brewery.api.breweries.StructureHolder;
+import dev.jsinco.brewery.api.ingredient.Ingredient;
+import dev.jsinco.brewery.api.ingredient.ScoredIngredient;
+import dev.jsinco.brewery.api.util.BreweryKey;
+import dev.jsinco.brewery.api.util.Logger;
+import dev.jsinco.brewery.api.vector.BreweryLocation;
+import dev.jsinco.brewery.brew.BrewImpl;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.bukkit.api.BukkitAdapter;
+import dev.jsinco.brewery.bukkit.api.integration.IntegrationTypes;
 import dev.jsinco.brewery.bukkit.brew.BrewAdapter;
 import dev.jsinco.brewery.bukkit.breweries.BreweryRegistry;
 import dev.jsinco.brewery.bukkit.breweries.BukkitCauldron;
 import dev.jsinco.brewery.bukkit.breweries.BukkitCauldronDataType;
 import dev.jsinco.brewery.bukkit.effect.event.DrunkEventExecutor;
 import dev.jsinco.brewery.bukkit.ingredient.BukkitIngredientManager;
-import dev.jsinco.brewery.bukkit.api.integration.IntegrationTypes;
 import dev.jsinco.brewery.bukkit.recipe.RecipeEffects;
 import dev.jsinco.brewery.configuration.Config;
 import dev.jsinco.brewery.configuration.serializers.ConsumableSerializer;
@@ -22,23 +27,17 @@ import dev.jsinco.brewery.effect.DrunkStateImpl;
 import dev.jsinco.brewery.effect.DrunksManagerImpl;
 import dev.jsinco.brewery.effect.text.DrunkTextRegistry;
 import dev.jsinco.brewery.effect.text.DrunkTextTransformer;
-import dev.jsinco.brewery.api.ingredient.Ingredient;
-import dev.jsinco.brewery.api.ingredient.ScoredIngredient;
 import dev.jsinco.brewery.format.TimeFormat;
 import dev.jsinco.brewery.format.TimeFormatter;
 import dev.jsinco.brewery.format.TimeModifier;
 import dev.jsinco.brewery.recipes.RecipeRegistryImpl;
 import dev.jsinco.brewery.structure.PlacedStructureRegistryImpl;
-import dev.jsinco.brewery.api.util.BreweryKey;
-import dev.jsinco.brewery.api.util.Logger;
 import dev.jsinco.brewery.util.MessageUtil;
-import dev.jsinco.brewery.api.vector.BreweryLocation;
 import io.papermc.paper.datacomponent.DataComponentTypes;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.translation.Argument;
-import net.kyori.adventure.translation.GlobalTranslator;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.Tag;
@@ -285,7 +284,7 @@ public class PlayerEventListener implements Listener {
             return;
         }
         String text = event.getMessage();
-        String transformed = DrunkTextTransformer.transform(text, drunkTextRegistry, drunkState.alcohol());
+        String transformed = DrunkTextTransformer.transform(text, drunkTextRegistry, drunkState.recalculate(TheBrewingProject.getInstance().getTime()));
         event.setMessage(transformed);
     }
 

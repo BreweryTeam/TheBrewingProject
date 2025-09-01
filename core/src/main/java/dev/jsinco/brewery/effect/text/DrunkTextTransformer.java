@@ -1,7 +1,7 @@
 package dev.jsinco.brewery.effect.text;
 
-import dev.jsinco.brewery.configuration.Config;
 import dev.jsinco.brewery.configuration.EventSection;
+import dev.jsinco.brewery.effect.DrunkStateImpl;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -9,11 +9,11 @@ import java.util.List;
 
 public class DrunkTextTransformer {
 
-    public static String transform(String text, DrunkTextRegistry registry, int alcohol) {
-        if (!EventSection.events().blurredSpeech() || alcohol < 5) {
+    public static String transform(String text, DrunkTextRegistry registry, DrunkStateImpl drunkState) {
+        if (!EventSection.events().blurredSpeech() || drunkState.additionalModifierData().isEmpty()) {
             return text;
         }
-        return transform(text, registry.getTextTransformers(alcohol));
+        return transform(text, registry.getTextTransformers(drunkState.modifiers()));
     }
 
 

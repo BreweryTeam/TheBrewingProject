@@ -2,67 +2,67 @@
   {
     "from": "с",
     "to": "ш",
-    "alcohol": 25,
+    "blood_alcohol": 25,
     "percentage": 30
   },
   {
     "from": "с",
     "to": "сс",
-    "alcohol": 25,
+    "blood_alcohol": 25,
     "percentage": 30
   },
   {
     "from": "ч",
     "to": "ш",
-    "alcohol": 10,
+    "blood_alcohol": 10,
     "percentage": 10
   },
   {
     "from": "х",
     "to": "хх",
-    "alcohol": 20,
+    "blood_alcohol": 20,
     "percentage": 50
   },
   {
     "from": "ш",
     "to": "щ",
-    "alcohol": 35,
+    "blood_alcohol": 35,
     "percentage": 40
   },
   {
     "from": "у",
     "to": "уф",
-    "alcohol": 20,
+    "blood_alcohol": 20,
     "percentage": 25
   },
   {
     "from": "у",
     "to": "уу",
-    "alcohol": 15,
+    "blood_alcohol": 15,
     "percentage": 50
   },
   {
     "from": "е",
     "to": "ее",
-    "alcohol": 15,
+    "blood_alcohol": 15,
     "percentage": 30
   },
   {
     "from": "ты",
     "to": "тыыэ",
-    "alcohol": 25,
+    "blood_alcohol": 25,
     "percentage": 30
   },
   {
     "from": "во",
     "to": "уо",
-    "alcohol": 25,
+    "blood_alcohol": 25,
     "percentage": 30
   },
   {
     "from": "это",
     "to": "этт",
-    "alcohol": 40,
+    "blood_alcohol": 40,
     "percentage": 20
   },
   {
@@ -73,278 +73,278 @@
   {
     "from": "п",
     "to": "б",
-    "alcohol": 60,
+    "blood_alcohol": 60,
     "percentage": 30
   },
   {
     "from": "вверх",
     "to": "ввьиерх",
-    "alcohol": 25,
+    "blood_alcohol": 25,
     "percentage": 60
   },
   {
     "from": "о",
     "to": "оо",
-    "alcohol": 15,
+    "blood_alcohol": 15,
     "percentage": 20
   },
   {
     "from": "э",
     "to": "ЭЭэЭЭэ",
-    "alcohol": 45,
+    "blood_alcohol": 45,
     "percentage": 30
   },
   {
     "from": "б",
     "to": "бб",
-    "alcohol": 40,
+    "blood_alcohol": 40,
     "percentage": 50
   },
   {
     "from": "б",
     "to": "п",
-    "alcohol": 30,
+    "blood_alcohol": 30,
     "percentage": 20
   },
   {
     "from": "!!!",
     "to": "!!!111!!!1!1!'",
-    "alcohol": 70,
+    "blood_alcohol": 70,
     "percentage": 20
   },
   {
     "from": "!",
     "to": "!!1",
-    "alcohol": 10,
+    "blood_alcohol": 10,
     "percentage": 30
   },
   {
     "from": "пьяный",
     "to": "ппбьянй",
-    "alcohol": 65,
+    "blood_alcohol": 65,
     "percentage": 60
   },
   {
     "from": "ходить",
     "to": "хходитьть",
-    "alcohol": 30,
+    "blood_alcohol": 30,
     "percentage": 70
   },
   {
     "from": "уходи",
     "to": "уухходии",
-    "alcohol": 30,
+    "blood_alcohol": 30,
     "percentage": 70
   },
   {
     "from": "идти",
     "to": "иийдьти",
-    "alcohol": 30,
+    "blood_alcohol": 30,
     "percentage": 70
   },
   {
     "from": "втф",
     "to": "чзхХх",
-    "alcohol": 40,
+    "blood_alcohol": 40,
     "percentage": 30
   },
   {
     "from": "лол",
     "to": "лЛлол",
-    "alcohol": 10,
+    "blood_alcohol": 10,
     "percentage": 60
   },
   {
     "from": "афк",
     "to": "ааыаффк",
-    "alcohol": 30,
+    "blood_alcohol": 30,
     "percentage": 50
   },
   {
     "from": "\\?",
     "to": "\\?7",
-    "alcohol": 20,
+    "blood_alcohol": 20,
     "percentage": 50
   },
   {
     "from": "c",
     "to": " ",
-    "alcohol": 10,
+    "blood_alcohol": 10,
     "percentage": 15
   },
   {
     "from": "т",
     "to": "тт",
-    "alcohol": 10,
+    "blood_alcohol": 10,
     "percentage": 20
   },
   {
     "from": " ",
     "to": "",
-    "alcohol": 25,
+    "blood_alcohol": 25,
     "percentage": 10
   },
   {
     "from": " ",
     "to": "",
-    "alcohol": 10,
+    "blood_alcohol": 10,
     "percentage": 10
   },
   {
     "from": "^",
     "to": "Уфхх",
-    "alcohol": 50,
+    "blood_alcohol": 50,
     "percentage": 5
   },
   {
     "from": "^",
     "to": "Хх",
-    "alcohol": 50,
+    "blood_alcohol": 50,
     "percentage": 5
   },
   {
     "from": ".{1}",
     "to": "й",
-	"alcohol": 50,
+	"blood_alcohol": 50,
     "percentage": 5
   },
   {
     "from": ".{1}",
     "to": "бьб",
-    "alcohol": 80,
+    "blood_alcohol": 80,
     "percentage": 3
   },
   {
     "from": ".{1}",
     "to": "буээ",
-    "alcohol": 85,
+    "blood_alcohol": 85,
     "percentage": 3
   },
   {
     "from": ".{1}",
     "to": "уфх",
-    "alcohol": 80,
+    "blood_alcohol": 80,
     "percentage": 10
   },
   {
     "to": " ",
-    "alcohol": 70,
+    "blood_alcohol": 70,
     "percentage": 5
   },
   {
     "to": " ",
-    "alcohol": 40,
+    "blood_alcohol": 40,
     "percentage": 5
   },
   {
     "to": " ",
-    "alcohol": 30,
+    "blood_alcohol": 30,
     "percentage": 3
   },
   {
     "from": ".{1}",
     "to": " ",
-    "alcohol": 20,
+    "blood_alcohol": 20,
     "percentage": 5
   },
   {
     "from": "$",
     "to": "!",
-    "alcohol": 30,
+    "blood_alcohol": 30,
     "percentage": 30
   },
   {
     "to": "*ик*",
-    "alcohol": 30,
+    "blood_alcohol": 30,
     "percentage": 5
   },
   {
     "to": " *ик* ",
-    "alcohol": 25,
+    "blood_alcohol": 25,
     "percentage": 3
   },
   {
     "from": " ",
     "to": " *ик* ",
-    "alcohol": 20,
+    "blood_alcohol": 20,
     "percentage": 3
   },
   {
     "from": "$",
     "to": " *ик*",
-    "alcohol": 50,
+    "blood_alcohol": 50,
     "percentage": 20
   },
   {
     "from": ".{1}",
     "to": "*рыг*",
-    "alcohol": 40,
+    "blood_alcohol": 40,
     "percentage": 5
   },
   {
     "from": "бля",
     "to": "бБляать",
-    "alcohol": 30,
+    "blood_alcohol": 30,
     "percentage": 30
   },
   {
     "from": "бля",
     "to": "ББЛЯАЯТЬ",
-    "alcohol": 65,
+    "blood_alcohol": 65,
     "percentage": 35
   },
   {
     "from": "сук",
     "to": "сСсука",
-    "alcohol": 20,
+    "blood_alcohol": 20,
     "percentage": 25
   },
   {
     "from": "х",
     "to": "хх",
-    "alcohol": 20,
+    "blood_alcohol": 20,
     "percentage": 30
   },
   {
     "from": ".*",
     "to": "*Ухх бл*",
-    "alcohol": 80,
+    "blood_alcohol": 80,
     "percentage": 5
   },
   {
     "from": ".*",
     "to": "*Этиловое пение*",
-    "alcohol": 85,
+    "blood_alcohol": 85,
     "percentage": 5
   },
   {
     "from": ".*",
     "to": "Ттыы м*ик*ьеня ув.. уважжаешь\\?\\?",
-    "alcohol": 80,
+    "blood_alcohol": 80,
     "percentage": 5
   },
   {
     "from": ".*",
     "to": "Хьихихи)",
-    "alcohol": 75,
+    "blood_alcohol": 75,
     "percentage": 5
   },
   {
     "from": ".*",
     "to": "Хехьехее)",
-    "alcohol": 75,
+    "blood_alcohol": 75,
     "percentage": 5
   },
   {
     "from": ".*",
     "to": "*пьяный поросячий визг*",
-    "alcohol": 90,
+    "blood_alcohol": 90,
     "percentage": 4
   },
   {
     "from": ".*",
     "to": "*рыг*",
-    "alcohol": 80,
+    "blood_alcohol": 80,
     "percentage": 5
   }
 ]
