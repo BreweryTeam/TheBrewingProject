@@ -6,12 +6,15 @@ import dev.jsinco.brewery.api.util.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
 public interface DrunksManager {
 
     @Nullable DrunkState consume(UUID playerUuid, String modifierName, double value);
+
+    @Nullable DrunkState consume(UUID playerUuid, List<ModifierConsume> consumptions);
 
     @Nullable DrunkState consume(UUID playerUuid, ModifierConsume modifier);
 

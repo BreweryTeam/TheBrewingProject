@@ -75,6 +75,7 @@ public class DrunksManagerImpl<C> implements DrunksManager {
                 ));
     }
 
+    @Override
     public @Nullable DrunkState consume(UUID playerUuid, List<ModifierConsume> consumptions) {
         return this.consume(playerUuid, consumptions, timeSupplier.getAsLong());
     }
@@ -108,8 +109,7 @@ public class DrunksManagerImpl<C> implements DrunksManager {
                     continue;
                 }
             }
-            newState = newState.setModifier(modifierConsume.modifier(), modifierConsume.value());
-
+            newState = newState.setModifier(modifierConsume.modifier(), modifierConsume.value() + newState.modifierValue(modifierConsume.modifier()));
         }
         if (newState.additionalModifierData().isEmpty() && !isPassedOut(newState)) {
             drunks.remove(playerUuid);

@@ -7,6 +7,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import dev.jsinco.brewery.api.effect.DrunkState;
 import dev.jsinco.brewery.api.effect.DrunksManager;
+import dev.jsinco.brewery.api.effect.ModifierConsume;
 import dev.jsinco.brewery.api.effect.modifier.DrunkenModifier;
 import dev.jsinco.brewery.api.event.DrunkEvent;
 import dev.jsinco.brewery.api.util.Pair;
@@ -45,28 +46,15 @@ public class StatusCommand {
         return 1;
     }
 
-    private static void consumeInternal(CommandContext<CommandSourceStack> context, List<FlaggedArgumentBuilder.Flag> flags, String translationMessage) throws CommandSyntaxException {
-        OfflinePlayer target = BreweryCommand.getOfflinePlayer(context);
-        DrunksManager drunksManager = TheBrewingProject.getInstance().getDrunksManager();
-        if (flags.isEmpty()) {
-            throw MISSING_ARGUMENT.create("modifier");
-        }
-        for (FlaggedArgumentBuilder.Flag flag : flags) {
-            drunksManager.consume(target.getUniqueId(), flag.fullName(), context.getArgument(flag.fullName(), Double.class));
-        }
-        CommandSender sender = context.getSource().getSender();
-        MessageUtil.message(sender, translationMessage, compileStatusTagResolvers(target, drunksManager));
-    }
-
     private static int info(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         OfflinePlayer target = BreweryCommand.getOfflinePlayer(context);
         CommandSender sender = context.getSource().getSender();
         DrunksManager drunksManager = TheBrewingProject.getInstance().getDrunksManager();
-        MessageUtil.message(sender, "tbp.command.status.info.message", compileStatusTagResolvers(target, drunksManager));
+        MessageUtil.message(sender, "tbp.command.status.info.message", compileStatusTagResolvers(target, drunksManager, List.of()));
         return 1;
     }
 
-    private static TagResolver[] compileStatusTagResolvers(OfflinePlayer target, DrunksManager drunksManager) {
+    private static TagResolver[] compileStatusTagResolvers(OfflinePlayer target, DrunksManager drunksManager, List<ModifierConsume> consumes) {
         DrunkState drunkState = drunksManager.getDrunkState(target.getUniqueId());
         Pair<DrunkEvent, Long> nextEvent = drunksManager.getPlannedEvent(target.getUniqueId());
         drunksManager.getPlannedEvent(target.getUniqueId());
@@ -74,7 +62,20 @@ public class StatusCommand {
         if (drunkState == null) {
             drunkState = new DrunkStateImpl(TheBrewingProject.getInstance().getTime(), -1);
         }
+        TagResolver consumesResolver = Placeholder.component("consumed_modifiers",
+                consumes.stream()
+                        .map(consumption ->
+                                Component.translatable(
+                                        "tbp.command.status.consumed-modifier",
+                                        Argument.tagResolver(
+                                                Placeholder.unparsed("modifier_name", consumption.modifier().name()),
+                                                Formatter.number("modifier_value", consumption.value())
+                                        )
+                                )
+                        ).collect(Component.toComponent(Component.text(",")))
+        );
         return new TagResolver[]{
+                consumesResolver,
                 Placeholder.component("modifiers", compileModifiersMessage(drunkState)),
                 Placeholder.unparsed("player_name", targetName == null ? "null" : targetName),
                 Formatter.number("next_event_time", nextEvent == null ? 0 : nextEvent.second() - TheBrewingProject.getInstance().getTime()),
@@ -94,7 +95,29 @@ public class StatusCommand {
     }
 
     public static ArgumentBuilder<CommandSourceStack, ?> command() {
-        Set<FlaggedArgumentBuilder.Flag> flags = DrunkenModifierSection.modifiers().drunkenModifiers()
+        ArgumentBuilder<CommandSourceStack, ?> root = Commands.literal("status");
+        registerBranches(root);
+        root.then(BreweryCommand.offlinePlayerBranch(StatusCommand::registerBranches));
+        return root;
+    }
+
+    private static void registerBranches(ArgumentBuilder<CommandSourceStack, ?> root) {
+        root.then(Commands.literal("info")
+                .executes(StatusCommand::info));
+        root.then(Commands.literal("clear")
+                .executes(StatusCommand::clear));
+        Set<FlaggedArgumentBuilder.Flag> setFlags = DrunkenModifierSection.modifiers().drunkenModifiers()
+                .stream()
+                .map(drunkenModifier -> new FlaggedArgumentBuilder.Flag(
+                                drunkenModifier.name(),
+                                null,
+                                List.of(new Pair<>(drunkenModifier.name(),
+                                        DoubleArgumentType.doubleArg(drunkenModifier.minValue() - drunkenModifier.maxValue(), drunkenModifier.maxValue() - drunkenModifier.minValue()))),
+                                Set.of()
+                        )
+                )
+                .collect(Collectors.toSet());
+        Set<FlaggedArgumentBuilder.Flag> consumeFlags = DrunkenModifierSection.modifiers().drunkenModifiers()
                 .stream()
                 .map(drunkenModifier -> new FlaggedArgumentBuilder.Flag(
                                 drunkenModifier.name(),
@@ -104,33 +127,53 @@ public class StatusCommand {
                         )
                 )
                 .collect(Collectors.toSet());
-
-        ArgumentBuilder<CommandSourceStack, ?> root = Commands.literal("status");
-        registerBranches(root, flags);
-        root.then(BreweryCommand.offlinePlayerBranch(argument -> registerBranches(argument, flags)));
-        return root;
-    }
-
-    private static void registerBranches(ArgumentBuilder<CommandSourceStack, ?> root, Set<FlaggedArgumentBuilder.Flag> flags) {
-        root.then(Commands.literal("info")
-                .executes(StatusCommand::info));
-        root.then(Commands.literal("clear")
-                .executes(StatusCommand::clear));
         ArgumentBuilder<CommandSourceStack, ?> consume = Commands.literal("consume");
         ArgumentBuilder<CommandSourceStack, ?> set = Commands.literal("set");
-        new FlaggedArgumentBuilder(flags, StatusCommand::consume).build().forEach(consume::then);
-        new FlaggedArgumentBuilder(flags, StatusCommand::set).build().forEach(set::then);
+        new FlaggedArgumentBuilder(consumeFlags, StatusCommand::consume).build().forEach(consume::then);
+        new FlaggedArgumentBuilder(setFlags, StatusCommand::set).build().forEach(set::then);
         root.then(consume);
         root.then(set);
     }
 
     private static void set(CommandContext<CommandSourceStack> context, List<FlaggedArgumentBuilder.Flag> flags) throws CommandSyntaxException {
         OfflinePlayer target = BreweryCommand.getOfflinePlayer(context);
-        TheBrewingProject.getInstance().getDrunksManager().clear(target.getUniqueId());
-        consumeInternal(context, flags, "tbp.command.status.set.message");
+        if (flags.isEmpty()) {
+            throw MISSING_ARGUMENT.create("modifier");
+        }
+        DrunksManager drunksManager = TheBrewingProject.getInstance().getDrunksManager();
+        DrunkState drunkState = drunksManager.getDrunkState(target.getUniqueId());
+        if (drunkState == null) {
+            drunkState = new DrunkStateImpl(TheBrewingProject.getInstance().getTime(), -1);
+        }
+        final DrunkState finalDrunkState = drunkState;
+        List<ModifierConsume> consumes = flags.stream()
+                .map(flag -> {
+                            DrunkenModifier modifier = DrunkenModifierSection.modifiers().modifier(flag.fullName());
+                            return new ModifierConsume(
+                                    modifier,
+                                    context.getArgument(flag.fullName(), Double.class) - finalDrunkState.modifierValue(modifier)
+                            );
+                        }
+                )
+                .toList();
+        drunksManager.consume(target.getUniqueId(), consumes);
+        CommandSender sender = context.getSource().getSender();
+        MessageUtil.message(sender, "tbp.command.status.set.message", compileStatusTagResolvers(target, drunksManager, consumes));
     }
 
     private static void consume(CommandContext<CommandSourceStack> context, List<FlaggedArgumentBuilder.Flag> flags) throws CommandSyntaxException {
-        consumeInternal(context, flags, "tbp.command.status.consume.message");
+        OfflinePlayer target = BreweryCommand.getOfflinePlayer(context);
+        DrunksManager drunksManager = TheBrewingProject.getInstance().getDrunksManager();
+        if (flags.isEmpty()) {
+            throw MISSING_ARGUMENT.create("modifier");
+        }
+        List<ModifierConsume> consumes = flags.stream()
+                .map(flag -> new ModifierConsume(
+                        DrunkenModifierSection.modifiers().modifier(flag.fullName()), context.getArgument(flag.fullName(), Double.class)
+                ))
+                .toList();
+        drunksManager.consume(target.getUniqueId(), consumes);
+        CommandSender sender = context.getSource().getSender();
+        MessageUtil.message(sender, "tbp.command.status.consume.message", compileStatusTagResolvers(target, drunksManager, consumes));
     }
 }

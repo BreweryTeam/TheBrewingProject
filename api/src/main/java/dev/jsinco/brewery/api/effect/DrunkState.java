@@ -16,6 +16,10 @@ public interface DrunkState {
 
     double modifierValue(String modifierName);
 
+    default double modifierValue(DrunkenModifier modifier) {
+        return modifierValue(modifier.name());
+    }
+
     List<Pair<DrunkenModifier, Double>> additionalModifierData();
 
     DrunkState withPassOut(long kickedTimestamp);
