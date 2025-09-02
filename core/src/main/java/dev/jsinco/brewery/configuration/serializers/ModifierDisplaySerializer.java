@@ -8,7 +8,6 @@ import eu.okaeri.configs.serdes.DeserializationData;
 import eu.okaeri.configs.serdes.ObjectSerializer;
 import eu.okaeri.configs.serdes.SerializationData;
 import lombok.NonNull;
-import net.kyori.adventure.text.Component;
 
 public class ModifierDisplaySerializer implements ObjectSerializer<ModifierDisplay> {
     @Override
@@ -18,20 +17,21 @@ public class ModifierDisplaySerializer implements ObjectSerializer<ModifierDispl
 
     @Override
     public void serialize(@NonNull ModifierDisplay object, @NonNull SerializationData data, @NonNull GenericsDeclaration generics) {
-        data.add("display-name", object.displayName());
-        data.add("expression", object.expression());
-        data.add("type", object.type());
+        data.add("message", object.message());
+        data.add("filter", object.filter());
+        data.add("display-value", object.value());
         data.add("display-window", object.displayWindow());
     }
 
     @Override
     public ModifierDisplay deserialize(@NonNull DeserializationData data, @NonNull GenericsDeclaration generics) {
-        Component displayName = data.get("display-name", Component.class);
-        ModifierExpression expression = data.get("expression", ModifierExpression.class);
-        ModifierDisplay.DisplayType type = data.get("type", ModifierDisplay.DisplayType.class);
+        String message = data.get("message", String.class);
+        ModifierExpression filter = data.get("filter", ModifierExpression.class);
+        ModifierExpression value = data.get("display-value", ModifierExpression.class);
         ModifierDisplay.DisplayWindow window = data.get("display-window", ModifierDisplay.DisplayWindow.class);
-        Preconditions.checkArgument(expression != null, "Modifier display requires an expression");
-        Preconditions.checkArgument(displayName != null, "Modifier display requires a display name");
-        return new ModifierDisplay(displayName, expression, type == null ? ModifierDisplay.DisplayType.BARS : type, window == null ? ModifierDisplay.DisplayWindow.BAR : window);
+        Preconditions.checkArgument(filter != null, "Modifier display requires a filter");
+        Preconditions.checkArgument(value != null, "Modifier display requires a display-value");
+        Preconditions.checkArgument(message != null, "Modifier display requires a message");
+        return new ModifierDisplay(message, filter, value, window == null ? ModifierDisplay.DisplayWindow.ACTION_BAR : window);
     }
 }

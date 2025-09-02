@@ -15,8 +15,6 @@ import eu.okaeri.configs.serdes.OkaeriSerdesPack;
 import eu.okaeri.configs.yaml.snakeyaml.YamlSnakeYamlConfigurer;
 import lombok.Getter;
 import lombok.experimental.Accessors;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.io.File;
 import java.util.List;
@@ -50,13 +48,14 @@ public class DrunkenModifierSection extends OkaeriConfig {
             "display-window can have the values [chat, bar title]"
     })
     private List<ModifierDisplay> drunkenDisplays = List.of(
-            new ModifierDisplay(Component.text("Alcohol").color(NamedTextColor.GRAY), new ModifierExpression("alcohol"), ModifierDisplay.DisplayType.BARS, ModifierDisplay.DisplayWindow.BAR)
+            new ModifierDisplay("<gray>Alcohol: [<bars>]", new ModifierExpression("abs(consumed_alcohol)"), new ModifierExpression("alcohol"), ModifierDisplay.DisplayWindow.ACTION_BAR),
+            new ModifierDisplay("<green>Toxins: [<skulls>]", new ModifierExpression("abs(consumed_toxins)"), new ModifierExpression("toxins"), ModifierDisplay.DisplayWindow.ACTION_BAR)
     );
 
     @CustomKey("drunken-tooltips")
     @Comment({
             "Change how modifiers will display for brew effects",
-            "a drunken modifier with an expression larger than 0 will display on an item"
+            "a drunken modifier with an filter larger than 0 will display on an item"
     })
     private List<ModifierTooltip> drunkenTooltips = List.of(
             new ModifierTooltip(new ModifierExpression("alcohol"),

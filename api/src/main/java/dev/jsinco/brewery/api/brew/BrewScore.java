@@ -1,5 +1,6 @@
 package dev.jsinco.brewery.api.brew;
 
+import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
@@ -39,7 +40,7 @@ public interface BrewScore {
     /**
      * @return A text representation of stars for this score
      */
-    String displayName();
+    Component displayName();
 
     /**
      * @return The difficulty to apply to the weighted score: {@link #score()}

@@ -26,5 +26,9 @@ public interface DrunkState {
 
     Map<DrunkenModifier, Double> modifiers();
 
-    Pair<DrunkState, Boolean> cascadeModifier(DrunkenModifier modifier, double value);
+    Pair<DrunkState, Boolean> cascadeModifier(DrunkenModifier modifier, double valueChange);
+
+    Map<String, Double> asVariables();
+
+    Map<String, Double> asVariables(DrunkenModifier modifier, double valueChange);
 }

@@ -14,6 +14,7 @@ import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.bukkit.command.argument.FlaggedArgumentBuilder;
 import dev.jsinco.brewery.bukkit.util.BukkitMessageUtil;
 import dev.jsinco.brewery.configuration.DrunkenModifierSection;
+import dev.jsinco.brewery.effect.DrunkStateImpl;
 import dev.jsinco.brewery.util.MessageUtil;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
@@ -24,6 +25,7 @@ import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import net.kyori.adventure.text.minimessage.translation.Argument;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.Set;
@@ -69,6 +71,9 @@ public class StatusCommand {
         Pair<DrunkEvent, Long> nextEvent = drunksManager.getPlannedEvent(target.getUniqueId());
         drunksManager.getPlannedEvent(target.getUniqueId());
         String targetName = target.getName();
+        if (drunkState == null) {
+            drunkState = new DrunkStateImpl(TheBrewingProject.getInstance().getTime(), -1);
+        }
         return new TagResolver[]{
                 Placeholder.component("modifiers", compileModifiersMessage(drunkState)),
                 Placeholder.unparsed("player_name", targetName == null ? "null" : targetName),
@@ -77,7 +82,7 @@ public class StatusCommand {
         };
     }
 
-    private static Component compileModifiersMessage(DrunkState drunkState) {
+    private static Component compileModifiersMessage(@NotNull DrunkState drunkState) {
         return DrunkenModifierSection.modifiers().drunkenModifiers()
                 .stream()
                 .map(DrunkenModifier::name)

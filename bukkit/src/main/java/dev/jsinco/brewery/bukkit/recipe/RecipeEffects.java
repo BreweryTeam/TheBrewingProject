@@ -2,8 +2,11 @@ package dev.jsinco.brewery.bukkit.recipe;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
+import dev.jsinco.brewery.api.effect.DrunkState;
+import dev.jsinco.brewery.api.effect.DrunksManager;
 import dev.jsinco.brewery.api.effect.ModifierConsume;
 import dev.jsinco.brewery.api.effect.modifier.DrunkenModifier;
+import dev.jsinco.brewery.api.effect.modifier.ModifierDisplay;
 import dev.jsinco.brewery.api.event.CustomEventRegistry;
 import dev.jsinco.brewery.api.event.DrunkEvent;
 import dev.jsinco.brewery.api.util.BreweryKey;
@@ -13,12 +16,12 @@ import dev.jsinco.brewery.bukkit.effect.ModifierConsumePdcType;
 import dev.jsinco.brewery.bukkit.util.BukkitMessageUtil;
 import dev.jsinco.brewery.bukkit.util.ListPersistentDataType;
 import dev.jsinco.brewery.configuration.DrunkenModifierSection;
+import dev.jsinco.brewery.effect.DrunkStateImpl;
 import dev.jsinco.brewery.effect.DrunksManagerImpl;
 import dev.jsinco.brewery.util.MessageUtil;
 import io.papermc.paper.persistence.PersistentDataContainerView;
 import lombok.Getter;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.minimessage.translation.Argument;
 import net.kyori.adventure.title.Title;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Entity;
@@ -179,12 +182,16 @@ public class RecipeEffects {
                     ),
                     Component.empty())
             );
+        } else {
+            renderDefaultDisplayMessage(player, ModifierDisplay.DisplayWindow.TITLE, drunksManager);
         }
         if (message != null) {
             player.sendMessage(MessageUtil.miniMessage(message,
                     BukkitMessageUtil.getPlayerTagResolver(player),
                     MessageUtil.numberedModifierTagResolver(modifiers, "consumed")
             ));
+        } else {
+            renderDefaultDisplayMessage(player, ModifierDisplay.DisplayWindow.CHAT, drunksManager);
         }
         if (actionBar != null) {
             player.sendActionBar(MessageUtil.miniMessage(actionBar,
@@ -192,11 +199,7 @@ public class RecipeEffects {
                     MessageUtil.numberedModifierTagResolver(modifiers, "consumed")
             ));
         } else {
-            player.sendActionBar(
-                    Component.translatable("tbp.info.after-drink",
-                            Argument.tagResolver(MessageUtil.getDrunkStateTagResolver(drunksManager.getDrunkState(player.getUniqueId())))
-                    )
-            );
+            renderDefaultDisplayMessage(player, ModifierDisplay.DisplayWindow.ACTION_BAR, drunksManager);
         }
         if (player.hasPermission("brewery.override.effect")) {
             return;
@@ -205,6 +208,29 @@ public class RecipeEffects {
         getEffects().stream()
                 .map(RecipeEffect::newPotionEffect)
                 .forEach(player::addPotionEffect);
+    }
+
+    private void renderDefaultDisplayMessage(Player player, ModifierDisplay.DisplayWindow displayWindow, DrunksManager drunksManager) {
+        DrunkState drunkState = drunksManager.getDrunkState(player.getUniqueId());
+        Map<String, Double> variables = (drunkState == null ? new DrunkStateImpl(0, -1) : drunkState).asVariables();
+        modifiers.forEach((modifier, value) -> variables.put("consumed_" + modifier.name(), value));
+        Component component = DrunkenModifierSection.modifiers().drunkenDisplays()
+                .stream()
+                .filter(modifierDisplay -> modifierDisplay.displayWindow().equals(displayWindow))
+                .filter(modifierDisplay -> modifierDisplay.filter().evaluate(variables) > 0)
+                .map(modifierDisplay -> MessageUtil.miniMessage(
+                        modifierDisplay.message(),
+                        MessageUtil.getValueDisplayTagResolver(modifierDisplay.value().evaluate(variables)))
+                )
+                .collect(Component.toComponent(Component.text(", ")));
+        if (component.equals(Component.empty())) {
+            return;
+        }
+        switch (displayWindow) {
+            case CHAT -> player.sendMessage(component);
+            case ACTION_BAR -> player.sendActionBar(component);
+            case TITLE -> player.showTitle(Title.title(component, Component.empty()));
+        }
     }
 
     public void applyTo(Projectile projectile) {

@@ -1,6 +1,9 @@
 package dev.jsinco.brewery.recipes;
 
 import dev.jsinco.brewery.api.brew.*;
+import dev.jsinco.brewery.util.MessageUtil;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.translation.Argument;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
@@ -10,9 +13,6 @@ import java.util.Map;
 public class BrewScoreImpl implements BrewScore {
 
     public static final BrewScoreImpl EXCELLENT = new BrewScoreImpl(1D);
-    private static final char FULL_STAR = '\u2605';
-    private static final char HALF_STAR = '\u2BEA';
-    private static final char EMPTY_STAR = '\u2606';
 
     private final List<Map<PartialBrewScore.Type, PartialBrewScore>> scores;
     private final boolean completed;
@@ -68,19 +68,11 @@ public class BrewScoreImpl implements BrewScore {
     }
 
     @Override
-    public String displayName() {
-        StringBuilder builder = new StringBuilder();
-        int score = (int) (score() * 10);
-        int fullStars = score / 2;
-        int remainder = score % 2;
-        builder.repeat(FULL_STAR, fullStars);
-        if (remainder == 1) {
-            builder.append(HALF_STAR);
-            builder.repeat(EMPTY_STAR, 4 - fullStars);
-        } else {
-            builder.repeat(EMPTY_STAR, 5 - fullStars);
-        }
-        return builder.toString();
+    public Component displayName() {
+        return Component.translatable(
+                "tbp.brew.tooltip.quality-display",
+                Argument.tagResolver(MessageUtil.getValueDisplayTagResolver(score() * 100))
+        );
     }
 
     @Override

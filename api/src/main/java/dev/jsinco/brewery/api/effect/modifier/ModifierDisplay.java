@@ -1,19 +1,11 @@
 package dev.jsinco.brewery.api.effect.modifier;
 
-import net.kyori.adventure.text.Component;
-
-public record ModifierDisplay(Component displayName, ModifierExpression expression, DisplayType type,
+public record ModifierDisplay(String message, ModifierExpression filter, ModifierExpression value,
                               DisplayWindow displayWindow) {
-
-    public enum DisplayType {
-        SKULLS,
-        BARS,
-        STARS
-    }
 
     public enum DisplayWindow {
         CHAT,
-        BAR,
+        ACTION_BAR,
         TITLE
     }
 }

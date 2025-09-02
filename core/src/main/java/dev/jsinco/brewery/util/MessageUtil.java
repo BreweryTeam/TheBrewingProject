@@ -1,9 +1,7 @@
 package dev.jsinco.brewery.util;
 
 import dev.jsinco.brewery.api.brew.*;
-import dev.jsinco.brewery.api.effect.DrunkState;
 import dev.jsinco.brewery.api.effect.modifier.DrunkenModifier;
-import dev.jsinco.brewery.api.effect.modifier.ModifierDisplay;
 import dev.jsinco.brewery.api.recipe.RecipeRegistry;
 import dev.jsinco.brewery.configuration.Config;
 import dev.jsinco.brewery.configuration.DrunkenModifierSection;
@@ -14,7 +12,6 @@ import dev.jsinco.brewery.recipes.BrewScoreImpl;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentLike;
-import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.StyleBuilderApplicable;
 import net.kyori.adventure.text.format.TextColor;
@@ -36,6 +33,9 @@ import java.util.stream.Stream;
 public class MessageUtil {
 
     private static final char SKULL = '\u2620';
+    private static final char FULL_STAR = '\u2605';
+    private static final char HALF_STAR = '\u2BEA';
+    private static final char EMPTY_STAR = '\u2606';
 
     public static Component miniMessage(String miniMessage, TagResolver... resolvers) {
         return MiniMessage.miniMessage().deserialize(miniMessage, resolvers);
@@ -55,7 +55,7 @@ public class MessageUtil {
     public static TagResolver getScoreTagResolver(@NotNull BrewScore score) {
         BrewQuality quality = score.brewQuality();
         return TagResolver.resolver(
-                Placeholder.component("quality", Component.text(score.displayName())),
+                Placeholder.component("quality", score.displayName()),
                 Placeholder.styling("quality_color", resolveQualityColor(quality))
         );
     }
@@ -124,28 +124,24 @@ public class MessageUtil {
         return compileBrewInfo(brew, score, detailed);
     }
 
-    public static @NotNull TagResolver getDrunkStateTagResolver(@Nullable DrunkState drunkState) {
-        TextComponent.Builder output = Component.text();
-        for (ModifierDisplay modifier : DrunkenModifierSection.modifiers().drunkenDisplays()) {
-            output.append(switch (modifier.type()) {
-                case SKULLS -> Component.translatable("tbp.info.after-drink.skulls");
-                case BARS -> Component.translatable("tbp.info.after-drink.bars");
-                case STARS -> Component.translatable("tbp.info.after-drink.stars");
-            });
-        }
-        return Placeholder.component("modifiers", output.build());
+    public static @NotNull TagResolver getValueDisplayTagResolver(double displayValue) {
+        return TagResolver.resolver(
+                Placeholder.component("bars", compileBars(displayValue)),
+                Placeholder.component("skulls", compileSkulls(displayValue)),
+                Placeholder.component("stars", compileStars(displayValue))
+        );
     }
 
-    private static @NotNull ComponentLike compileSkulls(int level) {
-        int partition = level / 20;
+    private static @NotNull ComponentLike compileSkulls(double level) {
+        int partition = (int) level / 20;
         StringBuilder skulls = new StringBuilder();
         skulls.repeat(SKULL, partition);
         skulls.repeat("  ", 5 - partition);
         return Component.text(skulls.toString()).color(NamedTextColor.GREEN);
     }
 
-    private static @NotNull ComponentLike compileBars(int level) {
-        int partitionedLevel = level / 5;
+    private static @NotNull ComponentLike compileBars(double level) {
+        int partitionedLevel = (int) level / 5;
         StringBuilder okLevel = new StringBuilder();
         okLevel.repeat("|", Math.min(partitionedLevel, 4));
         StringBuilder warningLevel = new StringBuilder();
@@ -158,6 +154,21 @@ public class MessageUtil {
                 .append(Component.text(warningLevel.toString()).color(NamedTextColor.YELLOW))
                 .append(Component.text(severeLevel.toString()).color(NamedTextColor.GOLD))
                 .append(Component.text(remainder.toString()).color(NamedTextColor.BLACK));
+    }
+
+    private static @NotNull Component compileStars(double level) {
+        StringBuilder builder = new StringBuilder();
+        int score = (int) (level / 10);
+        int fullStars = score / 2;
+        int remainder = score % 2;
+        builder.repeat(FULL_STAR, fullStars);
+        if (remainder == 1) {
+            builder.append(HALF_STAR);
+            builder.repeat(EMPTY_STAR, 4 - fullStars);
+        } else {
+            builder.repeat(EMPTY_STAR, 5 - fullStars);
+        }
+        return Component.text(builder.toString());
     }
 
     public static @NotNull TagResolver getTimeTagResolver(long timeTicks) {

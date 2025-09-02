@@ -17,7 +17,7 @@ public class ModifierTooltipSerializer implements ObjectSerializer<ModifierToolt
 
     @Override
     public void serialize(@NonNull ModifierTooltip object, @NonNull SerializationData data, @NonNull GenericsDeclaration generics) {
-        data.add("expression", object.expression());
+        data.add("filter", object.expression());
         data.add("brewing-tooltip", object.brewingTooltip());
         data.add("default-tooltip", object.defaultTooltip());
         data.add("sealed-tooltip", object.sealedTooltip());
@@ -25,11 +25,11 @@ public class ModifierTooltipSerializer implements ObjectSerializer<ModifierToolt
 
     @Override
     public ModifierTooltip deserialize(@NonNull DeserializationData data, @NonNull GenericsDeclaration generics) {
-        ModifierExpression modifierExpression = data.get("expression", ModifierExpression.class);
+        ModifierExpression modifierExpression = data.get("filter", ModifierExpression.class);
         String brewingTooltip = data.get("brewing-tooltip", String.class);
         String defaultTooltip = data.get("default-tooltip", String.class);
         String sealedTooltip = data.get("sealed-tooltip", String.class);
-        Preconditions.checkArgument(modifierExpression != null, "Tooltip display requires an expression and a tooltip message");
+        Preconditions.checkArgument(modifierExpression != null, "Tooltip display requires an filter and a tooltip message");
         return new ModifierTooltip(modifierExpression, brewingTooltip, defaultTooltip, sealedTooltip);
     }
 }

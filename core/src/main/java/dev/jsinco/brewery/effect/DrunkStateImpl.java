@@ -22,6 +22,10 @@ public record DrunkStateImpl(long timestamp,
         modifiers = builder.build();
     }
 
+    public DrunkStateImpl(long timestamp, long kickedTimestamp) {
+        this(timestamp, kickedTimestamp, Map.of());
+    }
+
     public DrunkStateImpl recalculate(long timestamp) {
         if (timestamp < this.timestamp) {
             return new DrunkStateImpl(this.timestamp, this.kickedTimestamp, modifiers);
@@ -87,9 +91,9 @@ public record DrunkStateImpl(long timestamp,
     }
 
     @Override
-    public Pair<DrunkState, Boolean> cascadeModifier(DrunkenModifier modifierToAdd, double value) {
+    public Pair<DrunkState, Boolean> cascadeModifier(DrunkenModifier modifierToAdd, double valueChange) {
         ImmutableMap.Builder<DrunkenModifier, Double> newModifiers = new ImmutableMap.Builder<>();
-        Map<String, Double> variables = compileVariables(modifiers, modifierToAdd, value);
+        Map<String, Double> variables = compileVariables(modifiers, modifierToAdd, valueChange);
         boolean cascadedOnSelf = false;
         for (Map.Entry<DrunkenModifier, Double> entry : modifiers.entrySet()) {
             double diff = entry.getKey().dependency().evaluate(variables);
@@ -103,12 +107,22 @@ public record DrunkStateImpl(long timestamp,
         return new Pair<>(new DrunkStateImpl(timestamp, kickedTimestamp, newModifiers.build()), cascadedOnSelf);
     }
 
-    public static Map<String, Double> compileVariables(Map<DrunkenModifier, Double> modifiers, @Nullable DrunkenModifier modifierToAdd, double value) {
+    @Override
+    public Map<String, Double> asVariables() {
+        return compileVariables(this.modifiers, null, 0D);
+    }
+
+    @Override
+    public Map<String, Double> asVariables(DrunkenModifier modifier, double valueChange) {
+        return compileVariables(this.modifiers, modifier, valueChange);
+    }
+
+    public static Map<String, Double> compileVariables(Map<DrunkenModifier, Double> modifiers, @Nullable DrunkenModifier modifierToAdd, double valueChange) {
         Map<String, Double> output = new HashMap<>();
         for (Map.Entry<DrunkenModifier, Double> entry : modifiers.entrySet()) {
             output.put(entry.getKey().name(), entry.getValue());
             if (entry.getKey().equals(modifierToAdd)) {
-                output.put("consumed_" + modifierToAdd.name(), value);
+                output.put("consumed_" + modifierToAdd.name(), valueChange);
             } else {
                 output.put("consumed_" + entry.getKey().name(), entry.getValue());
             }
