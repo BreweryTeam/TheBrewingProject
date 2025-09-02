@@ -15,8 +15,12 @@ public class RangeDSerializer implements ObjectSerializer<RangeD> {
 
     @Override
     public void serialize(@NonNull RangeD object, @NonNull SerializationData data, @NonNull GenericsDeclaration generics) {
-        data.add("min", object.min());
-        data.add("max", object.max());
+        if (object.min() != null) {
+            data.add("min", object.min());
+        }
+        if (object.max() != null) {
+            data.add("max", object.max());
+        }
     }
 
     @Override
