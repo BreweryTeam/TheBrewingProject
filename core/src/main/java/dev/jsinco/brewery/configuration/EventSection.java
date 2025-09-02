@@ -1,5 +1,6 @@
 package dev.jsinco.brewery.configuration;
 
+import com.google.common.base.Preconditions;
 import dev.jsinco.brewery.api.effect.modifier.ModifierExpression;
 import dev.jsinco.brewery.api.event.*;
 import dev.jsinco.brewery.api.event.step.ApplyPotionEffect;
@@ -10,7 +11,9 @@ import dev.jsinco.brewery.api.moment.Interval;
 import dev.jsinco.brewery.api.moment.Moment;
 import dev.jsinco.brewery.api.util.BreweryKey;
 import dev.jsinco.brewery.api.util.BreweryRegistry;
+import dev.jsinco.brewery.api.util.Logger;
 import dev.jsinco.brewery.api.vector.BreweryLocation;
+import dev.jsinco.brewery.effect.DrunkStateImpl;
 import eu.okaeri.configs.ConfigManager;
 import eu.okaeri.configs.OkaeriConfig;
 import eu.okaeri.configs.annotation.Comment;
@@ -92,6 +95,33 @@ public class EventSection extends OkaeriConfig {
     @Comment("Change the properties of premade events")
     @CustomKey("named-drunk-event-overrides")
     private List<NamedDrunkEvent> namedDrunkEventsOverride = BreweryRegistry.DRUNK_EVENT.values().stream().toList();
+
+    public static void validate() {
+        Preconditions.checkState(instance != null, "Instance can not be null");
+        Map<String, Double> variables = new DrunkStateImpl(0, -1).asVariables();
+        boolean noneFailed = true;
+        for (CustomEvent.Keyed customEvent : instance.customEvents().events()) {
+            noneFailed &= validateEvent(variables, customEvent.probability(), customEvent.key());
+        }
+        for (NamedDrunkEvent namedDrunkEvent : instance.namedDrunkEventsOverride()) {
+            noneFailed &= validateEvent(variables, namedDrunkEvent.probability(), namedDrunkEvent.key());
+        }
+        Preconditions.checkState(noneFailed, "An event has failed validation, please check above exception");
+    }
+
+    private static boolean validateEvent(Map<String, Double> variables, EventProbability probability, BreweryKey key) {
+        try {
+            probability.evaluate(variables);
+            for (String modifierName : probability.allowedRanges().keySet()) {
+                DrunkenModifierSection.modifiers().modifier(modifierName);
+            }
+            return true;
+        } catch (Exception e) {
+            Logger.logErr("Invalid event: " + key);
+            Logger.logErr(e);
+            return false;
+        }
+    }
 
     @Getter
     @Accessors(fluent = true)

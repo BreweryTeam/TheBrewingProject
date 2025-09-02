@@ -116,6 +116,8 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
         Config.load(this.getDataFolder(), serializers());
         DrunkenModifierSection.load(this.getDataFolder(), serializers());
         EventSection.load(getDataFolder(), serializers());
+        DrunkenModifierSection.validate();
+        EventSection.validate();
         this.translator = new BreweryTranslator(new File(this.getDataFolder(), "locale"));
         translator.reload();
         GlobalTranslator.translator().addSource(translator);
@@ -168,6 +170,8 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
         Config.config().load(true);
         DrunkenModifierSection.modifiers().load(true);
         EventSection.events().load(true);
+        DrunkenModifierSection.validate();
+        EventSection.validate();
         translator.reload();
         this.structureRegistry.clear();
         this.placedStructureRegistry.clear();

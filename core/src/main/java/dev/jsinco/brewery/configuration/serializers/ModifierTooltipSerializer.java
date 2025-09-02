@@ -17,7 +17,7 @@ public class ModifierTooltipSerializer implements ObjectSerializer<ModifierToolt
 
     @Override
     public void serialize(@NonNull ModifierTooltip object, @NonNull SerializationData data, @NonNull GenericsDeclaration generics) {
-        data.add("filter", object.expression());
+        data.add("filter", object.filter());
         data.add("brewing-tooltip", object.brewingTooltip());
         data.add("default-tooltip", object.defaultTooltip());
         data.add("sealed-tooltip", object.sealedTooltip());

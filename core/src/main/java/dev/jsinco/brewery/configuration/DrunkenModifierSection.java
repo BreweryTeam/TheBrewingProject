@@ -1,10 +1,13 @@
 package dev.jsinco.brewery.configuration;
 
+import com.google.common.base.Preconditions;
 import dev.jsinco.brewery.api.effect.modifier.DrunkenModifier;
 import dev.jsinco.brewery.api.effect.modifier.ModifierDisplay;
 import dev.jsinco.brewery.api.effect.modifier.ModifierExpression;
 import dev.jsinco.brewery.api.effect.modifier.ModifierTooltip;
+import dev.jsinco.brewery.api.util.Logger;
 import dev.jsinco.brewery.configuration.serializers.ConsumableSerializer;
+import dev.jsinco.brewery.effect.DrunkStateImpl;
 import eu.okaeri.configs.ConfigManager;
 import eu.okaeri.configs.OkaeriConfig;
 import eu.okaeri.configs.annotation.Comment;
@@ -98,6 +101,40 @@ public class DrunkenModifierSection extends OkaeriConfig {
             it.saveDefaults();
             it.load(true);
         });
+    }
+
+    public static void validate() {
+        Preconditions.checkState(instance != null, "Instance can not be null");
+        Map<String, Double> variables = new DrunkStateImpl(0, -1).asVariables();
+        boolean noneFailed = true;
+        for (DrunkenModifier drunkenModifier : instance.drunkenModifiers()) {
+            try {
+                drunkenModifier.decrementTime().evaluate(variables);
+                drunkenModifier.dependency().evaluate(variables);
+            } catch (Exception e) {
+                Logger.logErr("Failed to validate modifier: " + drunkenModifier.name());
+                Logger.logErr(e);
+                noneFailed = false;
+            }
+        }
+        for (ModifierDisplay modifierDisplay : instance.drunkenDisplays()) {
+            try {
+                modifierDisplay.filter().evaluate(variables);
+                modifierDisplay.value().evaluate(variables);
+            } catch (Exception e) {
+                Logger.logErr(e);
+                noneFailed = false;
+            }
+        }
+        for (ModifierTooltip modifierTooltip : instance.drunkenTooltips()) {
+            try {
+                modifierTooltip.filter().evaluate(variables);
+            } catch (Exception e) {
+                Logger.logErr(e);
+                noneFailed = false;
+            }
+        }
+        Preconditions.checkState(noneFailed, "Encountered an issue when validating modifiers, see above exception");
     }
 
     public DrunkenModifier modifier(String modifierName) {

@@ -186,7 +186,7 @@ public class BukkitRecipeResult implements RecipeResult<ItemStack> {
     private void applyDrunkenTooltips(Brew.State state, Stream.Builder<Component> streamBuilder, TagResolver resolver) {
         DrunkenModifierSection.modifiers().drunkenTooltips()
                 .stream()
-                .filter(modifierTooltip -> modifierTooltip.expression().evaluate(DrunkStateImpl.compileVariables(recipeEffects.getModifiers(), null, 0D)) > 0)
+                .filter(modifierTooltip -> modifierTooltip.filter().evaluate(DrunkStateImpl.compileVariables(recipeEffects.getModifiers(), null, 0D)) > 0)
                 .map(modifierTooltip -> modifierTooltip.getTooltip(state))
                 .filter(Objects::nonNull)
                 .map(miniMessage -> MessageUtil.miniMessage(miniMessage, resolver))
