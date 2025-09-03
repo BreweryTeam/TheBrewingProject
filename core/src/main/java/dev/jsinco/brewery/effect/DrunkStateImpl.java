@@ -102,6 +102,8 @@ public record DrunkStateImpl(long timestamp,
                 if (modifierToAdd.equals(entry.getKey())) {
                     cascadedOnSelf = true;
                 }
+            } else {
+                newModifiers.put(entry.getKey(), entry.getValue());
             }
         }
         return new Pair<>(new DrunkStateImpl(timestamp, kickedTimestamp, newModifiers.build()), cascadedOnSelf);
