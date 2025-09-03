@@ -32,7 +32,7 @@ public interface BrewManager<I> {
 
     /**
      * @param item An item stack
-     * @return A optionally present brew if item had brew contents
+     * @return An optionally present brew if item had brew contents
      */
     Optional<Brew> fromItem(I item);
 }
