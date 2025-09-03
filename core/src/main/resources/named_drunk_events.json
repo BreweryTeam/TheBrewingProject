@@ -3,7 +3,7 @@
     "name": "chicken",
     "probability": {
       "probability_weight": {
-        "function": "1"
+        "function": "1/250"
       },
       "allowed_ranges": {
         "alcohol": {
@@ -17,7 +17,7 @@
     "name": "drunk_message",
     "probability": {
       "probability_weight": {
-        "function": "1 / (110 - alcohol)"
+        "function": "0.04 / (110 - alcohol)"
       },
       "allowed_ranges": {
         "alcohol": {
@@ -31,7 +31,7 @@
     "name": "drunken_walk",
     "probability": {
       "probability_weight": {
-        "function": "4 / (110 - alcohol)"
+        "function": "0.16 / (110 - alcohol)"
       },
       "allowed_ranges": {
         "alcohol": {
@@ -45,7 +45,7 @@
     "name": "fever",
     "probability": {
       "probability_weight": {
-        "function": "1 / (110 - alcohol)"
+        "function": "0.04 / (110 - alcohol)"
       },
       "allowed_ranges": {
         "alcohol": {
@@ -59,7 +59,7 @@
     "name": "hallucination",
     "probability": {
       "probability_weight": {
-        "function": "7 / (110 - alcohol)"
+        "function": "0.26 / (110 - alcohol)"
       },
       "allowed_ranges": {
         "alcohol": {
@@ -73,7 +73,7 @@
     "name": "kaboom",
     "probability": {
       "probability_weight": {
-        "function": "0.2 / (110 - alcohol)"
+        "function": "0.08 / (110 - alcohol)"
       },
       "allowed_ranges": {
         "alcohol": {
@@ -87,7 +87,7 @@
     "name": "nausea",
     "probability": {
       "probability_weight": {
-        "function": "10 / (110 - alcohol)"
+        "function": "0.4 / (110 - alcohol)"
       },
       "allowed_ranges": {
         "alcohol": {
@@ -101,7 +101,7 @@
     "name": "pass_out",
     "probability": {
       "probability_weight": {
-        "function": "2 / (110 - alcohol)"
+        "function": "0.08 / (110 - alcohol)"
       },
       "allowed_ranges": {
         "alcohol": {
@@ -115,7 +115,7 @@
     "name": "puke",
     "probability": {
       "probability_weight": {
-        "function": "4 / (110 - alcohol)"
+        "function": "0.16 / (110 - alcohol)"
       },
       "allowed_ranges": {
         "alcohol": {
@@ -133,7 +133,7 @@
       },
       "allowed_ranges": {
         "alcohol": {
-          "min": 90,
+          "min": 40,
           "max": 100
         }
       }
@@ -143,7 +143,7 @@
     "name": "teleport",
     "probability": {
       "probability_weight": {
-        "function": "0.4 / (110 - alcohol)"
+        "function": "0.02 / (110 - alcohol)"
       },
       "allowed_ranges": {
         "alcohol": {

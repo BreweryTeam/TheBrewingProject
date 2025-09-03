@@ -6,7 +6,7 @@ import dev.jsinco.brewery.api.math.RangeD;
 
 import java.util.Map;
 
-public record EventProbability(@SerializedName("probability_weight") ModifierExpression probabilityWeight,
+public record EventProbability(@SerializedName("probability_expression") ModifierExpression probabilityExpression,
                                @SerializedName("allowed_ranges") Map<String, RangeD> allowedRanges) {
 
     public static EventProbability NONE = new EventProbability(new ModifierExpression("0"), Map.of());
@@ -23,7 +23,7 @@ public record EventProbability(@SerializedName("probability_weight") ModifierExp
                 return new Calculated(false, 0D);
             }
         }
-        return new Calculated(true, probabilityWeight().evaluate(variables));
+        return new Calculated(true, probabilityExpression().evaluate(variables));
     }
 
     public record Calculated(boolean enabled, double probability) {

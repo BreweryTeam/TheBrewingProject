@@ -19,8 +19,8 @@ public class EventProbabilitySerializer implements ObjectSerializer<EventProbabi
 
     @Override
     public void serialize(@NonNull EventProbability object, @NonNull SerializationData data, @NonNull GenericsDeclaration generics) {
-        if (object.probabilityWeight() != ModifierExpression.ZERO) {
-            data.add("probability-weight", object.probabilityWeight());
+        if (object.probabilityExpression() != ModifierExpression.ZERO) {
+            data.add("probability-expression", object.probabilityExpression());
         }
         if (!object.allowedRanges().isEmpty()) {
             data.add("allowed-ranges", object.allowedRanges());

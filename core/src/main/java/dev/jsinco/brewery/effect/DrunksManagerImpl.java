@@ -250,7 +250,7 @@ public class DrunksManagerImpl<C> implements DrunksManager {
                 .map(Pair::second)
                 .reduce(0D, Double::sum);
         DrunkEvent drunkEvent = RandomUtil.randomWeighted(drunkEvents, Pair::second).first();
-        double value = (double) 500 / cumulativeSum;
+        double value = (double) 20 / cumulativeSum;
         long time = (long) (timeSupplier.getAsLong() + Math.max(1, RANDOM.nextGaussian(value, value / 2)));
         events.computeIfAbsent(time, ignored -> new HashMap<>()).put(playerUuid, drunkEvent);
         plannedEvents.put(playerUuid, time);
