@@ -18,12 +18,12 @@ pipeline {
                     }
                 }
             }
-        }
-    }
 
-    post {
-        always {
-            archiveArtifacts artifacts: 'bukkit/build/libs/TheBrewingProject*.jar', fingerprint: true
+            post {        
+                always {
+                    archiveArtifacts artifacts: 'bukkit/build/libs/TheBrewingProject*.jar', fingerprint: true
+                }
+            }
         }
     }
 }
