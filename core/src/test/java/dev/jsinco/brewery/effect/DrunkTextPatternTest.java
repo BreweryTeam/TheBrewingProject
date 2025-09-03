@@ -7,6 +7,7 @@ import dev.jsinco.brewery.api.effect.modifier.DrunkenModifier;
 import dev.jsinco.brewery.api.effect.modifier.ModifierExpression;
 import dev.jsinco.brewery.effect.text.DrunkTextPattern;
 import dev.jsinco.brewery.effect.text.DrunkTextTransformer;
+import net.kyori.adventure.text.Component;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -35,7 +36,8 @@ class DrunkTextPatternTest {
                 "alcohol",
                 ModifierExpression.ZERO,
                 ModifierExpression.ZERO,
-                0D, 100D), 0D);
+                0D, 100D,
+                Component.text("Alcohol")), 0D);
         assertEquals(expected, DrunkTextTransformer.transform(text, List.of(drunkTextPattern)));
     }
 

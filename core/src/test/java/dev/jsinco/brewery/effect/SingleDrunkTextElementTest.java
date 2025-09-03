@@ -4,6 +4,7 @@ import dev.jsinco.brewery.api.effect.modifier.DrunkenModifier;
 import dev.jsinco.brewery.api.effect.modifier.ModifierExpression;
 import dev.jsinco.brewery.effect.text.DrunkTextElement;
 import dev.jsinco.brewery.effect.text.SingleDrunkTextElement;
+import net.kyori.adventure.text.Component;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -19,7 +20,8 @@ class SingleDrunkTextElementTest {
                 "alcohol",
                 ModifierExpression.ZERO,
                 ModifierExpression.ZERO,
-                0D, 100D), 0D);
+                0D, 100D,
+                Component.text("Alcohol")), 0D);
         assertFalse(singleDrunkTextElement.findTransform("").isEmpty(), "Did not insert any drunk text");
     }
 
@@ -29,7 +31,8 @@ class SingleDrunkTextElementTest {
                 "alcohol",
                 ModifierExpression.ZERO,
                 ModifierExpression.ZERO,
-                0D, 100D), 0D);
+                0D, 100D,
+                Component.text("Alcohol")), 0D);
         List<DrunkTextElement.TextTransformation> transformed = singleDrunkTextElement.findTransform(" ");
         assertFalse(transformed.isEmpty(), "Did not insert any drunk text");
     }

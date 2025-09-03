@@ -55,7 +55,7 @@ public class MiniPlaceholdersIntegration implements PlaceholderIntegration {
                     return TagsUtils.EMPTY_TAG;
                 }
                 DrunkState drunkState = TheBrewingProject.getInstance().getDrunksManager().getDrunkState(player.getUniqueId());
-                return Tag.selfClosingInserting(Component.text(drunkState == null ? 0 : drunkState.modifierValue(modifier.name())));
+                return Tag.selfClosingInserting(Component.text(drunkState == null ? 0 : drunkState.modifierValue(modifier)));
             });
         }
         builder.build().register();

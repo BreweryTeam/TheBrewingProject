@@ -1,8 +1,9 @@
 package dev.jsinco.brewery.api.effect.modifier;
 
-public record DrunkenModifier(String name, ModifierExpression dependency, ModifierExpression decrementTime,
-                              double minValue, double maxValue) {
+import net.kyori.adventure.text.Component;
 
+public record DrunkenModifier(String name, ModifierExpression dependency, ModifierExpression decrementTime,
+                              double minValue, double maxValue, Component displayName) {
 
 
     public double sanitize(double value) {

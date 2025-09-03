@@ -70,7 +70,7 @@ public class StatusCommand {
                                 Component.translatable(
                                         "tbp.command.status.consumed-modifier",
                                         Argument.tagResolver(
-                                                Placeholder.unparsed("modifier_name", consumption.modifier().name()),
+                                                Placeholder.component("modifier_name", consumption.modifier().displayName()),
                                                 Formatter.number("modifier_value", consumption.value())
                                         )
                                 )
@@ -90,9 +90,8 @@ public class StatusCommand {
     private static Component compileModifiersMessage(@NotNull DrunkState drunkState) {
         return DrunkenModifierSection.modifiers().drunkenModifiers()
                 .stream()
-                .map(DrunkenModifier::name)
                 .map(modifier -> Component.translatable("tbp.command.status.info.modifier", Argument.tagResolver(
-                        Placeholder.unparsed("modifier_name", modifier),
+                        Placeholder.component("modifier_name", modifier.displayName()),
                         Formatter.number("modifier_value", drunkState.modifierValue(modifier))
                 )))
                 .collect(Component.toComponent(Component.text("\n")));
@@ -110,7 +109,7 @@ public class StatusCommand {
                 .executes(StatusCommand::info));
         root.then(Commands.literal("clear")
                 .executes(StatusCommand::clear));
-        Set<FlaggedArgumentBuilder.Flag> setFlags = DrunkenModifierSection.modifiers().drunkenModifiers()
+        Set<FlaggedArgumentBuilder.Flag> consumeFlags = DrunkenModifierSection.modifiers().drunkenModifiers()
                 .stream()
                 .map(drunkenModifier -> new FlaggedArgumentBuilder.Flag(
                                 drunkenModifier.name(),
@@ -121,7 +120,7 @@ public class StatusCommand {
                         )
                 )
                 .collect(Collectors.toSet());
-        Set<FlaggedArgumentBuilder.Flag> consumeFlags = DrunkenModifierSection.modifiers().drunkenModifiers()
+        Set<FlaggedArgumentBuilder.Flag> setFlags = DrunkenModifierSection.modifiers().drunkenModifiers()
                 .stream()
                 .map(drunkenModifier -> new FlaggedArgumentBuilder.Flag(
                                 drunkenModifier.name(),

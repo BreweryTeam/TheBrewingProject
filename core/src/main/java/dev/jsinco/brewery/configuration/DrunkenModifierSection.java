@@ -18,6 +18,7 @@ import eu.okaeri.configs.serdes.OkaeriSerdesPack;
 import eu.okaeri.configs.yaml.snakeyaml.YamlSnakeYamlConfigurer;
 import lombok.Getter;
 import lombok.experimental.Accessors;
+import net.kyori.adventure.text.Component;
 
 import java.io.File;
 import java.util.*;
@@ -37,9 +38,9 @@ public class DrunkenModifierSection extends OkaeriConfig {
             "Avoid names with arithmetic operators included and names that clashes with other configuration keys,",
             "MODIFY AT YOUR OWN RISK!"})
     private List<DrunkenModifier> drunkenModifiers = List.of(
-            new DrunkenModifier("alcohol", new ModifierExpression("consumed_alcohol * (110 - alcohol_addiction) / 110"), new ModifierExpression("200"), 0D, 100D),
-            new DrunkenModifier("alcohol_addiction", new ModifierExpression("0.001 * consumed_alcohol"), new ModifierExpression("10000"), 0D, 100D),
-            new DrunkenModifier("toxins", new ModifierExpression("0"), new ModifierExpression("-1"), 0D, 100D)
+            new DrunkenModifier("alcohol", new ModifierExpression("consumed_alcohol * (110 - alcohol_addiction) / 110"), new ModifierExpression("200"), 0D, 100D, Component.text("Alcohol")),
+            new DrunkenModifier("alcohol_addiction", new ModifierExpression("0.001 * consumed_alcohol"), new ModifierExpression("10000"), 0D, 100D, Component.text("Alcohol addiction")),
+            new DrunkenModifier("toxins", new ModifierExpression("0"), new ModifierExpression("-1"), 0D, 100D, Component.text("Toxins"))
     );
 
     @CustomKey("drunken-displays")

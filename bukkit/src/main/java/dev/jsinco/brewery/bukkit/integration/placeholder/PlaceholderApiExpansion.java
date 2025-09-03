@@ -58,7 +58,7 @@ public class PlaceholderApiExpansion extends PlaceholderExpansion {
         }
         for (DrunkenModifier modifier : DrunkenModifierSection.modifiers().drunkenModifiers()) {
             if (params.equals(modifier.name())) {
-                return String.valueOf(drunkState.modifierValue(modifier.name()));
+                return String.valueOf(drunkState.modifierValue(modifier));
             }
         }
         if (params.equals("next_event")) {
