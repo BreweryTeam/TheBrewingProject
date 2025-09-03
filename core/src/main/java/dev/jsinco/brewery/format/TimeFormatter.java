@@ -63,12 +63,12 @@ public class TimeFormatter {
         }
 
         Pattern[] blockPatterns = new Pattern[] { // Don't even try to understand this madness, it's not worth your time
-            Pattern.compile("\\[\\[\\[(.*?)\\]\\]\\](?:<<\\s*(\\d+(?:\\s*-\\s*\\d+)?)\\s*>>|<\\s*(\\d+(?:\\s*-\\s*\\d+)?)\\s*>)?"
-                + "|\\{\\{\\{(.*?)\\}\\}\\}(?:<<\\s*(\\d+(?:\\s*-\\s*\\d+)?)\\s*>>|<\\s*(\\d+(?:\\s*-\\s*\\d+)?)\\s*>)?", Pattern.DOTALL),
-            Pattern.compile("\\[\\[(.*?)\\]\\](?:<<\\s*(\\d+(?:\\s*-\\s*\\d+)?)\\s*>>|<\\s*(\\d+(?:\\s*-\\s*\\d+)?)\\s*>)?"
-                + "|\\{\\{(.*?)\\}\\}(?:<<\\s*(\\d+(?:\\s*-\\s*\\d+)?)\\s*>>|<\\s*(\\d+(?:\\s*-\\s*\\d+)?)\\s*>)?", Pattern.DOTALL),
-            Pattern.compile("\\[(.*?)](?:<<\\s*(\\d+(?:\\s*-\\s*\\d+)?)\\s*>>|<\\s*(\\d+(?:\\s*-\\s*\\d+)?)\\s*>)?"
-                + "|\\{(.*?)}(?:<<\\s*(\\d+(?:\\s*-\\s*\\d+)?)\\s*>>|<\\s*(\\d+(?:\\s*-\\s*\\d+)?)\\s*>)?", Pattern.DOTALL)
+            Pattern.compile("\\[\\[\\[(.*?)\\]\\]\\](?:<<<\\s*(\\d+(?:\\s*-\\s*\\d+)?)\\s*>>>|<<\\s*(\\d+(?:\\s*-\\s*\\d+)?)\\s*>>|<\\s*(\\d+(?:\\s*-\\s*\\d+)?)\\s*>)?"
+                + "|\\{\\{\\{(.*?)\\}\\}\\}(?:<<<\\s*(\\d+(?:\\s*-\\s*\\d+)?)\\s*>>>|<<\\s*(\\d+(?:\\s*-\\s*\\d+)?)\\s*>>|<\\s*(\\d+(?:\\s*-\\s*\\d+)?)\\s*>)?", Pattern.DOTALL),
+            Pattern.compile("\\[\\[(.*?)\\]\\](?:<<<\\s*(\\d+(?:\\s*-\\s*\\d+)?)\\s*>>>|<<\\s*(\\d+(?:\\s*-\\s*\\d+)?)\\s*>>|<\\s*(\\d+(?:\\s*-\\s*\\d+)?)\\s*>)?"
+                + "|\\{\\{(.*?)\\}\\}(?:<<<\\s*(\\d+(?:\\s*-\\s*\\d+)?)\\s*>>>|<<\\s*(\\d+(?:\\s*-\\s*\\d+)?)\\s*>>|<\\s*(\\d+(?:\\s*-\\s*\\d+)?)\\s*>)?", Pattern.DOTALL),
+            Pattern.compile("\\[(.*?)](?:<<<\\s*(\\d+(?:\\s*-\\s*\\d+)?)\\s*>>>|<<\\s*(\\d+(?:\\s*-\\s*\\d+)?)\\s*>>|<\\s*(\\d+(?:\\s*-\\s*\\d+)?)\\s*>)?"
+                + "|\\{(.*?)}(?:<<<\\s*(\\d+(?:\\s*-\\s*\\d+)?)\\s*>>>|<<\\s*(\\d+(?:\\s*-\\s*\\d+)?)\\s*>>|<\\s*(\\d+(?:\\s*-\\s*\\d+)?)\\s*>)?", Pattern.DOTALL)
         };
 
         for (Pattern blockPattern : blockPatterns) {
@@ -105,25 +105,29 @@ public class TimeFormatter {
                 long value = 0; // default value if no prior number found
                 while (num.find()) value = Long.parseLong(num.group(1));
 
-                boolean isCurly = matcher.group(4) != null;
-                String content, spec;
-                boolean digitMode;
+                boolean isCurly = matcher.group(5) != null;
+                String content, spec = null;
+                int mode = 0; // 0 = whole number (<…> or none), 1 = last digit (<<…>>), 2 = last two digits (<<<…>>>)
 
                 if (isCurly) {
-                    content = matcher.group(4);
-                    if (matcher.group(5) != null) { spec = matcher.group(5); digitMode = true; }
-                    else { spec = matcher.group(6); digitMode = false; }
+                    content = matcher.group(5);
+                    if (matcher.group(6) != null) { spec = matcher.group(6); mode = 2; }
+                    else if (matcher.group(7) != null) { spec = matcher.group(7); mode = 1; }
+                    else if (matcher.group(8) != null) { spec = matcher.group(8); mode = 0; }
                 } else {
                     content = matcher.group(1);
-                    if (matcher.group(2) != null) { spec = matcher.group(2); digitMode = true; }
-                    else { spec = matcher.group(3); digitMode = false; }
+                    if (matcher.group(2) != null) { spec = matcher.group(2); mode = 2; }
+                    else if (matcher.group(3) != null) { spec = matcher.group(3); mode = 1; }
+                    else if (matcher.group(4) != null) { spec = matcher.group(4); mode = 0; }
                 }
 
-                if (digitMode) value = value % 10; // only compare last digit
+                long compareValue = value; // whole number
+                if (mode == 1) compareValue = value % 10; // last digit
+                else if (mode == 2) compareValue = value % 100; // last two digits
 
                 boolean matches;
                 if (spec == null) {
-                    matches = (value == 1); // default when no <> or <<>> provided
+                    matches = (compareValue == 1); // default when no <>/<<>>/<<<>>> provided
                 } else {
                     String str = spec.replaceAll("\\s+", ""); // allow spaces like "2 - 4"
                     int dash = str.indexOf('-');
@@ -131,10 +135,10 @@ public class TimeFormatter {
                         long a = Long.parseLong(str.substring(0, dash));
                         long b = Long.parseLong(str.substring(dash + 1));
                         if (a > b) { long temp = a; a = b; b = temp; } // normalize reversed ranges
-                        matches = (value >= a && value <= b);
+                        matches = (compareValue >= a && compareValue <= b);
                     } else {
                         long n = Long.parseLong(str);
-                        matches = (value == n);
+                        matches = (compareValue == n);
                     }
                 }
 
