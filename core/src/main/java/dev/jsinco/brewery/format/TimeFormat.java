@@ -8,6 +8,7 @@ public enum TimeFormat {
     AGING_YEARS("aging-years");
 
     private final String key;
+
     TimeFormat(String key) {
         this.key = key;
     }

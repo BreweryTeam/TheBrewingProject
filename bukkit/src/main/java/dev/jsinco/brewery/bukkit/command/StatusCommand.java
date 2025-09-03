@@ -16,6 +16,8 @@ import dev.jsinco.brewery.bukkit.command.argument.FlaggedArgumentBuilder;
 import dev.jsinco.brewery.bukkit.util.BukkitMessageUtil;
 import dev.jsinco.brewery.configuration.DrunkenModifierSection;
 import dev.jsinco.brewery.effect.DrunkStateImpl;
+import dev.jsinco.brewery.format.TimeFormat;
+import dev.jsinco.brewery.format.TimeFormatter;
 import dev.jsinco.brewery.util.MessageUtil;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
@@ -78,7 +80,9 @@ public class StatusCommand {
                 consumesResolver,
                 Placeholder.component("modifiers", compileModifiersMessage(drunkState)),
                 Placeholder.unparsed("player_name", targetName == null ? "null" : targetName),
-                Formatter.number("next_event_time", nextEvent == null ? 0 : nextEvent.second() - TheBrewingProject.getInstance().getTime()),
+                Placeholder.component("next_event_time", MessageUtil.miniMessage(
+                        TimeFormatter.format(nextEvent == null ? 0 : nextEvent.second() - TheBrewingProject.getInstance().getTime(), TimeFormat.CLOCK_MECHANIC))
+                ),
                 Placeholder.component("next_event", nextEvent == null ? Component.translatable("tbp.events.nothing-planned") : nextEvent.first().displayName())
         };
     }
