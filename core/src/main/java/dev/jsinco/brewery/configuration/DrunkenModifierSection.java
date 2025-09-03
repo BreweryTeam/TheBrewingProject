@@ -60,7 +60,7 @@ public class DrunkenModifierSection extends OkaeriConfig {
     })
     private List<ModifierTooltip> drunkenTooltips = List.of(
             new ModifierTooltip(new ModifierExpression("alcohol"),
-                    "<lang:tbp.brew.tooltip.detailed-alcoholic>",
+                    "<lang:tbp.brew.tooltip.detailed-alcoholic:'<alcohol>'>",
                     "<lang:tbp.brew.tooltip.alcoholic>",
                     "<lang:tbp.brew.tooltip.alcoholic>"
             )
