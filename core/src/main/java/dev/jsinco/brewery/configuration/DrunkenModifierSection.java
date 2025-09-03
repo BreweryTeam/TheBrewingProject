@@ -20,9 +20,7 @@ import lombok.Getter;
 import lombok.experimental.Accessors;
 
 import java.io.File;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @Getter
 @Accessors(fluent = true)
@@ -135,6 +133,16 @@ public class DrunkenModifierSection extends OkaeriConfig {
             }
         }
         Preconditions.checkState(noneFailed, "Encountered an issue when validating modifiers, see above exception");
+        Set<String> modifierNames = new HashSet<>();
+        Set<String> clashes = new HashSet<>();
+        for (DrunkenModifier drunkenModifier : instance.drunkenModifiers()) {
+            if (modifierNames.contains(drunkenModifier.name())) {
+                clashes.add(drunkenModifier.name());
+                continue;
+            }
+            modifierNames.add(drunkenModifier.name());
+        }
+        Preconditions.checkState(clashes.isEmpty(), "The following modifiers have the same name: " + clashes);
     }
 
     public DrunkenModifier modifier(String modifierName) {
