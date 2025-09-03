@@ -67,6 +67,9 @@ public class DrunkenModifierSection extends OkaeriConfig {
     );
 
     @CustomKey("consumables")
+    @Comment({
+            "Add some modifier change behavior to vanilla items"
+    })
     private List<ConsumableSerializer.Consumable> consumables = List.of(
             new ConsumableSerializer.Consumable("ROTTEN_FLESH", Map.of(
                     "toxins", 3D
