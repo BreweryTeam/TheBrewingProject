@@ -1,13 +1,7 @@
 pipeline {
-    agent none
-
-    tools {
-        jdk "jdk-21.0.8"
-    }
-
     stages {
         stage('Build') {
-            agent any
+            agent { label 'jdk-21' }
 
             steps {
                 sh 'chmod +x gradlew'
