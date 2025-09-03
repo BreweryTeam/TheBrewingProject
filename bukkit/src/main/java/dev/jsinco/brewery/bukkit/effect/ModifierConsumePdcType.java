@@ -29,8 +29,10 @@ public class ModifierConsumePdcType implements PersistentDataType<String, Modifi
     @Override
     public @NotNull ModifierConsume fromPrimitive(@NotNull String primitive, @NotNull PersistentDataAdapterContext context) {
         String[] split = primitive.split(";");
-        String modifier = split[0];
+        String modifierName = split[0];
         double value = Double.parseDouble(split[1]);
-        return new ModifierConsume(DrunkenModifierSection.modifiers().modifier(modifier), value, true);
+        return DrunkenModifierSection.modifiers().optionalModifier(modifierName)
+                .map(modifier -> new ModifierConsume(modifier, value, true))
+                .orElse(null);
     }
 }

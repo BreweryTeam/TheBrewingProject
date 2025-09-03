@@ -142,7 +142,7 @@ public class RecipeEffects {
         }
         List<ModifierConsume> consumeModifiers = persistentDataContainer.get(MODIFIERS, ModifierConsumePdcType.LIST_INSTANCE);
         if (consumeModifiers != null) {
-            consumeModifiers.forEach(modifierConsume -> modifiers.put(modifierConsume.modifier(), modifierConsume.value()));
+            consumeModifiers.stream().filter(Objects::nonNull).forEach(modifierConsume -> modifiers.put(modifierConsume.modifier(), modifierConsume.value()));
         }
         builder.addModifiers(modifiers);
         builder.events(persistentDataContainer.getOrDefault(EVENTS, ListPersistentDataType.STRING_LIST, List.of())
