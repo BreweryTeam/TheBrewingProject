@@ -29,7 +29,7 @@ public class EventProbabilitySerializer implements ObjectSerializer<EventProbabi
 
     @Override
     public EventProbability deserialize(@NonNull DeserializationData data, @NonNull GenericsDeclaration generics) {
-        ModifierExpression expression = data.get("probability-weight", ModifierExpression.class);
+        ModifierExpression expression = data.get("probability-expression", ModifierExpression.class);
         Map<String, RangeD> allowedRanges = data.getAsMap("allowed-ranges", String.class, RangeD.class);
         return new EventProbability(
                 expression == null ? ModifierExpression.ZERO : expression,

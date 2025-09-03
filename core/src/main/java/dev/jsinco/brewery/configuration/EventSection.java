@@ -6,6 +6,7 @@ import dev.jsinco.brewery.api.event.*;
 import dev.jsinco.brewery.api.event.step.ApplyPotionEffect;
 import dev.jsinco.brewery.api.event.step.ConditionalWaitStep;
 import dev.jsinco.brewery.api.event.step.ConsumeStep;
+import dev.jsinco.brewery.api.event.step.SendCommand;
 import dev.jsinco.brewery.api.math.RangeD;
 import dev.jsinco.brewery.api.moment.Interval;
 import dev.jsinco.brewery.api.moment.Moment;
@@ -70,6 +71,16 @@ public class EventSection extends OkaeriConfig {
                                     )).build()
                             )
                             .build(BreweryKey.parse("tunnel_vision"))
+            ).addEvent(
+                    new CustomEvent.Builder()
+                            .probability(new EventProbability(new ModifierExpression("1/(110 - alcohol_addiction)"),
+                                    Map.of("alcohol", new RangeD(null, 20D),
+                                            "alcohol_addiction", new RangeD(50D, null)))
+                            ).addStep(
+                                    new EventStep.Builder().addProperty(new ApplyPotionEffect("poison", new Interval(1, 1), new Interval(20, 20)))
+                                            .addProperty(new SendCommand("title @player_name@ actionbar {text:\"You are experiencing alcohol withdrawal\",color:\"gray\"}", SendCommand.CommandSenderType.SERVER))
+                                            .build()
+                            ).build(BreweryKey.parse("drinking_addiction"))
             ).build();
 
     @Comment("What events will be randomly chosen over time when the player is drunk")

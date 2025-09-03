@@ -44,19 +44,19 @@ public class DrunkenModifierSection extends OkaeriConfig {
 
     @CustomKey("drunken-displays")
     @Comment({
-            "You can display to the player once a modifier changes",
-            "type can have the values [skull, bars, stars]",
-            "display-window can have the values [chat, bar title]"
+            "You can display to the player once a modifier changes from consumption",
+            "There's 3 different tags you can use to display the value: [skull, bars, stars]",
+            "display-window can have the values [chat, action_bar title]"
     })
     private List<ModifierDisplay> drunkenDisplays = List.of(
-            new ModifierDisplay("<gray>Alcohol: [<bars>]", new ModifierExpression("abs(consumed_alcohol)"), new ModifierExpression("alcohol"), ModifierDisplay.DisplayWindow.ACTION_BAR),
+            new ModifierDisplay("<gray>Alcohol: <red>[<bars>]", new ModifierExpression("abs(consumed_alcohol)"), new ModifierExpression("alcohol"), ModifierDisplay.DisplayWindow.ACTION_BAR),
             new ModifierDisplay("<green>Toxins: [<skulls>]", new ModifierExpression("abs(consumed_toxins)"), new ModifierExpression("toxins"), ModifierDisplay.DisplayWindow.ACTION_BAR)
     );
 
     @CustomKey("drunken-tooltips")
     @Comment({
             "Change how modifiers will display for brew effects",
-            "a drunken modifier with an filter larger than 0 will display on an item"
+            "a drunken modifier with a filter larger than 0 will display on an item"
     })
     private List<ModifierTooltip> drunkenTooltips = List.of(
             new ModifierTooltip(new ModifierExpression("alcohol"),
