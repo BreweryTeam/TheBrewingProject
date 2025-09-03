@@ -119,12 +119,18 @@ public record DrunkStateImpl(long timestamp,
 
     public static Map<String, Double> compileVariables(Map<DrunkenModifier, Double> modifiers, @Nullable DrunkenModifier modifierToAdd, double valueChange) {
         Map<String, Double> output = new HashMap<>();
-        for (Map.Entry<DrunkenModifier, Double> entry : modifiers.entrySet()) {
-            output.put(entry.getKey().name(), entry.getValue());
-            if (entry.getKey().equals(modifierToAdd)) {
+        for (DrunkenModifier modifier : DrunkenModifierSection.modifiers().drunkenModifiers()) {
+            Double value = modifiers.get(modifier);
+            if (value == null) {
+                output.put(modifier.name(), modifier.minValue());
+                output.put("consumed_" + modifier.name(), 0D);
+                continue;
+            }
+            output.put(modifier.name(), value);
+            if (modifier.equals(modifierToAdd)) {
                 output.put("consumed_" + modifierToAdd.name(), valueChange);
             } else {
-                output.put("consumed_" + entry.getKey().name(), entry.getValue());
+                output.put("consumed_" + modifier.name(), 0D);
             }
         }
         return output;
