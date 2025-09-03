@@ -2,13 +2,14 @@ package dev.jsinco.brewery.configuration.serializers;
 
 import com.google.common.base.Preconditions;
 import dev.jsinco.brewery.api.event.CustomEvent;
-import dev.jsinco.brewery.api.event.EventStep;
 import dev.jsinco.brewery.api.event.EventProbability;
+import dev.jsinco.brewery.api.event.EventStep;
 import eu.okaeri.configs.schema.GenericsDeclaration;
 import eu.okaeri.configs.serdes.DeserializationData;
 import eu.okaeri.configs.serdes.ObjectSerializer;
 import eu.okaeri.configs.serdes.SerializationData;
 import lombok.NonNull;
+import net.kyori.adventure.text.Component;
 
 import java.util.List;
 
@@ -23,6 +24,7 @@ public class CustomEventSerializer implements ObjectSerializer<CustomEvent> {
         if (object.probability() != EventProbability.NONE) {
             data.add("probability", object.probability());
         }
+        data.add("display-name", object.displayName());
         data.add("steps", object.getSteps());
     }
 
@@ -31,7 +33,12 @@ public class CustomEventSerializer implements ObjectSerializer<CustomEvent> {
         EventProbability probability = data.get("probability", EventProbability.class);
         CustomEvent.Builder builder = new CustomEvent.Builder()
                 .probability(probability == null ? EventProbability.NONE : probability);
+
         List<EventStep> steps = data.getAsList("steps", EventStep.class);
+        Component displayName = data.get("display-name", Component.class);
+        if (displayName != null) {
+            builder.displayName(displayName);
+        }
         Preconditions.checkArgument(steps != null, "Steps has to be a list");
         steps.forEach(builder::addStep);
         return builder.build();

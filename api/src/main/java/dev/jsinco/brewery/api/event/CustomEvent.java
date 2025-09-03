@@ -14,14 +14,14 @@ public final class CustomEvent {
     private final Component displayName;
     private final EventProbability probability;
 
-    public CustomEvent(List<EventStep> steps, @Nullable String displayName, EventProbability probability) {
+    public CustomEvent(List<EventStep> steps, @Nullable Component displayName, EventProbability probability) {
         this.steps = steps;
-        this.displayName = Component.text(displayName == null ? "Unknown" : displayName);
+        this.displayName = displayName;
         this.probability = probability;
     }
 
     public Component displayName() {
-        return displayName;
+        return displayName == null ? Component.text("?") : displayName;
     }
 
     public List<EventStep> getSteps() {
@@ -42,7 +42,7 @@ public final class CustomEvent {
 
         @Override
         public Component displayName() {
-            return event.displayName();
+            return event.displayName == null ? Component.text(key.key()) : event.displayName;
         }
 
         @Override
@@ -57,15 +57,15 @@ public final class CustomEvent {
 
     public static class Builder {
         private final ImmutableList.Builder<EventStep> steps = new ImmutableList.Builder<>();
-        private String displayName;
-        private EventProbability probability;
+        private Component displayName;
+        private EventProbability probability = EventProbability.NONE;
 
         public Builder addStep(EventStep step) {
             steps.add(step);
             return this;
         }
 
-        public Builder displayName(String displayName) {
+        public Builder displayName(Component displayName) {
             this.displayName = displayName;
             return this;
         }

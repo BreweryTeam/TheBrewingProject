@@ -9,7 +9,6 @@ import dev.jsinco.brewery.api.event.step.ConsumeStep;
 import dev.jsinco.brewery.api.event.step.SendCommand;
 import dev.jsinco.brewery.api.math.RangeD;
 import dev.jsinco.brewery.api.moment.Interval;
-import dev.jsinco.brewery.api.moment.Moment;
 import dev.jsinco.brewery.api.util.BreweryKey;
 import dev.jsinco.brewery.api.util.BreweryRegistry;
 import dev.jsinco.brewery.api.util.Logger;
@@ -24,6 +23,7 @@ import eu.okaeri.configs.serdes.OkaeriSerdesPack;
 import eu.okaeri.configs.yaml.snakeyaml.YamlSnakeYamlConfigurer;
 import lombok.Getter;
 import lombok.experimental.Accessors;
+import net.kyori.adventure.text.Component;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.*;
@@ -55,6 +55,7 @@ public class EventSection extends OkaeriConfig {
     private CustomEventRegistry customEvents = CustomEventRegistry.builder()
             .addEvent(new CustomEvent.Builder()
                     .probability(new EventProbability(new ModifierExpression("1 / (110 - alcohol)"), Map.of("alcohol", new RangeD(60D, null))))
+                    .displayName(Component.text("loose memory"))
                     .addStep(new EventStep.Builder().addProperty(NamedDrunkEvent.fromKey("pass_out")).build())
                     .addStep(new EventStep.Builder()
                             .addProperty(new ConditionalWaitStep(ConditionalWaitStep.Condition.JOIN))
@@ -63,24 +64,24 @@ public class EventSection extends OkaeriConfig {
                             .build()
                     )
                     .build(BreweryKey.parse("memory_loss"))
-            ).addEvent(
-                    new CustomEvent.Builder()
-                            .probability(new EventProbability(new ModifierExpression("1 / (110 - alcohol)"), Map.of("alcohol", new RangeD(40D, null))))
-                            .addStep(new EventStep.Builder().addProperty(new ApplyPotionEffect("darkness",
-                                            new Interval(1, 1), new Interval(20 * Moment.SECOND, 20 * Moment.SECOND)
-                                    )).build()
-                            )
-                            .build(BreweryKey.parse("tunnel_vision"))
-            ).addEvent(
-                    new CustomEvent.Builder()
-                            .probability(new EventProbability(new ModifierExpression("1/(110 - alcohol_addiction)"),
-                                    Map.of("alcohol", new RangeD(null, 20D),
-                                            "alcohol_addiction", new RangeD(50D, null)))
-                            ).addStep(
-                                    new EventStep.Builder().addProperty(new ApplyPotionEffect("poison", new Interval(1, 1), new Interval(20, 20)))
-                                            .addProperty(new SendCommand("title @player_name@ actionbar {text:\"You are experiencing alcohol withdrawal\",color:\"gray\"}", SendCommand.CommandSenderType.SERVER))
-                                            .build()
-                            ).build(BreweryKey.parse("drinking_addiction"))
+            ).addEvent(new CustomEvent.Builder()
+                    .displayName(Component.text("get tunnel vision"))
+                    .probability(new EventProbability(new ModifierExpression("1 / (110 - alcohol)"), Map.of("alcohol", new RangeD(40D, null))))
+                    .addStep(new EventStep.Builder().addProperty(new ApplyPotionEffect("darkness",
+                                    new Interval(1, 1), new Interval(20, 20)
+                            )).build()
+                    )
+                    .build(BreweryKey.parse("tunnel_vision"))
+            ).addEvent(new CustomEvent.Builder()
+                    .displayName(Component.text("feel alcohol withdrawal"))
+                    .probability(new EventProbability(new ModifierExpression("1/(110 - alcohol_addiction)"),
+                            Map.of("alcohol", new RangeD(null, 20D),
+                                    "alcohol_addiction", new RangeD(50D, null)))
+                    ).addStep(
+                            new EventStep.Builder().addProperty(new ApplyPotionEffect("poison", new Interval(1, 1), new Interval(20, 20)))
+                                    .addProperty(new SendCommand("title @player_name@ actionbar {text:\"You are experiencing alcohol withdrawal\",color:\"gray\"}", SendCommand.CommandSenderType.SERVER))
+                                    .build()
+                    ).build(BreweryKey.parse("drinking_addiction"))
             ).build();
 
     @Comment("What events will be randomly chosen over time when the player is drunk")
