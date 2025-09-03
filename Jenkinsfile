@@ -1,11 +1,9 @@
 pipeline {
-    agent any
+    agent none
     
     stages {
         stage('Build') {
-            agent {
-                docker { image 'jenkins/agent:jdk21' }
-            }
+            agent { label 'linux-jdk21' }
 
             steps {
                 sh 'chmod +x gradlew'
