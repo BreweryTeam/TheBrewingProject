@@ -1,5 +1,6 @@
 package dev.jsinco.brewery.api.moment;
 
+import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -71,5 +72,12 @@ public record Interval(long start, long stop) implements Moment {
             return String.valueOf(start);
         }
         return String.format("%d;%d", start, stop);
+    }
+
+    public @NotNull Component displayName() {
+        if (start == stop) {
+            return Component.text(start);
+        }
+        return Component.text("[" + start + ", " + stop + "]");
     }
 }

@@ -8,7 +8,6 @@ import dev.jsinco.brewery.api.recipe.RecipeResult;
 import dev.jsinco.brewery.api.util.BreweryKey;
 import dev.jsinco.brewery.bukkit.util.ColorUtil;
 import dev.jsinco.brewery.configuration.DrunkenModifierSection;
-import dev.jsinco.brewery.recipes.RecipeReader;
 import dev.jsinco.brewery.recipes.RecipeResultReader;
 import org.bukkit.Color;
 import org.bukkit.NamespacedKey;
@@ -17,7 +16,10 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffectType;
 import org.simpleyaml.configuration.ConfigurationSection;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 
 public class BukkitRecipeResultReader implements RecipeResultReader<ItemStack> {
     @Override
@@ -80,9 +82,6 @@ public class BukkitRecipeResultReader implements RecipeResultReader<ItemStack> {
     }
 
     private static QualityData<Map<DrunkenModifier, Double>> parseModifiers(ConfigurationSection configurationSection) {
-        Optional<QualityData<Integer>> legacyAlcohol = Optional.ofNullable(configurationSection.getString("alcohol"))
-                .map(QualityData::readQualityFactoredString)
-                .map(stringQualityData -> stringQualityData.map(RecipeReader::parseAlcoholString));
         Map<DrunkenModifier, QualityData<Double>> modifierQualityMap = new HashMap<>();
         if (configurationSection.isConfigurationSection("modifiers")) {
             ConfigurationSection qualityDataSection = configurationSection.getConfigurationSection("modifiers");
@@ -92,9 +91,6 @@ public class BukkitRecipeResultReader implements RecipeResultReader<ItemStack> {
                 );
             }
         }
-        legacyAlcohol.ifPresent(
-                alcoholQuality -> modifierQualityMap.put(DrunkenModifierSection.modifiers().modifier("alcohol"), alcoholQuality.map(Integer::doubleValue))
-        );
         QualityData<HashMap<DrunkenModifier, Double>> output = QualityData.fromValueMapper(ignored -> new HashMap<>());
         modifierQualityMap.forEach((modifier, qualityData) -> qualityData.forEach(((quality, aDouble) -> output.get(quality).put(modifier, aDouble))));
         return output.map(Map::copyOf);

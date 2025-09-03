@@ -66,6 +66,7 @@ public class Config extends OkaeriConfig {
 
 
     @CustomKey("command-aliases")
+    @Comment("The aliases for the 'tbp' command")
     private List<String> commandAliases = List.of("brewery", "brew");
 
     @Exclude

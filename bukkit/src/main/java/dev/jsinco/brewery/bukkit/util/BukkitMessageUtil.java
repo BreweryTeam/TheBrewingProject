@@ -1,19 +1,24 @@
 package dev.jsinco.brewery.bukkit.util;
 
 import com.mojang.brigadier.Message;
+import dev.jsinco.brewery.api.effect.modifier.DrunkenModifier;
 import dev.jsinco.brewery.api.event.DrunkEvent;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.bukkit.api.integration.IntegrationTypes;
+import dev.jsinco.brewery.bukkit.recipe.RecipeEffect;
 import dev.jsinco.brewery.bukkit.recipe.RecipeEffects;
-import dev.jsinco.brewery.util.MessageUtil;
 import io.papermc.paper.command.brigadier.MessageComponentSerializer;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import net.kyori.adventure.text.minimessage.translation.Argument;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.Comparator;
+import java.util.List;
 
 public class BukkitMessageUtil {
 
@@ -27,12 +32,12 @@ public class BukkitMessageUtil {
     }
 
     public static TagResolver recipeEffectResolver(RecipeEffects effects) {
+        List<DrunkenModifier> modifiers = effects.getModifiers().keySet().stream()
+                .sorted(Comparator.comparing(DrunkenModifier::name, String::compareTo))
+                .toList();
         TagResolver.Builder builder = TagResolver.builder()
                 .resolver(Placeholder.component("potion_effects", effects.getEffects().stream()
-                        .map(effect ->
-                                Component.translatable(effect.type().translationKey())
-                                        .append(Component.text("/" + effect.durationRange() + "/" + effect.amplifierRange()))
-                        )
+                        .map(RecipeEffect::displayName)
                         .collect(Component.toComponent(Component.text(",")))
                 ))
                 .resolver(Placeholder.parsed("effect_title_message", effects.getTitle() == null ? "" : effects.getTitle()))
@@ -42,7 +47,16 @@ public class BukkitMessageUtil {
                         .map(DrunkEvent::displayName)
                         .collect(Component.toComponent(Component.text(", ")))
                 ))
-                .resolver(MessageUtil.numberedModifierTagResolver(effects.getModifiers(), "effect"));
+                .resolver(Placeholder.component("modifier_name_definition", modifiers.stream()
+                        .map(DrunkenModifier::name)
+                        .map(Component::text)
+                        .collect(Component.toComponent(Component.text("/").color(NamedTextColor.GOLD)))
+                ))
+                .resolver(Placeholder.component("modifier_value_definition", modifiers.stream()
+                        .map(effects.getModifiers()::get)
+                        .map(Component::text)
+                        .collect(Component.toComponent(Component.text("/").color(NamedTextColor.GOLD)))
+                ));
         return builder.build();
     }
 
