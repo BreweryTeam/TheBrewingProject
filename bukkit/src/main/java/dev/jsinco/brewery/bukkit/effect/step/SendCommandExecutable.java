@@ -36,7 +36,7 @@ public class SendCommandExecutable implements EventPropertyExecutable {
         }
         String command = this.command;
         for (String playerPlaceholder : PLAYER_PLACEHOLDERS) {
-            command = this.command.replace(playerPlaceholder, player.getName());
+            command = command.replace(playerPlaceholder, player.getName());
         }
         switch (senderType) {
             case PLAYER -> player.performCommand(command);
