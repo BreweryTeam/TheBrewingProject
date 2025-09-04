@@ -146,9 +146,10 @@ public class EventStepSerializer implements ObjectSerializer<EventStep> {
                     .filter(modifier -> modifiersData.containsKey(modifier.name()))
                     .collect(Collectors.toUnmodifiableMap(modifier -> modifier, modifier -> modifiersData.get(modifier.name())));
         } else {
+            Map<String, Object> modifiersData = data.asMap();
             modifiers = DrunkenModifierSection.modifiers().drunkenModifiers()
                     .stream()
-                    .filter(modifier -> data.containsKey(modifier.name()) && data.getValue(Double.class) != null)
+                    .filter(modifier -> modifiersData.containsKey(modifier.name()) && modifiersData.get(modifier.name()) instanceof Number)
                     .collect(Collectors.toUnmodifiableMap(modifier -> modifier, modifier -> data.get(modifier.name(), Double.class)));
         }
         if (!modifiers.isEmpty()) {
