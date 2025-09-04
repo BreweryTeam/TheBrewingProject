@@ -176,6 +176,9 @@ public class EventSection extends OkaeriConfig {
         }
         try (InputStream inputStream = new FileInputStream(configFile)) {
             Map<String, Object> config = yaml.load(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
+            if (config == null) {
+                return;
+            }
             output = config.get("events");
         } catch (IOException e) {
             throw new RuntimeException(e);

@@ -19,7 +19,8 @@ public class ListPersistentDataType<T> implements PersistentDataType<byte[], Lis
     private final PersistentDataType<byte[], T> persistentDataType;
 
     public static final ListPersistentDataType<String> STRING_LIST = new ListPersistentDataType<>(new StringPdcType());
-    public static final ListPersistentDataType<BrewingStep> BREWING_STEP_LIST = new ListPersistentDataType<>(new BrewingStepPdcType());
+    public static final ListPersistentDataType<BrewingStep> BREWING_STEP_CIPHERED_LIST = new ListPersistentDataType<>(new BrewingStepPdcType(true));
+    public static final ListPersistentDataType<BrewingStep> BREWING_STEP_LIST = new ListPersistentDataType<>(new BrewingStepPdcType(false));
 
     public ListPersistentDataType(PersistentDataType<byte[], T> persistentDataType) {
         this.persistentDataType = persistentDataType;

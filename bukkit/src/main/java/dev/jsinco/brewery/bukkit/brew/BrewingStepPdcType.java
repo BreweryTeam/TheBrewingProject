@@ -1,27 +1,42 @@
 package dev.jsinco.brewery.bukkit.brew;
 
 import dev.jsinco.brewery.api.brew.BrewingStep;
-import dev.jsinco.brewery.brew.*;
-import dev.jsinco.brewery.bukkit.ingredient.BukkitIngredientManager;
 import dev.jsinco.brewery.api.ingredient.Ingredient;
 import dev.jsinco.brewery.api.ingredient.IngredientManager;
 import dev.jsinco.brewery.api.moment.Interval;
 import dev.jsinco.brewery.api.moment.Moment;
 import dev.jsinco.brewery.api.moment.PassedMoment;
 import dev.jsinco.brewery.api.util.BreweryKey;
-import dev.jsinco.brewery.util.DecoderEncoder;
 import dev.jsinco.brewery.api.util.BreweryRegistry;
+import dev.jsinco.brewery.brew.AgeStepImpl;
+import dev.jsinco.brewery.brew.CookStepImpl;
+import dev.jsinco.brewery.brew.DistillStepImpl;
+import dev.jsinco.brewery.brew.MixStepImpl;
+import dev.jsinco.brewery.bukkit.ingredient.BukkitIngredientManager;
+import dev.jsinco.brewery.configuration.Config;
+import dev.jsinco.brewery.util.DecoderEncoder;
 import org.bukkit.persistence.PersistentDataAdapterContext;
 import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
 
+import javax.crypto.*;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
 public class BrewingStepPdcType implements PersistentDataType<byte[], BrewingStep> {
+
+
+    private final boolean useCipher;
+
+    public BrewingStepPdcType(boolean useCipher) {
+        this.useCipher = useCipher;
+    }
+
     @Override
     public @NotNull Class<byte[]> getPrimitiveType() {
         return byte[].class;
@@ -35,7 +50,7 @@ public class BrewingStepPdcType implements PersistentDataType<byte[], BrewingSte
     @Override
     public byte @NotNull [] toPrimitive(@NotNull BrewingStep complex, @NotNull PersistentDataAdapterContext context) {
         ByteArrayOutputStream output = new ByteArrayOutputStream();
-        try (DataOutputStream dataOutputStream = new DataOutputStream(output)) {
+        try (DataOutputStream dataOutputStream = new DataOutputStream(new CipherOutputStream(output, getCipher(Cipher.ENCRYPT_MODE)))) {
             dataOutputStream.writeUTF(complex.stepType().name());
             switch (complex) {
                 case BrewingStep.Age age -> {
@@ -65,7 +80,7 @@ public class BrewingStepPdcType implements PersistentDataType<byte[], BrewingSte
     @Override
     public @NotNull BrewingStep fromPrimitive(byte @NotNull [] primitive, @NotNull PersistentDataAdapterContext context) {
         ByteArrayInputStream input = new ByteArrayInputStream(primitive);
-        try (DataInputStream dataInputStream = new DataInputStream(input)) {
+        try (DataInputStream dataInputStream = new DataInputStream(new CipherInputStream(input, getCipher(Cipher.DECRYPT_MODE)))) {
             BrewingStep.StepType stepType = BrewingStep.StepType.valueOf(dataInputStream.readUTF());
             return switch (stepType) {
                 case COOK -> new CookStepImpl(
@@ -135,5 +150,15 @@ public class BrewingStepPdcType implements PersistentDataType<byte[], BrewingSte
                 .map(BukkitIngredientManager.INSTANCE::getIngredientWithAmount)
                 .forEach(ingredientAmountPair -> IngredientManager.insertIngredientIntoMap(ingredients, ingredientAmountPair.join()));
         return ingredients;
+    }
+
+    private Cipher getCipher(int operationMode) {
+        try {
+            Cipher cipher = Config.config().encryptSensitiveData() && useCipher ? Cipher.getInstance("des") : new NullCipher();
+            cipher.init(Cipher.ENCRYPT_MODE, Config.config().encryptionKey());
+            return cipher;
+        } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

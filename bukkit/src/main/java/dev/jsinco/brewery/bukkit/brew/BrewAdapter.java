@@ -4,21 +4,21 @@ import dev.jsinco.brewery.api.brew.Brew;
 import dev.jsinco.brewery.api.brew.BrewQuality;
 import dev.jsinco.brewery.api.brew.BrewScore;
 import dev.jsinco.brewery.api.brew.BrewingStep;
-import dev.jsinco.brewery.brew.*;
-import dev.jsinco.brewery.bukkit.TheBrewingProject;
-import dev.jsinco.brewery.bukkit.recipe.BukkitRecipeResult;
-import dev.jsinco.brewery.bukkit.util.IngredientUtil;
-import dev.jsinco.brewery.bukkit.util.ListPersistentDataType;
 import dev.jsinco.brewery.api.ingredient.Ingredient;
 import dev.jsinco.brewery.api.ingredient.IngredientManager;
 import dev.jsinco.brewery.api.recipe.Recipe;
 import dev.jsinco.brewery.api.recipe.RecipeResult;
+import dev.jsinco.brewery.api.util.BreweryKey;
+import dev.jsinco.brewery.api.util.Pair;
+import dev.jsinco.brewery.brew.BrewImpl;
+import dev.jsinco.brewery.bukkit.TheBrewingProject;
+import dev.jsinco.brewery.bukkit.recipe.BukkitRecipeResult;
+import dev.jsinco.brewery.bukkit.util.IngredientUtil;
+import dev.jsinco.brewery.bukkit.util.ListPersistentDataType;
 import dev.jsinco.brewery.configuration.Config;
 import dev.jsinco.brewery.recipes.BrewScoreImpl;
 import dev.jsinco.brewery.recipes.RecipeRegistryImpl;
-import dev.jsinco.brewery.api.util.BreweryKey;
 import dev.jsinco.brewery.util.ClassUtil;
-import dev.jsinco.brewery.api.util.Pair;
 import io.papermc.paper.datacomponent.DataComponentTypes;
 import io.papermc.paper.datacomponent.item.PotionContents;
 import io.papermc.paper.datacomponent.item.TooltipDisplay;
@@ -49,6 +49,7 @@ public class BrewAdapter {
 
     private static final NamespacedKey BREWING_STEPS = TheBrewingProject.key("steps");
     private static final NamespacedKey BREWERY_DATA_VERSION = TheBrewingProject.key("version");
+    private static final NamespacedKey BREWERY_CIPHERED = TheBrewingProject.key("ciphered");
     public static final NamespacedKey BREWERY_TAG = TheBrewingProject.key("tag");
     public static final NamespacedKey BREWERY_SCORE = TheBrewingProject.key("score");
     public static final NamespacedKey BREWERY_DISPLAY_NAME = TheBrewingProject.key("display_name");
@@ -119,8 +120,13 @@ public class BrewAdapter {
     }
 
     private static void fillPersistentData(PersistentDataContainer pdc, Brew brew) {
-        pdc.set(BREWING_STEPS, ListPersistentDataType.BREWING_STEP_LIST, brew.getSteps());
         pdc.set(BREWERY_DATA_VERSION, PersistentDataType.INTEGER, DATA_VERSION);
+        if (Config.config().encryptSensitiveData()) {
+            pdc.set(BREWERY_CIPHERED, PersistentDataType.BOOLEAN, true);
+            pdc.set(BREWING_STEPS, ListPersistentDataType.BREWING_STEP_CIPHERED_LIST, brew.getSteps());
+        } else {
+            pdc.set(BREWING_STEPS, ListPersistentDataType.BREWING_STEP_LIST, brew.getSteps());
+        }
     }
 
     public static Optional<Brew> fromItem(ItemStack itemStack) {
@@ -129,8 +135,13 @@ public class BrewAdapter {
         if (!Objects.equals(dataVersion, DATA_VERSION)) {
             return Optional.empty();
         }
-        return Optional.ofNullable(data.get(BREWING_STEPS, ListPersistentDataType.BREWING_STEP_LIST))
-                .map(BrewImpl::new);
+        if (data.has(BREWERY_CIPHERED, PersistentDataType.BOOLEAN)) {
+            return Optional.ofNullable(data.get(BREWING_STEPS, ListPersistentDataType.BREWING_STEP_CIPHERED_LIST))
+                    .map(BrewImpl::new);
+        } else {
+            return Optional.ofNullable(data.get(BREWING_STEPS, ListPersistentDataType.BREWING_STEP_LIST))
+                    .map(BrewImpl::new);
+        }
     }
 
     public static void hideTooltips(ItemStack itemStack) {

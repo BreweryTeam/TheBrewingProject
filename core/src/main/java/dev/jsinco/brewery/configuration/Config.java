@@ -10,7 +10,10 @@ import eu.okaeri.configs.yaml.snakeyaml.YamlSnakeYamlConfigurer;
 import lombok.Getter;
 import lombok.experimental.Accessors;
 
+import javax.crypto.KeyGenerator;
+import javax.crypto.SecretKey;
 import java.io.File;
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.Locale;
 
@@ -41,6 +44,14 @@ public class Config extends OkaeriConfig {
     @Comment("Whether everything non-item related should be translated to the players locale")
     @CustomKey("client-side-translations")
     private boolean clientSideTranslations = false;
+
+    @Comment({"The step data is accessible for the user, enable this, if you don't want anyone cheating the system",
+            "WARNING: Only one encryption key is allowed, switching keys will corrupt brew data"})
+    @CustomKey("encrypt-sensitive-data")
+    private boolean encryptSensitiveData = true;
+
+    @Comment("The key that is going to be used for the encryption, this is unique per server")
+    private SecretKey encryptionKey = generateKey();
 
     @CustomKey("cauldrons")
     private CauldronSection cauldrons = new CauldronSection();
@@ -84,5 +95,13 @@ public class Config extends OkaeriConfig {
 
     public static Config config() {
         return instance;
+    }
+
+    private SecretKey generateKey() {
+        try {
+            return KeyGenerator.getInstance("des").generateKey();
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
