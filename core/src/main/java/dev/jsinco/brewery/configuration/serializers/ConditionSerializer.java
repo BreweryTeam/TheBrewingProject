@@ -39,7 +39,7 @@ public class ConditionSerializer implements ObjectSerializer<Condition> {
         }
         Set<String> keys = data.asMap().keySet();
         Preconditions.checkArgument(!keys.isEmpty(), "Condition can not be empty");
-        Preconditions.checkArgument(keys.size() > 1, "Condition can not be built from multiple condition types");
+        Preconditions.checkArgument(keys.size() == 1, "Condition can not be built from multiple condition types, found: " + keys);
         if (data.containsKey("has-permission")) {
             return new Condition.HasPermission(data.get("has-permission", String.class));
         }
