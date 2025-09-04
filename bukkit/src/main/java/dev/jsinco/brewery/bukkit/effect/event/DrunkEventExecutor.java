@@ -5,12 +5,18 @@ import dev.jsinco.brewery.api.event.step.*;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.bukkit.effect.named.*;
 import dev.jsinco.brewery.bukkit.effect.step.*;
+import org.bukkit.Bukkit;
+import org.bukkit.World;
+import org.bukkit.entity.Player;
 
 import java.util.*;
 
 public class DrunkEventExecutor {
 
-    private final Map<UUID, List<EventStep>> onJoinExecutions = new HashMap<>();
+    private final Map<UUID, List<List<EventStep>>> onJoinServerExecutions = new HashMap<>();
+    private final Map<UUID, List<List<EventStep>>> onDeathExecutions = new HashMap<>();
+    private final Map<UUID, List<List<EventStep>>> onDamageExecutions = new HashMap<>();
+    private final Map<UUID, Map<String, List<List<EventStep>>>> onJoinedWorldExecutions = new HashMap<>();
 
     public DrunkEventExecutor() {
         EventStepRegistry registry = TheBrewingProject.getInstance().getEventStepRegistry();
@@ -64,23 +70,61 @@ public class DrunkEventExecutor {
         }
     }
 
-    public void add(UUID playerUuid, List<EventStep> events) {
-        onJoinExecutions.put(playerUuid, events);
+    public void addConditionalWaitExecution(UUID playerUuid, List<EventStep> events, Condition condition) {
+        switch (condition) {
+            case Condition.Died died ->
+                    onDeathExecutions.computeIfAbsent(playerUuid, ignored -> new ArrayList<>()).add(events);
+            case Condition.HasPermission hasPermission -> {
+                throw new IllegalStateException("Can not schedule 'has permission' conditions");
+            }
+            case Condition.JoinedServer joinedServer -> {
+                if (Bukkit.getPlayer(playerUuid) != null) {
+                    doDrunkEvents(playerUuid, events);
+                    return;
+                }
+                onJoinServerExecutions.computeIfAbsent(playerUuid, ignored -> new ArrayList<>()).add(events);
+            }
+            case Condition.JoinedWorld joinedWorld -> {
+                if (Bukkit.getPlayer(playerUuid) instanceof Player player && player.getWorld().getName().equals(joinedWorld.worldName())) {
+                    doDrunkEvents(playerUuid, events);
+                    return;
+                }
+                onJoinedWorldExecutions.computeIfAbsent(playerUuid, ignored -> new HashMap<>())
+                        .computeIfAbsent(joinedWorld.worldName(), ignored -> new ArrayList<>()).add(events);
+            }
+            case Condition.TookDamage tookDamage ->
+                    onDamageExecutions.computeIfAbsent(playerUuid, ignored -> new ArrayList<>()).add(events);
+        }
     }
 
     public void clear(UUID playerUuid) {
-        onJoinExecutions.remove(playerUuid);
+        onJoinServerExecutions.remove(playerUuid);
     }
 
     public void clear() {
-        onJoinExecutions.clear();
+        onJoinServerExecutions.clear();
     }
 
-    public void onPlayerJoin(UUID playerUuid) {
-        List<EventStep> eventStepList = onJoinExecutions.remove(playerUuid);
-        if (eventStepList == null) {
+    public void onPlayerJoinServer(UUID playerUuid) {
+        executeQueue(playerUuid, onJoinServerExecutions.remove(playerUuid));
+    }
+
+    public void onPlayerJoinWorld(UUID playerUuid, World world) {
+        executeQueue(playerUuid, onJoinedWorldExecutions.computeIfAbsent(playerUuid, ignored -> new HashMap<>()).remove(world.getName()));
+    }
+
+    public void onDamage(UUID playerUuid) {
+        executeQueue(playerUuid, onDamageExecutions.remove(playerUuid));
+    }
+
+    public void onDeathExecutions(UUID playerUuid) {
+        executeQueue(playerUuid, onDeathExecutions.remove(playerUuid));
+    }
+
+    private void executeQueue(UUID playerUuid, List<List<EventStep>> eventStepListQueue) {
+        if (eventStepListQueue == null) {
             return;
         }
-        doDrunkEvents(playerUuid, eventStepList);
+        eventStepListQueue.forEach(eventSteps -> doDrunkEvents(playerUuid, eventSteps));
     }
 }

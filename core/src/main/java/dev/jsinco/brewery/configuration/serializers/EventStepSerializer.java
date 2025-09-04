@@ -38,7 +38,10 @@ public class EventStepSerializer implements ObjectSerializer<EventStep> {
                         "amplifier", applyPotionEffect.amplifierBounds().asString()
                 );
                 case ConditionalWaitStep conditionalWaitStep -> Map.of(
-                        "condition", conditionalWaitStep.condition().toString().toLowerCase(Locale.ROOT)
+                        "wait-condition", conditionalWaitStep.condition()
+                );
+                case ConditionalStep conditionalStep -> Map.of(
+                        "if-condition", conditionalStep.condition()
                 );
                 case ConsumeStep consumeStep -> Map.of(
                         consumeStep.modifier().name(), consumeStep.incrementValue()
@@ -89,8 +92,21 @@ public class EventStepSerializer implements ObjectSerializer<EventStep> {
             Preconditions.checkArgument(command != null, "Command can not be empty");
             eventStepBuilder.addProperty(new SendCommand(command, senderType == null ? SendCommand.CommandSenderType.SERVER : senderType));
         }
+        Preconditions.checkArgument(!data.containsKey("condition") && !data.containsKey("wait-condition"), "Duplicate condition types 'condition' and 'wait-condition'");
         if (data.containsKey("condition")) {
-            ConditionalWaitStep.Condition condition = data.get("condition", ConditionalWaitStep.Condition.class);
+            Condition condition = data.get("condition", Condition.class);
+            Preconditions.checkArgument(condition != null, "Condition can not be empty");
+            Preconditions.checkArgument(condition.getClass() != Condition.HasPermission.class, "Unimplemented wait condition: has-permisison");
+            eventStepBuilder.addProperty(new ConditionalWaitStep(condition));
+        }
+        if (data.containsKey("wait-condition")) {
+            Condition condition = data.get("condition", Condition.class);
+            Preconditions.checkArgument(condition != null, "Condition can not be empty");
+            Preconditions.checkArgument(condition.getClass() != Condition.HasPermission.class, "Unimplemented wait condition: has-permisison");
+            eventStepBuilder.addProperty(new ConditionalWaitStep(condition));
+        }
+        if (data.containsKey("if-condition")) {
+            Condition condition = data.get("condition", Condition.class);
             Preconditions.checkArgument(condition != null, "Condition can not be empty");
             eventStepBuilder.addProperty(new ConditionalWaitStep(condition));
         }

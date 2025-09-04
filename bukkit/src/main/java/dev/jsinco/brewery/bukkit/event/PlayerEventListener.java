@@ -51,10 +51,9 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
-import org.bukkit.event.player.AsyncPlayerChatEvent;
-import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.event.player.PlayerItemConsumeEvent;
-import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.player.*;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -309,8 +308,26 @@ public class PlayerEventListener implements Listener {
 
     @EventHandler(ignoreCancelled = true)
     public void onPlayerJoin(PlayerJoinEvent event) {
-        drunkEventExecutor.onPlayerJoin(event.getPlayer().getUniqueId());
+        drunkEventExecutor.onPlayerJoinServer(event.getPlayer().getUniqueId());
+        drunkEventExecutor.onPlayerJoinWorld(event.getPlayer().getUniqueId(), event.getPlayer().getWorld());
         drunksManager.planEvent(event.getPlayer().getUniqueId());
+    }
+
+    @EventHandler(ignoreCancelled = true)
+    public void onPlayerChangedWorld(PlayerChangedWorldEvent event) {
+        drunkEventExecutor.onPlayerJoinWorld(event.getPlayer().getUniqueId(), event.getPlayer().getWorld());
+    }
+
+    @EventHandler(ignoreCancelled = true)
+    public void onPlayerDeath(PlayerDeathEvent event) {
+        drunkEventExecutor.onDeathExecutions(event.getPlayer().getUniqueId());
+    }
+
+    @EventHandler(ignoreCancelled = true)
+    public void onPlayerDamage(EntityDamageEvent event) {
+        if (event.getEntity() instanceof Player player) {
+            drunkEventExecutor.onDeathExecutions(player.getUniqueId());
+        }
     }
 
     @EventHandler(ignoreCancelled = true)

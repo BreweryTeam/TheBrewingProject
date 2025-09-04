@@ -3,10 +3,7 @@ package dev.jsinco.brewery.configuration;
 import com.google.common.base.Preconditions;
 import dev.jsinco.brewery.api.effect.modifier.ModifierExpression;
 import dev.jsinco.brewery.api.event.*;
-import dev.jsinco.brewery.api.event.step.ApplyPotionEffect;
-import dev.jsinco.brewery.api.event.step.ConditionalWaitStep;
-import dev.jsinco.brewery.api.event.step.ConsumeStep;
-import dev.jsinco.brewery.api.event.step.SendCommand;
+import dev.jsinco.brewery.api.event.step.*;
 import dev.jsinco.brewery.api.math.RangeD;
 import dev.jsinco.brewery.api.moment.Interval;
 import dev.jsinco.brewery.api.util.BreweryKey;
@@ -58,7 +55,7 @@ public class EventSection extends OkaeriConfig {
                     .displayName(Component.text("loose memory"))
                     .addStep(new EventStep.Builder().addProperty(NamedDrunkEvent.fromKey("pass_out")).build())
                     .addStep(new EventStep.Builder()
-                            .addProperty(new ConditionalWaitStep(ConditionalWaitStep.Condition.JOIN))
+                            .addProperty(new ConditionalWaitStep(new Condition.JoinedServer()))
                             .addProperty(NamedDrunkEvent.fromKey("teleport"))
                             .addProperty(new ConsumeStep(DrunkenModifierSection.modifiers().modifier("alcohol"), -30D))
                             .build()
