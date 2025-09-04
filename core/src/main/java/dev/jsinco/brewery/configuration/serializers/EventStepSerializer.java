@@ -106,7 +106,7 @@ public class EventStepSerializer implements ObjectSerializer<EventStep> {
             eventStepBuilder.addProperty(new ConditionalWaitStep(condition));
         }
         if (data.containsKey("if-condition")) {
-            Condition condition = data.get("condition", Condition.class);
+            Condition condition = data.get("if-condition", Condition.class);
             Preconditions.checkArgument(condition != null, "Condition can not be empty");
             eventStepBuilder.addProperty(new ConditionalWaitStep(condition));
         }
