@@ -92,7 +92,7 @@ public class EventStepSerializer implements ObjectSerializer<EventStep> {
             Preconditions.checkArgument(command != null, "Command can not be empty");
             eventStepBuilder.addProperty(new SendCommand(command, senderType == null ? SendCommand.CommandSenderType.SERVER : senderType));
         }
-        Preconditions.checkArgument(!data.containsKey("condition") && !data.containsKey("wait-condition"), "Duplicate condition types 'condition' and 'wait-condition'");
+        Preconditions.checkArgument(!data.containsKey("condition") || !data.containsKey("wait-condition"), "Duplicate condition types 'condition' and 'wait-condition'");
         if (data.containsKey("condition")) {
             Condition condition = data.get("condition", Condition.class);
             Preconditions.checkArgument(condition != null, "Condition can not be empty");
