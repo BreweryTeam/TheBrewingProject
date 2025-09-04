@@ -33,12 +33,12 @@ public class ConditionalWaitStepExecutable implements EventPropertyExecutable {
                         Stream.of(builder.build()),
                         events.subList(index + 1, events.size()).stream()
                 );
-        TheBrewingProject.getInstance().getDrunkEventExecutor().scheduleWait(contextPlayer, eventStepStream.toList(), condition);
+        TheBrewingProject.getInstance().getDrunkEventExecutor().addConditionalWaitExecution(contextPlayer, eventStepStream.toList(), condition);
         return ExecutionResult.STOP_EXECUTION;
     }
 
     @Override
     public int priority() {
-        return Integer.MIN_VALUE;
+        return Integer.MIN_VALUE + 1;
     }
 }
