@@ -8,21 +8,23 @@ import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 public class ConsumeStepExecutable implements EventPropertyExecutable {
 
-    private final DrunkenModifier modifier;
-    private final double incrementValue;
+    private final Map<DrunkenModifier, Double> consumeModifiers;
 
-    public ConsumeStepExecutable(DrunkenModifier modifier, double incrementValue) {
-        this.modifier = modifier;
-        this.incrementValue = incrementValue;
+    public ConsumeStepExecutable(Map<DrunkenModifier, Double> consumeModifiers) {
+        this.consumeModifiers = consumeModifiers;
     }
 
     @Override
     public @NotNull ExecutionResult execute(UUID contextPlayer, List<? extends EventStep> events, int index) {
-        TheBrewingProject.getInstance().getDrunksManager().consume(contextPlayer, new ModifierConsume(modifier, incrementValue));
+        TheBrewingProject.getInstance().getDrunksManager().consume(contextPlayer, consumeModifiers.entrySet().stream()
+                .map(entry -> new ModifierConsume(entry.getKey(), entry.getValue()))
+                .toList()
+        );
         return ExecutionResult.CONTINUE;
     }
 

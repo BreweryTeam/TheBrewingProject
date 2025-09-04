@@ -34,7 +34,7 @@ public class DrunkEventExecutor {
         registry.register(ApplyPotionEffect.class, stepProperty -> new ApplyPotionEffectExecutable(stepProperty.potionEffectName(), stepProperty.amplifierBounds(), stepProperty.durationBounds()));
         registry.register(ConditionalWaitStep.class, stepProperty -> new ConditionalWaitStepExecutable(stepProperty.getCondition()));
         registry.register(ConditionalStep.class, stepProperty -> new ConditionalStepExecutable(stepProperty.condition()));
-        registry.register(ConsumeStep.class, stepProperty -> new ConsumeStepExecutable(stepProperty.modifier(), stepProperty.incrementValue()));
+        registry.register(ConsumeStep.class, stepProperty -> new ConsumeStepExecutable(stepProperty.modifiers()));
         registry.register(SendCommand.class, stepProperty -> new SendCommandExecutable(stepProperty.command(), stepProperty.senderType()));
         registry.register(Teleport.class, stepProperty -> new TeleportExecutable(stepProperty.location()));
         registry.register(WaitStep.class, stepProperty -> new WaitStepExecutable(stepProperty.durationTicks()));

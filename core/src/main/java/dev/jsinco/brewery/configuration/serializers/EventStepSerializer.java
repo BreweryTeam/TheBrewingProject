@@ -1,6 +1,7 @@
 package dev.jsinco.brewery.configuration.serializers;
 
 import com.google.common.base.Preconditions;
+import dev.jsinco.brewery.api.effect.modifier.DrunkenModifier;
 import dev.jsinco.brewery.api.event.EventStep;
 import dev.jsinco.brewery.api.event.EventStepProperty;
 import dev.jsinco.brewery.api.event.NamedDrunkEvent;
@@ -20,6 +21,7 @@ import lombok.NonNull;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class EventStepSerializer implements ObjectSerializer<EventStep> {
     @Override
@@ -44,7 +46,9 @@ public class EventStepSerializer implements ObjectSerializer<EventStep> {
                         "if-condition", conditionalStep.condition()
                 );
                 case ConsumeStep consumeStep -> Map.of(
-                        consumeStep.modifier().name(), consumeStep.incrementValue()
+                        "consume", consumeStep.modifiers().entrySet()
+                                .stream()
+                                .collect(Collectors.toMap(entry -> entry.getKey().name(), Map.Entry::getValue))
                 );
                 case CustomEventStep customEvent -> Map.of(
                         "event", customEvent.customEventKey().key()
@@ -134,11 +138,22 @@ public class EventStepSerializer implements ObjectSerializer<EventStep> {
             Preconditions.checkArgument(breweryLocation != null, "Location can not be empty");
             eventStepBuilder.addProperty(new Teleport(breweryLocation));
         }
-        DrunkenModifierSection.modifiers().drunkenModifiers()
-                .stream()
-                .filter(modifier -> data.containsKey(modifier.name()))
-                .map(modifier -> new ConsumeStep(modifier, data.get(modifier.name(), Integer.class)))
-                .forEach(eventStepBuilder::addProperty);
+        Map<DrunkenModifier, Double> modifiers;
+        if (data.containsKey("consume")) {
+            Map<String, Double> modifiersData = data.getAsMap("consume", String.class, Double.class);
+            modifiers = DrunkenModifierSection.modifiers().drunkenModifiers()
+                    .stream()
+                    .filter(modifier -> modifiersData.containsKey(modifier.name()))
+                    .collect(Collectors.toUnmodifiableMap(modifier -> modifier, modifier -> modifiersData.get(modifier.name())));
+        } else {
+            modifiers = DrunkenModifierSection.modifiers().drunkenModifiers()
+                    .stream()
+                    .filter(modifier -> data.containsKey(modifier.name()) && data.getValue(Double.class) != null)
+                    .collect(Collectors.toUnmodifiableMap(modifier -> modifier, modifier -> data.get(modifier.name(), Double.class)));
+        }
+        if (!modifiers.isEmpty()) {
+            eventStepBuilder.addProperty(new ConsumeStep(modifiers));
+        }
         EventStep eventStep = eventStepBuilder.build();
         if (eventStep.properties().isEmpty()) {
             throw new IllegalArgumentException("Unknown step type");

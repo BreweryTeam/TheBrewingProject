@@ -57,7 +57,7 @@ public class EventSection extends OkaeriConfig {
                     .addStep(new EventStep.Builder()
                             .addProperty(new ConditionalWaitStep(new Condition.JoinedServer()))
                             .addProperty(NamedDrunkEvent.fromKey("teleport"))
-                            .addProperty(new ConsumeStep(DrunkenModifierSection.modifiers().modifier("alcohol"), -30D))
+                            .addProperty(new ConsumeStep(Map.of(DrunkenModifierSection.modifiers().modifier("alcohol"), -30D)))
                             .build()
                     )
                     .build(BreweryKey.parse("memory_loss"))
