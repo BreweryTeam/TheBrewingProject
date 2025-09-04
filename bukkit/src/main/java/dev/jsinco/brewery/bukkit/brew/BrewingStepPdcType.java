@@ -50,56 +50,60 @@ public class BrewingStepPdcType implements PersistentDataType<byte[], BrewingSte
     @Override
     public byte @NotNull [] toPrimitive(@NotNull BrewingStep complex, @NotNull PersistentDataAdapterContext context) {
         ByteArrayOutputStream output = new ByteArrayOutputStream();
-        try (DataOutputStream dataOutputStream = new DataOutputStream(new CipherOutputStream(output, getCipher(Cipher.ENCRYPT_MODE)))) {
-            dataOutputStream.writeUTF(complex.stepType().name());
-            switch (complex) {
-                case BrewingStep.Age age -> {
-                    encodeMoment(age.time(), dataOutputStream);
-                    dataOutputStream.writeUTF(age.barrelType().key().toString());
+        try (CipherOutputStream cipherOutputStream = new CipherOutputStream(output, getCipher(Cipher.ENCRYPT_MODE))) {
+            try (DataOutputStream dataOutputStream = new DataOutputStream(cipherOutputStream)) {
+                dataOutputStream.writeUTF(complex.stepType().name());
+                switch (complex) {
+                    case BrewingStep.Age age -> {
+                        encodeMoment(age.time(), dataOutputStream);
+                        dataOutputStream.writeUTF(age.barrelType().key().toString());
+                    }
+                    case BrewingStep.Cook cook -> {
+                        encodeMoment(cook.time(), dataOutputStream);
+                        encodeIngredients(cook.ingredients(), dataOutputStream);
+                        dataOutputStream.writeUTF(cook.cauldronType().key().toString());
+                    }
+                    case BrewingStep.Distill distill -> {
+                        dataOutputStream.writeInt(distill.runs());
+                    }
+                    case BrewingStep.Mix mix -> {
+                        encodeMoment(mix.time(), dataOutputStream);
+                        encodeIngredients(mix.ingredients(), dataOutputStream);
+                    }
+                    default -> throw new IllegalStateException("Unexpected value: " + complex);
                 }
-                case BrewingStep.Cook cook -> {
-                    encodeMoment(cook.time(), dataOutputStream);
-                    encodeIngredients(cook.ingredients(), dataOutputStream);
-                    dataOutputStream.writeUTF(cook.cauldronType().key().toString());
-                }
-                case BrewingStep.Distill distill -> {
-                    dataOutputStream.writeInt(distill.runs());
-                }
-                case BrewingStep.Mix mix -> {
-                    encodeMoment(mix.time(), dataOutputStream);
-                    encodeIngredients(mix.ingredients(), dataOutputStream);
-                }
-                default -> throw new IllegalStateException("Unexpected value: " + complex);
             }
-            return output.toByteArray();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+        return output.toByteArray();
     }
 
     @Override
     public @NotNull BrewingStep fromPrimitive(byte @NotNull [] primitive, @NotNull PersistentDataAdapterContext context) {
         ByteArrayInputStream input = new ByteArrayInputStream(primitive);
-        try (DataInputStream dataInputStream = new DataInputStream(new CipherInputStream(input, getCipher(Cipher.DECRYPT_MODE)))) {
-            BrewingStep.StepType stepType = BrewingStep.StepType.valueOf(dataInputStream.readUTF());
-            return switch (stepType) {
-                case COOK -> new CookStepImpl(
-                        decodeMoment(dataInputStream),
-                        decodeIngredients(dataInputStream),
-                        BreweryRegistry.CAULDRON_TYPE.get(BreweryKey.parse(dataInputStream.readUTF()))
-                );
-                case DISTILL -> new DistillStepImpl(
-                        dataInputStream.readInt()
-                );
-                case AGE -> new AgeStepImpl(
-                        decodeMoment(dataInputStream),
-                        BreweryRegistry.BARREL_TYPE.get(BreweryKey.parse(dataInputStream.readUTF()))
-                );
-                case MIX -> new MixStepImpl(
-                        decodeMoment(dataInputStream),
-                        decodeIngredients(dataInputStream)
-                );
-            };
+        try (CipherInputStream cipherInputStream = new CipherInputStream(input, getCipher(Cipher.DECRYPT_MODE))) {
+            try (DataInputStream dataInputStream = new DataInputStream(cipherInputStream)) {
+                BrewingStep.StepType stepType = BrewingStep.StepType.valueOf(dataInputStream.readUTF());
+                return switch (stepType) {
+                    case COOK -> new CookStepImpl(
+                            decodeMoment(dataInputStream),
+                            decodeIngredients(dataInputStream),
+                            BreweryRegistry.CAULDRON_TYPE.get(BreweryKey.parse(dataInputStream.readUTF()))
+                    );
+                    case DISTILL -> new DistillStepImpl(
+                            dataInputStream.readInt()
+                    );
+                    case AGE -> new AgeStepImpl(
+                            decodeMoment(dataInputStream),
+                            BreweryRegistry.BARREL_TYPE.get(BreweryKey.parse(dataInputStream.readUTF()))
+                    );
+                    case MIX -> new MixStepImpl(
+                            decodeMoment(dataInputStream),
+                            decodeIngredients(dataInputStream)
+                    );
+                };
+            }
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -155,7 +159,7 @@ public class BrewingStepPdcType implements PersistentDataType<byte[], BrewingSte
     private Cipher getCipher(int operationMode) {
         try {
             Cipher cipher = Config.config().encryptSensitiveData() && useCipher ? Cipher.getInstance("des") : new NullCipher();
-            cipher.init(Cipher.ENCRYPT_MODE, Config.config().encryptionKey());
+            cipher.init(operationMode, Config.config().encryptionKey());
             return cipher;
         } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException e) {
             throw new RuntimeException(e);

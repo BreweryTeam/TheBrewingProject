@@ -26,6 +26,6 @@ public class SecretKeySerializer implements ObjectSerializer<SecretKey> {
     public SecretKey deserialize(@NonNull DeserializationData data, @NonNull GenericsDeclaration generics) {
         String base64 = data.getValue(String.class);
         byte[] bytes = Base64.getDecoder().decode(base64);
-        return new SecretKeySpec(bytes, "des");
+        return new SecretKeySpec(bytes, 0, bytes.length, "des");
     }
 }

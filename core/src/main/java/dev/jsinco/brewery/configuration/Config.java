@@ -99,7 +99,7 @@ public class Config extends OkaeriConfig {
 
     private SecretKey generateKey() {
         try {
-            return KeyGenerator.getInstance("des").generateKey();
+            return KeyGenerator.getInstance("DES").generateKey();
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
         }
