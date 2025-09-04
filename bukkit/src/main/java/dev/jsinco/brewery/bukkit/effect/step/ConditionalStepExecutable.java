@@ -28,9 +28,9 @@ public class ConditionalStepExecutable implements EventPropertyExecutable {
         boolean cancel = switch (condition) {
             case Condition.Died died -> !player.isDead();
             case Condition.HasPermission hasPermission -> !player.hasPermission(hasPermission.permission());
-            case Condition.JoinedServer joinedServer -> true;
-            case Condition.JoinedWorld joinedWorld -> player.getWorld().getName().equals(joinedWorld.worldName());
-            case Condition.TookDamage tookDamage -> false;
+            case Condition.JoinedServer joinedServer -> false;
+            case Condition.JoinedWorld joinedWorld -> !player.getWorld().getName().equals(joinedWorld.worldName());
+            case Condition.TookDamage tookDamage -> true;
         };
         return cancel ? ExecutionResult.STOP_EXECUTION : ExecutionResult.CONTINUE;
     }
