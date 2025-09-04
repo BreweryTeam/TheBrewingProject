@@ -33,6 +33,7 @@ public class DrunkEventExecutor {
         registry.register(NamedDrunkEvent.fromKey("teleport"), TeleportNamedExecutable::new);
         registry.register(ApplyPotionEffect.class, stepProperty -> new ApplyPotionEffectExecutable(stepProperty.potionEffectName(), stepProperty.amplifierBounds(), stepProperty.durationBounds()));
         registry.register(ConditionalWaitStep.class, stepProperty -> new ConditionalWaitStepExecutable(stepProperty.getCondition()));
+        registry.register(ConditionalStep.class, stepProperty -> new ConditionalStepExecutable(stepProperty.condition()));
         registry.register(ConsumeStep.class, stepProperty -> new ConsumeStepExecutable(stepProperty.modifier(), stepProperty.incrementValue()));
         registry.register(SendCommand.class, stepProperty -> new SendCommandExecutable(stepProperty.command(), stepProperty.senderType()));
         registry.register(Teleport.class, stepProperty -> new TeleportExecutable(stepProperty.location()));
@@ -103,6 +104,9 @@ public class DrunkEventExecutor {
 
     public void clear() {
         onJoinServerExecutions.clear();
+        onDeathExecutions.clear();
+        onDamageExecutions.clear();
+        onJoinedWorldExecutions.clear();
     }
 
     public void onPlayerJoinServer(UUID playerUuid) {

@@ -326,7 +326,7 @@ public class PlayerEventListener implements Listener {
     @EventHandler(ignoreCancelled = true)
     public void onPlayerDamage(EntityDamageEvent event) {
         if (event.getEntity() instanceof Player player) {
-            drunkEventExecutor.onDeathExecutions(player.getUniqueId());
+            drunkEventExecutor.onDamage(player.getUniqueId());
         }
     }
 
