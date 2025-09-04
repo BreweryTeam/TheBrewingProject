@@ -14,6 +14,14 @@ public class SendCommandExecutable implements EventPropertyExecutable {
 
     private final String command;
     private final CommandSenderType senderType;
+    private static final List<String> PLAYER_PLACEHOLDERS = List.of(
+            "@player@",
+            "@player_name@",
+            "%player%",
+            "%player_name%",
+            "<player>",
+            "<player_name>"
+    );
 
     public SendCommandExecutable(String command, CommandSenderType senderType) {
         this.command = command;
@@ -26,7 +34,10 @@ public class SendCommandExecutable implements EventPropertyExecutable {
         if (player == null) {
             return ExecutionResult.CONTINUE;
         }
-        String command = this.command.replace("@player_name@", player.getName());
+        String command = this.command;
+        for (String playerPlaceholder : PLAYER_PLACEHOLDERS) {
+            command = this.command.replace(playerPlaceholder, player.getName());
+        }
         switch (senderType) {
             case PLAYER -> player.performCommand(command);
             case SERVER -> Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), command);
