@@ -216,10 +216,11 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
     }
 
     private void loadTimeFormats() {
-        File file = new File(getDataFolder(), "/locale/" + Config.config().language().toLanguageTag() + ".time_format.properties");
-        if (!file.exists()) {
+        String fileName = Config.config().language().toLanguageTag() + ".time.properties";
+        File file = new File(getDataFolder(), "/locale/" + fileName);
+        if (!file.exists() && TimeFormatRegistry.class.getResource("/locale/" + fileName) == null) {
             Logger.log("Could not find time formats for your language, using en-US");
-            file = new File(getDataFolder(), "/locale/en-US.time_format.properties");
+            file = new File(getDataFolder(), "/locale/en-US.time.properties");
         }
         try {
             timeFormatRegistry.sync(file);
