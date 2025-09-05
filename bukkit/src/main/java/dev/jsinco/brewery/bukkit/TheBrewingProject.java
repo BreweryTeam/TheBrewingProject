@@ -203,10 +203,10 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
     }
 
     private void loadDrunkenReplacements() {
-        File file = new File(getDataFolder(), "/locale/drunk_text_" + Config.config().language().toLanguageTag() + ".json");
+        File file = new File(getDataFolder(), "/locale/" + Config.config().language().toLanguageTag() + ".drunk_text.json");
         if (!file.exists()) {
             Logger.log("Could not find drunken text replacements for your language, using en-US");
-            file = new File(getDataFolder(), "/locale/drunk_text_en-US.json");
+            file = new File(getDataFolder(), "/locale/en-US.drunk_text.json");
         }
         try (InputStream inputStream = new FileInputStream(file)) {
             drunkTextRegistry.load(inputStream);
@@ -216,10 +216,10 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
     }
 
     private void loadTimeFormats() {
-        File file = new File(getDataFolder(), "/locale/time_format_" + Config.config().language().toLanguageTag() + ".properties");
+        File file = new File(getDataFolder(), "/locale/" + Config.config().language().toLanguageTag() + ".time_format.properties");
         if (!file.exists()) {
             Logger.log("Could not find time formats for your language, using en-US");
-            file = new File(getDataFolder(), "/locale/time_format_en-US.properties");
+            file = new File(getDataFolder(), "/locale/en-US.time_format.properties");
         }
         try {
             timeFormatRegistry.sync(file);
@@ -321,7 +321,7 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
     }
 
     private void saveResources() {
-        Stream.of("recipes.yml", "locale/drunk_text_en-US.json")
+        Stream.of("recipes.yml", "locale/en-US.drunk_text.json", "locale/ru.drunk_text.json")
                 .forEach(this::saveResourceIfNotExists);
     }
 

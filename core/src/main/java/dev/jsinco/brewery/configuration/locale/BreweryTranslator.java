@@ -18,8 +18,8 @@ import java.util.*;
 
 public class BreweryTranslator extends MiniMessageTranslator {
 
-    Map<Locale, Properties> translations;
-    File localeDirectory;
+    private Map<Locale, Properties> translations;
+    private final File localeDirectory;
 
     public BreweryTranslator(File localeDirectory) {
         this.localeDirectory = localeDirectory;
@@ -43,7 +43,7 @@ public class BreweryTranslator extends MiniMessageTranslator {
                 try (FileSystem fs = "jar".equals(url.getProtocol()) ? FileSystems.newFileSystem(url.toURI(), Collections.emptyMap()) : null) {
 
                     Path internalLocaleDir = fs == null ? Paths.get(url.toURI()) : fs.getPath("locale");
-                    try (DirectoryStream<Path> stream = Files.newDirectoryStream(internalLocaleDir, "*.lang")) {
+                    try (DirectoryStream<Path> stream = Files.newDirectoryStream(internalLocaleDir, "*.lang.properties")) {
                         for (Path path : stream) {
                             mergeAndStoreProperties(path);
                         }
@@ -102,11 +102,14 @@ public class BreweryTranslator extends MiniMessageTranslator {
             throw new IllegalArgumentException("Locale directory is not a directory!");
         }
         ImmutableMap.Builder<Locale, Properties> translationsBuilder = new ImmutableMap.Builder<>();
-        for (File translationFile : localeDirectory.listFiles(file -> file.getName().endsWith(".lang"))) {
+        for (File translationFile : localeDirectory.listFiles(file -> file.getName().endsWith(".lang.properties"))) {
             try (InputStream inputStream = new FileInputStream(translationFile)) {
                 Properties translation = new Properties();
                 translation.load(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
-                translationsBuilder.put(Locale.forLanguageTag(translationFile.getName().replaceAll(".lang$", "")), translation);
+                Locale locale = Locale.forLanguageTag(translationFile.getName().replaceAll(".lang.properties$", ""));
+                if (locale != null) {
+                    translationsBuilder.put(locale, translation);
+                }
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
