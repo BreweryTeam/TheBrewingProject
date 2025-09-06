@@ -1,4 +1,4 @@
-package dev.jsinco.brewery.migrator.migration
+package dev.jsinco.brewery.migrator.migration.world
 
 import com.dre.brewery.BCauldron
 import dev.jsinco.brewery.api.breweries.CauldronType

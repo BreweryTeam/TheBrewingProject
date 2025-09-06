@@ -21,6 +21,7 @@ dependencies {
     compileOnly(project(":api"))
     compileOnly(project(":core"))
     compileOnly("com.dre.brewery:BreweryX:3.6.0")
+    compileOnly(libs.adventure.text.minimessage)
 }
 
 tasks {

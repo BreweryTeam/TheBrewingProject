@@ -1,4 +1,4 @@
-package dev.jsinco.brewery.migrator.migration
+package dev.jsinco.brewery.migrator.migration.world
 
 import com.dre.brewery.BIngredients
 import com.dre.brewery.recipe.PluginItem
