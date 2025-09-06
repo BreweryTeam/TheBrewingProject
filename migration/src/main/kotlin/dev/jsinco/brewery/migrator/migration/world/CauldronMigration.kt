@@ -17,9 +17,9 @@ object CauldronMigration {
         BCauldron.bcauldrons.values.asSequence()
             .filter { it.block.world == world }
             .mapNotNull { convertToTbpCauldron(it) }
+            .filter { TheBrewingProject.getInstance().breweryRegistry.getActiveSinglePositionStructure(it.position()).isEmpty }
             .forEach {
                 TheBrewingProject.getInstance().database.insertValue(BukkitCauldronDataType.INSTANCE, it)
-                TheBrewingProject.getInstance().breweryRegistry.addActiveSinglePositionStructure(it)
             }
     }
 
