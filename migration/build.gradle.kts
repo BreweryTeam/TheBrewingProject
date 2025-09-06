@@ -23,6 +23,18 @@ dependencies {
     compileOnly("com.dre.brewery:BreweryX:3.6.0")
 }
 
+tasks {
+    jar {
+        archiveBaseName.set(rootProject.name)
+        archiveClassifier.set("incomplete")
+    }
+
+    shadowJar {
+        archiveBaseName.set(rootProject.name)
+        archiveClassifier.unset()
+    }
+}
+
 bukkit {
     main = "dev.jsinco.brewery.migrator.TBPMigratorPlugin"
     foliaSupported = false
