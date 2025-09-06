@@ -1,4 +1,4 @@
-package dev.jsinco.brewery.migrator.brew
+package dev.jsinco.brewery.migrator.migration
 
 import com.dre.brewery.BIngredients
 import com.dre.brewery.recipe.PluginItem
@@ -51,7 +51,7 @@ object BrewMigration {
         return BrewImpl(brewingSteps)
     }
 
-    private fun convertIngredients(legacyIngredients: BIngredients): Map<Ingredient, Int> {
+    public fun convertIngredients(legacyIngredients: BIngredients): Map<Ingredient, Int> {
         val ingredientManager = BukkitIngredientManager.INSTANCE
         val output = mutableMapOf<Ingredient, Int>()
         for (legacyIngredient in legacyIngredients.ingredients) {

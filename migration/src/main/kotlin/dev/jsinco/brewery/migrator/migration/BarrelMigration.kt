@@ -1,4 +1,4 @@
-package dev.jsinco.brewery.migrator.barrel
+package dev.jsinco.brewery.migrator.migration
 
 import com.dre.brewery.Barrel
 import dev.jsinco.brewery.api.breweries.BarrelType
@@ -11,7 +11,7 @@ import dev.jsinco.brewery.bukkit.breweries.barrel.BukkitBarrel
 import dev.jsinco.brewery.bukkit.breweries.barrel.BukkitBarrelDataType
 import dev.jsinco.brewery.bukkit.structure.BarrelBlockDataMatcher
 import dev.jsinco.brewery.bukkit.structure.PlacedBreweryStructure
-import dev.jsinco.brewery.migrator.brew.BrewMigration
+import dev.jsinco.brewery.migrator.migration.BrewMigration
 import org.bukkit.Location
 import org.bukkit.World
 import kotlin.jvm.optionals.getOrNull

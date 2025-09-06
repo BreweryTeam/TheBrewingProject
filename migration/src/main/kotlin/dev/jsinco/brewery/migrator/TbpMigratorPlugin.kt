@@ -1,7 +1,8 @@
 package dev.jsinco.brewery.migrator
 
 import dev.jsinco.brewery.bukkit.TheBrewingProject
-import dev.jsinco.brewery.migrator.barrel.BarrelMigration
+import dev.jsinco.brewery.migrator.migration.BarrelMigration
+import dev.jsinco.brewery.migrator.migration.CauldronMigration
 import org.bukkit.Bukkit
 import org.bukkit.plugin.java.JavaPlugin
 
@@ -10,6 +11,7 @@ class TbpMigratorPlugin : JavaPlugin() {
     override fun onEnable() {
         Bukkit.getScheduler().runTask(this) { ->
             Bukkit.getWorlds().forEach(BarrelMigration::migrateWorld)
+            Bukkit.getWorlds().forEach(CauldronMigration::migrateWorld)
             TheBrewingProject.getInstance().database.flush().join()
             TheBrewingProject.getInstance().reload()
             val pluginManager = Bukkit.getPluginManager()
