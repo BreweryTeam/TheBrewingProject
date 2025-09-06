@@ -5,7 +5,7 @@ import dev.jsinco.brewery.migrator.barrel.BarrelMigration
 import org.bukkit.Bukkit
 import org.bukkit.plugin.java.JavaPlugin
 
-class TBPMigratorPlugin : JavaPlugin() {
+class TbpMigratorPlugin : JavaPlugin() {
 
     override fun onEnable() {
         Bukkit.getScheduler().runTask(this) { ->

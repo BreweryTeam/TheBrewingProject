@@ -1,17 +1,17 @@
 package dev.jsinco.brewery.migrator.barrel
 
 import com.dre.brewery.Barrel
-import dev.jsinco.brewery.breweries.BarrelType
+import dev.jsinco.brewery.api.breweries.BarrelType
+import dev.jsinco.brewery.api.structure.StructureMeta
+import dev.jsinco.brewery.api.structure.StructureType
+import dev.jsinco.brewery.api.util.Pair
 import dev.jsinco.brewery.bukkit.TheBrewingProject
+import dev.jsinco.brewery.bukkit.api.BukkitAdapter
 import dev.jsinco.brewery.bukkit.breweries.barrel.BukkitBarrel
 import dev.jsinco.brewery.bukkit.breweries.barrel.BukkitBarrelDataType
 import dev.jsinco.brewery.bukkit.structure.BarrelBlockDataMatcher
 import dev.jsinco.brewery.bukkit.structure.PlacedBreweryStructure
-import dev.jsinco.brewery.bukkit.util.BukkitAdapter
 import dev.jsinco.brewery.migrator.brew.BrewMigration
-import dev.jsinco.brewery.structure.StructureMeta
-import dev.jsinco.brewery.structure.StructureType
-import dev.jsinco.brewery.util.Pair
 import org.bukkit.Location
 import org.bukkit.World
 import kotlin.jvm.optionals.getOrNull
@@ -48,17 +48,17 @@ object BarrelMigration {
         val structure = barrelStructurePair.first()
         val barrelType = barrelStructurePair.second()
         val bukkitBarrel = BukkitBarrel(
-            BukkitAdapter.toLocation(structure!!.unique),
+            BukkitAdapter.toLocation(structure.unique).get(),
             structure,
             structure.structure.getMeta(StructureMeta.INVENTORY_SIZE)!!,
             barrelType
         )
         structure.holder = bukkitBarrel
         legacyBarrel.inventory.contents.withIndex().asSequence()
-            .forEach {
-                val index = it.index
-                it.value?.let {
-                    bukkitBarrel.inventory.brews[index] = BrewMigration.migrateLegacyBrew(it)
+            .forEach { legacyBrew ->
+                val index = legacyBrew.index
+                legacyBrew.value?.let {
+                    bukkitBarrel.inventory.brews[index] = BrewMigration.migrateLegacyBrew(legacyBrew.value!!)
                 }
             }
         return bukkitBarrel

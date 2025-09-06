@@ -36,7 +36,7 @@ tasks {
 }
 
 bukkit {
-    main = "dev.jsinco.brewery.migrator.TBPMigratorPlugin"
+    main = "dev.jsinco.brewery.migrator.TbpMigratorPlugin"
     foliaSupported = false
     apiVersion = "1.21"
     authors = listOf("Thorinwasher")
