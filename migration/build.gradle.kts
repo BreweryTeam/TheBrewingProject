@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "dev.jsinco.brewery"
-version = "unspecified"
+version = project.property("version")!!
 
 repositories {
     mavenCentral()
@@ -25,12 +25,12 @@ dependencies {
 
 tasks {
     jar {
-        archiveBaseName.set(rootProject.name)
+        archiveBaseName.set(rootProject.name + "Migration")
         archiveClassifier.set("incomplete")
     }
 
     shadowJar {
-        archiveBaseName.set(rootProject.name)
+        archiveBaseName.set(rootProject.name + "Migration")
         archiveClassifier.unset()
     }
 }
