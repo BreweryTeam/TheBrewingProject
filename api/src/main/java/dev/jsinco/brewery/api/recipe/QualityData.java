@@ -19,7 +19,7 @@ import java.util.stream.Stream;
 public class QualityData<T> {
 
     private final Map<BrewQuality, T> backing;
-    private static final Pattern TAG_PATTERN = Pattern.compile("^[!?#]?[a-z0-9_-]*>");
+    private static final Pattern TAG_PATTERN = Pattern.compile("^[!?#]?[a-z0-9_-]*>|^[!?#]?[a-z0-9_-]*:.*>");
 
     private QualityData(Map<BrewQuality, T> backing) {
         this.backing = backing;
