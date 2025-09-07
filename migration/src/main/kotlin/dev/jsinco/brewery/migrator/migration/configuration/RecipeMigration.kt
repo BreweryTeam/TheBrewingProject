@@ -6,6 +6,7 @@ import org.bukkit.configuration.ConfigurationSection
 import org.bukkit.configuration.file.YamlConfiguration
 import java.io.File
 import java.util.regex.Pattern
+import java.util.stream.Collectors
 
 object RecipeMigration {
 
@@ -159,8 +160,12 @@ object RecipeMigration {
             } else {
                 value
             }
-            return MiniMessage.miniMessage()
-                .serialize(LegacyComponentSerializer.legacyAmpersand().deserialize(newValue))
+            return newValue.split("/")
+                .stream()
+                .map {
+                    MiniMessage.miniMessage()
+                        .serialize(LegacyComponentSerializer.legacyAmpersand().deserialize(it))
+                }.collect(Collectors.joining("/"))
         }
         return value
     }
