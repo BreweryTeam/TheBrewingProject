@@ -15,7 +15,7 @@ pipeline {
                     
                     jars.each { jar ->
                         def newFileName = jar.name.replaceFirst(/\.jar$/, "-${sanitizedBranch}-${shortHash}.jar")
-                        sh "mv '${jar.path}/${jar.name}' '${jar.path}/${newFileName}'"
+                        sh "mv '${jar.path}' '${jar.path}'"
                     }
                 }
             }
