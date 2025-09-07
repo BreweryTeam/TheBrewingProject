@@ -114,7 +114,8 @@ object RecipeMigration {
                 it.startsWith("$quality ") || (quality.isEmpty() && !it.contains("^\\++ ".toRegex()))
             }.map {
                 it.replace("^\\++ ".toRegex(), "")
-            }.map {
+            }.map(this::replaceCommand)
+            .map {
                 val re = " */(\\d+[sm]) *$".toRegex()
                 re.find(it)?.let { matchResult ->
                     mapOf(
@@ -127,7 +128,8 @@ object RecipeMigration {
                 it.startsWith("$quality ") || (quality.isEmpty() && !it.contains("^\\++ ".toRegex()))
             }.map {
                 it.replace("^\\++ ".toRegex(), "")
-            }.map {
+            }.map(this::replaceCommand)
+            .map {
                 val re = " */(\\d+ *[sm]) *$".toRegex()
                 re.find(it)?.let { matchResult ->
                     mapOf(
@@ -137,6 +139,32 @@ object RecipeMigration {
                     )
                 } ?: mapOf("command" to it, "as" to "player")
             }).toList()
+    }
+
+    private fun replaceCommand(command: String): String {
+        val commandWithoutSlash = command.replace("^/".toRegex(), "")
+        val breweryXCommand = "(?:breweryx:brew|breweryx:breweryx|breweryx:brewery|brew|breweryx|brewery)"
+        val createCommand = "^$breweryXCommand create ([^ ]+) (?:|\\d+ )%player_name%$".toRegex()
+        createCommand.find(commandWithoutSlash)
+            ?.let { matchResult ->
+                return "tbp replicate for %player_name% ${matchResult.groups[1]!!.value.lowercase()}"
+            }
+        val pukeCommand = "^$breweryXCommand puke %player_name%$".toRegex()
+        pukeCommand.find(commandWithoutSlash)
+            ?.let { matchResult ->
+                return "tbp event for %player_name% puke"
+            }
+        val setCommand = "^$breweryXCommand %player_name% (\\d+)$".toRegex()
+        setCommand.find(commandWithoutSlash)
+            ?.let { matchResult ->
+                return "tbp status set ${matchResult.groups[1]!!.value}"
+            }
+        val sealCommand = "^$breweryXCommand seal$".toRegex()
+        sealCommand.find(commandWithoutSlash)
+            ?.let {
+                return "tbp seal all"
+            }
+        return commandWithoutSlash
     }
 
     private fun compileSteps(recipeConfiguration: ConfigurationSection): List<Map<String, Any>> {
