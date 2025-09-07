@@ -101,6 +101,9 @@ object RecipeMigration {
                 tbpRecipes.set("recipes.${key}.events", qualities.map { "$it${qualityNames[it]!!}_${key}_event" })
             }
         }
+        println("----------------------")
+        println(tbpEvents.saveToString())
+        println("----------------------")
         tbpRecipes.save(tbpRecipesFile)
         tbpEvents.save(tbpEventsFile)
     }
@@ -112,18 +115,27 @@ object RecipeMigration {
             }.map {
                 it.replace("^\\++ ".toRegex(), "")
             }.map {
-                mapOf(
-                    "command" to it
-                )
+                val re = " */(\\d+[sm]) *$".toRegex()
+                re.find(it)?.let { matchResult ->
+                    mapOf(
+                        "command" to it.replace(re, ""),
+                        "wait-duration" to matchResult.groups[1]!!.value
+                    )
+                } ?: mapOf("command" to it)
             } + recipeConfiguration.getStringList("playercommands")
             .filter {
                 it.startsWith("$quality ") || (quality.isEmpty() && !it.contains("^\\++ ".toRegex()))
             }.map {
                 it.replace("^\\++ ".toRegex(), "")
             }.map {
-                mapOf(
-                    "command" to it, "as" to "player"
-                )
+                val re = " */(\\d+ *[sm]) *$".toRegex()
+                re.find(it)?.let { matchResult ->
+                    mapOf(
+                        "command" to it.replace(re, ""),
+                        "as" to "player",
+                        "wait-duration" to matchResult.groups[1]!!.value
+                    )
+                } ?: mapOf("command" to it, "as" to "player")
             }).toList()
     }
 
