@@ -14,8 +14,8 @@ pipeline {
                     def jars = findFiles(glob: 'bukkit/build/libs/TheBrewingProject*.jar') + findFiles(glob: 'migration/build/libs/TheBrewingProjectMigration*.jar')
                     
                     jars.each { jar ->
-                        def newFileName = jar.name.replaceFirst(/\.jar$/, "-${sanitizedBranch}-${shortHash}.jar")
-                        sh "mv '${jar.path}' '${jar.path}'"
+                        def newPath = jar.path.replaceFirst(/\.jar$/, "-${sanitizedBranch}-${shortHash}.jar")
+                        sh "mv '${jar.path}' '${newPath}'"
                     }
                 }
             }
