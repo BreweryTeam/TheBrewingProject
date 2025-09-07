@@ -15,8 +15,8 @@ dependencies {
     compileOnly(libs.exp4j)
 
     // test
-    testImplementation(platform(libs.junit.bom))
     testImplementation(libs.junit.jupiter)
+    testRuntimeOnly(libs.junit.platform.launcher)
 }
 
 tasks.test {

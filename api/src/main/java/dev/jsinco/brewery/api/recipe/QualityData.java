@@ -1,12 +1,15 @@
 package dev.jsinco.brewery.api.recipe;
 
 import dev.jsinco.brewery.api.brew.BrewQuality;
+import dev.jsinco.brewery.api.util.Logger;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Utility for handling quality data
@@ -16,6 +19,7 @@ import java.util.stream.Collectors;
 public class QualityData<T> {
 
     private final Map<BrewQuality, T> backing;
+    private static final Pattern TAG_PATTERN = Pattern.compile("^[!?#]?[a-z0-9_-]*>");
 
     private QualityData(Map<BrewQuality, T> backing) {
         this.backing = backing;
@@ -51,10 +55,10 @@ public class QualityData<T> {
         if (string == null) {
             return new QualityData<>(Map.of());
         }
-        if (!string.contains("/")) {
+        String[] list = split(string);
+        if (list.length == 1) {
             return new QualityData<>(Map.of(BrewQuality.BAD, string, BrewQuality.GOOD, string, BrewQuality.EXCELLENT, string));
         }
-        String[] list = string.split("/");
         if (list.length != 3) {
             throw new IllegalArgumentException("Expected a string with format <bad>/<good>/<excellent>");
         }
@@ -63,6 +67,30 @@ public class QualityData<T> {
             map.put(BrewQuality.values()[i], list[i]);
         }
         return new QualityData<>(map);
+    }
+
+    private static String[] split(String string) {
+        int previous = 0;
+        Stream.Builder<String> builder = Stream.builder();
+        for (int i = 0; i < string.length(); i++) {
+            char character = string.charAt(i);
+            if (character != '/') {
+                continue;
+            }
+            if (i == 0 || i == string.length() - 1) {
+                builder.add(string.substring(previous, i));
+                previous = i + 1;
+                continue;
+            }
+            if (string.charAt(i - 1) == '<' && TAG_PATTERN.matcher(string.substring(i + 1)).find()) {
+                continue;
+            }
+            builder.add(string.substring(previous, i));
+            previous = i + 1;
+        }
+        builder.add(string.substring(previous));
+        return builder.build()
+                .toArray(String[]::new);
     }
 
     public static QualityData<List<String>> readQualityFactoredStringList(@Nullable List<String> stringList) {
