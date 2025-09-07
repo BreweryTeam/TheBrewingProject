@@ -99,7 +99,9 @@ object RecipeMigration {
                             compileEvents(recipeConfiguration, it)
                         )
                     }
-                tbpRecipes.set("recipes.${lowercaseName}.events", qualities.map { "$it${qualityNames[it]!!}_${lowercaseName}_event" })
+                tbpRecipes.set(
+                    "recipes.${lowercaseName}.events",
+                    qualities.map { "$it${qualityNames[it]!!}_${lowercaseName}_event" })
             }
         }
         tbpRecipes.save(tbpRecipesFile)
@@ -216,7 +218,14 @@ object RecipeMigration {
                 value
             }
             return newValue.split("/").stream().map {
-                MiniMessage.miniMessage().serialize(LegacyComponentSerializer.legacyAmpersand().deserialize(it))
+
+                MiniMessage.miniMessage().serialize(
+                    if (it.contains("§")) {
+                        LegacyComponentSerializer.legacySection().deserialize(it)
+                    } else {
+                        LegacyComponentSerializer.legacyAmpersand().deserialize(it)
+                    }
+                )
             }.collect(Collectors.joining("/"))
         }
         return value
