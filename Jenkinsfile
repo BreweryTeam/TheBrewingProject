@@ -7,22 +7,22 @@ pipeline {
 
             steps {
                 sh 'chmod +x gradlew'
-                sh './gradlew bukkit:shadowJar'
+                sh './gradlew bukkit:shadowJar migration:shadowJar'
                 script {
                     def sanitizedBranch = env.BRANCH_NAME.replaceAll(/[^a-zA-Z0-9._]/, '_')
                     def shortHash = env.GIT_COMMIT.substring(0, 6)
-                    def jars = findFiles(glob: 'bukkit/build/libs/TheBrewingProject*.jar')
+                    def jars = findFiles(glob: 'bukkit/build/libs/TheBrewingProject*.jar') + findFiles(glob: 'migration/build/libs/TheBrewingProjectMigration*.jar')
                     
                     jars.each { jar ->
                         def newFileName = jar.name.replaceFirst(/\.jar$/, "-${sanitizedBranch}-${shortHash}.jar")
-                        sh "mv 'bukkit/build/libs/${jar.name}' 'bukkit/build/libs/${newFileName}'"
+                        sh "mv '${jar.path}/${jar.name}' '${jar.path}/${newFileName}'"
                     }
                 }
             }
 
             post {        
                 always {
-                    archiveArtifacts artifacts: 'bukkit/build/libs/TheBrewingProject*.jar', fingerprint: true
+                    archiveArtifacts artifacts: 'bukkit/build/libs/TheBrewingProject*.jar, migration/build/libs/TheBrewingProjectMigration*.jar', fingerprint: true
                 }
             }
         }
