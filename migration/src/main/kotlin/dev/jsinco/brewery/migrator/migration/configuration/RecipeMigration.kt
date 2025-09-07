@@ -33,8 +33,7 @@ object RecipeMigration {
     )
 
     val INGREDIENT_REPLACEMENTS = mapOf(
-        "grass" to "short_grass",
-        "blue-flowers" to "blue_orchid"
+        "grass" to "short_grass", "blue-flowers" to "blue_orchid"
     )
 
     val BARREL_TYPE_REPLACEMENTS = (sequenceOf(
@@ -51,15 +50,17 @@ object RecipeMigration {
         "bamboo",
         "copper",
         "pale_oak"
-    ).mapIndexed { index, string -> index.toString() to string }
-            + sequenceOf("cut_copper" to "copper")
-            ).toMap()
+    ).mapIndexed { index, string ->
+        index.toString() to string
+    } + sequenceOf("cut_copper" to "copper")).toMap()
 
     fun migrateRecipes(breweryXFolder: File, tbpFolder: File) {
         val breweryXConfiguration = YamlConfiguration.loadConfiguration(File(breweryXFolder, "recipes.yml"))
         val recipesConfiguration = breweryXConfiguration.getConfigurationSection("recipes")!!
-        val tbpConfigurationFile = File(tbpFolder, "recipes.yml")
-        val tbpConfiguration = YamlConfiguration.loadConfiguration(tbpConfigurationFile)
+        val tbpRecipesFile = File(tbpFolder, "recipes.yml")
+        val tbpEventsFile = File(tbpFolder, "events.yml")
+        val tbpRecipes = YamlConfiguration.loadConfiguration(tbpRecipesFile)
+        val tbpEvents = YamlConfiguration.loadConfiguration(tbpEventsFile)
         for (key in recipesConfiguration.getKeys(false)) {
             if (key == "ex") {
                 continue
@@ -69,12 +70,61 @@ object RecipeMigration {
                 val newKey = KEY_REMAPPING[recipeKey]
                 newKey?.let {
                     val newValue = processValue(recipeKey, recipeConfiguration.get(recipeKey)!!)
-                    tbpConfiguration.set("recipes.${key}.${newKey}", newValue)
+                    tbpRecipes.set("recipes.${key}.${newKey}", newValue)
                 }
             }
-            tbpConfiguration.set("recipes.${key}.steps", compileSteps(recipeConfiguration))
+            tbpRecipes.set("recipes.${key}.steps", compileSteps(recipeConfiguration))
+            if (recipeConfiguration.contains("servercommands") || recipeConfiguration.contains("playercommands")) {
+                val serverCommands = recipeConfiguration.getStringList("servercommands")
+                val playerCommands = recipeConfiguration.getStringList("playercommands")
+                val qualities = listOf("+", "++", "+++", "").filter { quality ->
+                    serverCommands.asSequence().any {
+                        it.startsWith("$quality ") || (quality.isEmpty() && !it.contains("^\\++ ".toRegex()))
+                    } || playerCommands.asSequence()
+                        .any {
+                            it.startsWith("$quality ") || (quality.isEmpty() && !it.contains("^\\++ ".toRegex()))
+                        }
+                }
+                val qualityNames = mapOf(
+                    "+" to "poor",
+                    "++" to "good",
+                    "+++" to "excellent",
+                    "" to "generic"
+                )
+                qualities
+                    .forEach {
+                        tbpEvents.set(
+                            "custom-events.${qualityNames[it]!!}_${key}_event.steps",
+                            compileEvents(recipeConfiguration, it)
+                        )
+                    }
+                tbpRecipes.set("recipes.${key}.events", qualities.map { "$it${qualityNames[it]!!}_${key}_event" })
+            }
         }
-        tbpConfiguration.save(tbpConfigurationFile)
+        tbpRecipes.save(tbpRecipesFile)
+        tbpEvents.save(tbpEventsFile)
+    }
+
+    private fun compileEvents(recipeConfiguration: ConfigurationSection, quality: String): List<Map<String, Any>> {
+        return (recipeConfiguration.getStringList("servercommands").asSequence()
+            .filter {
+                it.startsWith("$quality ") || (quality.isEmpty() && !it.contains("^\\++ ".toRegex()))
+            }.map {
+                it.replace("^\\++ ".toRegex(), "")
+            }.map {
+                mapOf(
+                    "command" to it
+                )
+            } + recipeConfiguration.getStringList("playercommands")
+            .filter {
+                it.startsWith("$quality ") || (quality.isEmpty() && !it.contains("^\\++ ".toRegex()))
+            }.map {
+                it.replace("^\\++ ".toRegex(), "")
+            }.map {
+                mapOf(
+                    "command" to it, "as" to "player"
+                )
+            }).toList()
     }
 
     private fun compileSteps(recipeConfiguration: ConfigurationSection): List<Map<String, Any>> {
@@ -93,23 +143,20 @@ object RecipeMigration {
         if (distillRuns > 0) {
             output.add(
                 mapOf(
-                    "type" to "distill",
-                    "runs" to distillRuns
+                    "type" to "distill", "runs" to distillRuns
                 )
             )
         }
         val ageingTime = recipeConfiguration.getInt("age", 0)
         val barrelType = recipeConfiguration.getString("wood") ?: "any"
         if (ageingTime > 0) {
-            val revisedBarrelType = BARREL_TYPE_REPLACEMENTS.keys.asSequence()
-                .filter { barrelType.contains(it, ignoreCase = true) }
-                .map { barrelType.replace(it, BARREL_TYPE_REPLACEMENTS[it]!!, ignoreCase = true) }
-                .firstOrNull() ?: barrelType
+            val revisedBarrelType =
+                BARREL_TYPE_REPLACEMENTS.keys.asSequence().filter { barrelType.contains(it, ignoreCase = true) }
+                    .map { barrelType.replace(it, BARREL_TYPE_REPLACEMENTS[it]!!, ignoreCase = true) }.firstOrNull()
+                    ?: barrelType
             output.add(
                 mapOf(
-                    "type" to "age",
-                    "age-years" to ageingTime,
-                    "barrel-type" to revisedBarrelType
+                    "type" to "age", "age-years" to ageingTime, "barrel-type" to revisedBarrelType
                 )
             )
         }
@@ -141,17 +188,13 @@ object RecipeMigration {
                     )
                 }.toList()
             }
-            return value.asSequence()
-                .mapNotNull { it }
-                .map { processValue(key, it) }
-                .toList()
+            return value.asSequence().mapNotNull { it }.map { processValue(key, it) }.toList()
         }
         if (value is String) {
             if (key == "ingredients") {
-                return INGREDIENT_REPLACEMENTS.keys.asSequence()
-                    .filter { value.contains(it, ignoreCase = true) }
-                    .map { value.replace(it, INGREDIENT_REPLACEMENTS[it]!!, ignoreCase = true) }
-                    .firstOrNull() ?: value.lowercase()
+                return INGREDIENT_REPLACEMENTS.keys.asSequence().filter { value.contains(it, ignoreCase = true) }
+                    .map { value.replace(it, INGREDIENT_REPLACEMENTS[it]!!, ignoreCase = true) }.firstOrNull()
+                    ?: value.lowercase()
             }
             val pattern = Pattern.compile("^(\\++) ")
             val matcher = pattern.matcher(value)
@@ -160,12 +203,9 @@ object RecipeMigration {
             } else {
                 value
             }
-            return newValue.split("/")
-                .stream()
-                .map {
-                    MiniMessage.miniMessage()
-                        .serialize(LegacyComponentSerializer.legacyAmpersand().deserialize(it))
-                }.collect(Collectors.joining("/"))
+            return newValue.split("/").stream().map {
+                MiniMessage.miniMessage().serialize(LegacyComponentSerializer.legacyAmpersand().deserialize(it))
+            }.collect(Collectors.joining("/"))
         }
         return value
     }
