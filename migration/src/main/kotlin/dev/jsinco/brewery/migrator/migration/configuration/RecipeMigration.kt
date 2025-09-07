@@ -33,7 +33,7 @@ object RecipeMigration {
     )
 
     val INGREDIENT_REPLACEMENTS = mapOf(
-        "grass" to "short_grass", "blue-flowers" to "blue_orchid"
+        "^grass" to "short_grass", "^blue-flowers" to "blue_orchid"
     )
 
     val BARREL_TYPE_REPLACEMENTS = (sequenceOf(
@@ -101,9 +101,6 @@ object RecipeMigration {
                 tbpRecipes.set("recipes.${key}.events", qualities.map { "$it${qualityNames[it]!!}_${key}_event" })
             }
         }
-        println("----------------------")
-        println(tbpEvents.saveToString())
-        println("----------------------")
         tbpRecipes.save(tbpRecipesFile)
         tbpEvents.save(tbpEventsFile)
     }
@@ -204,8 +201,10 @@ object RecipeMigration {
         }
         if (value is String) {
             if (key == "ingredients") {
-                return INGREDIENT_REPLACEMENTS.keys.asSequence().filter { value.contains(it, ignoreCase = true) }
-                    .map { value.replace(it, INGREDIENT_REPLACEMENTS[it]!!, ignoreCase = true) }.firstOrNull()
+                return INGREDIENT_REPLACEMENTS.keys.asSequence()
+                    .filter { value.toRegex(RegexOption.IGNORE_CASE).containsMatchIn(it) }
+                    .map { value.toRegex(RegexOption.IGNORE_CASE).replace(it, INGREDIENT_REPLACEMENTS[it]!!) }
+                    .firstOrNull()
                     ?: value.lowercase()
             }
             val pattern = Pattern.compile("^(\\++) ")
