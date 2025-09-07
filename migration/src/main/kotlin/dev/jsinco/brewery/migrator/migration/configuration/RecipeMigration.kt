@@ -65,15 +65,16 @@ object RecipeMigration {
             if (key == "ex") {
                 continue
             }
+            val lowercaseName = key.lowercase()
             val recipeConfiguration = recipesConfiguration.getConfigurationSection(key)!!
             for (recipeKey in recipeConfiguration.getKeys(true)) {
                 val newKey = KEY_REMAPPING[recipeKey]
                 newKey?.let {
                     val newValue = processValue(recipeKey, recipeConfiguration.get(recipeKey)!!)
-                    tbpRecipes.set("recipes.${key}.${newKey}", newValue)
+                    tbpRecipes.set("recipes.${lowercaseName}.${newKey}", newValue)
                 }
             }
-            tbpRecipes.set("recipes.${key}.steps", compileSteps(recipeConfiguration))
+            tbpRecipes.set("recipes.${lowercaseName}.steps", compileSteps(recipeConfiguration))
             if (recipeConfiguration.contains("servercommands") || recipeConfiguration.contains("playercommands")) {
                 val serverCommands = recipeConfiguration.getStringList("servercommands")
                 val playerCommands = recipeConfiguration.getStringList("playercommands")
@@ -94,11 +95,11 @@ object RecipeMigration {
                 qualities
                     .forEach {
                         tbpEvents.set(
-                            "custom-events.${qualityNames[it]!!}_${key}_event.steps",
+                            "custom-events.${qualityNames[it]!!}_${lowercaseName}_event.steps",
                             compileEvents(recipeConfiguration, it)
                         )
                     }
-                tbpRecipes.set("recipes.${key}.events", qualities.map { "$it${qualityNames[it]!!}_${key}_event" })
+                tbpRecipes.set("recipes.${lowercaseName}.events", qualities.map { "$it${qualityNames[it]!!}_${lowercaseName}_event" })
             }
         }
         tbpRecipes.save(tbpRecipesFile)
