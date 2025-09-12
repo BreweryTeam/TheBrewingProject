@@ -1,9 +1,12 @@
 package dev.jsinco.brewery.configuration.serializers;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableMap;
+import dev.jsinco.brewery.api.effect.modifier.ModifierExpression;
 import dev.jsinco.brewery.api.event.CustomEvent;
 import dev.jsinco.brewery.api.event.EventProbability;
 import dev.jsinco.brewery.api.event.EventStep;
+import dev.jsinco.brewery.api.math.RangeD;
 import eu.okaeri.configs.schema.GenericsDeclaration;
 import eu.okaeri.configs.serdes.DeserializationData;
 import eu.okaeri.configs.serdes.ObjectSerializer;
@@ -32,7 +35,22 @@ public class CustomEventSerializer implements ObjectSerializer<CustomEvent> {
 
     @Override
     public CustomEvent deserialize(@NonNull DeserializationData data, @NonNull GenericsDeclaration generics) {
-        EventProbability probability = data.get("probability", EventProbability.class);
+        EventProbability probability;
+        if ((data.containsKey("alcohol") || data.containsKey("toxins")) && data.containsKey("probability-weight")) {
+            ImmutableMap.Builder<String, RangeD> ranges = new ImmutableMap.Builder<>();
+            if (data.containsKey("alcohol")) {
+                ranges.put("alcohol", new RangeD(data.get("alcohol", Double.class), null));
+            }
+            if (data.containsKey("toxins")) {
+                ranges.put("toxins", new RangeD(data.get("toxins", Double.class), null));
+            }
+            probability = new EventProbability(
+                    new ModifierExpression(data.get("probability-weight", Double.class) / 5 + "*probabilityWeight(alcohol)"),
+                    ranges.build()
+            );
+        } else {
+            probability = data.get("probability", EventProbability.class);
+        }
         CustomEvent.Builder builder = new CustomEvent.Builder()
                 .probability(probability == null ? EventProbability.NONE : probability);
 

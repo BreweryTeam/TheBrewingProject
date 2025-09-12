@@ -14,6 +14,21 @@ public class Migrations {
 
     public static void migrateAllConfigFiles(File pluginFolder) {
         updateRecipes(new File(pluginFolder, "recipes.yml"));
+        updateEvents(new File(pluginFolder, "events.yml"));
+    }
+
+    private static void updateEvents(File eventsFile) {
+        if (!eventsFile.exists()) {
+            return;
+        }
+        YamlFile yaml = new YamlFile(eventsFile);
+        try {
+            yaml.load();
+        } catch (IOException e) {
+            Logger.logErr("Unable to read events.yml file even though it existed");
+            Logger.logErr(e);
+            return;
+        }
     }
 
     private static void updateRecipes(File recipesFile) {
