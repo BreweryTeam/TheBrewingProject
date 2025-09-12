@@ -1,18 +1,18 @@
 package dev.jsinco.brewery.recipes;
 
 import com.google.common.base.Preconditions;
-import dev.jsinco.brewery.brew.AgeStepImpl;
 import dev.jsinco.brewery.api.brew.BrewingStep;
+import dev.jsinco.brewery.api.ingredient.IngredientManager;
+import dev.jsinco.brewery.api.moment.PassedMoment;
+import dev.jsinco.brewery.api.util.BreweryKey;
+import dev.jsinco.brewery.api.util.BreweryRegistry;
+import dev.jsinco.brewery.api.util.Logger;
+import dev.jsinco.brewery.brew.AgeStepImpl;
 import dev.jsinco.brewery.brew.CookStepImpl;
 import dev.jsinco.brewery.brew.DistillStepImpl;
 import dev.jsinco.brewery.brew.MixStepImpl;
 import dev.jsinco.brewery.configuration.Config;
-import dev.jsinco.brewery.api.ingredient.IngredientManager;
-import dev.jsinco.brewery.api.moment.PassedMoment;
-import dev.jsinco.brewery.api.util.BreweryKey;
 import dev.jsinco.brewery.util.FutureUtil;
-import dev.jsinco.brewery.api.util.Logger;
-import dev.jsinco.brewery.api.util.BreweryRegistry;
 import org.jetbrains.annotations.NotNull;
 import org.simpleyaml.configuration.ConfigurationSection;
 import org.simpleyaml.configuration.file.YamlFile;
@@ -137,9 +137,5 @@ public class RecipeReader<I> {
                 Preconditions.checkArgument(map.get("ingredients") instanceof List, "Expected string list value for 'ingredients' in mix step!");
             }
         }
-    }
-
-    public static int parseAlcoholString(String str) {
-        return Integer.parseInt(str.replace("%", "").replace(" ", ""));
     }
 }

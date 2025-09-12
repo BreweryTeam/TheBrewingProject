@@ -28,6 +28,7 @@ import dev.jsinco.brewery.bukkit.effect.event.DrunkEventExecutor;
 import dev.jsinco.brewery.bukkit.event.*;
 import dev.jsinco.brewery.bukkit.ingredient.BukkitIngredientManager;
 import dev.jsinco.brewery.bukkit.integration.IntegrationManagerImpl;
+import dev.jsinco.brewery.bukkit.migration.Migrations;
 import dev.jsinco.brewery.bukkit.recipe.BukkitRecipeResultReader;
 import dev.jsinco.brewery.bukkit.recipe.DefaultRecipeReader;
 import dev.jsinco.brewery.bukkit.structure.*;
@@ -135,6 +136,7 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
     @Override
     public void onLoad() {
         saveResources();
+        Migrations.migrateAllConfigFiles(this.getDataFolder());
         initialize();
         Bukkit.getServicesManager().register(TheBrewingProjectApi.class, this, this, ServicePriority.Normal);
         integrationManager.registerIntegrations();
@@ -167,6 +169,7 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
     }
 
     public void reload() {
+        Migrations.migrateAllConfigFiles(this.getDataFolder());
         saveResources();
         closeDatabase();
         Config.config().load(true);

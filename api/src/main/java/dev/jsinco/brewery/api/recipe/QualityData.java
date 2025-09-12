@@ -1,11 +1,11 @@
 package dev.jsinco.brewery.api.recipe;
 
 import dev.jsinco.brewery.api.brew.BrewQuality;
-import dev.jsinco.brewery.api.util.Logger;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -131,5 +131,17 @@ public class QualityData<T> {
             }
             consumer.accept(brewQuality, value);
         }
+    }
+
+    public <U> QualityData<U> qualityMap(BiFunction<BrewQuality, T, U> biFunction) {
+        Map<BrewQuality, U> newBacking = new HashMap<>();
+        for (Map.Entry<BrewQuality, T> entry : backing.entrySet()) {
+            newBacking.put(entry.getKey(), biFunction.apply(entry.getKey(), entry.getValue()));
+        }
+        return new QualityData<>(newBacking);
+    }
+
+    public static String toQualityFactoredString(QualityData<String> qualityData) {
+        return qualityData.get(BrewQuality.BAD) + "/" + qualityData.get(BrewQuality.GOOD) + "/" + qualityData.get(BrewQuality.EXCELLENT);
     }
 }
