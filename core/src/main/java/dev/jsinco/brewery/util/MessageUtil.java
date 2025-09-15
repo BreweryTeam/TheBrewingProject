@@ -77,7 +77,10 @@ public class MessageUtil {
                     ),
                     Placeholder.component("cauldron_type", Component.translatable("tbp.cauldron.type." + cook.cauldronType().name().toLowerCase(Locale.ROOT)))
             );
-            case BrewingStep.Distill distill -> Formatter.number("distill_runs", distill.runs());
+            case BrewingStep.Distill distill -> TagResolver.resolver(
+                    Formatter.number("distill_runs", distill.runs()),
+                    Placeholder.unparsed("distill_runs_numerals", NumberFormatting.toRoman(distill.runs()))
+            );
             case BrewingStep.Mix mix -> TagResolver.resolver(
                     Placeholder.parsed("mixing_time", TimeFormatter.format(mix.time().moment(), TimeFormat.MIXING_TIME, TimeModifier.COOKING)),
                     Placeholder.component("ingredients", mix.ingredients().entrySet()
