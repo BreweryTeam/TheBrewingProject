@@ -5,12 +5,7 @@ import java.util.List;
 public class NumberFormatting {
 
     private static final List<Numeral> ROMAN_NUMERAL = List.of(
-            new Numeral("\u0305D", 500000, false),
-            new Numeral("\u0305C", 100000, true),
-            new Numeral("\u0305L", 50000, false),
-            new Numeral("\u0305X", 10000, true),
-            new Numeral("\u0305V", 5000, false),
-            new Numeral("\u0305I", 1000, true),
+            new Numeral("M", 1000, true),
             new Numeral("D", 500, false),
             new Numeral("C", 100, true),
             new Numeral("L", 50, false),

@@ -21,15 +21,15 @@ class NumberFormattingTest {
                 Arguments.of("XXXIX", 39),
                 Arguments.of("CCXLVI", 246),
                 Arguments.of("DCCLXXXIX", 789),
-                Arguments.of("\u0305I\u0305ICDXXI", 2421),
+                Arguments.of("MIMICDXXI", 2421),
                 Arguments.of("CLX", 160),
                 Arguments.of("CCVII", 207),
-                Arguments.of("\u0305IIX", 1009),
-                Arguments.of("\u0305ILXVI", 1066),
-                Arguments.of("\u0305IDCCLXXVI", 1776),
-                Arguments.of("\u0305IC\u0305IXVIII", 1918),
-                Arguments.of("\u0305IC\u0305IXLIV", 1944),
-                Arguments.of("\u0305I\u0305IXXV", 2025)
+                Arguments.of("MIIX", 1009),
+                Arguments.of("MILXVI", 1066),
+                Arguments.of("MIDCCLXXVI", 1776),
+                Arguments.of("MICMIXVIII", 1918),
+                Arguments.of("MICMIXLIV", 1944),
+                Arguments.of("MIMIXXV", 2025)
         );
     }
 
