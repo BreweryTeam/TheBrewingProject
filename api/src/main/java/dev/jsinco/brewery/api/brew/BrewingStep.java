@@ -19,7 +19,7 @@ public interface BrewingStep {
      * @param other The other step to compare to
      * @return A proximity index in the range [0, 1], where 1 is 100% match
      */
-    Map<PartialBrewScore.Type, PartialBrewScore> proximityScores(BrewingStep other);
+    Map<ScoreType, PartialBrewScore> proximityScores(BrewingStep other);
 
     /**
      * @return The type of the step
@@ -30,12 +30,12 @@ public interface BrewingStep {
      * @param other Another brewing step
      * @return The maximum scores "other" can get for this brewing step
      */
-    Map<PartialBrewScore.Type, PartialBrewScore> maximumScores(BrewingStep other);
+    Map<ScoreType, PartialBrewScore> maximumScores(BrewingStep other);
 
     /**
      * @return The scores for a failed step of this type
      */
-    Map<PartialBrewScore.Type, PartialBrewScore> failedScores();
+    Map<ScoreType, PartialBrewScore> failedScores();
 
     /**
      * @param state    The state of the brew

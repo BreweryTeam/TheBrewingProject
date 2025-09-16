@@ -60,7 +60,7 @@ public class MessageUtil {
         );
     }
 
-    public static @NotNull TagResolver getBrewStepTagResolver(BrewingStep brewingStep, Map<PartialBrewScore.Type, PartialBrewScore> scores, double difficulty) {
+    public static @NotNull TagResolver getBrewStepTagResolver(BrewingStep brewingStep, Map<ScoreType, PartialBrewScore> scores, double difficulty) {
         TagResolver resolver = switch (brewingStep) {
             case BrewingStep.Age age -> TagResolver.resolver(
                     Placeholder.component("barrel_type", GlobalTranslator.render(Component.translatable("tbp.barrel.type." + age.barrelType().name().toLowerCase(Locale.ROOT)), Config.config().language())),

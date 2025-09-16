@@ -6,6 +6,7 @@ import dev.jsinco.brewery.api.brew.BrewScore;
 import dev.jsinco.brewery.api.brew.BrewingStep;
 import dev.jsinco.brewery.api.ingredient.Ingredient;
 import dev.jsinco.brewery.api.ingredient.IngredientManager;
+import dev.jsinco.brewery.api.recipe.DefaultRecipe;
 import dev.jsinco.brewery.api.recipe.Recipe;
 import dev.jsinco.brewery.api.recipe.RecipeResult;
 import dev.jsinco.brewery.api.util.BreweryKey;
@@ -17,6 +18,7 @@ import dev.jsinco.brewery.bukkit.util.IngredientUtil;
 import dev.jsinco.brewery.bukkit.util.ListPersistentDataType;
 import dev.jsinco.brewery.configuration.Config;
 import dev.jsinco.brewery.recipes.BrewScoreImpl;
+import dev.jsinco.brewery.recipes.RecipeConditions;
 import dev.jsinco.brewery.recipes.RecipeRegistryImpl;
 import dev.jsinco.brewery.util.ClassUtil;
 import io.papermc.paper.datacomponent.DataComponentTypes;
@@ -36,16 +38,14 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class BrewAdapter {
 
 
     private static final int DATA_VERSION = 0;
+    private static final Random RANDOM = new Random();
 
     private static final NamespacedKey BREWING_STEPS = TheBrewingProject.key("steps");
     private static final NamespacedKey BREWERY_DATA_VERSION = TheBrewingProject.key("version");
@@ -61,9 +61,7 @@ public class BrewAdapter {
         Optional<BrewQuality> quality = score.flatMap(brewScore -> Optional.ofNullable(brewScore.brewQuality()));
         ItemStack itemStack;
         if (quality.isEmpty()) {
-            RecipeResult<ItemStack> randomDefault = recipeRegistry.getRandomDefaultRecipe();
-            //TODO Refactor this weird implementation for default recipes
-            itemStack = randomDefault.newBrewItem(BrewScoreImpl.PLACEHOLDER, brew, state);
+            itemStack = fromDefaultRecipe(recipe, recipeRegistry, brew, state);
         } else if (!score.map(BrewScore::completed).get()) {
             itemStack = incompletePotion(brew);
         } else {
@@ -117,6 +115,33 @@ public class BrewAdapter {
         itemStack.setData(DataComponentTypes.POTION_CONTENTS, PotionContents.potionContents()
                 .customColor(itemsInfo.first()).build());
         return itemStack;
+    }
+
+    private static ItemStack fromDefaultRecipe(Optional<Recipe<ItemStack>> recipe, RecipeRegistryImpl<ItemStack> recipeRegistry, Brew brew, Brew.State state) {
+        List<DefaultRecipe<ItemStack>> defaultRecipes = List.of();
+        if (recipe.isPresent()) {
+            defaultRecipes = recipeRegistry.getDefaultRecipes()
+                    .stream().filter(DefaultRecipe::onlyRuinedBrews)
+                    .filter(defaultRecipe ->
+                            !(defaultRecipe.recipeCondition() instanceof RecipeConditions.NoCondition) && defaultRecipe.recipeCondition().matches(recipe.get().getSteps(), brew.getSteps())
+                    )
+                    .toList();
+        }
+        if (defaultRecipes.isEmpty()) {
+            defaultRecipes = recipeRegistry.getDefaultRecipes()
+                    .stream().filter(DefaultRecipe::onlyRuinedBrews)
+                    .filter(defaultRecipe ->
+                            defaultRecipe.recipeCondition() instanceof RecipeConditions.NoCondition
+                    )
+                    .toList();
+        }
+        if (defaultRecipes.isEmpty()) {
+            ItemStack itemStack = new ItemStack(Material.POTION);
+            itemStack.setData(DataComponentTypes.CUSTOM_NAME, Component.text("Placeholder; you don't have any default recipes!"));
+            return itemStack;
+        }
+
+        return defaultRecipes.get(RANDOM.nextInt(defaultRecipes.size())).result().newBrewItem(BrewScoreImpl.PLACEHOLDER, brew, state);
     }
 
     public static void applyBrewStepsData(PersistentDataContainer pdc, Brew brew) {

@@ -202,7 +202,9 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
         RecipeReader<ItemStack> recipeReader = new RecipeReader<>(this.getDataFolder(), new BukkitRecipeResultReader(), BukkitIngredientManager.INSTANCE);
 
         recipeReader.readRecipes().forEach(recipeFuture -> recipeFuture.thenAcceptAsync(recipe -> recipeRegistry.registerRecipe(recipe)));
-        this.recipeRegistry.registerDefaultRecipes(DefaultRecipeReader.readDefaultRecipes(this.getDataFolder()));
+        DefaultRecipeReader.readDefaultRecipes(this.getDataFolder()).forEach((string, defaultRecipe) -> defaultRecipe
+                .thenAcceptAsync(defaultRecipe1 -> this.recipeRegistry.registerDefaultRecipe(string, defaultRecipe1))
+        );
         loadDrunkenReplacements();
         loadTimeFormats();
     }
@@ -300,7 +302,9 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
         RecipeReader<ItemStack> recipeReader = new RecipeReader<>(this.getDataFolder(), new BukkitRecipeResultReader(), BukkitIngredientManager.INSTANCE);
 
         recipeReader.readRecipes().forEach(recipeFuture -> recipeFuture.thenAcceptAsync(recipe -> recipeRegistry.registerRecipe(recipe)));
-        this.recipeRegistry.registerDefaultRecipes(DefaultRecipeReader.readDefaultRecipes(this.getDataFolder()));
+        DefaultRecipeReader.readDefaultRecipes(this.getDataFolder()).forEach((string, defaultRecipe) -> defaultRecipe
+                .thenAcceptAsync(defaultRecipe1 -> this.recipeRegistry.registerDefaultRecipe(string, defaultRecipe1))
+        );
         this.getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS, BreweryCommand::register);
         loadDrunkenReplacements();
         loadTimeFormats();

@@ -39,18 +39,18 @@ public interface RecipeRegistry<I> {
      * @param recipeName The key of the default recipe
      * @return A recipe result for the default recipe
      */
-    Optional<RecipeResult<I>> getDefaultRecipe(@NotNull String recipeName);
+    Optional<DefaultRecipe<I>> getDefaultRecipe(@NotNull String recipeName);
 
     /**
      * @return All default recipes
      */
-    Collection<RecipeResult<I>> getDefaultRecipes();
+    Collection<DefaultRecipe<I>> getDefaultRecipes();
 
     /**
      * @param name   The name of the default recipe
      * @param recipe The default recipe
      */
-    void registerDefaultRecipe(String name, RecipeResult<I> recipe);
+    void registerDefaultRecipe(String name, DefaultRecipe<I> recipe);
 
     /**
      * @param name The name of the default recipe

@@ -17,7 +17,7 @@ public interface BrewScore {
      * @return A map with partial scores
      * @throws IndexOutOfBoundsException If step index is too large, or smaller than 0
      */
-    Map<PartialBrewScore.Type, PartialBrewScore> getPartialScores(int stepIndex) throws IndexOutOfBoundsException;
+    Map<ScoreType, PartialBrewScore> getPartialScores(int stepIndex) throws IndexOutOfBoundsException;
 
     /**
      * @return A difficulty weighted score

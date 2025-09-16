@@ -83,7 +83,7 @@ public class BrewImpl implements Brew {
 
     public @NotNull BrewScore score(Recipe<?> recipe) {
         List<BrewingStep> recipeSteps = recipe.getSteps();
-        List<Map<PartialBrewScore.Type, PartialBrewScore>> scores = new ArrayList<>();
+        List<Map<ScoreType, PartialBrewScore>> scores = new ArrayList<>();
         List<BrewingStep> completedSteps = getCompletedSteps();
         if (completedSteps.size() > recipeSteps.size()) {
             return BrewScoreImpl.failed(this);

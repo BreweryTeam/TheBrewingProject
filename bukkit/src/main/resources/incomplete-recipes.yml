@@ -1,0 +1,105 @@
+# These recipes are used randomly when a player has brewed a potion with ingredients
+# that don't match with any recipes under the "recipes" category.
+#
+# default recipes are NOT the same as normal recipes and only have the following options available:
+# name : String
+# lore : List
+# custom-model-data : Integer
+# color : String
+# glint : Boolean
+incomplete-recipes:
+  ruined_brew:
+    name: 'Ruined brew'
+    color: 'gray'
+    lore:
+      - "<gray>I don't think it's drinkable"
+  overcooked_wash:
+    name: "Burnt wash"
+    color: "gray"
+    lore:
+      - <gray>With a bitter taste
+    condition:
+      final-step:
+        type: cook
+        cook-time: excessive
+  undercooked_wash:
+    name: "Raw wash"
+    color: "gray"
+    lore:
+      - <gray>Watery blend with many chunks at the bottom
+    condition:
+      final-step:
+        type: cook
+        cook-time: lacking
+  ruined_wash:
+    name: "Ruined wash"
+    color: "gray"
+    lore:
+      - <gray>Has an awful smell that makes you rethink your life choices
+    condition:
+      final-step:
+        type: cook
+  apple_wash:
+    name: "Apple wash"
+    color: red
+    lore:
+      - <red>With a sweet smell of apples
+    condition:
+      for-ruined-brews: false
+      final-step:
+        type: cook
+        ingredients:
+          - apple/any
+  undermixed_brew:
+    name: "Unevenly mixed brew"
+    color: "gray"
+    lore:
+      - <gray>Sour on the top, and sweet at the bottom
+    condition:
+      final-step:
+        type: mix
+        mix-time: lacking
+  overmixed_brew:
+    name: "Overmixed brew"
+    color: "gray"
+    lore:
+      - <gray>One monotonous blend
+    condition:
+      final-step:
+        type: mix
+        mix-time: excessive
+  ruined_mix:
+    name: "Ruined mix"
+    color: "gray"
+    lore:
+      - <gray>It's hard to tell, but this drink is somehow starting to solidify.
+      - <gray>What you do know, is that this is not fit for use
+    condition:
+      final-step:
+        type: mix
+  odorless_distillate:
+    name: "Odorless distillate"
+    color: "white"
+    lore:
+      - <gray>Stripped from all its features from multiple distill runs
+    condition:
+      final-step:
+        type: distill
+        runs: excessive
+  ruined_distillate:
+    name: "Ruined distillate"
+    color: "gray"
+    lore:
+      - <gray>Has an unappetizing synthetic smell
+    condition:
+      final-step:
+        type: distill
+  murky_vinegar:
+    name: "Murky vinegar"
+    color: "gray"
+    lore:
+      - <gray>With a weak acidic smell
+    condition:
+      final-step:
+        type: age
+        age-years: excessive

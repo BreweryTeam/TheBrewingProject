@@ -14,18 +14,18 @@ public class BrewScoreImpl implements BrewScore {
 
     public static final BrewScoreImpl PLACEHOLDER = new BrewScoreImpl(1D);
 
-    private final List<Map<PartialBrewScore.Type, PartialBrewScore>> scores;
+    private final List<Map<ScoreType, PartialBrewScore>> scores;
     private final boolean completed;
     private final double brewDifficulty;
 
     public BrewScoreImpl(double score) {
-        this.scores = List.of(Map.of(PartialBrewScore.Type.TIME, new PartialBrewScore(score, PartialBrewScore.Type.TIME)));
+        this.scores = List.of(Map.of(ScoreType.TIME, new PartialBrewScore(score, ScoreType.TIME)));
         completed = true;
         brewDifficulty = 1;
     }
 
     public static BrewScoreImpl failed(Brew brew) {
-        List<Map<PartialBrewScore.Type, PartialBrewScore>> scores = brew.getCompletedSteps()
+        List<Map<ScoreType, PartialBrewScore>> scores = brew.getCompletedSteps()
                 .stream().map(BrewingStep::failedScores)
                 .toList();
         return new BrewScoreImpl(scores, true, 1);
@@ -35,14 +35,14 @@ public class BrewScoreImpl implements BrewScore {
         return quality(score());
     }
 
-    public BrewScoreImpl(List<Map<PartialBrewScore.Type, PartialBrewScore>> scores, boolean completed, double brewDifficulty) {
+    public BrewScoreImpl(List<Map<ScoreType, PartialBrewScore>> scores, boolean completed, double brewDifficulty) {
         this.scores = scores;
         this.completed = completed;
         this.brewDifficulty = brewDifficulty / 2;
     }
 
     @Override
-    public Map<PartialBrewScore.Type, PartialBrewScore> getPartialScores(int stepIndex) {
+    public Map<ScoreType, PartialBrewScore> getPartialScores(int stepIndex) {
         return scores.get(stepIndex);
     }
 
