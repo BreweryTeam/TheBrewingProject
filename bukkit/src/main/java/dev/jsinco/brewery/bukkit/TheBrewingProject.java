@@ -204,7 +204,14 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
 
         recipeReader.readRecipes().forEach(recipeFuture -> recipeFuture.thenAcceptAsync(recipe -> recipeRegistry.registerRecipe(recipe)));
         DefaultRecipeReader.readDefaultRecipes(this.getDataFolder()).forEach((string, defaultRecipe) -> defaultRecipe
-                .thenAcceptAsync(defaultRecipe1 -> this.recipeRegistry.registerDefaultRecipe(string, defaultRecipe1))
+                .whenComplete((defaultRecipe1, throwable) -> {
+                    if (throwable != null) {
+                        Logger.logErr("Could not read default recipe: " + string);
+                        Logger.logErr(throwable);
+                        return;
+                    }
+                    this.recipeRegistry.registerDefaultRecipe(string, defaultRecipe1);
+                })
         );
         loadDrunkenReplacements();
         loadTimeFormats();
