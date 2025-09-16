@@ -101,7 +101,7 @@ public class RecipeRegistryImpl<I> implements RecipeRegistry<I> {
 
     @Override
     public boolean isRegisteredIngredient(Ingredient ingredient) {
-        return allIngredients.stream().anyMatch(ingredient::equals);
+        return allIngredients.contains(ingredient);
     }
 
     @Override
