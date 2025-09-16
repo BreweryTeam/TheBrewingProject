@@ -1,8 +1,8 @@
 package dev.jsinco.brewery.bukkit.api.ingredient;
 
-import dev.jsinco.brewery.bukkit.api.integration.ItemIntegration;
 import dev.jsinco.brewery.api.ingredient.Ingredient;
 import dev.jsinco.brewery.api.util.BreweryKey;
+import dev.jsinco.brewery.bukkit.api.integration.ItemIntegration;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 
@@ -37,12 +37,8 @@ public class PluginIngredient implements Ingredient {
             return false;
         }
         PluginIngredient that = (PluginIngredient) o;
-
-        // remove optional plugin namespaces before checking for equality
-        String thisKey = key.key().contains(":") ? key.key().split(":", 2)[1] : key.key();
-        String thatKey = that.key.key().contains(":") ? that.key.key().split(":", 2)[1] : that.key.key();
-
-        return Objects.equals(thisKey, thatKey) && itemIntegration == that.itemIntegration;
+        
+        return Objects.equals(that.key, this.key) && itemIntegration == that.itemIntegration;
     }
 
     @Override

@@ -1,5 +1,6 @@
 package dev.jsinco.brewery.bukkit.integration.item;
 
+import dev.jsinco.brewery.api.ingredient.Ingredient;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.bukkit.api.integration.ItemIntegration;
 import dev.jsinco.brewery.util.ClassUtil;
@@ -61,6 +62,14 @@ public class ItemsAdderIntegration implements ItemIntegration, Listener {
     public void onEnable() {
         Bukkit.getPluginManager().registerEvents(this, TheBrewingProject.getInstance());
         this.initializedFuture = new CompletableFuture<>();
+    }
+
+    @Override
+    public CompletableFuture<Optional<Ingredient>> createIngredient(String id) {
+        if (id.contains(":")) {
+            id = id.split(":", 2)[1];
+        }
+        return ItemIntegration.super.createIngredient(id);
     }
 
     @EventHandler
