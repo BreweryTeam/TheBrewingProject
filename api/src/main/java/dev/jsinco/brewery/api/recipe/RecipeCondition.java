@@ -7,4 +7,6 @@ import java.util.List;
 public interface RecipeCondition {
 
     boolean matches(List<BrewingStep> expected, List<BrewingStep> actual);
+
+    int complexity();
 }

@@ -18,7 +18,6 @@ import dev.jsinco.brewery.bukkit.util.IngredientUtil;
 import dev.jsinco.brewery.bukkit.util.ListPersistentDataType;
 import dev.jsinco.brewery.configuration.Config;
 import dev.jsinco.brewery.recipes.BrewScoreImpl;
-import dev.jsinco.brewery.recipes.RecipeConditions;
 import dev.jsinco.brewery.recipes.RecipeRegistryImpl;
 import dev.jsinco.brewery.util.ClassUtil;
 import io.papermc.paper.datacomponent.DataComponentTypes;
@@ -118,12 +117,17 @@ public class BrewAdapter {
     }
 
     private static ItemStack fromDefaultRecipe(Optional<Recipe<ItemStack>> recipe, RecipeRegistryImpl<ItemStack> recipeRegistry, Brew brew, Brew.State state) {
-        List<DefaultRecipe<ItemStack>> defaultRecipes = List.of();
-        if (recipe.isPresent()) {
+        List<DefaultRecipe<ItemStack>> defaultRecipes = recipeRegistry.getDefaultRecipes()
+                .stream().filter(DefaultRecipe::onlyRuinedBrews)
+                .filter(defaultRecipe ->
+                        defaultRecipe.recipeCondition().complexity() > 1 && defaultRecipe.recipeCondition().matches(recipe.map(Recipe::getSteps).orElse(null), brew.getSteps())
+                )
+                .toList();
+        if (defaultRecipes.isEmpty()) {
             defaultRecipes = recipeRegistry.getDefaultRecipes()
                     .stream().filter(DefaultRecipe::onlyRuinedBrews)
                     .filter(defaultRecipe ->
-                            !(defaultRecipe.recipeCondition() instanceof RecipeConditions.NoCondition) && defaultRecipe.recipeCondition().matches(recipe.get().getSteps(), brew.getSteps())
+                            defaultRecipe.recipeCondition().complexity() > 0 && defaultRecipe.recipeCondition().matches(recipe.map(Recipe::getSteps).orElse(null), brew.getSteps())
                     )
                     .toList();
         }
@@ -131,7 +135,7 @@ public class BrewAdapter {
             defaultRecipes = recipeRegistry.getDefaultRecipes()
                     .stream().filter(DefaultRecipe::onlyRuinedBrews)
                     .filter(defaultRecipe ->
-                            defaultRecipe.recipeCondition() instanceof RecipeConditions.NoCondition
+                            defaultRecipe.recipeCondition().complexity() == 0
                     )
                     .toList();
         }

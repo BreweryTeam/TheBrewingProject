@@ -106,3 +106,11 @@ incomplete-recipes:
       final-step:
         type: age
         age-years: excessive
+  aged_ruined_brew:
+    name: "Aged ruined brew"
+    color: "gray"
+    lore:
+      - <gray>At least it's aged
+    condition:
+      final-step:
+        type: age

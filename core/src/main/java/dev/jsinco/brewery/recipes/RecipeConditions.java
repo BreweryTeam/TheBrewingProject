@@ -4,6 +4,7 @@ import dev.jsinco.brewery.api.brew.BrewingStep;
 import dev.jsinco.brewery.api.brew.ScoreType;
 import dev.jsinco.brewery.api.ingredient.Ingredient;
 import dev.jsinco.brewery.api.recipe.RecipeCondition;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Map;
@@ -14,8 +15,13 @@ public class RecipeConditions {
     public static class NoCondition implements RecipeCondition {
 
         @Override
-        public boolean matches(List<BrewingStep> expected, List<BrewingStep> actual) {
+        public boolean matches(@Nullable List<BrewingStep> expected, List<BrewingStep> actual) {
             return true;
+        }
+
+        @Override
+        public int complexity() {
+            return 0;
         }
     }
 
@@ -23,34 +29,38 @@ public class RecipeConditions {
                            List<ScoreCondition> conditions) implements RecipeCondition {
 
         @Override
-        public boolean matches(List<BrewingStep> expected, List<BrewingStep> actual) {
-            if (expected.isEmpty() || actual.isEmpty()) {
+        public boolean matches(@Nullable List<BrewingStep> expected, List<BrewingStep> actual) {
+            if (actual.isEmpty()) {
                 return false;
             }
             if (actual.getLast().stepType() != stepType) {
                 return false;
             }
             return conditions().stream()
-                    .allMatch(scoreCondition -> scoreCondition.matches(expected.getLast(), actual.getLast()));
+                    .allMatch(scoreCondition -> scoreCondition.matches(expected == null ? null : expected.get(actual.size() - 1), actual.getLast()));
+        }
+
+        @Override
+        public int complexity() {
+            return 1 + conditions.size();
         }
     }
 
     public interface ScoreCondition {
 
-        boolean matches(BrewingStep expected, BrewingStep actual);
+        boolean matches(@Nullable BrewingStep expected, BrewingStep actual);
     }
 
     public record SingletonCondition(AmountCondition amountCondition, ScoreType type) implements ScoreCondition {
 
         @Override
-        public boolean matches(BrewingStep expected, BrewingStep actual) {
-            if (expected.getClass() != actual.getClass()) {
+        public boolean matches(@Nullable BrewingStep expected, BrewingStep actual) {
+            if (expected != null && expected.getClass() != actual.getClass()) {
                 return false;
             }
             return switch (type) {
-                case TIME -> expected instanceof BrewingStep.TimedStep expectedTime
-                        && actual instanceof BrewingStep.TimedStep actualTime
-                        && amountCondition.matches(actualTime.time().moment(), expectedTime.time().moment());
+                case TIME -> actual instanceof BrewingStep.TimedStep actualTime
+                        && amountCondition.matches(actualTime.time().moment(), expected == null ? -1D : ((BrewingStep.TimedStep) expected).time().moment());
                 case INGREDIENTS, BARREL_TYPE -> false; // Unimplemented
                 case DISTILL_AMOUNT -> expected instanceof BrewingStep.Distill expectedDistill
                         && actual instanceof BrewingStep.Distill actualDistill
@@ -61,14 +71,19 @@ public class RecipeConditions {
 
     public record IngredientsCondition(Map<Ingredient, AmountCondition> conditions) implements ScoreCondition {
         @Override
-        public boolean matches(BrewingStep expected, BrewingStep actual) {
-            if (!(expected instanceof BrewingStep.IngredientsStep expectedIngredients)
-                    || !(actual instanceof BrewingStep.IngredientsStep actualIngredients)) {
+        public boolean matches(@Nullable BrewingStep expected, BrewingStep actual) {
+            if (!(actual instanceof BrewingStep.IngredientsStep actualIngredients)) {
                 return false;
             }
             for (Map.Entry<Ingredient, AmountCondition> condition : conditions.entrySet()) {
-                int expectedAmount = expectedIngredients.ingredients().getOrDefault(condition.getKey(), -1);
                 int actualAmount = actualIngredients.ingredients().getOrDefault(condition.getKey(), -1);
+                if (!(expected instanceof BrewingStep.IngredientsStep expectedIngredients)) {
+                    if (condition.getValue() != AmountCondition.ANY) {
+                        return false;
+                    }
+                    continue;
+                }
+                int expectedAmount = expectedIngredients.ingredients().getOrDefault(condition.getKey(), -1);
                 if (expectedAmount == -1) {
                     continue;
                 }
@@ -91,6 +106,9 @@ public class RecipeConditions {
         public boolean matches(double value, double expected) {
             if (this == ANY) {
                 return true;
+            }
+            if (expected == -1D) {
+                return false;
             }
             if (this == LACKING) {
                 return value < expected;
