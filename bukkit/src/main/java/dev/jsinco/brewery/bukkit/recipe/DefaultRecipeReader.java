@@ -1,8 +1,9 @@
 package dev.jsinco.brewery.bukkit.recipe;
 
+import dev.jsinco.brewery.api.recipe.DefaultRecipe;
 import dev.jsinco.brewery.bukkit.ingredient.BukkitIngredientManager;
 import dev.jsinco.brewery.bukkit.util.ColorUtil;
-import dev.jsinco.brewery.api.recipe.DefaultRecipe;
+import dev.jsinco.brewery.recipes.RecipeConditions;
 import dev.jsinco.brewery.recipes.RecipeConditionsReader;
 import org.bukkit.inventory.ItemStack;
 import org.simpleyaml.configuration.ConfigurationSection;
@@ -31,12 +32,14 @@ public class DefaultRecipeReader {
         Map<String, CompletableFuture<DefaultRecipe<ItemStack>>> recipes = new HashMap<>();
         for (String recipeName : recipesSection.getKeys(false)) {
             BukkitRecipeResult bukkitRecipeResult = getDefaultRecipe(recipesSection.getConfigurationSection(recipeName));
-            recipes.put(recipeName, RecipeConditionsReader.fromConfigSection(recipesSection.getConfigurationSection(recipeName + ".condition"), BukkitIngredientManager.INSTANCE)
-                    .thenApplyAsync(recipeConditions -> new DefaultRecipe<>(
-                            bukkitRecipeResult,
-                            recipeConditions,
-                            recipesSection.getBoolean(recipeName + ".condition.for-ruined-brews", true)
-                    )));
+            recipes.put(recipeName, (!recipesSection.isConfigurationSection(recipeName + ".condition") ?
+                    CompletableFuture.completedFuture(new RecipeConditions.NoCondition()) :
+                    RecipeConditionsReader.fromConfigSection(recipesSection.getConfigurationSection(recipeName + ".condition"), BukkitIngredientManager.INSTANCE)
+            ).thenApplyAsync(recipeConditions -> new DefaultRecipe<>(
+                    bukkitRecipeResult,
+                    recipeConditions,
+                    recipesSection.getBoolean(recipeName + ".condition.for-ruined-brews", true)
+            )));
         }
         return recipes;
     }

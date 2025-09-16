@@ -27,7 +27,7 @@ public class RecipeConditions {
             if (expected.isEmpty() || actual.isEmpty()) {
                 return false;
             }
-            if (expected.getLast().stepType() != stepType) {
+            if (actual.getLast().stepType() != stepType) {
                 return false;
             }
             return conditions().stream()

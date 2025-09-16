@@ -199,6 +199,7 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
         }
         this.drunksManager.reset(EventSection.events().enabledRandomEvents().stream().map(BreweryKey::parse).collect(Collectors.toSet()));
         worldEventListener.init();
+        recipeRegistry.clear();
         RecipeReader<ItemStack> recipeReader = new RecipeReader<>(this.getDataFolder(), new BukkitRecipeResultReader(), BukkitIngredientManager.INSTANCE);
 
         recipeReader.readRecipes().forEach(recipeFuture -> recipeFuture.thenAcceptAsync(recipe -> recipeRegistry.registerRecipe(recipe)));
@@ -331,7 +332,7 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
     }
 
     private void saveResources() {
-        Stream.of("recipes.yml", "locale/en-US.drunk_text.json", "locale/ru.drunk_text.json")
+        Stream.of("recipes.yml", "incomplete-recipes.yml", "locale/en-US.drunk_text.json", "locale/ru.drunk_text.json")
                 .forEach(this::saveResourceIfNotExists);
     }
 

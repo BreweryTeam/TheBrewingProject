@@ -52,16 +52,7 @@ public record CookStepImpl(Moment time, Map<? extends Ingredient, Integer> ingre
 
     @Override
     public Map<ScoreType, PartialBrewScore> maximumScores(BrewingStep other) {
-        if (!(other instanceof Cook cook)) {
-            return BREW_STEP_MISMATCH;
-        }
-        double cauldronTypeScore = cauldronType().equals(cook.cauldronType()) ? 1D : 0D;
-        double maximumCookTimeScore = this.time.moment() > cook.time().moment() ? 1D : BrewingStepUtil.nearbyValueScore(this.time.moment(), cook.time().moment());
-        double ingredientsScore = BrewingStepUtil.getIngredientsScore((Map<Ingredient, Integer>) this.ingredients(), (Map<Ingredient, Integer>) cook.ingredients());
-        return Stream.of(
-                new PartialBrewScore(cauldronTypeScore * maximumCookTimeScore, ScoreType.TIME),
-                new PartialBrewScore(ingredientsScore, ScoreType.INGREDIENTS)
-        ).collect(Collectors.toUnmodifiableMap(PartialBrewScore::type, partial -> partial));
+        return proximityScores(other);
     }
 
     @Override

@@ -35,7 +35,8 @@ incomplete-recipes:
     name: "Ruined wash"
     color: "gray"
     lore:
-      - <gray>Has an awful smell that makes you rethink your life choices
+      - <gray>Has an awful smell that makes
+      - <gray>you rethink your life choices
     condition:
       final-step:
         type: cook
@@ -72,7 +73,8 @@ incomplete-recipes:
     name: "Ruined mix"
     color: "gray"
     lore:
-      - <gray>It's hard to tell, but this drink is somehow starting to solidify.
+      - <gray>It's hard to tell, but this drink
+      - <gray>is somehow starting to solidify.
       - <gray>What you do know, is that this is not fit for use
     condition:
       final-step:
@@ -81,7 +83,8 @@ incomplete-recipes:
     name: "Odorless distillate"
     color: "white"
     lore:
-      - <gray>Stripped from all its features from multiple distill runs
+      - <gray>Stripped from all its features
+      - <gray>from multiple distill runs
     condition:
       final-step:
         type: distill

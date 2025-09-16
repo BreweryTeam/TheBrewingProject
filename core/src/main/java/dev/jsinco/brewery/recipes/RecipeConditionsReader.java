@@ -24,7 +24,7 @@ public class RecipeConditionsReader {
         Preconditions.checkArgument(section.isConfigurationSection("final-step"), "Expected final-step to be a configuration section");
         ConfigurationSection configurationSection = section.getConfigurationSection("final-step");
         Preconditions.checkArgument(configurationSection.contains("type"));
-        BrewingStep.StepType stepType = BrewingStep.StepType.valueOf(configurationSection.getString("type"));
+        BrewingStep.StepType stepType = BrewingStep.StepType.valueOf(configurationSection.getString("type").toUpperCase(Locale.ROOT));
         List<CompletableFuture<RecipeConditions.ScoreCondition>> scoreConditions = new ArrayList<>();
         for (String key : configurationSection.getKeys(false)) {
             if (key.equals("type")) {

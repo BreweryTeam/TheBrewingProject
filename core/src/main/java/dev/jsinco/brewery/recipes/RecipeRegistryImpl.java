@@ -103,4 +103,11 @@ public class RecipeRegistryImpl<I> implements RecipeRegistry<I> {
     public Set<Ingredient> registeredIngredients() {
         return allIngredients;
     }
+
+    public void clear() {
+        recipes.clear();
+        defaultRecipes.clear();
+        defaultRecipeList.clear();
+        allIngredients.clear();
+    }
 }

@@ -42,15 +42,7 @@ public record MixStepImpl(Moment time, Map<? extends Ingredient, Integer> ingred
 
     @Override
     public Map<ScoreType, PartialBrewScore> maximumScores(BrewingStep other) {
-        if (!(other instanceof MixStepImpl(Moment time1, Map<? extends Ingredient, Integer> ingredients1))) {
-            return BREW_STEP_MISMATCH;
-        }
-        double mixTimeScore = time1.moment() < this.time.moment() ? 1D : BrewingStepUtil.nearbyValueScore(this.time.moment(), time1.moment());
-        double ingredientsScore = BrewingStepUtil.getIngredientsScore((Map<Ingredient, Integer>) this.ingredients(), (Map<Ingredient, Integer>) ingredients1);
-        return Stream.of(
-                new PartialBrewScore(mixTimeScore, ScoreType.TIME),
-                new PartialBrewScore(ingredientsScore, ScoreType.INGREDIENTS)
-        ).collect(Collectors.toUnmodifiableMap(PartialBrewScore::type, partial -> partial));
+        return proximityScores(other);
     }
 
     @Override
