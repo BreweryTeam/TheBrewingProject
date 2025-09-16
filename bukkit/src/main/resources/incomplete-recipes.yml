@@ -44,7 +44,7 @@ incomplete-recipes:
     name: "Apple wash"
     color: red
     lore:
-      - <red>With a sweet smell of apples
+      - <gray>With a sweet smell of apples
     condition:
       for-ruined-brews: false
       final-step:

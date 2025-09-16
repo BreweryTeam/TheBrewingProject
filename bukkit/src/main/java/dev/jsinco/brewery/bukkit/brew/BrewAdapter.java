@@ -21,6 +21,7 @@ import dev.jsinco.brewery.recipes.BrewScoreImpl;
 import dev.jsinco.brewery.recipes.RecipeRegistryImpl;
 import dev.jsinco.brewery.util.ClassUtil;
 import io.papermc.paper.datacomponent.DataComponentTypes;
+import io.papermc.paper.datacomponent.item.ItemLore;
 import io.papermc.paper.datacomponent.item.PotionContents;
 import io.papermc.paper.datacomponent.item.TooltipDisplay;
 import io.papermc.paper.persistence.PersistentDataContainerView;
@@ -62,7 +63,13 @@ public class BrewAdapter {
         if (quality.isEmpty()) {
             itemStack = fromDefaultRecipe(recipe, recipeRegistry, brew, state);
         } else if (!score.map(BrewScore::completed).get()) {
-            itemStack = incompletePotion(brew);
+            Optional<DefaultRecipe<ItemStack>> defaultRecipeOptional = recipeRegistry.getDefaultRecipes().stream()
+                    .filter(defaultRecipe -> !defaultRecipe.onlyRuinedBrews())
+                    .filter(defaultRecipe -> defaultRecipe.recipeCondition().matches(recipe.get().getSteps(), brew.getSteps()))
+                    .findAny();
+            itemStack = defaultRecipeOptional.map(DefaultRecipe::result).map(result -> result.newBrewItem(score.get(), brew, state)).orElse(
+                    incompletePotion(brew)
+            );
         } else {
             RecipeResult<ItemStack> recipeResult = recipe.get().getRecipeResult(quality.get());
             itemStack = recipeResult.newBrewItem(score.get(), brew, state);
@@ -141,7 +148,11 @@ public class BrewAdapter {
         }
         if (defaultRecipes.isEmpty()) {
             ItemStack itemStack = new ItemStack(Material.POTION);
-            itemStack.setData(DataComponentTypes.CUSTOM_NAME, Component.text("Placeholder; you don't have any default recipes!"));
+            itemStack.setData(DataComponentTypes.CUSTOM_NAME, Component.text("Placeholder"));
+            itemStack.setData(DataComponentTypes.LORE, ItemLore.lore(
+                    List.of(Component.text("you don't have any default/incomplete recipes!"),
+                            Component.text("Contact admin, or if your admin look into incomplete-recipes.yml"))
+            ));
             return itemStack;
         }
 
