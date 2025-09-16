@@ -40,7 +40,11 @@ public class ItemsAdderIntegration implements ItemIntegration, Listener {
     @Override
     public @Nullable String getItemId(ItemStack itemStack) {
         CustomStack customStack = CustomStack.byItemStack(itemStack);
-        return customStack == null ? null : customStack.getId();
+        if (customStack == null) {
+            return null;
+        }
+        String id = customStack.getId();
+        return id.contains(":") ? id.split(":", 2)[1] : id;
     }
 
     @Override
