@@ -14,6 +14,40 @@ public class Migrations {
 
     public static void migrateAllConfigFiles(File pluginFolder) {
         updateRecipes(new File(pluginFolder, "recipes.yml"));
+        updateIncompleteRecipes(pluginFolder);
+    }
+
+    private static void updateIncompleteRecipes(File pluginFolder) {
+        File recipesFile = new File(pluginFolder, "recipes.yml");
+        File incompleteRecipes = new File(pluginFolder, "incomplete-recipes.yml");
+        if (!recipesFile.exists() || !incompleteRecipes.exists()) {
+            return;
+        }
+        YamlFile recipesYaml = new YamlFile(recipesFile);
+        YamlFile incompleteYaml = new YamlFile(incompleteRecipes);
+        try {
+            recipesYaml.load();
+            incompleteYaml.load();
+        } catch (IOException e) {
+            Logger.logErr("Unable to read recipes.yml file even though it existed");
+            Logger.logErr(e);
+            return;
+        }
+        if (!recipesYaml.isConfigurationSection("default-recipes")) {
+            return;
+        }
+        ConfigurationSection defaultRecipesSection = recipesYaml.getConfigurationSection("default-recipes");
+        ConfigurationSection incompleteRecipesSection = incompleteYaml.getConfigurationSection("incomplete-recipes");
+        defaultRecipesSection.getKeys(true)
+                .forEach(key -> incompleteRecipesSection.set(key, defaultRecipesSection.get(key)));
+        recipesYaml.remove("default-recipes");
+        try {
+            incompleteYaml.save();
+            recipesYaml.save();
+        } catch (IOException e) {
+            Logger.logErr("Unable to save recipes.yml or incomplete-recipes.yml.");
+            Logger.logErr(e);
+        }
     }
 
     private static void updateRecipes(File recipesFile) {
