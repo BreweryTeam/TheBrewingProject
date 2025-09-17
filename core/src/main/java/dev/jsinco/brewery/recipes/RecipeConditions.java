@@ -84,11 +84,14 @@ public class RecipeConditions {
                     continue;
                 }
                 int expectedAmount = expectedIngredients.ingredients().getOrDefault(condition.getKey(), -1);
-                if (expectedAmount == -1) {
-                    continue;
-                }
                 if (actualAmount == -1) {
                     return false;
+                }
+                if (expectedAmount == -1) {
+                    if (condition.getValue() != AmountCondition.ANY) {
+                        return false;
+                    }
+                    continue;
                 }
                 if (!condition.getValue().matches(actualAmount, expectedAmount)) {
                     return false;

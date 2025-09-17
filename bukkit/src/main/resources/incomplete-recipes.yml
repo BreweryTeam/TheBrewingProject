@@ -41,7 +41,7 @@ incomplete-recipes:
       final-step:
         type: cook
   apple_wash:
-    name: "Apple wash"
+    name: "Fermented Apple Wash"
     color: red
     lore:
       - <gray>With a sweet smell of apples
@@ -70,12 +70,10 @@ incomplete-recipes:
         type: mix
         mix-time: excessive
   ruined_mix:
-    name: "Ruined mix"
+    name: "Ruined mixture"
     color: "gray"
     lore:
-      - <gray>It's hard to tell, but this drink
-      - <gray>is somehow starting to solidify.
-      - <gray>What you do know, is that this is not fit for use
+      - <gray>A heterogeneous mixture.
     condition:
       final-step:
         type: mix
