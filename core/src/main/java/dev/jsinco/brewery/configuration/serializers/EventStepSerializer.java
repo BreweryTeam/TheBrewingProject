@@ -102,13 +102,13 @@ public class EventStepSerializer implements ObjectSerializer<EventStep> {
         if (data.containsKey("condition")) {
             Condition condition = data.get("condition", Condition.class);
             Preconditions.checkArgument(condition != null, "Condition can not be empty");
-            Preconditions.checkArgument(condition.getClass() != Condition.HasPermission.class, "Unimplemented wait condition: has-permission");
+            Preconditions.checkArgument(condition.getClass() != Condition.HasPermission.class, "Unimplemented wait condition: has-permission, use if-condition instead");
             eventStepBuilder.addProperty(new ConditionalWaitStep(condition));
         }
         if (data.containsKey("wait-condition")) {
             Condition condition = data.get("wait-condition", Condition.class);
             Preconditions.checkArgument(condition != null, "Condition can not be empty");
-            Preconditions.checkArgument(condition.getClass() != Condition.HasPermission.class, "Unimplemented wait condition: has-permission");
+            Preconditions.checkArgument(condition.getClass() != Condition.HasPermission.class, "Unimplemented wait condition: has-permission, use if-condition instead");
             eventStepBuilder.addProperty(new ConditionalWaitStep(condition));
         }
         if (data.containsKey("if-condition")) {
