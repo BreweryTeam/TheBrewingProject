@@ -4,12 +4,12 @@ import dev.jsinco.brewery.configuration.Config;
 
 public enum TimeModifier {
 
-    NORMAL(1200.0),
-    COOKING((double) Config.config().cauldrons().cookingMinuteTicks()),
-    AGING((double) Config.config().barrels().agingYearTicks() / (365.0 * 24 * 60));
+    NORMAL(1200),
+    COOKING(Config.config().cauldrons().cookingMinuteTicks()),
+    AGING(Config.config().barrels().agingYearTicks() / (365 * 24 * 60));
 
-    private final double ticksPerMinute;
-    TimeModifier(double tpm) {
+    private final long ticksPerMinute;
+    TimeModifier(long tpm) {
         this.ticksPerMinute = tpm;
     }
 

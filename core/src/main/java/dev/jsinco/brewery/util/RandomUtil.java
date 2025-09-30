@@ -15,9 +15,9 @@ public class RandomUtil {
             cumulativeSum += toWeight.apply(t);
             cumulativeSums[i] = cumulativeSum;
         }
-        double randomInt = RANDOM.nextDouble(cumulativeSum);
+        double random = RANDOM.nextDouble(cumulativeSum);
         for (int i = 0; i < tList.size(); i++) {
-            if (cumulativeSums[i] > randomInt) {
+            if (cumulativeSums[i] > random) {
                 return tList.get(i);
             }
         }
