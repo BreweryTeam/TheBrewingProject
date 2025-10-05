@@ -45,13 +45,16 @@ public class Config extends OkaeriConfig {
     @CustomKey("client-side-translations")
     private boolean clientSideTranslations = false;
 
-    @Comment({"The step data is accessible for the user, enable this, if you don't want anyone cheating the system",
-            "WARNING: Only one encryption key is allowed, switching keys will corrupt brew data"})
+    @Comment({"Some clients and tools allow players to see the NBT data of an item, which, for our potions, includes",
+            "all the brewing steps it went through. Encrypt this data to prevent it from being abused as a recipe?"})
     @CustomKey("encrypt-sensitive-data")
     private boolean encryptSensitiveData = true;
 
     @Comment("The key that is going to be used for the encryption, this is unique per server")
     private SecretKey encryptionKey = generateKey();
+
+    @Comment("A list of previous keys to try when decryption with the current one fails")
+    private List<SecretKey> previousEncryptionKeys = List.of();
 
     @CustomKey("empty-any-drink-using-hopper")
     @Comment("Empty any drink when right-clicking a hopper. If false, only applies to failed brews")

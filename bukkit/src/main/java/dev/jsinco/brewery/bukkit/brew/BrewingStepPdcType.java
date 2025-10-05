@@ -30,7 +30,6 @@ import java.util.Map;
 
 public class BrewingStepPdcType implements PersistentDataType<byte[], BrewingStep> {
 
-
     private final boolean useCipher;
 
     public BrewingStepPdcType(boolean useCipher) {
@@ -81,31 +80,50 @@ public class BrewingStepPdcType implements PersistentDataType<byte[], BrewingSte
 
     @Override
     public @NotNull BrewingStep fromPrimitive(byte @NotNull [] primitive, @NotNull PersistentDataAdapterContext context) {
-        ByteArrayInputStream input = new ByteArrayInputStream(primitive);
-        try (CipherInputStream cipherInputStream = new CipherInputStream(input, getCipher(Cipher.DECRYPT_MODE))) {
-            try (DataInputStream dataInputStream = new DataInputStream(cipherInputStream)) {
-                BrewingStep.StepType stepType = BrewingStep.StepType.valueOf(dataInputStream.readUTF());
-                return switch (stepType) {
-                    case COOK -> new CookStepImpl(
-                            decodeMoment(dataInputStream),
-                            decodeIngredients(dataInputStream),
-                            BreweryRegistry.CAULDRON_TYPE.get(BreweryKey.parse(dataInputStream.readUTF()))
-                    );
-                    case DISTILL -> new DistillStepImpl(
-                            dataInputStream.readInt()
-                    );
-                    case AGE -> new AgeStepImpl(
-                            decodeMoment(dataInputStream),
-                            BreweryRegistry.BARREL_TYPE.get(BreweryKey.parse(dataInputStream.readUTF()))
-                    );
-                    case MIX -> new MixStepImpl(
-                            decodeMoment(dataInputStream),
-                            decodeIngredients(dataInputStream)
-                    );
-                };
+
+        Exception lastException;
+
+        try {
+            return attemptDecrypt(primitive, Config.config().encryptionKey());
+        } catch (Exception e) {
+            lastException = e;
+        }
+
+        for (SecretKey key : Config.config().previousEncryptionKeys()) {
+            try {
+                return attemptDecrypt(primitive, key);
+            } catch (Exception e) {
+                lastException = e;
             }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        }
+
+        throw new RuntimeException("Failed to decrypt BrewingStep after trying all known keys", lastException);
+    }
+
+    private BrewingStep attemptDecrypt(byte[] primitive, SecretKey key) throws IOException {
+        try (
+                ByteArrayInputStream input = new ByteArrayInputStream(primitive);
+                CipherInputStream cipherInputStream = new CipherInputStream(input, getCipher(Cipher.DECRYPT_MODE, key));
+                DataInputStream dataInputStream = new DataInputStream(cipherInputStream)
+        ) {
+
+            BrewingStep.StepType stepType = BrewingStep.StepType.valueOf(dataInputStream.readUTF());
+            return switch (stepType) {
+                case COOK -> new CookStepImpl(
+                        decodeMoment(dataInputStream),
+                        decodeIngredients(dataInputStream),
+                        BreweryRegistry.CAULDRON_TYPE.get(BreweryKey.parse(dataInputStream.readUTF()))
+                );
+                case DISTILL -> new DistillStepImpl(dataInputStream.readInt());
+                case AGE -> new AgeStepImpl(
+                        decodeMoment(dataInputStream),
+                        BreweryRegistry.BARREL_TYPE.get(BreweryKey.parse(dataInputStream.readUTF()))
+                );
+                case MIX -> new MixStepImpl(
+                        decodeMoment(dataInputStream),
+                        decodeIngredients(dataInputStream)
+                );
+            };
         }
     }
 
@@ -156,13 +174,17 @@ public class BrewingStepPdcType implements PersistentDataType<byte[], BrewingSte
         return ingredients;
     }
 
-    private Cipher getCipher(int operationMode) {
+    private Cipher getCipher(int operationMode, SecretKey key) {
         try {
             Cipher cipher = Config.config().encryptSensitiveData() && useCipher ? Cipher.getInstance("des") : new NullCipher();
-            cipher.init(operationMode, Config.config().encryptionKey());
+            cipher.init(operationMode, key);
             return cipher;
         } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private Cipher getCipher(int operationMode) {
+        return getCipher(operationMode, Config.config().encryptionKey());
     }
 }
