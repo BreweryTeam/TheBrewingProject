@@ -20,15 +20,19 @@ import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
 
 import javax.crypto.*;
+import javax.crypto.spec.GCMParameterSpec;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+import java.security.GeneralSecurityException;
+import java.security.SecureRandom;
+import java.util.*;
 
 public class BrewingStepPdcType implements PersistentDataType<byte[], BrewingStep> {
+
+    // AES-GCM header constants
+    private static final byte[] MAGIC = new byte[] { 'B','R','W','1' };
+    private static final int GCM_TAG_BITS = 128; // data authentication
+    private static final int VERSION = 1;
 
     private final boolean useCipher;
 
@@ -48,82 +52,150 @@ public class BrewingStepPdcType implements PersistentDataType<byte[], BrewingSte
 
     @Override
     public byte @NotNull [] toPrimitive(@NotNull BrewingStep complex, @NotNull PersistentDataAdapterContext context) {
-        ByteArrayOutputStream output = new ByteArrayOutputStream();
-        try (CipherOutputStream cipherOutputStream = new CipherOutputStream(output, getCipher(Cipher.ENCRYPT_MODE))) {
-            try (DataOutputStream dataOutputStream = new DataOutputStream(cipherOutputStream)) {
-                dataOutputStream.writeUTF(complex.stepType().name());
-                switch (complex) {
-                    case BrewingStep.Age age -> {
-                        encodeMoment(age.time(), dataOutputStream);
-                        dataOutputStream.writeUTF(age.barrelType().key().toString());
-                    }
-                    case BrewingStep.Cook cook -> {
-                        encodeMoment(cook.time(), dataOutputStream);
-                        encodeIngredients(cook.ingredients(), dataOutputStream);
-                        dataOutputStream.writeUTF(cook.cauldronType().key().toString());
-                    }
-                    case BrewingStep.Distill distill -> {
-                        dataOutputStream.writeInt(distill.runs());
-                    }
-                    case BrewingStep.Mix mix -> {
-                        encodeMoment(mix.time(), dataOutputStream);
-                        encodeIngredients(mix.ingredients(), dataOutputStream);
-                    }
-                    default -> throw new IllegalStateException("Unexpected value: " + complex);
+        try {
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            DataOutputStream headerOut = new DataOutputStream(out);
+
+            if (!useCipher || !Config.config().encryptSensitiveData()) {
+                headerOut.write(MAGIC);
+                headerOut.writeByte(VERSION);
+                headerOut.writeByte(0); // ivLen (0=plaintext)
+                try (DataOutputStream dos = new DataOutputStream(out)) {
+                    writePayload(complex, dos);
                 }
+                return out.toByteArray();
             }
-        } catch (IOException e) {
+
+            byte[] iv = new byte[12];
+            new SecureRandom().nextBytes(iv);
+
+            headerOut.write(MAGIC);
+            headerOut.writeByte(VERSION);
+            headerOut.writeByte(iv.length);
+            headerOut.write(iv);
+
+            Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
+            cipher.init(Cipher.ENCRYPT_MODE, Config.config().encryptionKey(), new GCMParameterSpec(128, iv));
+
+            try (CipherOutputStream cos = new CipherOutputStream(out, cipher);
+                 DataOutputStream dos = new DataOutputStream(cos)) {
+                writePayload(complex, dos);
+            }
+            return out.toByteArray();
+        } catch (GeneralSecurityException | IOException e) {
             throw new RuntimeException(e);
         }
-        return output.toByteArray();
+    }
+
+    private void writePayload(@NotNull BrewingStep complex, @NotNull DataOutputStream dataOutputStream) throws IOException {
+        dataOutputStream.writeUTF(complex.stepType().name());
+        switch (complex) {
+            case BrewingStep.Age age -> {
+                encodeMoment(age.time(), dataOutputStream);
+                dataOutputStream.writeUTF(age.barrelType().key().toString());
+            }
+            case BrewingStep.Cook cook -> {
+                encodeMoment(cook.time(), dataOutputStream);
+                encodeIngredients(cook.ingredients(), dataOutputStream);
+                dataOutputStream.writeUTF(cook.cauldronType().key().toString());
+            }
+            case BrewingStep.Distill distill -> dataOutputStream.writeInt(distill.runs());
+            case BrewingStep.Mix mix -> {
+                encodeMoment(mix.time(), dataOutputStream);
+                encodeIngredients(mix.ingredients(), dataOutputStream);
+            }
+            default -> throw new IllegalStateException("Unexpected value: " + complex);
+        }
     }
 
     @Override
     public @NotNull BrewingStep fromPrimitive(byte @NotNull [] primitive, @NotNull PersistentDataAdapterContext context) {
+        try (ByteArrayInputStream in = new ByteArrayInputStream(primitive);
+             DataInputStream headerIn = new DataInputStream(in)) {
 
+            byte[] magic = headerIn.readNBytes(MAGIC.length);
+
+            if (Arrays.equals(magic, MAGIC)) {
+                int version = headerIn.readUnsignedByte();
+                if (version != 1) throw new RuntimeException("Unsupported version: " + version);
+                int ivLen = headerIn.readUnsignedByte();
+                byte[] iv = headerIn.readNBytes(ivLen);
+
+                List<SecretKey> knownKeys = new ArrayList<>();
+                knownKeys.add(Config.config().encryptionKey());
+                knownKeys.addAll(Config.config().previousEncryptionKeys());
+
+                Exception last = null;
+                for (SecretKey key : knownKeys) {
+                    try {
+                        Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
+                        cipher.init(Cipher.DECRYPT_MODE, key, new GCMParameterSpec(GCM_TAG_BITS, iv));
+                        try (CipherInputStream cis = new CipherInputStream(inDup(primitive, MAGIC.length + 1 + 1 + ivLen), cipher);
+                             DataInputStream dis = new DataInputStream(cis)) {
+                            return readPayload(dis);
+                        }
+                    } catch (IOException | GeneralSecurityException e) {
+                        last = e; // wrong key or tampered data
+                    }
+                }
+                throw new RuntimeException("[AES-GCM] Decryption failed after trying all known keys", last);
+            } else {
+                return readLegacyDES(primitive);
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    private static ByteArrayInputStream inDup(byte[] all, int offset) {
+        return new ByteArrayInputStream(all, offset, all.length - offset);
+    }
+
+    private BrewingStep readPayload(@NotNull DataInputStream dataInputStream) throws IOException {
+        BrewingStep.StepType stepType = BrewingStep.StepType.valueOf(dataInputStream.readUTF());
+        return switch (stepType) {
+            case COOK -> new CookStepImpl(
+                    decodeMoment(dataInputStream),
+                    decodeIngredients(dataInputStream),
+                    BreweryRegistry.CAULDRON_TYPE.get(BreweryKey.parse(dataInputStream.readUTF()))
+            );
+            case DISTILL -> new DistillStepImpl(dataInputStream.readInt());
+            case AGE -> new AgeStepImpl(
+                    decodeMoment(dataInputStream),
+                    BreweryRegistry.BARREL_TYPE.get(BreweryKey.parse(dataInputStream.readUTF()))
+            );
+            case MIX -> new MixStepImpl(
+                    decodeMoment(dataInputStream),
+                    decodeIngredients(dataInputStream)
+            );
+        };
+    }
+
+    private BrewingStep readLegacyDES(byte[] primitive) {
         Exception lastException;
-
         try {
-            return attemptDecrypt(primitive, Config.config().encryptionKey());
-        } catch (Exception e) {
+            return attemptDecryptDES(primitive, Config.config().encryptionKey()); }
+        catch (Exception e) {
             lastException = e;
         }
 
         for (SecretKey key : Config.config().previousEncryptionKeys()) {
             try {
-                return attemptDecrypt(primitive, key);
-            } catch (Exception e) {
+                return attemptDecryptDES(primitive, key);
+            }
+            catch (Exception e) {
                 lastException = e;
             }
         }
-
-        throw new RuntimeException("Failed to decrypt BrewingStep after trying all known keys", lastException);
+        throw new RuntimeException("[DES] Decryption failed after trying all known keys", lastException);
     }
 
-    private BrewingStep attemptDecrypt(byte[] primitive, SecretKey key) throws IOException {
+    private BrewingStep attemptDecryptDES(byte[] primitive, SecretKey key) throws IOException {
         try (
                 ByteArrayInputStream input = new ByteArrayInputStream(primitive);
-                CipherInputStream cipherInputStream = new CipherInputStream(input, getCipher(Cipher.DECRYPT_MODE, key));
-                DataInputStream dataInputStream = new DataInputStream(cipherInputStream)
+                CipherInputStream cis = new CipherInputStream(input, getLegacyDESCipher(Cipher.DECRYPT_MODE, key));
+                DataInputStream dis = new DataInputStream(cis)
         ) {
-
-            BrewingStep.StepType stepType = BrewingStep.StepType.valueOf(dataInputStream.readUTF());
-            return switch (stepType) {
-                case COOK -> new CookStepImpl(
-                        decodeMoment(dataInputStream),
-                        decodeIngredients(dataInputStream),
-                        BreweryRegistry.CAULDRON_TYPE.get(BreweryKey.parse(dataInputStream.readUTF()))
-                );
-                case DISTILL -> new DistillStepImpl(dataInputStream.readInt());
-                case AGE -> new AgeStepImpl(
-                        decodeMoment(dataInputStream),
-                        BreweryRegistry.BARREL_TYPE.get(BreweryKey.parse(dataInputStream.readUTF()))
-                );
-                case MIX -> new MixStepImpl(
-                        decodeMoment(dataInputStream),
-                        decodeIngredients(dataInputStream)
-                );
-            };
+            return readPayload(dis);
         }
     }
 
@@ -174,17 +246,16 @@ public class BrewingStepPdcType implements PersistentDataType<byte[], BrewingSte
         return ingredients;
     }
 
-    private Cipher getCipher(int operationMode, SecretKey key) {
+    private Cipher getLegacyDESCipher(int operationMode, SecretKey key) {
         try {
-            Cipher cipher = Config.config().encryptSensitiveData() && useCipher ? Cipher.getInstance("des") : new NullCipher();
+            Cipher cipher = (Config.config().encryptSensitiveData() && useCipher)
+                    ? Cipher.getInstance("DES")
+                    : new NullCipher();
             cipher.init(operationMode, key);
             return cipher;
-        } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException e) {
+        } catch (GeneralSecurityException e) {
             throw new RuntimeException(e);
         }
     }
 
-    private Cipher getCipher(int operationMode) {
-        return getCipher(operationMode, Config.config().encryptionKey());
-    }
 }

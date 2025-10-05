@@ -14,6 +14,7 @@ import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import java.io.File;
 import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.util.List;
 import java.util.Locale;
 
@@ -51,7 +52,7 @@ public class Config extends OkaeriConfig {
     private boolean encryptSensitiveData = true;
 
     @Comment("The key that is going to be used for the encryption, this is unique per server")
-    private SecretKey encryptionKey = generateKey();
+    private SecretKey encryptionKey = generateAesKey();
 
     @Comment("A list of previous keys to try when decryption with the current one fails")
     private List<SecretKey> previousEncryptionKeys = List.of();
@@ -101,7 +102,21 @@ public class Config extends OkaeriConfig {
         return instance;
     }
 
-    private SecretKey generateKey() {
+    private SecretKey generateAesKey() {
+        try {
+            KeyGenerator kg = KeyGenerator.getInstance("AES");
+            try {
+                kg.init(256, SecureRandom.getInstanceStrong());
+            } catch (Exception ignored) {
+                kg.init(128, new SecureRandom());
+            }
+            return kg.generateKey();
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private SecretKey generateDesKey() {
         try {
             return KeyGenerator.getInstance("DES").generateKey();
         } catch (NoSuchAlgorithmException e) {
