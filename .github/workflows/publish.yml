@@ -24,10 +24,15 @@ jobs:
       - name: Publish to Hangar
         run: "./gradlew :bukkit:publishAllPublicationsToHangar"
         env:
-          RELEASE_NOTES: github.event.release.body
-          API_KEY: secrets.HANGAR_PUBLISH_KEY
+          RELEASE_NOTES: ${{ github.event.release.body }}
+          API_KEY: ${{ secrets.HANGAR_PUBLISH_KEY }}
       - name: Publish to Modrinth
         run: "./gradlew :bukkit:modrinth"
         env:
-          RELEASE_NOTES: github.event.release.body
-          API_KEY: secrets.MODRINTH_PUBLISH_KEY
+          RELEASE_NOTES: ${{ github.event.release.body }}
+          API_KEY: ${{ secrets.MODRINTH_PUBLISH_KEY }}
+      - name: Display in discord
+        run: "./gradlew :bukkit:postDiscordMessage"
+        env:
+          RELEASE_NOTES: ${{ github.event.release.body }}
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
