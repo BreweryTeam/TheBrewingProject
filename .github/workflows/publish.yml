@@ -25,4 +25,9 @@ jobs:
         run: "./gradlew :bukkit:publishAllPublicationsToHangar"
         env:
           RELEASE_NOTES: github.event.release.body
-          API_KEY: secrets.TBP_HANGAR_API_KEY
+          API_KEY: secrets.HANGAR_PUBLISH_KEY
+      - name: Publish to Modrinth
+        run: "./gradlew :bukkit:modrinth"
+        env:
+          RELEASE_NOTES: github.event.release.body
+          API_KEY: secrets.MODRINTH_PUBLISH_KEY

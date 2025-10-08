@@ -8,6 +8,7 @@ plugins {
     alias(libs.plugins.run.paper)
     alias(libs.plugins.plugin.yml.bukkit)
     alias(libs.plugins.hangar.publish)
+    alias(libs.plugins.modrinth.publish)
 }
 
 val supportedPaperVersions = listOf("1.21.8")
@@ -239,6 +240,20 @@ publishing {
     }
 }
 
+modrinth {
+    token.set(System.getenv("MODRINTH_TOKEN") ?: run {
+        return@modrinth
+    })
+    projectId.set("4zxCmDBL") // This can be the project ID or the slug. Either will work!
+    versionNumber.set(project.version.toString())
+    versionType.set("release") // This is the default -- can also be `beta` or `alpha`
+    uploadFile.set(tasks.shadowJar)
+    loaders.addAll("paper", "purpur")
+    gameVersions.addAll(supportedPaperVersions)
+    changelog.set(System.getenv("RELEASE_NOTES"))
+}
+
+
 hangarPublish {
     publications.register("plugin") {
         version = project.version as String // use project version as publication version
@@ -249,6 +264,7 @@ hangarPublish {
         // your api key.
         // defaults to the `io.papermc.hangar-publish-plugin.[publicationName].api-key` or `io.papermc.hangar-publish-plugin.default-api-key` Gradle properties
         apiKey = System.getenv("API_KEY")
+
 
         // register platforms
         platforms {
