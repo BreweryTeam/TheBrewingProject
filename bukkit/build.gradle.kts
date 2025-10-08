@@ -1,4 +1,10 @@
+import com.google.gson.JsonArray
+import com.google.gson.JsonObject
 import net.minecrell.pluginyml.bukkit.BukkitPluginDescription
+import java.net.HttpURLConnection
+import java.net.URI
+import kotlin.apply
+import kotlin.collections.forEach
 
 plugins {
     `tbp-module`
@@ -136,6 +142,14 @@ tasks {
             "eu.okaeri",
             "net.objecthunter.exp4j"
         ).forEach { relocate(it, "${project.group}.lib.$it") }
+    }
+
+    register("postDiscordMessage") {
+        val webhook = DiscordWebhook(System.getenv("DISCORD_WEBHOOK") ?: return@register)
+        webhook.message = "<@&1273951212227661856>"
+        webhook.embedTitle = "TheBrewingProject - v${project.version}"
+        webhook.embedDescription = System.getenv("RELEASE_NOTES")
+        webhook.send()
     }
 }
 
@@ -321,6 +335,122 @@ hangarPublish {
                         required = false
                     }
                 }
+            }
+        }
+    }
+}
+
+class DiscordWebhook(
+    val webhookUrl: String,
+    var defaultThumbnail: Boolean = true
+) {
+
+    companion object {
+        private const val MAX_EMBED_DESCRIPTION_LENGTH = 4096
+    }
+
+    var message: String = "content"
+    var username: String = "TheBrewingProject Updates"
+    var avatarUrl: String = "https://github.com/breweryteam.png"
+    var embedTitle: String = "Embed Title"
+    var embedDescription: String = "Embed Description"
+    var embedColor: String = "F5E083"
+    var embedThumbnailUrl: String? = if (defaultThumbnail) avatarUrl else null
+    var embedImageUrl: String? = null
+
+    private fun hexStringToInt(hex: String): Int {
+        val hexWithoutPrefix = hex.removePrefix("#")
+        return hexWithoutPrefix.toInt(16)
+    }
+
+    private fun buildToJson(): String {
+        val json = JsonObject()
+        json.addProperty("username", username)
+        json.addProperty("avatar_url", avatarUrl)
+        json.addProperty("content", message)
+
+        val embed = JsonObject()
+        embed.addProperty("title", embedTitle)
+        embed.addProperty("description", embedDescription)
+        embed.addProperty("color", hexStringToInt(embedColor))
+
+        embedThumbnailUrl?.let {
+            val thumbnail = JsonObject()
+            thumbnail.addProperty("url", it)
+            embed.add("thumbnail", thumbnail)
+        }
+
+        embedImageUrl?.let {
+            val image = JsonObject()
+            image.addProperty("url", it)
+            embed.add("image", image)
+        }
+
+        val embeds = JsonArray()
+        createEmbeds().forEach(embeds::add)
+
+        json.add("embeds", embeds)
+        return json.toString()
+    }
+
+    private fun createEmbeds(): List<JsonObject> {
+        if (embedDescription.length <= MAX_EMBED_DESCRIPTION_LENGTH) {
+            return listOf(JsonObject().apply {
+                addProperty("title", embedTitle)
+                addProperty("description", embedDescription)
+                addProperty("color", embedColor.toInt(16))
+                embedThumbnailUrl?.let {
+                    val thumbnail = JsonObject()
+                    thumbnail.addProperty("url", it)
+                    add("thumbnail", thumbnail)
+                }
+                embedImageUrl?.let {
+                    val image = JsonObject()
+                    image.addProperty("url", it)
+                    add("image", image)
+                }
+            })
+        }
+        val embeds = mutableListOf<JsonObject>()
+        var description = embedDescription
+        while (description.isNotEmpty()) {
+            val chunkLength = minOf(MAX_EMBED_DESCRIPTION_LENGTH, description.length)
+            val chunk = description.substring(0, chunkLength)
+            description = description.substring(chunkLength)
+            embeds.add(JsonObject().apply {
+                addProperty("title", embedTitle)
+                addProperty("description", chunk)
+                addProperty("color", embedColor.toInt(16))
+                embedThumbnailUrl?.let {
+                    val thumbnail = JsonObject()
+                    thumbnail.addProperty("url", it)
+                    add("thumbnail", thumbnail)
+                }
+                embedImageUrl?.let {
+                    val image = JsonObject()
+                    image.addProperty("url", it)
+                    add("image", image)
+                }
+            })
+        }
+        return embeds
+    }
+
+    fun send() {
+        val url = URI(webhookUrl).toURL()
+        val connection = url.openConnection() as HttpURLConnection
+        connection.requestMethod = "POST"
+        connection.setRequestProperty("Content-Type", "application/json")
+        connection.doOutput = true
+        connection.outputStream.use { outputStream ->
+            outputStream.write(buildToJson().toByteArray())
+
+            val responseCode = connection.responseCode
+            println("POST Response Code :: $responseCode")
+            if (responseCode == HttpURLConnection.HTTP_OK) {
+                println("Message sent successfully.")
+            } else {
+                println("Failed to send message.")
             }
         }
     }
