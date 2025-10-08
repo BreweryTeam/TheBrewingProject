@@ -80,4 +80,8 @@ public record Interval(long start, long stop) implements Moment {
         }
         return Component.text("[" + start + ", " + stop + "]");
     }
+
+    public Interval multiply(int factor) {
+        return new Interval(start * factor, stop * factor);
+    }
 }

@@ -3,6 +3,7 @@ package dev.jsinco.brewery.bukkit.recipe;
 import com.google.common.base.Preconditions;
 import dev.jsinco.brewery.api.effect.modifier.DrunkenModifier;
 import dev.jsinco.brewery.api.moment.Interval;
+import dev.jsinco.brewery.api.moment.Moment;
 import dev.jsinco.brewery.api.recipe.QualityData;
 import dev.jsinco.brewery.api.recipe.RecipeResult;
 import dev.jsinco.brewery.api.util.BreweryKey;
@@ -109,11 +110,16 @@ public class BukkitRecipeResultReader implements RecipeResultReader<ItemStack> {
         Interval durationBounds;
         Interval amplifierBounds;
         if (parts.length == 3) {
-            durationBounds = Interval.parse(parts[2]);
+            durationBounds = Interval.parse(parts[2]).multiply(Moment.SECOND);
             amplifierBounds = Interval.parse(parts[1]);
         } else {
-            durationBounds = Interval.parse(parts[1]);
-            amplifierBounds = new Interval(1, 1);
+            if(type.isInstant()) {
+                durationBounds = new Interval(1, 1);
+                amplifierBounds = Interval.parse(parts[1]);
+            } else {
+                durationBounds = Interval.parse(parts[1]).multiply(Moment.SECOND);
+                amplifierBounds = new Interval(1, 1);
+            }
         }
         return new RecipeEffect(type, durationBounds, amplifierBounds);
     }
