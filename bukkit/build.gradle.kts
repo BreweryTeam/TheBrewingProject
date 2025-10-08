@@ -7,7 +7,10 @@ plugins {
     alias(libs.plugins.shadow)
     alias(libs.plugins.run.paper)
     alias(libs.plugins.plugin.yml.bukkit)
+    alias(libs.plugins.hangar.publish)
 }
+
+val supportedPaperVersions = listOf("1.21.8")
 
 repositories {
     mavenCentral()
@@ -102,7 +105,7 @@ tasks {
     }
 
     shadowJar {
-        val publishing = project.gradle.startParameter.taskNames.any { it.contains("publish") }
+        val publishing = project.gradle.startParameter.taskNames.any { it.contains("publish", true) && it.contains("maven", true) }
         archiveBaseName.set(rootProject.name)
         archiveClassifier.unset()
 
@@ -232,6 +235,77 @@ publishing {
         create<MavenPublication>("maven") {
             artifactId = "thebrewingproject"
             artifact(tasks["shadowJar"])
+        }
+    }
+}
+
+hangarPublish {
+    publications.register("plugin") {
+        version = project.version as String // use project version as publication version
+        id = "thebrewingproject"
+        channel = "Release"
+        changelog = System.getenv("RELEASE_NOTES") // optional
+
+        // your api key.
+        // defaults to the `io.papermc.hangar-publish-plugin.[publicationName].api-key` or `io.papermc.hangar-publish-plugin.default-api-key` Gradle properties
+        apiKey = System.getenv("API_KEY")
+
+        // register platforms
+        platforms {
+            paper {
+                jar = tasks.shadowJar.flatMap { it.archiveFile }
+                platformVersions = supportedPaperVersions
+                dependencies {
+                    url("Bolt", "https://modrinth.com/plugin/bolt") {
+                        required = false
+                    }
+                    url("CraftEngine", "https://modrinth.com/plugin/craftengine") {
+                        required = false
+                    }
+                    url("GriefPrevention", "https://www.spigotmc.org/resources/griefprevention.1884/") {
+                        required = false
+                    }
+                    url("HuskClaims", "https://www.spigotmc.org/resources/huskclaims-1-17-1-21-modern-golden-shovel-land-claiming-fully-cross-server-compatible.114467/") {
+                        required = false
+                    }
+                    url("ItemsAdder", "https://www.spigotmc.org/resources/%E2%9C%A8itemsadder%E2%AD%90emotes-mobs-items-armors-hud-gui-emojis-blocks-wings-hats-liquids.73355/") {
+                        required = false
+                    }
+                    url("Lands", "https://www.spigotmc.org/resources/lands-%E2%AD%95-land-claim-plugin-%E2%9C%85-grief-prevention-protection-gui-management-nations-wars-1-21-support.53313/") {
+                        required = false
+                    }
+                    url("MMOItems", "https://www.spigotmc.org/resources/mmoitems.39267/") {
+                        required = false
+                    }
+                    url("MiniPlaceholders", "https://modrinth.com/plugin/miniplaceholders") {
+                        required = false
+                    }
+                    url("MythicLib", "https://www.spigotmc.org/resources/mmolib-mythiclib.90306/") {
+                        required = false
+                    }
+                    url("Nexo", "https://polymart.org/product/6901/nexo") {
+                        required = false
+                    }
+                    url("Oraxen", "https://www.spigotmc.org/resources/%E2%98%84%EF%B8%8F-oraxen-custom-items-blocks-emotes-furniture-resourcepack-and-gui-1-18-1-21-4.72448/") {
+                        required = false
+                    }
+                    url("PlaceholderAPI", "https://www.spigotmc.org/resources/placeholderapi.6245/") {
+                        required = false
+                    }
+                    url("ProtocolLib", "https://www.spigotmc.org/resources/protocollib.1997/") {
+                        required = false
+                    }
+                    url("QuickShop-Hikari", "https://modrinth.com/plugin/quickshop-hikari") {
+                        required = false
+                    }
+                    url("Towny", "https://modrinth.com/plugin/towny") {
+                        required = false
+                    }
+                    url("WorldGuard", "https://modrinth.com/plugin/worldguard") {
+                        required = false
+                    }
+                }
+            }
         }
     }
 }
