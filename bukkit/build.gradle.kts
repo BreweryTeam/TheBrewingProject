@@ -256,6 +256,7 @@ publishing {
 
 modrinth {
     token.set(System.getenv("MODRINTH_TOKEN") ?: run {
+        println("Could not find any Modrinth token!")
         return@modrinth
     })
     projectId.set("4zxCmDBL") // This can be the project ID or the slug. Either will work!
