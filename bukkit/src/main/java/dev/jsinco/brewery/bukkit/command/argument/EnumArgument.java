@@ -18,7 +18,7 @@ import java.util.concurrent.CompletableFuture;
 
 public class EnumArgument<E extends Enum<E>> implements CustomArgumentType.Converted<E, String> {
     private static final DynamicCommandExceptionType ERROR_INVALID_ENUM = new DynamicCommandExceptionType(event ->
-            BukkitMessageUtil.toBrigadier("tbp.command.illegal-argument-detailed", Placeholder.unparsed("argument", event.toString()))
+            BukkitMessageUtil.toBrigadier("tbp.command.illegal-argument-detailed", Placeholder.unparsed("arguments", event.toString()))
     );
     private final Class<E> eClass;
 

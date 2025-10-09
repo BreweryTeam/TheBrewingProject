@@ -28,7 +28,9 @@ public class BukkitMessageUtil {
 
 
     public static Message toBrigadier(String translation, TagResolver... resolvers) {
-        return MessageComponentSerializer.message().serialize(Component.translatable(translation, Argument.tagResolver(resolvers)));
+        return MessageComponentSerializer.message().serialize(
+                Component.translatable(translation, Argument.tagResolver(resolvers))
+        );
     }
 
     public static TagResolver recipeEffectResolver(RecipeEffects effects) {
