@@ -59,6 +59,14 @@ public class BrewingStepUtil {
         int amountOfScoredIngredients = 0;
         List<Ingredient> postProcess = new ArrayList<>();
         for (Ingredient ingredient : ingredientGroup.alternatives()) {
+            if (ingredient instanceof ScoredIngredient(Ingredient baseIngredient, double score)) {
+                ingredient = baseIngredient;
+                if (!targetIngredients.containsKey(ingredient) && modifiedActual.containsKey(ingredient)) {
+                    int amount = modifiedActual.get(ingredient);
+                    ingredientScoreSum += score * amount;
+                    amountOfScoredIngredients += amount;
+                }
+            }
             if (!modifiedActual.containsKey(ingredient)) {
                 continue;
             }
@@ -67,24 +75,20 @@ public class BrewingStepUtil {
                 postProcess.add(ingredient);
                 continue;
             }
-            if (ingredient instanceof ScoredIngredient(Ingredient baseIngredient, double score)) {
-                ingredientScoreSum += score;
-                amountOfScoredIngredients += modifiedActual.get(ingredient);
-                ingredient = baseIngredient;
-            }
             ingredientAmount += modifiedActual.remove(ingredient);
         }
         for (Ingredient ingredient : postProcess) {
             if (target <= ingredientAmount) {
                 break;
             }
-            if (ingredient instanceof ScoredIngredient(Ingredient baseIngredient, double score)) {
-                ingredientScoreSum += score;
-                ingredient = baseIngredient;
-                amountOfScoredIngredients += modifiedActual.get(ingredient);
-            }
+
             int amount = modifiedActual.getOrDefault(ingredient, 0);
             int increase = Math.min(amount, target - ingredientAmount);
+            if (ingredient instanceof ScoredIngredient(Ingredient baseIngredient, double score)) {
+                ingredientScoreSum += score * increase;
+                ingredient = baseIngredient;
+                amountOfScoredIngredients += increase;
+            }
             ingredientAmount += increase;
             if (amount == increase) {
                 modifiedActual.remove(ingredient);
