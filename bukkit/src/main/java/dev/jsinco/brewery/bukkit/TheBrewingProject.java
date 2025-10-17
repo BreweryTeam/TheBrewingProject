@@ -6,6 +6,7 @@ import dev.jsinco.brewery.api.breweries.Barrel;
 import dev.jsinco.brewery.api.breweries.BarrelType;
 import dev.jsinco.brewery.api.breweries.Distillery;
 import dev.jsinco.brewery.api.breweries.Tickable;
+import dev.jsinco.brewery.api.effect.modifier.ModifierManager;
 import dev.jsinco.brewery.api.event.CustomEventRegistry;
 import dev.jsinco.brewery.api.event.EventStepRegistry;
 import dev.jsinco.brewery.api.structure.MultiblockStructure;
@@ -43,6 +44,7 @@ import dev.jsinco.brewery.database.PersistenceException;
 import dev.jsinco.brewery.database.sql.Database;
 import dev.jsinco.brewery.database.sql.DatabaseDriver;
 import dev.jsinco.brewery.effect.DrunksManagerImpl;
+import dev.jsinco.brewery.effect.ModifierManagerImpl;
 import dev.jsinco.brewery.effect.text.DrunkTextRegistry;
 import dev.jsinco.brewery.format.TimeFormatRegistry;
 import dev.jsinco.brewery.recipes.RecipeReader;
@@ -108,6 +110,8 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
     private final ActiveEventsRegistry activeEventsRegistry = new ActiveEventsRegistry();
     @Getter
     private PlayerWalkListener playerWalkListener;
+    @Getter
+    private ModifierManager modifierManager = new ModifierManagerImpl();
     private BreweryTranslator translator;
     private boolean successfullLoad = false;
 

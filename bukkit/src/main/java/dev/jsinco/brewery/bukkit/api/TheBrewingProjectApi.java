@@ -1,6 +1,7 @@
 package dev.jsinco.brewery.bukkit.api;
 
 import dev.jsinco.brewery.api.brew.BrewManager;
+import dev.jsinco.brewery.api.effect.modifier.ModifierManager;
 import dev.jsinco.brewery.api.integration.IntegrationManager;
 import dev.jsinco.brewery.api.effect.DrunksManager;
 import dev.jsinco.brewery.api.recipe.RecipeRegistry;
@@ -13,6 +14,11 @@ public interface TheBrewingProjectApi {
      * @return A brew manager instance that helps you create and read brews
      */
     BrewManager<ItemStack> getBrewManager();
+
+    /**
+     * @return A modifier manager that helps you access modifiers
+     */
+    ModifierManager getModifierManager();
 
     /**
      * @return A drunks manager that helps you manage player drunkeness and plan events
