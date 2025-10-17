@@ -69,7 +69,7 @@ public class BreweryIngredient implements Ingredient {
     }
 
     public static Optional<CompletableFuture<Optional<Ingredient>>> from(String id) {
-        if (!id.startsWith("brewery:") || id.startsWith("#brewery:")) {
+        if (!id.startsWith("brewery:") && !id.startsWith("#brewery:")) {
             return Optional.empty();
         }
         BreweryKey breweryKey = BreweryKey.parse(id);

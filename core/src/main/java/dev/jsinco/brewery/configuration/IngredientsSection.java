@@ -63,6 +63,7 @@ public class IngredientsSection extends OkaeriConfig {
         private Component displayName;
         private List<String> materials;
 
+        @Exclude
         private static final Pattern INGREDIENT_GROUP_PATTERN = Pattern.compile("^\\+{0,3}#brewery:");
 
         public CustomIngredientSection() {
