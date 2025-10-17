@@ -28,9 +28,6 @@ public class BrewingStepUtil {
         Map<Ingredient, Integer> modifiedTarget = compressIngredients(target);
         Map<Ingredient, Integer> modifiedActual = compressIngredients(actual);
 
-        if (modifiedTarget.size() != modifiedActual.size()) {
-            return 0;
-        }
         List<@Nullable Double> ingredientScores = new ArrayList<>();
         for (Map.Entry<Ingredient, Integer> targetEntry : List.copyOf(modifiedTarget.entrySet())) {
             Ingredient ingredient = targetEntry.getKey();
@@ -46,6 +43,9 @@ public class BrewingStepUtil {
                 return 0;
             }
             output *= nearbyValueScore(targetEntry.getValue(), actualAmount);
+        }
+        if(!modifiedActual.isEmpty()){
+            return 0D;
         }
         double ingredientScore = ingredientScores.isEmpty() ? 1D : ingredientScores.stream()
                 .filter(Objects::nonNull)
