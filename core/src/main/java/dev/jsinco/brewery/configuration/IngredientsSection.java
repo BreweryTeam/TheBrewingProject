@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Function;
 import java.util.regex.Pattern;
 
 @Accessors(fluent = true)
@@ -76,25 +77,35 @@ public class IngredientsSection extends OkaeriConfig {
             this.materials = materials;
         }
 
-        public CompletableFuture<Optional<Ingredient>> create(IngredientManager<?> ingredientManager) {
+        public CompletableFuture<Optional<Ingredient>> create(IngredientManager<?> ingredientManager, Function<String, List<String>> tagResolver) {
             List<CompletableFuture<Optional<Ingredient>>> group = new ArrayList<>();
             for (String material : materials) {
                 if (INGREDIENT_GROUP_PATTERN.matcher(material).find()) {
                     Logger.logErr("Ingredient groups are not allowed to reference other groups!");
                     return CompletableFuture.completedFuture(Optional.empty());
                 }
-                group.add(
-                        ingredientManager.getIngredient(material.replaceAll("^\\+{1,3}", ""))
-                                .thenApplyAsync(ingredient -> {
-                                            Optional<Ingredient> ingredientOptional = ingredient.map(
-                                                    ingredient0 -> parseScore(ingredient0, material)
-                                            );
-                                            if (ingredientOptional.isEmpty()) {
-                                                Logger.logErr("Unknown ingredient: " + material);
-                                            }
-                                            return ingredientOptional;
-                                        }
-                                ));
+                List<String> strings;
+                String withoutScores = material.replaceAll("^\\+{1,3}", "");
+                if (withoutScores.startsWith("#")) {
+                    strings = tagResolver.apply(withoutScores.replaceFirst("#", ""));
+                    if(strings == null) {
+                        Logger.logErr("Invalid item tag: " + withoutScores);
+                        return CompletableFuture.completedFuture(Optional.empty());
+                    }
+                } else {
+                    strings = List.of(withoutScores);
+                }
+                strings.forEach(tagMaterial -> group.add(ingredientManager.getIngredient(tagMaterial)
+                        .thenApplyAsync(ingredient -> {
+                                    Optional<Ingredient> ingredientOptional = ingredient.map(
+                                            ingredient0 -> parseScore(ingredient0, material)
+                                    );
+                                    if (ingredientOptional.isEmpty()) {
+                                        Logger.logErr("Unknown ingredient: " + tagMaterial);
+                                    }
+                                    return ingredientOptional;
+                                }
+                        )));
             }
             return FutureUtil.mergeFutures(group)
                     .thenApplyAsync(ingredients -> {

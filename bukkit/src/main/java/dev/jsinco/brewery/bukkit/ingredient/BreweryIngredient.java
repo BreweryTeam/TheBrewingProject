@@ -7,7 +7,9 @@ import dev.jsinco.brewery.bukkit.brew.BrewAdapter;
 import dev.jsinco.brewery.configuration.IngredientsSection;
 import dev.jsinco.brewery.util.MessageUtil;
 import io.papermc.paper.persistence.PersistentDataContainerView;
+import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
+import org.bukkit.*;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
@@ -78,7 +80,21 @@ public class BreweryIngredient implements Ingredient {
             return IngredientsSection.ingredients().customIngredients()
                     .stream()
                     .filter(ingredient -> ingredient.key().equals(ingredientKey))
-                    .map(ingredient -> ingredient.create(BukkitIngredientManager.INSTANCE))
+                    .map(ingredient -> ingredient.create(BukkitIngredientManager.INSTANCE, key -> {
+                                NamespacedKey namespacedKey = NamespacedKey.fromString(key);
+                                if (namespacedKey == null) {
+                                    return null;
+                                }
+                                Tag<Material> itemTag = Bukkit.getTag(Tag.REGISTRY_ITEMS, namespacedKey, Material.class);
+                                if (itemTag == null) {
+                                    return null;
+                                }
+                                return itemTag.getValues()
+                                        .stream().map(Keyed::key)
+                                        .map(Key::asMinimalString)
+                                        .toList();
+                            }
+                    ))
                     .findFirst();
         }
         return Optional.<Ingredient>of(new BreweryIngredient(breweryKey, breweryKey.key()))
