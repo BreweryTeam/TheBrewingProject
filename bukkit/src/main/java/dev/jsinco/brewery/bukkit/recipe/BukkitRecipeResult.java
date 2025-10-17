@@ -81,16 +81,24 @@ public class BukkitRecipeResult implements RecipeResult<ItemStack> {
 
     @Override
     public ItemStack newBrewItem(@NotNull BrewScore score, @NotNull Brew brew, @NotNull Brew.State state) {
+        ItemStack itemStack = newLorelessItem();
+        applyLore(itemStack, score, brew, state);
+        return itemStack;
+    }
+
+    @Override
+    public ItemStack newLorelessItem() {
         if (customId != null) {
             ItemStack itemStack = createCustomItem();
+
             if (itemStack != null) {
-                applyData(itemStack, score, brew, state);
+                applyData(itemStack);
                 return itemStack;
             }
             Logger.logErr("Invalid item id '" + customId + "' for recipe: " + name);
         }
         ItemStack itemStack = new ItemStack(Material.POTION);
-        applyData(itemStack, score, brew, state);
+        applyData(itemStack);
         return itemStack;
     }
 
@@ -114,22 +122,12 @@ public class BukkitRecipeResult implements RecipeResult<ItemStack> {
         }
     }
 
-    private void applyData(ItemStack itemStack, BrewScore score, Brew brew, Brew.State state) {
+    private void applyData(ItemStack itemStack) {
         BrewAdapter.hideTooltips(itemStack);
         itemStack.setData(DataComponentTypes.CUSTOM_NAME, MessageUtil.miniMessage(name)
                 .decoration(TextDecoration.ITALIC, false)
                 .colorIfAbsent(NamedTextColor.WHITE)
         );
-        itemStack.setData(DataComponentTypes.LORE, ItemLore.lore(
-                Stream.concat(lore.stream()
-                                        .map(line -> MessageUtil.miniMessage(line, MessageUtil.getScoreTagResolver(score))),
-                                compileExtraLore(score, brew, state)
-                        )
-                        .map(component -> component.decoration(TextDecoration.ITALIC, false))
-                        .map(component -> component.colorIfAbsent(NamedTextColor.GRAY))
-                        .map(component -> GlobalTranslator.render(component, Config.config().language()))
-                        .toList()
-        ));
         if (glint) {
             itemStack.setData(DataComponentTypes.ENCHANTMENTS, ItemEnchantments.itemEnchantments().add(Enchantment.MENDING, 1));
         }
@@ -143,6 +141,19 @@ public class BukkitRecipeResult implements RecipeResult<ItemStack> {
         itemStack.setData(DataComponentTypes.POTION_CONTENTS, PotionContents.potionContents()
                 .customColor(color)
         );
+    }
+
+    private void applyLore(ItemStack itemStack, BrewScore score, Brew brew, Brew.State state) {
+        itemStack.setData(DataComponentTypes.LORE, ItemLore.lore(
+                Stream.concat(lore.stream()
+                                        .map(line -> MessageUtil.miniMessage(line, MessageUtil.getScoreTagResolver(score))),
+                                compileExtraLore(score, brew, state)
+                        )
+                        .map(component -> component.decoration(TextDecoration.ITALIC, false))
+                        .map(component -> component.colorIfAbsent(NamedTextColor.GRAY))
+                        .map(component -> GlobalTranslator.render(component, Config.config().language()))
+                        .toList()
+        ));
     }
 
     private Stream<? extends Component> compileExtraLore(BrewScore score, Brew brew, Brew.State state) {

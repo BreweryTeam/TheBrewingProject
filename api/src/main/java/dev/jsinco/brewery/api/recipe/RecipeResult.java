@@ -15,4 +15,9 @@ public interface RecipeResult<I> {
      * @return A new item from this recipe result
      */
     I newBrewItem(BrewScore score, Brew brew, Brew.State state);
+
+    /**
+     * @return The recipe item without any extra lore
+     */
+    I newLorelessItem();
 }
