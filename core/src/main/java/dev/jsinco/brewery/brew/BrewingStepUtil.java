@@ -1,13 +1,13 @@
 package dev.jsinco.brewery.brew;
 
 import dev.jsinco.brewery.api.ingredient.Ingredient;
+import dev.jsinco.brewery.api.ingredient.IngredientGroup;
 import dev.jsinco.brewery.api.ingredient.IngredientManager;
 import dev.jsinco.brewery.api.ingredient.ScoredIngredient;
 import dev.jsinco.brewery.api.util.Pair;
+import org.jspecify.annotations.Nullable;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class BrewingStepUtil {
 
@@ -31,14 +31,68 @@ public class BrewingStepUtil {
         if (modifiedTarget.size() != modifiedActual.size()) {
             return 0;
         }
-        for (Map.Entry<Ingredient, Integer> targetEntry : modifiedTarget.entrySet()) {
-            Integer actualAmount = modifiedActual.get(targetEntry.getKey());
-            if (actualAmount == null || actualAmount == 0) {
+        List<@Nullable Double> ingredientScores = new ArrayList<>();
+        for (Map.Entry<Ingredient, Integer> targetEntry : List.copyOf(modifiedTarget.entrySet())) {
+            Ingredient ingredient = targetEntry.getKey();
+            int actualAmount;
+            if (ingredient instanceof IngredientGroup ingredientGroup) {
+                Pair<Integer, Double> ingredientGroupMatch = computeIngredientGroupMatch(ingredientGroup, modifiedActual, modifiedTarget, targetEntry.getValue());
+                actualAmount = ingredientGroupMatch.first();
+                ingredientScores.add(ingredientGroupMatch.second());
+            } else {
+                actualAmount = modifiedActual.containsKey(ingredient) ? modifiedActual.remove(ingredient) : 0;
+            }
+            if (actualAmount == 0) {
                 return 0;
             }
             output *= nearbyValueScore(targetEntry.getValue(), actualAmount);
         }
-        return output;
+        double ingredientScore = ingredientScores.isEmpty() ? 1D : ingredientScores.stream()
+                .filter(Objects::nonNull)
+                .reduce(1D, (aDouble, aDouble2) -> aDouble * aDouble2);
+        return output * ingredientScore;
+    }
+
+    private static Pair<Integer, @Nullable Double> computeIngredientGroupMatch(IngredientGroup ingredientGroup, Map<Ingredient, Integer> modifiedActual, Map<Ingredient, Integer> targetIngredients, int target) {
+        int ingredientAmount = 0;
+        double ingredientScoreSum = 0D;
+        int amountOfScoredIngredients = 0;
+        List<Ingredient> postProcess = new ArrayList<>();
+        for (Ingredient ingredient : ingredientGroup.alternatives()) {
+            if (!modifiedActual.containsKey(ingredient)) {
+                continue;
+            }
+            if (targetIngredients.containsKey(ingredient)) {
+                // Prioritize explicitly specified ingredients first
+                postProcess.add(ingredient);
+                continue;
+            }
+            if (ingredient instanceof ScoredIngredient(Ingredient baseIngredient, double score)) {
+                ingredientScoreSum += score;
+                amountOfScoredIngredients += modifiedActual.get(ingredient);
+                ingredient = baseIngredient;
+            }
+            ingredientAmount += modifiedActual.remove(ingredient);
+        }
+        for (Ingredient ingredient : postProcess) {
+            if (target <= ingredientAmount) {
+                break;
+            }
+            if (ingredient instanceof ScoredIngredient(Ingredient baseIngredient, double score)) {
+                ingredientScoreSum += score;
+                ingredient = baseIngredient;
+                amountOfScoredIngredients += modifiedActual.get(ingredient);
+            }
+            int amount = modifiedActual.getOrDefault(ingredient, 0);
+            int increase = Math.min(amount, target - ingredientAmount);
+            ingredientAmount += increase;
+            if (amount == increase) {
+                modifiedActual.remove(ingredient);
+            } else {
+                modifiedActual.put(ingredient, amount - increase);
+            }
+        }
+        return new Pair<>(ingredientAmount, amountOfScoredIngredients == 0 ? null : ingredientScoreSum / amountOfScoredIngredients);
     }
 
     private static Map<Ingredient, Integer> compressIngredients(Map<Ingredient, Integer> ingredients) {
