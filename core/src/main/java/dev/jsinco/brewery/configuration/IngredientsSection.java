@@ -9,6 +9,7 @@ import dev.jsinco.brewery.api.util.Logger;
 import dev.jsinco.brewery.util.FutureUtil;
 import eu.okaeri.configs.ConfigManager;
 import eu.okaeri.configs.OkaeriConfig;
+import eu.okaeri.configs.annotation.Comment;
 import eu.okaeri.configs.annotation.CustomKey;
 import eu.okaeri.configs.annotation.Exclude;
 import eu.okaeri.configs.serdes.OkaeriSerdesPack;
@@ -30,6 +31,11 @@ import java.util.regex.Pattern;
 public class IngredientsSection extends OkaeriConfig {
 
     @CustomKey("ingredient-groups")
+    @Comment({
+            "To reference a ingredient group in your recipe, use the key",
+            "'#brewery:my_ingredient_group_key' normally as any ingredient.",
+            "You can also define vanilla tags here, for example #leaves"
+    })
     private List<CustomIngredientSection> customIngredients = List.of(
             new CustomIngredientSection("grass", Component.text("Grass"), List.of(
                     "+grass_block",
