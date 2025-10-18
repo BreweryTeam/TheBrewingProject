@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Paths;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
@@ -56,8 +57,17 @@ class BreweryStructureTest {
     }
 
     @ParameterizedTest
-    @MethodSource("getValidMeta")
-    void validMeta(Map<StructureMeta<?>, Object> structureMeta) throws URISyntaxException, IOException {
+    @MethodSource("getIncompleteMeta")
+    void incompleteMeta(Map<StructureMeta<?>, Object> inputMeta, Map<StructureMeta<?>, Object> expectedMeta) throws URISyntaxException, IOException {
+        URL url = PlacedBreweryStructure.class.getResource("/structures/test_barrel.schem");
+        Schematic schematic = new SchematicReader().read(Paths.get(url.toURI()));
+        BreweryStructure breweryStructure = new BreweryStructure(schematic, "hello", inputMeta);
+        expectedMeta.forEach((key, value) -> assertEquals(value, breweryStructure.getMeta(key)));
+    }
+
+    @ParameterizedTest
+    @MethodSource("getFullMeta")
+    void fullMeta(Map<StructureMeta<?>, Object> structureMeta) throws URISyntaxException, IOException {
         URL url = PlacedBreweryStructure.class.getResource("/structures/test_barrel.schem");
         Schematic schematic = new SchematicReader().read(Paths.get(url.toURI()));
         assertDoesNotThrow(() -> new BreweryStructure(schematic, "hello", structureMeta));
@@ -72,29 +82,64 @@ class BreweryStructureTest {
                         StructureMeta.TYPE, StructureType.BARREL));
     }
 
+    /**
+     * Helper method to create a mutable map for testing BreweryStructure, also allows null values
+     */
+    private static <T, U> Map<T, U> mutableMapOf(Object... entries) {
+        HashMap<T, U> map = new HashMap<>(Map.of());
+        for (int i = 0; i < entries.length; i += 2) {
+            map.put((T) entries[i], (U) entries[i + 1]);
+        }
+        return map;
+    }
+
     private static Stream<Arguments> getInvalidMeta() {
-        return Stream.of(Arguments.of(Map.of()),
-                Arguments.of(Map.of(StructureMeta.INVENTORY_SIZE, 9)),
-                Arguments.of(Map.of(StructureMeta.TYPE, StructureType.BARREL)),
-                Arguments.of(Map.of(
+        return Stream.of(
+                Arguments.of(mutableMapOf(StructureMeta.INVENTORY_SIZE, 9)),
+                Arguments.of(mutableMapOf(
                         StructureMeta.TYPE, StructureType.BARREL,
                         StructureMeta.USE_BARREL_SUBSTITUTION, true,
                         StructureMeta.INVENTORY_SIZE, 14)
-                ),
-                Arguments.of(Map.of(StructureMeta.TYPE, StructureType.DISTILLERY))
+                )
         );
     }
 
-    private static Stream<Arguments> getValidMeta() {
+    private static Stream<Arguments> getIncompleteMeta() {
         return Stream.of(
-                Arguments.of(Map.of(
+                Arguments.of(
+                        mutableMapOf(
+                                StructureMeta.TYPE, StructureType.BARREL
+                        ),
+                        mutableMapOf(
+                                StructureMeta.INVENTORY_SIZE, 9,
+                                StructureMeta.USE_BARREL_SUBSTITUTION, false,
+                                StructureMeta.PROCESS_AMOUNT, null
+                        )
+                ),
+                Arguments.of(
+                        mutableMapOf(
+                                StructureMeta.TYPE, StructureType.DISTILLERY
+                        ),
+                        mutableMapOf( // don't check for everything, so the test doesn't break on meta changes
+                                StructureMeta.INVENTORY_SIZE, 9,
+                                StructureMeta.USE_BARREL_SUBSTITUTION, null,
+                                StructureMeta.TAGGED_MATERIAL, "decorated_pot",
+                                StructureMeta.PROCESS_AMOUNT, 1
+                        )
+                )
+        );
+    }
+
+    private static Stream<Arguments> getFullMeta() {
+        return Stream.of(
+                Arguments.of(mutableMapOf(
                         StructureMeta.TYPE, StructureType.DISTILLERY,
                         StructureMeta.INVENTORY_SIZE, 18,
                         StructureMeta.TAGGED_MATERIAL, "decorated_pot",
                         StructureMeta.PROCESS_TIME, 0L,
                         StructureMeta.PROCESS_AMOUNT, 1
                 )),
-                Arguments.of(Map.of(
+                Arguments.of(mutableMapOf(
                         StructureMeta.TYPE, StructureType.BARREL,
                         StructureMeta.INVENTORY_SIZE, 9,
                         StructureMeta.USE_BARREL_SUBSTITUTION, true)
