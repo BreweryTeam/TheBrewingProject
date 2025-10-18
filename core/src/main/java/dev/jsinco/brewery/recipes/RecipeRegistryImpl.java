@@ -3,6 +3,7 @@ package dev.jsinco.brewery.recipes;
 import com.google.common.base.Preconditions;
 import dev.jsinco.brewery.api.brew.BrewingStep;
 import dev.jsinco.brewery.api.ingredient.Ingredient;
+import dev.jsinco.brewery.api.ingredient.IngredientGroup;
 import dev.jsinco.brewery.api.recipe.DefaultRecipe;
 import dev.jsinco.brewery.api.recipe.Recipe;
 import dev.jsinco.brewery.api.recipe.RecipeRegistry;
@@ -11,6 +12,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class RecipeRegistryImpl<I> implements RecipeRegistry<I> {
 
@@ -19,8 +21,6 @@ public class RecipeRegistryImpl<I> implements RecipeRegistry<I> {
     private Map<String, DefaultRecipe<I>> defaultRecipes = new HashMap<>();
     private List<DefaultRecipe<I>> defaultRecipeList = new ArrayList<>();
     private Set<Ingredient> allIngredients = Collections.newSetFromMap(new ConcurrentHashMap<>());
-
-    private static final Random RANDOM = new Random();
 
     public void registerRecipes(@NotNull Map<String, Recipe<I>> recipes) {
         this.recipes = new HashMap<>(recipes);
@@ -71,6 +71,12 @@ public class RecipeRegistryImpl<I> implements RecipeRegistry<I> {
                 .map(BrewingStep.IngredientsStep::ingredients)
                 .map(Map::keySet)
                 .flatMap(Collection::stream)
+                .flatMap(ingredient -> {
+                    if (ingredient instanceof IngredientGroup ingredientGroup) {
+                        return ingredientGroup.alternatives().stream();
+                    }
+                    return Stream.of(ingredient);
+                })
                 .collect(Collectors.toList());
     }
 

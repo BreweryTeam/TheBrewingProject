@@ -44,7 +44,7 @@ public class BukkitIngredientManager implements IngredientManager<ItemStack> {
                 .filter(itemIntegration -> itemIntegration.getId().equals(breweryKey.namespace()))
                 .findAny()
                 .map(itemIntegration -> itemIntegration.createIngredient(breweryKey.key()))
-                .or(() -> BreweryIngredient.from(id).map(Optional::of).map(CompletableFuture::completedFuture))
+                .or(() -> BreweryIngredient.from(id))
                 .or(() -> SimpleIngredient.from(id).map(Optional::of).map(CompletableFuture::completedFuture))
                 .orElse(CompletableFuture.completedFuture(Optional.empty()));
     }

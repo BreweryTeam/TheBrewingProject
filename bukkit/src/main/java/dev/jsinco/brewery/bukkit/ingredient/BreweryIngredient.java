@@ -1,18 +1,22 @@
 package dev.jsinco.brewery.bukkit.ingredient;
 
-import dev.jsinco.brewery.bukkit.brew.BrewAdapter;
 import dev.jsinco.brewery.api.ingredient.Ingredient;
 import dev.jsinco.brewery.api.ingredient.ScoredIngredient;
 import dev.jsinco.brewery.api.util.BreweryKey;
+import dev.jsinco.brewery.bukkit.brew.BrewAdapter;
+import dev.jsinco.brewery.configuration.IngredientsSection;
 import dev.jsinco.brewery.util.MessageUtil;
 import io.papermc.paper.persistence.PersistentDataContainerView;
+import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
+import org.bukkit.*;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 public class BreweryIngredient implements Ingredient {
     protected final BreweryKey ingredientKey;
@@ -66,11 +70,35 @@ public class BreweryIngredient implements Ingredient {
         return Optional.of(new BreweryIngredient(breweryKey, displayName));
     }
 
-    public static Optional<Ingredient> from(String id) {
-        if (!id.startsWith("brewery:")) {
+    public static Optional<CompletableFuture<Optional<Ingredient>>> from(String id) {
+        if (!id.startsWith("brewery:") && !id.startsWith("#brewery:")) {
             return Optional.empty();
         }
         BreweryKey breweryKey = BreweryKey.parse(id);
-        return Optional.of(new BreweryIngredient(breweryKey, breweryKey.key()));
+        if (breweryKey.namespace().startsWith("#")) {
+            String ingredientKey = breweryKey.key();
+            return IngredientsSection.ingredients().customIngredients()
+                    .stream()
+                    .filter(ingredient -> ingredient.key().equals(ingredientKey))
+                    .map(ingredient -> ingredient.create(BukkitIngredientManager.INSTANCE, key -> {
+                                NamespacedKey namespacedKey = NamespacedKey.fromString(key);
+                                if (namespacedKey == null) {
+                                    return null;
+                                }
+                                Tag<Material> itemTag = Bukkit.getTag(Tag.REGISTRY_ITEMS, namespacedKey, Material.class);
+                                if (itemTag == null) {
+                                    return null;
+                                }
+                                return itemTag.getValues()
+                                        .stream().map(Keyed::key)
+                                        .map(Key::asMinimalString)
+                                        .toList();
+                            }
+                    ))
+                    .findFirst();
+        }
+        return Optional.<Ingredient>of(new BreweryIngredient(breweryKey, breweryKey.key()))
+                .map(Optional::of)
+                .map(CompletableFuture::completedFuture);
     }
 }
