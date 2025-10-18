@@ -118,7 +118,7 @@ public class BukkitRecipeResultReader implements RecipeResultReader<ItemStack> {
                 amplifierBounds = Interval.parse(parts[1]);
             } else {
                 durationBounds = Interval.parse(parts[1]).multiply(Moment.SECOND);
-                amplifierBounds = new Interval(1, 1);
+                amplifierBounds = new Interval(0, 0);
             }
         }
         return new RecipeEffect(type, durationBounds, amplifierBounds);
