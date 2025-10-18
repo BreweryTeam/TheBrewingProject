@@ -52,7 +52,7 @@ public class BreweryStructure {
         StructureType type = getMeta(StructureMeta.TYPE);
         Preconditions.checkArgument(type != null, "Invalid structure '" + name + "', missing meta: " + StructureMeta.TYPE);
         List<StructureMeta<?>> missing = type.getMissingMandatory(structureMeta.keySet());
-        missing.forEach(missing1 -> structureMeta.put(missing1, missing1.defaultValue()));
+        missing.forEach(missingEntry -> structureMeta.put(missingEntry, missingEntry.defaultValue()));
     }
 
     private static List<Vector3i> computeOrigins(Schematic schem) {
