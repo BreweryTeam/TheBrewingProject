@@ -20,6 +20,9 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import javax.crypto.SecretKey;
+import java.util.Base64;
+import java.util.List;
 import java.util.function.Consumer;
 
 public class BreweryCommand {
@@ -68,6 +71,19 @@ public class BreweryCommand {
                             MessageUtil.message(commandContext.getSource().getSender(), "tbp.command.version", Placeholder.unparsed("version", TheBrewingProject.getInstance().getPluginMeta().getVersion()));
                             return com.mojang.brigadier.Command.SINGLE_SUCCESS;
                         })
+                ).then(Commands.literal("admin")
+                        .requires(commandSourceStack -> commandSourceStack.getSender().hasPermission("brewery.command.admin"))
+                        .then(Commands.literal("rotate_encryption_key")
+                                .executes(commandContext -> {
+                                    List<SecretKey> previousKeys = Config.config().previousEncryptionKeys();
+                                    previousKeys.add(Config.config().encryptionKey());
+                                    Config.config().set("previousEncryptionKeys", previousKeys.stream().map(key -> Base64.getEncoder().encodeToString(key.getEncoded())).toList());
+                                    Config.config().set("encryptionKey", Base64.getEncoder().encodeToString(Config.generateAesKey().getEncoded()));
+                                    Config.config().save();
+                                    MessageUtil.message(commandContext.getSource().getSender(), "tbp.command.admin.rotate_encryption_key");
+                                    return com.mojang.brigadier.Command.SINGLE_SUCCESS;
+                                })
+                        )
                 )
                 .build(), Config.config().commandAliases());
     }

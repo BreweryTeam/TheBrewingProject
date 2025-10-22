@@ -106,7 +106,7 @@ public class Config extends OkaeriConfig {
         return instance;
     }
 
-    private SecretKey generateAesKey() {
+    public static SecretKey generateAesKey() {
         try {
             KeyGenerator kg = KeyGenerator.getInstance("AES");
             try {
@@ -120,7 +120,7 @@ public class Config extends OkaeriConfig {
         }
     }
 
-    private SecretKey generateDesKey() {
+    public static SecretKey generateDesKey() {
         try {
             return KeyGenerator.getInstance("DES").generateKey();
         } catch (NoSuchAlgorithmException e) {
