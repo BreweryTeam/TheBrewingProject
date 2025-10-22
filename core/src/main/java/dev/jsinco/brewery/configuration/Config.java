@@ -57,6 +57,10 @@ public class Config extends OkaeriConfig {
     @Comment("A list of previous keys to try when decryption with the current one fails")
     private List<SecretKey> previousEncryptionKeys = List.of();
 
+    @Comment({"Should we re-encrypt all items in opened inventories to use the newest encryption standard and the latest key?",
+            "If your encryption key got leaked, use this to prevent anyone from seeing items encrypted with old keys ever again"})
+    private boolean reencryptItemsInInventories = false;
+
     @CustomKey("empty-any-drink-using-hopper")
     @Comment("Empty any drink when right-clicking a hopper. If false, only applies to failed brews")
     private boolean emptyAnyDrinkUsingHopper = false;

@@ -295,6 +295,7 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
         this.drunksManager = new DrunksManagerImpl<>(customDrunkEventRegistry, EventSection.events().enabledRandomEvents().stream().map(BreweryKey::parse).collect(Collectors.toSet()),
                 () -> this.time, database, SqlDrunkStateDataType.INSTANCE, SqlDrunkenModifierDataType.INSTANCE);
         PluginManager pluginManager = Bukkit.getPluginManager();
+        pluginManager.registerEvents(new BrewMigrationListener(), this);
         pluginManager.registerEvents(new BlockEventListener(this.structureRegistry, placedStructureRegistry, this.database, this.breweryRegistry), this);
         pluginManager.registerEvents(new PlayerEventListener(this.placedStructureRegistry, this.breweryRegistry, this.database, this.drunksManager, this.drunkTextRegistry, recipeRegistry, drunkEventExecutor), this);
         pluginManager.registerEvents(new InventoryEventListener(breweryRegistry, database), this);
