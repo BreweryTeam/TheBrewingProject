@@ -1,6 +1,7 @@
 package dev.jsinco.brewery.configuration;
 
 
+import com.google.common.base.Preconditions;
 import dev.jsinco.brewery.api.ingredient.Ingredient;
 import dev.jsinco.brewery.api.ingredient.IngredientGroup;
 import dev.jsinco.brewery.api.ingredient.IngredientManager;
@@ -19,9 +20,7 @@ import lombok.experimental.Accessors;
 import net.kyori.adventure.text.Component;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 import java.util.regex.Pattern;
@@ -36,8 +35,8 @@ public class IngredientsSection extends OkaeriConfig {
             "'#brewery:my_ingredient_group_key' normally as any ingredient.",
             "You can also define vanilla tags here, for example #leaves"
     })
-    private List<CustomIngredientSection> customIngredients = List.of(
-            new CustomIngredientSection("grass", Component.text("Grass"), List.of(
+    private List<IngredientGroupSection> ingredientGroups = List.of(
+            new IngredientGroupSection("grass", Component.text("Grass"), List.of(
                     "+grass_block",
                     "++fern",
                     "+++short_grass"
@@ -46,6 +45,8 @@ public class IngredientsSection extends OkaeriConfig {
 
     @Exclude
     private static IngredientsSection instance;
+    @Exclude
+    private static CompletableFuture<Void> validatedFuture;
 
     public static IngredientsSection ingredients() {
         return instance;
@@ -61,9 +62,36 @@ public class IngredientsSection extends OkaeriConfig {
         });
     }
 
+    public static void validate(IngredientManager<?> ingredientManager) {
+        Set<String> keys = new HashSet<>();
+        List<CompletableFuture<Optional<IngredientGroupSection>>> updatedSections = new ArrayList<>();
+        for (IngredientGroupSection ingredientGroup : instance.ingredientGroups()) {
+            String key = ingredientGroup.key;
+            Preconditions.checkArgument(!keys.contains(key), "Can't have two ingredient groups with the same key (ingredients.yml): " + key);
+            keys.add(key);
+            List<CompletableFuture<Optional<Ingredient>>> ingredientsFutures = ingredientGroup.materials.stream()
+                    .map(string -> IngredientGroupSection.INGREDIENT_GROUP_PATTERN.matcher(string).replaceAll(""))
+                    .map(ingredientManager::getIngredient)
+                    .toList();
+            FutureUtil.mergeFutures(ingredientsFutures)
+                    .thenApplyAsync(ingredients -> {
+                        if (ingredients.stream().allMatch(Optional::isPresent)) {
+                            return Optional.of(ingredientGroup);
+                        } else {
+                            Logger.logErr("Could not resolve ingredient group '" + key + "', undefined material");
+                            return Optional.empty();
+                        }
+                    });
+        }
+        IngredientsSection.validatedFuture = FutureUtil.mergeFutures(updatedSections).thenAccept(newGroups -> {
+            ingredients().ingredientGroups.clear();
+            ingredients().ingredientGroups.addAll(newGroups.stream().flatMap(Optional::stream).toList());
+        });
+    }
+
 
     @Accessors(fluent = true)
-    public static class CustomIngredientSection extends OkaeriConfig {
+    public static class IngredientGroupSection extends OkaeriConfig {
         @Getter
         private String key;
         @CustomKey("display-name")
@@ -73,11 +101,11 @@ public class IngredientsSection extends OkaeriConfig {
         @Exclude
         private static final Pattern INGREDIENT_GROUP_PATTERN = Pattern.compile("^\\+{0,3}#brewery:");
 
-        public CustomIngredientSection() {
+        public IngredientGroupSection() {
             // NO-OP, keep for deserialization
         }
 
-        public CustomIngredientSection(String key, Component displayName, List<String> materials) {
+        public IngredientGroupSection(String key, Component displayName, List<String> materials) {
             this.key = key;
             this.displayName = displayName;
             this.materials = materials;
@@ -94,7 +122,7 @@ public class IngredientsSection extends OkaeriConfig {
                 String withoutScores = material.replaceAll("^\\+{1,3}", "");
                 if (withoutScores.startsWith("#")) {
                     strings = tagResolver.apply(withoutScores.replaceFirst("#", ""));
-                    if(strings == null) {
+                    if (strings == null) {
                         Logger.logErr("Invalid item tag: " + withoutScores);
                         return CompletableFuture.completedFuture(Optional.empty());
                     }
@@ -113,7 +141,7 @@ public class IngredientsSection extends OkaeriConfig {
                                 }
                         )));
             }
-            return FutureUtil.mergeFutures(group)
+            return validatedFuture.thenCombine(FutureUtil.mergeFutures(group)
                     .thenApplyAsync(ingredients -> {
                         if (ingredients.stream().anyMatch(Optional::isEmpty)) {
                             return Optional.empty();
@@ -125,7 +153,7 @@ public class IngredientsSection extends OkaeriConfig {
                                         .map(Optional::get)
                                         .toList()
                         ));
-                    });
+                    }), (voidObj, ingredientGroup) -> ingredientGroup.map(Ingredient.class::cast));
         }
 
         private Ingredient parseScore(Ingredient ingredient, String ingredientString) {
