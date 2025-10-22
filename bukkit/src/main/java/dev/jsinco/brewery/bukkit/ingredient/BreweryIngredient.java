@@ -77,7 +77,7 @@ public class BreweryIngredient implements Ingredient {
         BreweryKey breweryKey = BreweryKey.parse(id);
         if (breweryKey.namespace().startsWith("#")) {
             String ingredientKey = breweryKey.key();
-            return IngredientsSection.ingredients().customIngredients()
+            return IngredientsSection.ingredients().ingredientGroups()
                     .stream()
                     .filter(ingredient -> ingredient.key().equals(ingredientKey))
                     .map(ingredient -> ingredient.create(BukkitIngredientManager.INSTANCE, key -> {

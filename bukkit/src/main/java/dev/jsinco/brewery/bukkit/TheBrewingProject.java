@@ -121,6 +121,7 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
         DrunkenModifierSection.validate();
         EventSection.validate();
         IngredientsSection.load(this.getDataFolder(), serializers());
+        IngredientsSection.validate(BukkitIngredientManager.INSTANCE);
         this.translator = new BreweryTranslator(new File(this.getDataFolder(), "locale"));
         translator.reload();
         GlobalTranslator.translator().addSource(translator);
