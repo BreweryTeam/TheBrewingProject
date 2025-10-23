@@ -14,7 +14,7 @@ import dev.jsinco.brewery.api.util.Pair;
 import dev.jsinco.brewery.brew.BrewImpl;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.bukkit.recipe.BukkitRecipeResult;
-import dev.jsinco.brewery.bukkit.util.IngredientUtil;
+import dev.jsinco.brewery.bukkit.util.BukkitIngredientUtil;
 import dev.jsinco.brewery.bukkit.util.ListPersistentDataType;
 import dev.jsinco.brewery.configuration.Config;
 import dev.jsinco.brewery.recipes.BrewScoreImpl;
@@ -104,7 +104,7 @@ public class BrewAdapter {
                 IngredientManager.merge(ingredients, (Map<Ingredient, Integer>) mix.ingredients());
             }
         }
-        Pair<org.bukkit.Color, Ingredient> itemsInfo = IngredientUtil.ingredientData(ingredients);
+        Pair<org.bukkit.Color, Ingredient> itemsInfo = BukkitIngredientUtil.ingredientData(ingredients);
         Ingredient topIngredient = itemsInfo.second();
         final Map<BrewingStep.StepType, String> displayNameByStep = Map.of(
                 BrewingStep.StepType.COOK, "unfinished-fermented",

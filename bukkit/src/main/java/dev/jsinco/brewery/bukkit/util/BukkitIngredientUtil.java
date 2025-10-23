@@ -1,14 +1,17 @@
 package dev.jsinco.brewery.bukkit.util;
 
 import dev.jsinco.brewery.api.ingredient.Ingredient;
-import dev.jsinco.brewery.util.ItemColorUtil;
 import dev.jsinco.brewery.api.util.Pair;
+import dev.jsinco.brewery.util.ItemColorUtil;
+import net.kyori.adventure.key.Key;
+import org.bukkit.*;
 import org.jspecify.annotations.Nullable;
 
-import java.awt.*;
+import java.awt.Color;
+import java.util.List;
 import java.util.Map;
 
-public class IngredientUtil {
+public class BukkitIngredientUtil {
 
     public static Pair<org.bukkit.Color, @Nullable Ingredient> ingredientData(Map<? extends Ingredient, Integer> ingredients) {
         int r = 0;
@@ -37,5 +40,28 @@ public class IngredientUtil {
         } else {
             return new Pair<>(org.bukkit.Color.YELLOW, topIngredient);
         }
+    }
+
+    public static @Nullable List<String> tagValuesFromString(String key) {
+        NamespacedKey namespacedKey = NamespacedKey.fromString(key);
+        if (namespacedKey == null) {
+            return null;
+        }
+        Tag<? extends Keyed> itemTag = Bukkit.getTag(Tag.REGISTRY_ITEMS, namespacedKey, Material.class);
+        if (itemTag == null) {
+            return null;
+        }
+        return itemTag.getValues()
+                .stream().map(Keyed::key)
+                .map(Key::asMinimalString)
+                .toList();
+    }
+
+    public static boolean isValidTag(String key) {
+        NamespacedKey namespacedKey = NamespacedKey.fromString(key);
+        if (namespacedKey == null) {
+            return false;
+        }
+        return Bukkit.getTag(Tag.REGISTRY_ITEMS, namespacedKey, Material.class) != null;
     }
 }

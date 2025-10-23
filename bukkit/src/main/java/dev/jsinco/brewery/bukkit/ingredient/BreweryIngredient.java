@@ -7,9 +7,7 @@ import dev.jsinco.brewery.bukkit.brew.BrewAdapter;
 import dev.jsinco.brewery.configuration.IngredientsSection;
 import dev.jsinco.brewery.util.MessageUtil;
 import io.papermc.paper.persistence.PersistentDataContainerView;
-import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
-import org.bukkit.*;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
@@ -76,26 +74,8 @@ public class BreweryIngredient implements Ingredient {
         }
         BreweryKey breweryKey = BreweryKey.parse(id);
         if (breweryKey.namespace().startsWith("#")) {
-            String ingredientKey = breweryKey.key();
-            return IngredientsSection.ingredients().ingredientGroups()
-                    .stream()
-                    .filter(ingredient -> ingredient.key().equals(ingredientKey))
-                    .map(ingredient -> ingredient.create(BukkitIngredientManager.INSTANCE, key -> {
-                                NamespacedKey namespacedKey = NamespacedKey.fromString(key);
-                                if (namespacedKey == null) {
-                                    return null;
-                                }
-                                Tag<Material> itemTag = Bukkit.getTag(Tag.REGISTRY_ITEMS, namespacedKey, Material.class);
-                                if (itemTag == null) {
-                                    return null;
-                                }
-                                return itemTag.getValues()
-                                        .stream().map(Keyed::key)
-                                        .map(Key::asMinimalString)
-                                        .toList();
-                            }
-                    ))
-                    .findFirst();
+            return Optional.of(IngredientsSection.ingredients()
+                    .getIngredient(id));
         }
         return Optional.<Ingredient>of(new BreweryIngredient(breweryKey, breweryKey.key()))
                 .map(Optional::of)

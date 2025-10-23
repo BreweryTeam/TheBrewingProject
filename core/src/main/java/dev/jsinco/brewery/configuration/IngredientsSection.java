@@ -24,6 +24,7 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 @Accessors(fluent = true)
 @Getter
@@ -46,7 +47,7 @@ public class IngredientsSection extends OkaeriConfig {
     @Exclude
     private static IngredientsSection instance;
     @Exclude
-    private static CompletableFuture<Void> validatedFuture;
+    private static CompletableFuture<Map<String, Ingredient>> validatedIngredients;
 
     public static IngredientsSection ingredients() {
         return instance;
@@ -62,33 +63,25 @@ public class IngredientsSection extends OkaeriConfig {
         });
     }
 
-    public static void validate(IngredientManager<?> ingredientManager) {
+    public static void validate(IngredientManager<?> ingredientManager, Function<String, List<String>> tagResolver) {
         Set<String> keys = new HashSet<>();
-        List<CompletableFuture<Optional<IngredientGroupSection>>> updatedSections = new ArrayList<>();
         for (IngredientGroupSection ingredientGroup : instance.ingredientGroups()) {
             String key = ingredientGroup.key;
             Preconditions.checkArgument(!keys.contains(key), "Can't have two ingredient groups with the same key (ingredients.yml): " + key);
             keys.add(key);
-            List<CompletableFuture<Optional<Ingredient>>> ingredientsFutures = ingredientGroup.materials.stream()
-                    .map(string -> IngredientGroupSection.INGREDIENT_GROUP_PATTERN.matcher(string).replaceAll(""))
-                    .map(ingredientManager::getIngredient)
-                    .toList();
-            FutureUtil.mergeFutures(ingredientsFutures)
-                    .thenApplyAsync(ingredients -> {
-                        if (ingredients.stream().allMatch(Optional::isPresent)) {
-                            return Optional.of(ingredientGroup);
-                        } else {
-                            Logger.logErr("Could not resolve ingredient group '" + key + "', undefined material");
-                            return Optional.empty();
-                        }
-                    });
         }
-        IngredientsSection.validatedFuture = FutureUtil.mergeFutures(updatedSections).thenAccept(newGroups -> {
-            ingredients().ingredientGroups.clear();
-            ingredients().ingredientGroups.addAll(newGroups.stream().flatMap(Optional::stream).toList());
-        });
+        IngredientsSection.validatedIngredients = FutureUtil.mergeFutures(ingredients().ingredientGroups.stream()
+                        .map(group -> group.create(ingredientManager, tagResolver))
+                        .toList())
+                .thenApply(ingredients -> ingredients.stream()
+                        .flatMap(Optional::stream)
+                        .collect(Collectors.toUnmodifiableMap(Ingredient::getKey, ingredient -> ingredient))
+                );
     }
 
+    public CompletableFuture<Optional<Ingredient>> getIngredient(String key) {
+        return validatedIngredients.thenApply(ingredients -> Optional.ofNullable(ingredients.get(key)));
+    }
 
     @Accessors(fluent = true)
     public static class IngredientGroupSection extends OkaeriConfig {
@@ -111,7 +104,7 @@ public class IngredientsSection extends OkaeriConfig {
             this.materials = materials;
         }
 
-        public CompletableFuture<Optional<Ingredient>> create(IngredientManager<?> ingredientManager, Function<String, List<String>> tagResolver) {
+        private CompletableFuture<Optional<Ingredient>> create(IngredientManager<?> ingredientManager, Function<String, List<String>> tagResolver) {
             List<CompletableFuture<Optional<Ingredient>>> group = new ArrayList<>();
             for (String material : materials) {
                 if (INGREDIENT_GROUP_PATTERN.matcher(material).find()) {
@@ -141,7 +134,7 @@ public class IngredientsSection extends OkaeriConfig {
                                 }
                         )));
             }
-            return validatedFuture.thenCombine(FutureUtil.mergeFutures(group)
+            return FutureUtil.mergeFutures(group)
                     .thenApplyAsync(ingredients -> {
                         if (ingredients.stream().anyMatch(Optional::isEmpty)) {
                             return Optional.empty();
@@ -153,7 +146,7 @@ public class IngredientsSection extends OkaeriConfig {
                                         .map(Optional::get)
                                         .toList()
                         ));
-                    }), (voidObj, ingredientGroup) -> ingredientGroup.map(Ingredient.class::cast));
+                    });
         }
 
         private Ingredient parseScore(Ingredient ingredient, String ingredientString) {
