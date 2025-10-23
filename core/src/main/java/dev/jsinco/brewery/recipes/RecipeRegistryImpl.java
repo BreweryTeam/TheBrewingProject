@@ -4,6 +4,7 @@ import com.google.common.base.Preconditions;
 import dev.jsinco.brewery.api.brew.BrewingStep;
 import dev.jsinco.brewery.api.ingredient.Ingredient;
 import dev.jsinco.brewery.api.ingredient.IngredientGroup;
+import dev.jsinco.brewery.api.ingredient.ScoredIngredient;
 import dev.jsinco.brewery.api.recipe.DefaultRecipe;
 import dev.jsinco.brewery.api.recipe.Recipe;
 import dev.jsinco.brewery.api.recipe.RecipeRegistry;
@@ -77,6 +78,7 @@ public class RecipeRegistryImpl<I> implements RecipeRegistry<I> {
                     }
                     return Stream.of(ingredient);
                 })
+                .map(ingredient -> ingredient instanceof ScoredIngredient scoredIngredient ? scoredIngredient.baseIngredient() : ingredient)
                 .collect(Collectors.toList());
     }
 
