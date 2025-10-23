@@ -34,6 +34,7 @@ import dev.jsinco.brewery.bukkit.recipe.BukkitRecipeResultReader;
 import dev.jsinco.brewery.bukkit.recipe.DefaultRecipeReader;
 import dev.jsinco.brewery.bukkit.structure.*;
 import dev.jsinco.brewery.bukkit.util.BreweryTimeDataType;
+import dev.jsinco.brewery.bukkit.util.BukkitIngredientUtil;
 import dev.jsinco.brewery.configuration.*;
 import dev.jsinco.brewery.configuration.locale.BreweryTranslator;
 import dev.jsinco.brewery.configuration.serializers.*;
@@ -121,7 +122,7 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
         DrunkenModifierSection.validate();
         EventSection.validate();
         IngredientsSection.load(this.getDataFolder(), serializers());
-        IngredientsSection.validate(BukkitIngredientManager.INSTANCE);
+        IngredientsSection.validate(BukkitIngredientManager.INSTANCE, BukkitIngredientUtil::tagValuesFromString);
         this.translator = new BreweryTranslator(new File(this.getDataFolder(), "locale"));
         translator.reload();
         GlobalTranslator.translator().addSource(translator);
@@ -182,6 +183,8 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
         EventSection.events().load(true);
         DrunkenModifierSection.validate();
         EventSection.validate();
+        IngredientsSection.ingredients().load(true);
+        IngredientsSection.validate(BukkitIngredientManager.INSTANCE, BukkitIngredientUtil::tagValuesFromString);
         translator.reload();
         this.structureRegistry.clear();
         this.placedStructureRegistry.clear();
