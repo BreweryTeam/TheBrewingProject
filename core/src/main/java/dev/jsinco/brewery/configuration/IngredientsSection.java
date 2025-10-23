@@ -32,7 +32,7 @@ public class IngredientsSection extends OkaeriConfig {
 
     @CustomKey("ingredient-groups")
     @Comment({
-            "To reference a ingredient group in your recipe, use the key",
+            "To reference an ingredient group in your recipe, use the key",
             "'#brewery:my_ingredient_group_key' normally as any ingredient.",
             "You can also define vanilla tags here, for example #leaves"
     })
