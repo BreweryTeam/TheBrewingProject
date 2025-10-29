@@ -4,32 +4,49 @@ import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
+import dev.jsinco.brewery.api.ingredient.Ingredient;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.bukkit.ingredient.BukkitIngredientManager;
-import dev.jsinco.brewery.api.ingredient.Ingredient;
+import io.papermc.paper.command.brigadier.MessageComponentSerializer;
 import io.papermc.paper.command.brigadier.argument.CustomArgumentType;
+import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class IngredientsArgument implements CustomArgumentType.Converted<Map<Ingredient, Integer>, String> {
 
     private static final Pattern INGREDIENT_PATTERN = Pattern.compile("(([^ ,]+[ ,])*)([^ ,]*)");
+    private static final SimpleCommandExceptionType TIMEOUT = new SimpleCommandExceptionType(
+            MessageComponentSerializer.message().serialize(Component.text("Command timed out, another integrated plugin probably failed on startup"))
+    );
 
     @Override
     public Map<Ingredient, Integer> convert(String nativeType) throws CommandSyntaxException {
-        return BukkitIngredientManager.INSTANCE.getIngredientsWithAmount(
-                Arrays.stream(nativeType.split("[, ]"))
-                        .map(String::strip)
-                        .filter(string -> !string.isBlank())
-                        .toList()
-        ).join();
+        try {
+            return BukkitIngredientManager.INSTANCE.getIngredientsWithAmount(
+                            Arrays.stream(nativeType.split("[, ]"))
+                                    .map(String::strip)
+                                    .filter(string -> !string.isBlank())
+                                    .toList()
+                    ).orTimeout(50, TimeUnit.MILLISECONDS)
+                    .join();
+        } catch (CompletionException e) {
+            if (e.getCause() != null && e.getCause() instanceof TimeoutException) {
+                throw TIMEOUT.create();
+            }
+            throw e;
+        }
     }
 
     @Override
