@@ -24,7 +24,7 @@ public class MythicIntegration implements ItemIntegration, Listener {
     public Optional<ItemStack> createItem(String id) {
         return getMythicItem(id)
                 .map(item -> item.generateItemStack(1))
-                .map(stack -> (BukkitItemStack) stack)
+                .map(BukkitItemStack.class::cast)
                 .map(BukkitItemStack::getItemStack);
     }
 
