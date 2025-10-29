@@ -106,7 +106,7 @@ public class RecipeReader<I> {
             ));
             case AGE -> CompletableFuture.completedFuture(new AgeStepImpl(
                     new PassedMoment(TimeUtil.parse(map.get("age-years").toString(), TimeUtil.TimeUnit.AGING_YEARS)),
-                    BreweryRegistry.BARREL_TYPE.get(BreweryKey.parse(map.get("barrel-type").toString().toLowerCase(Locale.ROOT)))
+                    BreweryRegistry.BARREL_TYPE.get(BreweryKey.parse(map.get("barrel-type").toString()))
             ));
             case MIX -> ingredientManager.getIngredientsWithAmount((List<String>) map.get("ingredients"))
                     .thenApplyAsync(ingredients -> new MixStepImpl(

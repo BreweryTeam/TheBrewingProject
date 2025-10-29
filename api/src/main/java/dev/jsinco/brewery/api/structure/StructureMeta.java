@@ -54,7 +54,7 @@ public record StructureMeta<V>(BreweryKey key, Predicate<Object> validator,
     );
 
     // Keep this at the bottom, going to cause issues because of class initialization order otherwise
-    public static final StructureMeta<StructureType> TYPE = new StructureMeta<>(BreweryKey.parse("type"), StructureType.class::isInstance, jsonElement -> BreweryRegistry.STRUCTURE_TYPE.get(BreweryKey.parse(jsonElement.getAsString().toLowerCase(Locale.ROOT))), StructureType.BARREL);
+    public static final StructureMeta<StructureType> TYPE = new StructureMeta<>(BreweryKey.parse("type"), StructureType.class::isInstance, jsonElement -> BreweryRegistry.STRUCTURE_TYPE.get(BreweryKey.parse(jsonElement.getAsString())), StructureType.BARREL);
 
     @Override
     public @NotNull String toString() {

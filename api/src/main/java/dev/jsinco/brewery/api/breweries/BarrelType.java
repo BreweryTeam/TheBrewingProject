@@ -27,6 +27,6 @@ public enum BarrelType implements BreweryKeyed {
     public static final BarrelType[] PLACEABLE_TYPES = Arrays.stream(values()).filter(barrelType -> barrelType != ANY).toArray(BarrelType[]::new);
 
     public BreweryKey key() {
-        return BreweryKey.parse(name().toLowerCase(Locale.ROOT));
+        return BreweryKey.parse(name());
     }
 }

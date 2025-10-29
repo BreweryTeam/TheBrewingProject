@@ -25,7 +25,7 @@ public enum CauldronType implements BreweryKeyed {
     }
 
     public BreweryKey key() {
-        return BreweryKey.parse(name().toLowerCase(Locale.ROOT));
+        return BreweryKey.parse(name());
     }
 
     public static @Nullable CauldronType from(String materialType) {
