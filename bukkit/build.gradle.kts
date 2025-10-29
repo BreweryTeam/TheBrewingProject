@@ -37,6 +37,7 @@ repositories {
     maven("https://repo.dmulloy2.net/repository/public/")
     maven("https://repo.extendedclip.com/releases/")
     maven("https://nexus.phoenixdevt.fr/repository/maven-public/")
+    maven("https://mvn.lumine.io/repository/maven-public/")
     maven("https://storehouse.okaeri.eu/repository/maven-public/")
 }
 
@@ -69,6 +70,7 @@ dependencies {
     compileOnly(libs.towny)
     compileOnly(libs.worldguard.bukkit)
     compileOnly(libs.quickshop.hikari)
+    compileOnly(libs.mythic)
 
     // other
     compileOnly(libs.jetbrains.annotations)
@@ -242,6 +244,7 @@ bukkit {
         "PlaceholderAPI",
         "MythicLib",
         "MMOItems",
+        "MythicMobs",
         "MiniPlaceholders",
         "QuickShop"
     )

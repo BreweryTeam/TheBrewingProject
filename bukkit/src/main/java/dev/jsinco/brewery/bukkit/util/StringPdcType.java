@@ -21,14 +21,15 @@ public class StringPdcType implements PersistentDataType<byte[], String> {
     }
 
 
+    @NotNull
     @Override
-    public byte @NotNull [] toPrimitive(@NotNull String complex, @NotNull PersistentDataAdapterContext context) {
+    public byte[] toPrimitive(@NotNull String complex, @NotNull PersistentDataAdapterContext context) {
         return complex.getBytes(StandardCharsets.UTF_8);
     }
 
     @NotNull
     @Override
-    public String fromPrimitive(byte @NotNull [] primitive, @NotNull PersistentDataAdapterContext context) {
+    public String fromPrimitive(@NotNull byte[] primitive, @NotNull PersistentDataAdapterContext context) {
         return new String(primitive, StandardCharsets.UTF_8);
     }
 }

@@ -50,8 +50,9 @@ public class BrewingStepPdcType implements PersistentDataType<byte[], BrewingSte
         return BrewingStep.class;
     }
 
+    @NotNull
     @Override
-    public byte @NotNull [] toPrimitive(@NotNull BrewingStep complex, @NotNull PersistentDataAdapterContext context) {
+    public byte[] toPrimitive(@NotNull BrewingStep complex, @NotNull PersistentDataAdapterContext context) {
         try {
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             DataOutputStream headerOut = new DataOutputStream(out);
@@ -109,7 +110,7 @@ public class BrewingStepPdcType implements PersistentDataType<byte[], BrewingSte
     }
 
     @Override
-    public @NotNull BrewingStep fromPrimitive(byte @NotNull [] primitive, @NotNull PersistentDataAdapterContext context) {
+    public @NotNull BrewingStep fromPrimitive(@NotNull byte[] primitive, @NotNull PersistentDataAdapterContext context) {
         try (ByteArrayInputStream in = new ByteArrayInputStream(primitive);
              DataInputStream headerIn = new DataInputStream(in)) {
 

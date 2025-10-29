@@ -38,8 +38,9 @@ public class ListPersistentDataType<T> implements PersistentDataType<byte[], Lis
         return (Class<List<T>>) List.of().getClass();
     }
 
+    @NotNull
     @Override
-    public byte @NotNull [] toPrimitive(@NotNull List<T> complex, @NotNull PersistentDataAdapterContext context) {
+    public byte[] toPrimitive(@NotNull List<T> complex, @NotNull PersistentDataAdapterContext context) {
         byte[][] byteArrayArray = complex.stream()
                 .map(complexElement -> persistentDataType.toPrimitive(complexElement, context))
                 .toArray(byte[][]::new);
@@ -53,7 +54,7 @@ public class ListPersistentDataType<T> implements PersistentDataType<byte[], Lis
     }
 
     @Override
-    public @NotNull List<T> fromPrimitive(byte @NotNull [] primitive, @NotNull PersistentDataAdapterContext context) {
+    public @NotNull List<T> fromPrimitive(@NotNull byte[] primitive, @NotNull PersistentDataAdapterContext context) {
         try {
             byte[][] byteArrayArray = DecoderEncoder.decode(new ByteArrayInputStream(primitive));
             return Arrays.stream(byteArrayArray)
