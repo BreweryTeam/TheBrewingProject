@@ -34,8 +34,7 @@ public class BukkitIngredientManager implements IngredientManager<ItemStack> {
 
 
     @Override
-    public CompletableFuture<Optional<Ingredient>> getIngredient(@NotNull String ingredientStr) {
-        String id = ingredientStr.toLowerCase(Locale.ROOT);
+    public CompletableFuture<Optional<Ingredient>> getIngredient(@NotNull String id) {
         BreweryKey breweryKey = BreweryKey.parse(id);
         IntegrationManagerImpl integrationManager = TheBrewingProject.getInstance().getIntegrationManager();
         return integrationManager.getIntegrationRegistry().getIntegrations(IntegrationTypes.ITEM)
