@@ -35,7 +35,8 @@ public record BreweryKey(String namespace, String key) {
             return new BreweryKey(defaultNamespace, split[0].toLowerCase(Locale.ROOT));
         }
         if (split.length == 2) {
-            return new BreweryKey(split[0].toLowerCase(Locale.ROOT), split[1].toLowerCase(Locale.ROOT));
+            return new BreweryKey(split[0].toLowerCase(Locale.ROOT), split[0]
+                    .equalsIgnoreCase("mythic") ? split[1] : split[1].toLowerCase(Locale.ROOT));
         }
         throw new IllegalArgumentException("Invalid Brewery Key: " + input);
     }
