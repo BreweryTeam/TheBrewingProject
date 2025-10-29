@@ -29,6 +29,7 @@ towny = "0.100.1.14"
 worldguard = "7.0.14"
 quickshop = "6.2.0.10"
 mythic = "5.10.1"
+mythic-crucible = "2.2.0-SNAPSHOT"
 
 # other
 jetbrainsAnnotations = "26.0.2-1"
@@ -75,6 +76,7 @@ towny = { group = "com.palmergames.bukkit.towny", name = "towny", version.ref = 
 worldguard-bukkit = { group = "com.sk89q.worldguard", name = "worldguard-bukkit", version.ref = "worldguard" }
 quickshop-hikari = { group = "com.ghostchu", name = "quickshop-api", version.ref = "quickshop" }
 mythic = { group = "io.lumine", name = "Mythic-Dist", version.ref = "mythic" }
+mythic-crucible = { group = "io.lumine", name = "MythicCrucible-Dist", version.ref = "mythic-crucible" }
 
 # other
 jetbrains-annotations = { group = "org.jetbrains", name = "annotations", version.ref = "jetbrainsAnnotations" }

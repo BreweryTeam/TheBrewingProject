@@ -5,8 +5,8 @@ import dev.jsinco.brewery.bukkit.api.integration.ItemIntegration;
 import dev.jsinco.brewery.util.ClassUtil;
 import io.lumine.mythic.bukkit.MythicBukkit;
 import io.lumine.mythic.bukkit.adapters.BukkitItemStack;
-import io.lumine.mythic.bukkit.events.MythicPostReloadedEvent;
 import io.lumine.mythic.core.items.MythicItem;
+import io.lumine.mythiccrucible.events.MythicCrucibleLoadedEvent;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
@@ -56,7 +56,7 @@ public class MythicIntegration implements ItemIntegration, Listener {
 
     @Override
     public boolean isEnabled() {
-        return ClassUtil.exists("io.lumine.mythic.api.items.ItemManager");
+        return ClassUtil.exists("io.lumine.mythiccrucible.events.MythicCrucibleLoadedEvent");
     }
 
     @Override
@@ -68,11 +68,10 @@ public class MythicIntegration implements ItemIntegration, Listener {
     public void onEnable() {
         Bukkit.getPluginManager().registerEvents(this, TheBrewingProject.getInstance());
         this.initialized = new CompletableFuture<>();
-        this.initialized.completeAsync(() -> null);
     }
 
     @EventHandler
-    public void onMythicReload(MythicPostReloadedEvent event) {
+    public void onMythicReload(MythicCrucibleLoadedEvent event) {
         initialized.completeAsync(() -> null);
     }
 }

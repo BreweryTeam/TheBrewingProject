@@ -71,6 +71,7 @@ dependencies {
     compileOnly(libs.worldguard.bukkit)
     compileOnly(libs.quickshop.hikari)
     compileOnly(libs.mythic)
+    compileOnly(libs.mythic.crucible)
 
     // other
     compileOnly(libs.jetbrains.annotations)
