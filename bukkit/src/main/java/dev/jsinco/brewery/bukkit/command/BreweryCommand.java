@@ -73,17 +73,7 @@ public class BreweryCommand {
                         })
                 ).then(Commands.literal("encryption")
                         .requires(commandSourceStack -> commandSourceStack.getSender().hasPermission("brewery.command.encryption"))
-                        .then(Commands.literal("rotate_key")
-                                .executes(commandContext -> {
-                                    List<SecretKey> previousKeys = Config.config().previousEncryptionKeys();
-                                    previousKeys.add(Config.config().encryptionKey());
-                                    Config.config().set("previousEncryptionKeys", previousKeys.stream().map(key -> Base64.getEncoder().encodeToString(key.getEncoded())).toList());
-                                    Config.config().set("encryptionKey", Base64.getEncoder().encodeToString(Config.generateAesKey().getEncoded()));
-                                    Config.config().save();
-                                    MessageUtil.message(commandContext.getSource().getSender(), "tbp.command.encryption.rotate_key");
-                                    return com.mojang.brigadier.Command.SINGLE_SUCCESS;
-                                })
-                        )
+                        .then(EncryptionCommand.command())
                 )
                 .build(), Config.config().commandAliases());
     }
