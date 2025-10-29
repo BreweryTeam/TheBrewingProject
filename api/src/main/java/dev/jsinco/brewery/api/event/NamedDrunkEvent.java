@@ -28,14 +28,14 @@ public class NamedDrunkEvent implements DrunkEvent, BreweryKeyed, EventStepPrope
         this.name = name;
         this.eventProbability = eventProbability;
 
-        this.key = BreweryKey.parse(name.toLowerCase(Locale.ROOT));
+        this.key = BreweryKey.parse(name);
     }
 
     @Override
     public BreweryKey key() {
         if (this.key == null) {
             // TODO: I don't like this lazy init, GSON is forcing me to do it rn but I want to fix it later
-            this.key = BreweryKey.parse(this.name.toLowerCase(Locale.ROOT));
+            this.key = BreweryKey.parse(this.name);
         }
         return this.key;
     }

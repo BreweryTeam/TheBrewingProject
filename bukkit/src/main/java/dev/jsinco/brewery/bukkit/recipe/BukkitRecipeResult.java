@@ -266,7 +266,7 @@ public class BukkitRecipeResult implements RecipeResult<ItemStack> {
                 this.customId = null;
                 return this;
             }
-            BreweryKey namespacedKey = BreweryKey.parse(customId.toLowerCase(Locale.ROOT), "minecraft");
+            BreweryKey namespacedKey = BreweryKey.parse(customId, "minecraft");
             List<String> ids = TheBrewingProject.getInstance().getIntegrationManager().retrieve(IntegrationTypes.ITEM)
                     .stream().map(ItemIntegration::getId)
                     .toList();
