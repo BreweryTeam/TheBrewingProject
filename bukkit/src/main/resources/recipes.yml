@@ -74,7 +74,7 @@ recipes:
       - cauldron-type: water
         cook-time: 3
         ingredients:
-          - Short_Grass/15
+          - "#brewery:grass/15"
         type: cook
       - runs: 6
         type: distill
