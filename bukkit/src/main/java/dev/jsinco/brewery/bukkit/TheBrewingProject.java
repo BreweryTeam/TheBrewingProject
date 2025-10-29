@@ -15,6 +15,7 @@ import dev.jsinco.brewery.api.structure.StructureType;
 import dev.jsinco.brewery.api.util.BreweryKey;
 import dev.jsinco.brewery.api.util.Logger;
 import dev.jsinco.brewery.bukkit.api.TheBrewingProjectApi;
+import dev.jsinco.brewery.bukkit.api.event.TBPReloadEvent;
 import dev.jsinco.brewery.bukkit.brew.BukkitBrewManager;
 import dev.jsinco.brewery.bukkit.breweries.BreweryRegistry;
 import dev.jsinco.brewery.bukkit.breweries.barrel.BukkitBarrel;
@@ -221,6 +222,7 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
         );
         loadDrunkenReplacements();
         loadTimeFormats();
+        new TBPReloadEvent().callEvent();
     }
 
     private void loadDrunkenReplacements() {
