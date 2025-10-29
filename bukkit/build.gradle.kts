@@ -151,7 +151,12 @@ tasks {
         val webhook = DiscordWebhook(System.getenv("DISCORD_WEBHOOK") ?: return@register)
         webhook.message = "<@&1273951212227661856>"
         webhook.embedTitle = "TheBrewingProject - v${project.version}"
-        webhook.embedDescription = System.getenv("RELEASE_NOTES")
+        webhook.embedDescription = System.getenv("RELEASE_NOTES") + """
+            
+            ## The release can be found here
+            **Modrinth:** https://modrinth.com/plugin/thebrewingproject/version/$version
+            **Hangar:** https://hangar.papermc.io/BreweryTeam/TheBrewingProject/versions/$version
+        """.trimIndent()
         webhook.send()
     }
 }
@@ -339,6 +344,9 @@ hangarPublish {
                         required = false
                     }
                     url("WorldGuard", "https://modrinth.com/plugin/worldguard") {
+                        required = false
+                    }
+                    url("MythicMobs", "https://modrinth.com/plugin/mythicmobs/version/5.8.2") {
                         required = false
                     }
                 }
