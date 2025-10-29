@@ -40,7 +40,10 @@ public class IngredientsSection extends OkaeriConfig {
             new IngredientGroupSection("grass", Component.text("Grass"), List.of(
                     "+grass_block",
                     "++fern",
-                    "+++short_grass"
+                    "+++short_grass",
+                    "+++tall_grass",
+                    "+short_dry_grass",
+                    "+tall_dry_grass"
             ))
     );
 
