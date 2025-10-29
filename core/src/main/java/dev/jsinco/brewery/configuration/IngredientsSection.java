@@ -2,6 +2,7 @@ package dev.jsinco.brewery.configuration;
 
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableMap;
 import dev.jsinco.brewery.api.ingredient.Ingredient;
 import dev.jsinco.brewery.api.ingredient.IngredientGroup;
 import dev.jsinco.brewery.api.ingredient.IngredientManager;
@@ -18,13 +19,13 @@ import eu.okaeri.configs.yaml.snakeyaml.YamlSnakeYamlConfigurer;
 import lombok.Getter;
 import lombok.experimental.Accessors;
 import net.kyori.adventure.text.Component;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 @Accessors(fluent = true)
 @Getter
@@ -42,15 +43,15 @@ public class IngredientsSection extends OkaeriConfig {
                     "++fern",
                     "+++short_grass",
                     "+++tall_grass",
-                    "+short_dry_grass",
-                    "+tall_dry_grass"
+                    "++short_dry_grass",
+                    "++tall_dry_grass"
             ))
     );
 
     @Exclude
     private static IngredientsSection instance;
     @Exclude
-    private static CompletableFuture<Map<String, Ingredient>> validatedIngredients;
+    private static Map<String, CompletableFuture<Optional<Ingredient>>> validatedIngredients;
 
     public static IngredientsSection ingredients() {
         return instance;
@@ -68,22 +69,19 @@ public class IngredientsSection extends OkaeriConfig {
 
     public static void validate(IngredientManager<?> ingredientManager, Function<String, List<String>> tagResolver) {
         Set<String> keys = new HashSet<>();
+        ImmutableMap.Builder<@NotNull String, @NotNull CompletableFuture<Optional<Ingredient>>> ingredientsFutures = new ImmutableMap.Builder<>();
         for (IngredientGroupSection ingredientGroup : instance.ingredientGroups()) {
             String key = ingredientGroup.key;
             Preconditions.checkArgument(!keys.contains(key), "Can't have two ingredient groups with the same key (ingredients.yml): " + key);
             keys.add(key);
+            ingredientsFutures.put("#brewery:" + key, ingredientGroup.create(ingredientManager, tagResolver));
         }
-        IngredientsSection.validatedIngredients = FutureUtil.mergeFutures(ingredients().ingredientGroups.stream()
-                        .map(group -> group.create(ingredientManager, tagResolver))
-                        .toList())
-                .thenApply(ingredients -> ingredients.stream()
-                        .flatMap(Optional::stream)
-                        .collect(Collectors.toUnmodifiableMap(Ingredient::getKey, ingredient -> ingredient))
-                );
+        validatedIngredients = ingredientsFutures.build();
     }
 
     public CompletableFuture<Optional<Ingredient>> getIngredient(String key) {
-        return validatedIngredients.thenApply(ingredients -> Optional.ofNullable(ingredients.get(key)));
+        return Optional.ofNullable(validatedIngredients.get(key))
+                .orElse(CompletableFuture.completedFuture(Optional.empty()));
     }
 
     @Accessors(fluent = true)
