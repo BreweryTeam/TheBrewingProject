@@ -54,15 +54,15 @@ public class RecipeEffects {
             .effects(List.of())
             .build();
 
-    private final @NotNull List<@NotNull RecipeEffect> effects;
+    private final @NotNull List<RecipeEffect> effects;
     private final @Nullable String title;
     private final @Nullable String message;
     private final @Nullable String actionBar;
     private final @NotNull Map<DrunkenModifier, Double> modifiers;
-    private final @NotNull List<@NotNull BreweryKey> events;
+    private final @NotNull List<BreweryKey> events;
 
     private RecipeEffects(@NotNull List<RecipeEffect> effects, @Nullable String title, @Nullable String message,
-                          @Nullable String actionBar, @NotNull List<@NotNull BreweryKey> events, Map<DrunkenModifier, Double> modifiers) {
+                          @Nullable String actionBar, @NotNull List<BreweryKey> events, @NotNull Map<DrunkenModifier, Double> modifiers) {
         this.effects = effects;
         this.title = title;
         this.message = message;
@@ -244,16 +244,16 @@ public class RecipeEffects {
         private @Nullable String title;
         private @Nullable String message;
         private @Nullable String actionBar;
-        private @NotNull List<@NotNull BreweryKey> events = List.of();
-        private ImmutableMap.Builder<DrunkenModifier, Double> modifiers = new ImmutableMap.Builder<>();
+        private @NotNull List<BreweryKey> events = List.of();
+        private final ImmutableMap.Builder<DrunkenModifier, Double> modifiers = new ImmutableMap.Builder<>();
 
-        public Builder effects(@NotNull List<@NotNull RecipeEffect> effects) {
+        public Builder effects(@NotNull List<RecipeEffect> effects) {
             Preconditions.checkNotNull(effects);
             this.effects = effects;
             return this;
         }
 
-        public Builder events(@NotNull List<@NotNull BreweryKey> events) {
+        public Builder events(@NotNull List<BreweryKey> events) {
             Preconditions.checkNotNull(events);
             this.events = List.copyOf(events);
             return this;

@@ -30,6 +30,7 @@ public class IntegrationManagerImpl implements IntegrationManager {
         register(IntegrationTypes.ITEM, new NexoIntegration());
         register(IntegrationTypes.ITEM, new OraxenIntegration());
         register(IntegrationTypes.ITEM, new MmoItemsIntegration());
+        register(IntegrationTypes.ITEM, new MythicIntegration());
         register(IntegrationTypes.PLACEHOLDER, new PlaceholderApiIntegration());
         register(IntegrationTypes.PLACEHOLDER, new MiniPlaceholdersIntegration());
         register(IntegrationTypes.CHEST_SHOP, new QuickShopHikariIntegration());

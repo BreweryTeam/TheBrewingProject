@@ -27,10 +27,12 @@ oraxen = "1.190.0"
 placeholderapi = "2.11.6"
 towny = "0.100.1.14"
 worldguard = "7.0.14"
+quickshop = "6.2.0.10"
+mythic = "5.10.1"
 
 # other
-jetbrainsAnnotations = "26.0.2"
-lombok = "1.18.38"
+jetbrainsAnnotations = "26.0.2-1"
+lombok = "1.18.42"
 
 # test
 adventure = "4.23.0"
@@ -71,7 +73,8 @@ oraxen = { group = "io.th0rgal", name = "oraxen", version.ref = "oraxen" }
 placeholderapi = { group = "me.clip", name = "placeholderapi", version.ref = "placeholderapi" }
 towny = { group = "com.palmergames.bukkit.towny", name = "towny", version.ref = "towny" }
 worldguard-bukkit = { group = "com.sk89q.worldguard", name = "worldguard-bukkit", version.ref = "worldguard" }
-quickshop-hikari = "com.ghostchu:quickshop-api:6.2.0.10"
+quickshop-hikari = { group = "com.ghostchu", name = "quickshop-api", version.ref = "quickshop" }
+mythic = { group = "io.lumine", name = "Mythic-Dist", version.ref = "mythic" }
 
 # other
 jetbrains-annotations = { group = "org.jetbrains", name = "annotations", version.ref = "jetbrainsAnnotations" }
