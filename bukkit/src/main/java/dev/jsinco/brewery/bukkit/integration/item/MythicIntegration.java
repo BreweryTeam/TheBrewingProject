@@ -41,7 +41,10 @@ public class MythicIntegration implements ItemIntegration, Listener {
     }
 
     private Optional<MythicItem> getMythicItem(String name) {
-        return MythicBukkit.inst().getItemManager().getItem(name);
+        Optional<MythicItem> result = MythicBukkit.inst().getItemManager().getItem(name);
+        if (result.isPresent()) return result;
+        return MythicBukkit.inst().getItemManager().getItems().stream()
+                .filter(item -> item.getInternalName().equalsIgnoreCase(name)).findFirst();
     }
 
     @Override
