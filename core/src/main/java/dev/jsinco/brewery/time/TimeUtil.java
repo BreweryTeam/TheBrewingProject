@@ -7,6 +7,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
@@ -82,7 +83,7 @@ public class TimeUtil {
         return 0;
     }
 
-    public record TimeUnit(Pattern pattern, long value, String suffix) {
+    public record TimeUnit(Pattern pattern, Supplier<Long> valueSupplier, String suffix) {
 
         public static final TimeUnit TICKS = new TimeUnit("(\\d+)t", 1, "t");
         public static final TimeUnit SECONDS = TICKS.relative("(\\d+)s", 20, "s");
@@ -91,8 +92,8 @@ public class TimeUtil {
         public static final TimeUnit DAYS = HOURS.relative("(\\d+)d", 24, "d");
         public static final TimeUnit WEEKS = DAYS.relative("(\\d+)w", 7, "w");
         public static final TimeUnit YEARS = DAYS.relative("(\\d+)y", 365, "y");
-        public static final TimeUnit COOKING_MINUTES = new TimeUnit("(\\d+)cmin", Config.config().cauldrons().cookingMinuteTicks(), "cmin");
-        public static final TimeUnit AGING_YEARS = new TimeUnit("(\\d+)ay", Config.config().barrels().agingYearTicks(), "ay");
+        public static final TimeUnit COOKING_MINUTES = new TimeUnit("(\\d+)cmin", () -> Config.config().cauldrons().cookingMinuteTicks(), "cmin");
+        public static final TimeUnit AGING_YEARS = new TimeUnit("(\\d+)ay", () -> Config.config().barrels().agingYearTicks(), "ay");
 
         public static final List<TimeUnit> ALL = Stream.of(
                         TICKS,
@@ -108,11 +109,19 @@ public class TimeUtil {
                 .toList();
 
         private TimeUnit(@RegExp String regex, long value, String suffix) {
-            this(Pattern.compile(regex), value, suffix);
+            this(Pattern.compile(regex), () -> value, suffix);
+        }
+
+        private TimeUnit(@RegExp String regex, Supplier<Long> valueSupplier, String suffix) {
+            this(Pattern.compile(regex), valueSupplier, suffix);
         }
 
         private TimeUnit relative(@RegExp String pattern, long multiplier, String suffix) {
             return new TimeUnit(pattern, this.value() * multiplier, suffix);
+        }
+
+        private long value() {
+            return valueSupplier.get();
         }
     }
 }

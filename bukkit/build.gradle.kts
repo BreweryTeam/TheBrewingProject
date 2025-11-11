@@ -99,7 +99,7 @@ tasks {
         minecraftVersion(project.findProperty("minecraft.version")!! as String)
         if (project.findProperty("testing.integrations")!! == "true") {
             downloadPlugins {
-                modrinth("worldedit", "DYf6XJqU")
+                modrinth("worldedit", "3ISh7ADm")
                 modrinth("craftengine", "0.0.61")
                 modrinth("vaultunlocked", "2.15.1")
                 url("https://github.com/EssentialsX/Essentials/releases/download/2.21.1/EssentialsX-2.21.1.jar")
