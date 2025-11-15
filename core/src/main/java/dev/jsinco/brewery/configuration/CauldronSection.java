@@ -31,6 +31,14 @@ public class CauldronSection extends OkaeriConfig {
     @CustomKey("cooking-minute-ticks")
     private long cookingMinuteTicks = Moment.MINUTE;
 
+    @Comment("How many ingredients can be removed from a cauldron with shift right-click")
+    @CustomKey("max-removable-ingredients")
+    private int maxRemovableIngredients = 3;
+
+    @Comment("How long (in ticks) after adding an ingredient can it be removed with shift right-click")
+    @CustomKey("ingredient-removal-time-window")
+    private long ingredientRemovalTimeWindow = Moment.MINUTE;
+
     @Comment("Should the time message be displayed in chat when clicking a cauldron with a clock?")
     @CustomKey("clock-time-in-chat")
     private boolean clockTimeInChat = true;

@@ -93,6 +93,61 @@ public class PlayerEventListener implements Listener {
     }
 
 
+    // Handle shift-click ingredient removal with higher priority
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true) //test and validate if that is correct
+    public void onPlayerShiftClickCauldron(PlayerInteractEvent event) {
+        if (event.getAction() != Action.RIGHT_CLICK_BLOCK || !event.getPlayer().isSneaking() || event.getHand() != EquipmentSlot.HAND) {
+            return;
+        }
+        
+        Block block = event.getClickedBlock();
+        if (block == null || !Tag.CAULDRONS.isTagged(block.getType())) {
+            return;
+        }
+        
+        ItemStack itemStack = event.getItem();
+        if (itemStack != null && itemStack.getType() != Material.AIR) {
+            return; // Only handle empty hand
+        }
+        
+        Optional<BukkitCauldron> cauldronOptional = breweryRegistry.getActiveSinglePositionStructure(BukkitAdapter.toBreweryLocation(block))
+                .filter(BukkitCauldron.class::isInstance)
+                .map(BukkitCauldron.class::cast);
+        
+        if (cauldronOptional.isPresent()) {
+            BukkitCauldron cauldron = cauldronOptional.get();
+            boolean hadIngredients = cauldron.hasIngredients();
+            ItemStack removedItem = cauldron.removeLastIngredient(event.getPlayer());
+            
+            if (removedItem != null) {
+                event.getPlayer().getWorld().dropItem(event.getPlayer().getLocation(), removedItem);
+                
+                // Check if cauldron was emptied (cauldron will be removed from registry if empty)
+                boolean isEmpty = !hadIngredients || !cauldron.hasIngredients();
+                
+                if (isEmpty) {
+                    event.getPlayer().sendActionBar(Component.text("Cauldron emptied - returned to water", net.kyori.adventure.text.format.NamedTextColor.AQUA));
+                } else {
+                    event.getPlayer().sendActionBar(Component.text("Removed ingredient", net.kyori.adventure.text.format.NamedTextColor.YELLOW));
+                }
+                
+                // Only update database if cauldron still has ingredients
+                if (!isEmpty) {
+                    try {
+                        database.updateValue(BukkitCauldronDataType.INSTANCE, cauldron);
+                    } catch (PersistenceException e) {
+                        Logger.logErr(e);
+                    }
+                }
+                
+                event.setUseInteractedBlock(Event.Result.DENY);
+                event.setUseItemInHand(Event.Result.DENY);
+            } else {
+                event.getPlayer().sendActionBar(Component.text("No ingredient to remove or time expired", net.kyori.adventure.text.format.NamedTextColor.RED));
+            }
+        }
+    }
+
     @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
     public void onPlayerInteractStructure(PlayerInteractEvent playerInteractEvent) {
         if (playerInteractEvent.getAction() != Action.RIGHT_CLICK_BLOCK || playerInteractEvent.getPlayer().isSneaking() || playerInteractEvent.getHand() != EquipmentSlot.HAND) {
@@ -201,6 +256,7 @@ public class PlayerEventListener implements Listener {
                 .filter(BukkitCauldron.class::isInstance)
                 .map(BukkitCauldron.class::cast);
         ItemStack itemStack = event.getItem();
+        
         if (itemStack == null) {
             return;
         }

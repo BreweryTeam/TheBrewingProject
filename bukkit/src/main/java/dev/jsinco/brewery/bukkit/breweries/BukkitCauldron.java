@@ -53,6 +53,38 @@ public class BukkitCauldron implements Cauldron {
     private boolean brewExtracted = false;
     private Color particleColor = Color.AQUA;
     private @Nullable Recipe<ItemStack> recipe;
+    // Track ingredient additions for removal feature
+    private final LinkedList<IngredientAddition> ingredientHistory = new LinkedList<>();
+
+    // Helper class to track ingredient additions
+    private static class IngredientAddition {
+        final Ingredient ingredient;
+        final long timestamp;
+        final ItemStack originalItem;
+
+        IngredientAddition(Ingredient ingredient, long timestamp, ItemStack originalItem) {
+            this.ingredient = ingredient;
+            this.timestamp = timestamp;
+            this.originalItem = originalItem.clone();
+        }
+    }
+
+    /**
+     * Checks if the cauldron has any ingredients in the current brewing step.
+     * @return true if there are ingredients, false if empty
+     */
+    public boolean hasIngredients() {
+        if (brew.getCompletedSteps().isEmpty()) {
+            return false;
+        }
+        BrewingStep lastStep = brew.lastStep();
+        if (lastStep instanceof BrewingStep.Cook cook) {
+            return !cook.ingredients().isEmpty();
+        } else if (lastStep instanceof BrewingStep.Mix mix) {
+            return !mix.ingredients().isEmpty();
+        }
+        return false;
+    }
 
 
     public BukkitCauldron(BreweryLocation location, boolean hot) {
@@ -83,6 +115,13 @@ public class BukkitCauldron implements Cauldron {
             ListenerUtil.removeActiveSinglePositionStructure(this, TheBrewingProject.getInstance().getBreweryRegistry(), TheBrewingProject.getInstance().getDatabase());
             return;
         }
+        
+        // Check if cauldron still has ingredients, if not remove it
+        if (!hasIngredients()) {
+            ListenerUtil.removeActiveSinglePositionStructure(this, TheBrewingProject.getInstance().getBreweryRegistry(), TheBrewingProject.getInstance().getDatabase());
+            return;
+        }
+        
         this.hot = isHeatSource(getBlock().getRelative(BlockFace.DOWN));
         recalculateBrewTime();
         if (getBrewTime() % Config.config().cauldrons().cookingMinuteTicks() == 0) {
@@ -137,6 +176,138 @@ public class BukkitCauldron implements Cauldron {
         ListenerUtil.removeActiveSinglePositionStructure(this, TheBrewingProject.getInstance().getBreweryRegistry(), TheBrewingProject.getInstance().getDatabase());
     }
 
+    /**
+     * Attempts to remove the last added ingredient from the cauldron.
+     * Can only remove ingredients within the configured time window.
+     * If all ingredients are removed, the cauldron reverts to a normal water cauldron.
+     * 
+     * @param player The player attempting to remove the ingredient
+     * @return The removed ingredient item, or null if removal failed
+     */
+    public @Nullable ItemStack removeLastIngredient(Player player) {
+        if (!player.hasPermission("brewery.cauldron.access")) {
+            MessageUtil.message(player, "tbp.cauldron.access-denied");
+            return null;
+        }
+        
+        if (ingredientHistory.isEmpty()) {
+            return null;
+        }
+        
+        // Check if brew has been extracted
+        if (brewExtracted) {
+            return null;
+        }
+        
+        long currentTime = TheBrewingProject.getInstance().getTime();
+        long timeWindow = Config.config().cauldrons().ingredientRemovalTimeWindow();
+        IngredientAddition lastAddition = ingredientHistory.getLast();
+        
+        // Check if the ingredient is still within the removal time window
+        if (currentTime - lastAddition.timestamp > timeWindow) {
+            return null;
+        }
+        
+        // Remove from history
+        ingredientHistory.removeLast();
+        
+        // Remove from brew
+        Ingredient ingredientToRemove = lastAddition.ingredient;
+        boolean removed = false;
+        boolean isEmpty = false;
+        
+        if (brew.lastStep() instanceof BrewingStep.Cook cook) {
+            Map<Ingredient, Integer> updatedIngredients = new HashMap<>(cook.ingredients());
+            Integer count = updatedIngredients.get(ingredientToRemove);
+            if (count != null && count > 0) {
+                if (count == 1) {
+                    updatedIngredients.remove(ingredientToRemove);
+                } else {
+                    updatedIngredients.put(ingredientToRemove, count - 1);
+                }
+                
+                // Check if this was the last ingredient in the cauldron
+                if (updatedIngredients.isEmpty()) {
+                    isEmpty = true;
+                    // Revert to normal water cauldron - remove from active structures
+                    ListenerUtil.removeActiveSinglePositionStructure(this, 
+                        TheBrewingProject.getInstance().getBreweryRegistry(), 
+                        TheBrewingProject.getInstance().getDatabase());
+                } else {
+                    // Update brew with remaining ingredients
+                    BrewingStep.Cook newCook = new CookStepImpl(cook.time(), updatedIngredients, cook.cauldronType());
+                    List<BrewingStep> newSteps = new ArrayList<>(brew.getCompletedSteps());
+                    if (!newSteps.isEmpty()) {
+                        newSteps.set(newSteps.size() - 1, newCook);
+                        brew = new BrewImpl(newSteps);
+                    } else {
+                        brew = new BrewImpl(List.of(newCook));
+                    }
+                }
+                removed = true;
+            }
+        } else if (brew.lastStep() instanceof BrewingStep.Mix mix) {
+            Map<Ingredient, Integer> updatedIngredients = new HashMap<>(mix.ingredients());
+            Integer count = updatedIngredients.get(ingredientToRemove);
+            if (count != null && count > 0) {
+                if (count == 1) {
+                    updatedIngredients.remove(ingredientToRemove);
+                } else {
+                    updatedIngredients.put(ingredientToRemove, count - 1);
+                }
+                
+                // Check if this was the last ingredient in the cauldron
+                if (updatedIngredients.isEmpty()) {
+                    isEmpty = true;
+                    // Revert to normal water cauldron - remove from active structures
+                    ListenerUtil.removeActiveSinglePositionStructure(this, 
+                        TheBrewingProject.getInstance().getBreweryRegistry(), 
+                        TheBrewingProject.getInstance().getDatabase());
+                } else {
+                    // Update brew with remaining ingredients
+                    BrewingStep.Mix newMix = new MixStepImpl(mix.time(), updatedIngredients);
+                    List<BrewingStep> newSteps = new ArrayList<>(brew.getCompletedSteps());
+                    if (!newSteps.isEmpty()) {
+                        newSteps.set(newSteps.size() - 1, newMix);
+                        brew = new BrewImpl(newSteps);
+                    } else {
+                        brew = new BrewImpl(List.of(newMix));
+                    }
+                }
+                removed = true;
+            }
+        }
+        
+        if (removed) {
+            // Recalculate recipe only if there are still ingredients
+            if (!isEmpty) {
+                this.recipe = brew.closestRecipe(TheBrewingProject.getInstance().getRecipeRegistry())
+                        .orElse(null);
+            } else {
+                this.recipe = null;
+            }
+            
+            // Play a sound effect
+            final boolean finalIsEmpty = isEmpty;
+            BukkitAdapter.toLocation(this.location)
+                    .ifPresent(loc -> {
+                        World world = loc.getWorld();
+                        if (finalIsEmpty) {
+                            // Play water splash sound when reverting to normal cauldron
+                            world.playSound(loc, org.bukkit.Sound.ENTITY_PLAYER_SPLASH, 0.7f, 1.0f);
+                            world.spawnParticle(Particle.SPLASH, loc.add(0.5, 0.7, 0.5), 20, 0.2, 0.1, 0.2, 0.5);
+                        } else {
+                            // Play item pickup sound for normal removal
+                            world.playSound(loc, org.bukkit.Sound.ENTITY_ITEM_PICKUP, 0.5f, 1.2f);
+                        }
+                    });
+            
+            return lastAddition.originalItem;
+        }
+        
+        return null;
+    }
+
     public boolean addIngredient(@NotNull ItemStack item, Player player) {
         // TODO: Add API event
         if (!player.hasPermission("brewery.cauldron.access")) {
@@ -149,6 +320,15 @@ public class BukkitCauldron implements Cauldron {
         this.hot = isHeatSource(getBlock().getRelative(BlockFace.DOWN));
         long time = TheBrewingProject.getInstance().getTime();
         Ingredient ingredient = BukkitIngredientManager.INSTANCE.getIngredient(item);
+        
+        // Track this ingredient addition for potential removal
+        ingredientHistory.add(new IngredientAddition(ingredient, time, item));
+        
+        // Keep only the configured amount of history
+        int maxHistory = Config.config().cauldrons().maxRemovableIngredients();
+        while (ingredientHistory.size() > maxHistory) {
+            ingredientHistory.removeFirst();
+        }
         if (hot) {
             brew = brew.withLastStep(BrewingStep.Cook.class,
                     cook -> {
