@@ -96,6 +96,11 @@ public class PlayerEventListener implements Listener {
     // Handle shift-click ingredient removal with higher priority
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true) //test and validate if that is correct
     public void onPlayerShiftClickCauldron(PlayerInteractEvent event) {
+        // Check if feature is enabled
+        if (!Config.config().cauldrons().enableIngredientRemoval()) {
+            return;
+        }
+        
         if (event.getAction() != Action.RIGHT_CLICK_BLOCK || !event.getPlayer().isSneaking() || event.getHand() != EquipmentSlot.HAND) {
             return;
         }

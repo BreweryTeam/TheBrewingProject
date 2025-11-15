@@ -31,6 +31,10 @@ public class CauldronSection extends OkaeriConfig {
     @CustomKey("cooking-minute-ticks")
     private long cookingMinuteTicks = Moment.MINUTE;
 
+    @Comment("Enable ingredient removal feature - allows players to remove recently added ingredients with shift right-click")
+    @CustomKey("enable-ingredient-removal")
+    private boolean enableIngredientRemoval = true;
+
     @Comment("How many ingredients can be removed from a cauldron with shift right-click")
     @CustomKey("max-removable-ingredients")
     private int maxRemovableIngredients = 3;
