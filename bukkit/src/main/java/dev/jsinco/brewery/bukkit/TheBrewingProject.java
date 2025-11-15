@@ -30,6 +30,7 @@ import dev.jsinco.brewery.bukkit.effect.event.DrunkEventExecutor;
 import dev.jsinco.brewery.bukkit.event.*;
 import dev.jsinco.brewery.bukkit.ingredient.BukkitIngredientManager;
 import dev.jsinco.brewery.bukkit.integration.IntegrationManagerImpl;
+import dev.jsinco.brewery.bukkit.task.CauldronHoverTask;
 import dev.jsinco.brewery.bukkit.migration.Migrations;
 import dev.jsinco.brewery.bukkit.recipe.BukkitRecipeResultReader;
 import dev.jsinco.brewery.bukkit.recipe.DefaultRecipeReader;
@@ -111,6 +112,7 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
     private PlayerWalkListener playerWalkListener;
     @Getter
     private ModifierManager modifierManager = new ModifierManagerImpl();
+    private CauldronHoverTask cauldronHoverTask;
     private BreweryTranslator translator;
     private boolean successfullLoad = false;
 
@@ -314,6 +316,11 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
         } else {
             pluginManager.registerEvents(new LegacyPlayerJoinListener(), this);
         }
+        
+        // Start cauldron hover task for action bar display
+        this.cauldronHoverTask = new CauldronHoverTask(this.breweryRegistry);
+        this.cauldronHoverTask.start();
+        
         Bukkit.getGlobalRegionScheduler().runAtFixedRate(this, this::updateStructures, 1, 1);
         Bukkit.getGlobalRegionScheduler().runAtFixedRate(this, this::otherTicking, 1, 1);
         RecipeReader<ItemStack> recipeReader = new RecipeReader<>(this.getDataFolder(), new BukkitRecipeResultReader(), BukkitIngredientManager.INSTANCE);
@@ -329,6 +336,10 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
 
     @Override
     public void onDisable() {
+        // Cancel cauldron hover task
+        if (cauldronHoverTask != null) {
+            cauldronHoverTask.cancel();
+        }
         closeDatabase();
     }
 
