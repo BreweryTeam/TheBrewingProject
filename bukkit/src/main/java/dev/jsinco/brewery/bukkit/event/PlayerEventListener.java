@@ -225,11 +225,21 @@ public class PlayerEventListener implements Listener {
         cauldronOptional
                 .filter(cauldron -> itemStack.getType() == Material.CLOCK)
                 .filter(cauldron -> event.getPlayer().hasPermission("brewery.cauldron.time"))
-                .ifPresent(cauldron -> event.getPlayer().sendMessage(
-                        Component.translatable("tbp.cauldron.clock-message", Argument.tagResolver(
-                                Placeholder.parsed("time", TimeFormatter.format(cauldron.getTime(), TimeFormat.CLOCK_MECHANIC, TimeModifier.COOKING))
-                        ))
-                ));
+                .ifPresent(cauldron -> {
+                    Component timeMessage = Component.translatable("tbp.cauldron.clock-message", Argument.tagResolver(
+                            Placeholder.parsed("time", TimeFormatter.format(cauldron.getTime(), TimeFormat.CLOCK_MECHANIC, TimeModifier.COOKING))
+                    ));
+                    
+                    // Send to chat if enabled
+                    if (Config.config().cauldrons().clockTimeInChat()) {
+                        event.getPlayer().sendMessage(timeMessage);
+                    }
+                    
+                    // Send to action bar if click mode is enabled
+                    if (Config.config().cauldrons().clockTimeActionBar() == dev.jsinco.brewery.configuration.CauldronSection.ClockActionBarMode.CLICK) {
+                        event.getPlayer().sendActionBar(timeMessage);
+                    }
+                });
 
         cauldronOptional.ifPresent(ignored -> {
             event.setUseInteractedBlock(Event.Result.DENY);

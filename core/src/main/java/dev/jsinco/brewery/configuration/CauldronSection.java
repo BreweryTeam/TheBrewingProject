@@ -31,4 +31,21 @@ public class CauldronSection extends OkaeriConfig {
     @CustomKey("cooking-minute-ticks")
     private long cookingMinuteTicks = Moment.MINUTE;
 
+    @Comment("Should the time message be displayed in chat when clicking a cauldron with a clock?")
+    @CustomKey("clock-time-in-chat")
+    private boolean clockTimeInChat = true;
+
+    @Comment({"How should the time be displayed in the action bar?",
+            "Options: 'hover' - show when looking at cauldron with clock in hand",
+            "         'click' - show only when clicking with clock",
+            "         'disabled' - don't show in action bar at all"})
+    @CustomKey("clock-time-action-bar")
+    private ClockActionBarMode clockTimeActionBar = ClockActionBarMode.DISABLED;
+
+    public enum ClockActionBarMode {
+        HOVER,
+        CLICK,
+        DISABLED
+    }
+
 }
