@@ -5,4 +5,8 @@ import dev.jsinco.brewery.api.util.Holder;
 import java.util.Set;
 
 public record MaterialTag(Set<Holder.Material> materials, int xRegion, int yRegion, int zRegion) {
+
+    public int volume() {
+        return xRegion * yRegion * zRegion;
+    }
 }

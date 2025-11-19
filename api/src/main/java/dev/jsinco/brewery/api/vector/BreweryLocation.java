@@ -33,6 +33,15 @@ public record BreweryLocation(int x, int y, int z, UUID worldUuid) {
         return new BreweryLocation(x + x(), y + y(), z + z(), worldUuid);
     }
 
+    /**
+     *
+     * @param breweryVector
+     * @return A new brewery location with the modified coordinates
+     */
+    public BreweryLocation add(BreweryVector breweryVector) {
+        return add(breweryVector.x(), breweryVector.y(), breweryVector.z());
+    }
+
     @ApiStatus.Internal
     public record Uncompiled(int x, int y, int z, String worldIdentifier) {
 

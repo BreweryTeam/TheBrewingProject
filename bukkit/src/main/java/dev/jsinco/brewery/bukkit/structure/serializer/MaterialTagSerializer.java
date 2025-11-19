@@ -47,9 +47,9 @@ public class MaterialTagSerializer implements ObjectSerializer<MaterialTag> {
         Integer zRegion = data.get("z_region", Integer.class);
         return new MaterialTag(
                 materials,
-                xRegion == null ? 1 : xRegion,
-                yRegion == null ? 1 : yRegion,
-                zRegion == null ? 1 : zRegion
+                xRegion == null || xRegion < 1 ? 1 : xRegion,
+                yRegion == null || yRegion < 1 ? 1 : yRegion,
+                zRegion == null || zRegion < 1 ? 1 : zRegion
         );
     }
 
