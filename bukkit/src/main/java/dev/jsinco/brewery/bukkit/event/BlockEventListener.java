@@ -3,6 +3,7 @@ package dev.jsinco.brewery.bukkit.event;
 import dev.jsinco.brewery.api.breweries.BarrelType;
 import dev.jsinco.brewery.api.breweries.InventoryAccessible;
 import dev.jsinco.brewery.api.breweries.StructureHolder;
+import dev.jsinco.brewery.api.structure.BlockMatcherReplacement;
 import dev.jsinco.brewery.api.structure.MultiblockStructure;
 import dev.jsinco.brewery.api.structure.StructureMeta;
 import dev.jsinco.brewery.api.structure.StructureType;
@@ -103,7 +104,7 @@ public class BlockEventListener implements Listener {
             Optional<Pair<PlacedBreweryStructure<BukkitDistillery>, Void>> placedBreweryStructureOptional = PlacedBreweryStructure.findValid(
                     breweryStructure,
                     placed.getLocation(),
-                    new GenericBlockDataMatcher(breweryStructure.getMetaOrDefault(StructureMeta.BLOCK_REPLACEMENTS, List.of())),
+                    new GenericBlockDataMatcher(breweryStructure.getMetaOrDefault(StructureMeta.BLOCK_REPLACEMENTS, new BlockMatcherReplacement.List()).elements()),
                     new Void[1]
             );
             if (placedBreweryStructureOptional.isPresent()) {

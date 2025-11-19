@@ -2,23 +2,26 @@ package dev.jsinco.brewery.bukkit.breweries.distillery;
 
 import dev.jsinco.brewery.api.brew.Brew;
 import dev.jsinco.brewery.api.brew.BrewingStep;
-import dev.jsinco.brewery.brew.DistillStepImpl;
 import dev.jsinco.brewery.api.breweries.Distillery;
-import dev.jsinco.brewery.bukkit.TheBrewingProject;
-import dev.jsinco.brewery.bukkit.brew.BrewAdapter;
-import dev.jsinco.brewery.bukkit.breweries.BrewInventory;
-import dev.jsinco.brewery.bukkit.structure.PlacedBreweryStructure;
-import dev.jsinco.brewery.bukkit.util.BlockUtil;
-import dev.jsinco.brewery.bukkit.api.BukkitAdapter;
-import dev.jsinco.brewery.bukkit.util.SoundPlayer;
-import dev.jsinco.brewery.configuration.Config;
-import dev.jsinco.brewery.database.PersistenceException;
 import dev.jsinco.brewery.api.moment.Moment;
+import dev.jsinco.brewery.api.structure.MaterialTag;
 import dev.jsinco.brewery.api.structure.StructureMeta;
 import dev.jsinco.brewery.api.util.Logger;
-import dev.jsinco.brewery.util.MessageUtil;
 import dev.jsinco.brewery.api.util.Pair;
 import dev.jsinco.brewery.api.vector.BreweryLocation;
+import dev.jsinco.brewery.brew.DistillStepImpl;
+import dev.jsinco.brewery.bukkit.TheBrewingProject;
+import dev.jsinco.brewery.bukkit.api.BukkitAdapter;
+import dev.jsinco.brewery.bukkit.brew.BrewAdapter;
+import dev.jsinco.brewery.bukkit.breweries.BrewInventory;
+import dev.jsinco.brewery.bukkit.structure.BreweryStructure;
+import dev.jsinco.brewery.bukkit.structure.PlacedBreweryStructure;
+import dev.jsinco.brewery.bukkit.util.BlockUtil;
+import dev.jsinco.brewery.bukkit.util.SoundPlayer;
+import dev.jsinco.brewery.bukkit.util.VectorUtil;
+import dev.jsinco.brewery.configuration.Config;
+import dev.jsinco.brewery.database.PersistenceException;
+import dev.jsinco.brewery.util.MessageUtil;
 import lombok.Getter;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
@@ -26,14 +29,15 @@ import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.Particle;
-import org.bukkit.block.Block;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
+import org.joml.Vector3i;
 
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class BukkitDistillery implements Distillery<BukkitDistillery, ItemStack, Inventory> {
@@ -143,21 +147,90 @@ public class BukkitDistillery implements Distillery<BukkitDistillery, ItemStack,
             return;
         }
         dirty = false;
-        Set<BreweryLocation> potLocations = new HashSet<>();
-        Material taggedMaterial = Material.valueOf(structure.getStructure().getMeta(StructureMeta.TAGGED_MATERIAL).toUpperCase(Locale.ROOT));
-        for (BreweryLocation location : structure.positions()) {
-            Block block = BukkitAdapter.toBlock(location).orElseThrow();
-            if (taggedMaterial == block.getType()) {
-                potLocations.add(location);
+        BreweryStructure breweryStructure = structure.getStructure();
+
+        // Locate key structure parts from reading from the world, try to prioritize large features first
+        if (breweryStructure.hasMeta(StructureMeta.DISTILLATE_MATERIAL_TAG)) {
+            MaterialTag distillateMaterialTag = breweryStructure.getMeta(StructureMeta.DISTILLATE_MATERIAL_TAG);
+            if (breweryStructure.hasMeta(StructureMeta.MIXTURE_MATERIAL_TAG)) {
+                MaterialTag mixtureMaterialTag = breweryStructure.getMeta(StructureMeta.MIXTURE_MATERIAL_TAG);
+                if (mixtureMaterialTag.volume() > distillateMaterialTag.volume()) {
+                    List<BreweryLocation> mixturePositions = findMaterialRegion(mixtureMaterialTag, List.of());
+                    mixtureContainerLocations.addAll(mixturePositions);
+                    distillateContainerLocations.addAll(findMaterialRegion(distillateMaterialTag, mixturePositions));
+                } else {
+                    List<BreweryLocation> distillatePositions = findMaterialRegion(distillateMaterialTag, List.of());
+                    distillateContainerLocations.addAll(distillatePositions);
+                    mixtureContainerLocations.addAll(findMaterialRegion(mixtureMaterialTag, distillatePositions));
+                }
+                return;
+            }
+            distillateContainerLocations.addAll(findMaterialRegion(distillateMaterialTag, List.of()));
+        }
+        if (breweryStructure.hasMeta(StructureMeta.MIXTURE_MATERIAL_TAG)) {
+            MaterialTag mixtureMaterialTag = breweryStructure.getMeta(StructureMeta.MIXTURE_MATERIAL_TAG);
+            mixtureContainerLocations.addAll(findMaterialRegion(mixtureMaterialTag, List.of()));
+        }
+        BreweryLocation worldOrigin = BukkitAdapter.toBreweryLocation(structure.getWorldOrigin());
+        if (breweryStructure.hasMeta(StructureMeta.DISTILLATE_ACCESS_POINTS)) {
+            breweryStructure.getMeta(StructureMeta.DISTILLATE_ACCESS_POINTS)
+                    .elements()
+                    .stream()
+                    .map(VectorUtil::toJoml)
+                    .map(vector -> VectorUtil.transform(vector, structure.getTransformation()))
+                    .map(VectorUtil::toBreweryVector)
+                    .map(worldOrigin::add)
+                    .forEach(distillateContainerLocations::add);
+        }
+        if (breweryStructure.hasMeta(StructureMeta.MIXTURE_ACCESS_POINTS)) {
+            breweryStructure.getMeta(StructureMeta.MIXTURE_ACCESS_POINTS)
+                    .elements()
+                    .stream()
+                    .map(VectorUtil::toJoml)
+                    .map(vector -> VectorUtil.transform(vector, structure.getTransformation()))
+                    .map(VectorUtil::toBreweryVector)
+                    .map(worldOrigin::add)
+                    .forEach(mixtureContainerLocations::add);
+        }
+    }
+
+    private List<BreweryLocation> findMaterialRegion(MaterialTag tag, List<BreweryLocation> blackList) {
+        Set<Material> materials = tag.materials().stream()
+                .map(BukkitAdapter::toMaterial)
+                .collect(Collectors.toSet());
+        List<BreweryLocation> matchingPositions = structure.positions().stream()
+                .map(BukkitAdapter::toBlock)
+                .flatMap(Optional::stream)
+                .filter(block -> materials.contains(block.getType()))
+                .map(BukkitAdapter::toBreweryLocation)
+                .toList();
+        List<BreweryLocation> output = new ArrayList<>();
+        Vector3i region = new Vector3i(tag.xRegion(), tag.yRegion(), tag.zRegion());
+        Vector3i transformedRegion = VectorUtil.transform(region, structure.getTransformation());
+        for (BreweryLocation matchingPosition : matchingPositions) {
+            List<BreweryLocation> found = findInSelection(matchingPosition, transformedRegion, matchingPositions);
+            if (blackList.stream().anyMatch(found::contains)) {
+                continue;
+            }
+            output.addAll(found);
+        }
+        return output;
+    }
+
+    private List<BreweryLocation> findInSelection(BreweryLocation startingPoint, Vector3i region, List<BreweryLocation> matchingPositions) {
+        List<BreweryLocation> output = new ArrayList<>();
+        for (int dx = 0; dx < region.x(); dx++) {
+            for (int dy = 0; dy < region.y(); dy++) {
+                for (int dz = 0; dz < region.z(); dz++) {
+                    BreweryLocation relative = startingPoint.add(dx, dy, dz);
+                    if (!matchingPositions.contains(relative)) {
+                        return List.of();
+                    }
+                    output.add(relative);
+                }
             }
         }
-        for (BreweryLocation breweryLocation : potLocations) {
-            if (potLocations.contains(breweryLocation.add(0, 1, 0)) || potLocations.contains(breweryLocation.add(0, -1, 0))) {
-                mixtureContainerLocations.add(breweryLocation);
-            } else {
-                distillateContainerLocations.add(breweryLocation);
-            }
-        }
+        return output;
     }
 
     private boolean inventoryUnpopulated() {

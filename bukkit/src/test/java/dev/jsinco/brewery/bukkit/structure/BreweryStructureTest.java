@@ -53,7 +53,7 @@ class BreweryStructureTest {
     void invalidMeta(Map<StructureMeta<?>, Object> structureMeta) throws URISyntaxException, IOException {
         URL url = PlacedBreweryStructure.class.getResource("/structures/test_barrel.schem");
         Schematic schematic = new SchematicReader().read(Paths.get(url.toURI()));
-        assertThrows(IllegalArgumentException.class, () -> new BreweryStructure(schematic, "hello", structureMeta));
+        assertThrows(IllegalArgumentException.class, () -> new BreweryStructure(schematic, "hello", new BreweryStructure.Meta(structureMeta), "hello.schem"));
     }
 
     @ParameterizedTest
@@ -61,7 +61,7 @@ class BreweryStructureTest {
     void incompleteMeta(Map<StructureMeta<?>, Object> inputMeta, Map<StructureMeta<?>, Object> expectedMeta) throws URISyntaxException, IOException {
         URL url = PlacedBreweryStructure.class.getResource("/structures/test_barrel.schem");
         Schematic schematic = new SchematicReader().read(Paths.get(url.toURI()));
-        BreweryStructure breweryStructure = new BreweryStructure(schematic, "hello", inputMeta);
+        BreweryStructure breweryStructure = new BreweryStructure(schematic, "hello", new BreweryStructure.Meta(inputMeta), "hello.schem");
         expectedMeta.forEach((key, value) -> assertEquals(value, breweryStructure.getMeta(key)));
     }
 
@@ -70,23 +70,25 @@ class BreweryStructureTest {
     void fullMeta(Map<StructureMeta<?>, Object> structureMeta) throws URISyntaxException, IOException {
         URL url = PlacedBreweryStructure.class.getResource("/structures/test_barrel.schem");
         Schematic schematic = new SchematicReader().read(Paths.get(url.toURI()));
-        assertDoesNotThrow(() -> new BreweryStructure(schematic, "hello", structureMeta));
+        assertDoesNotThrow(() -> new BreweryStructure(schematic, "hello", new BreweryStructure.Meta(structureMeta), "hello.schem"));
     }
 
     private BreweryStructure getOakBarrel() throws URISyntaxException {
         URL url = PlacedBreweryStructure.class.getResource("/structures/test_barrel.schem");
         Schematic schematic = new SchematicReader().read(Paths.get(url.toURI()));
-        return new BreweryStructure(schematic, List.of(new Vector3i(0, 0, 1)), "test_barrel",
-                Map.of(StructureMeta.INVENTORY_SIZE, 9,
+        return new BreweryStructure(schematic,
+                new BreweryStructure.EntryPoints(List.of(new Vector3i(0, 0, 1)), true), "test_barrel",
+                new BreweryStructure.Meta(Map.of(StructureMeta.INVENTORY_SIZE, 9,
                         StructureMeta.USE_BARREL_SUBSTITUTION, false,
-                        StructureMeta.TYPE, StructureType.BARREL));
+                        StructureMeta.TYPE, StructureType.BARREL)
+                ), "test_barrel.schem");
     }
 
     /**
      * Helper method to create a mutable map for testing BreweryStructure, also allows null values
      */
     private static <T, U> Map<T, U> mutableMapOf(Object... entries) {
-        HashMap<T, U> map = new HashMap<>(Map.of());
+        HashMap<T, U> map = new HashMap<>(Map.<T, U>of());
         for (int i = 0; i < entries.length; i += 2) {
             map.put((T) entries[i], (U) entries[i + 1]);
         }
@@ -94,7 +96,7 @@ class BreweryStructureTest {
     }
 
     private static Stream<Arguments> getInvalidMeta() {
-        return Stream.of(
+        return Stream.<Arguments>of(
                 Arguments.of(mutableMapOf(StructureMeta.INVENTORY_SIZE, 9)),
                 Arguments.of(mutableMapOf(
                         StructureMeta.TYPE, StructureType.BARREL,
@@ -119,11 +121,9 @@ class BreweryStructureTest {
                 Arguments.of(
                         mutableMapOf(
                                 StructureMeta.TYPE, StructureType.DISTILLERY
-                        ),
-                        mutableMapOf( // don't check for everything, so the test doesn't break on meta changes
+                        ), mutableMapOf( // don't check for everything, so the test doesn't break on meta changes
                                 StructureMeta.INVENTORY_SIZE, 9,
                                 StructureMeta.USE_BARREL_SUBSTITUTION, null,
-                                StructureMeta.TAGGED_MATERIAL, "decorated_pot",
                                 StructureMeta.PROCESS_AMOUNT, 1
                         )
                 )
@@ -135,7 +135,6 @@ class BreweryStructureTest {
                 Arguments.of(mutableMapOf(
                         StructureMeta.TYPE, StructureType.DISTILLERY,
                         StructureMeta.INVENTORY_SIZE, 18,
-                        StructureMeta.TAGGED_MATERIAL, "decorated_pot",
                         StructureMeta.PROCESS_TIME, 0L,
                         StructureMeta.PROCESS_AMOUNT, 1
                 )),
@@ -143,6 +142,6 @@ class BreweryStructureTest {
                         StructureMeta.TYPE, StructureType.BARREL,
                         StructureMeta.INVENTORY_SIZE, 9,
                         StructureMeta.USE_BARREL_SUBSTITUTION, true)
-        ));
+                ));
     }
 }

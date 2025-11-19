@@ -1,6 +1,7 @@
 package dev.jsinco.brewery.bukkit.structure;
 
 import com.google.common.base.Preconditions;
+import dev.jsinco.brewery.api.structure.MaterialTag;
 import dev.jsinco.brewery.api.structure.StructureMeta;
 import dev.thorinwasher.schem.Schematic;
 import eu.okaeri.configs.OkaeriConfig;
@@ -114,6 +115,10 @@ public class BreweryStructure extends OkaeriConfig {
 
     public <V> V getMetaOrDefault(StructureMeta<V> meta, V defaultValue) {
         return (V) this.meta.data().getOrDefault(meta, defaultValue);
+    }
+
+    public boolean hasMeta(StructureMeta<?> metaKey) {
+        return meta.data().containsKey(metaKey);
     }
 
     public record EntryPoints(List<Vector3i> entryPoints, boolean customDefinition) {

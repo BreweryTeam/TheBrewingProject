@@ -1,5 +1,10 @@
 package dev.jsinco.brewery.bukkit.structure;
 
+import dev.jsinco.brewery.bukkit.structure.serializer.*;
+import dev.jsinco.brewery.configuration.OkaeriSerdesPackBuilder;
+import eu.okaeri.configs.ConfigManager;
+import eu.okaeri.configs.serdes.OkaeriSerdesPack;
+import eu.okaeri.configs.yaml.snakeyaml.YamlSnakeYamlConfigurer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -11,6 +16,10 @@ import org.mockbukkit.mockbukkit.ServerMock;
 import org.mockbukkit.mockbukkit.world.WorldMock;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -29,10 +38,27 @@ class StructureReaderTest {
 
     @ParameterizedTest
     @MethodSource("getSchemFormatPaths")
-    void fromJson_names(String path) throws StructureReadException, IOException {
-        String structureName = path.replace("/structures/", "").replace(".json", "");
-        BreweryStructure structures = StructureReader.fromInternalResourceJson(path);
-        assertEquals(structureName, structures.getName());
+    void fromJson_names(String pathString) throws StructureReadException, IOException, URISyntaxException {
+        String structureName = pathString.replace("/structures/", "").replace(".json", "");
+        URL url = PlacedBreweryStructure.class.getResource(pathString);
+        Path path = Paths.get(url.toURI());
+        OkaeriSerdesPack pack = new OkaeriSerdesPackBuilder()
+                .add(new BreweryVectorSerializer())
+                .add(new BreweryVectorListSerializer())
+                .add(new MaterialHolderSerializer())
+                .add(new MaterialTagSerializer())
+                .add(new StructureMetaSerializer())
+                .add(new StructureSerializer(path))
+                .add(new Vector3iSerializer())
+                .build();
+        BreweryStructure structure = ConfigManager.create(BreweryStructure.class, it -> {
+            it.withConfigurer(new YamlSnakeYamlConfigurer(), pack);
+            it.withBindFile(path);
+            it.withRemoveOrphans(true);
+            it.saveDefaults();
+            it.load(true);
+        });
+        assertEquals(structureName, structure.getName());
     }
 
     static Stream<Arguments> getSchemFormatPaths() {

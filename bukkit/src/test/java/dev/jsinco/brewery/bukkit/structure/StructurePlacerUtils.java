@@ -1,5 +1,10 @@
 package dev.jsinco.brewery.bukkit.structure;
 
+import dev.jsinco.brewery.bukkit.structure.serializer.*;
+import dev.jsinco.brewery.configuration.OkaeriSerdesPackBuilder;
+import eu.okaeri.configs.ConfigManager;
+import eu.okaeri.configs.serdes.OkaeriSerdesPack;
+import eu.okaeri.configs.yaml.snakeyaml.YamlSnakeYamlConfigurer;
 import org.bukkit.Material;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.Bisected;
@@ -12,6 +17,7 @@ import org.mockbukkit.mockbukkit.world.WorldMock;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 
 public class StructurePlacerUtils {
@@ -65,6 +71,22 @@ public class StructurePlacerUtils {
 
     public static BreweryStructure matchingStructure() throws URISyntaxException, IOException {
         URL url = PlacedBreweryStructure.class.getResource("/structures/test_barrel.json");
-        return StructureReader.fromJson(Paths.get(url.toURI()));
+        Path path = Paths.get(url.toURI());
+        OkaeriSerdesPack pack = new OkaeriSerdesPackBuilder()
+                .add(new BreweryVectorSerializer())
+                .add(new BreweryVectorListSerializer())
+                .add(new MaterialHolderSerializer())
+                .add(new MaterialTagSerializer())
+                .add(new StructureMetaSerializer())
+                .add(new StructureSerializer(path))
+                .add(new Vector3iSerializer())
+                .build();
+        return ConfigManager.create(BreweryStructure.class, it -> {
+            it.withConfigurer(new YamlSnakeYamlConfigurer(), pack);
+            it.withBindFile(path);
+            it.withRemoveOrphans(true);
+            it.saveDefaults();
+            it.load(true);
+        });
     }
 }

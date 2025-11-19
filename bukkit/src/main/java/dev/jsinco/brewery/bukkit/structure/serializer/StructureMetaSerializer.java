@@ -3,6 +3,7 @@ package dev.jsinco.brewery.bukkit.structure.serializer;
 import com.google.common.base.Preconditions;
 import dev.jsinco.brewery.api.structure.MaterialTag;
 import dev.jsinco.brewery.api.structure.StructureMeta;
+import dev.jsinco.brewery.api.structure.StructureType;
 import dev.jsinco.brewery.api.util.BreweryKey;
 import dev.jsinco.brewery.api.util.BreweryRegistry;
 import dev.jsinco.brewery.api.util.Holder;
@@ -14,6 +15,7 @@ import eu.okaeri.configs.serdes.SerializationData;
 import lombok.NonNull;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -60,7 +62,13 @@ public class StructureMetaSerializer implements ObjectSerializer<BreweryStructur
             meta.put(metaItem, data.get(key, metaItem.vClass()));
         }
         Preconditions.checkArgument(meta.containsKey(StructureMeta.TYPE), "Expected structure type to be present");
-
+        StructureType type = (StructureType) meta.get(StructureMeta.TYPE);
+        List<StructureMeta<?>> missing = type.getMissingMandatory(meta.keySet());
+        Preconditions.checkArgument(missing.isEmpty(), "Structure is missing the following meta: " + missing);
+        if (type == StructureType.DISTILLERY) {
+            Preconditions.checkArgument(meta.containsKey(StructureMeta.MIXTURE_MATERIAL_TAG) || meta.containsKey(StructureMeta.MIXTURE_ACCESS_POINTS), "Missing meta 'mixture_material_tag' or 'mixture_access_points'!");
+            Preconditions.checkArgument(meta.containsKey(StructureMeta.DISTILLATE_MATERIAL_TAG) || meta.containsKey(StructureMeta.DISTILLATE_ACCESS_POINTS), "Missing meta 'distillate_material_tag' or 'distillate_access_points'");
+        }
         return new BreweryStructure.Meta(meta);
     }
 }
