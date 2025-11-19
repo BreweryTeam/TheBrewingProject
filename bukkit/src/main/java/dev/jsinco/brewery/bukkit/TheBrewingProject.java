@@ -9,6 +9,7 @@ import dev.jsinco.brewery.api.breweries.Tickable;
 import dev.jsinco.brewery.api.effect.modifier.ModifierManager;
 import dev.jsinco.brewery.api.event.CustomEventRegistry;
 import dev.jsinco.brewery.api.event.EventStepRegistry;
+import dev.jsinco.brewery.api.structure.BlockMatcherReplacement;
 import dev.jsinco.brewery.api.structure.MultiblockStructure;
 import dev.jsinco.brewery.api.structure.StructureMeta;
 import dev.jsinco.brewery.api.structure.StructureType;
@@ -33,7 +34,11 @@ import dev.jsinco.brewery.bukkit.integration.IntegrationManagerImpl;
 import dev.jsinco.brewery.bukkit.migration.Migrations;
 import dev.jsinco.brewery.bukkit.recipe.BukkitRecipeResultReader;
 import dev.jsinco.brewery.bukkit.recipe.DefaultRecipeReader;
-import dev.jsinco.brewery.bukkit.structure.*;
+import dev.jsinco.brewery.bukkit.structure.BarrelBlockDataMatcher;
+import dev.jsinco.brewery.bukkit.structure.BreweryStructure;
+import dev.jsinco.brewery.bukkit.structure.GenericBlockDataMatcher;
+import dev.jsinco.brewery.bukkit.structure.StructureRegistry;
+import dev.jsinco.brewery.bukkit.structure.serializer.*;
 import dev.jsinco.brewery.bukkit.util.BreweryTimeDataType;
 import dev.jsinco.brewery.bukkit.util.BukkitIngredientUtil;
 import dev.jsinco.brewery.configuration.*;
@@ -50,7 +55,9 @@ import dev.jsinco.brewery.recipes.RecipeReader;
 import dev.jsinco.brewery.recipes.RecipeRegistryImpl;
 import dev.jsinco.brewery.structure.PlacedStructureRegistryImpl;
 import dev.jsinco.brewery.util.ClassUtil;
+import eu.okaeri.configs.ConfigManager;
 import eu.okaeri.configs.serdes.OkaeriSerdesPack;
+import eu.okaeri.configs.yaml.snakeyaml.YamlSnakeYamlConfigurer;
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
 import io.papermc.paper.threadedregions.scheduler.ScheduledTask;
 import lombok.Getter;
@@ -262,24 +269,33 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
                 .map(string -> "structures/" + string)
                 .flatMap(name -> Stream.of(name + ".schem", name + ".json"))
                 .forEach(this::saveResourceIfNotExists);
+
         Stream.of(structureRoot.listFiles())
                 .filter(file -> file.getName().endsWith(".json"))
                 .map(File::toPath)
-                .filter(StructureJsonFormatValidator::validate)
-                .flatMap(path -> {
-                    try {
-                        return Stream.of(StructureReader.fromJson(path));
-                    } catch (IOException | StructureReadException e) {
-                        Logger.logErr("Could not load structure: " + path);
-                        Logger.logErr(e);
-                        return Stream.empty();
-                    }
+                .map(path -> {
+                    OkaeriSerdesPack pack = new OkaeriSerdesPackBuilder()
+                            .add(new BreweryVectorSerializer())
+                            .add(new BreweryVectorListSerializer())
+                            .add(new MaterialHolderSerializer())
+                            .add(new MaterialTagSerializer())
+                            .add(new StructureMetaSerializer())
+                            .add(new StructureSerializer(path))
+                            .add(new Vector3iSerializer())
+                            .build();
+                    return ConfigManager.create(BreweryStructure.class, it -> {
+                        it.withConfigurer(new YamlSnakeYamlConfigurer(), pack);
+                        it.withBindFile(path);
+                        it.withRemoveOrphans(true);
+                        it.saveDefaults();
+                        it.load(true);
+                    });
                 })
                 .forEach(structure -> {
                     if (structure.getMetaOrDefault(StructureMeta.USE_BARREL_SUBSTITUTION, false)) {
                         structureRegistry.addStructure(structure, BarrelBlockDataMatcher.INSTANCE, BarrelType.PLACEABLE_TYPES);
                     } else {
-                        structureRegistry.addStructure(structure, new GenericBlockDataMatcher(structure.getMetaOrDefault(StructureMeta.BLOCK_REPLACEMENTS, List.of())), new Void[1]);
+                        structureRegistry.addStructure(structure, new GenericBlockDataMatcher(structure.getMetaOrDefault(StructureMeta.BLOCK_REPLACEMENTS, new BlockMatcherReplacement.List()).elements()), new Void[1]);
                     }
                 });
     }

@@ -12,6 +12,17 @@ import java.util.Locale;
  */
 public record BreweryKey(String namespace, String key) {
 
+    public String minimalized() {
+        return minimalized("brewery");
+    }
+
+    public String minimalized(String namespace) {
+        if (this.namespace.equals(namespace)) {
+            return key;
+        }
+        return toString();
+    }
+
     /**
      * Defaults to brewery namespace.
      *
