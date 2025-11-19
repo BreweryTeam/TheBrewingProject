@@ -18,7 +18,7 @@ public record StructureType(BreweryKey key, Class<?> tClass,
                             StructureMeta<?>... mandatoryMeta) implements BreweryKeyed {
 
     public static final StructureType BARREL = new StructureType(BreweryKey.parse("barrel"), Barrel.class, StructureMeta.INVENTORY_SIZE, StructureMeta.USE_BARREL_SUBSTITUTION);
-    public static final StructureType DISTILLERY = new StructureType(BreweryKey.parse("distillery"), Distillery.class, StructureMeta.INVENTORY_SIZE, StructureMeta.TAGGED_MATERIAL, StructureMeta.PROCESS_TIME, StructureMeta.PROCESS_AMOUNT, StructureMeta.BLOCK_REPLACEMENTS);
+    public static final StructureType DISTILLERY = new StructureType(BreweryKey.parse("distillery"), Distillery.class, StructureMeta.INVENTORY_SIZE, StructureMeta.PROCESS_TIME, StructureMeta.PROCESS_AMOUNT, StructureMeta.BLOCK_REPLACEMENTS);
 
     /**
      * @param actualMeta The meta to check for

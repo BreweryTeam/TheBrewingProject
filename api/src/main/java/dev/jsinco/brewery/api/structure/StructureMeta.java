@@ -1,10 +1,14 @@
 package dev.jsinco.brewery.api.structure;
 
 import com.google.gson.JsonElement;
-import dev.jsinco.brewery.api.util.*;
+import dev.jsinco.brewery.api.util.BreweryKey;
+import dev.jsinco.brewery.api.util.BreweryKeyed;
+import dev.jsinco.brewery.api.util.Holder;
+import dev.jsinco.brewery.api.util.HolderProviderHolder;
+import dev.jsinco.brewery.api.vector.BreweryVector;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -23,10 +27,26 @@ public record StructureMeta<V>(BreweryKey key, Class<V> vClass, V defaultValue) 
     public static final StructureMeta<Integer> INVENTORY_SIZE = new StructureMeta<>(BreweryKey.parse("inventory_size"),
             Integer.class,
             9);
-    public static final StructureMeta<String> TAGGED_MATERIAL = new StructureMeta<>(
-            BreweryKey.parse("tagged_material"),
-            String.class,
-            "decorated_pot");
+    public static final StructureMeta<MaterialTag> MIXTURE_MATERIAL_TAG = new StructureMeta<>(
+            BreweryKey.parse("mixture_material_tag"),
+            MaterialTag.class,
+            new MaterialTag(Set.of(Holder.Material.fromMinecraftId("decorated_pot")), 1, 2, 1)
+    );
+    public static final StructureMeta<MaterialTag> DISTILLATE_MATERIAL_TAG = new StructureMeta<>(
+            BreweryKey.parse("distillate_material_tag"),
+            MaterialTag.class,
+            new MaterialTag(Set.of(Holder.Material.fromMinecraftId("decorated_pot")), 1, 1, 1)
+    );
+    public static final StructureMeta<BreweryVector.List> DISTILLATE_ACCESS_POINTS = new StructureMeta<>(
+            BreweryKey.parse("distillate_access_points"),
+            BreweryVector.List.class,
+            null
+    );
+    public static final StructureMeta<BreweryVector.List> MIXTURE_ACCESS_POINTS = new StructureMeta<>(
+            BreweryKey.parse("mixture_access_points"),
+            BreweryVector.List.class,
+            null
+    );
     public static final StructureMeta<Long> PROCESS_TIME = new StructureMeta<>(
             BreweryKey.parse("process_time"),
             Long.class,

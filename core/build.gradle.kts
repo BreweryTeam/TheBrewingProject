@@ -26,7 +26,7 @@ dependencies {
     compileOnly(libs.joml)
     compileOnly(libs.adventure.api)
     compileOnly(libs.adventure.text.minimessage)
-    api(libs.okaeri)
+    api(libs.okaeri.yaml)
     implementation(libs.simple.yaml)
     implementation(libs.hikaricp)
     implementation(libs.exp4j)

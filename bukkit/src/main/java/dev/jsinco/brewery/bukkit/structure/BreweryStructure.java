@@ -2,8 +2,8 @@ package dev.jsinco.brewery.bukkit.structure;
 
 import com.google.common.base.Preconditions;
 import dev.jsinco.brewery.api.structure.StructureMeta;
-import dev.jsinco.brewery.api.structure.StructureType;
 import dev.thorinwasher.schem.Schematic;
+import eu.okaeri.configs.OkaeriConfig;
 import lombok.Getter;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -16,46 +16,45 @@ import org.joml.Vector3i;
 
 import java.util.*;
 
-public class BreweryStructure {
+public class BreweryStructure extends OkaeriConfig {
 
     private final Schematic schem;
-    private final List<Vector3i> entryPoints;
+    @Getter
+    private final EntryPoints entryPoints;
     @Getter
     private final String name;
-    private final Map<StructureMeta<?>, Object> structureMeta;
+    @Getter
+    private final Meta meta;
+    @Getter
+    private final String schemFileName;
 
     /**
-     * Construct a schem structure where all blocks can finalize the structure (less performant)
+     * Construct a schem structure where all blocks can finalize the structure
      *
      * @param schem
      * @param name
      * @param structureMeta
      */
-    public BreweryStructure(@NotNull Schematic schem, @NotNull String name, Map<StructureMeta<?>, Object> structureMeta) {
-        this(schem, computeOrigins(schem), name, structureMeta);
+    public BreweryStructure(@NotNull Schematic schem, @NotNull String name, Meta structureMeta, String schemFileName) {
+        this(schem, new EntryPoints(computeEntryPoints(schem), false), name, structureMeta, schemFileName);
     }
 
     /**
-     * Construct a schem structure where only one block can finalize the structure
      *
      * @param schem
      * @param origins
      * @param name
      * @param structureMeta
      */
-    public BreweryStructure(@NotNull Schematic schem, @NotNull List<Vector3i> origins, @NotNull String name, Map<StructureMeta<?>, Object> structureMeta) {
+    public BreweryStructure(@NotNull Schematic schem, @NotNull EntryPoints origins, @NotNull String name, Meta structureMeta, String schemFileName) {
         this.schem = Objects.requireNonNull(schem);
         this.entryPoints = origins;
         this.name = Objects.requireNonNull(name);
-        this.structureMeta = Objects.requireNonNull(structureMeta);
-        structureMeta.forEach((key, value) -> Preconditions.checkArgument(key.validator().test(value), "Invalid structure '" + name + "': value '" + value + "' is not allowed for meta: " + structureMeta));
-        StructureType type = getMeta(StructureMeta.TYPE);
-        Preconditions.checkArgument(type != null, "Invalid structure '" + name + "', missing meta: " + StructureMeta.TYPE);
-        List<StructureMeta<?>> missing = type.getMissingMandatory(structureMeta.keySet());
-        missing.forEach(missingEntry -> structureMeta.put(missingEntry, missingEntry.defaultValue()));
+        this.meta = Objects.requireNonNull(structureMeta);
+        this.schemFileName = schemFileName;
     }
 
-    private static List<Vector3i> computeOrigins(Schematic schem) {
+    private static List<Vector3i> computeEntryPoints(Schematic schem) {
         List<Vector3i> vector3iList = new ArrayList<>();
         schem.apply(new Matrix3d(), (position, blockData) -> {
             if (blockData.getMaterial().isAir()) {
@@ -68,7 +67,7 @@ public class BreweryStructure {
 
     public <T> Optional<Location> findValidOrigin(Matrix3d transformation, Location entryPoint, BlockDataMatcher<T> blockDataMatcher, T matcherType) {
         Preconditions.checkNotNull(entryPoint.getWorld(), "World for entry point can not be null!");
-        for (Vector3i structureEntryPoint : entryPoints) {
+        for (Vector3i structureEntryPoint : entryPoints.entryPoints()) {
             Vector3d transformedEntryPoint = transformation.transform(new Vector3d(structureEntryPoint));
             Location worldOrigin = entryPoint.clone().subtract((int) transformedEntryPoint.x(), (int) transformedEntryPoint.y(), (int) transformedEntryPoint.z());
             if (matches(transformation, worldOrigin, blockDataMatcher, matcherType)) {
@@ -110,10 +109,16 @@ public class BreweryStructure {
     }
 
     public <V> @Nullable V getMeta(StructureMeta<V> meta) {
-        return (V) structureMeta.get(meta);
+        return (V) this.meta.data().get(meta);
     }
 
     public <V> V getMetaOrDefault(StructureMeta<V> meta, V defaultValue) {
-        return (V) structureMeta.getOrDefault(meta, defaultValue);
+        return (V) this.meta.data().getOrDefault(meta, defaultValue);
+    }
+
+    public record EntryPoints(List<Vector3i> entryPoints, boolean customDefinition) {
+    }
+
+    public record Meta(Map<StructureMeta<?>, Object> data) {
     }
 }

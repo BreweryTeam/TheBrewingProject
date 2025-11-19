@@ -3,8 +3,6 @@ import com.google.gson.JsonObject
 import net.minecrell.pluginyml.bukkit.BukkitPluginDescription
 import java.net.HttpURLConnection
 import java.net.URI
-import kotlin.apply
-import kotlin.collections.forEach
 
 plugins {
     `tbp-module`
@@ -51,6 +49,7 @@ dependencies {
     compileOnly(libs.protocolLib)
     implementation(libs.schem.reader)
     implementation(libs.simple.yaml)
+    implementation(libs.okaeri.json)
 
     // integrations
     compileOnly(libs.bolt.bukkit)
@@ -115,7 +114,8 @@ tasks {
     }
 
     shadowJar {
-        val publishing = project.gradle.startParameter.taskNames.any { it.contains("publish", true) && it.contains("maven", true) }
+        val publishing =
+            project.gradle.startParameter.taskNames.any { it.contains("publish", true) && it.contains("maven", true) }
         archiveBaseName.set(rootProject.name)
         archiveClassifier.unset()
 
@@ -307,13 +307,22 @@ hangarPublish {
                     url("GriefPrevention", "https://www.spigotmc.org/resources/griefprevention.1884/") {
                         required = false
                     }
-                    url("HuskClaims", "https://www.spigotmc.org/resources/huskclaims-1-17-1-21-modern-golden-shovel-land-claiming-fully-cross-server-compatible.114467/") {
+                    url(
+                        "HuskClaims",
+                        "https://www.spigotmc.org/resources/huskclaims-1-17-1-21-modern-golden-shovel-land-claiming-fully-cross-server-compatible.114467/"
+                    ) {
                         required = false
                     }
-                    url("ItemsAdder", "https://www.spigotmc.org/resources/%E2%9C%A8itemsadder%E2%AD%90emotes-mobs-items-armors-hud-gui-emojis-blocks-wings-hats-liquids.73355/") {
+                    url(
+                        "ItemsAdder",
+                        "https://www.spigotmc.org/resources/%E2%9C%A8itemsadder%E2%AD%90emotes-mobs-items-armors-hud-gui-emojis-blocks-wings-hats-liquids.73355/"
+                    ) {
                         required = false
                     }
-                    url("Lands", "https://www.spigotmc.org/resources/lands-%E2%AD%95-land-claim-plugin-%E2%9C%85-grief-prevention-protection-gui-management-nations-wars-1-21-support.53313/") {
+                    url(
+                        "Lands",
+                        "https://www.spigotmc.org/resources/lands-%E2%AD%95-land-claim-plugin-%E2%9C%85-grief-prevention-protection-gui-management-nations-wars-1-21-support.53313/"
+                    ) {
                         required = false
                     }
                     url("MMOItems", "https://www.spigotmc.org/resources/mmoitems.39267/") {
@@ -328,7 +337,10 @@ hangarPublish {
                     url("Nexo", "https://polymart.org/product/6901/nexo") {
                         required = false
                     }
-                    url("Oraxen", "https://www.spigotmc.org/resources/%E2%98%84%EF%B8%8F-oraxen-custom-items-blocks-emotes-furniture-resourcepack-and-gui-1-18-1-21-4.72448/") {
+                    url(
+                        "Oraxen",
+                        "https://www.spigotmc.org/resources/%E2%98%84%EF%B8%8F-oraxen-custom-items-blocks-emotes-furniture-resourcepack-and-gui-1-18-1-21-4.72448/"
+                    ) {
                         required = false
                     }
                     url("PlaceholderAPI", "https://www.spigotmc.org/resources/placeholderapi.6245/") {

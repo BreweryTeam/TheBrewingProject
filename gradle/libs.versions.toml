@@ -49,7 +49,8 @@ paper-api = { group = "io.papermc.paper", name = "paper-api", version.ref = "pap
 gson = { group = "com.google.code.gson", name = "gson", version.ref = "gson" }
 guava = { group = "com.google.guava", name = "guava", version.ref = "guava" }
 hikaricp = { group = "com.zaxxer", name = "HikariCP", version.ref = "hikaricp" }
-okaeri = { group = "eu.okaeri", name = "okaeri-configs-yaml-snakeyaml", version.ref = "okaeri" }
+okaeri-yaml = { group = "eu.okaeri", name = "okaeri-configs-yaml-snakeyaml", version.ref = "okaeri" }
+okaeri-json = { group = "eu.okaeri", name = "okaeri-configs-json-gson", version.ref = "okaeri"}
 joml = { group = "org.joml", name = "joml", version.ref = "joml" }
 protocolLib = { group = "com.comphenix.protocol", name = "ProtocolLib", version.ref = "protocolLib" }
 schem-reader = { group = "dev.thorinwasher.schem", name = "schem-reader", version.ref = "schem-reader" }
