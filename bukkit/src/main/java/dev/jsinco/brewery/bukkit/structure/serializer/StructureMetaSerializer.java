@@ -6,7 +6,7 @@ import dev.jsinco.brewery.api.structure.StructureMeta;
 import dev.jsinco.brewery.api.structure.StructureType;
 import dev.jsinco.brewery.api.util.BreweryKey;
 import dev.jsinco.brewery.api.util.BreweryRegistry;
-import dev.jsinco.brewery.api.util.Holder;
+import dev.jsinco.brewery.api.util.Materials;
 import dev.jsinco.brewery.bukkit.structure.BreweryStructure;
 import eu.okaeri.configs.schema.GenericsDeclaration;
 import eu.okaeri.configs.serdes.DeserializationData;
@@ -15,7 +15,6 @@ import eu.okaeri.configs.serdes.SerializationData;
 import lombok.NonNull;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -42,15 +41,15 @@ public class StructureMetaSerializer implements ObjectSerializer<BreweryStructur
             BreweryKey breweryKey = BreweryKey.parse(key);
             // Backwards compatibility handling
             if (breweryKey.equals(BreweryKey.parse("tagged_material"))) {
-                Set<Holder.Material> materials = data.getAsSet(key, Holder.Material.class);
+                Materials materials = data.get(key, Materials.class);
                 meta.put(StructureMeta.DISTILLATE_MATERIAL_TAG, new MaterialTag(
-                        materials,
+                        materials.values(),
                         1,
                         1,
                         1)
                 );
                 meta.put(StructureMeta.MIXTURE_MATERIAL_TAG, new MaterialTag(
-                        materials,
+                        materials.values(),
                         1,
                         2,
                         1)
@@ -63,8 +62,9 @@ public class StructureMetaSerializer implements ObjectSerializer<BreweryStructur
         }
         Preconditions.checkArgument(meta.containsKey(StructureMeta.TYPE), "Expected structure type to be present");
         StructureType type = (StructureType) meta.get(StructureMeta.TYPE);
-        List<StructureMeta<?>> missing = type.getMissingMandatory(meta.keySet());
-        Preconditions.checkArgument(missing.isEmpty(), "Structure is missing the following meta: " + missing);
+        type.getMissingMandatory(meta.keySet()).forEach(structureMeta -> {
+            meta.put(structureMeta, structureMeta.defaultValue());
+        });
         if (type == StructureType.DISTILLERY) {
             Preconditions.checkArgument(meta.containsKey(StructureMeta.MIXTURE_MATERIAL_TAG) || meta.containsKey(StructureMeta.MIXTURE_ACCESS_POINTS), "Missing meta 'mixture_material_tag' or 'mixture_access_points'!");
             Preconditions.checkArgument(meta.containsKey(StructureMeta.DISTILLATE_MATERIAL_TAG) || meta.containsKey(StructureMeta.DISTILLATE_ACCESS_POINTS), "Missing meta 'distillate_material_tag' or 'distillate_access_points'");

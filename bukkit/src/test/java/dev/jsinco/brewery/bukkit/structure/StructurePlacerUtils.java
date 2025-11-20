@@ -78,15 +78,14 @@ public class StructurePlacerUtils {
                 .add(new MaterialHolderSerializer())
                 .add(new MaterialTagSerializer())
                 .add(new StructureMetaSerializer())
-                .add(new StructureSerializer(path))
                 .add(new Vector3iSerializer())
                 .build();
-        return ConfigManager.create(BreweryStructure.class, it -> {
+        return ConfigManager.create(BreweryStructureConfig.class, it -> {
             it.withConfigurer(new YamlSnakeYamlConfigurer(), pack);
             it.withBindFile(path);
             it.withRemoveOrphans(true);
             it.saveDefaults();
             it.load(true);
-        });
+        }).toStructure(path);
     }
 }
