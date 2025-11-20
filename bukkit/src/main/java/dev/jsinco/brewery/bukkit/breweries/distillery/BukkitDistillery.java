@@ -219,9 +219,9 @@ public class BukkitDistillery implements Distillery<BukkitDistillery, ItemStack,
 
     private List<BreweryLocation> findInSelection(BreweryLocation startingPoint, Vector3i region, List<BreweryLocation> matchingPositions) {
         List<BreweryLocation> output = new ArrayList<>();
-        for (int dx = 0; dx < region.x(); dx++) {
-            for (int dy = 0; dy < region.y(); dy++) {
-                for (int dz = 0; dz < region.z(); dz++) {
+        for (int dx = 0; dx < Math.abs(region.x()); dx++) {
+            for (int dy = 0; dy < Math.abs(region.y()); dy++) {
+                for (int dz = 0; dz < Math.abs(region.z()); dz++) {
                     BreweryLocation relative = startingPoint.add(dx, dy, dz);
                     if (!matchingPositions.contains(relative)) {
                         return List.of();
