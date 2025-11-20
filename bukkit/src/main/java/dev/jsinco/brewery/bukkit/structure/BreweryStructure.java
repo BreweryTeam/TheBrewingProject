@@ -17,7 +17,7 @@ import org.joml.Vector3i;
 
 import java.util.*;
 
-public class BreweryStructure extends OkaeriConfig {
+public class BreweryStructure  {
 
     private final Schematic schem;
     @Getter

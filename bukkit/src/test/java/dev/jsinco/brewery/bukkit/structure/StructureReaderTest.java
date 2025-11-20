@@ -48,16 +48,15 @@ class StructureReaderTest {
                 .add(new MaterialHolderSerializer())
                 .add(new MaterialTagSerializer())
                 .add(new StructureMetaSerializer())
-                .add(new StructureSerializer(path))
                 .add(new Vector3iSerializer())
                 .build();
-        BreweryStructure structure = ConfigManager.create(BreweryStructure.class, it -> {
+        BreweryStructure structure = ConfigManager.create(BreweryStructureConfig.class, it -> {
             it.withConfigurer(new YamlSnakeYamlConfigurer(), pack);
             it.withBindFile(path);
             it.withRemoveOrphans(true);
             it.saveDefaults();
             it.load(true);
-        });
+        }).toStructure(path);
         assertEquals(structureName, structure.getName());
     }
 

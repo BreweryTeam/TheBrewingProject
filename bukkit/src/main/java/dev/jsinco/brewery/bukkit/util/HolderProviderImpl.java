@@ -1,5 +1,6 @@
 package dev.jsinco.brewery.bukkit.util;
 
+import dev.jsinco.brewery.api.util.BreweryKey;
 import dev.jsinco.brewery.api.util.Holder;
 import dev.jsinco.brewery.api.util.HolderProvider;
 import dev.jsinco.brewery.bukkit.api.BukkitAdapter;
@@ -13,8 +14,8 @@ import java.util.stream.Collectors;
 
 public class HolderProviderImpl implements HolderProvider {
     @Override
-    public Optional<Holder.Material> material(String materialString) {
-        return Optional.ofNullable(NamespacedKey.fromString(materialString))
+    public Optional<Holder.Material> material(BreweryKey materialKey) {
+        return Optional.ofNullable(BukkitAdapter.toNamespacedKey(materialKey))
                 .filter(key -> Registry.MATERIAL.get(key) != null)
                 .map(key -> new Holder.Material(BukkitAdapter.toBreweryKey(key)));
     }
@@ -32,8 +33,8 @@ public class HolderProviderImpl implements HolderProvider {
     }
 
     @Override
-    public Set<Holder.Material> parseTag(String tagString) {
-        NamespacedKey namespacedKey = NamespacedKey.fromString(tagString);
+    public Set<Holder.Material> parseTag(BreweryKey tagKey) {
+        NamespacedKey namespacedKey = BukkitAdapter.toNamespacedKey(tagKey);
         if (namespacedKey == null) {
             return Set.of();
         }

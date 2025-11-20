@@ -69,27 +69,5 @@ public record StructureMeta<V>(BreweryKey key, Class<V> vClass, V defaultValue) 
         return "StructureMeta(" + key + ")";
     }
 
-    private static BlockMatcherReplacement deserializeReplacement(JsonElement element) {
-        JsonElement original = element.getAsJsonObject().get("original");
-        Holder.Material originalHolder = HolderProviderHolder.instance().material(original.getAsString())
-                .orElseThrow(() -> new IllegalArgumentException("Expected a valid material, got: " + original.getAsString()));
-        JsonElement replacement = element.getAsJsonObject().get("replacement");
-        if (replacement.isJsonArray()) {
-            return new BlockMatcherReplacement(
-                    replacement.getAsJsonArray().asList().stream()
-                            .map(JsonElement::getAsString)
-                            .flatMap(StructureMeta::parseMaterials)
-                            .collect(Collectors.toUnmodifiableSet()),
-                    originalHolder
-            );
-        }
-        return new BlockMatcherReplacement(parseMaterials(replacement.getAsString()).collect(Collectors.toUnmodifiableSet()), originalHolder);
-    }
 
-    private static Stream<Holder.Material> parseMaterials(String string) {
-        if (string.startsWith("#")) {
-            return HolderProviderHolder.instance().parseTag(string.replaceFirst("#", "")).stream();
-        }
-        return HolderProviderHolder.instance().material(string).stream();
-    }
 }

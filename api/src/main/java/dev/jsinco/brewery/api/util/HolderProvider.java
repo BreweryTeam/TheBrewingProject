@@ -6,11 +6,11 @@ import java.util.UUID;
 
 public interface HolderProvider {
 
-    Optional<Holder.Material> material(String materialString);
+    Optional<Holder.Material> material(BreweryKey materialString);
 
     Optional<Holder.Player> player(UUID playerUuid);
 
     Optional<Holder.World> world(UUID worldUuid);
 
-    Set<Holder.Material> parseTag(String tagString);
+    Set<Holder.Material> parseTag(BreweryKey tagString);
 }
