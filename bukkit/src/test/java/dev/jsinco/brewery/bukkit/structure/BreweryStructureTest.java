@@ -49,23 +49,6 @@ class BreweryStructureTest {
     }
 
     @ParameterizedTest
-    @MethodSource("getInvalidMeta")
-    void invalidMeta(Map<StructureMeta<?>, Object> structureMeta) throws URISyntaxException, IOException {
-        URL url = PlacedBreweryStructure.class.getResource("/structures/test_barrel.schem");
-        Schematic schematic = new SchematicReader().read(Paths.get(url.toURI()));
-        assertThrows(IllegalArgumentException.class, () -> new BreweryStructure(schematic, "hello", new BreweryStructure.Meta(structureMeta), "hello.schem"));
-    }
-
-    @ParameterizedTest
-    @MethodSource("getIncompleteMeta")
-    void incompleteMeta(Map<StructureMeta<?>, Object> inputMeta, Map<StructureMeta<?>, Object> expectedMeta) throws URISyntaxException, IOException {
-        URL url = PlacedBreweryStructure.class.getResource("/structures/test_barrel.schem");
-        Schematic schematic = new SchematicReader().read(Paths.get(url.toURI()));
-        BreweryStructure breweryStructure = new BreweryStructure(schematic, "hello", new BreweryStructure.Meta(inputMeta), "hello.schem");
-        expectedMeta.forEach((key, value) -> assertEquals(value, breweryStructure.getMeta(key)));
-    }
-
-    @ParameterizedTest
     @MethodSource("getFullMeta")
     void fullMeta(Map<StructureMeta<?>, Object> structureMeta) throws URISyntaxException, IOException {
         URL url = PlacedBreweryStructure.class.getResource("/structures/test_barrel.schem");

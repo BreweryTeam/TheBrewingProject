@@ -7,6 +7,7 @@ import eu.okaeri.configs.serdes.OkaeriSerdesPack;
 import eu.okaeri.configs.yaml.snakeyaml.YamlSnakeYamlConfigurer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -15,11 +16,13 @@ import org.mockbukkit.mockbukkit.MockBukkitInject;
 import org.mockbukkit.mockbukkit.ServerMock;
 import org.mockbukkit.mockbukkit.world.WorldMock;
 
+import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.nio.file.*;
+import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -30,6 +33,8 @@ class StructureReaderTest {
     @MockBukkitInject
     ServerMock serverMock;
     WorldMock worldMock;
+    @TempDir
+    File tempDirectory;
 
     @BeforeEach
     void setUp() {
@@ -41,7 +46,22 @@ class StructureReaderTest {
     void fromJson_names(String pathString) throws StructureReadException, IOException, URISyntaxException {
         String structureName = pathString.replace("/structures/", "").replace(".json", "");
         URL url = PlacedBreweryStructure.class.getResource(pathString);
-        Path path = Paths.get(url.toURI());
+        BreweryStructure structure;
+        File jsonFile = new File(tempDirectory, "structure.json");
+        try (InputStream inputStream = PlacedBreweryStructure.class.getResourceAsStream(pathString)) {
+            Files.copy(inputStream, new File(tempDirectory, "structure.json").toPath());
+        }
+        try {
+            structure = readStructure(Paths.get(url.toURI()), jsonFile);
+        } catch (FileSystemNotFoundException e) {
+            try (FileSystem ignored = FileSystems.newFileSystem(url.toURI(), Map.of())) {
+                structure = readStructure(Paths.get(url.toURI()), jsonFile);
+            }
+        }
+        assertEquals(structureName, structure.getName());
+    }
+
+    BreweryStructure readStructure(Path internalPath, File jsonFile) {
         OkaeriSerdesPack pack = new OkaeriSerdesPackBuilder()
                 .add(new BreweryVectorSerializer())
                 .add(new BreweryVectorListSerializer())
@@ -49,15 +69,18 @@ class StructureReaderTest {
                 .add(new MaterialTagSerializer())
                 .add(new StructureMetaSerializer())
                 .add(new Vector3iSerializer())
+                .add(new MaterialsSerializer())
+                .add(new StructureTypeSerializer())
+                .add(new BlockMatcherReplacementSerializer())
+                .add(new BlockMatcherReplacementsSerializer())
                 .build();
-        BreweryStructure structure = ConfigManager.create(BreweryStructureConfig.class, it -> {
+        return ConfigManager.create(BreweryStructureConfig.class, it -> {
             it.withConfigurer(new YamlSnakeYamlConfigurer(), pack);
-            it.withBindFile(path);
+            it.withBindFile(jsonFile);
             it.withRemoveOrphans(true);
             it.saveDefaults();
-            it.load(true);
-        }).toStructure(path);
-        assertEquals(structureName, structure.getName());
+            it.load(false);
+        }).toStructure(internalPath);
     }
 
     static Stream<Arguments> getSchemFormatPaths() {

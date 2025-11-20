@@ -79,6 +79,10 @@ public class StructurePlacerUtils {
                 .add(new MaterialTagSerializer())
                 .add(new StructureMetaSerializer())
                 .add(new Vector3iSerializer())
+                .add(new MaterialsSerializer())
+                .add(new StructureTypeSerializer())
+                .add(new BlockMatcherReplacementSerializer())
+                .add(new BlockMatcherReplacementsSerializer())
                 .build();
         return ConfigManager.create(BreweryStructureConfig.class, it -> {
             it.withConfigurer(new YamlSnakeYamlConfigurer(), pack);
