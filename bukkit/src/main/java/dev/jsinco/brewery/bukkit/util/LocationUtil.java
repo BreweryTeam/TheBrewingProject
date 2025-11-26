@@ -1,6 +1,7 @@
 package dev.jsinco.brewery.bukkit.util;
 
 import dev.jsinco.brewery.api.util.Logger;
+import dev.jsinco.brewery.configuration.EventSection;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -49,8 +50,7 @@ public class LocationUtil {
             if (dx * dx + dz * dz > radius * radius) continue; // Outside circle
             int x = center.getBlockX() + dx;
             int z = center.getBlockZ() + dz;
-            Location loc = new Location(world, x + 0.5, world.getHighestBlockYAt(center), z + 0.5, center.getYaw(),  center.getPitch());
-            if (random.nextInt(4) < 3) loc.add(0, 1, 0); // 3in4 chance for surface
+            Location loc = new Location(world, x + 0.5, world.getMaxHeight(), z + 0.5, center.getYaw(), center.getPitch());
             Location candidate = safeLocationHere(loc);
             if (isSafe(candidate)) return candidate;
         }
@@ -63,7 +63,9 @@ public class LocationUtil {
         Location loc = location.clone();
         if (isSafe(loc)) return loc;
         if (loc.getWorld() == null) return null;
-        loc.setY(loc.getWorld().getHighestBlockYAt(loc) + 1);
+        loc.setY(loc.getWorld().getHighestBlockYAt(loc));
+        if (ThreadLocalRandom.current().nextInt(100) >=
+                EventSection.events().undergroundChance()) loc.add(0, 1, 0);
         while (loc.getY() >= loc.getWorld().getMinHeight()) {
             if (isSafe(loc)) return loc;
             loc.setY(loc.getY() - 1);

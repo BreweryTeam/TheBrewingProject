@@ -1,5 +1,6 @@
 package dev.jsinco.brewery.bukkit.effect.named;
 
+import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.bukkit.api.BukkitAdapter;
 import dev.jsinco.brewery.bukkit.util.BukkitMessageUtil;
 import dev.jsinco.brewery.bukkit.util.LocationUtil;
@@ -36,7 +37,12 @@ public class TeleportNamedExecutable implements EventPropertyExecutable {
                 .ifPresent(location -> {
                     location.setPitch(player.getPitch());
                     location.setYaw(player.getYaw());
-                    player.teleportAsync(LocationUtil.safeLocationInRadius(location, Bukkit.getSpawnRadius()));
+                    if (!EventSection.events().ensureSafeLocation()) player.teleportAsync(location);
+                    else {
+                        int radius = EventSection.events().randomOffsetRadius();
+                        if (radius < 0) radius = Bukkit.getSpawnRadius();
+                        player.teleportAsync(LocationUtil.safeLocationInRadius(location, radius));
+                    }
                     MessageUtil.message(player, "tbp.events.teleport-message", BukkitMessageUtil.getPlayerTagResolver(player));
                 });
         return ExecutionResult.CONTINUE;

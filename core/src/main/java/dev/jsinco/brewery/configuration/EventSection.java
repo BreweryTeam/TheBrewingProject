@@ -60,6 +60,18 @@ public class EventSection extends OkaeriConfig {
     @CustomKey("teleport-destinations")
     private List<BreweryLocation.Uncompiled> teleportDestinations = List.of(new BreweryLocation.Uncompiled(0, 70, 0, "world"));
 
+    @Comment("Whether we should find a safe location at the requested coordinates")
+    @CustomKey("ensure-safe-location")
+    private boolean ensureSafeLocation = true;
+
+    @Comment({"Should we randomly offset target locations inside a given radius?", "Set to -1 to use the world's spawn radius"})
+    @CustomKey("random-offset-radius")
+    private int randomOffsetRadius = -1;
+
+    @Comment("How likely should it be that the target location is chosen underground? (%)")
+    @CustomKey("underground-chance")
+    private int undergroundChance = 25;
+
     @Comment("Deny joining the server if too drunk")
     @CustomKey("drunken-join-deny-event")
     private DrunkenJoinEvent drunkenJoinDeny = new DrunkenJoinEvent();
