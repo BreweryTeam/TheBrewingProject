@@ -34,6 +34,8 @@ public class TeleportNamedExecutable implements EventPropertyExecutable {
         BreweryLocation teleport = locations.get(RANDOM.nextInt(locations.size()));
         BukkitAdapter.toLocation(teleport)
                 .ifPresent(location -> {
+                    location.setPitch(player.getPitch());
+                    location.setYaw(player.getYaw());
                     player.teleportAsync(LocationUtil.safeLocationInRadius(location, Bukkit.getSpawnRadius()));
                     MessageUtil.message(player, "tbp.events.teleport-message", BukkitMessageUtil.getPlayerTagResolver(player));
                 });
