@@ -367,7 +367,7 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
     }
 
     private void saveResources() {
-        Stream.of("recipes.yml", "incomplete-recipes.yml", "locale/en-US.drunk_text.json", "locale/ru.drunk_text.json")
+        Stream.of("recipes.yml", "incomplete-recipes.yml", "locale/en-US.drunk_text.json", "locale/ru.drunk_text.json", "locale/lol-US.drunk_text.json")
                 .forEach(this::saveResourceIfNotExists);
     }
 

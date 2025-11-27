@@ -127,7 +127,7 @@
   },
   {
     "from": "lol",
-    "to": "loool",
+    "to": "lol :3",
     "alcohol": 10,
     "percentage": 80
   },
@@ -219,41 +219,41 @@
   },
   {
     "from": "$",
-    "to": "!",
+    "to": " :3",
     "alcohol": 30,
     "percentage": 40
   },
   {
-    "to": " *hic* ",
+    "to": " *meow* ",
     "alcohol": 70,
     "percentage": 80
   },
   {
-    "to": " *hic* ",
+    "to": " *meow* ",
     "alcohol": 40,
     "percentage": 15
   },
   {
     "from": " ",
-    "to": " *hic* ",
+    "to": " *meow* ",
     "alcohol": 20,
     "percentage": 5
   },
   {
     "from": "$",
-    "to": " *hic*",
+    "to": " *meow*",
     "alcohol": 50,
     "percentage": 70
   },
   {
     "from": ".{1}",
-    "to": "*burp*",
+    "to": "*hiss*",
     "alcohol": 60,
     "percentage": 3
   },
   {
     "from": ".{1}",
-    "to": "*burp*",
+    "to": "*hiss*",
     "alcohol": 80,
     "percentage": 6
   }
