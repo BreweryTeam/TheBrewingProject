@@ -1,0 +1,260 @@
+[
+  {
+    "from": "s",
+    "to": "sh",
+    "alcohol": 30,
+    "percentage": 90
+  },
+  {
+    "from": "([usoa])ch",
+    "to": "sh",
+    "alcohol": 10,
+    "percentage": 70
+  },
+  {
+    "from": "(sch|t)h",
+    "to": "hh",
+    "alcohol": 20,
+    "percentage": 60
+  },
+  {
+    "from": "th",
+    "to": "thl",
+    "alcohol": 30,
+    "percentage": 40
+  },
+  {
+    "from": "sch",
+    "to": "shk",
+    "alcohol": 40,
+    "percentage": 60
+  },
+  {
+    "from": "u",
+    "to": "uuh",
+    "percentage": 20
+  },
+  {
+    "from": "y",
+    "to": "yy",
+    "alcohol": 15,
+    "percentage": 60
+  },
+  {
+    "from": "e",
+    "to": "ee",
+    "alcohol": 15,
+    "percentage": 40
+  },
+  {
+    "from": "you",
+    "to": "u",
+    "percentage": 40
+  },
+  {
+    "from": "(u)u",
+    "to": "uo",
+    "percentage": 60
+  },
+  {
+    "from": "that",
+    "to": "taht",
+    "alcohol": 40,
+    "percentage": 20
+  },
+  {
+    "from": "p",
+    "to": "b",
+    "percentage": 30
+  },
+  {
+    "from": "p",
+    "to": "b",
+    "alcohol": 60,
+    "percentage": 70
+  },
+  {
+    "from": "up",
+    "to": "ubb",
+    "alcohol": 25,
+    "percentage": 80
+  },
+  {
+    "from": "o",
+    "to": "oh",
+    "percentage": 20
+  },
+  {
+    "from": "ei",
+    "to": "i",
+    "alcohol": 15,
+    "percentage": 30
+  },
+  {
+    "from": "b",
+    "to": "bb",
+    "alcohol": 40,
+    "percentage": 80
+  },
+  {
+    "from": "!!!!",
+    "to": "!!!!111!!!eleven!1!",
+    "alcohol": 70,
+    "percentage": 20
+  },
+  {
+    "from": "!!",
+    "to": "!!!",
+    "percentage": 90
+  },
+  {
+    "from": "drunk",
+    "to": "dhrkunn",
+    "alcohol": 65,
+    "percentage": 70
+  },
+  {
+    "from": "walk",
+    "to": "whhealhk",
+    "alcohol": 30,
+    "percentage": 80
+  },
+  {
+    "from": "wtf",
+    "to": "wft",
+    "alcohol": 40,
+    "percentage": 20
+  },
+  {
+    "from": "lol",
+    "to": "loool",
+    "alcohol": 10,
+    "percentage": 80
+  },
+  {
+    "from": "afk",
+    "to": "aafkayyy",
+    "alcohol": 30,
+    "percentage": 30
+  },
+  {
+    "from": "write",
+    "to": "wreitt",
+    "alcohol": 50,
+    "percentage": 80
+  },
+  {
+    "from": "drink",
+    "to": "booze",
+    "alcohol": 70,
+    "percentage": 80
+  },
+  {
+    "from": "\\?\\?",
+    "to": "\\?\\?\\?\\?\\?",
+    "alcohol": 40,
+    "percentage": 80
+  },
+  {
+    "from": " ",
+    "to": "",
+    "alcohol": 35,
+    "percentage": 30
+  },
+  {
+    "from": " ",
+    "to": "",
+    "percentage": 10
+  },
+  {
+    "from": "^",
+    "to": "dho",
+    "alcohol": 50,
+    "percentage": 15
+  },
+  {
+    "from": "^",
+    "to": "hhn",
+    "alcohol": 50,
+    "percentage": 10
+  },
+  {
+    "to": "lu",
+    "percentage": 10
+  },
+  {
+    "to": "lug",
+    "alcohol": 50,
+    "percentage": 10
+  },
+  {
+    "to": "blub",
+    "alcohol": 80,
+    "percentage": 20
+  },
+  {
+    "to": "lerg",
+    "alcohol": 85,
+    "percentage": 40
+  },
+  {
+    "to": "gul",
+    "alcohol": 80,
+    "percentage": 40
+  },
+  {
+    "to": " ",
+    "alcohol": 70,
+    "percentage": 100
+  },
+  {
+    "to": " ",
+    "alcohol": 40,
+    "percentage": 60
+  },
+  {
+    "to": " ",
+    "alcohol": 30,
+    "percentage": 50
+  },
+  {
+    "from": "$",
+    "to": "!",
+    "alcohol": 30,
+    "percentage": 40
+  },
+  {
+    "to": " *hic* ",
+    "alcohol": 70,
+    "percentage": 80
+  },
+  {
+    "to": " *hic* ",
+    "alcohol": 40,
+    "percentage": 15
+  },
+  {
+    "from": " ",
+    "to": " *hic* ",
+    "alcohol": 20,
+    "percentage": 5
+  },
+  {
+    "from": "$",
+    "to": " *hic*",
+    "alcohol": 50,
+    "percentage": 70
+  },
+  {
+    "from": ".{1}",
+    "to": "*burp*",
+    "alcohol": 60,
+    "percentage": 3
+  },
+  {
+    "from": ".{1}",
+    "to": "*burp*",
+    "alcohol": 80,
+    "percentage": 6
+  }
+]
