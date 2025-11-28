@@ -44,7 +44,9 @@ public class NexoIntegration implements ItemIntegration, Listener {
             return null;
         }
         return ClassUtil.<Component>invoke(itemBuilder, "getDisplayName")
-                .orElseGet(itemBuilder::getItemName);
+                .or(() -> Optional.ofNullable(itemBuilder.getCustomName()))
+                .or(() -> Optional.ofNullable(itemBuilder.getItemName()))
+                .orElseGet(() -> Component.text(itemsAdderId));
     }
 
     @Override
