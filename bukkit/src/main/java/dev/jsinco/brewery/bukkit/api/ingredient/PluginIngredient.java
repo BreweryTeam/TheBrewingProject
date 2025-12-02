@@ -4,6 +4,7 @@ import dev.jsinco.brewery.api.ingredient.Ingredient;
 import dev.jsinco.brewery.api.util.BreweryKey;
 import dev.jsinco.brewery.bukkit.api.integration.ItemIntegration;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.Style;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
@@ -25,7 +26,7 @@ public class PluginIngredient implements Ingredient {
     @Override
     public @NotNull Component displayName() {
         Component displayName = itemIntegration.displayName(key.key());
-        return displayName == null ? Component.text(key.key()) : displayName;
+        return displayName == null ? Component.text(key.key()) : displayName.style(Style.empty());
     }
 
     @Override
@@ -37,7 +38,7 @@ public class PluginIngredient implements Ingredient {
             return false;
         }
         PluginIngredient that = (PluginIngredient) o;
-        
+
         return Objects.equals(that.key, this.key) && itemIntegration == that.itemIntegration;
     }
 

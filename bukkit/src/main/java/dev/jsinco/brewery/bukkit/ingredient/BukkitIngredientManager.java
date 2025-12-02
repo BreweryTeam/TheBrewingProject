@@ -58,7 +58,7 @@ public class BukkitIngredientManager implements IngredientManager<ItemStack> {
             IllegalArgumentException {
         String[] ingredientSplit = ingredientStr.split("/");
         if (ingredientSplit.length > 2) {
-            throw new IllegalArgumentException("To many '/' separators for ingredientString, was: " + ingredientStr);
+            throw new IllegalArgumentException("Too many '/' separators for ingredientString, was: " + ingredientStr);
         }
         int amount;
         if (ingredientSplit.length == 1) {
