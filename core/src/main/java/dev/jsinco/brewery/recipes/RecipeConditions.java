@@ -1,32 +1,23 @@
 package dev.jsinco.brewery.recipes;
 
 import dev.jsinco.brewery.api.brew.BrewingStep;
-import dev.jsinco.brewery.api.brew.ScoreType;
-import dev.jsinco.brewery.api.ingredient.Ingredient;
 import dev.jsinco.brewery.api.recipe.RecipeCondition;
+import dev.jsinco.brewery.api.recipe.ScoreCondition;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
-import java.util.Map;
 
 public class RecipeConditions {
 
-
-    public static class NoCondition implements RecipeCondition {
-
-        @Override
-        public boolean matches(@Nullable List<BrewingStep> expected, List<BrewingStep> actual) {
-            return true;
+    static @Nullable BrewingStep sanitizeExpected(@Nullable List<BrewingStep> expected, int index) {
+        if (expected == null) {
+            return null;
         }
-
-        @Override
-        public int complexity() {
-            return 0;
-        }
+        return expected.size() > index ? expected.get(index) : null;
     }
 
-    public record LastStep(BrewingStep.StepType stepType,
-                           List<ScoreCondition> conditions) implements RecipeCondition {
+    public record LastStepImpl(BrewingStep.StepType stepType,
+                               List<ScoreCondition> conditions) implements RecipeCondition.LastStep {
 
         @Override
         public boolean matches(@Nullable List<BrewingStep> expected, List<BrewingStep> actual) {
@@ -37,7 +28,10 @@ public class RecipeConditions {
                 return false;
             }
             return conditions().stream()
-                    .allMatch(scoreCondition -> scoreCondition.matches(expected == null ? null : expected.get(Math.min(actual.size(), expected.size()) - 1), actual.getLast()));
+                    .allMatch(scoreCondition -> scoreCondition.matches(
+                            sanitizeExpected(expected, actual.size() - 1),
+                            actual.getLast()
+                    ));
         }
 
         @Override
@@ -46,77 +40,83 @@ public class RecipeConditions {
         }
     }
 
-    public interface ScoreCondition {
-
-        boolean matches(@Nullable BrewingStep expected, BrewingStep actual);
-    }
-
-    public record SingletonCondition(AmountCondition amountCondition, ScoreType type) implements ScoreCondition {
+    public record ExactStepImpl(BrewingStep.StepType stepType, List<ScoreCondition> conditions,
+                                int index) implements RecipeCondition.ExactStep {
 
         @Override
-        public boolean matches(@Nullable BrewingStep expected, BrewingStep actual) {
-            if (expected != null && expected.getClass() != actual.getClass()) {
+        public boolean matches(@Nullable List<BrewingStep> expected, List<BrewingStep> actual) {
+            if (actual.isEmpty()) {
                 return false;
             }
-            return switch (type) {
-                case TIME -> actual instanceof BrewingStep.TimedStep actualTime
-                        && amountCondition.matches(actualTime.time().moment(), expected == null ? -1D : ((BrewingStep.TimedStep) expected).time().moment());
-                case INGREDIENTS, BARREL_TYPE -> false; // Unimplemented
-                case DISTILL_AMOUNT -> expected instanceof BrewingStep.Distill expectedDistill
-                        && actual instanceof BrewingStep.Distill actualDistill
-                        && amountCondition.matches(actualDistill.runs(), expectedDistill.runs());
-            };
+            if (actual.size() <= index) {
+                return false;
+            }
+            if (actual.get(index).stepType() != stepType) {
+                return false;
+            }
+            return conditions().stream()
+                    .allMatch(scoreCondition -> scoreCondition.matches(
+                            sanitizeExpected(expected, index),
+                            actual.get(index)
+                    ));
         }
-    }
 
-    public record IngredientsCondition(Map<Ingredient, AmountCondition> conditions) implements ScoreCondition {
         @Override
-        public boolean matches(@Nullable BrewingStep expected, BrewingStep actual) {
-            if (!(actual instanceof BrewingStep.IngredientsStep actualIngredients)) {
-                return false;
-            }
-            for (Map.Entry<Ingredient, AmountCondition> condition : conditions.entrySet()) {
-                int actualAmount = actualIngredients.ingredients().getOrDefault(condition.getKey(), -1);
-                if (!(expected instanceof BrewingStep.IngredientsStep expectedIngredients)) {
-                    if (condition.getValue() != AmountCondition.ANY) {
-                        return false;
-                    }
-                    continue;
-                }
-                int expectedAmount = expectedIngredients.ingredients().getOrDefault(condition.getKey(), -1);
-                if (actualAmount == -1) {
-                    return false;
-                }
-                if (expectedAmount == -1) {
-                    if (condition.getValue() != AmountCondition.ANY) {
-                        return false;
-                    }
-                    continue;
-                }
-                if (!condition.getValue().matches(actualAmount, expectedAmount)) {
-                    return false;
-                }
-            }
-            return true;
+        public int complexity() {
+            return 1 + conditions.size();
         }
     }
 
-    public enum AmountCondition {
-        EXCESSIVE,
-        LACKING,
-        ANY;
+    public record AnyStepImpl(BrewingStep.StepType stepType,
+                          List<ScoreCondition> conditions) implements RecipeCondition.AnyStep {
 
-        public boolean matches(double value, double expected) {
-            if (this == ANY) {
-                return true;
-            }
-            if (expected == -1D) {
+
+        @Override
+        public boolean matches(@Nullable List<BrewingStep> expected, List<BrewingStep> actual) {
+            if (actual.isEmpty()) {
                 return false;
             }
-            if (this == LACKING) {
-                return value < expected;
+            for (int i = 0; i < actual.size(); i++) {
+                final int index = i;
+                if (actual.get(index).stepType() == stepType && conditions.stream()
+                        .allMatch(scoreCondition -> scoreCondition.matches(
+                                sanitizeExpected(expected, index),
+                                actual.get(index)
+                        ))
+                ) {
+                    return true;
+                }
             }
-            return value > expected;
+            return false;
+        }
+
+        @Override
+        public int complexity() {
+            return 1 + conditions.size();
         }
     }
+
+    public record FirstStepImpl(BrewingStep.StepType stepType, List<ScoreCondition> conditions) implements RecipeCondition.FirstStep {
+
+        @Override
+        public boolean matches(@Nullable List<BrewingStep> expected, List<BrewingStep> actual) {
+            if (actual.isEmpty()) {
+                return false;
+            }
+            if (actual.getFirst().stepType() != stepType) {
+                return false;
+            }
+            return conditions().stream()
+                    .allMatch(scoreCondition -> scoreCondition.matches(
+                            sanitizeExpected(expected, 0),
+                            actual.getFirst()
+                    ));
+        }
+
+        @Override
+        public int complexity() {
+            return 1 + conditions.size();
+        }
+    }
+
 }
