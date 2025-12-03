@@ -28,6 +28,9 @@ public class RecipeConditionsReader {
     public static CompletableFuture<List<RecipeCondition>> fromConfigSection(ConfigurationSection section, IngredientManager<?> ingredientManager) {
         List<CompletableFuture<RecipeCondition>> recipeConditionFutures = new ArrayList<>();
         for (String stepKey : section.getKeys(false)) {
+            if (!section.isConfigurationSection(stepKey)) {
+                continue;
+            }
             ConfigurationSection configurationSection = section.getConfigurationSection(stepKey);
             Preconditions.checkArgument(configurationSection.contains("type"), "Unspecified step type for final-step");
             List<CompletableFuture<ScoreCondition>> scoreConditions = new ArrayList<>();

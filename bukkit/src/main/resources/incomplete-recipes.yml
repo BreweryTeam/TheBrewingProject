@@ -51,6 +51,32 @@ incomplete-recipes:
         type: cook
         ingredients:
           - apple/any
+  distilled_apples:
+    name: "Distilled Apple brew"
+    color: red
+    lore:
+      - <gray>With a hint of apple
+    condition:
+      for-ruined-brews: false
+      first-step:
+        type: cook
+        ingredients:
+          - apple/any
+      final-step:
+        type: distill
+  aged_apples:
+    name: "Aged Apple Brew"
+    color: red
+    lore:
+      - <gray>With a fresh aroma
+    condition:
+      for-ruined-brews: false
+      first-step:
+        type: cook
+        ingredients:
+          - apple/any
+      final-step:
+        type: age
   undermixed_brew:
     name: "Unevenly mixed brew"
     color: "gray"
