@@ -1,15 +1,15 @@
 package dev.jsinco.brewery.bukkit.integration;
 
+import dev.jsinco.brewery.api.integration.Integration;
+import dev.jsinco.brewery.api.integration.IntegrationManager;
+import dev.jsinco.brewery.api.integration.IntegrationType;
+import dev.jsinco.brewery.api.util.Logger;
 import dev.jsinco.brewery.bukkit.api.integration.IntegrationTypes;
 import dev.jsinco.brewery.bukkit.integration.chest_shop.QuickShopHikariIntegration;
 import dev.jsinco.brewery.bukkit.integration.item.*;
 import dev.jsinco.brewery.bukkit.integration.placeholder.MiniPlaceholdersIntegration;
 import dev.jsinco.brewery.bukkit.integration.placeholder.PlaceholderApiIntegration;
 import dev.jsinco.brewery.bukkit.integration.structure.*;
-import dev.jsinco.brewery.api.integration.Integration;
-import dev.jsinco.brewery.api.integration.IntegrationManager;
-import dev.jsinco.brewery.api.integration.IntegrationType;
-import dev.jsinco.brewery.api.util.Logger;
 import lombok.Getter;
 
 import java.util.Set;
@@ -25,6 +25,7 @@ public class IntegrationManagerImpl implements IntegrationManager {
         register(IntegrationTypes.STRUCTURE, new HuskClaimsIntegration());
         register(IntegrationTypes.STRUCTURE, new LandsIntegration());
         register(IntegrationTypes.STRUCTURE, new TownyIntegration());
+        register(IntegrationTypes.STRUCTURE, new GriefDefenderIntegration());
         register(IntegrationTypes.ITEM, new CraftEngineIntegration());
         register(IntegrationTypes.ITEM, new ItemsAdderIntegration());
         register(IntegrationTypes.ITEM, new NexoIntegration());
