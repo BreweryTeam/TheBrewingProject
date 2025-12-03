@@ -68,8 +68,9 @@ public class BrewAdapter {
         } else if (!score.map(BrewScore::completed).get()) {
             Optional<DefaultRecipe<ItemStack>> defaultRecipeOptional = recipeRegistry.getDefaultRecipes().stream()
                     .filter(defaultRecipe -> !defaultRecipe.onlyRuinedBrews())
-                    .filter(defaultRecipe -> defaultRecipe.recipeCondition().matches(recipe.get().getSteps(), brew.getCompletedSteps()))
-                    .findAny();
+                    .filter(defaultRecipe -> defaultRecipe.recipeConditions().stream()
+                            .allMatch(recipeCondition -> recipeCondition.matches(recipe.get().getSteps(), brew.getCompletedSteps())))
+                    .max(Comparator.comparing(DefaultRecipe::complexity));
             itemStack = defaultRecipeOptional.map(DefaultRecipe::result).map(result -> result.newBrewItem(score.get(), brew, state)).orElse(
                     incompletePotion(brew)
             );
@@ -127,39 +128,26 @@ public class BrewAdapter {
     }
 
     private static ItemStack fromDefaultRecipe(Optional<Recipe<ItemStack>> recipe, RecipeRegistryImpl<ItemStack> recipeRegistry, Brew brew, Brew.State state) {
-        List<DefaultRecipe<ItemStack>> defaultRecipes = recipeRegistry.getDefaultRecipes()
-                .stream().filter(DefaultRecipe::onlyRuinedBrews)
-                .filter(defaultRecipe ->
-                        defaultRecipe.recipeCondition().complexity() > 1 && defaultRecipe.recipeCondition().matches(recipe.map(Recipe::getSteps).orElse(null), brew.getCompletedSteps())
-                )
+        List<DefaultRecipe<ItemStack>> allDefaultRecipes = new ArrayList<>(recipeRegistry.getDefaultRecipes());
+        Collections.shuffle(allDefaultRecipes);
+        List<DefaultRecipe<ItemStack>> defaultRecipes = allDefaultRecipes
+                .stream()
+                .filter(DefaultRecipe::onlyRuinedBrews)
+                .filter(defaultRecipe -> defaultRecipe.recipeConditions().stream().allMatch(recipeCondition ->
+                        recipeCondition.matches(recipe.map(Recipe::getSteps).orElse(null), brew.getCompletedSteps())))
+                .sorted(Comparator.comparing(DefaultRecipe::complexity))
                 .toList();
-        if (defaultRecipes.isEmpty()) {
-            defaultRecipes = recipeRegistry.getDefaultRecipes()
-                    .stream().filter(DefaultRecipe::onlyRuinedBrews)
-                    .filter(defaultRecipe ->
-                            defaultRecipe.recipeCondition().complexity() > 0 && defaultRecipe.recipeCondition().matches(recipe.map(Recipe::getSteps).orElse(null), brew.getCompletedSteps())
-                    )
-                    .toList();
-        }
-        if (defaultRecipes.isEmpty()) {
-            defaultRecipes = recipeRegistry.getDefaultRecipes()
-                    .stream().filter(DefaultRecipe::onlyRuinedBrews)
-                    .filter(defaultRecipe ->
-                            defaultRecipe.recipeCondition().complexity() == 0
-                    )
-                    .toList();
-        }
         if (defaultRecipes.isEmpty()) {
             ItemStack itemStack = new ItemStack(Material.POTION);
             itemStack.setData(DataComponentTypes.CUSTOM_NAME, Component.text("Placeholder"));
             itemStack.setData(DataComponentTypes.LORE, ItemLore.lore(
                     List.of(Component.text("you don't have any default/incomplete recipes!"),
-                            Component.text("Contact admin, or if your admin look into incomplete-recipes.yml"))
+                            Component.text("Contact admin, or if you're admin look into incomplete-recipes.yml"))
             ));
             return itemStack;
         }
 
-        return defaultRecipes.get(RANDOM.nextInt(defaultRecipes.size())).result().newBrewItem(BrewScoreImpl.PLACEHOLDER, brew, state);
+        return defaultRecipes.getLast().result().newBrewItem(BrewScoreImpl.PLACEHOLDER, brew, state);
     }
 
     public static void applyBrewStepsData(PersistentDataContainer pdc, Brew brew) {

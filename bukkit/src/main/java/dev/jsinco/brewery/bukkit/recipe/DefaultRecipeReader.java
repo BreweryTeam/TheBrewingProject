@@ -1,10 +1,10 @@
 package dev.jsinco.brewery.bukkit.recipe;
 
 import dev.jsinco.brewery.api.recipe.DefaultRecipe;
+import dev.jsinco.brewery.api.recipe.RecipeCondition;
 import dev.jsinco.brewery.api.util.Logger;
 import dev.jsinco.brewery.bukkit.ingredient.BukkitIngredientManager;
 import dev.jsinco.brewery.bukkit.util.ColorUtil;
-import dev.jsinco.brewery.recipes.RecipeConditions;
 import dev.jsinco.brewery.recipes.RecipeConditionsReader;
 import org.bukkit.inventory.ItemStack;
 import org.simpleyaml.configuration.ConfigurationSection;
@@ -13,6 +13,7 @@ import org.simpleyaml.configuration.file.YamlFile;
 import java.io.File;
 import java.nio.file.Path;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
@@ -37,14 +38,18 @@ public class DefaultRecipeReader {
         for (String recipeName : recipesSection.getKeys(false)) {
             try {
                 BukkitRecipeResult bukkitRecipeResult = getDefaultRecipe(recipesSection.getConfigurationSection(recipeName));
-                recipes.put(recipeName, (!recipesSection.isConfigurationSection(recipeName + ".condition") ?
-                        CompletableFuture.completedFuture(new RecipeConditions.NoCondition()) :
-                        RecipeConditionsReader.fromConfigSection(recipesSection.getConfigurationSection(recipeName + ".condition"), BukkitIngredientManager.INSTANCE)
-                ).thenApplyAsync(recipeConditions -> new DefaultRecipe<>(
-                        bukkitRecipeResult,
-                        recipeConditions,
-                        recipesSection.getBoolean(recipeName + ".condition.for-ruined-brews", true)
-                )));
+                CompletableFuture<List<RecipeCondition>> recipeConditionsFuture;
+                if (!recipesSection.isConfigurationSection(recipeName + ".condition")) {
+                    recipeConditionsFuture = CompletableFuture.completedFuture(List.of());
+                } else {
+                    recipeConditionsFuture = RecipeConditionsReader.fromConfigSection(recipesSection.getConfigurationSection(recipeName + ".condition"), BukkitIngredientManager.INSTANCE);
+                }
+                recipes.put(recipeName, recipeConditionsFuture.thenApplyAsync(recipeConditions -> new DefaultRecipe<>(
+                                bukkitRecipeResult,
+                                recipeConditions,
+                                recipesSection.getBoolean(recipeName + ".condition.for-ruined-brews", true)
+                        )
+                ));
             } catch (Throwable e) {
                 Logger.logErr("Could not read default recipe: " + recipeName);
                 Logger.logErr(e);
