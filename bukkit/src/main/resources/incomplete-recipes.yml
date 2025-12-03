@@ -9,12 +9,12 @@
 # glint : Boolean
 incomplete-recipes:
   ruined_brew:
-    name: 'Ruined brew'
+    name: 'Ruined Brew'
     color: 'gray'
     lore:
       - "<gray>I don't think it's drinkable"
   overcooked_wash:
-    name: "Burnt wash"
+    name: "Burnt Wash"
     color: "gray"
     lore:
       - <gray>With a bitter taste
@@ -23,7 +23,7 @@ incomplete-recipes:
         type: cook
         cook-time: excessive
   undercooked_wash:
-    name: "Raw wash"
+    name: "Raw Wash"
     color: "gray"
     lore:
       - <gray>Watery blend with many chunks at the bottom
@@ -32,7 +32,7 @@ incomplete-recipes:
         type: cook
         cook-time: lacking
   ruined_wash:
-    name: "Ruined wash"
+    name: "Ruined Wash"
     color: "gray"
     lore:
       - <gray>Has an awful smell that makes
@@ -52,7 +52,7 @@ incomplete-recipes:
         ingredients:
           - apple/any
   distilled_apples:
-    name: "Distilled Apple brew"
+    name: "Distilled Apple Brew"
     color: red
     lore:
       - <gray>With a hint of apple
@@ -78,7 +78,7 @@ incomplete-recipes:
       final-step:
         type: age
   undermixed_brew:
-    name: "Unevenly mixed brew"
+    name: "Unevenly Mixed Brew"
     color: "gray"
     lore:
       - <gray>Sour on the top, and sweet at the bottom
@@ -87,7 +87,7 @@ incomplete-recipes:
         type: mix
         mix-time: lacking
   overmixed_brew:
-    name: "Overmixed brew"
+    name: "Overmixed Brew"
     color: "gray"
     lore:
       - <gray>One monotonous blend
@@ -96,7 +96,7 @@ incomplete-recipes:
         type: mix
         mix-time: excessive
   ruined_mix:
-    name: "Ruined mixture"
+    name: "Ruined Mixture"
     color: "gray"
     lore:
       - <gray>A heterogeneous mixture.
@@ -104,7 +104,7 @@ incomplete-recipes:
       final-step:
         type: mix
   odorless_distillate:
-    name: "Odorless distillate"
+    name: "Odorless Distillate"
     color: "white"
     lore:
       - <gray>Stripped from all its features
@@ -114,7 +114,7 @@ incomplete-recipes:
         type: distill
         runs: excessive
   ruined_distillate:
-    name: "Ruined distillate"
+    name: "Ruined Distillate"
     color: "gray"
     lore:
       - <gray>Has an unappetizing synthetic smell
@@ -122,7 +122,7 @@ incomplete-recipes:
       final-step:
         type: distill
   murky_vinegar:
-    name: "Murky vinegar"
+    name: "Murky Vinegar"
     color: "gray"
     lore:
       - <gray>With a weak acidic smell
@@ -131,7 +131,7 @@ incomplete-recipes:
         type: age
         age-years: excessive
   aged_ruined_brew:
-    name: "Aged ruined brew"
+    name: "Aged Ruined Brew"
     color: "gray"
     lore:
       - <gray>At least it's aged
