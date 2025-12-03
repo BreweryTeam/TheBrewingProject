@@ -253,7 +253,8 @@ bukkit {
         "MMOItems",
         "MythicMobs",
         "MiniPlaceholders",
-        "QuickShop"
+        "QuickShop",
+        "GriefDefender"
     )
 }
 
