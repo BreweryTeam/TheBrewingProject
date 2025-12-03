@@ -30,6 +30,7 @@ worldguard = "7.0.14"
 quickshop = "6.2.0.10"
 mythic = "5.10.1"
 mythic-crucible = "2.2.0-SNAPSHOT"
+griefdefender = "2.1.1-SNAPSHOT"
 
 # other
 jetbrainsAnnotations = "26.0.2-1"
@@ -78,7 +79,7 @@ worldguard-bukkit = { group = "com.sk89q.worldguard", name = "worldguard-bukkit"
 quickshop-hikari = { group = "com.ghostchu", name = "quickshop-api", version.ref = "quickshop" }
 mythic = { group = "io.lumine", name = "Mythic-Dist", version.ref = "mythic" }
 mythic-crucible = { group = "io.lumine", name = "MythicCrucible-Dist", version.ref = "mythic-crucible" }
-
+griefdefender = {group = "com.griefdefender", name = "api", version.ref = "griefdefender"}
 # other
 jetbrains-annotations = { group = "org.jetbrains", name = "annotations", version.ref = "jetbrainsAnnotations" }
 lombok = { group = "org.projectlombok", name = "lombok", version.ref = "lombok" }

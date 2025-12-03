@@ -71,6 +71,7 @@ dependencies {
     compileOnly(libs.quickshop.hikari)
     compileOnly(libs.mythic)
     compileOnly(libs.mythic.crucible)
+    compileOnly(libs.griefdefender)
 
     // other
     compileOnly(libs.jetbrains.annotations)
