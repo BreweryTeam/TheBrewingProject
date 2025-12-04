@@ -1,4 +1,4 @@
-package dev.jsinco.brewery.bukkit.event;
+package dev.jsinco.brewery.bukkit.listener;
 
 import org.bukkit.Input;
 import org.bukkit.event.EventHandler;

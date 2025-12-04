@@ -4,12 +4,13 @@ import dev.jsinco.brewery.api.brew.Brew;
 import dev.jsinco.brewery.bukkit.breweries.BukkitCauldron;
 import lombok.Getter;
 import lombok.Setter;
-import org.bukkit.event.Event;
+import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-public class CauldronExtractEvent extends Event {
+public class CauldronExtractEvent extends PermissibleBreweryEvent implements ItemModifiableEvent {
 
     @Getter
     private final BukkitCauldron cauldron;
@@ -19,7 +20,7 @@ public class CauldronExtractEvent extends Event {
     @Setter
     private ItemStack itemRepresentation;
 
-    public CauldronExtractEvent(BukkitCauldron cauldron, Brew brew, ItemStack itemStack) {
+    public CauldronExtractEvent(BukkitCauldron cauldron, Brew brew, ItemStack itemStack, @Nullable Player player) {
         this.cauldron = cauldron;
         this.brew = brew;
         this.itemRepresentation = itemStack;

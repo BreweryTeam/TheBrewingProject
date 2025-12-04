@@ -4,12 +4,13 @@ import dev.jsinco.brewery.api.brew.Brew;
 import dev.jsinco.brewery.bukkit.breweries.distillery.BukkitDistillery;
 import lombok.Getter;
 import lombok.Setter;
-import org.bukkit.event.Event;
+import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-public class DistilleryExtractEvent extends Event {
+public class DistilleryExtractEvent extends PermissibleBreweryEvent implements ItemModifiableEvent {
 
     private static final HandlerList HANDLERS = new HandlerList();
     @Getter
@@ -17,14 +18,17 @@ public class DistilleryExtractEvent extends Event {
     @Getter
     private final Brew brew;
     @Getter
+    private final @Nullable Player player;
+    @Getter
     @Setter
     private ItemStack itemRepresentation;
 
 
-    public DistilleryExtractEvent(BukkitDistillery distillery, Brew brew, ItemStack itemStack) {
+    public DistilleryExtractEvent(BukkitDistillery distillery, Brew brew, ItemStack itemStack, @Nullable Player player) {
         this.distillery = distillery;
         this.brew = brew;
         this.itemRepresentation = itemStack;
+        this.player = player;
     }
 
     @Override
