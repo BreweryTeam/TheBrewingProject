@@ -363,6 +363,9 @@ hangarPublish {
                     url("MythicMobs", "https://modrinth.com/plugin/mythicmobs/version/5.8.2") {
                         required = false
                     }
+                    url("GriefDefender", "https://www.spigotmc.org/resources/68900/") {
+                        required = false
+                    }
                 }
             }
         }
