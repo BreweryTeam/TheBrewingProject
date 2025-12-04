@@ -1,6 +1,8 @@
 package dev.jsinco.brewery.bukkit.api.event;
 
 import dev.jsinco.brewery.api.brew.Brew;
+import dev.jsinco.brewery.bukkit.api.transaction.ItemSource;
+import dev.jsinco.brewery.bukkit.api.transaction.ItemTransactionSession;
 import dev.jsinco.brewery.bukkit.breweries.barrel.BukkitBarrel;
 import lombok.Getter;
 import lombok.Setter;
@@ -10,7 +12,7 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class BarrelInsertEvent extends PermissibleBreweryEvent implements BrewModifiableEvent {
+public class BarrelInsertEvent extends PermissibleBreweryEvent implements ItemTransactionEvent<ItemSource.BrewBasedSource> {
 
     private static final HandlerList HANDLERS = new HandlerList();
     @Getter
@@ -18,16 +20,12 @@ public class BarrelInsertEvent extends PermissibleBreweryEvent implements BrewMo
     @Getter
     private final @Nullable Player player;
     @Getter
-    @Setter
-    private Brew brew;
-    @Getter
-    private final ItemStack itemRepresentation;
+    private final ItemTransactionSession<ItemSource.BrewBasedSource> transactionSession;
 
 
-    public BarrelInsertEvent(BukkitBarrel barrel, Brew brew, ItemStack itemRepresentation, @Nullable Player player) {
+    public BarrelInsertEvent(BukkitBarrel barrel, ItemTransactionSession<ItemSource.BrewBasedSource> transactionSession, @Nullable Player player) {
         this.barrel = barrel;
-        this.brew = brew;
-        this.itemRepresentation = itemRepresentation;
+        this.transactionSession = transactionSession;
         this.player = player;
     }
 

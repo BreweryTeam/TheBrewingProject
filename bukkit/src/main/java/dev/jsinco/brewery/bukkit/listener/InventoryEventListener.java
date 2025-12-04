@@ -1,25 +1,22 @@
 package dev.jsinco.brewery.bukkit.listener;
 
 import dev.jsinco.brewery.api.brew.Brew;
-import dev.jsinco.brewery.api.breweries.InventoryAccessible;
 import dev.jsinco.brewery.brew.BrewImpl;
-import dev.jsinco.brewery.bukkit.api.event.BarrelInsertEvent;
-import dev.jsinco.brewery.bukkit.api.event.BrewModifiableEvent;
-import dev.jsinco.brewery.bukkit.api.event.ItemModifiableEvent;
-import dev.jsinco.brewery.bukkit.api.event.PermissibleBreweryEvent;
+import dev.jsinco.brewery.api.breweries.InventoryAccessible;
 import dev.jsinco.brewery.bukkit.brew.BrewAdapter;
 import dev.jsinco.brewery.bukkit.breweries.BreweryRegistry;
-import dev.jsinco.brewery.bukkit.breweries.barrel.BukkitBarrel;
-import dev.jsinco.brewery.bukkit.breweries.distillery.BukkitDistillery;
 import dev.jsinco.brewery.bukkit.effect.named.PukeNamedExecutable;
 import dev.jsinco.brewery.configuration.Config;
 import dev.jsinco.brewery.database.sql.Database;
-import org.bukkit.entity.HumanEntity;
-import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.inventory.*;
+import org.bukkit.event.inventory.ClickType;
+import org.bukkit.event.inventory.InventoryAction;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryDragEvent;
+import org.bukkit.event.inventory.InventoryMoveItemEvent;
+import org.bukkit.event.inventory.InventoryPickupItemEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
@@ -37,9 +34,6 @@ public class InventoryEventListener implements Listener {
     private static final Set<InventoryAction> CLICKED_INVENTORY_ITEM_MOVE = Set.of(InventoryAction.PLACE_SOME,
             InventoryAction.PLACE_ONE, InventoryAction.PLACE_ALL, InventoryAction.PICKUP_ALL, InventoryAction.PICKUP_HALF,
             InventoryAction.PICKUP_SOME, InventoryAction.PICKUP_ONE);
-    private static final Set<InventoryAction> CURSOR_PICKUP = Set.of(
-            InventoryAction.PICKUP_ONE, InventoryAction.PICKUP_ALL, InventoryAction.PICKUP_HALF, InventoryAction.PICKUP_SOME
-    );
 
     public InventoryEventListener(BreweryRegistry registry, Database database) {
         this.registry = registry;
@@ -70,8 +64,6 @@ public class InventoryEventListener implements Listener {
 
         ItemStack hoveredItem = event.getCurrentItem();
         Stream<ItemStack> relatedItems;
-        ItemStack insertedItem = null;
-        ItemStack extractedItem = null;
         if (upperInventoryIsClicked && hoveredItem != null) {
             BrewAdapter.fromItem(hoveredItem)
                     .map(brew -> BrewAdapter.toItem(brew, new BrewImpl.State.Other()))
@@ -80,74 +72,24 @@ public class InventoryEventListener implements Listener {
         if (action == InventoryAction.MOVE_TO_OTHER_INVENTORY) {
             // player takes something out
             if (upperInventoryIsClicked && hotbarItem == null) {
-                if (triggerExtractEvent(inventoryAccessible, event.getWhoClicked(), false, hoveredItem)) {
-                    event.setResult(Event.Result.DENY);
-                }
                 return;
             }
-            extractedItem = hoveredItem;
-            insertedItem = hotbarItem;
             relatedItems = Stream.of(hotbarItem, hoveredItem);
         } else if (action == InventoryAction.HOTBAR_SWAP) {
             // barrel not involved
             if (!upperInventoryIsClicked) {
                 return;
             }
-            extractedItem = hoveredItem;
-            insertedItem = hotbarItem;
             relatedItems = Stream.of(hotbarItem, hoveredItem);
         } else {
             ItemStack cursor = event.getCursor();
             relatedItems = Stream.of(cursor);
-            if (CURSOR_PICKUP.contains(action)) {
-                extractedItem = cursor;
-            } else {
-                insertedItem = cursor;
-            }
         }
         Stream<ItemStack> itemsToCheck = relatedItems
                 .filter(Objects::nonNull)
                 .filter(item -> !item.getType().isAir());
-        boolean cancelled = itemsToCheck.anyMatch(item -> !inventoryAccessible.inventoryAllows(event.getWhoClicked().getUniqueId(), item));
-        ItemModifiableEvent extractEvent = extractedItem != null ? triggerExtractEvent(inventoryAccessible, event.getWhoClicked(), cancelled, extractedItem) : null;
-        BrewModifiableEvent insertEvent = insertedItem != null ? triggerInsertEvent(inventoryAccessible, event.getWhoClicked(), cancelled, insertedItem) : null;
-        if ((extractEvent != null && extractEvent.isCancelled()) || (insertEvent != null && insertEvent.isCancelled())) {
+        if (itemsToCheck.anyMatch(item -> !inventoryAccessible.inventoryAllows(event.getWhoClicked().getUniqueId(), item))) {
             event.setResult(Event.Result.DENY);
-            return;
-        }
-        if (extractEvent != null) {
-
-        }
-        if (insertEvent != null) {
-
-        }
-    }
-
-    private BrewModifiableEvent triggerInsertEvent(InventoryAccessible<ItemStack, Inventory> inventoryAccessible, HumanEntity whoClicked, boolean cancelled, ItemStack insertedItem) {
-        Player player = whoClicked instanceof Player temp ? temp : null;
-        PermissibleBreweryEvent event;
-        if (inventoryAccessible instanceof BukkitBarrel barrel) {
-            event = new BarrelInsertEvent(barrel, brew);
-        }
-        if (inventoryAccessible instanceof BukkitDistillery distillery) {
-
-        }
-    }
-
-    /**
-     *
-     * @param inventoryAccessible
-     * @param whoClicked
-     * @param relatedItems
-     * @return True if event result is cancelled
-     */
-    private ItemModifiableEvent triggerExtractEvent(InventoryAccessible<ItemStack, Inventory> inventoryAccessible, HumanEntity whoClicked, boolean cancelled, ItemStack... relatedItems) {
-        Player player = whoClicked instanceof Player temp ? temp : null;
-        if (inventoryAccessible instanceof BukkitBarrel barrel) {
-
-        }
-        if (inventoryAccessible instanceof BukkitDistillery distillery) {
-
         }
     }
 
