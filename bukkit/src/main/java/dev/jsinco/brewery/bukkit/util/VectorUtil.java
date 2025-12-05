@@ -17,9 +17,9 @@ public class VectorUtil {
     public static Vector3i transform(Vector3i initial, Matrix3d transformation) {
         Vector3d transformedVector = transformation.transform(new Vector3d(initial));
         return new Vector3i(
-                (int) transformedVector.x(),
-                (int) transformedVector.y(),
-                (int) transformedVector.z()
+                (int) Math.round(transformedVector.x()),
+                (int) Math.round(transformedVector.y()),
+                (int) Math.round(transformedVector.z())
         );
     }
 
