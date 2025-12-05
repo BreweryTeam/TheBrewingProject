@@ -2,13 +2,20 @@ package dev.jsinco.brewery.bukkit.listener;
 
 import dev.jsinco.brewery.api.brew.Brew;
 import dev.jsinco.brewery.api.breweries.InventoryAccessible;
-import dev.jsinco.brewery.bukkit.api.event.ItemTransactionEvent;
+import dev.jsinco.brewery.bukkit.TheBrewingProject;
+import dev.jsinco.brewery.bukkit.api.event.*;
+import dev.jsinco.brewery.bukkit.api.transaction.ItemSource;
 import dev.jsinco.brewery.bukkit.api.transaction.ItemTransaction;
+import dev.jsinco.brewery.bukkit.api.transaction.ItemTransactionSession;
 import dev.jsinco.brewery.bukkit.brew.BrewAdapter;
 import dev.jsinco.brewery.bukkit.breweries.BreweryRegistry;
+import dev.jsinco.brewery.bukkit.breweries.barrel.BukkitBarrel;
+import dev.jsinco.brewery.bukkit.breweries.distillery.BukkitDistillery;
 import dev.jsinco.brewery.bukkit.effect.named.PukeNamedExecutable;
 import dev.jsinco.brewery.configuration.Config;
 import dev.jsinco.brewery.database.sql.Database;
+import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -19,7 +26,6 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
-import java.util.stream.Stream;
 
 public class InventoryEventListener implements Listener {
 
@@ -63,29 +69,59 @@ public class InventoryEventListener implements Listener {
         if (!upperInventoryIsClicked && CLICKED_INVENTORY_ITEM_MOVE.contains(action)) {
             return;
         }
-        List<ItemTransactionEvent<?>> transactions = compileTransactionsFromClick(event, upperInventoryIsClicked, inventoryAccessible);
-
+        List<? extends ItemTransactionEvent<?>> transactions = compileTransactionsFromClick(event, upperInventoryIsClicked, inventoryAccessible);
+        for (ItemTransactionEvent<?> transactionEvent : transactions) {
+            if (!transactionEvent.callEvent()) {
+                if (transactionEvent.isDenied()) {
+                    event.getWhoClicked().sendMessage(transactionEvent.getDenyMessage());
+                }
+                event.setResult(Event.Result.DENY);
+                return;
+            }
+        }
+        Bukkit.getScheduler().runTask(TheBrewingProject.getInstance(), () -> {
+            for (ItemTransactionEvent<?> transactionEvent : transactions) {
+                ItemTransactionSession<?> session = transactionEvent.getTransactionSession();
+                ItemTransaction transaction = session.getTransaction();
+                ItemStack itemStack = session.getResult() == null ? null : session.getResult().get();
+                if (transaction.to() instanceof ItemTransaction.Cursor) {
+                    event.getView().setCursor(itemStack);
+                }
+                if (transaction.to() instanceof ItemTransaction.RawPosition(int pos)) {
+                    event.getView().setItem(pos, itemStack);
+                }
+            }
+        });
     }
 
-    private List<ItemTransactionEvent<?>> compileTransactionsFromClick(InventoryClickEvent event, boolean upperInventoryIsClicked,
-                                                                       InventoryAccessible<ItemStack, Inventory> inventoryAccessible) {
+    private List<? extends ItemTransactionEvent<?>> compileTransactionsFromClick(InventoryClickEvent event, boolean upperInventoryIsClicked,
+                                                                                 InventoryAccessible<ItemStack, Inventory> inventoryAccessible) {
+        Player player = event.getWhoClicked() instanceof Player temp ? temp : null;
         if (event.getAction() == InventoryAction.MOVE_TO_OTHER_INVENTORY) {
             if (upperInventoryIsClicked) {
-                return eventsFromStructure(
-                        inventoryAccessible,
-                        new ItemTransaction.RawPosition(event.getRawSlot()),
-                        findEmptyPositions(event.getView(), event.getCurrentItem(), false),
-                        event.getCurrentItem(),
-                        true
-                );
+                return findEmptyPositions(event.getView(), event.getCurrentItem(), true)
+                        .stream()
+                        .map(inventoryPosition -> eventsFromStructure(
+                                inventoryAccessible,
+                                new ItemTransaction.RawPosition(event.getRawSlot()),
+                                inventoryPosition,
+                                event.getCurrentItem(),
+                                true,
+                                player
+                        ))
+                        .toList();
             } else {
-                return eventsFromStructure(
-                        inventoryAccessible,
-                        new ItemTransaction.RawPosition(event.getRawSlot()),
-                        findEmptyPositions(event.getView(), event.getCurrentItem(), true),
-                        event.getCurrentItem(),
-                        false
-                );
+                return findEmptyPositions(event.getView(), event.getCurrentItem(), true)
+                        .stream()
+                        .map(inventoryPosition -> eventsFromStructure(
+                                inventoryAccessible,
+                                new ItemTransaction.RawPosition(event.getRawSlot()),
+                                inventoryPosition,
+                                event.getCurrentItem(),
+                                false,
+                                player
+                        ))
+                        .toList();
             }
         }
         if (event.getAction() == InventoryAction.HOTBAR_SWAP) {
@@ -98,58 +134,64 @@ public class InventoryEventListener implements Listener {
             if (hotbar == -1) {
                 return List.of();
             }
-            Stream.Builder<ItemTransactionEvent<?>> eventBuilder = Stream.builder();
-            eventsFromStructure(
-                    inventoryAccessible,
-                    new ItemTransaction.RawPosition(hotbar),
-                    List.of(new ItemTransaction.RawPosition(event.getRawSlot())),
-                    event.getCurrentItem(),
-                    true
-            ).forEach(eventBuilder::add);
-            eventsFromStructure(
-                    inventoryAccessible,
-                    new ItemTransaction.RawPosition(event.getRawSlot()),
-                    List.of(new ItemTransaction.RawPosition(hotbar)),
-                    event.getView().getItem(hotbar),
-                    false
-            ).forEach(eventBuilder::add);
-            return eventBuilder.build().toList();
+            return List.of(
+                    eventsFromStructure(
+                            inventoryAccessible,
+                            new ItemTransaction.RawPosition(hotbar),
+                            new ItemTransaction.RawPosition(event.getRawSlot()),
+                            event.getCurrentItem(),
+                            true,
+                            player
+                    ),
+                    eventsFromStructure(
+                            inventoryAccessible,
+                            new ItemTransaction.RawPosition(event.getRawSlot()),
+                            new ItemTransaction.RawPosition(hotbar),
+                            event.getView().getItem(hotbar),
+                            false,
+                            player
+                    )
+            );
         }
         if (CURSOR.contains(event.getAction())) {
             if (InventoryAction.SWAP_WITH_CURSOR == event.getAction()) {
-                Stream.Builder<ItemTransactionEvent<?>> eventBuilder = Stream.builder();
-                eventsFromStructure(
-                        inventoryAccessible,
-                        new ItemTransaction.Cursor(),
-                        List.of(new ItemTransaction.RawPosition(event.getRawSlot())),
-                        event.getCursor(),
-                        true
-                ).forEach(eventBuilder::add);
-                eventsFromStructure(
-                        inventoryAccessible,
-                        new ItemTransaction.RawPosition(event.getRawSlot()),
-                        List.of(new ItemTransaction.Cursor()),
-                        event.getCurrentItem(),
-                        false
-                ).forEach(eventBuilder::add);
-                return eventBuilder.build().toList();
-            }
-            if (ITEM_PICKUP_CURSOR.contains(event.getAction())) {
-                return eventsFromStructure(
-                        inventoryAccessible,
-                        new ItemTransaction.RawPosition(event.getRawSlot()),
-                        List.of(new ItemTransaction.Cursor()),
-                        event.getCurrentItem(),
-                        false
+                return List.of(
+                        eventsFromStructure(
+                                inventoryAccessible,
+                                new ItemTransaction.Cursor(),
+                                new ItemTransaction.RawPosition(event.getRawSlot()),
+                                event.getCursor(),
+                                true,
+                                player
+                        ),
+                        eventsFromStructure(
+                                inventoryAccessible,
+                                new ItemTransaction.RawPosition(event.getRawSlot()),
+                                new ItemTransaction.Cursor(),
+                                event.getCurrentItem(),
+                                false,
+                                player
+                        )
                 );
             }
-            return eventsFromStructure(
+            if (ITEM_PICKUP_CURSOR.contains(event.getAction())) {
+                return List.of(eventsFromStructure(
+                        inventoryAccessible,
+                        new ItemTransaction.RawPosition(event.getRawSlot()),
+                        new ItemTransaction.Cursor(),
+                        event.getCurrentItem(),
+                        false,
+                        player
+                ));
+            }
+            return List.of(eventsFromStructure(
                     inventoryAccessible,
                     new ItemTransaction.Cursor(),
-                    List.of(new ItemTransaction.RawPosition(event.getRawSlot())),
+                    new ItemTransaction.RawPosition(event.getRawSlot()),
                     event.getCursor(),
-                    true
-            );
+                    true,
+                    player
+            ));
         }
         return List.of();
     }
@@ -160,17 +202,18 @@ public class InventoryEventListener implements Listener {
         }
         Inventory inventory = topInventory ? view.getTopInventory() : view.getBottomInventory();
         int amount = currentItem.getAmount();
+        int offset = topInventory ? view.getBottomInventory().getSize() : 0;
         List<ItemTransaction.InventoryPosition> positions = new ArrayList<>();
         for (int i = 0; i < inventory.getSize(); i++) {
             ItemStack item = inventory.getItem(i);
             if (item == null || item.isEmpty()) {
-                positions.add(new ItemTransaction.RawPosition(i));
+                positions.add(new ItemTransaction.RawPosition(i + offset));
                 return positions;
             }
-            if (!item.isSimilar(currentItem)) {
+            if (!item.isSimilar(currentItem) || item.getMaxStackSize() <= item.getAmount()) {
                 continue;
             }
-            positions.add(new ItemTransaction.RawPosition(i));
+            positions.add(new ItemTransaction.RawPosition(i + offset));
             amount -= item.getMaxStackSize() - item.getAmount();
             if (amount <= 0) {
                 break;
@@ -179,10 +222,40 @@ public class InventoryEventListener implements Listener {
         return positions;
     }
 
-    private static List<ItemTransactionEvent<?>> eventsFromStructure(InventoryAccessible<ItemStack, Inventory> inventoryAccessible,
-                                                                     ItemTransaction.InventoryPosition from, List<ItemTransaction.InventoryPosition> to,
-                                                                     ItemStack item, boolean insertion) {
-
+    private static ItemTransactionEvent<?> eventsFromStructure(InventoryAccessible<ItemStack, Inventory> inventoryAccessible,
+                                                               ItemTransaction.InventoryPosition from, ItemTransaction.InventoryPosition to,
+                                                               ItemStack item, boolean insertion, @Nullable Player player) {
+        ItemTransaction transaction = new ItemTransaction(from, to, item, insertion);
+        Optional<Brew> brewOptional = BrewAdapter.fromItem(item);
+        if (inventoryAccessible instanceof BukkitDistillery distillery) {
+            return insertion ? new DistilleryInsertEvent(
+                    distillery,
+                    new ItemTransactionSession<>(transaction, brewOptional
+                            .map(brew -> new ItemSource.BrewBasedSource(brew, new Brew.State.Other()))
+                            .orElse(null)
+                    ),
+                    player
+            ) : new DistilleryExtractEvent(
+                    distillery,
+                    new ItemTransactionSession<>(transaction, new ItemSource.ItemBasedSource(item)),
+                    player
+            );
+        }
+        if (inventoryAccessible instanceof BukkitBarrel barrel) {
+            return insertion ? new BarrelInsertEvent(
+                    barrel,
+                    new ItemTransactionSession<>(transaction, brewOptional
+                            .map(brew -> new ItemSource.BrewBasedSource(brew, new Brew.State.Other()))
+                            .orElse(null)
+                    ),
+                    player
+            ) : new BarrelExtractEvent(
+                    barrel,
+                    new ItemTransactionSession<>(transaction, new ItemSource.ItemBasedSource(item)),
+                    player
+            );
+        }
+        throw new IllegalStateException("Unknown structure: " + inventoryAccessible);
     }
 
     @EventHandler(ignoreCancelled = true)
