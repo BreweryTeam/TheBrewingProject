@@ -3,22 +3,26 @@ package dev.jsinco.brewery.bukkit.api.transaction;
 import com.google.common.base.Preconditions;
 import lombok.Getter;
 import lombok.Setter;
+import org.jetbrains.annotations.Nullable;
 
 public class ItemTransactionSession<T extends ItemSource> {
 
+    /**
+     * The transaction
+     */
     @Getter
-    public ItemTransaction transaction;
-    @Getter
+    private ItemTransaction transaction;
+
+    /**
+     * The item in the transaction
+     */
     @Setter
-    public boolean cancelled;
-    @Setter
     @Getter
-    public T result;
+    private @Nullable T result;
 
 
-    public ItemTransactionSession(ItemTransaction transaction, boolean cancelled, T result) {
+    public ItemTransactionSession(ItemTransaction transaction, @Nullable T result) {
         this.transaction = Preconditions.checkNotNull(transaction);
-        this.cancelled = cancelled;
         this.result = Preconditions.checkNotNull(result);
     }
 }
