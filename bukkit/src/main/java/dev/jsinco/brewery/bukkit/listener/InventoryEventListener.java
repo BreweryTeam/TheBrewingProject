@@ -36,7 +36,7 @@ public class InventoryEventListener implements Listener {
             InventoryAction.PICKUP_SOME, InventoryAction.PICKUP_ONE, InventoryAction.SWAP_WITH_CURSOR);
     private static final Set<InventoryAction> CURSOR = Set.of(
             InventoryAction.PICKUP_ONE, InventoryAction.PICKUP_SOME, InventoryAction.PICKUP_HALF, InventoryAction.PICKUP_ALL,
-            InventoryAction.PLACE_ONE, InventoryAction.PLACE_SOME, InventoryAction.PLACE_ALL
+            InventoryAction.PLACE_ONE, InventoryAction.PLACE_SOME, InventoryAction.PLACE_ALL, InventoryAction.SWAP_WITH_CURSOR
     );
     private static final Set<InventoryAction> ITEM_PICKUP_CURSOR = Set.of(
             InventoryAction.PICKUP_ONE, InventoryAction.PICKUP_SOME, InventoryAction.PICKUP_HALF, InventoryAction.PICKUP_ALL
@@ -99,14 +99,14 @@ public class InventoryEventListener implements Listener {
         Player player = event.getWhoClicked() instanceof Player temp ? temp : null;
         if (event.getAction() == InventoryAction.MOVE_TO_OTHER_INVENTORY) {
             if (upperInventoryIsClicked) {
-                return findEmptyPositions(event.getView(), event.getCurrentItem(), true)
+                return findEmptyPositions(event.getView(), event.getCurrentItem(), false)
                         .stream()
                         .map(inventoryPosition -> eventsFromStructure(
                                 inventoryAccessible,
                                 new ItemTransaction.RawPosition(event.getRawSlot()),
                                 inventoryPosition,
                                 event.getCurrentItem(),
-                                true,
+                                false,
                                 player
                         ))
                         .toList();
@@ -118,7 +118,7 @@ public class InventoryEventListener implements Listener {
                                 new ItemTransaction.RawPosition(event.getRawSlot()),
                                 inventoryPosition,
                                 event.getCurrentItem(),
-                                false,
+                                true,
                                 player
                         ))
                         .toList();
@@ -202,10 +202,13 @@ public class InventoryEventListener implements Listener {
         }
         Inventory inventory = topInventory ? view.getTopInventory() : view.getBottomInventory();
         int amount = currentItem.getAmount();
-        int offset = topInventory ? view.getBottomInventory().getSize() : 0;
+        int offset = topInventory ? 0 : view.getTopInventory().getSize();
         List<ItemTransaction.InventoryPosition> positions = new ArrayList<>();
-        for (int i = 0; i < inventory.getSize(); i++) {
-            ItemStack item = inventory.getItem(i);
+        for (int i = 0; i < view.countSlots(); i++) {
+            if (inventory != view.getInventory(i)) {
+                continue;
+            }
+            ItemStack item = view.getItem(i);
             if (item == null || item.isEmpty()) {
                 positions.add(new ItemTransaction.RawPosition(i + offset));
                 return positions;
@@ -231,13 +234,16 @@ public class InventoryEventListener implements Listener {
             return insertion ? new DistilleryInsertEvent(
                     distillery,
                     new ItemTransactionSession<>(transaction, brewOptional
-                            .map(brew -> new ItemSource.BrewBasedSource(brew, new Brew.State.Other()))
+                            .map(brew -> new ItemSource.BrewBasedSource(brew, new Brew.State.Brewing()))
                             .orElse(null)
                     ),
                     player
             ) : new DistilleryExtractEvent(
                     distillery,
-                    new ItemTransactionSession<>(transaction, new ItemSource.ItemBasedSource(item)),
+                    new ItemTransactionSession<>(transaction, brewOptional
+                            .map(brew -> BrewAdapter.toItem(brew, new Brew.State.Other()))
+                            .map(brewItem -> new ItemSource.ItemBasedSource(item))
+                            .orElse(null)),
                     player
             );
         }
