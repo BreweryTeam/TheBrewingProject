@@ -20,4 +20,12 @@ public record ItemTransaction(InventoryPosition from, InventoryPosition to, Item
     public record Cursor() implements InventoryPosition {
 
     }
+
+    public record LowerInventoryPosition(int pos) implements InventoryPosition {
+
+    }
+
+    public record UpperInventoryPosition(int pos) implements InventoryPosition {
+        
+    }
 }
