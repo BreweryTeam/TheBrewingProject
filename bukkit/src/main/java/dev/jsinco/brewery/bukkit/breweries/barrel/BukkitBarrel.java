@@ -1,23 +1,23 @@
 package dev.jsinco.brewery.bukkit.breweries.barrel;
 
 import com.google.common.base.Preconditions;
-import dev.jsinco.brewery.brew.AgeStepImpl;
 import dev.jsinco.brewery.api.brew.Brew;
 import dev.jsinco.brewery.api.brew.BrewingStep;
 import dev.jsinco.brewery.api.breweries.Barrel;
 import dev.jsinco.brewery.api.breweries.BarrelType;
+import dev.jsinco.brewery.api.moment.Interval;
+import dev.jsinco.brewery.api.moment.Moment;
+import dev.jsinco.brewery.api.util.Pair;
+import dev.jsinco.brewery.api.vector.BreweryLocation;
+import dev.jsinco.brewery.brew.AgeStepImpl;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
+import dev.jsinco.brewery.bukkit.api.BukkitAdapter;
 import dev.jsinco.brewery.bukkit.brew.BrewAdapter;
 import dev.jsinco.brewery.bukkit.breweries.BrewInventory;
 import dev.jsinco.brewery.bukkit.structure.PlacedBreweryStructure;
-import dev.jsinco.brewery.bukkit.api.BukkitAdapter;
 import dev.jsinco.brewery.bukkit.util.SoundPlayer;
 import dev.jsinco.brewery.configuration.Config;
-import dev.jsinco.brewery.api.moment.Interval;
-import dev.jsinco.brewery.api.moment.Moment;
 import dev.jsinco.brewery.util.MessageUtil;
-import dev.jsinco.brewery.api.util.Pair;
-import dev.jsinco.brewery.api.vector.BreweryLocation;
 import lombok.Getter;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
@@ -118,9 +118,7 @@ public class BukkitBarrel implements Barrel<BukkitBarrel, ItemStack, Inventory> 
         if (ticksUntilNextCheck-- > 0L) {
             return;
         }
-        // Choose randomly, so to not do this everywhere at the same time
-        long minAgingYearsTickUpdate = Config.config().barrels().agingYearTicks() / 20L;
-        ticksUntilNextCheck = RANDOM.nextLong(minAgingYearsTickUpdate, 2 * minAgingYearsTickUpdate);
+        ticksUntilNextCheck = Math.min(Config.config().barrels().agingYearTicks() / 20L, Moment.MINUTE * 5);
         Brew[] previousBrews = Arrays.copyOf(inventory.getBrews(), inventory.getBrews().length);
         inventory.updateBrewsFromInventory();
         processBrews(previousBrews);
