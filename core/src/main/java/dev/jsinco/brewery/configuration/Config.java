@@ -61,6 +61,13 @@ public class Config extends OkaeriConfig {
             "If your encryption key got leaked, use this to prevent anyone from seeing items encrypted with old keys ever again"})
     private boolean reencryptItemsInInventories = false;
 
+    @Comment("Whether we should try to migrate old brews from BreweryX (TBP's predecessor) to the new TBP format")
+    private boolean migrateFromBreweryX = true;
+
+    @Comment({"A list of encryption seeds from BreweryX used to convert encrypted BreweryX brews",
+            "This only converts brews when a recipe with matching id is configured in TBP"})
+    private List<Long> breweryxMigrationSeeds = List.of();
+
     @CustomKey("empty-any-drink-using-hopper")
     @Comment("Empty any drink when right-clicking a hopper. If false, only applies to failed brews")
     private boolean emptyAnyDrinkUsingHopper = false;

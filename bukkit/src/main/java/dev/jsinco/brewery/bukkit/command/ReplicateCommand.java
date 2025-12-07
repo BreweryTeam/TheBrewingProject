@@ -4,11 +4,13 @@ import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import dev.jsinco.brewery.api.brew.Brew;
 import dev.jsinco.brewery.api.brew.BrewQuality;
+import dev.jsinco.brewery.api.brew.BrewScore;
 import dev.jsinco.brewery.api.recipe.Recipe;
 import dev.jsinco.brewery.brew.BrewImpl;
 import dev.jsinco.brewery.bukkit.brew.BrewAdapter;
 import dev.jsinco.brewery.bukkit.command.argument.EnumArgument;
 import dev.jsinco.brewery.bukkit.command.argument.RecipeArgument;
+import dev.jsinco.brewery.recipes.BrewScoreImpl;
 import dev.jsinco.brewery.util.MessageUtil;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
@@ -38,10 +40,11 @@ public class ReplicateCommand {
                 });
     }
 
-    private static void givePlayerBrew(Recipe<ItemStack> recipe, CommandContext<CommandSourceStack> context, Player target, BrewQuality excellent) {
+    private static void givePlayerBrew(Recipe<ItemStack> recipe, CommandContext<CommandSourceStack> context, Player target, BrewQuality quality) {
         Brew brew = new BrewImpl(recipe.getSteps());
-        ItemStack brewItem = recipe.getRecipeResult(excellent)
-                .newBrewItem(brew.score(recipe), brew, new Brew.State.Other());
+        BrewScore score = brew.score(recipe);
+        if (score instanceof BrewScoreImpl scoreImpl) scoreImpl.setQualityOverride(quality);
+        ItemStack brewItem = recipe.getRecipeResult(quality).newBrewItem(score, brew, new Brew.State.Other());
         brewItem.editPersistentDataContainer(pdc -> BrewAdapter.applyBrewStepsData(pdc, brew));
         if (!target.getInventory().addItem(brewItem).isEmpty()) {
             target.getLocation().getWorld().dropItem(target.getLocation(), brewItem);

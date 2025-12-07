@@ -32,6 +32,7 @@ import dev.jsinco.brewery.bukkit.event.*;
 import dev.jsinco.brewery.bukkit.ingredient.BukkitIngredientManager;
 import dev.jsinco.brewery.bukkit.integration.IntegrationManagerImpl;
 import dev.jsinco.brewery.bukkit.migration.Migrations;
+import dev.jsinco.brewery.bukkit.migration.breweryx.BreweryXMigrationListener;
 import dev.jsinco.brewery.bukkit.recipe.BukkitRecipeResultReader;
 import dev.jsinco.brewery.bukkit.recipe.DefaultRecipeReader;
 import dev.jsinco.brewery.bukkit.structure.BarrelBlockDataMatcher;
@@ -333,6 +334,7 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
         } else {
             pluginManager.registerEvents(new LegacyPlayerJoinListener(), this);
         }
+        pluginManager.registerEvents(new BreweryXMigrationListener(), this);
         Bukkit.getGlobalRegionScheduler().runAtFixedRate(this, this::updateStructures, 1, 1);
         Bukkit.getGlobalRegionScheduler().runAtFixedRate(this, this::otherTicking, 1, 1);
         RecipeReader<ItemStack> recipeReader = new RecipeReader<>(this.getDataFolder(), new BukkitRecipeResultReader(), BukkitIngredientManager.INSTANCE);

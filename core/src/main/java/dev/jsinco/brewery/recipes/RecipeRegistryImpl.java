@@ -35,7 +35,21 @@ public class RecipeRegistryImpl<I> implements RecipeRegistry<I> {
     @Override
     public Optional<Recipe<I>> getRecipe(@NotNull String recipeName) {
         Preconditions.checkNotNull(recipeName);
-        return Optional.ofNullable(recipes.get(recipeName));
+
+        // Try case-sensitive first
+        Recipe<I> recipe = recipes.get(recipeName);
+        if (recipe != null) {
+            return Optional.of(recipe);
+        }
+
+        // Then try case-insensitive
+        for (Map.Entry<String, Recipe<I>> entry : recipes.entrySet()) {
+            if (entry.getKey().equalsIgnoreCase(recipeName)) {
+                return Optional.of(entry.getValue());
+            }
+        }
+
+        return Optional.empty();
     }
 
     @Override
