@@ -31,4 +31,33 @@ public class CauldronSection extends OkaeriConfig {
     @CustomKey("cooking-minute-ticks")
     private long cookingMinuteTicks = Moment.MINUTE;
 
+    @Comment("Enable ingredient removal feature - allows players to remove recently added ingredients with shift right-click")
+    @CustomKey("enable-ingredient-removal")
+    private boolean enableIngredientRemoval = true;
+
+    @Comment("How many ingredients can be removed from a cauldron with shift right-click")
+    @CustomKey("max-removable-ingredients")
+    private int maxRemovableIngredients = 3;
+
+    @Comment("How long (in ticks) after adding an ingredient can it be removed with shift right-click")
+    @CustomKey("ingredient-removal-time-window")
+    private long ingredientRemovalTimeWindow = Moment.MINUTE;
+
+    @Comment("Should the time message be displayed in chat when clicking a cauldron with a clock?")
+    @CustomKey("clock-time-in-chat")
+    private boolean clockTimeInChat = true;
+
+    @Comment({"How should the time be displayed in the action bar?",
+            "Options: 'hover' - show when looking at cauldron with clock in hand",
+            "         'click' - show only when clicking with clock",
+            "         'disabled' - don't show in action bar at all"})
+    @CustomKey("clock-time-action-bar")
+    private ClockActionBarMode clockTimeActionBar = ClockActionBarMode.DISABLED;
+
+    public enum ClockActionBarMode {
+        HOVER,
+        CLICK,
+        DISABLED
+    }
+
 }
