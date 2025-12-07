@@ -11,6 +11,7 @@ import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix3d;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -69,13 +70,22 @@ public class PlacedBreweryStructure<H extends StructureHolder<H>> implements Mul
         List<Matrix3d> output = new ArrayList<>();
         Matrix3d transformation = new Matrix3d();
         for (int i = 0; i < 4; i++) {
-            output.add(transformation.rotate(Math.PI / 2 * i, 0, 1, 0, new Matrix3d()));
+            output.add(roundMatrix(transformation.rotate(Math.PI / 2 * i, 0, 1, 0, new Matrix3d())));
         }
         transformation.reflect(1, 0, 0);
         for (int i = 0; i < 4; i++) {
-            output.add(transformation.rotate(Math.PI / 2 * i, 0, 1, 0, new Matrix3d()));
+            output.add(roundMatrix(transformation.rotate(Math.PI / 2 * i, 0, 1, 0, new Matrix3d())));
         }
         return List.copyOf(output);
+    }
+
+    private static Matrix3d roundMatrix(Matrix3d matrix3d) {
+        double[] doubles = matrix3d.get(new double[9]);
+        matrix3d.set(Arrays.stream(doubles)
+                .map(Math::round)
+                .toArray()
+        );
+        return matrix3d;
     }
 
     private int comparePositions(BreweryLocation breweryLocation, BreweryLocation breweryLocation1) {
