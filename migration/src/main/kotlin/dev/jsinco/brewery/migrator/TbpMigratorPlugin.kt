@@ -2,6 +2,7 @@ package dev.jsinco.brewery.migrator
 
 import com.google.common.base.Preconditions
 import dev.jsinco.brewery.bukkit.TheBrewingProject
+import dev.jsinco.brewery.migrator.migration.configuration.ConfigMigration
 import dev.jsinco.brewery.migrator.migration.configuration.RecipeMigration
 import dev.jsinco.brewery.migrator.migration.world.BarrelMigration
 import dev.jsinco.brewery.migrator.migration.world.CauldronMigration
@@ -10,7 +11,6 @@ import org.bukkit.plugin.java.JavaPlugin
 import java.io.*
 import java.nio.charset.StandardCharsets
 import java.util.*
-
 
 class TbpMigratorPlugin : JavaPlugin() {
     private var loadSuccess = false
@@ -25,6 +25,10 @@ class TbpMigratorPlugin : JavaPlugin() {
             return
         }
         RecipeMigration.migrateRecipes(
+            File(dataFolder.parent, "BreweryX"),
+            File(dataFolder.parent, "TheBrewingProject")
+        )
+        ConfigMigration.migrateConfig(
             File(dataFolder.parent, "BreweryX"),
             File(dataFolder.parent, "TheBrewingProject")
         )
