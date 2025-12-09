@@ -28,10 +28,17 @@ public final class Logger {
         logger().log(Level.SEVERE, prefix + throwable.getMessage(), throwable);
     }
 
-    public static void logWarn(String message) {
+    public static void logDev(String message) {
         StackTraceElement caller = Thread.currentThread().getStackTrace()[2];
         String className = caller.getClassName().substring(caller.getClassName().lastIndexOf('.') + 1);
         String prefixedMessage = "[TBP DevDebug - " + className + ":" + caller.getLineNumber() + "] " + message;
+        logger().log(Level.WARNING, prefixedMessage);
+    }
+
+    public static void logWarn(String message) {
+        StackTraceElement caller = Thread.currentThread().getStackTrace()[2];
+        String className = caller.getClassName().substring(caller.getClassName().lastIndexOf('.') + 1);
+        String prefixedMessage = "[TBP Warning - " + className + ":" + caller.getLineNumber() + "] " + message;
         logger().log(Level.WARNING, prefixedMessage);
     }
 
