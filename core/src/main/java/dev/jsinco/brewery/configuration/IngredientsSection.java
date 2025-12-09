@@ -45,6 +45,11 @@ public class IngredientsSection extends OkaeriConfig {
                     "+++tall_grass",
                     "++short_dry_grass",
                     "++tall_dry_grass"
+            )),
+            new IngredientGroupSection("egg", Component.text("Egg"), List.of(
+                    "+++egg",
+                    "+++blue_egg",
+                    "+++brown_egg"
             ))
     );
 

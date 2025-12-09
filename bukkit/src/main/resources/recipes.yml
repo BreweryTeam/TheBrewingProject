@@ -205,7 +205,7 @@ recipes:
       - cauldron-type: water
         cook-time: 2
         ingredients:
-          - Egg/5
+          - "#brewery:egg/5"
           - Sugar/2
           - Milk_Bucket/1
         type: cook
