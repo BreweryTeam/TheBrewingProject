@@ -67,7 +67,7 @@ public class BreweryXMigrationUtils {
             BrewData data = loadBrewdataFromStream(in);
             BrewManager<ItemStack> brewManager = TheBrewingProject.getInstance().getBrewManager();
             Brew.State state = data.sealed ? new Brew.State.Seal(null) : new Brew.State.Other();
-            if (data.brew.getSteps().isEmpty()) {
+            if (data.brew == null) {
                 return itemFromDataWithoutSteps(data, brewManager, state);
             }
             return brewManager.toItem(data.brew, state);
@@ -99,16 +99,15 @@ public class BreweryXMigrationUtils {
         return brewManager.toItem(brew, state);
     }
 
-    private record BrewData(Brew brew, String recipe, boolean sealed, byte quality) {
+    private record BrewData(@Nullable Brew brew, @Nullable String recipe, boolean sealed, byte quality) {
     }
 
     private static BrewData loadBrewdataFromStream(DataInputStream in) throws IOException {
         byte quality = in.readByte();
         int flags = in.readUnsignedByte();
 
-        int alcohol = 0;
         if ((flags & 64) != 0) {
-            alcohol = in.readShort();
+            in.skipBytes(2); // Alcohol ignored (short)
         }
         List<BrewingStep> steps = new ArrayList<>();
         if ((flags & 1) != 0) {
@@ -142,6 +141,10 @@ public class BreweryXMigrationUtils {
         boolean sealed = (flags & 128) != 0;
         int cookingTime = in.readInt();
         byte ingredientAmount = in.readByte();
+        if (ingredientAmount == 0) {
+            // Probably no data, brew is sealed
+            return new BrewData(null, recipe, true, quality);
+        }
         Map<Ingredient, Integer> ingredients = new HashMap<>();
         for (int i = 0; i < ingredientAmount; i++) {
             Ingredient ingredient = readIngredient(in);
