@@ -28,7 +28,7 @@ public final class Logger {
         logger().log(Level.SEVERE, prefix + throwable.getMessage(), throwable);
     }
 
-    public static void logDev(String message) {
+    public static void logWarn(String message) {
         StackTraceElement caller = Thread.currentThread().getStackTrace()[2];
         String className = caller.getClassName().substring(caller.getClassName().lastIndexOf('.') + 1);
         String prefixedMessage = "[TBP DevDebug - " + className + ":" + caller.getLineNumber() + "] " + message;
