@@ -57,7 +57,7 @@ public class BreweryXMigrationUtils {
         XORUnscrambleStream unscrambler = new XORUnscrambleStream(nbtStream, Config.config().breweryxMigrationSeeds());
         try (DataInputStream in = new DataInputStream(unscrambler)) {
             if (in.readByte() != 86) {
-                Logger.logErr("Parity check failed on BreweryX Brew while migrating. Trying to load it anyway...");
+                Logger.logWarn("Parity check failed on BreweryX Brew while migrating. Trying to load it anyway...");
             }
             if (in.readByte() != 1) {
                 Logger.log("Trying to convert a BreweryX Brew that stores data in an unsupported version...");
@@ -81,12 +81,12 @@ public class BreweryXMigrationUtils {
 
     private static ItemStack itemFromDataWithoutSteps(BrewData data, BrewManager<ItemStack> brewManager, Brew.State state) {
         if (data.recipe == null) {
-            Logger.logErr("Failed to convert a BreweryX Brew: Couldn't extract recipe identifier.");
+            Logger.logWarn("Failed to convert a BreweryX Brew: Couldn't extract recipe identifier.");
             return null;
         }
         Optional<Recipe<ItemStack>> recipeOptional = TheBrewingProject.getInstance().getRecipeRegistry().getRecipe(data.recipe);
         if (recipeOptional.isEmpty()) {
-            Logger.logErr("Failed to convert a BreweryX Brew: Recipe '" + data.recipe + "' not configured in TBP.");
+            Logger.logWarn("Failed to convert a BreweryX Brew: Recipe '" + data.recipe + "' not configured in TBP.");
             return null;
         }
         Recipe<ItemStack> recipe = recipeOptional.get();
