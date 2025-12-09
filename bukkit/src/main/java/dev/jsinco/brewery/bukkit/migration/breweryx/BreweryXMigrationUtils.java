@@ -1,9 +1,6 @@
 package dev.jsinco.brewery.bukkit.migration.breweryx;
 
-import dev.jsinco.brewery.api.brew.Brew;
-import dev.jsinco.brewery.api.brew.BrewManager;
-import dev.jsinco.brewery.api.brew.BrewScore;
-import dev.jsinco.brewery.api.brew.BrewingStep;
+import dev.jsinco.brewery.api.brew.*;
 import dev.jsinco.brewery.api.breweries.BarrelType;
 import dev.jsinco.brewery.api.breweries.CauldronType;
 import dev.jsinco.brewery.api.ingredient.Ingredient;
@@ -22,6 +19,8 @@ import dev.jsinco.brewery.recipes.BrewScoreImpl;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.DataInputStream;
 import java.io.IOException;
@@ -47,7 +46,7 @@ public class BreweryXMigrationUtils {
             BarrelType.PALE_OAK
     );
 
-    public static ItemStack migrate(ItemStack item) {
+    public static @Nullable ItemStack migrate(@NotNull ItemStack item) {
         ItemMeta meta = item.getItemMeta();
 
         NBTLoadStream nbtStream = new NBTLoadStream(meta);
@@ -66,21 +65,12 @@ public class BreweryXMigrationUtils {
 
             unscrambler.start();
             BrewData data = loadBrewdataFromStream(in);
-            if (data.recipe == null) {
-                Logger.logErr("Failed to convert a BreweryX Brew: Couldn't extract recipe identifier.");
-                return null;
-            }
-
-            Optional<Recipe<ItemStack>> recipeOptional = TheBrewingProject.getInstance().getRecipeRegistry().getRecipe(data.recipe);
-            if (recipeOptional.isEmpty()) {
-                Logger.logErr("Failed to convert a BreweryX Brew: Recipe '" + data.recipe + "' not configured in TBP.");
-                return null;
-            }
-            Recipe<ItemStack> recipe = recipeOptional.get();
             BrewManager<ItemStack> brewManager = TheBrewingProject.getInstance().getBrewManager();
-            Brew brew = brewManager.createBrew(recipe.getSteps());
             Brew.State state = data.sealed ? new Brew.State.Seal(null) : new Brew.State.Other();
-            return brewManager.toItem(brew, state);
+            if (data.brew.getSteps().isEmpty()) {
+                return itemFromDataWithoutSteps(data, brewManager, state);
+            }
+            return brewManager.toItem(data.brew, state);
 
         } catch (IOException | InvalidKeyException e) {
             Logger.logErr("Failed to convert a BreweryX Brew:");
@@ -89,11 +79,31 @@ public class BreweryXMigrationUtils {
         return null;
     }
 
-    private record BrewData(Brew brew, String recipe, boolean sealed) {
+    private static ItemStack itemFromDataWithoutSteps(BrewData data, BrewManager<ItemStack> brewManager, Brew.State state) {
+        if (data.recipe == null) {
+            Logger.logErr("Failed to convert a BreweryX Brew: Couldn't extract recipe identifier.");
+            return null;
+        }
+        Optional<Recipe<ItemStack>> recipeOptional = TheBrewingProject.getInstance().getRecipeRegistry().getRecipe(data.recipe);
+        if (recipeOptional.isEmpty()) {
+            Logger.logErr("Failed to convert a BreweryX Brew: Recipe '" + data.recipe + "' not configured in TBP.");
+            return null;
+        }
+        Recipe<ItemStack> recipe = recipeOptional.get();
+        Brew brew = brewManager.createBrew(recipe.getSteps());
+        BrewScore score = brew.score(recipe);
+        if (score instanceof BrewScoreImpl scoreImpl) {
+            scoreImpl.setQualityOverride(data.quality >= 9 ?
+                    BrewQuality.EXCELLENT : data.quality >= 6 ? BrewQuality.GOOD : BrewQuality.BAD);
+        }
+        return brewManager.toItem(brew, state);
+    }
+
+    private record BrewData(Brew brew, String recipe, boolean sealed, byte quality) {
     }
 
     private static BrewData loadBrewdataFromStream(DataInputStream in) throws IOException {
-        int quality = in.readByte();
+        byte quality = in.readByte();
         int flags = in.readUnsignedByte();
 
         int alcohol = 0;
@@ -146,7 +156,7 @@ public class BreweryXMigrationUtils {
                 ingredients,
                 CauldronType.WATER
         ));
-        return new BrewData(new BrewImpl(steps), recipe, sealed);
+        return new BrewData(new BrewImpl(steps), recipe, sealed, quality);
     }
 
     private static Ingredient readIngredient(DataInputStream in) throws IOException {
