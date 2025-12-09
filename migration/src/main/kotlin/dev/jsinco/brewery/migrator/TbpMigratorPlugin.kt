@@ -6,6 +6,9 @@ import dev.jsinco.brewery.migrator.migration.configuration.ConfigMigration
 import dev.jsinco.brewery.migrator.migration.configuration.RecipeMigration
 import dev.jsinco.brewery.migrator.migration.world.BarrelMigration
 import dev.jsinco.brewery.migrator.migration.world.CauldronMigration
+import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.format.NamedTextColor
+import net.kyori.adventure.text.format.TextDecoration
 import org.bukkit.Bukkit
 import org.bukkit.plugin.java.JavaPlugin
 import java.io.*
@@ -19,8 +22,7 @@ class TbpMigratorPlugin : JavaPlugin() {
     override fun onLoad() {
         this.hasMigrated = loadMigrator()
         if (hasMigrated) {
-            logger.severe { "The migration has already been run, shutting down the server!" }
-            logger.info { "You need to remove both BreweryX and this migrator plugin from your server." }
+            sendFailMessage()
             Bukkit.getServer().shutdown()
             return
         }
@@ -66,10 +68,65 @@ class TbpMigratorPlugin : JavaPlugin() {
             TheBrewingProject.getInstance().database.flush().join()
             TheBrewingProject.getInstance().reload()
             val pluginManager = Bukkit.getPluginManager()
-            logger.info("Successfully migrated barrel and configuration data to TheBrewingProject")
-            logger.info("You can now remove both BreweryX and " + this.name + " from your plugins folder")
+            sendSuccessMessage()
             pluginManager.disablePlugin(pluginManager.getPlugin("BreweryX")!!)
             pluginManager.disablePlugin(this)
         }
+    }
+
+    fun sendSuccessMessage() {
+        val audience = Bukkit.getServer().consoleSender
+        fun send(line: Component) = audience.sendMessage(line)
+        send(Component.empty())
+        send(
+            Component.text("==============================================================")
+                .color(NamedTextColor.GREEN)
+        )
+        send(Component.empty())
+        send(
+            Component.text("Successfully migrated all data from BreweryX to TheBrewingProject!")
+                .color(NamedTextColor.GREEN)
+                .decorate(TextDecoration.BOLD)
+        )
+        send(Component.empty())
+        send(
+            Component.text("Please remove both BreweryX and the migrator plugin and restart")
+                .color(NamedTextColor.YELLOW)
+                .decorate(TextDecoration.BOLD)
+        )
+        send(Component.empty())
+        send(
+            Component.text("==============================================================")
+                .color(NamedTextColor.GREEN)
+        )
+        send(Component.empty())
+    }
+
+    fun sendFailMessage() {
+        val audience = Bukkit.getServer().consoleSender
+        fun send(line: Component) = audience.sendMessage(line)
+        send(Component.empty())
+        send(
+            Component.text("==============================================================")
+                .color(NamedTextColor.YELLOW)
+        )
+        send(Component.empty())
+        send(
+            Component.text("The migration has already been run, shutting down the server!")
+                .color(NamedTextColor.RED)
+                .decorate(TextDecoration.BOLD)
+        )
+        send(Component.empty())
+        send(
+            Component.text("Please remove both BreweryX and the migrator plugin and restart")
+                .color(NamedTextColor.YELLOW)
+                .decorate(TextDecoration.BOLD)
+        )
+        send(Component.empty())
+        send(
+            Component.text("==============================================================")
+                .color(NamedTextColor.YELLOW)
+        )
+        send(Component.empty())
     }
 }
