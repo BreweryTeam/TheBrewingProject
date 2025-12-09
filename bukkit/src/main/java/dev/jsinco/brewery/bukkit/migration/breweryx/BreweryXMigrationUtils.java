@@ -155,7 +155,7 @@ public class BreweryXMigrationUtils {
             ingredients.put(ingredient, amount);
         }
         steps.addFirst(new CookStepImpl(
-                new PassedMoment(cookingTime),
+                new PassedMoment((long) cookingTime * PassedMoment.MINUTE),
                 ingredients,
                 CauldronType.WATER
         ));
