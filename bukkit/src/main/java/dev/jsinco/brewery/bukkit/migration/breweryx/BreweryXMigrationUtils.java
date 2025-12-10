@@ -67,7 +67,7 @@ public class BreweryXMigrationUtils {
             BrewData data = loadBrewdataFromStream(in);
             BrewManager<ItemStack> brewManager = TheBrewingProject.getInstance().getBrewManager();
             Brew.State state = data.sealed ? new Brew.State.Seal(null) : new Brew.State.Other();
-            if (data.brew == null) {
+            if (data.brew == null || data.sealed) {
                 return itemFromDataWithoutSteps(data, brewManager, state);
             }
             return brewManager.toItem(data.brew, state);
