@@ -4,6 +4,8 @@ import dev.jsinco.brewery.api.brew.*;
 import dev.jsinco.brewery.api.breweries.BarrelType;
 import dev.jsinco.brewery.api.breweries.CauldronType;
 import dev.jsinco.brewery.api.ingredient.Ingredient;
+import dev.jsinco.brewery.api.ingredient.IngredientGroup;
+import dev.jsinco.brewery.api.ingredient.ScoredIngredient;
 import dev.jsinco.brewery.api.moment.PassedMoment;
 import dev.jsinco.brewery.api.recipe.Recipe;
 import dev.jsinco.brewery.api.util.Logger;
@@ -90,13 +92,37 @@ public class BreweryXMigrationUtils {
             return null;
         }
         Recipe<ItemStack> recipe = recipeOptional.get();
-        Brew brew = brewManager.createBrew(recipe.getSteps());
+        List<BrewingStep> steps = new ArrayList<>(recipe.getSteps());
+        if (steps.getFirst() instanceof BrewingStep.Cook cookStep) {
+            steps.set(0, cookStep.withIngredients(sanitizeIngredients(cookStep.ingredients())));
+        }
+        if (steps.getFirst() instanceof BrewingStep.Mix mixStep) {
+            steps.set(0, mixStep.withIngredients(sanitizeIngredients(mixStep.ingredients())));
+        }
+        Brew brew = brewManager.createBrew(steps);
         BrewScore score = brew.score(recipe);
         if (score instanceof BrewScoreImpl scoreImpl) {
             scoreImpl.setQualityOverride(data.quality >= 9 ?
                     BrewQuality.EXCELLENT : data.quality >= 6 ? BrewQuality.GOOD : BrewQuality.BAD);
         }
         return brewManager.toItem(brew, state);
+    }
+
+    private static Map<Ingredient, Integer> sanitizeIngredients(Map<? extends Ingredient, Integer> ingredients) {
+        Map<Ingredient, Integer> output = new HashMap<>();
+        for (Map.Entry<? extends Ingredient, Integer> entry : ingredients.entrySet()) {
+            Ingredient ingredient = entry.getKey();
+            if (ingredient instanceof IngredientGroup ingredientGroup) {
+                ingredient = ingredientGroup.alternatives().stream().max(Comparator.comparing(groupIngredient ->
+                        groupIngredient instanceof ScoredIngredient scoredIngredient ? scoredIngredient.score() : 1D
+                )).orElse(null);
+            }
+            if (ingredient == null) {
+                continue;
+            }
+            output.put(ingredient, entry.getValue());
+        }
+        return output;
     }
 
     private record BrewData(@Nullable Brew brew, @Nullable String recipe, boolean sealed, byte quality) {
