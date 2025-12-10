@@ -66,7 +66,7 @@ public class BreweryXMigrationUtils {
             }
 
             unscrambler.start();
-            BrewData data = loadBrewdataFromStream(in);
+            BrewData data = loadBrewDataFromStream(in);
             BrewManager<ItemStack> brewManager = TheBrewingProject.getInstance().getBrewManager();
             Brew.State state = data.sealed ? new Brew.State.Seal(null) : new Brew.State.Other();
             if (data.brew == null || data.sealed) {
@@ -130,7 +130,7 @@ public class BreweryXMigrationUtils {
     private record BrewData(@Nullable Brew brew, @Nullable String recipe, boolean sealed, byte quality) {
     }
 
-    private static BrewData loadBrewdataFromStream(DataInputStream in) throws IOException {
+    private static BrewData loadBrewDataFromStream(DataInputStream in) throws IOException {
         byte quality = in.readByte();
         int flags = in.readUnsignedByte();
 
