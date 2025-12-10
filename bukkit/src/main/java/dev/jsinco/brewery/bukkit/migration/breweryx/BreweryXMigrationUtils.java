@@ -101,11 +101,13 @@ public class BreweryXMigrationUtils {
         }
         Brew brew = brewManager.createBrew(steps);
         BrewScore score = brew.score(recipe);
+        BrewQuality quality = data.quality >= 9 ?
+                BrewQuality.EXCELLENT : data.quality >= 6 ? BrewQuality.GOOD : BrewQuality.BAD;
         if (score instanceof BrewScoreImpl scoreImpl) {
-            scoreImpl.setQualityOverride(data.quality >= 9 ?
-                    BrewQuality.EXCELLENT : data.quality >= 6 ? BrewQuality.GOOD : BrewQuality.BAD);
+            scoreImpl.setQualityOverride(quality);
         }
-        return brewManager.toItem(brew, state);
+        return recipe.getRecipeResult(quality)
+                .newBrewItem(score, brew, state);
     }
 
     private static Map<Ingredient, Integer> sanitizeIngredients(Map<? extends Ingredient, Integer> ingredients) {
