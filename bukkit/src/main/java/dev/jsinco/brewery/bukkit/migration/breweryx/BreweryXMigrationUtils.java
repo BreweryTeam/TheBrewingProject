@@ -138,7 +138,7 @@ public class BreweryXMigrationUtils {
         if ((flags & 8) != 0) {
             recipe = in.readUTF();
         }
-        boolean sealed = (flags & 128) != 0;
+        boolean sealed = ((flags & 128) | (flags & 32)) != 0;
         int cookingTime = in.readInt();
         byte ingredientAmount = in.readByte();
         if (ingredientAmount == 0) {
