@@ -68,6 +68,7 @@ public class PukeNamedExecutable implements EventPropertyExecutable {
 
             World world = loc.getWorld();
 
+            @SuppressWarnings("removal")
             YamlConfiguration spigotConfig = Bukkit.spigot().getConfig(); // Deprecated but no obvious replacement by paper yet?
             int worldDespawnRate = spigotConfig.getInt("world-settings." + world.getName() + ".item-despawn-rate", -1);
             if (worldDespawnRate < 0) {
