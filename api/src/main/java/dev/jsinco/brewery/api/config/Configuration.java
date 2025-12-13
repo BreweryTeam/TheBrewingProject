@@ -1,5 +1,7 @@
 package dev.jsinco.brewery.api.config;
 
+import java.util.Locale;
+
 public interface Configuration {
 
   Locale language();
