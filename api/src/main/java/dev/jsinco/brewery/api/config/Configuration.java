@@ -1,4 +1,4 @@
-package dev.jsinco.brewery.api.config
+package dev.jsinco.brewery.api.config;
 
 public interface Configuration {
 
