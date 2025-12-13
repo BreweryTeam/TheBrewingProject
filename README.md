@@ -57,6 +57,9 @@ and [Modrinth](https://modrinth.com/plugin/thebrewingproject).
 ### Developers
 
 **API**
+> [!IMPORTANT]
+> Classes outside the API package may change without notice!
+
 Importing the API
 
 ```kts
