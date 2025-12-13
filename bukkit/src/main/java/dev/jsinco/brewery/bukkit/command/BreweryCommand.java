@@ -97,12 +97,16 @@ public class BreweryCommand {
     public static OfflinePlayer getOfflinePlayer(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         try {
             return context.getArgument("player", OfflinePlayer.class);
-        } catch (IllegalArgumentException e) {
-            if (context.getSource().getSender() instanceof OfflinePlayer player) {
-                return player;
-            }
-            throw ERROR_UNDEFINED_PLAYER.create();
-        }
+        } catch (IllegalArgumentException ignored) {}
+        try {
+            PlayerSelectorArgumentResolver resolver =
+                    context.getArgument("player", PlayerSelectorArgumentResolver.class);
+            List<Player> resolved = resolver.resolve(context.getSource());
+            if (resolved.isEmpty()) throw ERROR_UNDEFINED_PLAYER.create();
+            return resolved.getFirst();
+        } catch (IllegalArgumentException ignored) {}
+        if (context.getSource().getSender() instanceof OfflinePlayer player) return player;
+        throw ERROR_UNDEFINED_PLAYER.create();
     }
 
     public static Player getPlayer(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {

@@ -100,6 +100,7 @@ public class StatusCommand {
     public static ArgumentBuilder<CommandSourceStack, ?> command() {
         ArgumentBuilder<CommandSourceStack, ?> root = Commands.literal("status");
         registerBranches(root);
+        root.then(BreweryCommand.playerBranch(StatusCommand::registerBranches));
         root.then(BreweryCommand.offlinePlayerBranch(StatusCommand::registerBranches));
         return root;
     }
