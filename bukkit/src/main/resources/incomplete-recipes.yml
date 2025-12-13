@@ -108,7 +108,7 @@ incomplete-recipes:
     color: "white"
     lore:
       - <gray>Stripped from all its features
-      - <gray>from multiple distill runs
+      - <gray>by way too many distill runs
     condition:
       final-step:
         type: distill
