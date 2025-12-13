@@ -1,6 +1,7 @@
 package dev.jsinco.brewery.bukkit;
 
 import com.google.common.base.Preconditions;
+import dev.jsinco.brewery.api.config.Configuration;
 import dev.jsinco.brewery.api.brew.BrewManager;
 import dev.jsinco.brewery.api.breweries.Barrel;
 import dev.jsinco.brewery.api.breweries.BarrelType;
@@ -406,6 +407,10 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
 
     public static NamespacedKey key(String key) {
         return new NamespacedKey("brewery", key);
+    }
+
+    public Configuration getConfiguration() {
+        return Config.config();
     }
 }
 

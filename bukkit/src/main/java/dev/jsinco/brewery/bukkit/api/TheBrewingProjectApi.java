@@ -6,6 +6,7 @@ import dev.jsinco.brewery.api.integration.IntegrationManager;
 import dev.jsinco.brewery.api.effect.DrunksManager;
 import dev.jsinco.brewery.api.recipe.RecipeRegistry;
 import dev.jsinco.brewery.api.structure.PlacedStructureRegistry;
+import dev.jsinco.brewery.api.config.Configuration;
 import org.bukkit.inventory.ItemStack;
 
 public interface TheBrewingProjectApi {
@@ -39,4 +40,9 @@ public interface TheBrewingProjectApi {
      * @return An integration manager, that allows you to register integrations
      */
     IntegrationManager getIntegrationManager();
+
+    /**
+     * @return Access to some configuration options
+     */
+    Configuration getConfiguration();
 }

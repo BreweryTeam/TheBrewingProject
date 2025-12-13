@@ -2,6 +2,7 @@ package dev.jsinco.brewery.configuration;
 
 import dev.jsinco.brewery.api.moment.Moment;
 import dev.jsinco.brewery.api.util.Holder;
+import dev.jsinco.brewery.api.config.Configuration;
 import eu.okaeri.configs.OkaeriConfig;
 import eu.okaeri.configs.annotation.Comment;
 import eu.okaeri.configs.annotation.CustomKey;
@@ -13,7 +14,7 @@ import java.util.stream.Stream;
 
 @Getter
 @Accessors(fluent = true)
-public class CauldronSection extends OkaeriConfig {
+public class CauldronSection extends OkaeriConfig implements Configuration.Cauldrons {
     @Comment({"Reduce the number of particles that spawn while cauldrons brew.",
             "This won't affect performance, but it will make the particles less obtrusive."})
     @CustomKey("minimal-particles")
