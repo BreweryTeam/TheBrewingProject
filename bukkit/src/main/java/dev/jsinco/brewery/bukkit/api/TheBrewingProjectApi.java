@@ -44,5 +44,5 @@ public interface TheBrewingProjectApi {
     /**
      * @return Access to some configuration options
      */
-    Configuration configuration();
+    Configuration getConfiguration();
 }
