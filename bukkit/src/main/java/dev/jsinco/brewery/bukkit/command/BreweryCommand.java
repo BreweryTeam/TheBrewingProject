@@ -7,21 +7,20 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.bukkit.command.argument.EventArgument;
 import dev.jsinco.brewery.bukkit.command.argument.OfflinePlayerArgument;
-import dev.jsinco.brewery.bukkit.command.argument.OnlinePlayerArgument;
 import dev.jsinco.brewery.bukkit.util.BukkitMessageUtil;
 import dev.jsinco.brewery.configuration.Config;
 import dev.jsinco.brewery.api.event.DrunkEvent;
 import dev.jsinco.brewery.util.MessageUtil;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
+import io.papermc.paper.command.brigadier.argument.ArgumentTypes;
+import io.papermc.paper.command.brigadier.argument.resolvers.selector.PlayerSelectorArgumentResolver;
 import io.papermc.paper.plugin.lifecycle.event.registrar.ReloadableRegistrarEvent;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import javax.crypto.SecretKey;
-import java.util.Base64;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -79,7 +78,7 @@ public class BreweryCommand {
     }
 
     public static ArgumentBuilder<CommandSourceStack, ?> playerBranch(Consumer<ArgumentBuilder<CommandSourceStack, ?>> childAction) {
-        ArgumentBuilder<CommandSourceStack, ?> child = Commands.argument("player", new OnlinePlayerArgument());
+        ArgumentBuilder<CommandSourceStack, ?> child = Commands.argument("player", ArgumentTypes.player());
         childAction.accept(child);
         return Commands.literal("for")
                 .then(child)
@@ -108,11 +107,13 @@ public class BreweryCommand {
 
     public static Player getPlayer(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         try {
-            return context.getArgument("player", Player.class);
+            PlayerSelectorArgumentResolver resolver =
+                    context.getArgument("player", PlayerSelectorArgumentResolver.class);
+            List<Player> resolved = resolver.resolve(context.getSource());
+            if (resolved.isEmpty()) throw ERROR_UNDEFINED_PLAYER.create();
+            return resolved.getFirst();
         } catch (IllegalArgumentException e) {
-            if (context.getSource().getSender() instanceof Player player) {
-                return player;
-            }
+            if (context.getSource().getSender() instanceof Player player) return player;
             throw ERROR_UNDEFINED_PLAYER.create();
         }
     }
