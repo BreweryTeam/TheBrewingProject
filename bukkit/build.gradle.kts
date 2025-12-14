@@ -172,24 +172,34 @@ bukkit {
     permissions {
         register("brewery.barrel.create") {
             children = listOf("brewery.barrel.access")
+            description = "Allows the user to create barrels."
         }
-        register("brewery.barrel.access")
+        register("brewery.barrel.access") {
+            description = "Allows the user to access barrels."
+        }
         register("brewery.distillery.create") {
             children = listOf("brewery.distillery.access")
+            description = "Allows the user to create distilleries."
         }
-        register("brewery.distillery.access")
+        register("brewery.distillery.access") {
+            description = "Allows the user to access distilleries."
+        }
         register("brewery.cauldron.access") {
             childrenMap = mapOf(
                 "brewery.cauldron.time" to true
             )
+            description = "Allows the user to access cauldrons."
         }
-        register("brewery.cauldron.time")
+        register("brewery.cauldron.time") {
+            description = "Allows the user to use a clock on a cauldron to check brewing time."
+        }
         register("brewery.structure.access") {
             childrenMap = mapOf(
                 "brewery.barrel.access" to true,
                 "brewery.distillery.access" to true,
                 "brewery.cauldron.access" to true
             )
+            description = "Allows the user to access any type of structure."
         }
         register("brewery.structure.create") {
             default = BukkitPluginDescription.Permission.Default.TRUE
@@ -198,17 +208,38 @@ bukkit {
                 "brewery.barrel.create" to true,
                 "brewery.distillery.create" to true
             )
+            description = "Allows the user to create any type of structure."
         }
-        register("brewery.command.create")
-        register("brewery.command.status")
-        register("brewery.command.event")
-        register("brewery.command.reload")
-        register("brewery.command.info")
-        register("brewery.command.seal")
-        register("brewery.command.other")
-        register("brewery.command.replicate")
-        register("brewery.command.version")
-        register("brewery.command.encryption")
+        register("brewery.command.create") {
+            description = "Allows the user to use the /tbp create command."
+        }
+        register("brewery.command.status") {
+            description = "Allows the user to use the /tbp status command."
+        }
+        register("brewery.command.event") {
+            description = "Allows the user to use the /tbp event command."
+        }
+        register("brewery.command.reload") {
+            description = "Allows the user to use the /tbp reload command."
+        }
+        register("brewery.command.info") {
+            description = "Allows the user to use the /tbp info command."
+        }
+        register("brewery.command.seal") {
+            description = "Allows the user to use the /tbp seal command."
+        }
+        register("brewery.command.other") {
+            description = "Allows the user to use other /tbp commands."
+        }
+        register("brewery.command.replicate") {
+            description = "Allows the user to use the /tbp replicate command."
+        }
+        register("brewery.command.version") {
+            description = "Allows the user to use the /tbp version command."
+        }
+        register("brewery.command.encryption") {
+            description = "Allows the user to use the /tbp encryption command."
+        }
         register("brewery.command") {
             childrenMap = mapOf(
                 "brewery.command.create" to true,
@@ -223,17 +254,25 @@ bukkit {
                 "brewery.command.encryption" to true,
             )
             default = BukkitPluginDescription.Permission.Default.OP
+            description = "Allows the user to use /tbp commands."
         }
         register("brewery.override.kick") {
             default = BukkitPluginDescription.Permission.Default.OP
+            description = "Prevents the user from being kicked by events (the pass out event)."
         }
-        register("brewery.override.effect") {}
-        register("brewery.override.drunk") {}
+        register("brewery.override.effect") {
+            description = "Prevents the user from receiving brew's potion effects."
+        }
+        register("brewery.override.drunk") {
+            description = "Prevents the user from having their modifiers changed. (e.g. prevents alcohol)"
+        }
         register("brewery.override") {
             children = listOf("brewery.override.kick", "brewery.override.effect", "brewery.override.drunk")
+            description = "Prevents the user from being affected by certain TBP mechanics. Recommended for admins/mods."
         }
         register("brewery") {
             children = listOf("brewery.command", "brewery.structure.create", "brewery.override")
+            description = "Main permission node for TBP."
         }
     }
     softDepend = listOf(
