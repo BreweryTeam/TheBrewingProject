@@ -5,6 +5,8 @@ even memory loss?**
 You're in luck! You can simply install this plugin and find out today! Experience what's listed above and much more with
 TheBrewingProject.
 
+Check it out on our demo server, where you can easily brew and drink, with no setup required whatsoever: [showcase.breweryteam.dev](https://mcsrvstat.us/server/showcase.breweryteam.dev)
+
 ***
 
 ### Get the Plugin
