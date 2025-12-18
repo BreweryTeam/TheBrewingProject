@@ -33,7 +33,8 @@ public class HallucinationNamedExecutable implements EventPropertyExecutable {
         } while (!material.isBlock() || material.isAir() || material.isLegacy());
 
         BlockData blockData = material.createBlockData();
-        Location location = (material.isSolid() && material.isOccluding()) ?
+        Location location = ((material.isSolid() && material.isOccluding())
+                || !block.isSolid() || !block.getBlockData().isOccluding()) ?
                 block.getLocation() : block.getLocation().add(0, 1, 0);
 
         player.sendBlockChange(location, blockData);
