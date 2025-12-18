@@ -3,6 +3,7 @@ package dev.jsinco.brewery.bukkit.effect.named;
 import dev.jsinco.brewery.api.event.EventPropertyExecutable;
 import dev.jsinco.brewery.api.event.EventStep;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.block.Block;
@@ -32,9 +33,11 @@ public class HallucinationNamedExecutable implements EventPropertyExecutable {
         } while (!material.isBlock() || material.isAir() || material.isLegacy());
 
         BlockData blockData = material.createBlockData();
+        Location location = (material.isSolid() && material.isOccluding()) ?
+                block.getLocation() : block.getLocation().add(0, 1, 0);
 
-        player.sendBlockChange(block.getLocation(), blockData);
-        player.spawnParticle(Particle.DUST, block.getLocation().toCenterLocation(), 10, 0.5, 0.5, 0.5, new Particle.DustOptions(blockData.getMapColor(), 1f));
+        player.sendBlockChange(location, blockData);
+        player.spawnParticle(Particle.DUST, location.toCenterLocation(), 10, 0.5, 0.5, 0.5, new Particle.DustOptions(blockData.getMapColor(), 1f));
         return ExecutionResult.CONTINUE;
     }
 
