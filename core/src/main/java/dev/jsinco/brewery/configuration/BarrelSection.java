@@ -6,12 +6,13 @@ import eu.okaeri.configs.annotation.Comment;
 import eu.okaeri.configs.annotation.CustomKey;
 import lombok.Getter;
 import lombok.experimental.Accessors;
+import dev.jsinco.brewery.api.config.Configuration;
 
 import java.util.List;
 
 @Getter
 @Accessors(fluent = true)
-public class BarrelSection extends OkaeriConfig {
+public class BarrelSection extends OkaeriConfig implements Configuration.Barrels {
 
     @Comment("How many ticks it will take to age a brew one year")
     @CustomKey("aging-year-ticks")

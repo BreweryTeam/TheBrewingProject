@@ -18,9 +18,11 @@ import java.security.SecureRandom;
 import java.util.List;
 import java.util.Locale;
 
+import dev.jsinco.brewery.api.config.Configuration;
+
 @Getter
 @Accessors(fluent = true)
-public class Config extends OkaeriConfig {
+public class Config extends OkaeriConfig implements Configuration{
 
     @Comment("Config version. Don't change this")
     @CustomKey("config-version")
