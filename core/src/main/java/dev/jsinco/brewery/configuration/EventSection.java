@@ -84,6 +84,10 @@ public class EventSection extends OkaeriConfig {
     @CustomKey("kaboom-velocity")
     private double kaboomVelocity = 0.2;
 
+    @Comment({"What health players should be set to in the kaboom event",
+            "This will not heal them when they have less HP"})
+    @CustomKey("kaboom-health")
+    private double kaboomHealth = 12.0;
 
     @Comment("The duration where player freezes for the fever event")
     @CustomKey("fever-freezing-time")

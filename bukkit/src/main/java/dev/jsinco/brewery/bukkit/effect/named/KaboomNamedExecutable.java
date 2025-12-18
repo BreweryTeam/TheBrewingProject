@@ -41,8 +41,7 @@ public class KaboomNamedExecutable implements EventPropertyExecutable {
             player.setVelocity(new Vector(0, EventSection.events().kaboomVelocity(), 0));
         }
 
-
-        double targetHealth = 8.0;
+        double targetHealth = EventSection.events().kaboomHealth();
         double currentHealth = player.getHealth();
         double damageAmount = currentHealth - targetHealth;
 
