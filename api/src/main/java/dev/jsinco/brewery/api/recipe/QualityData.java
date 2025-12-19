@@ -1,6 +1,8 @@
 package dev.jsinco.brewery.api.recipe;
 
+import com.google.common.base.Preconditions;
 import dev.jsinco.brewery.api.brew.BrewQuality;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -33,7 +35,19 @@ public class QualityData<T> {
     public <U> QualityData<U> map(Function<T, U> mapper) {
         Map<BrewQuality, U> newBacking = new HashMap<>();
         for (Map.Entry<BrewQuality, T> entry : backing.entrySet()) {
-            newBacking.put(entry.getKey(), mapper.apply(entry.getValue()));
+            newBacking.put(entry.getKey(), Preconditions.checkNotNull(mapper.apply(entry.getValue())));
+        }
+        return new QualityData<>(newBacking);
+    }
+
+    public <U> QualityData<U> map(U defaultValue, Function<T, U> mapper) {
+        Map<BrewQuality, U> newBacking = new HashMap<>();
+        for (Map.Entry<BrewQuality, T> entry : backing.entrySet()) {
+            try {
+                newBacking.put(entry.getKey(), Preconditions.checkNotNull(mapper.apply(entry.getValue())));
+            } catch (Throwable throwable) {
+                newBacking.put(entry.getKey(), defaultValue);
+            }
         }
         return new QualityData<>(newBacking);
     }
@@ -42,7 +56,7 @@ public class QualityData<T> {
      * @param brewQuality Quality data
      * @return The data for specified
      */
-    public @Nullable T get(BrewQuality brewQuality) {
+    public @NotNull T get(BrewQuality brewQuality) {
         return backing.get(brewQuality);
     }
 
@@ -51,10 +65,7 @@ public class QualityData<T> {
                 .collect(Collectors.toMap(quality -> quality, mapper)));
     }
 
-    public static QualityData<String> readQualityFactoredString(@Nullable String string) {
-        if (string == null) {
-            return new QualityData<>(Map.of());
-        }
+    public static QualityData<String> readQualityFactoredString(@NotNull String string) {
         String[] list = split(string);
         if (list.length == 1) {
             return new QualityData<>(Map.of(BrewQuality.BAD, string, BrewQuality.GOOD, string, BrewQuality.EXCELLENT, string));
@@ -117,10 +128,6 @@ public class QualityData<T> {
             map.putIfAbsent(quality, new ArrayList<>());
         }
         return new QualityData<>(map);
-    }
-
-    public T getOrDefault(BrewQuality quality, T t) {
-        return backing.getOrDefault(quality, t);
     }
 
     public void forEach(BiConsumer<BrewQuality, T> consumer) {
