@@ -129,7 +129,7 @@ public class BukkitCauldron implements Cauldron {
         BrewScore score = brew.score(recipeOptional.get());
         return !score.completed() ?
                 BukkitIngredientUtil.ingredientData(ingredients).first() :
-                ((BukkitRecipeResult) recipeOptional.get().getRecipeResults().getOrDefault(score.brewQuality(), BukkitRecipeResult.GENERIC)).getColor();
+                ((BukkitRecipeResult) recipeOptional.get().getRecipeResults().get(score.brewQuality())).getColor();
     }
 
 

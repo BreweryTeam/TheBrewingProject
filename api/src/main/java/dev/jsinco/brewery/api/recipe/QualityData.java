@@ -60,6 +60,16 @@ public class QualityData<T> {
         return backing.get(brewQuality);
     }
 
+    /**
+     * @param brewQuality Quality data
+     * @param ignored The ignored default value
+     * @return The data for specified
+     */
+    @Deprecated(forRemoval = true)
+    public @NotNull T get(BrewQuality brewQuality, T ignored) {
+        return backing.get(brewQuality);
+    }
+
     public static <T> QualityData<T> fromValueMapper(Function<BrewQuality, T> mapper) {
         return new QualityData<>(Arrays.stream(BrewQuality.values())
                 .collect(Collectors.toMap(quality -> quality, mapper)));
