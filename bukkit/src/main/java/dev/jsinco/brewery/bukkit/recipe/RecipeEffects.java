@@ -2,7 +2,6 @@ package dev.jsinco.brewery.bukkit.recipe;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
-import dev.jsinco.brewery.api.effect.DrunkState;
 import dev.jsinco.brewery.api.effect.DrunksManager;
 import dev.jsinco.brewery.api.effect.ModifierConsume;
 import dev.jsinco.brewery.api.effect.modifier.DrunkenModifier;
@@ -12,11 +11,11 @@ import dev.jsinco.brewery.api.event.DrunkEvent;
 import dev.jsinco.brewery.api.util.BreweryKey;
 import dev.jsinco.brewery.api.util.BreweryRegistry;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
+import dev.jsinco.brewery.bukkit.effect.ConsumedModifierDisplay;
 import dev.jsinco.brewery.bukkit.effect.ModifierConsumePdcType;
 import dev.jsinco.brewery.bukkit.util.BukkitMessageUtil;
 import dev.jsinco.brewery.bukkit.util.ListPersistentDataType;
 import dev.jsinco.brewery.configuration.DrunkenModifierSection;
-import dev.jsinco.brewery.effect.DrunkStateImpl;
 import dev.jsinco.brewery.effect.DrunksManagerImpl;
 import dev.jsinco.brewery.util.MessageUtil;
 import io.papermc.paper.persistence.PersistentDataContainerView;
@@ -211,26 +210,7 @@ public class RecipeEffects {
     }
 
     private void renderDefaultDisplayMessage(Player player, ModifierDisplay.DisplayWindow displayWindow, DrunksManager drunksManager) {
-        DrunkState drunkState = drunksManager.getDrunkState(player.getUniqueId());
-        Map<String, Double> variables = (drunkState == null ? new DrunkStateImpl(0, -1) : drunkState).asVariables();
-        modifiers.forEach((modifier, value) -> variables.put("consumed_" + modifier.name(), value));
-        Component component = DrunkenModifierSection.modifiers().drunkenDisplays()
-                .stream()
-                .filter(modifierDisplay -> modifierDisplay.displayWindow().equals(displayWindow))
-                .filter(modifierDisplay -> modifierDisplay.filter().evaluate(variables) > 0)
-                .map(modifierDisplay -> MessageUtil.miniMessage(
-                        modifierDisplay.message(),
-                        MessageUtil.getValueDisplayTagResolver(modifierDisplay.value().evaluate(variables)))
-                )
-                .collect(Component.toComponent(Component.text(", ")));
-        if (component.equals(Component.empty())) {
-            return;
-        }
-        switch (displayWindow) {
-            case CHAT -> player.sendMessage(component);
-            case ACTION_BAR -> player.sendActionBar(component);
-            case TITLE -> player.showTitle(Title.title(component, Component.empty()));
-        }
+        ConsumedModifierDisplay.renderConsumeDisplay(player, displayWindow, drunksManager, modifiers);
     }
 
     public void applyTo(Projectile projectile) {
