@@ -10,6 +10,7 @@ import dev.jsinco.brewery.api.event.CustomEventRegistry;
 import dev.jsinco.brewery.api.event.DrunkEvent;
 import dev.jsinco.brewery.api.util.BreweryKey;
 import dev.jsinco.brewery.api.util.BreweryRegistry;
+import dev.jsinco.brewery.api.util.Builder;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.bukkit.effect.ConsumedModifierDisplay;
 import dev.jsinco.brewery.bukkit.effect.ModifierConsumePdcType;
@@ -218,7 +219,7 @@ public class RecipeEffects {
         applyTo(persistentDataContainer);
     }
 
-    public static class Builder {
+    public static class Builder implements dev.jsinco.brewery.api.util.Builder<RecipeEffects> {
 
         private List<RecipeEffect> effects = List.of();
         private @Nullable String title;

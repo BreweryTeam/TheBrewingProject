@@ -5,12 +5,12 @@ import dev.jsinco.brewery.api.effect.modifier.DrunkenModifier;
 import dev.jsinco.brewery.api.moment.Interval;
 import dev.jsinco.brewery.api.moment.Moment;
 import dev.jsinco.brewery.api.recipe.QualityData;
+import dev.jsinco.brewery.api.recipe.QualityDataBuilder;
 import dev.jsinco.brewery.api.recipe.RecipeResult;
 import dev.jsinco.brewery.api.util.BreweryKey;
 import dev.jsinco.brewery.bukkit.util.ColorUtil;
 import dev.jsinco.brewery.configuration.DrunkenModifierSection;
 import dev.jsinco.brewery.recipes.RecipeResultReader;
-import org.bukkit.Color;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Registry;
 import org.bukkit.inventory.ItemStack;
@@ -25,61 +25,44 @@ import java.util.Map;
 public class BukkitRecipeResultReader implements RecipeResultReader<ItemStack> {
     @Override
     public QualityData<RecipeResult<ItemStack>> readRecipeResults(ConfigurationSection configurationSection) {
-        QualityData<RecipeEffects> recipeEffects = getRecipeEffects(configurationSection);
-        QualityData<Integer> customModelData = QualityData.readQualityFactoredString(configurationSection.getString("potion-attributes.custom-model-data"))
-                .map(Integer::parseInt);
-        QualityData<String> itemModel = QualityData.readQualityFactoredString(configurationSection.getString("potion-attributes.item-model"));
-        QualityData<List<String>> lore = QualityData.readQualityFactoredStringList(configurationSection.getStringList("potion-attributes.lore"));
-        QualityData<Boolean> glint = QualityData.readQualityFactoredString(configurationSection.getString("potion-attributes.glint"))
-                .map(Boolean::parseBoolean);
-        QualityData<String> names = QualityData.readQualityFactoredString(configurationSection.getString("potion-attributes.name"));
-        QualityData<Color> colors = QualityData.readQualityFactoredString(configurationSection.getString("potion-attributes.color"))
-                .map(ColorUtil::parseColorString);
-        QualityData<Boolean> appendBrewInfoLore = QualityData.readQualityFactoredString(configurationSection.getString("potion-attributes.append-brew-info-lore"))
-                .map(Boolean::parseBoolean);
-        QualityData<String> customId = QualityData.readQualityFactoredString(configurationSection.getString("potion-attributes.custom-id"));
-
-        return QualityData.fromValueMapper(brewQuality ->
-                new BukkitRecipeResult.Builder()
-                        .name(names.get(brewQuality))
-                        .recipeEffects(recipeEffects.getOrDefault(brewQuality, RecipeEffects.GENERIC))
-                        .lore(lore.getOrDefault(brewQuality, List.of()))
-                        .glint(glint.getOrDefault(brewQuality, false))
-                        .color(Preconditions.checkNotNull(colors.get(brewQuality)))
-                        .appendBrewInfoLore(appendBrewInfoLore.getOrDefault(brewQuality, true))
-                        .customId(customId.get(brewQuality))
-                        .customModelData(customModelData.getOrDefault(brewQuality, -1))
-                        .itemModel(itemModel.get(brewQuality))
-                        .build()
+        QualityDataBuilder<RecipeResult<ItemStack>, BukkitRecipeResult.Builder> qualityDataBuilder = new QualityDataBuilder<>(BukkitRecipeResult.Builder::new);
+        qualityDataBuilder.addOptional(configurationSection.getString("potion-attributes.custom-model-data"),
+                Integer::parseInt,
+                BukkitRecipeResult.Builder::customModelData
         );
+        qualityDataBuilder.addOptionalString(configurationSection.getString("potion-attributes.item-model"), BukkitRecipeResult.Builder::itemModel);
+        qualityDataBuilder.addOptionalStringList(configurationSection.getStringList("potion-attributes.lore"), BukkitRecipeResult.Builder::lore);
+        qualityDataBuilder.addOptional(configurationSection.getString("potion-attributes.glint"), Boolean::parseBoolean, BukkitRecipeResult.Builder::glint);
+        qualityDataBuilder.addString(
+                configurationSection.getString("potion-attributes.name"),
+                "Expected field 'potion-attributes.name'!",
+                BukkitRecipeResult.Builder::name
+        );
+        qualityDataBuilder.add(
+                configurationSection.getString("potion-attributes.color"),
+                "Expected field 'potion-attributes.color'!",
+                ColorUtil::parseColorString,
+                BukkitRecipeResult.Builder::color
+        );
+        qualityDataBuilder.addOptional(
+                configurationSection.getString("potion-attributes.append-brew-info-lore"),
+                Boolean::parseBoolean,
+                BukkitRecipeResult.Builder::appendBrewInfoLore
+        );
+        qualityDataBuilder.addOptionalString(configurationSection.getString("potion-attributes.custom-id"), BukkitRecipeResult.Builder::customId);
+        qualityDataBuilder.add(getRecipeEffects(configurationSection), BukkitRecipeResult.Builder::recipeEffects);
+        return qualityDataBuilder.build();
     }
 
     private static QualityData<RecipeEffects> getRecipeEffects(ConfigurationSection configurationSection) {
-        QualityData<String> actionBar = QualityData.readQualityFactoredString(configurationSection.getString("messages.action-bar", null));
-        QualityData<String> title = QualityData.readQualityFactoredString(configurationSection.getString("messages.title", null));
-        QualityData<String> message = QualityData.readQualityFactoredString(configurationSection.getString("messages.message", null));
-        QualityData<List<RecipeEffect>> effects = QualityData.readQualityFactoredStringList(configurationSection.getStringList("effects"))
-                .map(list -> list
-                        .stream()
-                        .map(BukkitRecipeResultReader::getEffect)
-                        .toList()
-                );
-        QualityData<List<BreweryKey>> events = QualityData.readQualityFactoredStringList(configurationSection.getStringList("events"))
-                .map(list -> list
-                        .stream()
-                        .map(BreweryKey::parse)
-                        .toList()
-                );
-        QualityData<Map<DrunkenModifier, Double>> modifiers = parseModifiers(configurationSection);
-        return QualityData.fromValueMapper(quality -> new RecipeEffects.Builder()
-                .actionBar(actionBar.get(quality))
-                .title(title.get(quality))
-                .message(message.get(quality))
-                .addModifiers(modifiers.get(quality))
-                .effects(effects.getOrDefault(quality, List.of()))
-                .events(events.getOrDefault(quality, List.of()))
-                .build()
-        );
+        QualityDataBuilder<RecipeEffects, RecipeEffects.Builder> qualityDataBuilder = new QualityDataBuilder<>(RecipeEffects.Builder::new);
+        qualityDataBuilder.addOptionalString(configurationSection.getString("messages.action-bar"), RecipeEffects.Builder::actionBar);
+        qualityDataBuilder.addOptionalString(configurationSection.getString("messages.title"), RecipeEffects.Builder::title);
+        qualityDataBuilder.addOptionalString(configurationSection.getString("messages.message"), RecipeEffects.Builder::message);
+        qualityDataBuilder.addOptionalList(configurationSection.getStringList("effects"), BukkitRecipeResultReader::getEffect, RecipeEffects.Builder::effects);
+        qualityDataBuilder.addOptionalList(configurationSection.getStringList("events"), BreweryKey::parse, RecipeEffects.Builder::events);
+        qualityDataBuilder.add(parseModifiers(configurationSection), RecipeEffects.Builder::addModifiers);
+        return qualityDataBuilder.build();
     }
 
     private static QualityData<Map<DrunkenModifier, Double>> parseModifiers(ConfigurationSection configurationSection) {
@@ -113,7 +96,7 @@ public class BukkitRecipeResultReader implements RecipeResultReader<ItemStack> {
             durationBounds = Interval.parse(parts[2]).multiply(Moment.SECOND);
             amplifierBounds = Interval.parse(parts[1]);
         } else {
-            if(type.isInstant()) {
+            if (type.isInstant()) {
                 durationBounds = new Interval(1, 1);
                 amplifierBounds = Interval.parse(parts[1]);
             } else {
