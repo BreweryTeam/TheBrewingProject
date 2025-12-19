@@ -1,6 +1,5 @@
 package dev.jsinco.brewery.bukkit.util;
 
-import dev.jsinco.brewery.api.util.Logger;
 import dev.jsinco.brewery.configuration.EventSection;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -111,6 +110,16 @@ public class LocationUtil {
                  POWDER_SNOW -> true;
             default -> false;
         };
+    }
+
+    /**
+     * Checks if a location is within the <strong>vertical</strong> build limit.
+     * @param location The location with a non-null world
+     * @return true if the location is within the build limit
+     */
+    public static boolean isWithinBuildLimit(Location location) {
+        World world = location.getWorld();
+        return world.getMinHeight() <= location.getBlockY() && location.getBlockY() <= world.getMaxHeight();
     }
 
 }
