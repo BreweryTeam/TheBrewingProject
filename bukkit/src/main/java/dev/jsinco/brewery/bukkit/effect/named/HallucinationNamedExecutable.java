@@ -111,7 +111,7 @@ public class HallucinationNamedExecutable implements EventPropertyExecutable {
 
     private static boolean canReplace(Block toReplace) {
         // Only replacing full blocks ensures no physics desyncs
-        return !CANNOT_REPLACE.contains(toReplace.getType()) && BlockUtil.isFullBlock(toReplace);
+        return !CANNOT_REPLACE.contains(toReplace.getType()) && toReplace.isSolid() && BlockUtil.isFullBlock(toReplace);
     }
 
     private static @Nullable BlockType getReplacementBlock(Block target) {
