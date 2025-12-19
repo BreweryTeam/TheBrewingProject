@@ -40,7 +40,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
-import java.util.Locale;
 import java.util.Objects;
 import java.util.stream.Stream;
 
@@ -214,7 +213,7 @@ public class BukkitRecipeResult implements RecipeResult<ItemStack> {
     }
 
 
-    public static class Builder {
+    public static class Builder implements dev.jsinco.brewery.api.util.Builder<RecipeResult<ItemStack>> {
 
         private boolean glint;
         private int customModelData;
@@ -279,8 +278,10 @@ public class BukkitRecipeResult implements RecipeResult<ItemStack> {
 
         public BukkitRecipeResult build() {
             Objects.requireNonNull(name, "Names not initialized, a recipe has to have names");
-            Objects.requireNonNull(lore, "Lore not initialized, a recipe has to have lore");
             Objects.requireNonNull(recipeEffects, "Effects not initialized, a recipe has to have effects");
+            if(lore == null) {
+                lore = List.of();
+            }
             return new BukkitRecipeResult(glint, customModelData, itemModel, recipeEffects, name, lore, color, appendBrewInfoLore, customId);
         }
 
