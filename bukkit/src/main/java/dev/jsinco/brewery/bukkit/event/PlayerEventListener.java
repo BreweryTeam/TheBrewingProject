@@ -5,6 +5,7 @@ import dev.jsinco.brewery.api.breweries.InventoryAccessible;
 import dev.jsinco.brewery.api.breweries.StructureHolder;
 import dev.jsinco.brewery.api.effect.DrunkState;
 import dev.jsinco.brewery.api.effect.ModifierConsume;
+import dev.jsinco.brewery.api.effect.modifier.ModifierDisplay;
 import dev.jsinco.brewery.api.ingredient.Ingredient;
 import dev.jsinco.brewery.api.ingredient.ScoredIngredient;
 import dev.jsinco.brewery.api.util.BreweryKey;
@@ -18,6 +19,7 @@ import dev.jsinco.brewery.bukkit.brew.BrewAdapter;
 import dev.jsinco.brewery.bukkit.breweries.BreweryRegistry;
 import dev.jsinco.brewery.bukkit.breweries.BukkitCauldron;
 import dev.jsinco.brewery.bukkit.breweries.BukkitCauldronDataType;
+import dev.jsinco.brewery.bukkit.effect.ConsumedModifierDisplay;
 import dev.jsinco.brewery.bukkit.effect.event.DrunkEventExecutor;
 import dev.jsinco.brewery.bukkit.ingredient.BukkitIngredientManager;
 import dev.jsinco.brewery.bukkit.recipe.RecipeEffects;
@@ -65,10 +67,7 @@ import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Optional;
-import java.util.Random;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 public class PlayerEventListener implements Listener {
     public static final Set<Material> DISALLOWED_INGREDIENT_MATERIALS = Set.of(Material.CLOCK, Material.BUCKET, Material.GLASS_BOTTLE);
@@ -316,11 +315,13 @@ public class PlayerEventListener implements Listener {
         for (ConsumableSerializer.Consumable consumable : DrunkenModifierSection.modifiers().consumables()) {
             String key = consumable.type().contains(":") ? consumable.type() : "minecraft:" + consumable.type();
             if (ingredient.getKey().equalsIgnoreCase(key)) {
-                drunksManager.consume(event.getPlayer().getUniqueId(),
-                        consumable.modifiers().entrySet().stream()
-                                .map(entry -> new ModifierConsume(DrunkenModifierSection.modifiers().modifier(entry.getKey()), entry.getValue(), true))
-                                .toList()
-                );
+                List<ModifierConsume> consumedModifiers = consumable.modifiers().entrySet().stream()
+                        .map(entry -> new ModifierConsume(DrunkenModifierSection.modifiers().modifier(entry.getKey()), entry.getValue(), true))
+                        .toList();
+                drunksManager.consume(event.getPlayer().getUniqueId(), consumedModifiers);
+                for (ModifierDisplay.DisplayWindow window : ModifierDisplay.DisplayWindow.values()) {
+                    ConsumedModifierDisplay.renderConsumeDisplay(event.getPlayer(), window, drunksManager, consumedModifiers);
+                }
             }
         }
     }
