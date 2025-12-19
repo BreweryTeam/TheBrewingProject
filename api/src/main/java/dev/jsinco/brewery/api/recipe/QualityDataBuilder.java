@@ -6,6 +6,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -65,6 +66,20 @@ public class QualityDataBuilder<T, B extends Builder<T>> {
         }
         QualityData<List<String>> uQualityData = QualityData.readQualityFactoredStringList(values);
         elementBuilders.forEach((quality, builder) -> action.accept(builder, uQualityData.get(quality)));
+        return this;
+    }
+
+    public <U> QualityDataBuilder<T, B> addOptionalList(List<String> values, Function<String, U> uMapper, BiConsumer<B, List<U>> action) {
+        if (values == null) {
+            return this;
+        }
+        QualityData<List<String>> uQualityData = QualityData.readQualityFactoredStringList(values);
+        elementBuilders.forEach((quality, builder) -> action.accept(builder, uQualityData.get(quality)
+                .stream()
+                .map(uMapper)
+                .filter(Objects::nonNull)
+                .toList()
+        ));
         return this;
     }
 
