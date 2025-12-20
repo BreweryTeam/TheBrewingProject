@@ -10,6 +10,7 @@ import dev.jsinco.brewery.brew.BrewImpl;
 import dev.jsinco.brewery.bukkit.brew.BrewAdapter;
 import dev.jsinco.brewery.bukkit.command.argument.EnumArgument;
 import dev.jsinco.brewery.bukkit.command.argument.RecipeArgument;
+import dev.jsinco.brewery.bukkit.recipe.BukkitRecipeResult;
 import dev.jsinco.brewery.recipes.BrewScoreImpl;
 import dev.jsinco.brewery.util.MessageUtil;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
@@ -45,7 +46,10 @@ public class ReplicateCommand {
         BrewScore score = brew.score(recipe);
         if (score instanceof BrewScoreImpl scoreImpl) scoreImpl.setQualityOverride(quality);
         ItemStack brewItem = recipe.getRecipeResult(quality).newBrewItem(score, brew, new Brew.State.Other());
-        brewItem.editPersistentDataContainer(pdc -> BrewAdapter.applyBrewStepsData(pdc, brew));
+        brewItem.editPersistentDataContainer(pdc -> {
+            BrewAdapter.applyBrewTags(pdc, recipe, score.score(), ((BukkitRecipeResult) recipe.getRecipeResult(quality)).getName());
+            BrewAdapter.applyBrewStepsData(pdc, brew);
+        });
         if (!target.getInventory().addItem(brewItem).isEmpty()) {
             target.getLocation().getWorld().dropItem(target.getLocation(), brewItem);
         }
