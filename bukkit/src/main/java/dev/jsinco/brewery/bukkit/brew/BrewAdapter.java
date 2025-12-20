@@ -13,7 +13,6 @@ import dev.jsinco.brewery.api.util.BreweryKey;
 import dev.jsinco.brewery.api.util.Pair;
 import dev.jsinco.brewery.brew.BrewImpl;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
-import dev.jsinco.brewery.bukkit.recipe.BukkitRecipeResult;
 import dev.jsinco.brewery.bukkit.util.BukkitIngredientUtil;
 import dev.jsinco.brewery.bukkit.util.ListPersistentDataType;
 import dev.jsinco.brewery.configuration.Config;
@@ -78,11 +77,7 @@ public class BrewAdapter {
             RecipeResult<ItemStack> recipeResult = recipe.get().getRecipeResult(quality.get());
             itemStack = recipeResult.newBrewItem(score.get(), brew, state);
             itemStack.editPersistentDataContainer(pdc -> {
-                pdc.set(BREWERY_TAG, PersistentDataType.STRING, BreweryKey.parse(recipe.get().getRecipeName()).toString());
-                pdc.set(BREWERY_SCORE, PersistentDataType.DOUBLE, score.get().score());
-                if (recipeResult instanceof BukkitRecipeResult bukkitRecipeResult) {
-                    pdc.set(BREWERY_DISPLAY_NAME, PersistentDataType.STRING, bukkitRecipeResult.getName());
-                }
+
             });
         }
         if (!(state instanceof BrewImpl.State.Seal)) {
@@ -188,5 +183,11 @@ public class BrewAdapter {
                     ItemFlag.HIDE_DYE, ItemFlag.HIDE_DESTROYS, ItemFlag.HIDE_ENCHANTS, ItemFlag.HIDE_STORED_ENCHANTS,
                     ItemFlag.HIDE_UNBREAKABLE, ItemFlag.HIDE_ADDITIONAL_TOOLTIP));
         }
+    }
+
+    public static void applyBrewTags(PersistentDataContainer pdc, Recipe<ItemStack> recipe, double score, String miniMessageName) {
+        pdc.set(BREWERY_TAG, PersistentDataType.STRING, BreweryKey.parse(recipe.getRecipeName()).toString());
+        pdc.set(BREWERY_SCORE, PersistentDataType.DOUBLE, score);
+        pdc.set(BREWERY_DISPLAY_NAME, PersistentDataType.STRING, miniMessageName);
     }
 }
