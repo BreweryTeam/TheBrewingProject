@@ -14,6 +14,7 @@ import dev.jsinco.brewery.bukkit.breweries.distillery.BukkitDistillery;
 import dev.jsinco.brewery.bukkit.effect.named.PukeNamedExecutable;
 import dev.jsinco.brewery.configuration.Config;
 import dev.jsinco.brewery.database.sql.Database;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
@@ -72,8 +73,9 @@ public class InventoryEventListener implements Listener {
         List<? extends ItemTransactionEvent<?>> transactions = compileTransactionsFromClick(event, upperInventoryIsClicked, inventoryAccessible);
         for (ItemTransactionEvent<?> transactionEvent : transactions) {
             if (!transactionEvent.callEvent()) {
-                if (transactionEvent.isDenied()) {
-                    event.getWhoClicked().sendMessage(transactionEvent.getDenyMessage());
+                Component denyMessage = transactionEvent.getDenyMessage();
+                if (transactionEvent.isDenied() && denyMessage != null) {
+                    event.getWhoClicked().sendMessage(denyMessage);
                 }
                 event.setResult(Event.Result.DENY);
                 return;
@@ -84,16 +86,24 @@ public class InventoryEventListener implements Listener {
                 ItemTransactionSession<?> session = transactionEvent.getTransactionSession();
                 ItemTransaction transaction = session.getTransaction();
                 ItemStack itemStack = session.getResult() == null ? null : session.getResult().get();
-                if (transaction.to() instanceof ItemTransaction.Cursor) {
+                if (transaction.to() instanceof ItemTransaction.Cursor
+                        && transaction.itemStack().equals(event.getView().getCursor())
+                ) {
                     event.getView().setCursor(itemStack);
                 }
-                if (transaction.to() instanceof ItemTransaction.RawPosition(int pos)) {
+                if (transaction.to() instanceof ItemTransaction.RawPosition(int pos)
+                        && transaction.itemStack().equals(event.getView().getItem(pos))
+                ) {
                     event.getView().setItem(pos, itemStack);
                 }
-                if (transaction.to() instanceof ItemTransaction.UpperInventoryPosition(int pos)) {
+                if (transaction.to() instanceof ItemTransaction.UpperInventoryPosition(int pos)
+                        && transaction.itemStack().equals(event.getView().getTopInventory().getItem(pos))
+                ) {
                     event.getView().getTopInventory().setItem(pos, itemStack);
                 }
-                if (transaction.to() instanceof ItemTransaction.LowerInventoryPosition(int pos)) {
+                if (transaction.to() instanceof ItemTransaction.LowerInventoryPosition(int pos)
+                        && transaction.itemStack().equals(event.getView().getBottomInventory().getItem(pos))
+                ) {
                     event.getView().getBottomInventory().setItem(pos, itemStack);
                 }
             }
