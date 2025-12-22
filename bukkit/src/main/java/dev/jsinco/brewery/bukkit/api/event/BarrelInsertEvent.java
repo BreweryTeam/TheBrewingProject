@@ -23,7 +23,8 @@ public class BarrelInsertEvent extends PermissibleBreweryEvent implements ItemTr
     private final ItemTransactionSession<ItemSource.BrewBasedSource> transactionSession;
 
 
-    public BarrelInsertEvent(BukkitBarrel barrel, ItemTransactionSession<ItemSource.BrewBasedSource> transactionSession, @Nullable Player player) {
+    public BarrelInsertEvent(BukkitBarrel barrel, ItemTransactionSession<ItemSource.BrewBasedSource> transactionSession, boolean cancelled, @Nullable Player player) {
+        super(cancelled);
         this.barrel = barrel;
         this.transactionSession = transactionSession;
         this.player = player;
