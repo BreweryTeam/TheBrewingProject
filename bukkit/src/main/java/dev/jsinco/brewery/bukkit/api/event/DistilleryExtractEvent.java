@@ -20,7 +20,8 @@ public class DistilleryExtractEvent extends PermissibleBreweryEvent implements I
     private final @Nullable Player player;
 
 
-    public DistilleryExtractEvent(BukkitDistillery distillery, ItemTransactionSession<ItemSource.ItemBasedSource> transactionSession, @Nullable Player player) {
+    public DistilleryExtractEvent(BukkitDistillery distillery, ItemTransactionSession<ItemSource.ItemBasedSource> transactionSession, boolean cancelled, @Nullable Player player) {
+        super(cancelled);
         this.distillery = distillery;
         this.transactionSession = transactionSession;
         this.player = player;

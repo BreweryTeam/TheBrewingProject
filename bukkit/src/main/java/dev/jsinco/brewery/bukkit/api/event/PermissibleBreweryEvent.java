@@ -11,11 +11,19 @@ import org.jetbrains.annotations.Nullable;
 @Setter
 public abstract class PermissibleBreweryEvent extends Event implements Cancellable {
 
-    private boolean cancelled;
+    private boolean cancelled = false;
     @Getter
-    private boolean denied;
+    private boolean denied = false;
     @Getter
     private @Nullable Component denyMessage;
+
+    public PermissibleBreweryEvent(boolean cancelled) {
+        this.cancelled = cancelled;
+    }
+
+    public PermissibleBreweryEvent() {
+        // NO-OP
+    }
 
     public boolean isCancelled() {
         return cancelled || denied;
