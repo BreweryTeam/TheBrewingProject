@@ -1,17 +1,17 @@
 package dev.jsinco.brewery.brew;
 
 import dev.jsinco.brewery.api.brew.*;
+import dev.jsinco.brewery.api.meta.MetaData;
+import dev.jsinco.brewery.api.meta.MetaDataType;
 import dev.jsinco.brewery.configuration.Config;
 import dev.jsinco.brewery.api.recipe.Recipe;
 import dev.jsinco.brewery.api.recipe.RecipeRegistry;
 import dev.jsinco.brewery.recipes.BrewScoreImpl;
 import lombok.Getter;
+import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
@@ -20,6 +20,7 @@ public class BrewImpl implements Brew {
 
     @Getter
     private final List<BrewingStep> steps;
+    private final MetaData meta;
     public static final BrewSerializer SERIALIZER = new BrewSerializer();
 
     public BrewImpl(BrewingStep.Cook cook) {
@@ -31,7 +32,12 @@ public class BrewImpl implements Brew {
     }
 
     public BrewImpl(@NotNull List<BrewingStep> steps) {
+        this(steps, new MetaData());
+    }
+
+    private BrewImpl(List<BrewingStep> steps, MetaData meta) {
         this.steps = steps;
+        this.meta = meta;
     }
 
     public BrewImpl withStep(BrewingStep step) {
@@ -66,6 +72,21 @@ public class BrewImpl implements Brew {
 
     private boolean isCompleted(BrewingStep step) {
         return !(step instanceof BrewingStep.Age age) || age.time().moment() > Config.config().barrels().agingYearTicks() / 2;
+    }
+
+    @Override
+    public <P, C> Brew withMeta(Key key, MetaDataType<P, C> type, C value) {
+        return new BrewImpl(steps, meta.withMeta(key, type, value));
+    }
+
+    @Override
+    public Brew withoutMeta(Key key) {
+        return new BrewImpl(steps, meta.withoutMeta(key));
+    }
+
+    @Override
+    public <P, C> C meta(Key key, MetaDataType<P, C> type) {
+        return meta.meta(key, type);
     }
 
     public <I> Optional<Recipe<I>> closestRecipe(RecipeRegistry<I> registry) {
