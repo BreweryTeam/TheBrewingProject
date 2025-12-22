@@ -90,6 +90,12 @@ public class InventoryEventListener implements Listener {
                 if (transaction.to() instanceof ItemTransaction.RawPosition(int pos)) {
                     event.getView().setItem(pos, itemStack);
                 }
+                if (transaction.to() instanceof ItemTransaction.UpperInventoryPosition(int pos)) {
+                    event.getView().getTopInventory().setItem(pos, itemStack);
+                }
+                if (transaction.to() instanceof ItemTransaction.LowerInventoryPosition(int pos)) {
+                    event.getView().getBottomInventory().setItem(pos, itemStack);
+                }
             }
         });
     }
@@ -101,7 +107,7 @@ public class InventoryEventListener implements Listener {
             if (upperInventoryIsClicked) {
                 return findEmptyPositions(event.getView(), event.getCurrentItem(), false)
                         .stream()
-                        .map(inventoryPosition -> eventsFromStructure(
+                        .map(inventoryPosition -> eventFromStructure(
                                 inventoryAccessible,
                                 new ItemTransaction.RawPosition(event.getRawSlot()),
                                 inventoryPosition,
@@ -113,7 +119,7 @@ public class InventoryEventListener implements Listener {
             } else {
                 return findEmptyPositions(event.getView(), event.getCurrentItem(), true)
                         .stream()
-                        .map(inventoryPosition -> eventsFromStructure(
+                        .map(inventoryPosition -> eventFromStructure(
                                 inventoryAccessible,
                                 new ItemTransaction.RawPosition(event.getRawSlot()),
                                 inventoryPosition,
@@ -125,7 +131,7 @@ public class InventoryEventListener implements Listener {
             }
         }
         if (event.getAction() == InventoryAction.HOTBAR_SWAP) {
-            if (upperInventoryIsClicked) {
+            if (!upperInventoryIsClicked) {
                 return List.of();
             }
             int hotbar = event.getHotbarButton() == -1 ?
@@ -134,29 +140,35 @@ public class InventoryEventListener implements Listener {
             if (hotbar == -1) {
                 return List.of();
             }
-            return List.of(
-                    eventsFromStructure(
-                            inventoryAccessible,
-                            new ItemTransaction.RawPosition(hotbar),
-                            new ItemTransaction.RawPosition(event.getRawSlot()),
-                            event.getCurrentItem(),
-                            true,
-                            player
-                    ),
-                    eventsFromStructure(
-                            inventoryAccessible,
-                            new ItemTransaction.RawPosition(event.getRawSlot()),
-                            new ItemTransaction.RawPosition(hotbar),
-                            event.getView().getItem(hotbar),
-                            false,
-                            player
-                    )
-            );
+            ItemStack currentItem = event.getCurrentItem();
+            List<ItemTransactionEvent<?>> output = new ArrayList<>();
+            if (currentItem != null && !currentItem.isEmpty()) {
+                output.add(eventFromStructure(
+                        inventoryAccessible,
+                        new ItemTransaction.RawPosition(event.getRawSlot()),
+                        new ItemTransaction.LowerInventoryPosition(hotbar),
+                        currentItem,
+                        false,
+                        player
+                ));
+            }
+            ItemStack hotbarItem = event.getView().getBottomInventory().getItem(hotbar);
+            if (hotbarItem != null && !hotbarItem.isEmpty()) {
+                output.add(eventFromStructure(
+                        inventoryAccessible,
+                        new ItemTransaction.LowerInventoryPosition(hotbar),
+                        new ItemTransaction.RawPosition(event.getRawSlot()),
+                        hotbarItem,
+                        true,
+                        player
+                ));
+            }
+            return output;
         }
         if (CURSOR.contains(event.getAction())) {
             if (InventoryAction.SWAP_WITH_CURSOR == event.getAction()) {
                 return List.of(
-                        eventsFromStructure(
+                        eventFromStructure(
                                 inventoryAccessible,
                                 new ItemTransaction.Cursor(),
                                 new ItemTransaction.RawPosition(event.getRawSlot()),
@@ -164,7 +176,7 @@ public class InventoryEventListener implements Listener {
                                 true,
                                 player
                         ),
-                        eventsFromStructure(
+                        eventFromStructure(
                                 inventoryAccessible,
                                 new ItemTransaction.RawPosition(event.getRawSlot()),
                                 new ItemTransaction.Cursor(),
@@ -175,7 +187,7 @@ public class InventoryEventListener implements Listener {
                 );
             }
             if (ITEM_PICKUP_CURSOR.contains(event.getAction())) {
-                return List.of(eventsFromStructure(
+                return List.of(eventFromStructure(
                         inventoryAccessible,
                         new ItemTransaction.RawPosition(event.getRawSlot()),
                         new ItemTransaction.Cursor(),
@@ -184,7 +196,7 @@ public class InventoryEventListener implements Listener {
                         player
                 ));
             }
-            return List.of(eventsFromStructure(
+            return List.of(eventFromStructure(
                     inventoryAccessible,
                     new ItemTransaction.Cursor(),
                     new ItemTransaction.RawPosition(event.getRawSlot()),
@@ -231,9 +243,9 @@ public class InventoryEventListener implements Listener {
         return positions;
     }
 
-    private static ItemTransactionEvent<?> eventsFromStructure(InventoryAccessible<ItemStack, Inventory> inventoryAccessible,
-                                                               ItemTransaction.InventoryPosition from, ItemTransaction.InventoryPosition to,
-                                                               ItemStack item, boolean insertion, @Nullable Player player) {
+    private static ItemTransactionEvent<?> eventFromStructure(InventoryAccessible<ItemStack, Inventory> inventoryAccessible,
+                                                              ItemTransaction.InventoryPosition from, ItemTransaction.InventoryPosition to,
+                                                              ItemStack item, boolean insertion, @Nullable Player player) {
         ItemTransaction transaction = new ItemTransaction(from, to, item, insertion);
         Optional<Brew> brewOptional = BrewAdapter.fromItem(item);
         if (inventoryAccessible instanceof BukkitDistillery distillery) {
