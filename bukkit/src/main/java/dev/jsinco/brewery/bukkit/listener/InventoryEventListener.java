@@ -202,21 +202,27 @@ public class InventoryEventListener implements Listener {
         }
         Inventory inventory = topInventory ? view.getTopInventory() : view.getBottomInventory();
         int amount = currentItem.getAmount();
-        int offset = topInventory ? 0 : view.getTopInventory().getSize();
+        int size = view.getTopInventory().getSize() + 9 * 4;
         List<ItemTransaction.InventoryPosition> positions = new ArrayList<>();
-        for (int i = 0; i < view.countSlots(); i++) {
-            if (inventory != view.getInventory(i)) {
+        for (int i = 0; i < size; i++) {
+            int rawPos;
+            if (topInventory) {
+                rawPos = i;
+            } else {
+                rawPos = size - 1 - i;
+            }
+            if (inventory != view.getInventory(rawPos)) {
                 continue;
             }
-            ItemStack item = view.getItem(i);
+            ItemStack item = view.getItem(rawPos);
             if (item == null || item.isEmpty()) {
-                positions.add(new ItemTransaction.RawPosition(i + offset));
+                positions.add(new ItemTransaction.RawPosition(rawPos));
                 return positions;
             }
             if (!item.isSimilar(currentItem) || item.getMaxStackSize() <= item.getAmount()) {
                 continue;
             }
-            positions.add(new ItemTransaction.RawPosition(i + offset));
+            positions.add(new ItemTransaction.RawPosition(rawPos));
             amount -= item.getMaxStackSize() - item.getAmount();
             if (amount <= 0) {
                 break;
@@ -242,7 +248,7 @@ public class InventoryEventListener implements Listener {
                     distillery,
                     new ItemTransactionSession<>(transaction, brewOptional
                             .map(brew -> BrewAdapter.toItem(brew, new Brew.State.Other()))
-                            .map(brewItem -> new ItemSource.ItemBasedSource(item))
+                            .map(ItemSource.ItemBasedSource::new)
                             .orElse(null)),
                     player
             );
