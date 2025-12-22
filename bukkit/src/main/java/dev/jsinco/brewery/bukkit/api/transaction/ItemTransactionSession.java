@@ -23,6 +23,6 @@ public class ItemTransactionSession<T extends ItemSource> {
 
     public ItemTransactionSession(ItemTransaction transaction, @Nullable T result) {
         this.transaction = Preconditions.checkNotNull(transaction);
-        this.result = Preconditions.checkNotNull(result);
+        this.result = result;
     }
 }

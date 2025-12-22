@@ -18,7 +18,8 @@ public class CauldronInsertEvent extends PermissibleBreweryEvent implements Item
     @Getter
     private final ItemTransactionSession<ItemSource.ItemBasedSource> transactionSession;
 
-    public CauldronInsertEvent(BukkitCauldron cauldron, ItemTransactionSession<ItemSource.ItemBasedSource> transactionSession, @Nullable Player player) {
+    public CauldronInsertEvent(BukkitCauldron cauldron, ItemTransactionSession<ItemSource.ItemBasedSource> transactionSession, boolean cancelled, @Nullable Player player) {
+        super(cancelled);
         this.cauldron = cauldron;
         this.transactionSession = transactionSession;
     }

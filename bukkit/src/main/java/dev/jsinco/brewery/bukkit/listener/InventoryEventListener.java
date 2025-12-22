@@ -243,6 +243,7 @@ public class InventoryEventListener implements Listener {
                             .map(brew -> new ItemSource.BrewBasedSource(brew, new Brew.State.Brewing()))
                             .orElse(null)
                     ),
+                    brewOptional.isEmpty(),
                     player
             ) : new DistilleryExtractEvent(
                     distillery,
@@ -250,6 +251,7 @@ public class InventoryEventListener implements Listener {
                             .map(brew -> BrewAdapter.toItem(brew, new Brew.State.Other()))
                             .map(ItemSource.ItemBasedSource::new)
                             .orElse(null)),
+                    false,
                     player
             );
         }
@@ -260,10 +262,12 @@ public class InventoryEventListener implements Listener {
                             .map(brew -> new ItemSource.BrewBasedSource(brew, new Brew.State.Other()))
                             .orElse(null)
                     ),
+                    brewOptional.isEmpty(),
                     player
             ) : new BarrelExtractEvent(
                     barrel,
                     new ItemTransactionSession<>(transaction, new ItemSource.ItemBasedSource(item)),
+                    false,
                     player
             );
         }
