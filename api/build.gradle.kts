@@ -17,6 +17,9 @@ dependencies {
     // test
     testImplementation(libs.junit.jupiter)
     testRuntimeOnly(libs.junit.platform.launcher)
+    testImplementation(libs.gson)
+    testImplementation(libs.guava)
+    testImplementation(libs.adventure.api)
 }
 
 tasks.test {
