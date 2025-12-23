@@ -266,6 +266,8 @@ public class InventoryEventListener implements Listener {
                             .orElse(null)
                     ),
                     brewOptional.isEmpty(),
+                    player != null && !player.hasPermission("brewery.distillery.access"),
+                    Component.translatable("tbp.distillery.access-denied"),
                     player
             ) : new DistilleryExtractEvent(
                     distillery,
@@ -274,6 +276,8 @@ public class InventoryEventListener implements Listener {
                             .map(ItemSource.ItemBasedSource::new)
                             .orElse(null)),
                     false,
+                    player != null && !player.hasPermission("brewery.distillery.access"),
+                    Component.translatable("tbp.distillery.access-denied"),
                     player
             );
         }
@@ -285,11 +289,15 @@ public class InventoryEventListener implements Listener {
                             .orElse(null)
                     ),
                     brewOptional.isEmpty(),
+                    player != null && !player.hasPermission("brewery.barrel.access"),
+                    Component.translatable("tbp.barrel.access-denied"),
                     player
             ) : new BarrelExtractEvent(
                     barrel,
                     new ItemTransactionSession<>(transaction, new ItemSource.ItemBasedSource(item)),
                     false,
+                    player != null && !player.hasPermission("brewery.barrel.access"),
+                    Component.translatable("tbp.barrel.access-denied"),
                     player
             );
         }
