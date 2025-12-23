@@ -17,6 +17,12 @@ public abstract class PermissibleBreweryEvent extends Event implements Cancellab
     @Getter
     private @Nullable Component denyMessage;
 
+    public PermissibleBreweryEvent(boolean cancelled, boolean denied, @Nullable Component denyMessage) {
+        this.cancelled = cancelled;
+        this.denied = denied;
+        this.denyMessage = denyMessage;
+    }
+
     public PermissibleBreweryEvent(boolean cancelled) {
         this.cancelled = cancelled;
     }

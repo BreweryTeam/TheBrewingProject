@@ -6,6 +6,7 @@ import dev.jsinco.brewery.bukkit.api.transaction.ItemTransactionSession;
 import dev.jsinco.brewery.bukkit.breweries.barrel.BukkitBarrel;
 import lombok.Getter;
 import lombok.Setter;
+import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
 import org.bukkit.inventory.ItemStack;
@@ -23,8 +24,9 @@ public class BarrelInsertEvent extends PermissibleBreweryEvent implements ItemTr
     private final ItemTransactionSession<ItemSource.BrewBasedSource> transactionSession;
 
 
-    public BarrelInsertEvent(BukkitBarrel barrel, ItemTransactionSession<ItemSource.BrewBasedSource> transactionSession, boolean cancelled, @Nullable Player player) {
-        super(cancelled);
+    public BarrelInsertEvent(BukkitBarrel barrel, ItemTransactionSession<ItemSource.BrewBasedSource> transactionSession,
+                             boolean cancelled, boolean denied, @Nullable Component denyMessage, @Nullable Player player) {
+        super(cancelled, denied, denyMessage);
         this.barrel = barrel;
         this.transactionSession = transactionSession;
         this.player = player;
