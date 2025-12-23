@@ -4,6 +4,7 @@ import dev.jsinco.brewery.bukkit.api.transaction.ItemSource;
 import dev.jsinco.brewery.bukkit.api.transaction.ItemTransactionSession;
 import dev.jsinco.brewery.bukkit.breweries.BukkitCauldron;
 import lombok.Getter;
+import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
 import org.jetbrains.annotations.NotNull;
@@ -18,8 +19,9 @@ public class CauldronInsertEvent extends PermissibleBreweryEvent implements Item
     @Getter
     private final ItemTransactionSession<ItemSource.ItemBasedSource> transactionSession;
 
-    public CauldronInsertEvent(BukkitCauldron cauldron, ItemTransactionSession<ItemSource.ItemBasedSource> transactionSession, boolean cancelled, @Nullable Player player) {
-        super(cancelled);
+    public CauldronInsertEvent(BukkitCauldron cauldron, ItemTransactionSession<ItemSource.ItemBasedSource> transactionSession,
+                               boolean cancelled, boolean denied, @Nullable Component denyMessage, @Nullable Player player) {
+        super(cancelled, denied, denyMessage);
         this.cauldron = cauldron;
         this.transactionSession = transactionSession;
     }

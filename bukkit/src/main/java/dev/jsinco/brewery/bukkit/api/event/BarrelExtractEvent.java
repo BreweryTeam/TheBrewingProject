@@ -5,6 +5,7 @@ import dev.jsinco.brewery.bukkit.api.transaction.ItemTransaction;
 import dev.jsinco.brewery.bukkit.api.transaction.ItemTransactionSession;
 import dev.jsinco.brewery.bukkit.breweries.barrel.BukkitBarrel;
 import lombok.Getter;
+import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
 import org.bukkit.inventory.ItemStack;
@@ -22,8 +23,9 @@ public class BarrelExtractEvent extends PermissibleBreweryEvent implements ItemT
     private final ItemTransactionSession<ItemSource.ItemBasedSource> transactionSession;
 
 
-    public BarrelExtractEvent(BukkitBarrel barrel, ItemTransactionSession<ItemSource.ItemBasedSource> transactionSession, boolean cancelled, @Nullable Player player) {
-        super(cancelled);
+    public BarrelExtractEvent(BukkitBarrel barrel, ItemTransactionSession<ItemSource.ItemBasedSource> transactionSession,
+                              boolean cancelled, boolean denied, @Nullable Component denyMessage, @Nullable Player player) {
+        super(cancelled, denied, denyMessage);
         this.barrel = barrel;
         this.transactionSession = transactionSession;
         this.player = player;

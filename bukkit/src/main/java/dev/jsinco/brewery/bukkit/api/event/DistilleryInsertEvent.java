@@ -4,6 +4,7 @@ import dev.jsinco.brewery.bukkit.api.transaction.ItemSource;
 import dev.jsinco.brewery.bukkit.api.transaction.ItemTransactionSession;
 import dev.jsinco.brewery.bukkit.breweries.distillery.BukkitDistillery;
 import lombok.Getter;
+import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
 import org.jetbrains.annotations.NotNull;
@@ -20,8 +21,9 @@ public class DistilleryInsertEvent extends PermissibleBreweryEvent implements It
     private final ItemTransactionSession<ItemSource.BrewBasedSource> transactionSession;
 
 
-    public DistilleryInsertEvent(BukkitDistillery distillery, ItemTransactionSession<ItemSource.BrewBasedSource> transactionSession, boolean cancelled, @Nullable Player player) {
-        super(cancelled);
+    public DistilleryInsertEvent(BukkitDistillery distillery, ItemTransactionSession<ItemSource.BrewBasedSource> transactionSession,
+                                 boolean cancelled, boolean denied, @Nullable Component denyMessage, @Nullable Player player) {
+        super(cancelled, denied, denyMessage);
         this.distillery = distillery;
         this.transactionSession = transactionSession;
         this.player = player;
