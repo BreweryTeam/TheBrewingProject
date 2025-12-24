@@ -318,9 +318,10 @@ public class PlayerEventListener implements Listener {
                 List<ModifierConsume> consumedModifiers = consumable.modifiers().entrySet().stream()
                         .map(entry -> new ModifierConsume(DrunkenModifierSection.modifiers().modifier(entry.getKey()), entry.getValue(), true))
                         .toList();
-                drunksManager.consume(event.getPlayer().getUniqueId(), consumedModifiers);
+                DrunkState beforeState = drunksManager.getDrunkState(event.getPlayer().getUniqueId());
+                DrunkState afterState = drunksManager.consume(event.getPlayer().getUniqueId(), consumedModifiers);
                 for (ModifierDisplay.DisplayWindow window : ModifierDisplay.DisplayWindow.values()) {
-                    ConsumedModifierDisplay.renderConsumeDisplay(event.getPlayer(), window, drunksManager, consumedModifiers);
+                    ConsumedModifierDisplay.renderConsumeDisplay(event.getPlayer(), window, beforeState, afterState, consumedModifiers);
                 }
             }
         }
