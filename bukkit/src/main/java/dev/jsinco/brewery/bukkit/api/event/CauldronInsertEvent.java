@@ -10,20 +10,20 @@ import org.bukkit.event.HandlerList;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class CauldronInsertEvent extends PermissibleBreweryEvent implements ItemTransactionEvent<ItemSource.ItemBasedSource> {
+public class CauldronInsertEvent extends PermissibleBreweryEvent {
 
     private static final HandlerList HANDLERS = new HandlerList();
 
     @Getter
     private final BukkitCauldron cauldron;
     @Getter
-    private final ItemTransactionSession<ItemSource.ItemBasedSource> transactionSession;
+    private final ItemSource.ItemBasedSource itemSource;
 
-    public CauldronInsertEvent(BukkitCauldron cauldron, ItemTransactionSession<ItemSource.ItemBasedSource> transactionSession,
+    public CauldronInsertEvent(BukkitCauldron cauldron, ItemSource.ItemBasedSource itemSource,
                                boolean cancelled, boolean denied, @Nullable Component denyMessage, @Nullable Player player) {
         super(cancelled, denied, denyMessage);
         this.cauldron = cauldron;
-        this.transactionSession = transactionSession;
+        this.itemSource = itemSource;
     }
 
     @Override

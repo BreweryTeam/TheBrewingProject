@@ -16,6 +16,8 @@ import dev.jsinco.brewery.brew.CookStepImpl;
 import dev.jsinco.brewery.brew.MixStepImpl;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.bukkit.api.BukkitAdapter;
+import dev.jsinco.brewery.bukkit.api.event.CauldronInsertEvent;
+import dev.jsinco.brewery.bukkit.api.transaction.ItemSource;
 import dev.jsinco.brewery.bukkit.brew.BrewAdapter;
 import dev.jsinco.brewery.bukkit.ingredient.BukkitIngredientManager;
 import dev.jsinco.brewery.bukkit.listener.ListenerUtil;
@@ -30,6 +32,7 @@ import dev.jsinco.brewery.util.MessageUtil;
 import lombok.Getter;
 import lombok.Setter;
 import net.kyori.adventure.sound.Sound;
+import net.kyori.adventure.text.Component;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -145,9 +148,18 @@ public class BukkitCauldron implements Cauldron {
     }
 
     public boolean addIngredient(@NotNull ItemStack item, Player player) {
-        // TODO: Add API event
-        if (!player.hasPermission("brewery.cauldron.access")) {
-            MessageUtil.message(player, "tbp.cauldron.access-denied");
+        CauldronInsertEvent event = new CauldronInsertEvent(this,
+                new ItemSource.ItemBasedSource(item),
+                false,
+                player.hasPermission("brewery.cauldron.access"),
+                Component.translatable("tbp.cauldron.access-denied"),
+                player
+        );
+        if (!event.callEvent()) {
+            Component denyMessage = event.getDenyMessage();
+            if (event.isDenied()) {
+                player.sendMessage(denyMessage);
+            }
             return false;
         }
         if (!brewExtracted && item.getType() == Material.POTION) {
