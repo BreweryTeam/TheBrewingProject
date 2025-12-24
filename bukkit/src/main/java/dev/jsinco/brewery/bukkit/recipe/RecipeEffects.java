@@ -2,7 +2,7 @@ package dev.jsinco.brewery.bukkit.recipe;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
-import dev.jsinco.brewery.api.effect.DrunksManager;
+import dev.jsinco.brewery.api.effect.DrunkState;
 import dev.jsinco.brewery.api.effect.ModifierConsume;
 import dev.jsinco.brewery.api.effect.modifier.DrunkenModifier;
 import dev.jsinco.brewery.api.effect.modifier.ModifierDisplay;
@@ -10,7 +10,6 @@ import dev.jsinco.brewery.api.event.CustomEventRegistry;
 import dev.jsinco.brewery.api.event.DrunkEvent;
 import dev.jsinco.brewery.api.util.BreweryKey;
 import dev.jsinco.brewery.api.util.BreweryRegistry;
-import dev.jsinco.brewery.api.util.Builder;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.bukkit.effect.ConsumedModifierDisplay;
 import dev.jsinco.brewery.bukkit.effect.ModifierConsumePdcType;
@@ -167,8 +166,10 @@ public class RecipeEffects {
 
     public void applyTo(Player player) {
         DrunksManagerImpl<?> drunksManager = TheBrewingProject.getInstance().getDrunksManager();
+        DrunkState beforeState = drunksManager.getDrunkState(player.getUniqueId());
+        DrunkState afterState = null;
         if (!player.hasPermission("brewery.override.drunk")) {
-            drunksManager.consume(player.getUniqueId(),
+            afterState = drunksManager.consume(player.getUniqueId(),
                     modifiers.entrySet().stream()
                             .map(entry -> new ModifierConsume(entry.getKey(), entry.getValue(), true))
                             .toList()
@@ -183,7 +184,7 @@ public class RecipeEffects {
                     Component.empty())
             );
         } else {
-            renderDefaultDisplayMessage(player, ModifierDisplay.DisplayWindow.TITLE, drunksManager);
+            renderDefaultDisplayMessage(player, ModifierDisplay.DisplayWindow.TITLE, beforeState, afterState);
         }
         if (message != null) {
             player.sendMessage(MessageUtil.miniMessage(message,
@@ -191,7 +192,7 @@ public class RecipeEffects {
                     MessageUtil.numberedModifierTagResolver(modifiers, "consumed")
             ));
         } else {
-            renderDefaultDisplayMessage(player, ModifierDisplay.DisplayWindow.CHAT, drunksManager);
+            renderDefaultDisplayMessage(player, ModifierDisplay.DisplayWindow.CHAT, beforeState, afterState);
         }
         if (actionBar != null) {
             player.sendActionBar(MessageUtil.miniMessage(actionBar,
@@ -199,7 +200,7 @@ public class RecipeEffects {
                     MessageUtil.numberedModifierTagResolver(modifiers, "consumed")
             ));
         } else {
-            renderDefaultDisplayMessage(player, ModifierDisplay.DisplayWindow.ACTION_BAR, drunksManager);
+            renderDefaultDisplayMessage(player, ModifierDisplay.DisplayWindow.ACTION_BAR, beforeState, afterState);
         }
         if (player.hasPermission("brewery.override.effect")) {
             return;
@@ -210,8 +211,9 @@ public class RecipeEffects {
                 .forEach(player::addPotionEffect);
     }
 
-    private void renderDefaultDisplayMessage(Player player, ModifierDisplay.DisplayWindow displayWindow, DrunksManager drunksManager) {
-        ConsumedModifierDisplay.renderConsumeDisplay(player, displayWindow, drunksManager, modifiers);
+    private void renderDefaultDisplayMessage(Player player, ModifierDisplay.DisplayWindow displayWindow,
+                                             DrunkState beforeState, DrunkState afterState) {
+        ConsumedModifierDisplay.renderConsumeDisplay(player, displayWindow, beforeState, afterState, modifiers);
     }
 
     public void applyTo(Projectile projectile) {
