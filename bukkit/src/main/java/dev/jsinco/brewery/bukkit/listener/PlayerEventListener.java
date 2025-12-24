@@ -14,7 +14,9 @@ import dev.jsinco.brewery.api.vector.BreweryLocation;
 import dev.jsinco.brewery.brew.BrewImpl;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.bukkit.api.BukkitAdapter;
+import dev.jsinco.brewery.bukkit.api.event.CauldronInsertEvent;
 import dev.jsinco.brewery.bukkit.api.integration.IntegrationTypes;
+import dev.jsinco.brewery.bukkit.api.transaction.ItemSource;
 import dev.jsinco.brewery.bukkit.brew.BrewAdapter;
 import dev.jsinco.brewery.bukkit.breweries.BreweryRegistry;
 import dev.jsinco.brewery.bukkit.breweries.BukkitCauldron;
@@ -212,6 +214,7 @@ public class PlayerEventListener implements Listener {
         }
         if (itemStack.getType() == Material.GLASS_BOTTLE) {
             cauldronOptional
+                    .filter(cauldron -> eventAcceptsIngredientAddition(cauldron, itemStack, event.getPlayer()))
                     .map(BukkitCauldron::extractBrew)
                     .ifPresent(brewItemStack -> {
                         updateHeldItem(decreaseItem(itemStack, event.getPlayer()), event.getPlayer(), event.getHand());
@@ -236,18 +239,43 @@ public class PlayerEventListener implements Listener {
         });
     }
 
+    private boolean eventAcceptsIngredientAddition(@NotNull BukkitCauldron bukkitCauldron, ItemStack itemStack, Player player) {
+        CauldronInsertEvent event = new CauldronInsertEvent(
+                bukkitCauldron,
+                new ItemSource.ItemBasedSource(itemStack),
+                false,
+                !player.hasPermission("brewery.cauldron.access"),
+                Component.translatable("tbp.cauldron.access-denied"),
+                player
+        );
+        if (event.callEvent()) {
+            return true;
+        }
+        Component denyMessage = event.getDenyMessage();
+        if (denyMessage != null) {
+            player.sendMessage(denyMessage);
+        }
+        return false;
+    }
+
     private boolean handleIngredientAddition(ItemStack itemStack, Block block, @Nullable BukkitCauldron cauldron, Player player, @Nullable EquipmentSlot hand) {
         if (block.getType() == Material.CAULDRON && itemStack.getType() != Material.POTION) {
             return false;
         }
-        if (cauldron == null) {
-            cauldron = this.initCauldron(block);
+        boolean createNewCauldron = cauldron == null;
+        if (createNewCauldron) {
+            cauldron = new BukkitCauldron(BukkitAdapter.toBreweryLocation(block), BukkitCauldron.isHeatSource(block.getRelative(BlockFace.DOWN)));
         }
         boolean addedIngredient = cauldron.addIngredient(itemStack, player);
         if (addedIngredient) {
             updateHeldItem(decreaseItem(itemStack, player), player, hand);
             try {
-                database.updateValue(BukkitCauldronDataType.INSTANCE, cauldron);
+                if (createNewCauldron) {
+                    database.insertValue(BukkitCauldronDataType.INSTANCE, cauldron);
+                    breweryRegistry.addActiveSinglePositionStructure(cauldron);
+                } else {
+                    database.updateValue(BukkitCauldronDataType.INSTANCE, cauldron);
+                }
             } catch (PersistenceException e) {
                 Logger.logErr(e);
             }
@@ -263,17 +291,6 @@ public class PlayerEventListener implements Listener {
         } else {
             throw new IllegalArgumentException("Only main hand and offhand equipment slots are allowed: " + equipmentSlot);
         }
-    }
-
-    private BukkitCauldron initCauldron(Block block) {
-        BukkitCauldron newCauldron = new BukkitCauldron(BukkitAdapter.toBreweryLocation(block), BukkitCauldron.isHeatSource(block.getRelative(BlockFace.DOWN)));
-        try {
-            database.insertValue(BukkitCauldronDataType.INSTANCE, newCauldron);
-        } catch (PersistenceException e) {
-            Logger.logErr(e);
-        }
-        breweryRegistry.addActiveSinglePositionStructure(newCauldron);
-        return newCauldron;
     }
 
 
