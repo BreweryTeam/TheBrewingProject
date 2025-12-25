@@ -1,30 +1,23 @@
 package dev.jsinco.brewery.bukkit.api.event;
 
+import com.google.common.base.Preconditions;
 import lombok.Getter;
-import lombok.Setter;
-import net.kyori.adventure.text.Component;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
-import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.NotNull;
 
 
-@Setter
 public abstract class PermissibleBreweryEvent extends Event implements Cancellable {
 
-    private boolean cancelled = false;
     @Getter
-    private boolean denied = false;
-    @Getter
-    private @Nullable Component denyMessage;
+    private CancelState cancelState;
 
-    public PermissibleBreweryEvent(boolean cancelled, boolean denied, @Nullable Component denyMessage) {
-        this.cancelled = cancelled;
-        this.denied = denied;
-        this.denyMessage = denyMessage;
+    public PermissibleBreweryEvent(@NotNull CancelState cancelState) {
+        this.cancelState = Preconditions.checkNotNull(cancelState);
     }
 
     public PermissibleBreweryEvent(boolean cancelled) {
-        this.cancelled = cancelled;
+        this.cancelState = cancelled ? new CancelState.Cancelled() : new CancelState.Allowed();
     }
 
     public PermissibleBreweryEvent() {
@@ -32,7 +25,16 @@ public abstract class PermissibleBreweryEvent extends Event implements Cancellab
     }
 
     public boolean isCancelled() {
-        return cancelled || denied;
+        return !(cancelState instanceof CancelState.Allowed);
     }
+
+    public void setCancelled(boolean cancelled) {
+        this.cancelState = cancelled ? new CancelState.Cancelled() : new CancelState.Allowed();
+    }
+
+    public void setCancelState(@NotNull CancelState state) {
+        this.cancelState = Preconditions.checkNotNull(state);
+    }
+
 
 }

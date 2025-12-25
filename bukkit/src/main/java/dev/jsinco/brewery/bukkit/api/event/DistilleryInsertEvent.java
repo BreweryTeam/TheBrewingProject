@@ -22,8 +22,8 @@ public class DistilleryInsertEvent extends PermissibleBreweryEvent implements It
 
 
     public DistilleryInsertEvent(BukkitDistillery distillery, ItemTransactionSession<ItemSource.BrewBasedSource> transactionSession,
-                                 boolean cancelled, boolean denied, @Nullable Component denyMessage, @Nullable Player player) {
-        super(cancelled, denied, denyMessage);
+                                 @NotNull CancelState state, @Nullable Player player) {
+        super(state);
         this.distillery = distillery;
         this.transactionSession = transactionSession;
         this.player = player;

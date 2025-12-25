@@ -18,12 +18,15 @@ public class CauldronInsertEvent extends PermissibleBreweryEvent {
     private final BukkitCauldron cauldron;
     @Getter
     private final ItemSource.ItemBasedSource itemSource;
+    @Getter
+    private final @Nullable Player player;
 
     public CauldronInsertEvent(BukkitCauldron cauldron, ItemSource.ItemBasedSource itemSource,
-                               boolean cancelled, boolean denied, @Nullable Component denyMessage, @Nullable Player player) {
-        super(cancelled, denied, denyMessage);
+                               @NotNull CancelState state, @Nullable Player player) {
+        super(state);
         this.cauldron = cauldron;
         this.itemSource = itemSource;
+        this.player = player;
     }
 
     @Override

@@ -24,8 +24,8 @@ public class BarrelExtractEvent extends PermissibleBreweryEvent implements ItemT
 
 
     public BarrelExtractEvent(BukkitBarrel barrel, ItemTransactionSession<ItemSource.ItemBasedSource> transactionSession,
-                              boolean cancelled, boolean denied, @Nullable Component denyMessage, @Nullable Player player) {
-        super(cancelled, denied, denyMessage);
+                              @NotNull CancelState state, @Nullable Player player) {
+        super(state);
         this.barrel = barrel;
         this.transactionSession = transactionSession;
         this.player = player;
