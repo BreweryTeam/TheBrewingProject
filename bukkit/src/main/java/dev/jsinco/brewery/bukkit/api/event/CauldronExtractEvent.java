@@ -15,13 +15,13 @@ public class CauldronExtractEvent extends PermissibleBreweryEvent implements Ite
     @Getter
     private final BukkitCauldron cauldron;
     @Getter
-    private final Player player;
+    private final @Nullable Player player;
     @Getter
     private final ItemTransactionSession<ItemSource.ItemBasedSource> transactionSession;
 
     public CauldronExtractEvent(BukkitCauldron cauldron, ItemTransactionSession<ItemSource.ItemBasedSource> transactionSession,
-                                boolean cancelled, boolean denied, @Nullable Component denyMessage, @Nullable Player player) {
-        super(cancelled, denied, denyMessage);
+                                @NotNull CancelState state, @Nullable Player player) {
+        super(state);
         this.cauldron = cauldron;
         this.transactionSession = transactionSession;
         this.player = player;

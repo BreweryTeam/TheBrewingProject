@@ -3,7 +3,7 @@ package dev.jsinco.brewery.bukkit.api.event;
 import dev.jsinco.brewery.bukkit.api.transaction.ItemSource;
 import dev.jsinco.brewery.bukkit.api.transaction.ItemTransactionSession;
 
-public interface ItemTransactionEvent<T extends ItemSource> extends Permissible {
+public interface ItemTransactionEvent<T extends ItemSource> {
 
     /**
      * @return A session for an item transaction
@@ -16,4 +16,15 @@ public interface ItemTransactionEvent<T extends ItemSource> extends Permissible 
      * @return {@code false} if event was cancelled, if cancellable. otherwise {@code true}.
      */
     boolean callEvent();
+
+    /**
+     *
+     * @return The cancel state of the item transaction
+     */
+    CancelState getCancelState();
+
+    /**
+     * @param state The new cancel state for the item transaction
+     */
+    void setCancelState(CancelState state);
 }

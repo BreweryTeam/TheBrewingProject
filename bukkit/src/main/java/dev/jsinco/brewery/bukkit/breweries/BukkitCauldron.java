@@ -16,6 +16,7 @@ import dev.jsinco.brewery.brew.CookStepImpl;
 import dev.jsinco.brewery.brew.MixStepImpl;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.bukkit.api.BukkitAdapter;
+import dev.jsinco.brewery.bukkit.api.event.CancelState;
 import dev.jsinco.brewery.bukkit.api.event.CauldronInsertEvent;
 import dev.jsinco.brewery.bukkit.api.transaction.ItemSource;
 import dev.jsinco.brewery.bukkit.brew.BrewAdapter;
@@ -150,14 +151,12 @@ public class BukkitCauldron implements Cauldron {
     public boolean addIngredient(@NotNull ItemStack item, Player player) {
         CauldronInsertEvent event = new CauldronInsertEvent(this,
                 new ItemSource.ItemBasedSource(item),
-                false,
-                player.hasPermission("brewery.cauldron.access"),
-                Component.translatable("tbp.cauldron.access-denied"),
+                player.hasPermission("brewery.cauldron.access") ?
+                        new CancelState.Allowed() : new CancelState.PermissionDenied(Component.translatable("tbp.cauldron.access-denied")),
                 player
         );
         if (!event.callEvent()) {
-            Component denyMessage = event.getDenyMessage();
-            if (event.isDenied()) {
+            if(event.getCancelState() instanceof CancelState.PermissionDenied(Component denyMessage)) {
                 player.sendMessage(denyMessage);
             }
             return false;

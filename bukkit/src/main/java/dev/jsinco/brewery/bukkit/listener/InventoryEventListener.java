@@ -73,8 +73,7 @@ public class InventoryEventListener implements Listener {
         List<? extends ItemTransactionEvent<?>> transactions = compileTransactionsFromClick(event, upperInventoryIsClicked, inventoryAccessible);
         for (ItemTransactionEvent<?> transactionEvent : transactions) {
             if (!transactionEvent.callEvent()) {
-                Component denyMessage = transactionEvent.getDenyMessage();
-                if (transactionEvent.isDenied() && denyMessage != null) {
+                if (transactionEvent.getCancelState() instanceof CancelState.PermissionDenied(Component denyMessage)) {
                     event.getWhoClicked().sendMessage(denyMessage);
                 }
                 event.setResult(Event.Result.DENY);
@@ -259,15 +258,16 @@ public class InventoryEventListener implements Listener {
         ItemTransaction transaction = new ItemTransaction(from, to, item, insertion);
         Optional<Brew> brewOptional = BrewAdapter.fromItem(item);
         if (inventoryAccessible instanceof BukkitDistillery distillery) {
+            CancelState cancelState = brewOptional.isEmpty() ? new CancelState.Cancelled() :
+                    player  == null || player.hasPermission("brewery.distillery.access") ? new CancelState.Allowed() :
+                            new CancelState.PermissionDenied(Component.translatable("tbp.distillery.access-denied"));
             return insertion ? new DistilleryInsertEvent(
                     distillery,
                     new ItemTransactionSession<>(transaction, brewOptional
                             .map(brew -> new ItemSource.BrewBasedSource(brew, new Brew.State.Brewing()))
                             .orElse(null)
                     ),
-                    brewOptional.isEmpty(),
-                    player != null && !player.hasPermission("brewery.distillery.access"),
-                    Component.translatable("tbp.distillery.access-denied"),
+                    cancelState,
                     player
             ) : new DistilleryExtractEvent(
                     distillery,
@@ -275,29 +275,26 @@ public class InventoryEventListener implements Listener {
                             .map(brew -> BrewAdapter.toItem(brew, new Brew.State.Other()))
                             .map(ItemSource.ItemBasedSource::new)
                             .orElse(null)),
-                    false,
-                    player != null && !player.hasPermission("brewery.distillery.access"),
-                    Component.translatable("tbp.distillery.access-denied"),
+                    cancelState,
                     player
             );
         }
         if (inventoryAccessible instanceof BukkitBarrel barrel) {
+            CancelState cancelState = brewOptional.isEmpty() ? new CancelState.Cancelled() :
+                    player  == null || player.hasPermission("brewery.barrel.access") ? new CancelState.Allowed() :
+                            new CancelState.PermissionDenied(Component.translatable("tbp.barrel.access-denied"));
             return insertion ? new BarrelInsertEvent(
                     barrel,
                     new ItemTransactionSession<>(transaction, brewOptional
                             .map(brew -> new ItemSource.BrewBasedSource(brew, new Brew.State.Other()))
                             .orElse(null)
                     ),
-                    brewOptional.isEmpty(),
-                    player != null && !player.hasPermission("brewery.barrel.access"),
-                    Component.translatable("tbp.barrel.access-denied"),
+                    cancelState,
                     player
             ) : new BarrelExtractEvent(
                     barrel,
                     new ItemTransactionSession<>(transaction, new ItemSource.ItemBasedSource(item)),
-                    false,
-                    player != null && !player.hasPermission("brewery.barrel.access"),
-                    Component.translatable("tbp.barrel.access-denied"),
+                    cancelState,
                     player
             );
         }
