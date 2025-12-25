@@ -4,26 +4,35 @@ import dev.jsinco.brewery.api.brew.Brew;
 import dev.jsinco.brewery.api.brew.BrewScore;
 import dev.jsinco.brewery.api.brew.BrewingStep;
 import dev.jsinco.brewery.api.breweries.Cauldron;
-import dev.jsinco.brewery.brew.*;
 import dev.jsinco.brewery.api.breweries.CauldronType;
-import dev.jsinco.brewery.bukkit.TheBrewingProject;
-import dev.jsinco.brewery.bukkit.brew.BrewAdapter;
-import dev.jsinco.brewery.bukkit.ingredient.BukkitIngredientManager;
-import dev.jsinco.brewery.bukkit.event.ListenerUtil;
-import dev.jsinco.brewery.bukkit.recipe.BukkitRecipeResult;
-import dev.jsinco.brewery.bukkit.util.*;
-import dev.jsinco.brewery.bukkit.api.BukkitAdapter;
-import dev.jsinco.brewery.configuration.Config;
 import dev.jsinco.brewery.api.ingredient.Ingredient;
 import dev.jsinco.brewery.api.moment.Interval;
 import dev.jsinco.brewery.api.recipe.Recipe;
-import dev.jsinco.brewery.sound.SoundDefinition;
-import dev.jsinco.brewery.util.MessageUtil;
 import dev.jsinco.brewery.api.util.BreweryRegistry;
 import dev.jsinco.brewery.api.vector.BreweryLocation;
+import dev.jsinco.brewery.brew.BrewImpl;
+import dev.jsinco.brewery.brew.CookStepImpl;
+import dev.jsinco.brewery.brew.MixStepImpl;
+import dev.jsinco.brewery.bukkit.TheBrewingProject;
+import dev.jsinco.brewery.bukkit.api.BukkitAdapter;
+import dev.jsinco.brewery.bukkit.api.event.CancelState;
+import dev.jsinco.brewery.bukkit.api.event.CauldronInsertEvent;
+import dev.jsinco.brewery.bukkit.api.transaction.ItemSource;
+import dev.jsinco.brewery.bukkit.brew.BrewAdapter;
+import dev.jsinco.brewery.bukkit.ingredient.BukkitIngredientManager;
+import dev.jsinco.brewery.bukkit.listener.ListenerUtil;
+import dev.jsinco.brewery.bukkit.recipe.BukkitRecipeResult;
+import dev.jsinco.brewery.bukkit.util.BlockUtil;
+import dev.jsinco.brewery.bukkit.util.BukkitIngredientUtil;
+import dev.jsinco.brewery.bukkit.util.ColorUtil;
+import dev.jsinco.brewery.bukkit.util.SoundPlayer;
+import dev.jsinco.brewery.configuration.Config;
+import dev.jsinco.brewery.sound.SoundDefinition;
+import dev.jsinco.brewery.util.MessageUtil;
 import lombok.Getter;
 import lombok.Setter;
 import net.kyori.adventure.sound.Sound;
+import net.kyori.adventure.text.Component;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -138,9 +147,16 @@ public class BukkitCauldron implements Cauldron {
     }
 
     public boolean addIngredient(@NotNull ItemStack item, Player player) {
-        // TODO: Add API event
-        if (!player.hasPermission("brewery.cauldron.access")) {
-            MessageUtil.message(player, "tbp.cauldron.access-denied");
+        CauldronInsertEvent event = new CauldronInsertEvent(this,
+                new ItemSource.ItemBasedSource(item),
+                player.hasPermission("brewery.cauldron.access") ?
+                        new CancelState.Allowed() : new CancelState.PermissionDenied(Component.translatable("tbp.cauldron.access-denied")),
+                player
+        );
+        if (!event.callEvent()) {
+            if(event.getCancelState() instanceof CancelState.PermissionDenied(Component denyMessage)) {
+                player.sendMessage(denyMessage);
+            }
             return false;
         }
         if (!brewExtracted && item.getType() == Material.POTION) {
