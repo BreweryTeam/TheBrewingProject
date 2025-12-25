@@ -14,6 +14,7 @@ import dev.jsinco.brewery.api.vector.BreweryLocation;
 import dev.jsinco.brewery.brew.BrewImpl;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.bukkit.api.BukkitAdapter;
+import dev.jsinco.brewery.bukkit.api.event.CancelState;
 import dev.jsinco.brewery.bukkit.api.event.CauldronInsertEvent;
 import dev.jsinco.brewery.bukkit.api.integration.IntegrationTypes;
 import dev.jsinco.brewery.bukkit.api.transaction.ItemSource;
@@ -243,16 +244,14 @@ public class PlayerEventListener implements Listener {
         CauldronInsertEvent event = new CauldronInsertEvent(
                 bukkitCauldron,
                 new ItemSource.ItemBasedSource(itemStack),
-                false,
-                !player.hasPermission("brewery.cauldron.access"),
-                Component.translatable("tbp.cauldron.access-denied"),
+                player.hasPermission("brewery.cauldron.access") ?
+                        new CancelState.Allowed() : new CancelState.PermissionDenied(Component.translatable("tbp.cauldron.access-denied")),
                 player
         );
         if (event.callEvent()) {
             return true;
         }
-        Component denyMessage = event.getDenyMessage();
-        if (denyMessage != null) {
+        if (event.getCancelState() instanceof CancelState.PermissionDenied(Component denyMessage)) {
             player.sendMessage(denyMessage);
         }
         return false;
