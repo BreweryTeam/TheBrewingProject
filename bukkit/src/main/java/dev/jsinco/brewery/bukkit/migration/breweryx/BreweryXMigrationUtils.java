@@ -18,6 +18,7 @@ import dev.jsinco.brewery.bukkit.api.integration.IntegrationTypes;
 import dev.jsinco.brewery.bukkit.ingredient.SimpleIngredient;
 import dev.jsinco.brewery.configuration.Config;
 import dev.jsinco.brewery.recipes.BrewScoreImpl;
+import dev.jsinco.brewery.util.IngredientUtil;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -94,10 +95,10 @@ public class BreweryXMigrationUtils {
         Recipe<ItemStack> recipe = recipeOptional.get();
         List<BrewingStep> steps = new ArrayList<>(recipe.getSteps());
         if (steps.getFirst() instanceof BrewingStep.Cook cookStep) {
-            steps.set(0, cookStep.withIngredients(sanitizeIngredients(cookStep.ingredients())));
+            steps.set(0, cookStep.withIngredients(IngredientUtil.sanitizeIngredients(cookStep.ingredients())));
         }
         if (steps.getFirst() instanceof BrewingStep.Mix mixStep) {
-            steps.set(0, mixStep.withIngredients(sanitizeIngredients(mixStep.ingredients())));
+            steps.set(0, mixStep.withIngredients(IngredientUtil.sanitizeIngredients(mixStep.ingredients())));
         }
         Brew brew = brewManager.createBrew(steps);
         BrewScore score = brew.score(recipe);
@@ -108,23 +109,6 @@ public class BreweryXMigrationUtils {
         }
         return recipe.getRecipeResult(quality)
                 .newBrewItem(score, brew, state);
-    }
-
-    private static Map<Ingredient, Integer> sanitizeIngredients(Map<? extends Ingredient, Integer> ingredients) {
-        Map<Ingredient, Integer> output = new HashMap<>();
-        for (Map.Entry<? extends Ingredient, Integer> entry : ingredients.entrySet()) {
-            Ingredient ingredient = entry.getKey();
-            if (ingredient instanceof IngredientGroup ingredientGroup) {
-                ingredient = ingredientGroup.alternatives().stream().max(Comparator.comparing(groupIngredient ->
-                        groupIngredient instanceof ScoredIngredient scoredIngredient ? scoredIngredient.score() : 1D
-                )).orElse(null);
-            }
-            if (ingredient == null) {
-                continue;
-            }
-            output.put(ingredient, entry.getValue());
-        }
-        return output;
     }
 
     private record BrewData(@Nullable Brew brew, @Nullable String recipe, boolean sealed, byte quality) {
