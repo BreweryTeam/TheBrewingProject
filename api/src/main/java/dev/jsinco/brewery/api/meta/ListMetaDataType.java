@@ -38,4 +38,8 @@ public class ListMetaDataType<P, C> implements MetaDataType<List<P>, List<C>> {
         return Lists.transform(primitive, elementType::toComplex);
     }
 
+    public MetaDataType<P, C> getElementDataType() {
+        return elementType;
+    }
+
 }

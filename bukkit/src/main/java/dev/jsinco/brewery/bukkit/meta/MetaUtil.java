@@ -1,5 +1,6 @@
 package dev.jsinco.brewery.bukkit.meta;
 
+import dev.jsinco.brewery.api.meta.ListMetaDataType;
 import dev.jsinco.brewery.api.meta.MetaData;
 import dev.jsinco.brewery.api.meta.MetaDataType;
 import org.bukkit.NamespacedKey;
@@ -61,8 +62,30 @@ import java.util.List;
             case long[] ignored -> PersistentDataType.LONG_ARRAY;
             case MetaData ignored -> MetaDataPdcType.INSTANCE;
             case PersistentDataContainer ignored -> PersistentDataType.TAG_CONTAINER;
-            case List<?> ignored -> PersistentDataType.LIST.strings();
+            case List<?> list -> pdcListTypeOf(list);
             default -> throw new IllegalArgumentException("No type found for " + value.getClass().getSimpleName());
+        };
+    }
+
+    private static PersistentDataType<?, ?> pdcListTypeOf(List<?> list) {
+        if (list.isEmpty()) {
+            return PersistentDataType.LIST.bytes();
+        }
+        Object element = list.getFirst();
+        return switch (element) {
+            case Byte ignored -> PersistentDataType.LIST.bytes();
+            case Short ignored -> PersistentDataType.LIST.shorts();
+            case Integer ignored -> PersistentDataType.LIST.integers();
+            case Long ignored -> PersistentDataType.LIST.longs();
+            case Float ignored -> PersistentDataType.LIST.floats();
+            case Double ignored -> PersistentDataType.LIST.doubles();
+            case String ignored -> PersistentDataType.LIST.strings();
+            case byte[] ignored -> PersistentDataType.LIST.byteArrays();
+            case int[] ignored -> PersistentDataType.LIST.integerArrays();
+            case long[] ignored -> PersistentDataType.LIST.longArrays();
+            case MetaData ignored -> MetaDataPdcType.LIST;
+            case PersistentDataContainer ignored -> PersistentDataType.LIST.dataContainers();
+            default -> throw new IllegalArgumentException("No type found for list element " + element.getClass().getSimpleName());
         };
     }
 
@@ -80,8 +103,30 @@ import java.util.List;
             case long[] ignored -> MetaDataType.LONG_ARRAY;
             case MetaData ignored -> MetaDataType.CONTAINER;
             case PersistentDataContainer pdc -> PdcMetaDataType.with(pdc.getAdapterContext());
-            case List<?> ignored -> MetaDataType.STRING_LIST;
+            case List<?> list -> metaDataListTypeOf(list);
             default -> throw new IllegalArgumentException("No type found for " + value.getClass().getSimpleName());
+        };
+    }
+
+    private static MetaDataType<?, ?> metaDataListTypeOf(List<?> list) {
+        if (list.isEmpty()) {
+            return MetaDataType.BYTE_LIST;
+        }
+        Object element = list.getFirst();
+        return switch (element) {
+            case Byte ignored -> MetaDataType.BYTE_LIST;
+            case Short ignored -> MetaDataType.SHORT_LIST;
+            case Integer ignored -> MetaDataType.INTEGER_LIST;
+            case Long ignored -> MetaDataType.LONG_LIST;
+            case Float ignored -> MetaDataType.FLOAT_LIST;
+            case Double ignored -> MetaDataType.DOUBLE_LIST;
+            case String ignored -> MetaDataType.STRING_LIST;
+            case byte[] ignored -> MetaDataType.BYTE_ARRAY_LIST;
+            case int[] ignored -> MetaDataType.INTEGER_ARRAY_LIST;
+            case long[] ignored -> MetaDataType.LONG_ARRAY_LIST;
+            case MetaData ignored -> MetaDataType.CONTAINER_LIST;
+            case PersistentDataContainer pdc -> ListMetaDataType.from(PdcMetaDataType.with(pdc.getAdapterContext()));
+            default -> throw new IllegalArgumentException("No type found for list element " + element.getClass().getSimpleName());
         };
     }
 
