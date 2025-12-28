@@ -4,6 +4,7 @@ import dev.jsinco.brewery.api.meta.MetaData;
 import dev.jsinco.brewery.api.meta.MetaDataType;
 import net.kyori.adventure.key.Key;
 import org.bukkit.NamespacedKey;
+import org.bukkit.persistence.ListPersistentDataType;
 import org.bukkit.persistence.PersistentDataAdapterContext;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
@@ -16,6 +17,7 @@ import java.util.Objects;
 public class MetaDataPdcType implements PersistentDataType<PersistentDataContainer, MetaData> {
 
     public static final MetaDataPdcType INSTANCE = new MetaDataPdcType();
+    public static final ListPersistentDataType<PersistentDataContainer, MetaData> LIST = PersistentDataType.LIST.listTypeFrom(INSTANCE);
 
     @NotNull
     @Override

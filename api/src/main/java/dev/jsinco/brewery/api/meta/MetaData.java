@@ -3,6 +3,7 @@ package dev.jsinco.brewery.api.meta;
 import net.kyori.adventure.key.Key;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -47,6 +48,13 @@ public final class MetaData implements MetaContainer<MetaData> {
             return null;
         }
         if (type.getPrimitiveType().isInstance(value)) {
+            if (type instanceof ListMetaDataType<?,?> listType) {
+                List<?> list = (List<?>) value;
+                if (!list.isEmpty() && !listType.getElementDataType().getPrimitiveType().isInstance(list.getFirst())) {
+                    throw new IllegalArgumentException("Meta for " + key + " is not of List with element type " +
+                            listType.getElementDataType().getPrimitiveType().getSimpleName());
+                }
+            }
             return type.toComplex(type.getPrimitiveType().cast(value));
         }
         throw new IllegalArgumentException("Meta for " + key + " is not of type " + type.getPrimitiveType().getSimpleName());
