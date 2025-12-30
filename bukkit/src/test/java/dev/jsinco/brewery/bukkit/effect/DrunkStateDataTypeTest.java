@@ -3,15 +3,15 @@ package dev.jsinco.brewery.bukkit.effect;
 import dev.jsinco.brewery.api.effect.modifier.DrunkenModifier;
 import dev.jsinco.brewery.api.util.Pair;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
+import dev.jsinco.brewery.bukkit.testutil.TBPServerMock;
 import dev.jsinco.brewery.configuration.DrunkenModifierSection;
 import dev.jsinco.brewery.database.PersistenceException;
 import dev.jsinco.brewery.database.sql.Database;
 import dev.jsinco.brewery.effect.DrunkStateImpl;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockbukkit.mockbukkit.MockBukkit;
-import org.mockbukkit.mockbukkit.MockBukkitExtension;
 
 import java.util.Map;
 import java.util.UUID;
@@ -19,9 +19,7 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@ExtendWith(MockBukkitExtension.class)
 class DrunkStateDataTypeTest {
-
 
     private Database database;
     private DrunkenModifier alcohol;
@@ -29,9 +27,14 @@ class DrunkStateDataTypeTest {
 
     @BeforeEach
     void setup() {
+        MockBukkit.mock(new TBPServerMock());
         this.database = MockBukkit.load(TheBrewingProject.class).getDatabase();
         this.alcohol = DrunkenModifierSection.modifiers().modifier("alcohol");
         this.toxins = DrunkenModifierSection.modifiers().modifier("toxins");
+    }
+    @AfterEach
+    public void tearDown() {
+        MockBukkit.unmock();
     }
 
     @Test
