@@ -10,6 +10,7 @@ import dev.jsinco.brewery.bukkit.breweries.distillery.BukkitDistillery;
 import dev.jsinco.brewery.bukkit.breweries.distillery.BukkitDistilleryDataType;
 import dev.jsinco.brewery.bukkit.ingredient.SimpleIngredient;
 import dev.jsinco.brewery.bukkit.structure.PlacedBreweryStructure;
+import dev.jsinco.brewery.bukkit.testutil.TBPServerMock;
 import dev.jsinco.brewery.database.PersistenceException;
 import dev.jsinco.brewery.database.sql.Database;
 import dev.jsinco.brewery.api.moment.PassedMoment;
@@ -20,12 +21,10 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.joml.Matrix3d;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockbukkit.mockbukkit.MockBukkit;
-import org.mockbukkit.mockbukkit.MockBukkitExtension;
-import org.mockbukkit.mockbukkit.MockBukkitInject;
 import org.mockbukkit.mockbukkit.ServerMock;
 
 import java.util.List;
@@ -34,20 +33,22 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@ExtendWith(MockBukkitExtension.class)
 class BukkitDistilleryBrewDataTypeTest {
-    @MockBukkitInject
-    ServerMock serverMock;
 
+    private TheBrewingProject theBrewingProject;
     private Database database;
     private World world;
-    private TheBrewingProject theBrewingProject;
 
     @BeforeEach
-    void setUp() {
+    void setup() {
+        ServerMock serverMock = MockBukkit.mock(new TBPServerMock());
         this.theBrewingProject = MockBukkit.load(TheBrewingProject.class);
-        this.database = theBrewingProject.getDatabase();
+        this.database = this.theBrewingProject.getDatabase();
         this.world = serverMock.addSimpleWorld("hello_world!");
+    }
+    @AfterEach
+    public void tearDown() {
+        MockBukkit.unmock();
     }
 
     @Test

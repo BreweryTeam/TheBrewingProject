@@ -7,15 +7,14 @@ import dev.jsinco.brewery.bukkit.breweries.distillery.BukkitDistilleryDataType;
 import dev.jsinco.brewery.bukkit.structure.GenericBlockDataMatcher;
 import dev.jsinco.brewery.bukkit.structure.PlacedBreweryStructure;
 import dev.jsinco.brewery.bukkit.structure.StructurePlacerUtils;
+import dev.jsinco.brewery.bukkit.testutil.TBPServerMock;
 import dev.jsinco.brewery.database.PersistenceException;
 import dev.jsinco.brewery.database.sql.Database;
 import org.bukkit.block.Block;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockbukkit.mockbukkit.MockBukkit;
-import org.mockbukkit.mockbukkit.MockBukkitExtension;
-import org.mockbukkit.mockbukkit.MockBukkitInject;
 import org.mockbukkit.mockbukkit.ServerMock;
 import org.mockbukkit.mockbukkit.world.WorldMock;
 
@@ -25,20 +24,22 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@ExtendWith(MockBukkitExtension.class)
 class BukkitDistilleryDataTypeTest {
 
     TheBrewingProject plugin;
     Database database;
-    @MockBukkitInject
-    ServerMock server;
     WorldMock world;
 
     @BeforeEach
     void setUp() {
+        ServerMock server = MockBukkit.mock(new TBPServerMock());
         this.plugin = MockBukkit.load(TheBrewingProject.class);
         this.database = plugin.getDatabase();
         this.world = server.addSimpleWorld("world");
+    }
+    @AfterEach
+    public void tearDown() {
+        MockBukkit.unmock();
     }
 
     @Test

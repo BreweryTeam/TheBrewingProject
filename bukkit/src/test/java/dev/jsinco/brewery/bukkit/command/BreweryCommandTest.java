@@ -2,33 +2,34 @@ package dev.jsinco.brewery.bukkit.command;
 
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.api.effect.DrunkState;
+import dev.jsinco.brewery.bukkit.testutil.TBPServerMock;
 import org.bukkit.Material;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvFileSource;
 import org.mockbukkit.mockbukkit.MockBukkit;
-import org.mockbukkit.mockbukkit.MockBukkitExtension;
-import org.mockbukkit.mockbukkit.MockBukkitInject;
 import org.mockbukkit.mockbukkit.ServerMock;
 import org.mockbukkit.mockbukkit.entity.PlayerMock;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@ExtendWith(MockBukkitExtension.class)
 class BreweryCommandTest {
 
-    @MockBukkitInject
-    ServerMock serverMock;
     PlayerMock target;
     TheBrewingProject theBrewingProject;
 
     @BeforeEach
     void setUp() {
+        ServerMock serverMock = MockBukkit.mock(new TBPServerMock());
         theBrewingProject = MockBukkit.load(TheBrewingProject.class);
         target = serverMock.addPlayer();
         target.addAttachment(theBrewingProject, "brewery.command", true);
+    }
+    @AfterEach
+    public void tearDown() {
+        MockBukkit.unmock();
     }
 
     @ParameterizedTest

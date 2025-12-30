@@ -6,14 +6,15 @@ import dev.jsinco.brewery.api.event.CustomEventRegistry;
 import dev.jsinco.brewery.api.event.NamedDrunkEvent;
 import dev.jsinco.brewery.api.util.BreweryRegistry;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
+import dev.jsinco.brewery.bukkit.testutil.TBPServerMock;
 import dev.jsinco.brewery.configuration.DrunkenModifierSection;
+import dev.jsinco.brewery.database.sql.Database;
 import dev.jsinco.brewery.effect.DrunkStateImpl;
 import dev.jsinco.brewery.effect.DrunksManagerImpl;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockbukkit.mockbukkit.MockBukkit;
-import org.mockbukkit.mockbukkit.MockBukkitExtension;
 
 import java.sql.Connection;
 import java.util.List;
@@ -25,7 +26,6 @@ import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@ExtendWith(MockBukkitExtension.class)
 class DrunksManagerTest {
 
     private DrunksManagerImpl<Connection> drunksManager;
@@ -35,15 +35,21 @@ class DrunksManagerTest {
 
     @BeforeEach
     void setup() {
+        MockBukkit.mock(new TBPServerMock());
+        Database database = MockBukkit.load(TheBrewingProject.class).getDatabase();
         this.drunksManager = new DrunksManagerImpl<>(new CustomEventRegistry(), BreweryRegistry.DRUNK_EVENT.values().stream()
                 .map(NamedDrunkEvent::key)
                 .collect(Collectors.toSet()),
                 time::get,
-                MockBukkit.load(TheBrewingProject.class).getDatabase(),
+                database,
                 SqlDrunkStateDataType.INSTANCE,
                 SqlDrunkenModifierDataType.INSTANCE
         );
         this.alcohol = DrunkenModifierSection.modifiers().modifier("alcohol");
+    }
+    @AfterEach
+    public void tearDown() {
+        MockBukkit.unmock();
     }
 
     @Test

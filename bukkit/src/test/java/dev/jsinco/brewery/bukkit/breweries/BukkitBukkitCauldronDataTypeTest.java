@@ -2,6 +2,7 @@ package dev.jsinco.brewery.bukkit.breweries;
 
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.bukkit.api.BukkitAdapter;
+import dev.jsinco.brewery.bukkit.testutil.TBPServerMock;
 import dev.jsinco.brewery.database.PersistenceException;
 import dev.jsinco.brewery.database.sql.Database;
 import dev.jsinco.brewery.util.FutureUtil;
@@ -9,12 +10,10 @@ import dev.jsinco.brewery.api.vector.BreweryLocation;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockbukkit.mockbukkit.MockBukkit;
-import org.mockbukkit.mockbukkit.MockBukkitExtension;
-import org.mockbukkit.mockbukkit.MockBukkitInject;
 import org.mockbukkit.mockbukkit.ServerMock;
 import org.mockbukkit.mockbukkit.world.WorldMock;
 
@@ -22,18 +21,21 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@ExtendWith(MockBukkitExtension.class)
 class BukkitBukkitCauldronDataTypeTest {
-    @MockBukkitInject
-    ServerMock server;
+
     private @NotNull WorldMock world;
     private Database database;
 
     @BeforeEach
     void setUp() {
+        ServerMock server = MockBukkit.mock(new TBPServerMock());
         this.world = server.addSimpleWorld("hello!");
         TheBrewingProject theBrewingProject = MockBukkit.load(TheBrewingProject.class);
         this.database = theBrewingProject.getDatabase();
+    }
+    @AfterEach
+    public void tearDown() {
+        MockBukkit.unmock();
     }
 
     @Test
