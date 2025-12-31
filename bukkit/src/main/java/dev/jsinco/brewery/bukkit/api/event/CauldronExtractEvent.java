@@ -3,9 +3,7 @@ package dev.jsinco.brewery.bukkit.api.event;
 import dev.jsinco.brewery.api.breweries.Cauldron;
 import dev.jsinco.brewery.bukkit.api.transaction.ItemSource;
 import dev.jsinco.brewery.bukkit.api.transaction.ItemTransactionSession;
-import dev.jsinco.brewery.bukkit.breweries.BukkitCauldron;
 import lombok.Getter;
-import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
 import org.jetbrains.annotations.NotNull;
@@ -35,7 +33,7 @@ public class CauldronExtractEvent extends PermissibleBreweryEvent implements Ite
         return HANDLERS;
     }
 
-    public static HandlerList getHandlerLists() {
+    public static HandlerList getHandlerList() {
         return HANDLERS;
     }
 }

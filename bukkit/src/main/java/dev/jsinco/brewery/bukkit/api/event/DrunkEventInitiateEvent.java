@@ -26,7 +26,7 @@ public class DrunkEventInitiateEvent extends Event implements Cancellable {
         return HANDLERS;
     }
 
-    public static HandlerList getHandlerLists() {
+    public static HandlerList getHandlerList() {
         return HANDLERS;
     }
 }

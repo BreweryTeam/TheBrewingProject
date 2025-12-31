@@ -1,16 +1,11 @@
 package dev.jsinco.brewery.bukkit.api.event;
 
-import dev.jsinco.brewery.api.breweries.Barrel;
 import dev.jsinco.brewery.api.breweries.BarrelAccess;
 import dev.jsinco.brewery.bukkit.api.transaction.ItemSource;
-import dev.jsinco.brewery.bukkit.api.transaction.ItemTransaction;
 import dev.jsinco.brewery.bukkit.api.transaction.ItemTransactionSession;
-import dev.jsinco.brewery.bukkit.breweries.barrel.BukkitBarrel;
 import lombok.Getter;
-import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
-import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -38,7 +33,7 @@ public class BarrelExtractEvent extends PermissibleBreweryEvent implements ItemT
         return HANDLERS;
     }
 
-    public static HandlerList getHandlerLists() {
+    public static HandlerList getHandlerList() {
         return HANDLERS;
     }
 }

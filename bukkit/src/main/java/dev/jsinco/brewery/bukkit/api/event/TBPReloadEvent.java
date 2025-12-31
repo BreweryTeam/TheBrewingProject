@@ -13,7 +13,7 @@ public class TBPReloadEvent extends Event {
         return HANDLERS;
     }
 
-    public static HandlerList getHandlerLists() {
+    public static HandlerList getHandlerList() {
         return HANDLERS;
     }
 }
