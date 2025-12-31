@@ -1,6 +1,7 @@
 package dev.jsinco.brewery.bukkit.api.event;
 
 import dev.jsinco.brewery.api.breweries.Barrel;
+import dev.jsinco.brewery.api.breweries.BarrelAccess;
 import dev.jsinco.brewery.bukkit.api.transaction.ItemSource;
 import dev.jsinco.brewery.bukkit.api.transaction.ItemTransaction;
 import dev.jsinco.brewery.bukkit.api.transaction.ItemTransactionSession;
@@ -17,14 +18,14 @@ public class BarrelExtractEvent extends PermissibleBreweryEvent implements ItemT
 
     private static final HandlerList HANDLERS = new HandlerList();
     @Getter
-    private final Barrel barrel;
+    private final BarrelAccess barrel;
     @Getter
     private final @Nullable Player player;
     @Getter
     private final ItemTransactionSession<ItemSource.ItemBasedSource> transactionSession;
 
 
-    public BarrelExtractEvent(BukkitBarrel barrel, ItemTransactionSession<ItemSource.ItemBasedSource> transactionSession,
+    public BarrelExtractEvent(BarrelAccess barrel, ItemTransactionSession<ItemSource.ItemBasedSource> transactionSession,
                               @NotNull CancelState state, @Nullable Player player) {
         super(state);
         this.barrel = barrel;

@@ -1,5 +1,6 @@
 package dev.jsinco.brewery.bukkit.api.event;
 
+import dev.jsinco.brewery.api.breweries.Cauldron;
 import dev.jsinco.brewery.bukkit.api.transaction.ItemSource;
 import dev.jsinco.brewery.bukkit.api.transaction.ItemTransactionSession;
 import dev.jsinco.brewery.bukkit.breweries.BukkitCauldron;
@@ -13,13 +14,13 @@ import org.jetbrains.annotations.Nullable;
 public class CauldronExtractEvent extends PermissibleBreweryEvent implements ItemTransactionEvent<ItemSource.ItemBasedSource> {
 
     @Getter
-    private final BukkitCauldron cauldron;
+    private final Cauldron cauldron;
     @Getter
     private final @Nullable Player player;
     @Getter
     private final ItemTransactionSession<ItemSource.ItemBasedSource> transactionSession;
 
-    public CauldronExtractEvent(BukkitCauldron cauldron, ItemTransactionSession<ItemSource.ItemBasedSource> transactionSession,
+    public CauldronExtractEvent(Cauldron cauldron, ItemTransactionSession<ItemSource.ItemBasedSource> transactionSession,
                                 @NotNull CancelState state, @Nullable Player player) {
         super(state);
         this.cauldron = cauldron;
