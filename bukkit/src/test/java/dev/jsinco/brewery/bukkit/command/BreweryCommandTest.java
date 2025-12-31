@@ -6,6 +6,7 @@ import dev.jsinco.brewery.bukkit.testutil.TBPServerMock;
 import org.bukkit.Material;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvFileSource;
@@ -15,6 +16,7 @@ import org.mockbukkit.mockbukkit.entity.PlayerMock;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@Disabled("Current MockBukkit version does not support player args in Brigadier commands")
 class BreweryCommandTest {
 
     PlayerMock target;
