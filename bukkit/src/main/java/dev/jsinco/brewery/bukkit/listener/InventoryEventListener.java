@@ -24,9 +24,13 @@ import org.bukkit.event.inventory.*;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 public class InventoryEventListener implements Listener {
 
@@ -80,33 +84,37 @@ public class InventoryEventListener implements Listener {
                 return;
             }
         }
-        Bukkit.getScheduler().runTask(TheBrewingProject.getInstance(), () -> {
-            for (ItemTransactionEvent<?> transactionEvent : transactions) {
-                ItemTransactionSession<?> session = transactionEvent.getTransactionSession();
-                ItemTransaction transaction = session.getTransaction();
-                ItemStack itemStack = session.getResult() == null ? null : session.getResult().get();
-                if (transaction.to() instanceof ItemTransaction.Cursor
-                        && transaction.itemStack().equals(event.getView().getCursor())
-                ) {
-                    event.getView().setCursor(itemStack);
-                }
-                if (transaction.to() instanceof ItemTransaction.RawPosition(int pos)
-                        && transaction.itemStack().equals(event.getView().getItem(pos))
-                ) {
-                    event.getView().setItem(pos, itemStack);
-                }
-                if (transaction.to() instanceof ItemTransaction.UpperInventoryPosition(int pos)
-                        && transaction.itemStack().equals(event.getView().getTopInventory().getItem(pos))
-                ) {
-                    event.getView().getTopInventory().setItem(pos, itemStack);
-                }
-                if (transaction.to() instanceof ItemTransaction.LowerInventoryPosition(int pos)
-                        && transaction.itemStack().equals(event.getView().getBottomInventory().getItem(pos))
-                ) {
-                    event.getView().getBottomInventory().setItem(pos, itemStack);
-                }
+        Bukkit.getScheduler().runTask(TheBrewingProject.getInstance(), () ->
+                displayEventResult(event.getView(), transactions)
+        );
+    }
+
+    private void displayEventResult(@NotNull InventoryView view, List<? extends ItemTransactionEvent<?>> transactions) {
+        for (ItemTransactionEvent<?> transactionEvent : transactions) {
+            ItemTransactionSession<?> session = transactionEvent.getTransactionSession();
+            ItemTransaction transaction = session.getTransaction();
+            ItemStack itemStack = session.getResult() == null ? null : session.getResult().get();
+            if (transaction.to() instanceof ItemTransaction.Cursor
+                    && transaction.itemStack().equals(view.getCursor())
+            ) {
+                view.setCursor(itemStack);
             }
-        });
+            if (transaction.to() instanceof ItemTransaction.RawPosition(int pos)
+                    && transaction.itemStack().equals(view.getItem(pos))
+            ) {
+                view.setItem(pos, itemStack);
+            }
+            if (transaction.to() instanceof ItemTransaction.UpperInventoryPosition(int pos)
+                    && transaction.itemStack().equals(view.getTopInventory().getItem(pos))
+            ) {
+                view.getTopInventory().setItem(pos, itemStack);
+            }
+            if (transaction.to() instanceof ItemTransaction.LowerInventoryPosition(int pos)
+                    && transaction.itemStack().equals(view.getBottomInventory().getItem(pos))
+            ) {
+                view.getBottomInventory().setItem(pos, itemStack);
+            }
+        }
     }
 
     private List<? extends ItemTransactionEvent<?>> compileTransactionsFromClick(InventoryClickEvent event, boolean upperInventoryIsClicked,
@@ -260,7 +268,7 @@ public class InventoryEventListener implements Listener {
         Optional<Brew> brewOptional = BrewAdapter.fromItem(itemCloned);
         if (inventoryAccessible instanceof BukkitDistillery distillery) {
             CancelState cancelState = brewOptional.isEmpty() ? new CancelState.Cancelled() :
-                    player  == null || player.hasPermission("brewery.distillery.access") ? new CancelState.Allowed() :
+                    player == null || player.hasPermission("brewery.distillery.access") ? new CancelState.Allowed() :
                             new CancelState.PermissionDenied(Component.translatable("tbp.distillery.access-denied"));
             return insertion ? new DistilleryInsertEvent(
                     distillery,
@@ -282,7 +290,7 @@ public class InventoryEventListener implements Listener {
         }
         if (inventoryAccessible instanceof BukkitBarrel barrel) {
             CancelState cancelState = brewOptional.isEmpty() ? new CancelState.Cancelled() :
-                    player  == null || player.hasPermission("brewery.barrel.access") ? new CancelState.Allowed() :
+                    player == null || player.hasPermission("brewery.barrel.access") ? new CancelState.Allowed() :
                             new CancelState.PermissionDenied(Component.translatable("tbp.barrel.access-denied"));
             return insertion ? new BarrelInsertEvent(
                     barrel,
@@ -309,12 +317,35 @@ public class InventoryEventListener implements Listener {
             return;
         }
         InventoryView inventoryView = dragEvent.getView();
-        if (!dragEvent.getNewItems().entrySet().stream()
+        List<? extends ItemTransactionEvent<?>> transactionEvents = dragEvent.getNewItems()
+                .entrySet()
+                .stream()
                 .filter(entry -> dragEvent.getInventory() == inventoryView.getInventory(entry.getKey()))
-                .map(Map.Entry::getValue)
-                .allMatch(itemStack -> inventoryAccessible.inventoryAllows(dragEvent.getWhoClicked().getUniqueId(), itemStack))) {
-            dragEvent.setResult(Event.Result.DENY);
+                .map(entry -> eventFromStructure(
+                        inventoryAccessible,
+                        new ItemTransaction.Cursor(),
+                        new ItemTransaction.RawPosition(entry.getKey()),
+                        entry.getValue(),
+                        true,
+                        dragEvent.getWhoClicked() instanceof Player player ? player : null
+                )).toList();
+        List<CancelState> cancelled = transactionEvents.stream()
+                .filter(ItemTransactionEvent::callEvent)
+                .map(ItemTransactionEvent::getCancelState)
+                .toList();
+        if (!cancelled.isEmpty()) {
+            cancelled.stream()
+                    .filter(CancelState.PermissionDenied.class::isInstance)
+                    .map(CancelState.PermissionDenied.class::cast)
+                    .map(CancelState.PermissionDenied::message)
+                    .forEach(dragEvent.getWhoClicked()::sendMessage);
+            dragEvent.setCancelled(true);
+            return;
         }
+
+        Bukkit.getScheduler().runTask(TheBrewingProject.getInstance(), () ->
+                displayEventResult(inventoryView, transactionEvents)
+        );
     }
 
     @EventHandler(ignoreCancelled = true)
@@ -326,12 +357,28 @@ public class InventoryEventListener implements Listener {
             both.ifPresent(ignored -> event.setCancelled(true));
             return;
         }
-        both.filter(inventoryAccessible -> !inventoryAccessible.inventoryAllows(event.getItem()))
-                .ifPresent(ignored -> event.setCancelled(true));
-        source.flatMap(ignored -> BrewAdapter.fromItem(event.getItem())
-                        .map(brew -> BrewAdapter.toItem(brew, new Brew.State.Other())))
-                .ifPresent(event::setItem);
-
+        if (both.isEmpty()) {
+            return;
+        }
+        InventoryAccessible<ItemStack, Inventory> inventoryAccessible = both.get();
+        ItemTransactionEvent<?> transactionEvent = eventFromStructure(
+                inventoryAccessible,
+                new ItemTransaction.FirstInventoryPosition(source.isPresent()),
+                new ItemTransaction.FirstInventoryPosition(destination.isPresent()),
+                event.getItem(),
+                destination.isPresent(),
+                null
+        );
+        if (!transactionEvent.callEvent()) {
+            event.setCancelled(true);
+            return;
+        }
+        ItemSource result = transactionEvent.getTransactionSession().getResult();
+        if (result == null) {
+            event.setCancelled(true);
+            return;
+        }
+        event.setItem(result.get());
     }
 
     @EventHandler(ignoreCancelled = true)

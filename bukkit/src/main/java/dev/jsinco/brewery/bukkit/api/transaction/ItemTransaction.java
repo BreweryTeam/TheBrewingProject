@@ -26,6 +26,10 @@ public record ItemTransaction(InventoryPosition from, InventoryPosition to, Item
     }
 
     public record UpperInventoryPosition(int pos) implements InventoryPosition {
-        
+
+    }
+
+    public record FirstInventoryPosition(boolean breweryInventory) implements InventoryPosition {
+
     }
 }
