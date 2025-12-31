@@ -122,6 +122,12 @@ public class BrewingStepPdcType implements PersistentDataType<byte[], BrewingSte
                 int ivLen = headerIn.readUnsignedByte();
                 byte[] iv = headerIn.readNBytes(ivLen);
 
+                if (ivLen == 0) { // brew isn't encrypted
+                    try (DataInputStream dis = new DataInputStream(in)) {
+                        return readPayload(dis);
+                    }
+                }
+
                 List<SecretKey> knownKeys = new ArrayList<>();
                 knownKeys.add(Config.config().encryptionKey());
                 knownKeys.addAll(Config.config().previousEncryptionKeys());
