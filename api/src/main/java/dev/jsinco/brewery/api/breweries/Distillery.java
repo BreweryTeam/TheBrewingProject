@@ -2,6 +2,7 @@ package dev.jsinco.brewery.api.breweries;
 
 import dev.jsinco.brewery.api.structure.StructureType;
 
+@Deprecated(forRemoval = true)
 public interface Distillery<D extends Distillery<D, IS, I>, IS, I> extends StructureHolder<D>, InventoryAccessible<IS, I>, Tickable {
 
     /**
