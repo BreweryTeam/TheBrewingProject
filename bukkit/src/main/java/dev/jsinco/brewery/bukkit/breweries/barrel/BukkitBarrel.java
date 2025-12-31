@@ -4,7 +4,9 @@ import com.google.common.base.Preconditions;
 import dev.jsinco.brewery.api.brew.Brew;
 import dev.jsinco.brewery.api.brew.BrewingStep;
 import dev.jsinco.brewery.api.breweries.Barrel;
+import dev.jsinco.brewery.api.breweries.BarrelAccess;
 import dev.jsinco.brewery.api.breweries.BarrelType;
+import dev.jsinco.brewery.api.breweries.BrewInventory;
 import dev.jsinco.brewery.api.moment.Interval;
 import dev.jsinco.brewery.api.moment.Moment;
 import dev.jsinco.brewery.api.util.Pair;
@@ -13,7 +15,7 @@ import dev.jsinco.brewery.brew.AgeStepImpl;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.bukkit.api.BukkitAdapter;
 import dev.jsinco.brewery.bukkit.brew.BrewAdapter;
-import dev.jsinco.brewery.bukkit.breweries.BrewInventory;
+import dev.jsinco.brewery.bukkit.breweries.BrewInventoryImpl;
 import dev.jsinco.brewery.bukkit.structure.PlacedBreweryStructure;
 import dev.jsinco.brewery.bukkit.util.SoundPlayer;
 import dev.jsinco.brewery.configuration.Config;
@@ -32,7 +34,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.*;
 
 @Getter
-public class BukkitBarrel implements Barrel<BukkitBarrel, ItemStack, Inventory> {
+public class BukkitBarrel implements Barrel<BukkitBarrel, ItemStack, Inventory>, BarrelAccess {
     private final PlacedBreweryStructure<BukkitBarrel> structure;
     @Getter
     private final int size;
@@ -40,7 +42,7 @@ public class BukkitBarrel implements Barrel<BukkitBarrel, ItemStack, Inventory> 
     private final BarrelType type;
     @Getter
     private final Location uniqueLocation;
-    private final BrewInventory inventory;
+    private final BrewInventoryImpl inventory;
     private long recentlyAccessed = -1L;
     private long ticksUntilNextCheck = 0L;
     private static final Random RANDOM = new Random();
@@ -50,7 +52,7 @@ public class BukkitBarrel implements Barrel<BukkitBarrel, ItemStack, Inventory> 
         this.size = size;
         this.type = Preconditions.checkNotNull(type);
         this.uniqueLocation = Preconditions.checkNotNull(uniqueLocation);
-        this.inventory = new BrewInventory(Component.translatable("tbp.barrel.gui-title"), size, new BarrelBrewPersistenceHandler(BukkitAdapter.toBreweryLocation(uniqueLocation)));
+        this.inventory = new BrewInventoryImpl(Component.translatable("tbp.barrel.gui-title"), size, new BarrelBrewPersistenceHandler(BukkitAdapter.toBreweryLocation(uniqueLocation)));
     }
 
     @Override
@@ -178,6 +180,11 @@ public class BukkitBarrel implements Barrel<BukkitBarrel, ItemStack, Inventory> 
                     List<ItemStack> contents = inventory.destroy();
                     contents.forEach(itemStack -> location.getWorld().dropItem(location, itemStack));
                 });
+    }
+
+    @Override
+    public BrewInventory getBrewInventory() {
+        return inventory;
     }
 
     @Override

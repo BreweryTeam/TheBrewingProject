@@ -3,7 +3,7 @@ package dev.jsinco.brewery.bukkit.breweries.distillery;
 import dev.jsinco.brewery.api.brew.Brew;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.bukkit.brew.BukkitDistilleryBrewDataType;
-import dev.jsinco.brewery.bukkit.breweries.BrewInventory;
+import dev.jsinco.brewery.bukkit.breweries.BrewInventoryImpl;
 import dev.jsinco.brewery.bukkit.structure.BreweryStructure;
 import dev.jsinco.brewery.bukkit.structure.PlacedBreweryStructure;
 import dev.jsinco.brewery.bukkit.api.BukkitAdapter;
@@ -105,7 +105,7 @@ public class BukkitDistilleryDataType implements SqlStoredData.Findable<BukkitDi
                     .thenAcceptAsync(contents ->
                             contents.forEach(content -> {
                                 BukkitDistilleryBrewDataType.DistilleryContext context = content.second();
-                                BrewInventory inventory = context.distillate() ? distillery.getDistillate() : distillery.getMixture();
+                                BrewInventoryImpl inventory = context.distillate() ? distillery.getDistillate() : distillery.getMixture();
                                 inventory.set(content.first(), context.inventoryPos());
                             })
                     );

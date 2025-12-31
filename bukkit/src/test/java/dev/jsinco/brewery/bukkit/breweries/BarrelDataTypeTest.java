@@ -67,7 +67,7 @@ class BarrelDataTypeTest {
                 .map(Optional::get)
                 .findFirst();
         BukkitBarrel barrel = new BukkitBarrel(new Location(world, 1, 2, 3), breweryStructureOptional.get().first(), 9, BarrelType.OAK);
-        BrewInventory inventory = barrel.getInventory();
+        BrewInventoryImpl inventory = barrel.getInventory();
         inventory.set(new BrewImpl(
                 List.of(
                         new CookStepImpl(new PassedMoment(10), Map.of(), CauldronType.WATER),

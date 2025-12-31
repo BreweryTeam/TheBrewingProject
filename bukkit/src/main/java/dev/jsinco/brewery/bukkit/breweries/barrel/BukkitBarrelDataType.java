@@ -5,7 +5,7 @@ import dev.jsinco.brewery.api.brew.Brew;
 import dev.jsinco.brewery.api.breweries.BarrelType;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.bukkit.brew.BukkitBarrelBrewDataType;
-import dev.jsinco.brewery.bukkit.breweries.BrewInventory;
+import dev.jsinco.brewery.bukkit.breweries.BrewInventoryImpl;
 import dev.jsinco.brewery.bukkit.structure.BreweryStructure;
 import dev.jsinco.brewery.bukkit.structure.PlacedBreweryStructure;
 import dev.jsinco.brewery.bukkit.api.BukkitAdapter;
@@ -113,7 +113,7 @@ public class BukkitBarrelDataType implements SqlStoredData.Findable<BukkitBarrel
             throw new PersistenceException(e);
         }
         for (BukkitBarrel barrel : output) {
-            BrewInventory barrelInventory = barrel.getInventory();
+            BrewInventoryImpl barrelInventory = barrel.getInventory();
             FutureUtil.mergeFutures(BukkitBarrelBrewDataType.INSTANCE.find(BukkitAdapter.toBreweryLocation(barrel.getUniqueLocation()), connection))
                     .thenAcceptAsync(brews -> brews.forEach(pair -> barrelInventory.set(pair.first(), pair.second()))).join();
         }

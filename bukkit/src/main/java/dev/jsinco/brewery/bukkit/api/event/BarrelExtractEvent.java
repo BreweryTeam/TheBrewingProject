@@ -1,5 +1,6 @@
 package dev.jsinco.brewery.bukkit.api.event;
 
+import dev.jsinco.brewery.api.breweries.Barrel;
 import dev.jsinco.brewery.bukkit.api.transaction.ItemSource;
 import dev.jsinco.brewery.bukkit.api.transaction.ItemTransaction;
 import dev.jsinco.brewery.bukkit.api.transaction.ItemTransactionSession;
@@ -16,7 +17,7 @@ public class BarrelExtractEvent extends PermissibleBreweryEvent implements ItemT
 
     private static final HandlerList HANDLERS = new HandlerList();
     @Getter
-    private final BukkitBarrel barrel;
+    private final Barrel barrel;
     @Getter
     private final @Nullable Player player;
     @Getter
