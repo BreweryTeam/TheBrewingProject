@@ -37,11 +37,12 @@ public class ConsumedModifierDisplay {
             return;
         }
         Map<String, Double> variables = (afterState == null ? new DrunkStateImpl(0, -1) : afterState).asVariables();
-        consumedModifiers.forEach((modifier, value) -> variables.put("consumed_" + modifier.name(), value));
+        consumedModifiers.entrySet().stream()
+                .filter(entry -> changed.contains(entry.getKey()))
+                .forEach(entry ->  variables.put("consumed_" + entry.getKey().name(), entry.getValue()));
         Component component = DrunkenModifierSection.modifiers().drunkenDisplays()
                 .stream()
                 .filter(modifierDisplay -> modifierDisplay.displayWindow().equals(displayWindow))
-                .filter(modifierDisplay -> changed.stream().anyMatch(modifier -> displayReferencesModifier(modifierDisplay, modifier)))
                 .filter(modifierDisplay -> modifierDisplay.filter().evaluate(variables) > 0)
                 .map(modifierDisplay -> MessageUtil.miniMessage(
                         modifierDisplay.message(),
@@ -79,11 +80,6 @@ public class ConsumedModifierDisplay {
                     .toList();
         }
         return List.of();
-    }
-
-    private static boolean displayReferencesModifier(ModifierDisplay display, DrunkenModifier modifier) {
-        return display.value().function().contains(modifier.name()) ||
-                display.filter().function().contains(modifier.name());
     }
 
 }
