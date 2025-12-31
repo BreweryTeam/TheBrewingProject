@@ -70,6 +70,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.jetbrains.annotations.VisibleForTesting;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -158,7 +159,8 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
         this.successfullLoad = true;
     }
 
-    private OkaeriSerdesPack serializers() {
+    @VisibleForTesting
+    public OkaeriSerdesPack serializers() {
         return new OkaeriSerdesPackBuilder()
                 .add(new BreweryLocationSerializer())
                 .add(new EventRegistrySerializer())

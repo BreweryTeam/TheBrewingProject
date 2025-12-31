@@ -8,12 +8,10 @@ import dev.jsinco.brewery.recipes.BrewScoreImpl;
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class BrewImpl implements Brew {
@@ -62,6 +60,14 @@ public class BrewImpl implements Brew {
         return steps.stream()
                 .filter(this::isCompleted)
                 .toList();
+    }
+
+    @Override
+    public SequencedSet<UUID> getBrewers() {
+        return steps.stream()
+                .map(BrewingStep::brewers)
+                .flatMap(Collection::stream)
+                .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
     private boolean isCompleted(BrewingStep step) {

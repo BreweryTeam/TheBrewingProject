@@ -30,6 +30,15 @@ public final class FileUtil {
         }
     }
 
+    public static byte[] readInternalResourceBytes(String path) {
+        try (InputStream inputStream = FileUtil.class.getResourceAsStream(path)) {
+            if (inputStream == null) return new byte[0];
+            return inputStream.readAllBytes();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public static String readInternalResource(String path) {
         try (InputStream inputStream = FileUtil.class.getResourceAsStream(path)) {
             if (inputStream == null) return "";
