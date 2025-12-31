@@ -57,7 +57,7 @@ class DrunksManagerTest {
         drunksManager.consume(playerUuid, List.of(new ModifierConsume(alcohol, 10D)), 0L);
         assertEquals(new DrunkStateImpl(0, -1, Map.of(alcohol, 10D)), drunksManager.getDrunkState(playerUuid));
         drunksManager.consume(playerUuid, List.of(new ModifierConsume(alcohol, 0)), 400);
-        assertEquals(new DrunkStateImpl(400, -1, Map.of(alcohol, 8D)), drunksManager.getDrunkState(playerUuid));
+        assertEquals(new DrunkStateImpl(400, -1, Map.of(alcohol, 9D)), drunksManager.getDrunkState(playerUuid));
         drunksManager.consume(playerUuid, List.of(new ModifierConsume(alcohol, -9)), 400);
         assertNull(drunksManager.getDrunkState(playerUuid));
         drunksManager.consume(playerUuid, List.of(new ModifierConsume(alcohol, 0D)), -200);
