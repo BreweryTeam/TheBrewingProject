@@ -184,7 +184,8 @@ public class RecipeEffects {
                     Component.empty())
             );
         } else {
-            renderDefaultDisplayMessage(player, ModifierDisplay.DisplayWindow.TITLE, beforeState, afterState);
+            ConsumedModifierDisplay.renderConsumeDisplay(player, ModifierDisplay.DisplayWindow.TITLE,
+                    beforeState, afterState, modifiers);
         }
         if (message != null) {
             player.sendMessage(MessageUtil.miniMessage(message,
@@ -192,7 +193,8 @@ public class RecipeEffects {
                     MessageUtil.numberedModifierTagResolver(modifiers, "consumed")
             ));
         } else {
-            renderDefaultDisplayMessage(player, ModifierDisplay.DisplayWindow.CHAT, beforeState, afterState);
+            ConsumedModifierDisplay.renderConsumeDisplay(player, ModifierDisplay.DisplayWindow.CHAT,
+                    beforeState, afterState, modifiers);
         }
         if (actionBar != null) {
             player.sendActionBar(MessageUtil.miniMessage(actionBar,
@@ -200,7 +202,8 @@ public class RecipeEffects {
                     MessageUtil.numberedModifierTagResolver(modifiers, "consumed")
             ));
         } else {
-            renderDefaultDisplayMessage(player, ModifierDisplay.DisplayWindow.ACTION_BAR, beforeState, afterState);
+            ConsumedModifierDisplay.renderConsumeDisplay(player, ModifierDisplay.DisplayWindow.ACTION_BAR,
+                    beforeState, afterState, modifiers);
         }
         if (player.hasPermission("brewery.override.effect")) {
             return;
@@ -209,11 +212,6 @@ public class RecipeEffects {
         getEffects().stream()
                 .map(RecipeEffect::newPotionEffect)
                 .forEach(player::addPotionEffect);
-    }
-
-    private void renderDefaultDisplayMessage(Player player, ModifierDisplay.DisplayWindow displayWindow,
-                                             DrunkState beforeState, DrunkState afterState) {
-        ConsumedModifierDisplay.renderConsumeDisplay(player, displayWindow, beforeState, afterState, modifiers);
     }
 
     public void applyTo(Projectile projectile) {
