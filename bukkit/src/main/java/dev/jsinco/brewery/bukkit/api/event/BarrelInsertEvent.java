@@ -1,6 +1,7 @@
 package dev.jsinco.brewery.bukkit.api.event;
 
 import dev.jsinco.brewery.api.brew.Brew;
+import dev.jsinco.brewery.api.breweries.BarrelAccess;
 import dev.jsinco.brewery.bukkit.api.transaction.ItemSource;
 import dev.jsinco.brewery.bukkit.api.transaction.ItemTransactionSession;
 import dev.jsinco.brewery.bukkit.breweries.barrel.BukkitBarrel;
@@ -17,14 +18,14 @@ public class BarrelInsertEvent extends PermissibleBreweryEvent implements ItemTr
 
     private static final HandlerList HANDLERS = new HandlerList();
     @Getter
-    private final BukkitBarrel barrel;
+    private final BarrelAccess barrel;
     @Getter
     private final @Nullable Player player;
     @Getter
     private final ItemTransactionSession<ItemSource.BrewBasedSource> transactionSession;
 
 
-    public BarrelInsertEvent(BukkitBarrel barrel, ItemTransactionSession<ItemSource.BrewBasedSource> transactionSession,
+    public BarrelInsertEvent(BarrelAccess barrel, ItemTransactionSession<ItemSource.BrewBasedSource> transactionSession,
                              @NotNull CancelState state, @Nullable Player player) {
         super(state);
         this.barrel = barrel;

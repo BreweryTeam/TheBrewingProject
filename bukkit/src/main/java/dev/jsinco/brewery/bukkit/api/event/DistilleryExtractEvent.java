@@ -1,5 +1,6 @@
 package dev.jsinco.brewery.bukkit.api.event;
 
+import dev.jsinco.brewery.api.breweries.DistilleryAccess;
 import dev.jsinco.brewery.bukkit.api.transaction.ItemSource;
 import dev.jsinco.brewery.bukkit.api.transaction.ItemTransactionSession;
 import dev.jsinco.brewery.bukkit.breweries.distillery.BukkitDistillery;
@@ -14,14 +15,14 @@ public class DistilleryExtractEvent extends PermissibleBreweryEvent implements I
 
     private static final HandlerList HANDLERS = new HandlerList();
     @Getter
-    private final BukkitDistillery distillery;
+    private final DistilleryAccess distillery;
     @Getter
     private final ItemTransactionSession<ItemSource.ItemBasedSource> transactionSession;
     @Getter
     private final @Nullable Player player;
 
 
-    public DistilleryExtractEvent(BukkitDistillery distillery, ItemTransactionSession<ItemSource.ItemBasedSource> transactionSession,
+    public DistilleryExtractEvent(DistilleryAccess distillery, ItemTransactionSession<ItemSource.ItemBasedSource> transactionSession,
                                   @NotNull CancelState state, @Nullable Player player) {
         super(state);
         this.distillery = distillery;
