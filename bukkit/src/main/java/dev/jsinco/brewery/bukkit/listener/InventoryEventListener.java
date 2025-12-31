@@ -120,7 +120,7 @@ public class InventoryEventListener implements Listener {
                                 inventoryAccessible,
                                 new ItemTransaction.RawPosition(event.getRawSlot()),
                                 inventoryPosition,
-                                event.getCurrentItem(),
+                                event.getCurrentItem().clone(),
                                 false,
                                 player
                         ))
@@ -255,8 +255,9 @@ public class InventoryEventListener implements Listener {
     private static ItemTransactionEvent<?> eventFromStructure(InventoryAccessible<ItemStack, Inventory> inventoryAccessible,
                                                               ItemTransaction.InventoryPosition from, ItemTransaction.InventoryPosition to,
                                                               ItemStack item, boolean insertion, @Nullable Player player) {
-        ItemTransaction transaction = new ItemTransaction(from, to, item, insertion);
-        Optional<Brew> brewOptional = BrewAdapter.fromItem(item);
+        ItemStack itemCloned = item.clone();
+        ItemTransaction transaction = new ItemTransaction(from, to, itemCloned, insertion);
+        Optional<Brew> brewOptional = BrewAdapter.fromItem(itemCloned);
         if (inventoryAccessible instanceof BukkitDistillery distillery) {
             CancelState cancelState = brewOptional.isEmpty() ? new CancelState.Cancelled() :
                     player  == null || player.hasPermission("brewery.distillery.access") ? new CancelState.Allowed() :
@@ -293,7 +294,7 @@ public class InventoryEventListener implements Listener {
                     player
             ) : new BarrelExtractEvent(
                     barrel,
-                    new ItemTransactionSession<>(transaction, new ItemSource.ItemBasedSource(item)),
+                    new ItemTransactionSession<>(transaction, new ItemSource.ItemBasedSource(itemCloned)),
                     cancelState,
                     player
             );
