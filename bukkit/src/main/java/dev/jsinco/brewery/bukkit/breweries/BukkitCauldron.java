@@ -330,6 +330,7 @@ public class BukkitCauldron implements Cauldron {
         return false;
     }
 
+    @Override
     public long getTime() {
         if (brew.getCompletedSteps().isEmpty()) {
             return 0L;
