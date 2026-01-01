@@ -1,12 +1,12 @@
 package dev.jsinco.brewery.bukkit;
 
 import com.google.common.base.Preconditions;
-import dev.jsinco.brewery.api.config.Configuration;
 import dev.jsinco.brewery.api.brew.BrewManager;
 import dev.jsinco.brewery.api.breweries.Barrel;
 import dev.jsinco.brewery.api.breweries.BarrelType;
 import dev.jsinco.brewery.api.breweries.Distillery;
 import dev.jsinco.brewery.api.breweries.Tickable;
+import dev.jsinco.brewery.api.config.Configuration;
 import dev.jsinco.brewery.api.effect.modifier.ModifierManager;
 import dev.jsinco.brewery.api.event.CustomEventRegistry;
 import dev.jsinco.brewery.api.event.EventStepRegistry;
@@ -66,6 +66,7 @@ import lombok.Getter;
 import net.kyori.adventure.translation.GlobalTranslator;
 import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
+import org.bukkit.ServerTickManager;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.ServicePriority;
@@ -382,6 +383,9 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
     }
 
     private void updateStructures(ScheduledTask ignored) {
+        if (noTicking()) {
+            return; // Don't tick if the server is frozen, debug purposes
+        }
         breweryRegistry.getActiveSinglePositionStructure().stream()
                 .filter(Tickable.class::isInstance)
                 .map(Tickable.class::cast)
@@ -395,6 +399,9 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
     }
 
     private void otherTicking(ScheduledTask ignored) {
+        if (noTicking()) {
+            return; // Don't tick if the server is frozen, debug purposes
+        }
         drunksManager.tick(drunkEventExecutor::doDrunkEvent, uuid -> Bukkit.getPlayer(uuid) != null);
         try {
             if (++time % 200 == 0) {
@@ -411,6 +418,12 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
 
     public Configuration getConfiguration() {
         return Config.config();
+    }
+
+    private boolean noTicking() {
+        ServerTickManager serverTickManager = Bukkit.getServerTickManager();
+        return serverTickManager.isFrozen() && !serverTickManager.isSprinting()
+                && !serverTickManager.isStepping();
     }
 }
 
