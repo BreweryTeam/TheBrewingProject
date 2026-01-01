@@ -1,6 +1,7 @@
 package dev.jsinco.brewery.api.brew;
 
 import com.google.errorprone.annotations.Immutable;
+import dev.jsinco.brewery.api.meta.MetaContainer;
 import dev.jsinco.brewery.api.recipe.Recipe;
 import dev.jsinco.brewery.api.recipe.RecipeRegistry;
 import org.jetbrains.annotations.NotNull;
@@ -12,7 +13,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 @Immutable
-public interface Brew {
+public interface Brew extends MetaContainer<Brew> {
 
     /**
      * @param registry A registry with all available recipes
