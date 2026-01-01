@@ -9,6 +9,9 @@ import dev.jsinco.brewery.api.breweries.BarrelType;
 import dev.jsinco.brewery.api.breweries.BrewInventory;
 import dev.jsinco.brewery.api.moment.Interval;
 import dev.jsinco.brewery.api.moment.Moment;
+import dev.jsinco.brewery.api.util.CancelState;
+import dev.jsinco.brewery.api.util.Holder;
+import dev.jsinco.brewery.api.util.HolderProviderHolder;
 import dev.jsinco.brewery.api.util.Pair;
 import dev.jsinco.brewery.api.vector.BreweryLocation;
 import dev.jsinco.brewery.brew.AgeStepImpl;
@@ -56,11 +59,14 @@ public class BukkitBarrel implements Barrel<BukkitBarrel, ItemStack, Inventory>,
     }
 
     @Override
-    public boolean open(@NotNull BreweryLocation location, @NotNull UUID playerUuid) {
-        Player player = Bukkit.getPlayer(playerUuid);
+    public CancelState open(@NotNull BreweryLocation location, @NotNull Holder.Player playerHolder) {
+        Player player = BukkitAdapter.toPlayer(playerHolder)
+                .orElse(null);
+        if (player == null) {
+            return new CancelState.Cancelled();
+        }
         if (!player.hasPermission("brewery.barrel.access")) {
-            MessageUtil.message(player, "tbp.barrel.access-denied");
-            return true;
+            return new CancelState.PermissionDenied(Component.translatable("tbp.barrel.access-denied"));
         }
         if (inventoryUnpopulated()) {
             inventory.updateInventoryFromBrews();
@@ -70,7 +76,7 @@ public class BukkitBarrel implements Barrel<BukkitBarrel, ItemStack, Inventory>,
             SoundPlayer.playSoundEffect(Config.config().sounds().barrelOpen(), Sound.Source.BLOCK, uniqueLocation.toCenterLocation());
         }
         player.openInventory(inventory.getInventory());
-        return true;
+        return new CancelState.Allowed();
     }
 
     @Override
@@ -94,6 +100,23 @@ public class BukkitBarrel implements Barrel<BukkitBarrel, ItemStack, Inventory>,
     @Override
     public Set<Inventory> getInventories() {
         return Set.of(this.inventory.getInventory());
+    }
+
+    @Override
+    public boolean open(@NotNull BreweryLocation breweryLocation, @NotNull UUID playerUuid) {
+        Optional<Holder.Player> playerOptional = HolderProviderHolder.instance().player(playerUuid);
+        CancelState cancelState = playerOptional
+                .map(player -> open(breweryLocation, player))
+                .orElseGet(CancelState.Cancelled::new);
+        return switch (cancelState) {
+            case CancelState.Cancelled ignored -> false;
+            case CancelState.Allowed ignored -> true;
+            case CancelState.PermissionDenied(Component message) -> {
+                playerOptional.flatMap(BukkitAdapter::toPlayer)
+                        .ifPresent(player -> player.sendMessage(message));
+                yield false;
+            }
+        };
     }
 
     public void close(boolean silent) {

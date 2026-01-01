@@ -7,8 +7,7 @@ import dev.jsinco.brewery.api.breweries.DistilleryAccess;
 import dev.jsinco.brewery.api.moment.Moment;
 import dev.jsinco.brewery.api.structure.MaterialTag;
 import dev.jsinco.brewery.api.structure.StructureMeta;
-import dev.jsinco.brewery.api.util.Logger;
-import dev.jsinco.brewery.api.util.Pair;
+import dev.jsinco.brewery.api.util.*;
 import dev.jsinco.brewery.api.vector.BreweryLocation;
 import dev.jsinco.brewery.brew.DistillStepImpl;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
@@ -70,9 +69,12 @@ public class BukkitDistillery implements Distillery<BukkitDistillery, ItemStack,
     }
 
     @Override
-    public boolean open(@NotNull BreweryLocation location, @NotNull UUID playerUuid) {
+    public CancelState open(@NotNull BreweryLocation location, @NotNull Holder.Player playerHolder) {
         checkDirty();
-        Player player = Bukkit.getPlayer(playerUuid);
+        Player player = BukkitAdapter.toPlayer(playerHolder).orElse(null);
+        if (player == null) {
+            return new CancelState.Cancelled();
+        }
         if (mixtureContainerLocations.contains(location)) {
             playInteractionEffects(location, player);
             return openInventory(mixture, player);
@@ -81,7 +83,24 @@ public class BukkitDistillery implements Distillery<BukkitDistillery, ItemStack,
             playInteractionEffects(location, player);
             return openInventory(distillate, player);
         }
-        return false;
+        return new CancelState.Cancelled();
+    }
+
+    @Override
+    public boolean open(@NotNull BreweryLocation breweryLocation, @NotNull UUID playerUuid) {
+        Optional<Holder.Player> playerHolder = HolderProviderHolder.instance().player(playerUuid);
+        CancelState cancelState = playerHolder
+                .map(player -> open(breweryLocation, player))
+                .orElseGet(CancelState.Cancelled::new);
+        return switch (cancelState) {
+            case CancelState.Cancelled ignored -> false;
+            case CancelState.Allowed ignored -> true;
+            case CancelState.PermissionDenied(Component message) -> {
+                playerHolder.flatMap(BukkitAdapter::toPlayer)
+                        .ifPresent(player -> player.sendMessage(message));
+                yield false;
+            }
+        };
     }
 
     @Override
@@ -103,10 +122,9 @@ public class BukkitDistillery implements Distillery<BukkitDistillery, ItemStack,
         BlockUtil.playWobbleEffect(location, player);
     }
 
-    private boolean openInventory(BrewInventoryImpl inventory, Player player) {
+    private CancelState openInventory(BrewInventoryImpl inventory, Player player) {
         if (!player.hasPermission("brewery.distillery.access")) {
-            MessageUtil.message(player, "tbp.distillery.access-denied");
-            return false;
+            return new CancelState.PermissionDenied(Component.translatable("tbp.distillery.access-denied"));
         }
         if (inventoryUnpopulated()) {
             mixture.updateInventoryFromBrews();
@@ -115,7 +133,7 @@ public class BukkitDistillery implements Distillery<BukkitDistillery, ItemStack,
         this.recentlyAccessed = TheBrewingProject.getInstance().getTime();
         TheBrewingProject.getInstance().getBreweryRegistry().registerOpened(this);
         player.openInventory(inventory.getInventory());
-        return true;
+        return new CancelState.Allowed();
     }
 
     @Override

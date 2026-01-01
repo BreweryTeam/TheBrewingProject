@@ -21,10 +21,10 @@ public interface ItemTransactionEvent<T extends ItemSource> {
      *
      * @return The cancel state of the item transaction
      */
-    CancelState getCancelState();
+    dev.jsinco.brewery.api.util.CancelState getCancelState();
 
     /**
      * @param state The new cancel state for the item transaction
      */
-    void setCancelState(CancelState state);
+    void setCancelState(dev.jsinco.brewery.api.util.CancelState state);
 }
