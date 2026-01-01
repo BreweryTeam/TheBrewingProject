@@ -256,7 +256,8 @@ public class BukkitDistillery implements Distillery<BukkitDistillery, ItemStack,
                             world, unique.x() + 0.5, unique.y() + 0.5, unique.z() + 0.5
                     ));
         }
-        if (timeProcessed % (processTime / 4) < processTime / 16 && mixture.brewAmount() > processedBrews) {
+        long particleEffectInterval = Math.max(processTime / 4L, 10L);
+        if (timeProcessed % particleEffectInterval < 5 && mixture.brewAmount() > processedBrews) {
             distillateContainerLocations.stream()
                     .map(BukkitAdapter::toLocation)
                     .flatMap(Optional::stream)
