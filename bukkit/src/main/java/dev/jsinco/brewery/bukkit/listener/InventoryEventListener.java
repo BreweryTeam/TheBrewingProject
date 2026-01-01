@@ -77,7 +77,7 @@ public class InventoryEventListener implements Listener {
         List<? extends ItemTransactionEvent<?>> transactions = compileTransactionsFromClick(event, upperInventoryIsClicked, inventoryAccessible);
         for (ItemTransactionEvent<?> transactionEvent : transactions) {
             if (!transactionEvent.callEvent()) {
-                if (transactionEvent.getCancelState() instanceof CancelState.PermissionDenied(Component denyMessage)) {
+                if (transactionEvent.getCancelState() instanceof dev.jsinco.brewery.api.util.CancelState.PermissionDenied(Component denyMessage)) {
                     event.getWhoClicked().sendMessage(denyMessage);
                 }
                 event.setResult(Event.Result.DENY);
@@ -267,9 +267,9 @@ public class InventoryEventListener implements Listener {
         ItemTransaction transaction = new ItemTransaction(from, to, itemCloned, insertion);
         Optional<Brew> brewOptional = BrewAdapter.fromItem(itemCloned);
         if (inventoryAccessible instanceof BukkitDistillery distillery) {
-            CancelState cancelState = brewOptional.isEmpty() ? new CancelState.Cancelled() :
-                    player == null || player.hasPermission("brewery.distillery.access") ? new CancelState.Allowed() :
-                            new CancelState.PermissionDenied(Component.translatable("tbp.distillery.access-denied"));
+            dev.jsinco.brewery.api.util.CancelState cancelState = brewOptional.isEmpty() ? new dev.jsinco.brewery.api.util.CancelState.Cancelled() :
+                    player == null || player.hasPermission("brewery.distillery.access") ? new dev.jsinco.brewery.api.util.CancelState.Allowed() :
+                            new dev.jsinco.brewery.api.util.CancelState.PermissionDenied(Component.translatable("tbp.distillery.access-denied"));
             return insertion ? new DistilleryInsertEvent(
                     distillery,
                     new ItemTransactionSession<>(transaction, brewOptional
@@ -289,9 +289,9 @@ public class InventoryEventListener implements Listener {
             );
         }
         if (inventoryAccessible instanceof BukkitBarrel barrel) {
-            CancelState cancelState = brewOptional.isEmpty() ? new CancelState.Cancelled() :
-                    player == null || player.hasPermission("brewery.barrel.access") ? new CancelState.Allowed() :
-                            new CancelState.PermissionDenied(Component.translatable("tbp.barrel.access-denied"));
+            dev.jsinco.brewery.api.util.CancelState cancelState = brewOptional.isEmpty() ? new dev.jsinco.brewery.api.util.CancelState.Cancelled() :
+                    player == null || player.hasPermission("brewery.barrel.access") ? new dev.jsinco.brewery.api.util.CancelState.Allowed() :
+                            new dev.jsinco.brewery.api.util.CancelState.PermissionDenied(Component.translatable("tbp.barrel.access-denied"));
             return insertion ? new BarrelInsertEvent(
                     barrel,
                     new ItemTransactionSession<>(transaction, brewOptional
@@ -329,15 +329,15 @@ public class InventoryEventListener implements Listener {
                         true,
                         dragEvent.getWhoClicked() instanceof Player player ? player : null
                 )).toList();
-        List<CancelState> cancelled = transactionEvents.stream()
+        List<dev.jsinco.brewery.api.util.CancelState> cancelled = transactionEvents.stream()
                 .filter(ItemTransactionEvent::callEvent)
                 .map(ItemTransactionEvent::getCancelState)
                 .toList();
         if (!cancelled.isEmpty()) {
             cancelled.stream()
-                    .filter(CancelState.PermissionDenied.class::isInstance)
-                    .map(CancelState.PermissionDenied.class::cast)
-                    .map(CancelState.PermissionDenied::message)
+                    .filter(dev.jsinco.brewery.api.util.CancelState.PermissionDenied.class::isInstance)
+                    .map(dev.jsinco.brewery.api.util.CancelState.PermissionDenied.class::cast)
+                    .map(dev.jsinco.brewery.api.util.CancelState.PermissionDenied::message)
                     .forEach(dragEvent.getWhoClicked()::sendMessage);
             dragEvent.setCancelled(true);
             return;

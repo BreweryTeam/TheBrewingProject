@@ -20,7 +20,7 @@ public class CauldronInsertEvent extends PermissibleBreweryEvent {
     private final @Nullable Player player;
 
     public CauldronInsertEvent(Cauldron cauldron, ItemSource.ItemBasedSource itemSource,
-                               @NotNull CancelState state, @Nullable Player player) {
+                               @NotNull dev.jsinco.brewery.api.util.CancelState state, @Nullable Player player) {
         super(state);
         this.cauldron = cauldron;
         this.itemSource = itemSource;

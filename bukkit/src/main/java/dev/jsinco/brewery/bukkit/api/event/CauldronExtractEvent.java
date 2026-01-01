@@ -19,7 +19,7 @@ public class CauldronExtractEvent extends PermissibleBreweryEvent implements Ite
     private final ItemTransactionSession<ItemSource.ItemBasedSource> transactionSession;
 
     public CauldronExtractEvent(Cauldron cauldron, ItemTransactionSession<ItemSource.ItemBasedSource> transactionSession,
-                                @NotNull CancelState state, @Nullable Player player) {
+                                @NotNull dev.jsinco.brewery.api.util.CancelState state, @Nullable Player player) {
         super(state);
         this.cauldron = cauldron;
         this.transactionSession = transactionSession;

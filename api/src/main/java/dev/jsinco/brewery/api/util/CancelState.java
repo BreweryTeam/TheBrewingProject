@@ -1,8 +1,8 @@
-package dev.jsinco.brewery.bukkit.api.event;
+package dev.jsinco.brewery.api.util;
 
 import net.kyori.adventure.text.Component;
 
-public interface CancelState {
+public sealed interface CancelState {
 
     record Cancelled() implements CancelState {
     }

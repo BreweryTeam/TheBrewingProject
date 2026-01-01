@@ -21,7 +21,7 @@ public class BarrelInsertEvent extends PermissibleBreweryEvent implements ItemTr
 
 
     public BarrelInsertEvent(BarrelAccess barrel, ItemTransactionSession<ItemSource.BrewBasedSource> transactionSession,
-                             @NotNull CancelState state, @Nullable Player player) {
+                             @NotNull dev.jsinco.brewery.api.util.CancelState state, @Nullable Player player) {
         super(state);
         this.barrel = barrel;
         this.transactionSession = transactionSession;

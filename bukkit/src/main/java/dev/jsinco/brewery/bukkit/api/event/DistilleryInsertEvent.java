@@ -21,7 +21,7 @@ public class DistilleryInsertEvent extends PermissibleBreweryEvent implements It
 
 
     public DistilleryInsertEvent(DistilleryAccess distillery, ItemTransactionSession<ItemSource.BrewBasedSource> transactionSession,
-                                 @NotNull CancelState state, @Nullable Player player) {
+                                 @NotNull dev.jsinco.brewery.api.util.CancelState state, @Nullable Player player) {
         super(state);
         this.distillery = distillery;
         this.transactionSession = transactionSession;

@@ -1,6 +1,8 @@
 package dev.jsinco.brewery.api.breweries;
 
 import dev.jsinco.brewery.api.structure.MultiblockStructure;
+import dev.jsinco.brewery.api.util.CancelState;
+import dev.jsinco.brewery.api.util.Holder;
 import dev.jsinco.brewery.api.vector.BreweryLocation;
 import org.jetbrains.annotations.NotNull;
 
@@ -11,10 +13,10 @@ public interface BarrelAccess {
     /**
      * Open this barrels inventory for the player with the specified UUID
      * @param location The location to open from
-     * @param playerUuid The player UUID
-     * @return True if canceled
+     * @param player The player
+     * @return The resulting state
      */
-    boolean open(@NotNull BreweryLocation location, @NotNull UUID playerUuid);
+    CancelState open(@NotNull BreweryLocation location, @NotNull Holder.Player player);
 
     /**
      * Closes the barrel inventory for all viewers

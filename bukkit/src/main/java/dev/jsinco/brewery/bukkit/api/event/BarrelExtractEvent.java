@@ -21,7 +21,7 @@ public class BarrelExtractEvent extends PermissibleBreweryEvent implements ItemT
 
 
     public BarrelExtractEvent(BarrelAccess barrel, ItemTransactionSession<ItemSource.ItemBasedSource> transactionSession,
-                              @NotNull CancelState state, @Nullable Player player) {
+                              @NotNull dev.jsinco.brewery.api.util.CancelState state, @Nullable Player player) {
         super(state);
         this.barrel = barrel;
         this.transactionSession = transactionSession;
