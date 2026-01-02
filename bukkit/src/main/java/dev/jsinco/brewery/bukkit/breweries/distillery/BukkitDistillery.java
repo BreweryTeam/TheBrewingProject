@@ -367,7 +367,11 @@ public class BukkitDistillery implements Distillery<BukkitDistillery, ItemStack,
         BukkitAdapter.toLocation(breweryLocation)
                 .map(location -> location.add(0.5, 0, 0.5))
                 .ifPresent(location -> {
+                    boolean inventoryUnpopulated = inventoryUnpopulated();
                     for (BrewInventory distilleryInventory : List.of(distillate, mixture)) {
+                        if (!inventoryUnpopulated) {
+                            distilleryInventory.updateBrewsFromInventory();
+                        }
                         List.copyOf(distilleryInventory.getInventory().getViewers()).forEach(HumanEntity::closeInventory);
                         distilleryInventory.getInventory().clear();
                         for (Brew brew : distilleryInventory.getBrews()) {
