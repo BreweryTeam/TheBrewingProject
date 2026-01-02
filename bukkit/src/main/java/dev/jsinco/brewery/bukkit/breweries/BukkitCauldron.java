@@ -1,26 +1,32 @@
 package dev.jsinco.brewery.bukkit.breweries;
 
 import dev.jsinco.brewery.api.brew.Brew;
+import dev.jsinco.brewery.api.brew.BrewQuality;
 import dev.jsinco.brewery.api.brew.BrewScore;
 import dev.jsinco.brewery.api.brew.BrewingStep;
 import dev.jsinco.brewery.api.breweries.Cauldron;
-import dev.jsinco.brewery.brew.*;
 import dev.jsinco.brewery.api.breweries.CauldronType;
-import dev.jsinco.brewery.bukkit.TheBrewingProject;
-import dev.jsinco.brewery.bukkit.brew.BrewAdapter;
-import dev.jsinco.brewery.bukkit.ingredient.BukkitIngredientManager;
-import dev.jsinco.brewery.bukkit.event.ListenerUtil;
-import dev.jsinco.brewery.bukkit.recipe.BukkitRecipeResult;
-import dev.jsinco.brewery.bukkit.util.*;
-import dev.jsinco.brewery.bukkit.api.BukkitAdapter;
-import dev.jsinco.brewery.configuration.Config;
 import dev.jsinco.brewery.api.ingredient.Ingredient;
 import dev.jsinco.brewery.api.moment.Interval;
 import dev.jsinco.brewery.api.recipe.Recipe;
-import dev.jsinco.brewery.sound.SoundDefinition;
-import dev.jsinco.brewery.util.MessageUtil;
 import dev.jsinco.brewery.api.util.BreweryRegistry;
 import dev.jsinco.brewery.api.vector.BreweryLocation;
+import dev.jsinco.brewery.brew.BrewImpl;
+import dev.jsinco.brewery.brew.CookStepImpl;
+import dev.jsinco.brewery.brew.MixStepImpl;
+import dev.jsinco.brewery.bukkit.TheBrewingProject;
+import dev.jsinco.brewery.bukkit.api.BukkitAdapter;
+import dev.jsinco.brewery.bukkit.brew.BrewAdapter;
+import dev.jsinco.brewery.bukkit.event.ListenerUtil;
+import dev.jsinco.brewery.bukkit.ingredient.BukkitIngredientManager;
+import dev.jsinco.brewery.bukkit.recipe.BukkitRecipeResult;
+import dev.jsinco.brewery.bukkit.util.BlockUtil;
+import dev.jsinco.brewery.bukkit.util.BukkitIngredientUtil;
+import dev.jsinco.brewery.bukkit.util.ColorUtil;
+import dev.jsinco.brewery.bukkit.util.SoundPlayer;
+import dev.jsinco.brewery.configuration.Config;
+import dev.jsinco.brewery.sound.SoundDefinition;
+import dev.jsinco.brewery.util.MessageUtil;
 import lombok.Getter;
 import lombok.Setter;
 import net.kyori.adventure.sound.Sound;
@@ -127,9 +133,10 @@ public class BukkitCauldron implements Cauldron {
             return Color.AQUA;
         }
         BrewScore score = brew.score(recipeOptional.get());
+        BrewQuality brewQuality = score.brewQuality() == null ? BrewQuality.BAD : score.brewQuality();
         return !score.completed() ?
                 BukkitIngredientUtil.ingredientData(ingredients).first() :
-                ((BukkitRecipeResult) recipeOptional.get().getRecipeResults().get(score.brewQuality())).getColor();
+                ((BukkitRecipeResult) recipeOptional.get().getRecipeResults().get(brewQuality)).getColor();
     }
 
 
