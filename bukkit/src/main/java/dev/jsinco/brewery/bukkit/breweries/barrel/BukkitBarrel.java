@@ -107,9 +107,10 @@ public class BukkitBarrel implements Barrel<BukkitBarrel, ItemStack, Inventory> 
 
     @Override
     public void tickInventory() {
-        if (inventoryUnpopulated()) {
+        if (shouldUnpopulateInventory()) {
             close(false);
             TheBrewingProject.getInstance().getBreweryRegistry().unregisterOpened(this);
+            recentlyAccessed = -1L;
             return;
         }
         if (!inventory.getInventory().getViewers().isEmpty()) {
@@ -171,6 +172,9 @@ public class BukkitBarrel implements Barrel<BukkitBarrel, ItemStack, Inventory> 
         BukkitAdapter.toLocation(breweryLocation)
                 .map(location -> location.add(0.5, 0, 0.5))
                 .ifPresent(location -> {
+                    if(!inventoryUnpopulated()){
+                        inventory.updateBrewsFromInventory();
+                    }
                     List<ItemStack> contents = inventory.destroy();
                     contents.forEach(itemStack -> location.getWorld().dropItem(location, itemStack));
                 });
@@ -197,6 +201,10 @@ public class BukkitBarrel implements Barrel<BukkitBarrel, ItemStack, Inventory> 
     }
 
     private boolean inventoryUnpopulated() {
+        return recentlyAccessed == -1L;
+    }
+
+    private boolean shouldUnpopulateInventory(){
         return recentlyAccessed == -1L || recentlyAccessed + Moment.SECOND <= TheBrewingProject.getInstance().getTime();
     }
 }
