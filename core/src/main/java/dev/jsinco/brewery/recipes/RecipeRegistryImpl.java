@@ -24,7 +24,7 @@ public class RecipeRegistryImpl<I> implements RecipeRegistry<I> {
     private Set<Ingredient> allIngredients = Collections.newSetFromMap(new ConcurrentHashMap<>());
 
     public void registerRecipes(@NotNull Map<String, Recipe<I>> recipes) {
-        this.recipes = new HashMap<>(recipes);
+        this.recipes = new ConcurrentHashMap<>(recipes);
         recipes.values().stream()
                 .map(this::getRecipeIngredients)
                 .flatMap(Collection::stream)
