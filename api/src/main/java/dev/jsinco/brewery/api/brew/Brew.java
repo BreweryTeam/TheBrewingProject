@@ -8,6 +8,8 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.SequencedSet;
+import java.util.UUID;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -77,6 +79,13 @@ public interface Brew {
      * @return All steps
      */
     List<BrewingStep> getSteps();
+
+    /**
+     * All players who contributed to this brew, in their order of contribution.
+     *
+     * @return All brewers, may be empty
+     */
+    SequencedSet<UUID> getBrewers();
 
     /**
      * A state of a brew, mainly indicates how the data should be written when converting into an item
