@@ -283,7 +283,8 @@ public class InventoryEventListener implements Listener {
                     new ItemTransactionSession<>(transaction, brewOptional
                             .map(brew -> BrewAdapter.toItem(brew, new Brew.State.Other()))
                             .map(ItemSource.ItemBasedSource::new)
-                            .orElse(null)),
+                            .orElse(null)
+                    ),
                     cancelState,
                     player
             );
@@ -295,14 +296,17 @@ public class InventoryEventListener implements Listener {
             return insertion ? new BarrelInsertEvent(
                     barrel,
                     new ItemTransactionSession<>(transaction, brewOptional
-                            .map(brew -> new ItemSource.BrewBasedSource(brew, new Brew.State.Other()))
+                            .map(brew -> new ItemSource.BrewBasedSource(brew, new Brew.State.Brewing()))
                             .orElse(null)
                     ),
                     cancelState,
                     player
             ) : new BarrelExtractEvent(
                     barrel,
-                    new ItemTransactionSession<>(transaction, new ItemSource.ItemBasedSource(itemCloned)),
+                    new ItemTransactionSession<>(transaction, brewOptional
+                            .map(brew -> BrewAdapter.toItem(brew, new Brew.State.Other()))
+                            .map(ItemSource.ItemBasedSource::new)
+                            .orElse(null)),
                     cancelState,
                     player
             );
