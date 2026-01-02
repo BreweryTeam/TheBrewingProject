@@ -233,8 +233,12 @@ public class BukkitDistillery implements Distillery<BukkitDistillery, ItemStack,
         return output;
     }
 
-    private boolean inventoryUnpopulated() {
+    private boolean shouldUnpopulateInventory() {
         return recentlyAccessed == -1L || recentlyAccessed + Moment.SECOND <= TheBrewingProject.getInstance().getTime();
+    }
+
+    private boolean inventoryUnpopulated() {
+        return recentlyAccessed == -1L;
     }
 
     public void tick() {
@@ -268,10 +272,11 @@ public class BukkitDistillery implements Distillery<BukkitDistillery, ItemStack,
 
     public void tickInventory() {
         checkDirty();
-        if (inventoryUnpopulated()) {
+        if (shouldUnpopulateInventory()) {
             close(false);
             TheBrewingProject.getInstance().getBreweryRegistry().unregisterOpened(this);
             // Distilling results can be computed later on
+            this.recentlyAccessed = -1L;
             return;
         }
         if (!mixture.getInventory().getViewers().isEmpty() || !distillate.getInventory().getViewers().isEmpty()) {
