@@ -159,12 +159,13 @@ public class BukkitCauldron implements Cauldron {
             }
             return false;
         }
-        if (!brewExtracted && item.getType() == Material.POTION) {
+        ItemStack addedItem = event.getItemSource().get();
+        if (!brewExtracted && addedItem.getType() == Material.POTION) {
             BukkitCauldron.incrementLevel(getBlock());
         }
         this.hot = isHeatSource(getBlock().getRelative(BlockFace.DOWN));
         long time = TheBrewingProject.getInstance().getTime();
-        Ingredient ingredient = BukkitIngredientManager.INSTANCE.getIngredient(item);
+        Ingredient ingredient = BukkitIngredientManager.INSTANCE.getIngredient(addedItem);
         if (hot) {
             brew = brew.withLastStep(BrewingStep.Cook.class,
                     cook -> {
@@ -173,7 +174,7 @@ public class BukkitCauldron implements Cauldron {
                         ingredients.put(ingredient, amount + 1);
                         return cook.withIngredients(ingredients);
                     },
-                    () -> new CookStepImpl(new Interval(time, time), Map.of(BukkitIngredientManager.INSTANCE.getIngredient(item), 1), findCauldronType(getBlock()))
+                    () -> new CookStepImpl(new Interval(time, time), Map.of(BukkitIngredientManager.INSTANCE.getIngredient(addedItem), 1), findCauldronType(getBlock()))
             );
         } else {
             brew = brew.withLastStep(BrewingStep.Mix.class,
@@ -183,13 +184,13 @@ public class BukkitCauldron implements Cauldron {
                         ingredients.put(ingredient, amount + 1);
                         return mix.withIngredients(ingredients);
                     },
-                    () -> new MixStepImpl(new Interval(time, time), Map.of(BukkitIngredientManager.INSTANCE.getIngredient(item), 1))
+                    () -> new MixStepImpl(new Interval(time, time), Map.of(BukkitIngredientManager.INSTANCE.getIngredient(addedItem), 1))
             );
         }
         this.recipe = brew.closestRecipe(TheBrewingProject.getInstance().getRecipeRegistry())
                 .orElse(null);
 
-        playIngredientAddedEffects(item);
+        playIngredientAddedEffects(addedItem);
         return true;
     }
 

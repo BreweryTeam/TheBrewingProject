@@ -1,5 +1,7 @@
 package dev.jsinco.brewery.bukkit.api.event;
 
+import com.google.common.base.Preconditions;
+import dev.jsinco.brewery.api.brew.Brew;
 import dev.jsinco.brewery.api.breweries.Cauldron;
 import dev.jsinco.brewery.bukkit.api.transaction.ItemSource;
 import lombok.Getter;
@@ -13,7 +15,7 @@ public class CauldronExtractEvent extends PermissibleBreweryEvent {
     @Getter
     private final Cauldron cauldron;
     @Getter
-    private final ItemSource.BrewBasedSource brewSource;
+    private ItemSource.BrewBasedSource brewSource;
     @Getter
     private final @Nullable Player player;
 
@@ -23,6 +25,11 @@ public class CauldronExtractEvent extends PermissibleBreweryEvent {
         this.cauldron = cauldron;
         this.brewSource = brewSource;
         this.player = player;
+    }
+
+    public void setResult(@NotNull Brew brew) {
+        Preconditions.checkNotNull(brew);
+        brewSource = new ItemSource.BrewBasedSource(brew, new Brew.State.Other());
     }
 
     private static final HandlerList HANDLERS = new HandlerList();

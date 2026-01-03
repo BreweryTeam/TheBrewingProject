@@ -219,16 +219,7 @@ public class PlayerEventListener implements Listener {
         }
         BukkitCauldron cauldron = cauldronOptional.get();
         if (itemStack.getType() == Material.GLASS_BOTTLE) {
-            Brew brew = cauldron.getUpdatedBrew();
-            if (eventAcceptsBrewExtraction(cauldron, brew, event.getPlayer())) {
-                cauldron.extractBrew();
-                ItemStack brewItemStack = BrewAdapter.toItem(brew, new Brew.State.Other());
-                updateHeldItem(decreaseItem(itemStack, event.getPlayer()), event.getPlayer(), event.getHand());
-                event.getPlayer().getWorld().dropItem(event.getPlayer().getLocation(), brewItemStack);
-                if (BukkitCauldron.decrementLevel(block)) {
-                    ListenerUtil.removeActiveSinglePositionStructure(cauldronOptional.get(), breweryRegistry, database);
-                }
-            }
+            handleCauldronExtract(event, block, cauldron);
         }
         if (itemStack.getType() == Material.CLOCK && event.getPlayer().hasPermission("brewery.cauldron.time")) {
             event.getPlayer().sendMessage(
@@ -241,21 +232,31 @@ public class PlayerEventListener implements Listener {
         event.setUseItemInHand(Event.Result.DENY);
     }
 
-    private boolean eventAcceptsBrewExtraction(@NotNull BukkitCauldron bukkitCauldron, Brew brew, Player player) {
-        CauldronExtractEvent event = new CauldronExtractEvent(
-                bukkitCauldron,
+    private void handleCauldronExtract(PlayerInteractEvent event, Block block, BukkitCauldron cauldron) {
+        Player player = event.getPlayer();
+        Brew brew = cauldron.getUpdatedBrew();
+
+        CauldronExtractEvent extractEvent = new CauldronExtractEvent(
+                cauldron,
                 new ItemSource.BrewBasedSource(brew, new Brew.State.Other()),
                 player.hasPermission("brewery.cauldron.access") ?
                         new CancelState.Allowed() : new CancelState.PermissionDenied(Component.translatable("tbp.cauldron.access-denied")),
                 player
         );
-        if (event.callEvent()) {
-            return true;
+        if (!extractEvent.callEvent()) {
+            if (extractEvent.getCancelState() instanceof CancelState.PermissionDenied(Component denyMessage)) {
+                player.sendMessage(denyMessage);
+            }
+            return;
         }
-        if (event.getCancelState() instanceof CancelState.PermissionDenied(Component denyMessage)) {
-            player.sendMessage(denyMessage);
+
+        cauldron.extractBrew();
+        ItemStack brewItemStack = extractEvent.getBrewSource().get();
+        updateHeldItem(decreaseItem(event.getItem(), player), player, event.getHand());
+        player.getWorld().dropItem(player.getLocation(), brewItemStack);
+        if (BukkitCauldron.decrementLevel(block)) {
+            ListenerUtil.removeActiveSinglePositionStructure(cauldron, breweryRegistry, database);
         }
-        return false;
     }
 
     private boolean handleIngredientAddition(ItemStack itemStack, Block block, @Nullable BukkitCauldron cauldron, Player player, @Nullable EquipmentSlot hand) {
