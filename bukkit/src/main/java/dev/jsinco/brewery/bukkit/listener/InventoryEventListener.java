@@ -128,7 +128,7 @@ public class InventoryEventListener implements Listener {
                                 inventoryAccessible,
                                 new ItemTransaction.RawPosition(event.getRawSlot()),
                                 inventoryPosition,
-                                event.getCurrentItem().clone(),
+                                event.getCurrentItem(),
                                 false,
                                 player
                         ))
@@ -263,9 +263,8 @@ public class InventoryEventListener implements Listener {
     private static ItemTransactionEvent<?> eventFromStructure(InventoryAccessible<ItemStack, Inventory> inventoryAccessible,
                                                               ItemTransaction.InventoryPosition from, ItemTransaction.InventoryPosition to,
                                                               ItemStack item, boolean insertion, @Nullable Player player) {
-        ItemStack itemCloned = item.clone();
-        ItemTransaction transaction = new ItemTransaction(from, to, itemCloned, insertion);
-        Optional<Brew> brewOptional = BrewAdapter.fromItem(itemCloned);
+        ItemTransaction transaction = new ItemTransaction(from, to, item, insertion);
+        Optional<Brew> brewOptional = BrewAdapter.fromItem(item);
         if (inventoryAccessible instanceof BukkitDistillery distillery) {
             dev.jsinco.brewery.api.util.CancelState cancelState = brewOptional.isEmpty() ? new dev.jsinco.brewery.api.util.CancelState.Cancelled() :
                     player == null || player.hasPermission("brewery.distillery.access") ? new dev.jsinco.brewery.api.util.CancelState.Allowed() :

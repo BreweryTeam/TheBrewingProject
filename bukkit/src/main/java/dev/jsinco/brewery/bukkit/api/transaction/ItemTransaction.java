@@ -4,6 +4,12 @@ import org.bukkit.inventory.ItemStack;
 
 public record ItemTransaction(InventoryPosition from, InventoryPosition to, ItemStack itemStack, boolean insertion) {
 
+    public ItemTransaction(InventoryPosition from, InventoryPosition to, ItemStack itemStack, boolean insertion) {
+        this.from = from;
+        this.to = to;
+        this.itemStack = itemStack.clone();
+        this.insertion = insertion;
+    }
 
     public ItemStack itemStack() {
         return itemStack.clone();
