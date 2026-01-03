@@ -19,7 +19,6 @@ import dev.jsinco.brewery.bukkit.api.BukkitAdapter;
 import dev.jsinco.brewery.api.util.CancelState;
 import dev.jsinco.brewery.bukkit.api.event.CauldronInsertEvent;
 import dev.jsinco.brewery.bukkit.api.transaction.ItemSource;
-import dev.jsinco.brewery.bukkit.brew.BrewAdapter;
 import dev.jsinco.brewery.bukkit.ingredient.BukkitIngredientManager;
 import dev.jsinco.brewery.bukkit.listener.ListenerUtil;
 import dev.jsinco.brewery.bukkit.recipe.BukkitRecipeResult;
@@ -275,11 +274,14 @@ public class BukkitCauldron implements Cauldron {
         return location;
     }
 
-    public ItemStack extractBrew() {
+    public Brew getUpdatedBrew() {
         recalculateBrewTime();
+        return brew;
+    }
+
+    public void extractBrew() {
         this.brewExtracted = true;
         playBrewExtractedEffects();
-        return BrewAdapter.toItem(brew, new Brew.State.Other());
     }
 
     private void recalculateBrewTime() {
