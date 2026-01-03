@@ -2,27 +2,26 @@ package dev.jsinco.brewery.bukkit.api.event;
 
 import dev.jsinco.brewery.api.breweries.Cauldron;
 import dev.jsinco.brewery.bukkit.api.transaction.ItemSource;
-import dev.jsinco.brewery.bukkit.api.transaction.ItemTransactionSession;
 import lombok.Getter;
 import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class CauldronExtractEvent extends PermissibleBreweryEvent implements ItemTransactionEvent<ItemSource.ItemBasedSource> {
+public class CauldronExtractEvent extends PermissibleBreweryEvent {
 
     @Getter
     private final Cauldron cauldron;
     @Getter
-    private final @Nullable Player player;
+    private final ItemSource.BrewBasedSource brewSource;
     @Getter
-    private final ItemTransactionSession<ItemSource.ItemBasedSource> transactionSession;
+    private final @Nullable Player player;
 
-    public CauldronExtractEvent(Cauldron cauldron, ItemTransactionSession<ItemSource.ItemBasedSource> transactionSession,
+    public CauldronExtractEvent(Cauldron cauldron, ItemSource.BrewBasedSource brewSource,
                                 @NotNull dev.jsinco.brewery.api.util.CancelState state, @Nullable Player player) {
         super(state);
         this.cauldron = cauldron;
-        this.transactionSession = transactionSession;
+        this.brewSource = brewSource;
         this.player = player;
     }
 
