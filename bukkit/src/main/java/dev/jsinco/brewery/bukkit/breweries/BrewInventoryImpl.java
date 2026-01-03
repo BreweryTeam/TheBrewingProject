@@ -1,6 +1,7 @@
 package dev.jsinco.brewery.bukkit.breweries;
 
 import dev.jsinco.brewery.api.brew.Brew;
+import dev.jsinco.brewery.api.breweries.BrewInventory;
 import dev.jsinco.brewery.bukkit.brew.BrewAdapter;
 import lombok.Getter;
 import net.kyori.adventure.text.Component;
@@ -16,14 +17,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public class BrewInventory implements InventoryHolder {
+public class BrewInventoryImpl implements InventoryHolder, BrewInventory {
 
     private final Inventory inventory;
     @Getter
     private final Brew[] brews;
     private final BrewPersistenceHandler store;
 
-    public BrewInventory(Component title, int size, BrewPersistenceHandler store) {
+    public BrewInventoryImpl(Component title, int size, BrewPersistenceHandler store) {
         this.inventory = Bukkit.createInventory(this, size, title);
         this.brews = new Brew[size];
         this.store = store;
@@ -35,16 +36,12 @@ public class BrewInventory implements InventoryHolder {
         return inventory;
     }
 
-    /**
-     * Set an item in the inventory without changing the database
-     *
-     * @param brew
-     * @param position
-     */
+    @Override
     public void set(@Nullable Brew brew, int position) {
         brews[position] = brew;
     }
 
+    @Override
     public void updateInventoryFromBrews() {
         for (int i = 0; i < brews.length; i++) {
             Brew brew = brews[i];
@@ -56,6 +53,7 @@ public class BrewInventory implements InventoryHolder {
         }
     }
 
+    @Override
     public boolean updateBrewsFromInventory() {
         boolean hasUpdated = false;
         for (int i = 0; i < inventory.getSize(); i++) {
@@ -74,11 +72,13 @@ public class BrewInventory implements InventoryHolder {
         return hasUpdated;
     }
 
+    @Override
     public void store(Brew brew, int position) {
         this.store.store(brew, position, this);
         set(brew, position);
     }
 
+    @Override
     public boolean isEmpty() {
         for (Brew brew : brews) {
             if (brew != null) {
@@ -88,6 +88,7 @@ public class BrewInventory implements InventoryHolder {
         return true;
     }
 
+    @Override
     public boolean isFull() {
         for (Brew brew : brews) {
             if (brew == null) {
@@ -97,6 +98,7 @@ public class BrewInventory implements InventoryHolder {
         return true;
     }
 
+    @Override
     public int brewAmount() {
         int amount = 0;
         for (Brew brew : brews) {

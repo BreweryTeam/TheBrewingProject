@@ -6,5 +6,5 @@ import org.jetbrains.annotations.Nullable;
 
 public interface BrewPersistenceHandler {
 
-    void store(@Nullable Brew brew, int position, @NotNull BrewInventory inventory);
+    void store(@Nullable Brew brew, int position, @NotNull BrewInventoryImpl inventory);
 }

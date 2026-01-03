@@ -4,16 +4,21 @@ import com.google.common.base.Preconditions;
 import dev.jsinco.brewery.api.brew.Brew;
 import dev.jsinco.brewery.api.brew.BrewingStep;
 import dev.jsinco.brewery.api.breweries.Barrel;
+import dev.jsinco.brewery.api.breweries.BarrelAccess;
 import dev.jsinco.brewery.api.breweries.BarrelType;
+import dev.jsinco.brewery.api.breweries.BrewInventory;
 import dev.jsinco.brewery.api.moment.Interval;
 import dev.jsinco.brewery.api.moment.Moment;
+import dev.jsinco.brewery.api.util.CancelState;
+import dev.jsinco.brewery.api.util.Holder;
+import dev.jsinco.brewery.api.util.HolderProviderHolder;
 import dev.jsinco.brewery.api.util.Pair;
 import dev.jsinco.brewery.api.vector.BreweryLocation;
 import dev.jsinco.brewery.brew.AgeStepImpl;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.bukkit.api.BukkitAdapter;
 import dev.jsinco.brewery.bukkit.brew.BrewAdapter;
-import dev.jsinco.brewery.bukkit.breweries.BrewInventory;
+import dev.jsinco.brewery.bukkit.breweries.BrewInventoryImpl;
 import dev.jsinco.brewery.bukkit.structure.PlacedBreweryStructure;
 import dev.jsinco.brewery.bukkit.util.SoundPlayer;
 import dev.jsinco.brewery.configuration.Config;
@@ -32,7 +37,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.*;
 
 @Getter
-public class BukkitBarrel implements Barrel<BukkitBarrel, ItemStack, Inventory> {
+public class BukkitBarrel implements Barrel<BukkitBarrel, ItemStack, Inventory>, BarrelAccess {
     private final PlacedBreweryStructure<BukkitBarrel> structure;
     @Getter
     private final int size;
@@ -40,7 +45,7 @@ public class BukkitBarrel implements Barrel<BukkitBarrel, ItemStack, Inventory> 
     private final BarrelType type;
     @Getter
     private final Location uniqueLocation;
-    private final BrewInventory inventory;
+    private final BrewInventoryImpl inventory;
     private long recentlyAccessed = -1L;
     private long ticksUntilNextCheck = 0L;
     private static final Random RANDOM = new Random();
@@ -50,15 +55,18 @@ public class BukkitBarrel implements Barrel<BukkitBarrel, ItemStack, Inventory> 
         this.size = size;
         this.type = Preconditions.checkNotNull(type);
         this.uniqueLocation = Preconditions.checkNotNull(uniqueLocation);
-        this.inventory = new BrewInventory(Component.translatable("tbp.barrel.gui-title"), size, new BarrelBrewPersistenceHandler(BukkitAdapter.toBreweryLocation(uniqueLocation)));
+        this.inventory = new BrewInventoryImpl(Component.translatable("tbp.barrel.gui-title"), size, new BarrelBrewPersistenceHandler(BukkitAdapter.toBreweryLocation(uniqueLocation)));
     }
 
     @Override
-    public boolean open(@NotNull BreweryLocation location, @NotNull UUID playerUuid) {
-        Player player = Bukkit.getPlayer(playerUuid);
+    public CancelState open(@NotNull BreweryLocation location, @NotNull Holder.Player playerHolder) {
+        Player player = BukkitAdapter.toPlayer(playerHolder)
+                .orElse(null);
+        if (player == null) {
+            return new CancelState.Cancelled();
+        }
         if (!player.hasPermission("brewery.barrel.access")) {
-            MessageUtil.message(player, "tbp.barrel.access-denied");
-            return true;
+            return new CancelState.PermissionDenied(Component.translatable("tbp.barrel.access-denied"));
         }
         if (inventoryUnpopulated()) {
             inventory.updateInventoryFromBrews();
@@ -68,7 +76,7 @@ public class BukkitBarrel implements Barrel<BukkitBarrel, ItemStack, Inventory> 
             SoundPlayer.playSoundEffect(Config.config().sounds().barrelOpen(), Sound.Source.BLOCK, uniqueLocation.toCenterLocation());
         }
         player.openInventory(inventory.getInventory());
-        return true;
+        return new CancelState.Allowed();
     }
 
     @Override
@@ -92,6 +100,23 @@ public class BukkitBarrel implements Barrel<BukkitBarrel, ItemStack, Inventory> 
     @Override
     public Set<Inventory> getInventories() {
         return Set.of(this.inventory.getInventory());
+    }
+
+    @Override
+    public boolean open(@NotNull BreweryLocation breweryLocation, @NotNull UUID playerUuid) {
+        Optional<Holder.Player> playerOptional = HolderProviderHolder.instance().player(playerUuid);
+        CancelState cancelState = playerOptional
+                .map(player -> open(breweryLocation, player))
+                .orElseGet(CancelState.Cancelled::new);
+        return switch (cancelState) {
+            case CancelState.Cancelled ignored -> false;
+            case CancelState.Allowed ignored -> true;
+            case CancelState.PermissionDenied(Component message) -> {
+                playerOptional.flatMap(BukkitAdapter::toPlayer)
+                        .ifPresent(player -> player.sendMessage(message));
+                yield false;
+            }
+        };
     }
 
     public void close(boolean silent) {
@@ -178,6 +203,11 @@ public class BukkitBarrel implements Barrel<BukkitBarrel, ItemStack, Inventory> 
                     List<ItemStack> contents = inventory.destroy();
                     contents.forEach(itemStack -> location.getWorld().dropItem(location, itemStack));
                 });
+    }
+
+    @Override
+    public BrewInventory getBrewInventory() {
+        return inventory;
     }
 
     @Override

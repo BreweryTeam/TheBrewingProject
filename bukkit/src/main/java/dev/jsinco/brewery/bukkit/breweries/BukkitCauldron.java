@@ -16,9 +16,11 @@ import dev.jsinco.brewery.brew.CookStepImpl;
 import dev.jsinco.brewery.brew.MixStepImpl;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.bukkit.api.BukkitAdapter;
-import dev.jsinco.brewery.bukkit.brew.BrewAdapter;
-import dev.jsinco.brewery.bukkit.event.ListenerUtil;
+import dev.jsinco.brewery.api.util.CancelState;
+import dev.jsinco.brewery.bukkit.api.event.CauldronInsertEvent;
+import dev.jsinco.brewery.bukkit.api.transaction.ItemSource;
 import dev.jsinco.brewery.bukkit.ingredient.BukkitIngredientManager;
+import dev.jsinco.brewery.bukkit.listener.ListenerUtil;
 import dev.jsinco.brewery.bukkit.recipe.BukkitRecipeResult;
 import dev.jsinco.brewery.bukkit.util.BlockUtil;
 import dev.jsinco.brewery.bukkit.util.BukkitIngredientUtil;
@@ -26,10 +28,10 @@ import dev.jsinco.brewery.bukkit.util.ColorUtil;
 import dev.jsinco.brewery.bukkit.util.SoundPlayer;
 import dev.jsinco.brewery.configuration.Config;
 import dev.jsinco.brewery.sound.SoundDefinition;
-import dev.jsinco.brewery.util.MessageUtil;
 import lombok.Getter;
 import lombok.Setter;
 import net.kyori.adventure.sound.Sound;
+import net.kyori.adventure.text.Component;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -145,17 +147,25 @@ public class BukkitCauldron implements Cauldron {
     }
 
     public boolean addIngredient(@NotNull ItemStack item, Player player) {
-        // TODO: Add API event
-        if (!player.hasPermission("brewery.cauldron.access")) {
-            MessageUtil.message(player, "tbp.cauldron.access-denied");
+        CauldronInsertEvent event = new CauldronInsertEvent(this,
+                new ItemSource.ItemBasedSource(item),
+                player.hasPermission("brewery.cauldron.access") ?
+                        new CancelState.Allowed() : new CancelState.PermissionDenied(Component.translatable("tbp.cauldron.access-denied")),
+                player
+        );
+        if (!event.callEvent()) {
+            if(event.getCancelState() instanceof CancelState.PermissionDenied(Component denyMessage)) {
+                player.sendMessage(denyMessage);
+            }
             return false;
         }
-        if (!brewExtracted && item.getType() == Material.POTION) {
+        ItemStack addedItem = event.getItemSource().get();
+        if (!brewExtracted && addedItem.getType() == Material.POTION) {
             BukkitCauldron.incrementLevel(getBlock());
         }
         this.hot = isHeatSource(getBlock().getRelative(BlockFace.DOWN));
         long time = TheBrewingProject.getInstance().getTime();
-        Ingredient ingredient = BukkitIngredientManager.INSTANCE.getIngredient(item);
+        Ingredient ingredient = BukkitIngredientManager.INSTANCE.getIngredient(addedItem);
         if (hot) {
             brew = brew.withLastStep(BrewingStep.Cook.class,
                     cook -> {
@@ -164,7 +174,7 @@ public class BukkitCauldron implements Cauldron {
                         ingredients.put(ingredient, amount + 1);
                         return cook.withIngredients(ingredients);
                     },
-                    () -> new CookStepImpl(new Interval(time, time), Map.of(BukkitIngredientManager.INSTANCE.getIngredient(item), 1), findCauldronType(getBlock()))
+                    () -> new CookStepImpl(new Interval(time, time), Map.of(BukkitIngredientManager.INSTANCE.getIngredient(addedItem), 1), findCauldronType(getBlock()))
             );
         } else {
             brew = brew.withLastStep(BrewingStep.Mix.class,
@@ -174,13 +184,13 @@ public class BukkitCauldron implements Cauldron {
                         ingredients.put(ingredient, amount + 1);
                         return mix.withIngredients(ingredients);
                     },
-                    () -> new MixStepImpl(new Interval(time, time), Map.of(BukkitIngredientManager.INSTANCE.getIngredient(item), 1))
+                    () -> new MixStepImpl(new Interval(time, time), Map.of(BukkitIngredientManager.INSTANCE.getIngredient(addedItem), 1))
             );
         }
         this.recipe = brew.closestRecipe(TheBrewingProject.getInstance().getRecipeRegistry())
                 .orElse(null);
 
-        playIngredientAddedEffects(item);
+        playIngredientAddedEffects(addedItem);
         return true;
     }
 
@@ -265,11 +275,14 @@ public class BukkitCauldron implements Cauldron {
         return location;
     }
 
-    public ItemStack extractBrew() {
+    public Brew getUpdatedBrew() {
         recalculateBrewTime();
+        return brew;
+    }
+
+    public void extractBrew() {
         this.brewExtracted = true;
         playBrewExtractedEffects();
-        return BrewAdapter.toItem(brew, new Brew.State.Other());
     }
 
     private void recalculateBrewTime() {
@@ -319,6 +332,7 @@ public class BukkitCauldron implements Cauldron {
         return false;
     }
 
+    @Override
     public long getTime() {
         if (brew.getCompletedSteps().isEmpty()) {
             return 0L;

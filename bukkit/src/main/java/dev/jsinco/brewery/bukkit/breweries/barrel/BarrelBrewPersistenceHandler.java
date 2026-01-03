@@ -4,7 +4,7 @@ import dev.jsinco.brewery.brew.BarrelBrewDataType;
 import dev.jsinco.brewery.api.brew.Brew;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.bukkit.brew.BukkitBarrelBrewDataType;
-import dev.jsinco.brewery.bukkit.breweries.BrewInventory;
+import dev.jsinco.brewery.bukkit.breweries.BrewInventoryImpl;
 import dev.jsinco.brewery.bukkit.breweries.BrewPersistenceHandler;
 import dev.jsinco.brewery.database.PersistenceException;
 import dev.jsinco.brewery.api.util.Logger;
@@ -24,7 +24,7 @@ public class BarrelBrewPersistenceHandler implements BrewPersistenceHandler {
     }
 
     @Override
-    public void store(@Nullable Brew brew, int position, @NotNull BrewInventory inventory) {
+    public void store(@Nullable Brew brew, int position, @NotNull BrewInventoryImpl inventory) {
         if (Objects.equals(inventory.getBrews()[position], brew)) {
             return;
         }

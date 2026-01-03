@@ -3,17 +3,17 @@ package dev.jsinco.brewery.bukkit.breweries.distillery;
 import dev.jsinco.brewery.api.brew.Brew;
 import dev.jsinco.brewery.api.brew.BrewingStep;
 import dev.jsinco.brewery.api.breweries.Distillery;
+import dev.jsinco.brewery.api.breweries.DistilleryAccess;
 import dev.jsinco.brewery.api.moment.Moment;
 import dev.jsinco.brewery.api.structure.MaterialTag;
 import dev.jsinco.brewery.api.structure.StructureMeta;
-import dev.jsinco.brewery.api.util.Logger;
-import dev.jsinco.brewery.api.util.Pair;
+import dev.jsinco.brewery.api.util.*;
 import dev.jsinco.brewery.api.vector.BreweryLocation;
 import dev.jsinco.brewery.brew.DistillStepImpl;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.bukkit.api.BukkitAdapter;
 import dev.jsinco.brewery.bukkit.brew.BrewAdapter;
-import dev.jsinco.brewery.bukkit.breweries.BrewInventory;
+import dev.jsinco.brewery.bukkit.breweries.BrewInventoryImpl;
 import dev.jsinco.brewery.bukkit.structure.BreweryStructure;
 import dev.jsinco.brewery.bukkit.structure.PlacedBreweryStructure;
 import dev.jsinco.brewery.bukkit.util.BlockUtil;
@@ -40,16 +40,16 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class BukkitDistillery implements Distillery<BukkitDistillery, ItemStack, Inventory> {
+public class BukkitDistillery implements Distillery<BukkitDistillery, ItemStack, Inventory>, DistilleryAccess {
 
     @Getter
     private final PlacedBreweryStructure<BukkitDistillery> structure;
     @Getter
     private long startTime;
     @Getter
-    private final BrewInventory mixture;
+    private final BrewInventoryImpl mixture;
     @Getter
-    private final BrewInventory distillate;
+    private final BrewInventoryImpl distillate;
     private boolean dirty = true;
     private final Set<BreweryLocation> mixtureContainerLocations = new HashSet<>();
     private final Set<BreweryLocation> distillateContainerLocations = new HashSet<>();
@@ -64,13 +64,17 @@ public class BukkitDistillery implements Distillery<BukkitDistillery, ItemStack,
         this.structure = structure;
         this.startTime = startTime;
         BreweryLocation unique = structure.getUnique();
-        this.mixture = new BrewInventory(Component.translatable("tbp.distillery.gui-title.mixture"), structure.getStructure().getMeta(StructureMeta.INVENTORY_SIZE), new DistilleryBrewPersistenceHandler(unique, false));
-        this.distillate = new BrewInventory(Component.translatable("tbp.distillery.gui-title.distillate"), structure.getStructure().getMeta(StructureMeta.INVENTORY_SIZE), new DistilleryBrewPersistenceHandler(unique, true));
+        this.mixture = new BrewInventoryImpl(Component.translatable("tbp.distillery.gui-title.mixture"), structure.getStructure().getMeta(StructureMeta.INVENTORY_SIZE), new DistilleryBrewPersistenceHandler(unique, false));
+        this.distillate = new BrewInventoryImpl(Component.translatable("tbp.distillery.gui-title.distillate"), structure.getStructure().getMeta(StructureMeta.INVENTORY_SIZE), new DistilleryBrewPersistenceHandler(unique, true));
     }
 
-    public boolean open(@NotNull BreweryLocation location, @NotNull UUID playerUuid) {
+    @Override
+    public CancelState open(@NotNull BreweryLocation location, @NotNull Holder.Player playerHolder) {
         checkDirty();
-        Player player = Bukkit.getPlayer(playerUuid);
+        Player player = BukkitAdapter.toPlayer(playerHolder).orElse(null);
+        if (player == null) {
+            return new CancelState.Cancelled();
+        }
         if (mixtureContainerLocations.contains(location)) {
             playInteractionEffects(location, player);
             return openInventory(mixture, player);
@@ -79,7 +83,24 @@ public class BukkitDistillery implements Distillery<BukkitDistillery, ItemStack,
             playInteractionEffects(location, player);
             return openInventory(distillate, player);
         }
-        return false;
+        return new CancelState.Cancelled();
+    }
+
+    @Override
+    public boolean open(@NotNull BreweryLocation breweryLocation, @NotNull UUID playerUuid) {
+        Optional<Holder.Player> playerHolder = HolderProviderHolder.instance().player(playerUuid);
+        CancelState cancelState = playerHolder
+                .map(player -> open(breweryLocation, player))
+                .orElseGet(CancelState.Cancelled::new);
+        return switch (cancelState) {
+            case CancelState.Cancelled ignored -> false;
+            case CancelState.Allowed ignored -> true;
+            case CancelState.PermissionDenied(Component message) -> {
+                playerHolder.flatMap(BukkitAdapter::toPlayer)
+                        .ifPresent(player -> player.sendMessage(message));
+                yield false;
+            }
+        };
     }
 
     @Override
@@ -101,10 +122,9 @@ public class BukkitDistillery implements Distillery<BukkitDistillery, ItemStack,
         BlockUtil.playWobbleEffect(location, player);
     }
 
-    private boolean openInventory(BrewInventory inventory, Player player) {
+    private CancelState openInventory(BrewInventoryImpl inventory, Player player) {
         if (!player.hasPermission("brewery.distillery.access")) {
-            MessageUtil.message(player, "tbp.distillery.access-denied");
-            return false;
+            return new CancelState.PermissionDenied(Component.translatable("tbp.distillery.access-denied"));
         }
         if (inventoryUnpopulated()) {
             mixture.updateInventoryFromBrews();
@@ -113,7 +133,7 @@ public class BukkitDistillery implements Distillery<BukkitDistillery, ItemStack,
         this.recentlyAccessed = TheBrewingProject.getInstance().getTime();
         TheBrewingProject.getInstance().getBreweryRegistry().registerOpened(this);
         player.openInventory(inventory.getInventory());
-        return true;
+        return new CancelState.Allowed();
     }
 
     @Override
@@ -338,7 +358,7 @@ public class BukkitDistillery implements Distillery<BukkitDistillery, ItemStack,
         return getStructure().getStructure().getMeta(StructureMeta.PROCESS_TIME);
     }
 
-    private void transferItems(BrewInventory inventory1, BrewInventory inventory2, int amount) {
+    private void transferItems(BrewInventoryImpl inventory1, BrewInventoryImpl inventory2, int amount) {
         Queue<Pair<Brew, Integer>> brewsToTransfer = new LinkedList<>();
         for (int i = 0; i < inventory1.getBrews().length; i++) {
             if (inventory1.getBrews()[i] == null) {
@@ -373,7 +393,7 @@ public class BukkitDistillery implements Distillery<BukkitDistillery, ItemStack,
                 .map(location -> location.add(0.5, 0, 0.5))
                 .ifPresent(location -> {
                     boolean inventoryUnpopulated = inventoryUnpopulated();
-                    for (BrewInventory distilleryInventory : List.of(distillate, mixture)) {
+                    for (BrewInventoryImpl distilleryInventory : List.of(distillate, mixture)) {
                         if (!inventoryUnpopulated) {
                             distilleryInventory.updateBrewsFromInventory();
                         }
