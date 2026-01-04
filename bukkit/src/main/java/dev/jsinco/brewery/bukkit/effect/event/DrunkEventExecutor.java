@@ -3,6 +3,7 @@ package dev.jsinco.brewery.bukkit.effect.event;
 import dev.jsinco.brewery.api.event.*;
 import dev.jsinco.brewery.api.event.step.*;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
+import dev.jsinco.brewery.bukkit.api.event.DrunkEventInitiateEvent;
 import dev.jsinco.brewery.bukkit.effect.named.*;
 import dev.jsinco.brewery.bukkit.effect.step.*;
 import org.bukkit.Bukkit;
@@ -45,6 +46,10 @@ public class DrunkEventExecutor {
     }
 
     public void doDrunkEvent(UUID playerUuid, DrunkEvent event) {
+        DrunkEventInitiateEvent eventInitiateEvent = new DrunkEventInitiateEvent(event, Bukkit.getPlayer(playerUuid));
+        if (!eventInitiateEvent.callEvent()) {
+            return;
+        }
         if (event instanceof NamedDrunkEvent namedDrunkEvent) {
             doDrunkEvents(playerUuid, List.of(
                     new EventStep.Builder().addProperty(namedDrunkEvent).build()
