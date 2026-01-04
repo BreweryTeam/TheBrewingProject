@@ -333,7 +333,7 @@ public class InventoryEventListener implements Listener {
                         dragEvent.getWhoClicked() instanceof Player player ? player : null
                 )).toList();
         List<dev.jsinco.brewery.api.util.CancelState> cancelled = transactionEvents.stream()
-                .filter(ItemTransactionEvent::callEvent)
+                .filter(transactionEvent -> !transactionEvent.callEvent())
                 .map(ItemTransactionEvent::getCancelState)
                 .toList();
         if (!cancelled.isEmpty()) {
