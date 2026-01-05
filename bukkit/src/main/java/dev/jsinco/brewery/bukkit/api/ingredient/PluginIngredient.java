@@ -1,15 +1,17 @@
 package dev.jsinco.brewery.bukkit.api.ingredient;
 
+import dev.jsinco.brewery.api.ingredient.BaseIngredient;
 import dev.jsinco.brewery.api.ingredient.Ingredient;
 import dev.jsinco.brewery.api.util.BreweryKey;
 import dev.jsinco.brewery.bukkit.api.integration.ItemIntegration;
+import dev.jsinco.brewery.bukkit.ingredient.SimpleIngredient;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.Style;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
-public class PluginIngredient implements Ingredient {
+public class PluginIngredient implements BaseIngredient {
     private final ItemIntegration itemIntegration;
     private final BreweryKey key;
 

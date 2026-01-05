@@ -304,7 +304,7 @@ public class BukkitDistillery implements Distillery<BukkitDistillery, ItemStack,
         }
         long timeProcessed = getTimeProcessed();
         long processTime = getProcessTime();
-        // Process has changed one extra tick, to avoid running a sound if the mixture inventory changed
+        // Process has changed one meta tick, to avoid running a sound if the mixture inventory changed
         if (timeProcessed < processTime - 1 || mixture.getInventory().isEmpty()) {
             return;
         }

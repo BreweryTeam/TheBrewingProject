@@ -7,6 +7,7 @@ import com.google.gson.reflect.TypeToken;
 import dev.jsinco.brewery.api.breweries.BarrelType;
 import dev.jsinco.brewery.api.breweries.CauldronType;
 import dev.jsinco.brewery.api.event.NamedDrunkEvent;
+import dev.jsinco.brewery.api.ingredient.IngredientMeta;
 import dev.jsinco.brewery.api.structure.StructureMeta;
 import dev.jsinco.brewery.api.structure.StructureType;
 import org.jetbrains.annotations.Nullable;
@@ -32,6 +33,7 @@ public class BreweryRegistry<T extends BreweryKeyed> {
     public static final BreweryRegistry<BarrelType> BARREL_TYPE = fromEnums(BarrelType.class);
     public static final BreweryRegistry<CauldronType> CAULDRON_TYPE = fromEnums(CauldronType.class);
     public static final BreweryRegistry<StructureMeta<?>> STRUCTURE_META = (BreweryRegistry<StructureMeta<?>>) fromFields(StructureMeta.class);
+    public static final BreweryRegistry<IngredientMeta<?>> INGREDIENT_META = (BreweryRegistry<IngredientMeta<?>>) fromFields(IngredientMeta.class);
     public static final BreweryRegistry<StructureType> STRUCTURE_TYPE = (BreweryRegistry<StructureType>) fromFields(StructureType.class);
     public static final BreweryRegistry<NamedDrunkEvent> DRUNK_EVENT = fromJson("/named_drunk_events.json", NamedDrunkEvent.class);
 

@@ -1,5 +1,9 @@
 package dev.jsinco.brewery.api.ingredient;
 
+import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableMap;
+import dev.jsinco.brewery.api.util.BreweryKey;
+import dev.jsinco.brewery.api.util.BreweryRegistry;
 import dev.jsinco.brewery.api.util.Pair;
 import org.jetbrains.annotations.NotNull;
 
@@ -7,6 +11,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * Get an instance of an ingredient from an ItemStack or a string.
@@ -16,13 +23,16 @@ import java.util.concurrent.CompletableFuture;
  */
 public interface IngredientManager<I> {
 
+    Pattern INGREDIENT_META_DATA_RE = Pattern.compile("\\{(.+)\\}");
+    Pattern INGREDIENT_META_DATA_ELEMENT_RE = Pattern.compile("([^,{}]+)=([^,{}])");
+
     /**
      * Don't use this method on startup, expect unexpected behavior if you do
      *
      * @param itemStack An item stack
      * @return An ingredient of the item stack
      */
-    Ingredient getIngredient(@NotNull I itemStack);
+    BaseIngredient getIngredient(@NotNull I itemStack);
 
     /**
      * Pretty much all items plugins initialize items on a delay. This is therefore a necessary measure to use on enable
@@ -31,9 +41,60 @@ public interface IngredientManager<I> {
      * </p>
      *
      * @param ingredientStr A string representing the ingredient
-     * @return A completable future with an optionally present ingredient, if
+     * @return A completable future with an optionally present ingredient
      */
     CompletableFuture<Optional<Ingredient>> getIngredient(@NotNull String ingredientStr);
+
+    /**
+     * Deserialize the ingredient with meta data. Meta data is within curly brackets
+     *
+     * @param serializedIngredient Serialized form of the ingredient
+     * @return A completable future with an optionally present ingredient
+     * @throws IllegalArgumentException if the ingredient meta in the string was invalid
+     */
+    default CompletableFuture<Optional<Ingredient>> deserializeIngredient(@NotNull String serializedIngredient) throws IllegalArgumentException {
+        Matcher matcher = INGREDIENT_META_DATA_RE.matcher(serializedIngredient);
+        if (!matcher.find()) {
+            return getIngredient(serializedIngredient);
+        }
+        String id = matcher.replaceAll("");
+        String meta = matcher.group(1);
+        ImmutableMap.Builder<IngredientMeta<?>, Object> metaBuilder = new ImmutableMap.Builder<>();
+        for (String extraElement : meta.split(",")) {
+            Matcher elementMatcher = INGREDIENT_META_DATA_ELEMENT_RE.matcher(extraElement);
+            Preconditions.checkArgument(elementMatcher.matches(), "Invalid meta ingredient data, invalid pattern: " + extraElement);
+            String key = elementMatcher.group(1).strip();
+            String value = elementMatcher.group(2).strip();
+            IngredientMeta<?> ingredientMeta = BreweryRegistry.INGREDIENT_META.get(BreweryKey.parse(key));
+            Preconditions.checkArgument(ingredientMeta != null, "Invalid meta ingredient data, unknown key: " + key);
+            Object deserialized = ingredientMeta.serializer().deserialize(value);
+            metaBuilder.put(ingredientMeta, deserialized);
+        }
+        return getIngredient(id)
+                .thenApply(ingredientOptional -> ingredientOptional
+                        .map(ingredient -> new IngredientWithMeta(ingredient, metaBuilder.build()))
+                );
+    }
+
+    /**
+     * Serialize the ingredient with meta data. Meta data is within curly brackets
+     *
+     * @param ingredient Ingredient to serialize
+     * @return Ingredient in serialized form
+     * @throws IllegalArgumentException If the ingredient contains invalid meta data
+     */
+    default String serializeIngredient(Ingredient ingredient) throws IllegalArgumentException {
+        if (!(ingredient instanceof IngredientWithMeta metaIngredient)) {
+            return ingredient.getKey();
+        }
+        Map<IngredientMeta<?>, Object> meta = metaIngredient.meta();
+        return String.format("%s{%s}", metaIngredient.getKey(),
+                meta.entrySet()
+                        .stream()
+                        .map(entry -> entry.getKey().key().minimalized() + "=" + entry.getKey().serializer().serializeSafely(entry.getValue()))
+                        .collect(Collectors.joining(","))
+        );
+    }
 
     /**
      * @param ingredientStr A string with the format [ingredient-name]/[runs]. Allows not specifying runs, where it will default to 1
