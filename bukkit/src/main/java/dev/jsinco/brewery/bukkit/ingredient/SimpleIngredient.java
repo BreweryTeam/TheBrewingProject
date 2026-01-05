@@ -1,5 +1,6 @@
 package dev.jsinco.brewery.bukkit.ingredient;
 
+import dev.jsinco.brewery.api.ingredient.BaseIngredient;
 import dev.jsinco.brewery.api.ingredient.Ingredient;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
@@ -13,9 +14,9 @@ import java.util.Objects;
 import java.util.Optional;
 
 /**
- * Represents a simple ingredient that only consists of a material and runs
+ * Represents a simple ingredient that only consists of a material
  */
-public class SimpleIngredient implements Ingredient {
+public class SimpleIngredient implements BaseIngredient {
 
     private final Material material;
 

@@ -5,9 +5,14 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
-public record IngredientGroup(String key, Component displayName, List<Ingredient> alternatives) implements Ingredient {
+public record IngredientGroup(String key, Component displayName, List<BaseIngredient> alternatives) implements ComplexIngredient {
     @Override
     public @NotNull String getKey() {
         return key;
+    }
+
+    @Override
+    public List<BaseIngredient> derivatives() {
+        return alternatives;
     }
 }

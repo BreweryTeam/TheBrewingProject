@@ -1,7 +1,10 @@
 package dev.jsinco.brewery.bukkit.ingredient;
 
+import com.google.common.collect.ImmutableMap;
+import dev.jsinco.brewery.api.ingredient.BaseIngredient;
+import dev.jsinco.brewery.api.ingredient.IngredientMeta;
 import dev.jsinco.brewery.api.ingredient.Ingredient;
-import dev.jsinco.brewery.api.ingredient.ScoredIngredient;
+import dev.jsinco.brewery.api.ingredient.IngredientWithMeta;
 import dev.jsinco.brewery.api.util.BreweryKey;
 import dev.jsinco.brewery.bukkit.brew.BrewAdapter;
 import dev.jsinco.brewery.configuration.IngredientsSection;
@@ -16,7 +19,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
-public class BreweryIngredient implements Ingredient {
+public class BreweryIngredient implements BaseIngredient {
     protected final BreweryKey ingredientKey;
     private final String displayName;
 
@@ -62,10 +65,13 @@ public class BreweryIngredient implements Ingredient {
         String displayName = dataContainer.get(BrewAdapter.BREWERY_DISPLAY_NAME, PersistentDataType.STRING);
         BreweryKey breweryKey = BreweryKey.parse(key);
         displayName = displayName == null ? breweryKey.key() : displayName;
+        BaseIngredient baseIngredient = new BreweryIngredient(breweryKey, displayName);
+        ImmutableMap.Builder<IngredientMeta<?>, Object> extraBuilder = new ImmutableMap.Builder<>();
+        extraBuilder.put(IngredientMeta.DISPLAY_NAME_OVERRIDE, displayName);
         if (score != null) {
-            return Optional.of(new ScoredIngredient(new BreweryIngredient(breweryKey, displayName), score));
+            extraBuilder.put(IngredientMeta.SCORE, score);
         }
-        return Optional.of(new BreweryIngredient(breweryKey, displayName));
+        return Optional.of(new IngredientWithMeta(baseIngredient, extraBuilder.build()));
     }
 
     public static Optional<CompletableFuture<Optional<Ingredient>>> from(BreweryKey id) {

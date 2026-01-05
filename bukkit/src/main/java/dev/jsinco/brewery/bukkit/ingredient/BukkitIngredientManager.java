@@ -33,7 +33,6 @@ public class BukkitIngredientManager implements IngredientManager<ItemStack> {
                 .orElse(SimpleIngredient.from(itemStack));
     }
 
-
     @Override
     public CompletableFuture<Optional<Ingredient>> getIngredient(@NotNull String id) {
         BreweryKey breweryKey = BreweryKey.parse(id, Key.MINECRAFT_NAMESPACE);

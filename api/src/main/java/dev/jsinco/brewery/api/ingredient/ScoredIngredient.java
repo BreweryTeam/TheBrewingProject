@@ -7,6 +7,7 @@ import org.jetbrains.annotations.NotNull;
  * @param baseIngredient The underlying ingredient for this
  * @param score          The score of the ingredient
  */
+@Deprecated(forRemoval = true)
 public record ScoredIngredient(Ingredient baseIngredient, double score) implements Ingredient {
 
     @Override

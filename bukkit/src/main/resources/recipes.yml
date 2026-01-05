@@ -21,7 +21,7 @@
 #    name: Poor quality/Good quality/Excellent quality # Formatted in minimessage
 #    custom-model-data: 1/2/3 # poor/good/excellent A number that is used for item models in the legacy model format
 #    item-model: my_namespace:poor/my_namespace:good/my_namespace:excellent # Modern model format introduced in mc 1.21.4
-#    append-brew-info-lore: true/true/false # poor/good/excellent Whether to hide extra lore completely
+#    append-brew-info-lore: true/true/false # poor/good/excellent Whether to hide meta lore completely
 #    custom-id: minecraft:splash_potion/minecraft:splash_potion/minecraft:splash_potion # poor/good/excellent What should the resulting material be for the brew? Supports all item integrations
 #  messages:
 #    # Message in the action bar after drinking
