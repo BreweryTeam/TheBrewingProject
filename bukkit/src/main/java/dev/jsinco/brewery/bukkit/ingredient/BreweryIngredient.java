@@ -68,16 +68,15 @@ public class BreweryIngredient implements Ingredient {
         return Optional.of(new BreweryIngredient(breweryKey, displayName));
     }
 
-    public static Optional<CompletableFuture<Optional<Ingredient>>> from(String id) {
-        if (!id.startsWith("brewery:") && !id.startsWith("#brewery:")) {
+    public static Optional<CompletableFuture<Optional<Ingredient>>> from(BreweryKey id) {
+        if (!id.namespace().equals("brewery") && !id.namespace().equals("#brewery")) {
             return Optional.empty();
         }
-        BreweryKey breweryKey = BreweryKey.parse(id);
-        if (breweryKey.namespace().startsWith("#")) {
+        if (id.namespace().startsWith("#")) {
             return Optional.of(IngredientsSection.ingredients()
                     .getIngredient(id));
         }
-        return Optional.<Ingredient>of(new BreweryIngredient(breweryKey, breweryKey.key()))
+        return Optional.<Ingredient>of(new BreweryIngredient(id, id.key()))
                 .map(Optional::of)
                 .map(CompletableFuture::completedFuture);
     }
