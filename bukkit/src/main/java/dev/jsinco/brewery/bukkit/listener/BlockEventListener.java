@@ -1,16 +1,19 @@
 package dev.jsinco.brewery.bukkit.listener;
 
 import dev.jsinco.brewery.api.breweries.BarrelType;
+import dev.jsinco.brewery.api.breweries.Cauldron;
 import dev.jsinco.brewery.api.breweries.InventoryAccessible;
 import dev.jsinco.brewery.api.breweries.StructureHolder;
-import dev.jsinco.brewery.api.structure.BlockMatcherReplacement;
-import dev.jsinco.brewery.api.structure.MultiblockStructure;
-import dev.jsinco.brewery.api.structure.StructureMeta;
-import dev.jsinco.brewery.api.structure.StructureType;
+import dev.jsinco.brewery.api.structure.*;
+import dev.jsinco.brewery.api.util.CancelState;
 import dev.jsinco.brewery.api.util.Logger;
 import dev.jsinco.brewery.api.util.Pair;
 import dev.jsinco.brewery.api.vector.BreweryLocation;
 import dev.jsinco.brewery.bukkit.api.BukkitAdapter;
+import dev.jsinco.brewery.bukkit.api.event.BarrelDestroyEvent;
+import dev.jsinco.brewery.bukkit.api.event.CauldronDestroyEvent;
+import dev.jsinco.brewery.bukkit.api.event.DistilleryDestroyEvent;
+import dev.jsinco.brewery.bukkit.api.event.PermissibleBreweryEvent;
 import dev.jsinco.brewery.bukkit.breweries.BreweryRegistry;
 import dev.jsinco.brewery.bukkit.breweries.barrel.BukkitBarrel;
 import dev.jsinco.brewery.bukkit.breweries.barrel.BukkitBarrelDataType;
@@ -22,6 +25,7 @@ import dev.jsinco.brewery.database.PersistenceException;
 import dev.jsinco.brewery.database.sql.Database;
 import dev.jsinco.brewery.structure.PlacedStructureRegistryImpl;
 import dev.jsinco.brewery.util.MessageUtil;
+import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.ExplosionResult;
 import org.bukkit.Location;
@@ -38,6 +42,7 @@ import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.inventory.HopperInventorySearchEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.HashSet;
 import java.util.List;
@@ -151,22 +156,30 @@ public class BlockEventListener implements Listener {
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onBlockBreak(BlockBreakEvent event) {
-        destroyFromBlock(event.getBlock());
+        boolean success = destroyFromBlock(event.getBlock(), event.getPlayer());
+        if (!success) {
+            event.setCancelled(true);
+        }
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onPistonExtend(BlockPistonExtendEvent event) {
-        onMultiBlockRemove(event.getBlocks().stream()
+        boolean success = onMultiBlockRemove(event.getBlocks().stream()
                 .map(Block::getLocation)
-                .toList());
+                .toList(), null);
+        if (!success) {
+            event.setCancelled(true);
+        }
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onPistonRetract(BlockPistonRetractEvent event) {
-        onMultiBlockRemove(event.getBlocks().stream()
+        boolean success = onMultiBlockRemove(event.getBlocks().stream()
                 .map(Block::getLocation)
-                .toList()
-        );
+                .toList(), null);
+        if (!success) {
+            event.setCancelled(true);
+        }
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
@@ -174,10 +187,12 @@ public class BlockEventListener implements Listener {
         if (event.getExplosionResult() == ExplosionResult.TRIGGER_BLOCK) {
             return;
         }
-        onMultiBlockRemove(event.blockList().stream()
+        boolean success = onMultiBlockRemove(event.blockList().stream()
                 .map(Block::getLocation)
-                .toList()
-        );
+                .toList(), null);
+        if (!success) {
+            event.setCancelled(true);
+        }
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
@@ -185,41 +200,29 @@ public class BlockEventListener implements Listener {
         if (event.getExplosionResult() == ExplosionResult.TRIGGER_BLOCK) {
             return;
         }
-        onMultiBlockRemove(event.blockList().stream()
+        boolean success = onMultiBlockRemove(event.blockList().stream()
                 .map(Block::getLocation)
-                .toList()
-        );
-    }
-
-    private void onMultiBlockRemove(List<Location> locationList) {
-        Set<MultiblockStructure<?>> multiblockStructures = new HashSet<>();
-        Set<StructureHolder<?>> holders = new HashSet<>();
-        for (Location location : locationList) {
-            BreweryLocation breweryLocation = BukkitAdapter.toBreweryLocation(location);
-            placedStructureRegistry.getHolder(breweryLocation).ifPresent(holder -> {
-                holders.add(holder);
-                multiblockStructures.add(holder.getStructure());
-                if (holder instanceof InventoryAccessible inventoryAccessible) {
-                    breweryRegistry.unregisterInventory(inventoryAccessible);
-                }
-            });
-            breweryRegistry.getActiveSinglePositionStructure(breweryLocation).ifPresent(cauldron -> ListenerUtil.removeActiveSinglePositionStructure(cauldron, breweryRegistry, database));
-        }
-        multiblockStructures.forEach(placedStructureRegistry::unregisterStructure);
-        for (StructureHolder<?> holder : holders) {
-            holder.destroy(BukkitAdapter.toBreweryLocation(locationList.getFirst()));
-            remove(holder);
+                .toList(), null);
+        if (!success) {
+            event.setCancelled(true);
         }
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onBlockBurn(BlockBurnEvent event) {
-        destroyFromBlock(event.getBlock());
+        boolean success = destroyFromBlock(event.getBlock(), null);
+        if (!success) {
+            event.setCancelled(true);
+        }
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onEntityChangeBlock(EntityChangeBlockEvent event) {
-        destroyFromBlock(event.getBlock());
+        Player player = event.getEntity() instanceof Player p ? p : null;
+        boolean success = destroyFromBlock(event.getBlock(), player);
+        if (!success) {
+            event.setCancelled(true);
+        }
     }
 
     @EventHandler(ignoreCancelled = true)
@@ -244,20 +247,104 @@ public class BlockEventListener implements Listener {
      *
      * @param block
      */
-    private void destroyFromBlock(Block block) {
-        BreweryLocation breweryLocation = BukkitAdapter.toBreweryLocation(block);
-        Optional<MultiblockStructure<?>> multiBlockStructure = placedStructureRegistry.getStructure(breweryLocation);
-        multiBlockStructure.ifPresent(placedStructureRegistry::unregisterStructure);
-        multiBlockStructure
-                .map(MultiblockStructure::getHolder)
-                .ifPresent(holder -> {
-                    holder.destroy(breweryLocation);
-                    remove(holder);
-                    if (holder instanceof InventoryAccessible<?, ?> inventoryAccessible) {
-                        breweryRegistry.unregisterInventory((InventoryAccessible<ItemStack, Inventory>) inventoryAccessible);
+    private boolean destroyFromBlock(Block block, @Nullable Player player) {
+        return onMultiBlockRemove(List.of(block.getLocation()), player);
+    }
+
+    private boolean onMultiBlockRemove(List<Location> locations, @Nullable Player player) {
+        Set<SinglePositionStructure> singlePositionStructures = new HashSet<>();
+        Set<MultiblockStructure<?>> multiblockStructures = new HashSet<>();
+        Set<StructureHolder<?>> holders = new HashSet<>();
+        for (Location location : locations) {
+            BreweryLocation breweryLocation = BukkitAdapter.toBreweryLocation(location);
+            boolean cancelled = breweryRegistry.getActiveSinglePositionStructure(breweryLocation).map(structure -> {
+                CancelState state = callSinglePositionStructureEvent(location, player, structure);
+                if (state instanceof CancelState.Allowed) {
+                    singlePositionStructures.add(structure);
+                    return false;
+                } else {
+                    if (player != null && state instanceof CancelState.PermissionDenied(Component message)) {
+                        player.sendMessage(message);
                     }
-                });
-        breweryRegistry.getActiveSinglePositionStructure(breweryLocation).ifPresent(cauldron -> ListenerUtil.removeActiveSinglePositionStructure(cauldron, breweryRegistry, database));
+                    return true;
+                }
+            }).orElse(false);
+            if (cancelled) {
+                return false;
+            }
+            cancelled = placedStructureRegistry.getHolder(breweryLocation).map(holder -> {
+                if (holders.contains(holder)) {
+                    return false;
+                }
+                CancelState state = callPlacedStructureEvent(location, player, holder);
+                if (state instanceof CancelState.Allowed) {
+                    holders.add(holder);
+                    multiblockStructures.add(holder.getStructure());
+                    return false;
+                } else {
+                    if (player != null && state instanceof CancelState.PermissionDenied(Component message)) {
+                        player.sendMessage(message);
+                    }
+                    return true;
+                }
+            }).orElse(false);
+            if (cancelled) {
+                return false;
+            }
+        }
+        singlePositionStructures.forEach(structure -> ListenerUtil.removeActiveSinglePositionStructure(structure, breweryRegistry, database));
+        multiblockStructures.forEach(placedStructureRegistry::unregisterStructure);
+        for (StructureHolder<?> holder : holders) {
+            if (holder instanceof InventoryAccessible inventoryAccessible) {
+                breweryRegistry.unregisterInventory(inventoryAccessible);
+            }
+            holder.destroy(BukkitAdapter.toBreweryLocation(locations.getFirst()));
+            remove(holder);
+        }
+        return true;
+    }
+
+    private static CancelState callSinglePositionStructureEvent(Location location, @Nullable Player player, SinglePositionStructure structure) {
+        if (structure instanceof Cauldron cauldron) {
+            CauldronDestroyEvent event = new CauldronDestroyEvent(
+                    player == null || player.hasPermission("brewery.cauldron.access") ?
+                            new CancelState.Allowed() :
+                            new CancelState.PermissionDenied(Component.translatable("tbp.cauldron.access-denied")),
+                    cauldron,
+                    player,
+                    location
+            );
+            event.callEvent();
+            return event.getCancelState();
+        }
+        return new CancelState.Allowed();
+    }
+
+    private static CancelState callPlacedStructureEvent(Location location, @Nullable Player player, StructureHolder<?> holder) {
+        PermissibleBreweryEvent event = switch (holder) {
+            case BukkitBarrel barrel -> new BarrelDestroyEvent(
+                    player == null || player.hasPermission("brewery.barrel.access") ?
+                            new CancelState.Allowed() :
+                            new CancelState.PermissionDenied(Component.translatable("tbp.barrel.access-denied")),
+                    barrel,
+                    player,
+                    location
+            );
+            case BukkitDistillery distillery -> new DistilleryDestroyEvent(
+                    player == null || player.hasPermission("brewery.distillery.access") ?
+                            new CancelState.Allowed() :
+                            new CancelState.PermissionDenied(Component.translatable("tbp.distillery.access-denied")),
+                    distillery,
+                    player,
+                    location
+            );
+            default -> null;
+        };
+        if (event != null) {
+            event.callEvent();
+            return event.getCancelState();
+        }
+        return new CancelState.Allowed();
     }
 
     private void remove(StructureHolder<?> holder) {

@@ -3,12 +3,11 @@ package dev.jsinco.brewery.api.breweries;
 import dev.jsinco.brewery.api.brew.Brew;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.function.BiConsumer;
-import java.util.function.Consumer;
-
 public interface BrewInventory {
 
     /**
+     * Gets a view of brews in the inventory, where each index of the array corresponds to a position in the inventory.
+     * Empty slots are represented by null.
      *
      * @return All brews in this inventory
      */
