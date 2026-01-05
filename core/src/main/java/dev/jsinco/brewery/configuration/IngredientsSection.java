@@ -7,6 +7,7 @@ import dev.jsinco.brewery.api.ingredient.Ingredient;
 import dev.jsinco.brewery.api.ingredient.IngredientGroup;
 import dev.jsinco.brewery.api.ingredient.IngredientManager;
 import dev.jsinco.brewery.api.ingredient.ScoredIngredient;
+import dev.jsinco.brewery.api.util.BreweryKey;
 import dev.jsinco.brewery.api.util.Logger;
 import dev.jsinco.brewery.util.FutureUtil;
 import eu.okaeri.configs.ConfigManager;
@@ -56,7 +57,7 @@ public class IngredientsSection extends OkaeriConfig {
     @Exclude
     private static IngredientsSection instance;
     @Exclude
-    private static Map<String, CompletableFuture<Optional<Ingredient>>> validatedIngredients;
+    private static Map<BreweryKey, CompletableFuture<Optional<Ingredient>>> validatedIngredients;
 
     public static IngredientsSection ingredients() {
         return instance;
@@ -74,17 +75,17 @@ public class IngredientsSection extends OkaeriConfig {
 
     public static void validate(IngredientManager<?> ingredientManager, Function<String, List<String>> tagResolver) {
         Set<String> keys = new HashSet<>();
-        ImmutableMap.Builder<@NotNull String, @NotNull CompletableFuture<Optional<Ingredient>>> ingredientsFutures = new ImmutableMap.Builder<>();
+        ImmutableMap.Builder<@NotNull BreweryKey, @NotNull CompletableFuture<Optional<Ingredient>>> ingredientsFutures = new ImmutableMap.Builder<>();
         for (IngredientGroupSection ingredientGroup : instance.ingredientGroups()) {
             String key = ingredientGroup.key;
             Preconditions.checkArgument(!keys.contains(key), "Can't have two ingredient groups with the same key (ingredients.yml): " + key);
             keys.add(key);
-            ingredientsFutures.put("#brewery:" + key, ingredientGroup.create(ingredientManager, tagResolver));
+            ingredientsFutures.put(new BreweryKey("#brewery", key.toLowerCase(Locale.ROOT)), ingredientGroup.create(ingredientManager, tagResolver));
         }
         validatedIngredients = ingredientsFutures.build();
     }
 
-    public CompletableFuture<Optional<Ingredient>> getIngredient(String key) {
+    public CompletableFuture<Optional<Ingredient>> getIngredient(BreweryKey key) {
         return Optional.ofNullable(validatedIngredients.get(key))
                 .orElse(CompletableFuture.completedFuture(Optional.empty()));
     }

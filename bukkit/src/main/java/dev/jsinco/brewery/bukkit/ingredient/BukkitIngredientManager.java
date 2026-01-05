@@ -8,6 +8,7 @@ import dev.jsinco.brewery.api.ingredient.Ingredient;
 import dev.jsinco.brewery.api.ingredient.IngredientManager;
 import dev.jsinco.brewery.api.util.BreweryKey;
 import dev.jsinco.brewery.api.util.Pair;
+import me.clip.placeholderapi.libs.kyori.adventure.key.Key;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
@@ -35,7 +36,7 @@ public class BukkitIngredientManager implements IngredientManager<ItemStack> {
 
     @Override
     public CompletableFuture<Optional<Ingredient>> getIngredient(@NotNull String id) {
-        BreweryKey breweryKey = BreweryKey.parse(id);
+        BreweryKey breweryKey = BreweryKey.parse(id, Key.MINECRAFT_NAMESPACE);
         IntegrationManagerImpl integrationManager = TheBrewingProject.getInstance().getIntegrationManager();
         return integrationManager.getIntegrationRegistry().getIntegrations(IntegrationTypes.ITEM)
                 .stream()
@@ -43,7 +44,7 @@ public class BukkitIngredientManager implements IngredientManager<ItemStack> {
                 .filter(itemIntegration -> itemIntegration.getId().equals(breweryKey.namespace()))
                 .findAny()
                 .map(itemIntegration -> itemIntegration.createIngredient(breweryKey.key()))
-                .or(() -> BreweryIngredient.from(id))
+                .or(() -> BreweryIngredient.from(breweryKey))
                 .or(() -> SimpleIngredient.from(id).map(Optional::of).map(CompletableFuture::completedFuture))
                 .orElse(CompletableFuture.completedFuture(Optional.empty()));
     }
