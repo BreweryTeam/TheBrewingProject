@@ -260,7 +260,8 @@ public class BlockEventListener implements Listener {
 
         for (Location location : locations) {
             BreweryLocation breweryLocation = BukkitAdapter.toBreweryLocation(location);
-            Optional<SinglePositionStructure> single = breweryRegistry.getActiveSinglePositionStructure(breweryLocation);
+            Optional<SinglePositionStructure> single = breweryRegistry.getActiveSinglePositionStructure(breweryLocation)
+                    .filter(singlePositionStructure -> !singlePositionStructures.contains(singlePositionStructure));
             CancelState cancelState = single
                     .map(singlePositionStructure -> callSinglePositionStructureEvent(location, player, singlePositionStructure))
                     .orElseGet(CancelState.Allowed::new);
@@ -270,7 +271,7 @@ public class BlockEventListener implements Listener {
             }
 
             Optional<StructureHolder<?>> structureHolderOptional = placedStructureRegistry.getHolder(breweryLocation)
-                    .filter(structureHolder -> !holdersToDrops.containsKey(structureHolder));
+                    .filter(structureHolder -> !multiblockStructures.contains(structureHolder.getStructure()));
             Result result = structureHolderOptional
                     .map(holder -> callPlacedStructureEvent(location, player, holder))
                     .orElseGet(() -> new Result(new CancelState.Allowed(), List.of()));
