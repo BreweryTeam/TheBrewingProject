@@ -32,7 +32,7 @@ public interface IngredientManager<I> {
      * @param itemStack An item stack
      * @return An ingredient of the item stack
      */
-    BaseIngredient getIngredient(@NotNull I itemStack);
+    Ingredient getIngredient(@NotNull I itemStack);
 
     /**
      * Pretty much all items plugins initialize items on a delay. This is therefore a necessary measure to use on enable

@@ -3,10 +3,7 @@ package dev.jsinco.brewery.configuration;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
-import dev.jsinco.brewery.api.ingredient.Ingredient;
-import dev.jsinco.brewery.api.ingredient.IngredientGroup;
-import dev.jsinco.brewery.api.ingredient.IngredientManager;
-import dev.jsinco.brewery.api.ingredient.ScoredIngredient;
+import dev.jsinco.brewery.api.ingredient.*;
 import dev.jsinco.brewery.api.util.BreweryKey;
 import dev.jsinco.brewery.api.util.Logger;
 import dev.jsinco.brewery.util.FutureUtil;
@@ -150,7 +147,7 @@ public class IngredientsSection extends OkaeriConfig {
                                 "#brewery:" + key,
                                 displayName,
                                 ingredients.stream()
-                                        .map(Optional::get)
+                                        .flatMap(Optional::stream)
                                         .toList()
                         ));
                     });
@@ -158,13 +155,13 @@ public class IngredientsSection extends OkaeriConfig {
 
         private Ingredient parseScore(Ingredient ingredient, String ingredientString) {
             if (ingredientString.startsWith("+++")) {
-                return new ScoredIngredient(ingredient, 1.0);
+                return new IngredientWithMeta(ingredient, Map.of(IngredientMeta.SCORE, 1.0));
             }
             if (ingredientString.startsWith("++")) {
-                return new ScoredIngredient(ingredient, 0.7);
+                return new IngredientWithMeta(ingredient, Map.of(IngredientMeta.SCORE, 0.7));
             }
             if (ingredientString.startsWith("+")) {
-                return new ScoredIngredient(ingredient, 0.3);
+                return new IngredientWithMeta(ingredient, Map.of(IngredientMeta.SCORE, 0.3));
             }
             return ingredient;
         }
