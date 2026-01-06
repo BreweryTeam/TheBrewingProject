@@ -391,7 +391,7 @@ public class BukkitDistillery implements Distillery<BukkitDistillery, ItemStack,
      * Ensures that the distillery's inventory is up-to-date before the distillery is destroyed.
      * @return A snapshot of the brews that should drop from the distillery
      */
-    public List<Brew> prepForDestroy() {
+    public List<Brew> calculateDestroyDrops() {
         List<Brew> drops = new ArrayList<>();
         boolean inventoryUnpopulated = inventoryUnpopulated();
         for (BrewInventoryImpl distilleryInventory : List.of(distillate, mixture)) {
@@ -410,7 +410,7 @@ public class BukkitDistillery implements Distillery<BukkitDistillery, ItemStack,
 
     @Override
     public void destroy(BreweryLocation breweryLocation) {
-        prepForDestroy();
+        calculateDestroyDrops();
         List<Brew> drops = new ArrayList<>();
         drops.addAll(distillate.destroy());
         drops.addAll(mixture.destroy());
