@@ -197,7 +197,7 @@ public class BukkitBarrel implements Barrel<BukkitBarrel, ItemStack, Inventory>,
      * Ensures that the barrel's inventory is up-to-date before the barrel is destroyed.
      * @return A snapshot of the brews that should drop from the barrel
      */
-    public List<Brew> prepForDestroy() {
+    public List<Brew> calculateDestroyDrops() {
         if (!inventoryUnpopulated()) {
             inventory.updateBrewsFromInventory();
         }
@@ -210,7 +210,7 @@ public class BukkitBarrel implements Barrel<BukkitBarrel, ItemStack, Inventory>,
 
     @Override
     public void destroy(BreweryLocation breweryLocation) {
-        prepForDestroy();
+        calculateDestroyDrops();
         LocationUtil.dropBrews(breweryLocation, inventory.destroy());
     }
 

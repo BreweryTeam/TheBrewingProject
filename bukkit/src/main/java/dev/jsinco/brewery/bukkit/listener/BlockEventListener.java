@@ -26,6 +26,7 @@ import dev.jsinco.brewery.database.PersistenceException;
 import dev.jsinco.brewery.database.sql.Database;
 import dev.jsinco.brewery.structure.PlacedStructureRegistryImpl;
 import dev.jsinco.brewery.util.MessageUtil;
+import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.ExplosionResult;
@@ -259,42 +260,27 @@ public class BlockEventListener implements Listener {
 
         for (Location location : locations) {
             BreweryLocation breweryLocation = BukkitAdapter.toBreweryLocation(location);
-            boolean cancelled = breweryRegistry.getActiveSinglePositionStructure(breweryLocation).map(structure -> {
-                CancelState state = callSinglePositionStructureEvent(location, player, structure);
-                if (state instanceof CancelState.Allowed) {
-                    singlePositionStructures.add(structure);
-                    return false;
-                } else {
-                    if (player != null && state instanceof CancelState.PermissionDenied(Component message)) {
-                        player.sendMessage(message);
-                    }
-                    return true;
-                }
-            }).orElse(false);
-            if (cancelled) {
+            Optional<SinglePositionStructure> single = breweryRegistry.getActiveSinglePositionStructure(breweryLocation);
+            CancelState cancelState = single
+                    .map(singlePositionStructure -> callSinglePositionStructureEvent(location, player, singlePositionStructure))
+                    .orElseGet(CancelState.Allowed::new);
+            single.ifPresent(singlePositionStructures::add);
+            if (actOnCancelState(cancelState, player)) {
                 return false;
             }
 
-            cancelled = placedStructureRegistry.getHolder(breweryLocation).map(holder -> {
-                if (holdersToDrops.containsKey(holder)) {
-                    return false;
-                }
-                Result result = callPlacedStructureEvent(location, player, holder);
-                CancelState state = result.cancelState;
-                if (state instanceof CancelState.Allowed) {
-                    holdersToDrops.put(holder, result.drops);
-                    multiblockStructures.add(holder.getStructure());
-                    return false;
-                } else {
-                    if (player != null && state instanceof CancelState.PermissionDenied(Component message)) {
-                        player.sendMessage(message);
-                    }
-                    return true;
-                }
-            }).orElse(false);
-            if (cancelled) {
+            Optional<StructureHolder<?>> structureHolderOptional = placedStructureRegistry.getHolder(breweryLocation)
+                    .filter(structureHolder -> !holdersToDrops.containsKey(structureHolder));
+            Result result = structureHolderOptional
+                    .map(holder -> callPlacedStructureEvent(location, player, holder))
+                    .orElseGet(() -> new Result(new CancelState.Allowed(), List.of()));
+            if (actOnCancelState(result.cancelState(), player)) {
                 return false;
             }
+            structureHolderOptional.ifPresent(holder -> {
+                holdersToDrops.put(holder, result.drops);
+                multiblockStructures.add(holder.getStructure());
+            });
         }
 
         singlePositionStructures.forEach(structure -> ListenerUtil.removeActiveSinglePositionStructure(structure, breweryRegistry, database));
@@ -310,6 +296,18 @@ public class BlockEventListener implements Listener {
             LocationUtil.dropBrews(location, drops);
         }
         return true;
+    }
+
+    /**
+     *
+     * @return True if cancel state means to cancel
+     */
+    private static boolean actOnCancelState(CancelState cancelState, @Nullable Audience audience) {
+        if (cancelState instanceof CancelState.PermissionDenied permissionDenied) {
+            permissionDenied.sendMessage(audience);
+            return true;
+        }
+        return cancelState instanceof CancelState.Cancelled;
     }
 
     private static CancelState callSinglePositionStructureEvent(Location location, @Nullable Player player, SinglePositionStructure structure) {
@@ -338,7 +336,7 @@ public class BlockEventListener implements Listener {
                         barrel,
                         player,
                         location,
-                        barrel.prepForDestroy()
+                        barrel.calculateDestroyDrops()
                 );
                 event.callEvent();
                 yield new Result(event.getCancelState(), event.getDrops());
@@ -351,7 +349,7 @@ public class BlockEventListener implements Listener {
                         distillery,
                         player,
                         location,
-                        distillery.prepForDestroy()
+                        distillery.calculateDestroyDrops()
                 );
                 event.callEvent();
                 yield new Result(event.getCancelState(), event.getDrops());
@@ -360,7 +358,8 @@ public class BlockEventListener implements Listener {
         };
     }
 
-    private record Result(CancelState cancelState, List<Brew> drops) {}
+    private record Result(CancelState cancelState, List<Brew> drops) {
+    }
 
     private void remove(StructureHolder<?> holder) {
         try {
