@@ -20,6 +20,7 @@ import dev.jsinco.brewery.bukkit.api.BukkitAdapter;
 import dev.jsinco.brewery.bukkit.brew.BrewAdapter;
 import dev.jsinco.brewery.bukkit.breweries.BrewInventoryImpl;
 import dev.jsinco.brewery.bukkit.structure.PlacedBreweryStructure;
+import dev.jsinco.brewery.bukkit.util.LocationUtil;
 import dev.jsinco.brewery.bukkit.util.SoundPlayer;
 import dev.jsinco.brewery.configuration.Config;
 import dev.jsinco.brewery.util.MessageUtil;
@@ -192,17 +193,25 @@ public class BukkitBarrel implements Barrel<BukkitBarrel, ItemStack, Inventory>,
         return Optional.of(inventory.getInventory());
     }
 
+    /**
+     * Ensures that the barrel's inventory is up-to-date before the barrel is destroyed.
+     * @return A snapshot of the brews that should drop from the barrel
+     */
+    public List<Brew> prepForDestroy() {
+        if (!inventoryUnpopulated()) {
+            inventory.updateBrewsFromInventory();
+        }
+        return inventory.getBrewSnapshot();
+    }
+
+    public void destroyWithoutDrops() {
+        inventory.destroy();
+    }
+
     @Override
     public void destroy(BreweryLocation breweryLocation) {
-        BukkitAdapter.toLocation(breweryLocation)
-                .map(location -> location.add(0.5, 0, 0.5))
-                .ifPresent(location -> {
-                    if(!inventoryUnpopulated()){
-                        inventory.updateBrewsFromInventory();
-                    }
-                    List<ItemStack> contents = inventory.destroy();
-                    contents.forEach(itemStack -> location.getWorld().dropItem(location, itemStack));
-                });
+        prepForDestroy();
+        LocationUtil.dropBrews(breweryLocation, inventory.destroy());
     }
 
     @Override

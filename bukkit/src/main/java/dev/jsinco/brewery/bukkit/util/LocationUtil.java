@@ -1,5 +1,9 @@
 package dev.jsinco.brewery.bukkit.util;
 
+import dev.jsinco.brewery.api.brew.Brew;
+import dev.jsinco.brewery.api.vector.BreweryLocation;
+import dev.jsinco.brewery.bukkit.api.BukkitAdapter;
+import dev.jsinco.brewery.bukkit.brew.BrewAdapter;
 import dev.jsinco.brewery.configuration.EventSection;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -10,6 +14,7 @@ import org.bukkit.block.BlockFace;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -120,6 +125,16 @@ public class LocationUtil {
     public static boolean isWithinBuildLimit(Location location) {
         World world = location.getWorld();
         return world.getMinHeight() <= location.getBlockY() && location.getBlockY() <= world.getMaxHeight();
+    }
+
+    public static void dropBrews(BreweryLocation breweryLocation, List<Brew> drops) {
+        BukkitAdapter.toLocation(breweryLocation).ifPresent(location -> dropBrews(location, drops));
+    }
+    public static void dropBrews(Location location, List<Brew> drops) {
+        Location offset = location.clone().add(0.5, 0, 0.5);
+        drops.stream()
+                .map(brew -> BrewAdapter.toItem(brew, new Brew.State.Other()))
+                .forEach(itemStack -> offset.getWorld().dropItem(offset, itemStack));
     }
 
 }
