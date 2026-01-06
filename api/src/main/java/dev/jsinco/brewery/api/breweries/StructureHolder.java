@@ -12,7 +12,7 @@ public interface StructureHolder<H extends StructureHolder<H>> {
     MultiblockStructure<H> getStructure();
 
     /**
-     * Persistently destroy the structure
+     * Persistently destroy the structure, dropping all contained items
      *
      * @param breweryLocation The location to destroy from
      */

@@ -3,6 +3,10 @@ package dev.jsinco.brewery.api.breweries;
 import dev.jsinco.brewery.api.brew.Brew;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
+
 public interface BrewInventory {
 
     /**
@@ -12,6 +16,17 @@ public interface BrewInventory {
      * @return All brews in this inventory
      */
     Brew[] getBrews();
+
+    /**
+     * Gets a snapshot of all brews currently in the inventory. The list does not update as the inventory updates.
+     *
+     * @return All brews in this inventory
+     */
+    default List<Brew> getBrewSnapshot() {
+        return Arrays.stream(getBrews())
+                .filter(Objects::nonNull)
+                .toList();
+    }
 
     /**
      * Set an item in the inventory without changing the database

@@ -24,7 +24,7 @@ public interface DistilleryAccess {
     void close(boolean silent);
 
     /**
-     * Destroy the distillery
+     * Destroy the distillery, dropping all contained items
      * @param breweryLocation The location to destroy from
      */
     void destroy(BreweryLocation breweryLocation);

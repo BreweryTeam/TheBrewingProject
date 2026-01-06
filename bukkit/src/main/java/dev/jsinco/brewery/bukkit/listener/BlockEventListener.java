@@ -1,5 +1,6 @@
 package dev.jsinco.brewery.bukkit.listener;
 
+import dev.jsinco.brewery.api.brew.Brew;
 import dev.jsinco.brewery.api.breweries.BarrelType;
 import dev.jsinco.brewery.api.breweries.Cauldron;
 import dev.jsinco.brewery.api.breweries.InventoryAccessible;
@@ -13,13 +14,13 @@ import dev.jsinco.brewery.bukkit.api.BukkitAdapter;
 import dev.jsinco.brewery.bukkit.api.event.BarrelDestroyEvent;
 import dev.jsinco.brewery.bukkit.api.event.CauldronDestroyEvent;
 import dev.jsinco.brewery.bukkit.api.event.DistilleryDestroyEvent;
-import dev.jsinco.brewery.bukkit.api.event.PermissibleBreweryEvent;
 import dev.jsinco.brewery.bukkit.breweries.BreweryRegistry;
 import dev.jsinco.brewery.bukkit.breweries.barrel.BukkitBarrel;
 import dev.jsinco.brewery.bukkit.breweries.barrel.BukkitBarrelDataType;
 import dev.jsinco.brewery.bukkit.breweries.distillery.BukkitDistillery;
 import dev.jsinco.brewery.bukkit.breweries.distillery.BukkitDistilleryDataType;
 import dev.jsinco.brewery.bukkit.structure.*;
+import dev.jsinco.brewery.bukkit.util.LocationUtil;
 import dev.jsinco.brewery.configuration.Config;
 import dev.jsinco.brewery.database.PersistenceException;
 import dev.jsinco.brewery.database.sql.Database;
@@ -44,10 +45,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class BlockEventListener implements Listener {
@@ -252,9 +250,13 @@ public class BlockEventListener implements Listener {
     }
 
     private boolean onMultiBlockRemove(List<Location> locations, @Nullable Player player) {
+        if (locations.isEmpty()) {
+            return true;
+        }
         Set<SinglePositionStructure> singlePositionStructures = new HashSet<>();
         Set<MultiblockStructure<?>> multiblockStructures = new HashSet<>();
-        Set<StructureHolder<?>> holders = new HashSet<>();
+        Map<StructureHolder<?>, List<Brew>> holdersToDrops = new HashMap<>();
+
         for (Location location : locations) {
             BreweryLocation breweryLocation = BukkitAdapter.toBreweryLocation(location);
             boolean cancelled = breweryRegistry.getActiveSinglePositionStructure(breweryLocation).map(structure -> {
@@ -272,13 +274,15 @@ public class BlockEventListener implements Listener {
             if (cancelled) {
                 return false;
             }
+
             cancelled = placedStructureRegistry.getHolder(breweryLocation).map(holder -> {
-                if (holders.contains(holder)) {
+                if (holdersToDrops.containsKey(holder)) {
                     return false;
                 }
-                CancelState state = callPlacedStructureEvent(location, player, holder);
+                Result result = callPlacedStructureEvent(location, player, holder);
+                CancelState state = result.cancelState;
                 if (state instanceof CancelState.Allowed) {
-                    holders.add(holder);
+                    holdersToDrops.put(holder, result.drops);
                     multiblockStructures.add(holder.getStructure());
                     return false;
                 } else {
@@ -292,14 +296,18 @@ public class BlockEventListener implements Listener {
                 return false;
             }
         }
+
         singlePositionStructures.forEach(structure -> ListenerUtil.removeActiveSinglePositionStructure(structure, breweryRegistry, database));
         multiblockStructures.forEach(placedStructureRegistry::unregisterStructure);
-        for (StructureHolder<?> holder : holders) {
+        Location location = locations.getFirst();
+        for (Map.Entry<StructureHolder<?>, List<Brew>> entry : holdersToDrops.entrySet()) {
+            StructureHolder<?> holder = entry.getKey();
+            List<Brew> drops = entry.getValue();
             if (holder instanceof InventoryAccessible inventoryAccessible) {
                 breweryRegistry.unregisterInventory(inventoryAccessible);
             }
-            holder.destroy(BukkitAdapter.toBreweryLocation(locations.getFirst()));
             remove(holder);
+            LocationUtil.dropBrews(location, drops);
         }
         return true;
     }
@@ -320,40 +328,52 @@ public class BlockEventListener implements Listener {
         return new CancelState.Allowed();
     }
 
-    private static CancelState callPlacedStructureEvent(Location location, @Nullable Player player, StructureHolder<?> holder) {
-        PermissibleBreweryEvent event = switch (holder) {
-            case BukkitBarrel barrel -> new BarrelDestroyEvent(
-                    player == null || player.hasPermission("brewery.barrel.access") ?
-                            new CancelState.Allowed() :
-                            new CancelState.PermissionDenied(Component.translatable("tbp.barrel.access-denied")),
-                    barrel,
-                    player,
-                    location
-            );
-            case BukkitDistillery distillery -> new DistilleryDestroyEvent(
-                    player == null || player.hasPermission("brewery.distillery.access") ?
-                            new CancelState.Allowed() :
-                            new CancelState.PermissionDenied(Component.translatable("tbp.distillery.access-denied")),
-                    distillery,
-                    player,
-                    location
-            );
-            default -> null;
+    private static Result callPlacedStructureEvent(Location location, @Nullable Player player, StructureHolder<?> holder) {
+        return switch (holder) {
+            case BukkitBarrel barrel -> {
+                BarrelDestroyEvent event = new BarrelDestroyEvent(
+                        player == null || player.hasPermission("brewery.barrel.access") ?
+                                new CancelState.Allowed() :
+                                new CancelState.PermissionDenied(Component.translatable("tbp.barrel.access-denied")),
+                        barrel,
+                        player,
+                        location,
+                        barrel.prepForDestroy()
+                );
+                event.callEvent();
+                yield new Result(event.getCancelState(), event.getDrops());
+            }
+            case BukkitDistillery distillery -> {
+                DistilleryDestroyEvent event = new DistilleryDestroyEvent(
+                        player == null || player.hasPermission("brewery.distillery.access") ?
+                                new CancelState.Allowed() :
+                                new CancelState.PermissionDenied(Component.translatable("tbp.distillery.access-denied")),
+                        distillery,
+                        player,
+                        location,
+                        distillery.prepForDestroy()
+                );
+                event.callEvent();
+                yield new Result(event.getCancelState(), event.getDrops());
+            }
+            default -> new Result(new CancelState.Allowed(), Collections.emptyList());
         };
-        if (event != null) {
-            event.callEvent();
-            return event.getCancelState();
-        }
-        return new CancelState.Allowed();
     }
+
+    private record Result(CancelState cancelState, List<Brew> drops) {}
 
     private void remove(StructureHolder<?> holder) {
         try {
-            if (holder instanceof BukkitBarrel barrel) {
-                database.remove(BukkitBarrelDataType.INSTANCE, barrel);
-            }
-            if (holder instanceof BukkitDistillery distillery) {
-                database.remove(BukkitDistilleryDataType.INSTANCE, distillery);
+            switch (holder) {
+                case BukkitBarrel barrel -> {
+                    barrel.destroyWithoutDrops();
+                    database.remove(BukkitBarrelDataType.INSTANCE, barrel);
+                }
+                case BukkitDistillery distillery -> {
+                    distillery.destroyWithoutDrops();
+                    database.remove(BukkitDistilleryDataType.INSTANCE, distillery);
+                }
+                default -> throw new IllegalArgumentException("Unknown structure type");
             }
         } catch (PersistenceException e) {
             Logger.logErr(e);

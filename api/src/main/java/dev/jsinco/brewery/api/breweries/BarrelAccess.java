@@ -25,7 +25,7 @@ public interface BarrelAccess {
     void close(boolean silent);
 
     /**
-     * Destroy the barrel
+     * Destroy the barrel, dropping all contained items
      * @param breweryLocation The location to destroy from
      */
     void destroy(BreweryLocation breweryLocation);

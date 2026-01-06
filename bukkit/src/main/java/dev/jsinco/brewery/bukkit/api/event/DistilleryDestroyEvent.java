@@ -1,5 +1,6 @@
 package dev.jsinco.brewery.bukkit.api.event;
 
+import dev.jsinco.brewery.api.brew.Brew;
 import dev.jsinco.brewery.api.breweries.DistilleryAccess;
 import dev.jsinco.brewery.api.util.CancelState;
 import lombok.Getter;
@@ -8,6 +9,10 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 public class DistilleryDestroyEvent extends PermissibleBreweryEvent {
 
@@ -30,12 +35,26 @@ public class DistilleryDestroyEvent extends PermissibleBreweryEvent {
      */
     @Getter
     private final Location location;
+    /**
+     * The brews that will be dropped when the distillery is broken. Can be modified.
+     */
+    @Getter
+    private List<Brew> drops;
 
-    public DistilleryDestroyEvent(CancelState state, DistilleryAccess distillery, @Nullable Player player, Location location) {
+    public DistilleryDestroyEvent(CancelState state, DistilleryAccess distillery, @Nullable Player player, Location location, Collection<Brew> drops) {
         super(state);
         this.distillery = distillery;
         this.player = player;
         this.location = location;
+        setDrops(drops);
+    }
+
+    /**
+     * Replaces the list of drops with the provided collection.
+     * @param drops collection of brews to drop
+     */
+    public void setDrops(Collection<Brew> drops) {
+        this.drops = new ArrayList<>(drops);
     }
 
     @Override

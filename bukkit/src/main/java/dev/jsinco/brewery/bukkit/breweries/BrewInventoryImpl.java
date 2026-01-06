@@ -109,16 +109,9 @@ public class BrewInventoryImpl implements InventoryHolder, BrewInventory {
         return amount;
     }
 
-    public List<ItemStack> destroy() {
-        List<ItemStack> output = new ArrayList<>();
+    public List<Brew> destroy() {
         List.copyOf(inventory.getViewers()).forEach(HumanEntity::closeInventory);
         this.inventory.clear();
-        for (Brew brew : brews) {
-            if (brew == null) {
-                continue;
-            }
-            output.add(BrewAdapter.toItem(brew, new Brew.State.Other()));
-        }
-        return output;
+        return getBrewSnapshot();
     }
 }

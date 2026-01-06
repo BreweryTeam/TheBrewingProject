@@ -17,6 +17,7 @@ import dev.jsinco.brewery.bukkit.breweries.BrewInventoryImpl;
 import dev.jsinco.brewery.bukkit.structure.BreweryStructure;
 import dev.jsinco.brewery.bukkit.structure.PlacedBreweryStructure;
 import dev.jsinco.brewery.bukkit.util.BlockUtil;
+import dev.jsinco.brewery.bukkit.util.LocationUtil;
 import dev.jsinco.brewery.bukkit.util.SoundPlayer;
 import dev.jsinco.brewery.bukkit.util.VectorUtil;
 import dev.jsinco.brewery.configuration.Config;
@@ -29,7 +30,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.Particle;
-import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -387,27 +387,34 @@ public class BukkitDistillery implements Distillery<BukkitDistillery, ItemStack,
         }
     }
 
+    /**
+     * Ensures that the distillery's inventory is up-to-date before the distillery is destroyed.
+     * @return A snapshot of the brews that should drop from the distillery
+     */
+    public List<Brew> prepForDestroy() {
+        List<Brew> drops = new ArrayList<>();
+        boolean inventoryUnpopulated = inventoryUnpopulated();
+        for (BrewInventoryImpl distilleryInventory : List.of(distillate, mixture)) {
+            if (!inventoryUnpopulated) {
+                distilleryInventory.updateBrewsFromInventory();
+            }
+            drops.addAll(distilleryInventory.getBrewSnapshot());
+        }
+        return drops;
+    }
+
+    public void destroyWithoutDrops() {
+        distillate.destroy();
+        mixture.destroy();
+    }
+
     @Override
     public void destroy(BreweryLocation breweryLocation) {
-        BukkitAdapter.toLocation(breweryLocation)
-                .map(location -> location.add(0.5, 0, 0.5))
-                .ifPresent(location -> {
-                    boolean inventoryUnpopulated = inventoryUnpopulated();
-                    for (BrewInventoryImpl distilleryInventory : List.of(distillate, mixture)) {
-                        if (!inventoryUnpopulated) {
-                            distilleryInventory.updateBrewsFromInventory();
-                        }
-                        List.copyOf(distilleryInventory.getInventory().getViewers()).forEach(HumanEntity::closeInventory);
-                        distilleryInventory.getInventory().clear();
-                        for (Brew brew : distilleryInventory.getBrews()) {
-                            if (brew == null) {
-                                continue;
-                            }
-                            location.getWorld().dropItem(location, BrewAdapter.toItem(brew, new Brew.State.Other()));
-                        }
-                    }
-                });
-
+        prepForDestroy();
+        List<Brew> drops = new ArrayList<>();
+        drops.addAll(distillate.destroy());
+        drops.addAll(mixture.destroy());
+        LocationUtil.dropBrews(breweryLocation, drops);
     }
 
 }
