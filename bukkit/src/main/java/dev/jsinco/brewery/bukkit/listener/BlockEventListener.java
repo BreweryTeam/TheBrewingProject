@@ -265,10 +265,10 @@ public class BlockEventListener implements Listener {
             CancelState cancelState = single
                     .map(singlePositionStructure -> callSinglePositionStructureEvent(location, player, singlePositionStructure))
                     .orElseGet(CancelState.Allowed::new);
-            single.ifPresent(singlePositionStructures::add);
             if (actOnCancelState(cancelState, player)) {
                 return false;
             }
+            single.ifPresent(singlePositionStructures::add);
 
             Optional<StructureHolder<?>> structureHolderOptional = placedStructureRegistry.getHolder(breweryLocation)
                     .filter(structureHolder -> !multiblockStructures.contains(structureHolder.getStructure()));
