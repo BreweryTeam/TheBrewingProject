@@ -32,7 +32,7 @@ public class BrewingStepPdcType implements PersistentDataType<byte[], BrewingSte
     // AES-GCM header constants
     private static final byte[] MAGIC = new byte[] { 'B','R','W','1' };
     private static final int GCM_TAG_BITS = 128; // data authentication
-    private static final int VERSION = 1;
+    private static final int VERSION = 2;
 
     private final boolean useCipher;
 
@@ -107,6 +107,7 @@ public class BrewingStepPdcType implements PersistentDataType<byte[], BrewingSte
             }
             default -> throw new IllegalStateException("Unexpected value: " + complex);
         }
+        encodeBrewers(complex.brewers(), dataOutputStream);
     }
 
     @Override
@@ -118,7 +119,7 @@ public class BrewingStepPdcType implements PersistentDataType<byte[], BrewingSte
 
             if (Arrays.equals(magic, MAGIC)) {
                 int version = headerIn.readUnsignedByte();
-                if (version != 1) throw new RuntimeException("Unsupported version: " + version);
+                if (version < 1 || version > VERSION) throw new RuntimeException("Unsupported version: " + version);
                 int ivLen = headerIn.readUnsignedByte();
                 byte[] iv = headerIn.readNBytes(ivLen);
 
@@ -139,7 +140,7 @@ public class BrewingStepPdcType implements PersistentDataType<byte[], BrewingSte
                         cipher.init(Cipher.DECRYPT_MODE, key, new GCMParameterSpec(GCM_TAG_BITS, iv));
                         try (CipherInputStream cis = new CipherInputStream(inDup(primitive, MAGIC.length + 1 + 1 + ivLen), cipher);
                              DataInputStream dis = new DataInputStream(cis)) {
-                            return readPayload(dis);
+                            return readPayload(dis, version);
                         }
                     } catch (IOException | GeneralSecurityException e) {
                         last = e; // wrong key or tampered data
@@ -157,22 +158,28 @@ public class BrewingStepPdcType implements PersistentDataType<byte[], BrewingSte
         return new ByteArrayInputStream(all, offset, all.length - offset);
     }
 
-    private BrewingStep readPayload(@NotNull DataInputStream dataInputStream) throws IOException {
+    private BrewingStep readPayload(@NotNull DataInputStream dataInputStream, int version) throws IOException {
         BrewingStep.StepType stepType = BrewingStep.StepType.valueOf(dataInputStream.readUTF());
         return switch (stepType) {
             case COOK -> new CookStepImpl(
                     decodeMoment(dataInputStream),
                     decodeIngredients(dataInputStream),
-                    BreweryRegistry.CAULDRON_TYPE.get(BreweryKey.parse(dataInputStream.readUTF()))
+                    BreweryRegistry.CAULDRON_TYPE.get(BreweryKey.parse(dataInputStream.readUTF())),
+                    decodeBrewers(dataInputStream, version)
             );
-            case DISTILL -> new DistillStepImpl(dataInputStream.readInt());
+            case DISTILL -> new DistillStepImpl(
+                    dataInputStream.readInt(),
+                    decodeBrewers(dataInputStream, version)
+            );
             case AGE -> new AgeStepImpl(
                     decodeMoment(dataInputStream),
-                    BreweryRegistry.BARREL_TYPE.get(BreweryKey.parse(dataInputStream.readUTF()))
+                    BreweryRegistry.BARREL_TYPE.get(BreweryKey.parse(dataInputStream.readUTF())),
+                    decodeBrewers(dataInputStream, version)
             );
             case MIX -> new MixStepImpl(
                     decodeMoment(dataInputStream),
-                    decodeIngredients(dataInputStream)
+                    decodeIngredients(dataInputStream),
+                    decodeBrewers(dataInputStream, version)
             );
         };
     }
@@ -202,7 +209,7 @@ public class BrewingStepPdcType implements PersistentDataType<byte[], BrewingSte
                 CipherInputStream cis = new CipherInputStream(input, getLegacyDESCipher(Cipher.DECRYPT_MODE, key));
                 DataInputStream dis = new DataInputStream(cis)
         ) {
-            return readPayload(dis);
+            return readPayload(dis, 1);
         }
     }
 
@@ -251,6 +258,26 @@ public class BrewingStepPdcType implements PersistentDataType<byte[], BrewingSte
                 .map(ingredientString -> BukkitIngredientManager.INSTANCE.getIngredientWithAmount(ingredientString, true))
                 .forEach(ingredientAmountPair -> IngredientManager.insertIngredientIntoMap(ingredients, ingredientAmountPair.join()));
         return ingredients;
+    }
+
+    private void encodeBrewers(@NotNull SequencedSet<UUID> brewers, OutputStream outputStream) throws IOException {
+        DecoderEncoder.writeVarInt(brewers.size(), outputStream);
+        for (UUID uuid : brewers) {
+            outputStream.write(DecoderEncoder.asBytes(uuid));
+        }
+    }
+
+    private SequencedSet<UUID> decodeBrewers(InputStream inputStream, int version) throws IOException {
+        if (version == 1) {
+            return new LinkedHashSet<>();
+        }
+        int length = DecoderEncoder.readVarInt(inputStream);
+        SequencedSet<UUID> brewers = new LinkedHashSet<>();
+        for (int i = 0; i < length; i++) {
+            UUID uuid = DecoderEncoder.asUuid(inputStream.readNBytes(16));
+            brewers.add(uuid);
+        }
+        return brewers;
     }
 
     private Cipher getLegacyDESCipher(int operationMode, SecretKey key) {
