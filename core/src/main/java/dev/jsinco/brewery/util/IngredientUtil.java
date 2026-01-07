@@ -1,9 +1,7 @@
 package dev.jsinco.brewery.util;
 
 import dev.jsinco.brewery.api.brew.BrewingStep;
-import dev.jsinco.brewery.api.ingredient.Ingredient;
-import dev.jsinco.brewery.api.ingredient.IngredientGroup;
-import dev.jsinco.brewery.api.ingredient.ScoredIngredient;
+import dev.jsinco.brewery.api.ingredient.*;
 
 import java.util.Comparator;
 import java.util.HashMap;
@@ -22,8 +20,12 @@ public class IngredientUtil {
             Ingredient ingredient = entry.getKey();
             if (ingredient instanceof IngredientGroup ingredientGroup) {
                 ingredient = ingredientGroup.alternatives().stream().max(Comparator.comparing(groupIngredient ->
-                        groupIngredient instanceof ScoredIngredient scoredIngredient ? scoredIngredient.score() : 1D
+                        groupIngredient instanceof IngredientWithMeta ingredientWithMeta &&
+                                ingredientWithMeta.get(IngredientMeta.SCORE) instanceof Double score
+                                ? score : 1D
                 )).orElse(null);
+            } else if (ingredient instanceof ComplexIngredient complexIngredient) {
+                ingredient = complexIngredient.derivatives().getFirst();
             }
             if (ingredient == null) {
                 continue;

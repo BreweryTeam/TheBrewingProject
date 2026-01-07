@@ -2,7 +2,8 @@ package dev.jsinco.brewery.bukkit.integration.chest_shop;
 
 import com.ghostchu.quickshop.api.event.general.ShopItemMatchEvent;
 import dev.jsinco.brewery.api.ingredient.Ingredient;
-import dev.jsinco.brewery.api.ingredient.ScoredIngredient;
+import dev.jsinco.brewery.api.ingredient.IngredientMeta;
+import dev.jsinco.brewery.api.ingredient.IngredientWithMeta;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.bukkit.api.integration.ChestShopIntegration;
 import dev.jsinco.brewery.bukkit.ingredient.BreweryIngredient;
@@ -37,18 +38,18 @@ public class QuickShopHikariIntegration implements ChestShopIntegration, Listene
     private boolean matches(ItemStack originalItem, ItemStack comparisonItem) {
         Ingredient original = BukkitIngredientManager.INSTANCE.getIngredient(originalItem);
         double originalScore = 1D;
-        if (original instanceof ScoredIngredient(Ingredient baseIngredient, double score1)) {
-            originalScore = score1;
-            original = baseIngredient;
+        if (original instanceof IngredientWithMeta ingredientWithMeta && ingredientWithMeta.get(IngredientMeta.SCORE) instanceof Double score) {
+            originalScore = score;
+            original = ingredientWithMeta.derivatives().getFirst();
         }
         if (!(original instanceof BreweryIngredient origininalBreweryIngredient)) {
             return false;
         }
         Ingredient comparison = BukkitIngredientManager.INSTANCE.getIngredient(comparisonItem);
         double comparisonScore = 1D;
-        if (comparison instanceof ScoredIngredient(Ingredient baseIngredient, double score1)) {
-            comparisonScore = score1;
-            comparison = baseIngredient;
+        if (comparison instanceof IngredientWithMeta ingredientWithMeta && ingredientWithMeta.get(IngredientMeta.SCORE) instanceof Double score) {
+            comparisonScore = score;
+            comparison = ingredientWithMeta.derivatives().getFirst();
         }
         if (!(comparison instanceof BreweryIngredient comparisonBreweryIngredient)) {
             return false;
