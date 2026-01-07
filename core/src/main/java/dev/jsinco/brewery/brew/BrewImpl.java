@@ -14,6 +14,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class BrewImpl implements Brew {
@@ -42,6 +43,21 @@ public class BrewImpl implements Brew {
 
     public BrewImpl withStep(BrewingStep step) {
         return new BrewImpl(Stream.concat(steps.stream(), Stream.of(step)).toList(), meta);
+    }
+
+    public BrewImpl withSteps(Collection<BrewingStep> steps) {
+        return new BrewImpl(List.copyOf(steps), meta);
+    }
+
+    public BrewImpl withModifiedStep(int index, Function<BrewingStep, BrewingStep> modifier) {
+        BrewingStep newStep = modifier.apply(steps.get(index));
+        return new BrewImpl(
+                Stream.concat(
+                        steps.subList(0, steps.size() - 1).stream(),
+                        Stream.of(newStep)
+                ).toList(),
+                meta
+        );
     }
 
     public BrewImpl witModifiedLastStep(Function<BrewingStep, BrewingStep> modifier) {
@@ -84,6 +100,20 @@ public class BrewImpl implements Brew {
                 .filter(this::isCompleted)
                 .toList();
     }
+
+    @Override
+    public SequencedSet<UUID> getBrewers() {
+        return steps.stream()
+                .map(BrewingStep::brewers)
+                .flatMap(Collection::stream)
+                .collect(Collectors.toCollection(LinkedHashSet::new));
+    }
+
+    @Override
+    public int stepAmount() {
+        return steps.size();
+    }
+
 
     private boolean isCompleted(BrewingStep step) {
         return !(step instanceof BrewingStep.Age age) || age.time().moment() > Config.config().barrels().agingYearTicks() / 2;
