@@ -161,10 +161,7 @@ public class BrewerCommand {
 
         sendSuccessMessage("add", sender, players);
         return Optional.of(brew.withModifiedStep(stepIndex, step ->
-                ((BrewingStep.AuthoredStep<?>) step).withBrewers(Stream.concat(
-                        step.brewers().stream(),
-                        players.stream().map(OfflinePlayer::getUniqueId)
-                ).toList())
+                ((BrewingStep.AuthoredStep<?>) step).withBrewers(players.stream().map(OfflinePlayer::getUniqueId).toList())
         ));
     };
 
@@ -188,12 +185,12 @@ public class BrewerCommand {
                         return step;
                     })
                     .toList();
-            return Optional.of(brew.withSteps(steps));
+            return Optional.of(brew.withStepsReplaced(steps));
         }
     };
 
     private static BrewingStep remove(BrewingStep.AuthoredStep<?> authoredStep, List<OfflinePlayer> players) {
-        return authoredStep.withBrewers(authoredStep.brewers().stream()
+        return authoredStep.withBrewersReplaced(authoredStep.brewers().stream()
                 .filter(uuid -> players.stream().noneMatch(player -> player.getUniqueId().equals(uuid)))
                 .toList());
     }
@@ -207,7 +204,8 @@ public class BrewerCommand {
                 return Optional.empty();
             }
             sendSuccessMessage("set", sender, players);
-            return Optional.of(brew.withModifiedStep(stepIndex, step -> ((BrewingStep.AuthoredStep<?>) step).withBrewers(brewers)));
+            return Optional.of(brew.withModifiedStep(stepIndex, step ->
+                    ((BrewingStep.AuthoredStep<?>) step).withBrewersReplaced(brewers)));
 
         } else {
             Optional<Integer> resolvedStepIndex = lastAuthoredStepIndex(brew);
@@ -221,16 +219,16 @@ public class BrewerCommand {
             for (int i = 0; i < brew.getSteps().size(); i++) {
                 BrewingStep step = brew.getSteps().get(i);
                 if (i == lastStepIndex) {
-                    BrewingStep modifiedStep = ((BrewingStep.AuthoredStep<?>) step).withBrewers(brewers);
+                    BrewingStep modifiedStep = ((BrewingStep.AuthoredStep<?>) step).withBrewersReplaced(brewers);
                     steps.add(modifiedStep);
                 } else {
                     BrewingStep modifiedStep = step instanceof BrewingStep.AuthoredStep<?> authoredStep ?
-                            authoredStep.withBrewers(List.of()) :
+                            authoredStep.withBrewersReplaced(List.of()) :
                             step;
                     steps.add(modifiedStep);
                 }
             }
-            return Optional.of(brew.withSteps(steps));
+            return Optional.of(brew.withStepsReplaced(steps));
         }
     };
 
@@ -242,19 +240,20 @@ public class BrewerCommand {
                 return Optional.empty();
             }
             sendClearSuccessMessage(sender);
-            return Optional.of(brew.withModifiedStep(stepIndex, step -> ((BrewingStep.AuthoredStep<?>) step).withBrewers(List.of())));
+            return Optional.of(brew.withModifiedStep(stepIndex, step ->
+                    ((BrewingStep.AuthoredStep<?>) step).withBrewersReplaced(List.of())));
 
         } else {
             sendClearSuccessMessage(sender);
             List<BrewingStep> steps = brew.getSteps().stream()
                     .map(step -> {
                         if (step instanceof BrewingStep.AuthoredStep<?> authoredStep) {
-                            return authoredStep.withBrewers(List.of());
+                            return authoredStep.withBrewersReplaced(List.of());
                         }
                         return step;
                     })
                     .toList();
-            return Optional.of(brew.withSteps(steps));
+            return Optional.of(brew.withStepsReplaced(steps));
         }
     };
 

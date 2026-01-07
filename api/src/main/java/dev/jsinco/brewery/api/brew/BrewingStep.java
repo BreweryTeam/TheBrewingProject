@@ -81,7 +81,9 @@ public interface BrewingStep {
          * @param brewers A collection of brewer UUIDs
          * @return A new instance of this step with the specified brewers
          */
-        SELF withBrewers(Collection<UUID> brewers);
+        SELF withBrewers(SequencedCollection<UUID> brewers);
+
+        SELF withBrewersReplaced(SequencedCollection<UUID> brewers);
     }
 
     interface Cook extends TimedStep, IngredientsStep, AuthoredStep<Cook> {
