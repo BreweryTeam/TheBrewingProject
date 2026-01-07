@@ -7,6 +7,7 @@ import dev.jsinco.brewery.api.breweries.StructureHolder;
 import dev.jsinco.brewery.api.effect.DrunkState;
 import dev.jsinco.brewery.api.effect.ModifierConsume;
 import dev.jsinco.brewery.api.effect.modifier.ModifierDisplay;
+import dev.jsinco.brewery.api.ingredient.ComplexIngredient;
 import dev.jsinco.brewery.api.ingredient.Ingredient;
 import dev.jsinco.brewery.api.ingredient.ScoredIngredient;
 import dev.jsinco.brewery.api.util.BreweryKey;
@@ -307,8 +308,10 @@ public class PlayerEventListener implements Listener {
             return true;
         }
         Ingredient ingredient = BukkitIngredientManager.INSTANCE.getIngredient(itemStack);
-        if (ingredient instanceof ScoredIngredient scoredIngredient) {
-            ingredient = scoredIngredient.baseIngredient();
+        if (ingredient instanceof ComplexIngredient complexIngredient) {
+            return complexIngredient.derivatives()
+                    .stream()
+                    .anyMatch(recipeRegistry::isRegisteredIngredient);
         }
         return recipeRegistry.isRegisteredIngredient(ingredient);
     }

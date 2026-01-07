@@ -1,9 +1,6 @@
 package dev.jsinco.brewery.brew;
 
-import dev.jsinco.brewery.api.ingredient.Ingredient;
-import dev.jsinco.brewery.api.ingredient.IngredientGroup;
-import dev.jsinco.brewery.api.ingredient.IngredientManager;
-import dev.jsinco.brewery.api.ingredient.ScoredIngredient;
+import dev.jsinco.brewery.api.ingredient.*;
 import dev.jsinco.brewery.api.util.Pair;
 import org.jspecify.annotations.Nullable;
 
@@ -44,7 +41,7 @@ public class BrewingStepUtil {
             }
             output *= nearbyValueScore(targetEntry.getValue(), actualAmount);
         }
-        if(!modifiedActual.isEmpty()){
+        if (!modifiedActual.isEmpty()) {
             return 0D;
         }
         double ingredientScore = ingredientScores.isEmpty() ? 1D : ingredientScores.stream()
@@ -104,8 +101,8 @@ public class BrewingStepUtil {
         ingredients.entrySet()
                 .stream()
                 .map(entry -> {
-                    if (entry.getKey() instanceof ScoredIngredient scoredIngredient) {
-                        return new Pair<>(scoredIngredient.baseIngredient(), entry.getValue());
+                    if (entry.getKey() instanceof ComplexIngredient complexIngredient) {
+                        return new Pair<>(complexIngredient.derivatives().getFirst(), entry.getValue());
                     } else {
                         return new Pair<>(entry.getKey(), entry.getValue());
                     }
