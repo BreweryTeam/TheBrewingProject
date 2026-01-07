@@ -114,6 +114,11 @@ public interface Brew extends MetaContainer<Brew> {
     SequencedSet<UUID> getBrewers();
 
     /**
+     * @return The amount of steps in this brew
+     */
+    int stepAmount();
+
+    /**
      * A state of a brew, mainly indicates how the data should be written when converting into an item
      */
     sealed interface State {
