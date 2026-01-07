@@ -46,7 +46,7 @@ public class BrewImpl implements Brew {
     }
 
     public BrewImpl withSteps(Collection<BrewingStep> steps) {
-        return new BrewImpl(List.copyOf(steps), meta);
+        return new BrewImpl(Stream.concat(this.steps.stream(), steps.stream()).toList(), meta);
     }
 
     public BrewImpl withStepsReplaced(Collection<BrewingStep> steps) {
@@ -117,7 +117,6 @@ public class BrewImpl implements Brew {
     public int stepAmount() {
         return steps.size();
     }
-
 
     private boolean isCompleted(BrewingStep step) {
         return !(step instanceof BrewingStep.Age age) || age.time().moment() > Config.config().barrels().agingYearTicks() / 2;
