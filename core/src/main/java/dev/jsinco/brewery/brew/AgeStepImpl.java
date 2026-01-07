@@ -5,12 +5,13 @@ import dev.jsinco.brewery.api.brew.PartialBrewScore;
 import dev.jsinco.brewery.api.brew.ScoreType;
 import dev.jsinco.brewery.api.breweries.BarrelType;
 import dev.jsinco.brewery.api.moment.Moment;
+import dev.jsinco.brewery.util.CollectionUtil;
 
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public record AgeStepImpl(Moment time, BarrelType barrelType) implements BrewingStep.Age {
+public record AgeStepImpl(Moment time, BarrelType barrelType, SequencedSet<UUID> brewers) implements BrewingStep.Age {
 
     private static final Map<ScoreType, PartialBrewScore> BREW_STEP_MISMATCH = Stream.of(
                     new PartialBrewScore(0, ScoreType.TIME),
@@ -18,13 +19,17 @@ public record AgeStepImpl(Moment time, BarrelType barrelType) implements Brewing
             )
             .collect(Collectors.toUnmodifiableMap(PartialBrewScore::type, partial -> partial));
 
+    public AgeStepImpl(Moment time, BarrelType barrelType) {
+        this(time, barrelType, Collections.emptySortedSet());
+    }
+
     public AgeStepImpl withAge(Moment age) {
-        return new AgeStepImpl(age, this.barrelType);
+        return new AgeStepImpl(age, this.barrelType, this.brewers);
     }
 
     @Override
     public Map<ScoreType, PartialBrewScore> proximityScores(BrewingStep other) {
-        if (!(other instanceof AgeStepImpl(Moment otherAge, BarrelType otherType))) {
+        if (!(other instanceof AgeStepImpl(Moment otherAge, BarrelType otherType, SequencedSet<UUID> ignored))) {
             return BREW_STEP_MISMATCH;
         }
         double barrelTypeScore = barrelType.equals(BarrelType.ANY) || barrelType.equals(otherType) ? 1D : 0.9D;
@@ -42,7 +47,7 @@ public record AgeStepImpl(Moment time, BarrelType barrelType) implements Brewing
 
     @Override
     public Map<ScoreType, PartialBrewScore> maximumScores(BrewingStep other) {
-        if (!(other instanceof AgeStepImpl(Moment otherAge, BarrelType otherType))) {
+        if (!(other instanceof AgeStepImpl(Moment otherAge, BarrelType otherType, SequencedSet<UUID> ignored))) {
             return BREW_STEP_MISMATCH;
         }
         double barrelTypeScore = barrelType.equals(BarrelType.ANY) || barrelType.equals(otherType) ? 1D : 0.9D;
@@ -56,5 +61,36 @@ public record AgeStepImpl(Moment time, BarrelType barrelType) implements Brewing
     @Override
     public Map<ScoreType, PartialBrewScore> failedScores() {
         return BREW_STEP_MISMATCH;
+    }
+
+    @Override
+    public Age withBrewer(UUID brewer) {
+        return new AgeStepImpl(this.time, this.barrelType, Stream.concat(
+                this.brewers.stream(),
+                Stream.of(brewer)
+        ).collect(Collectors.toCollection(LinkedHashSet::new)));
+    }
+
+    @Override
+    public Age withBrewers(SequencedCollection<UUID> brewers) {
+        return new AgeStepImpl(this.time, this.barrelType, Stream.concat(
+                this.brewers.stream(),
+                brewers.stream()
+        ).collect(Collectors.toCollection(LinkedHashSet::new)));
+    }
+
+    @Override
+    public Age withBrewersReplaced(SequencedCollection<UUID> brewers) {
+        return new AgeStepImpl(this.time, this.barrelType, new LinkedHashSet<>(brewers));
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof AgeStepImpl(Moment otherTime, BarrelType otherType, SequencedSet<UUID> otherBrewers))) {
+            return false;
+        }
+        return Objects.equals(time, otherTime)
+                && barrelType == otherType
+                && CollectionUtil.isEqualWithOrdering(brewers, otherBrewers);
     }
 }

@@ -52,10 +52,16 @@ public interface Brew extends MetaContainer<Brew> {
     Brew withStep(BrewingStep step);
 
     /**
-     * @param steps A collection of brewing steps
-     * @return A new brew instance with the brewing steps overwriting the existing steps
+     * @param steps A collection brewing steps
+     * @return A new brew instance with the brewing step added in the chain
      */
     Brew withSteps(Collection<BrewingStep> steps);
+
+    /**
+     * @param steps A collection of brewing steps
+     * @return A new brew instance with the brewing steps replacing the existing steps
+     */
+    Brew withStepsReplaced(Collection<BrewingStep> steps);
 
     /**
      * @param index Index of the step in {@link #getSteps()}

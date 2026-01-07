@@ -92,7 +92,7 @@ public class BrewTest {
     }
 
     @Test
-    void withSteps() {
+    void withStepsReplaced() {
         List<BrewingStep> steps = List.of(
                 new CookStepImpl(
                         new PassedMoment(20),
@@ -108,7 +108,7 @@ public class BrewTest {
                 )
         );
         Brew brew = new BrewImpl(List.of(new DistillStepImpl(1)));
-        assertEquals(steps, brew.withSteps(steps).getSteps());
+        assertEquals(steps, brew.withStepsReplaced(steps).getSteps());
     }
 
     void withModifiedStep() {

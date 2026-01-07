@@ -49,6 +49,10 @@ public class BrewImpl implements Brew {
         return new BrewImpl(List.copyOf(steps), meta);
     }
 
+    public BrewImpl withStepsReplaced(Collection<BrewingStep> steps) {
+        return new BrewImpl(List.copyOf(steps), meta);
+    }
+
     public BrewImpl withModifiedStep(int index, Function<BrewingStep, BrewingStep> modifier) {
         BrewingStep newStep = modifier.apply(steps.get(index));
         return new BrewImpl(
