@@ -5,7 +5,6 @@ import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
-import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import dev.jsinco.brewery.api.brew.Brew;
 import dev.jsinco.brewery.api.brew.BrewingStep;
 import dev.jsinco.brewery.brew.BrewImpl;
@@ -66,14 +65,15 @@ public class BrewerCommand {
         builder.then(Commands.literal("add")
                 .then(Commands.argument("brewers", OfflinePlayerArgument.MULTIPLE)
                         .then(Commands.argument("step", IntegerArgumentType.integer(0))
-                                .executes(context ->
-                                        modifyBrew(context,
-                                                BrewerCommand::addBrewers,
-                                                "tbp.command.brewer.add"
-                                        ))
+                                .executes(context -> modifyBrew(context,
+                                        BrewerCommand::addBrewers,
+                                        BrewerCommand::addBrewersToLast,
+                                        "tbp.command.brewer.add"
+                                ))
                         )
                         .executes(context -> modifyBrew(context,
                                 BrewerCommand::addBrewers,
+                                BrewerCommand::addBrewersToLast,
                                 "tbp.command.brewer.add"
                         ))
                 )
@@ -83,22 +83,25 @@ public class BrewerCommand {
                                 .executes(context -> modifyBrew(context,
                                         BrewerCommand::removeBrewers,
                                         "tbp.command.brewer.remove"
-                                )))
+                                ))
+                        )
+                        .executes(context -> modifyBrew(context,
+                                BrewerCommand::removeBrewers,
+                                "tbp.command.brewer.remove"
+                        ))
                 )
-                .executes(context -> modifyBrew(context,
-                        BrewerCommand::removeBrewers,
-                        "tbp.command.brewer.remove"
-                ))
         ).then(Commands.literal("set")
                 .then(Commands.argument("brewers", OfflinePlayerArgument.MULTIPLE)
                         .then(Commands.argument("step", IntegerArgumentType.integer(0))
                                 .executes(context -> modifyBrew(context,
                                         BrewerCommand::setBrewers,
+                                        BrewerCommand::setBrewersClearingOtherSteps,
                                         "tbp.command.brewer.set"
                                 ))
                         )
                         .executes(context -> modifyBrew(context,
                                 BrewerCommand::setBrewers,
+                                BrewerCommand::setBrewersClearingOtherSteps,
                                 "tbp.command.brewer.set"
                         ))
                 )
@@ -116,11 +119,16 @@ public class BrewerCommand {
         );
     }
 
-    private static BrewingStep setBrewers(BrewingStep step, List<UUID> brewers) {
+    private static BrewingStep addBrewers(BrewingStep step, List<UUID> brewers) {
         if (step instanceof BrewingStep.AuthoredStep<?> authoredStep) {
-            return authoredStep.withBrewersReplaced(brewers);
+            return authoredStep.withBrewers(brewers);
         }
         return step;
+    }
+    private static Brew addBrewersToLast(Brew brew, List<UUID> brewers) {
+        return lastAuthoredStepIndex(brew).map(index ->
+                brew.withModifiedStep(index, ignored -> addBrewers(brew.getSteps().get(index), brewers))
+        ).orElse(brew);
     }
 
     private static BrewingStep removeBrewers(BrewingStep step, List<UUID> brewers) {
@@ -134,21 +142,40 @@ public class BrewerCommand {
         return step;
     }
 
-    private static BrewingStep clearBrewers(BrewingStep step, List<UUID> brewers) {
+    private static BrewingStep setBrewers(BrewingStep step, List<UUID> brewers) {
+        if (step instanceof BrewingStep.AuthoredStep<?> authoredStep) {
+            return authoredStep.withBrewersReplaced(brewers);
+        }
+        return step;
+    }
+    private static Brew setBrewersClearingOtherSteps(Brew brew, List<UUID> brewers) {
+        Brew cleared = modifyAllBrewSteps(brew, BrewerCommand::clearBrewers, brewers);
+        return lastAuthoredStepIndex(cleared).map(index ->
+                brew.withModifiedStep(index, ignored -> addBrewers(cleared.getSteps().get(index), brewers))
+        ).orElse(brew);
+    }
+
+    private static BrewingStep clearBrewers(BrewingStep step, List<UUID> ignored) {
         if (step instanceof BrewingStep.AuthoredStep<?> authoredStep) {
             return authoredStep.withBrewersReplaced(List.of());
         }
         return step;
     }
 
-    private static BrewingStep addBrewers(BrewingStep step, List<UUID> brewers) {
-        if (step instanceof BrewingStep.AuthoredStep<?> authoredStep) {
-            return authoredStep.withBrewers(brewers);
-        }
-        return step;
+    private static int modifyBrew(CommandContext<CommandSourceStack> context,
+                                  BiFunction<BrewingStep, List<UUID>, BrewingStep> stepOperation,
+                                  String successMessageKey) throws CommandSyntaxException {
+        return modifyBrew(
+                context,
+                stepOperation,
+                (brew, brewers) -> modifyAllBrewSteps(brew, stepOperation, brewers),
+                successMessageKey
+        );
     }
-
-    private static int modifyBrew(CommandContext<CommandSourceStack> context, BiFunction<BrewingStep, List<UUID>, BrewingStep> operation, String successMessageKey) throws CommandSyntaxException {
+    private static int modifyBrew(CommandContext<CommandSourceStack> context,
+                                  BiFunction<BrewingStep, List<UUID>, BrewingStep> stepOperation,
+                                  BiFunction<Brew, List<UUID>, Brew> brewOperation,
+                                  String successMessageKey) throws CommandSyntaxException {
         CommandSender sender = context.getSource().getSender();
         Slot targetSlot = getTargetSlot(context, BreweryCommand.getPlayer(context));
         ItemStack itemStack = targetSlot.itemGetter.get();
@@ -157,8 +184,7 @@ public class BrewerCommand {
             return 1;
         }
         Optional<Integer> stepIndex = getArgument(context, "step", int.class);
-        List<OfflinePlayer> brewers = context.getArgument("brewers", OfflinePlayerSelectorArgumentResolver.class)
-                .resolve(context.getSource());
+        List<OfflinePlayer> brewers = getBrewers(context);
         List<UUID> brewerUuids = brewers
                 .stream()
                 .map(OfflinePlayer::getUniqueId)
@@ -173,8 +199,8 @@ public class BrewerCommand {
         }
         brewOptional
                 .map(brew -> stepIndex.map(index ->
-                                brew.withModifiedStep(index, brewingStep -> operation.apply(brewingStep, brewerUuids))
-                        ).orElseGet(() -> modifyAllBrewSteps(brew, operation, brewerUuids))
+                                brew.withModifiedStep(index, brewingStep -> stepOperation.apply(brewingStep, brewerUuids))
+                        ).orElseGet(() -> brewOperation.apply(brew, brewerUuids))
                 ).ifPresentOrElse(brew -> {
                     targetSlot.itemSetter().accept(BrewAdapter.toItem(brew, new Brew.State.Other()));
                     MessageUtil.message(sender, successMessageKey, Placeholder.component("brewers",
@@ -195,6 +221,16 @@ public class BrewerCommand {
         );
     }
 
+    private static Optional<Integer> lastAuthoredStepIndex(Brew brew) {
+        for (int i = brew.getSteps().size() - 1; i >= 0; i--) {
+            BrewingStep step = brew.getSteps().get(i);
+            if (step instanceof BrewingStep.AuthoredStep<?>) {
+                return Optional.of(i);
+            }
+        }
+        return Optional.empty();
+    }
+
     private static Slot getTargetSlot(CommandContext<CommandSourceStack> context, Player targetPlayer) {
         PlayerInventory inventory = targetPlayer.getInventory();
         return getArgument(context, "equipment_slot", EquipmentSlot.class).map(equipmentSlot -> new Slot(
@@ -212,6 +248,15 @@ public class BrewerCommand {
     }
 
     private record Slot(Supplier<ItemStack> itemGetter, Consumer<ItemStack> itemSetter) {
+    }
+
+    private static List<OfflinePlayer> getBrewers(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+        try {
+            return context.getArgument("brewers", OfflinePlayerSelectorArgumentResolver.class)
+                    .resolve(context.getSource());
+        } catch (IllegalArgumentException e) {
+            return List.of();
+        }
     }
 
     private static <T> Optional<T> getArgument(CommandContext<CommandSourceStack> context, String name, Class<T> resolver) {
