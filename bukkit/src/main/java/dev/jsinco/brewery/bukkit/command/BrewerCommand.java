@@ -4,15 +4,21 @@ import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
+import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import dev.jsinco.brewery.api.brew.Brew;
 import dev.jsinco.brewery.api.brew.BrewingStep;
+import dev.jsinco.brewery.brew.BrewImpl;
 import dev.jsinco.brewery.bukkit.brew.BrewAdapter;
 import dev.jsinco.brewery.bukkit.command.argument.EnumArgument;
 import dev.jsinco.brewery.bukkit.command.argument.OfflinePlayerArgument;
 import dev.jsinco.brewery.bukkit.command.argument.OfflinePlayerSelectorArgumentResolver;
+import dev.jsinco.brewery.bukkit.util.BukkitMessageUtil;
 import dev.jsinco.brewery.util.MessageUtil;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.tag.resolver.Formatter;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
@@ -21,12 +27,18 @@ import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 
-import java.util.*;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
-import java.util.stream.Stream;
 
 public class BrewerCommand {
+
+    private static DynamicCommandExceptionType INDEX_OUT_OF_BOUNDS = new DynamicCommandExceptionType(object ->
+            BukkitMessageUtil.toBrigadier("tbp.command.brewer.step-out-of-bounds", Formatter.number("max_index", (Number) object))
+    );
 
     private static final int PLAYER_INVENTORY_SIZE = 41;
 
@@ -54,33 +66,89 @@ public class BrewerCommand {
         builder.then(Commands.literal("add")
                 .then(Commands.argument("brewers", OfflinePlayerArgument.MULTIPLE)
                         .then(Commands.argument("step", IntegerArgumentType.integer(0))
-                                .executes(context -> execute(context, ADD))
+                                .executes(context ->
+                                        modifyBrew(context,
+                                                BrewerCommand::addBrewers,
+                                                "tbp.command.brewer.add"
+                                        ))
                         )
-                        .executes(context -> execute(context, ADD))
+                        .executes(context -> modifyBrew(context,
+                                BrewerCommand::addBrewers,
+                                "tbp.command.brewer.add"
+                        ))
                 )
         ).then(Commands.literal("remove")
                 .then(Commands.argument("brewers", OfflinePlayerArgument.MULTIPLE)
                         .then(Commands.argument("step", IntegerArgumentType.integer(0))
-                                .executes(context -> execute(context, REMOVE))
-                        )
-                        .executes(context -> execute(context, REMOVE))
+                                .executes(context -> modifyBrew(context,
+                                        BrewerCommand::removeBrewers,
+                                        "tbp.command.brewer.remove"
+                                )))
                 )
+                .executes(context -> modifyBrew(context,
+                        BrewerCommand::removeBrewers,
+                        "tbp.command.brewer.remove"
+                ))
         ).then(Commands.literal("set")
                 .then(Commands.argument("brewers", OfflinePlayerArgument.MULTIPLE)
                         .then(Commands.argument("step", IntegerArgumentType.integer(0))
-                                .executes(context -> execute(context, SET))
+                                .executes(context -> modifyBrew(context,
+                                        BrewerCommand::setBrewers,
+                                        "tbp.command.brewer.set"
+                                ))
                         )
-                        .executes(context -> execute(context, SET))
+                        .executes(context -> modifyBrew(context,
+                                BrewerCommand::setBrewers,
+                                "tbp.command.brewer.set"
+                        ))
                 )
         ).then(Commands.literal("clear")
                 .then(Commands.argument("step", IntegerArgumentType.integer(0))
-                        .executes(context -> execute(context, CLEAR))
+                        .executes(context -> modifyBrew(context,
+                                BrewerCommand::clearBrewers,
+                                "tbp.command.brewer.clear"
+                        ))
                 )
-                .executes(context -> execute(context, CLEAR))
+                .executes(context -> modifyBrew(context,
+                        BrewerCommand::clearBrewers,
+                        "tbp.command.brewer.clear"
+                ))
         );
     }
 
-    private static int execute(CommandContext<CommandSourceStack> context, BrewerAction action) throws CommandSyntaxException {
+    private static BrewingStep setBrewers(BrewingStep step, List<UUID> brewers) {
+        if (step instanceof BrewingStep.AuthoredStep<?> authoredStep) {
+            return authoredStep.withBrewersReplaced(brewers);
+        }
+        return step;
+    }
+
+    private static BrewingStep removeBrewers(BrewingStep step, List<UUID> brewers) {
+        if (step instanceof BrewingStep.AuthoredStep<?> authoredStep) {
+            return authoredStep.withBrewersReplaced(
+                    authoredStep.brewers().stream()
+                            .filter(uuid -> brewers.stream().noneMatch(uuid::equals))
+                            .toList()
+            );
+        }
+        return step;
+    }
+
+    private static BrewingStep clearBrewers(BrewingStep step, List<UUID> brewers) {
+        if (step instanceof BrewingStep.AuthoredStep<?> authoredStep) {
+            return authoredStep.withBrewersReplaced(List.of());
+        }
+        return step;
+    }
+
+    private static BrewingStep addBrewers(BrewingStep step, List<UUID> brewers) {
+        if (step instanceof BrewingStep.AuthoredStep<?> authoredStep) {
+            return authoredStep.withBrewers(brewers);
+        }
+        return step;
+    }
+
+    private static int modifyBrew(CommandContext<CommandSourceStack> context, BiFunction<BrewingStep, List<UUID>, BrewingStep> operation, String successMessageKey) throws CommandSyntaxException {
         CommandSender sender = context.getSource().getSender();
         Slot targetSlot = getTargetSlot(context, BreweryCommand.getPlayer(context));
         ItemStack itemStack = targetSlot.itemGetter.get();
@@ -89,25 +157,42 @@ public class BrewerCommand {
             return 1;
         }
         Optional<Integer> stepIndex = getArgument(context, "step", int.class);
-        List<OfflinePlayer> brewers = action == CLEAR ? null : context.getArgument("brewers", OfflinePlayerSelectorArgumentResolver.class)
+        List<OfflinePlayer> brewers = context.getArgument("brewers", OfflinePlayerSelectorArgumentResolver.class)
                 .resolve(context.getSource());
-        BrewAdapter.fromItem(itemStack).ifPresentOrElse(
-                brew -> {
-                    if (brew.getSteps().isEmpty()) {
-                        MessageUtil.message(sender, "tbp.command.brewer.empty");
-                        return;
-                    }
-                    if (stepIndex.isPresent() && stepIndex.get() >= brew.getSteps().size()) {
-                        MessageUtil.message(sender, "tbp.command.brewer.step-out-of-bounds");
-                        return;
-                    }
-                    action.modify(sender, brew, stepIndex, brewers)
-                            .map(modifiedBrew -> BrewAdapter.toItem(modifiedBrew, new Brew.State.Other()))
-                            .ifPresent(targetSlot.itemSetter);
-                },
-                () -> MessageUtil.message(sender, "tbp.command.info.not-a-brew")
-        );
+        List<UUID> brewerUuids = brewers
+                .stream()
+                .map(OfflinePlayer::getUniqueId)
+                .toList();
+        Optional<Brew> brewOptional = BrewAdapter.fromItem(itemStack);
+        if (stepIndex.isPresent() && brewOptional.isPresent() && brewOptional.get().stepAmount() <= stepIndex.get()) {
+            throw INDEX_OUT_OF_BOUNDS.create(brewOptional.get().stepAmount() - 1);
+        }
+        if(brewOptional.map(Brew::stepAmount).filter(stepAmount -> stepAmount <= 0).isPresent()){
+            MessageUtil.message(sender, "tbp.command.brewer.empty");
+            return 1;
+        }
+        brewOptional
+                .map(brew -> stepIndex.map(index ->
+                                brew.withModifiedStep(index, brewingStep -> operation.apply(brewingStep, brewerUuids))
+                        ).orElseGet(() -> modifyAllBrewSteps(brew, operation, brewerUuids))
+                ).ifPresentOrElse(brew -> {
+                    targetSlot.itemSetter().accept(BrewAdapter.toItem(brew, new Brew.State.Other()));
+                    MessageUtil.message(sender, successMessageKey, Placeholder.component("brewers",
+                            brewers.stream()
+                                    .map(BrewerCommand::getName)
+                                    .map(Component::text)
+                                    .collect(Component.toComponent(Component.text(", ")))
+                    ));
+                }, () -> MessageUtil.message(sender, "tbp.command.info.not-a-brew"));
         return 1;
+    }
+
+    private static Brew modifyAllBrewSteps(Brew brew, BiFunction<BrewingStep, List<UUID>, BrewingStep> operation, List<UUID> brewers) {
+        return new BrewImpl(
+                brew.getSteps().stream()
+                        .map(brewingStep -> operation.apply(brewingStep, brewers))
+                        .toList()
+        );
     }
 
     private static Slot getTargetSlot(CommandContext<CommandSourceStack> context, Player targetPlayer) {
@@ -135,149 +220,6 @@ public class BrewerCommand {
         } catch (IllegalArgumentException e) {
             return Optional.empty();
         }
-    }
-
-    @FunctionalInterface
-    private interface BrewerAction {
-        Optional<Brew> modify(CommandSender sender, Brew brew, Optional<Integer> stepIndexArg, List<OfflinePlayer> brewers);
-    }
-
-    private static final BrewerAction ADD = (sender, brew, stepIndexArg, players) -> {
-        int stepIndex;
-        if (stepIndexArg.isPresent()) {
-            stepIndex = stepIndexArg.get();
-            if (!(brew.getSteps().get(stepIndex) instanceof BrewingStep.AuthoredStep<?>)) {
-                MessageUtil.message(sender, "tbp.command.brewer.step-invalid");
-                return Optional.empty();
-            }
-        } else {
-            Optional<Integer> resolvedStepIndex = lastAuthoredStepIndex(brew);
-            if (resolvedStepIndex.isEmpty()) {
-                MessageUtil.message(sender, "tbp.command.brewer.empty");
-                return Optional.empty();
-            }
-            stepIndex = resolvedStepIndex.get();
-        }
-
-        sendSuccessMessage("add", sender, players);
-        return Optional.of(brew.withModifiedStep(stepIndex, step ->
-                ((BrewingStep.AuthoredStep<?>) step).withBrewers(players.stream().map(OfflinePlayer::getUniqueId).toList())
-        ));
-    };
-
-    private static final BrewerAction REMOVE = (sender, brew, stepIndexArg, players) -> {
-        if (stepIndexArg.isPresent()) {
-            int stepIndex = stepIndexArg.get();
-            if (!(brew.getSteps().get(stepIndex) instanceof BrewingStep.AuthoredStep<?>)) {
-                MessageUtil.message(sender, "tbp.command.brewer.step-invalid");
-                return Optional.empty();
-            }
-            sendSuccessMessage("remove", sender, players);
-            return Optional.of(brew.withModifiedStep(stepIndex, step -> remove((BrewingStep.AuthoredStep<?>) step, players)));
-
-        } else {
-            sendSuccessMessage("remove", sender, players);
-            List<BrewingStep> steps = brew.getSteps().stream()
-                    .map(step -> {
-                        if (step instanceof BrewingStep.AuthoredStep<?> authoredStep) {
-                            return remove(authoredStep, players);
-                        }
-                        return step;
-                    })
-                    .toList();
-            return Optional.of(brew.withStepsReplaced(steps));
-        }
-    };
-
-    private static BrewingStep remove(BrewingStep.AuthoredStep<?> authoredStep, List<OfflinePlayer> players) {
-        return authoredStep.withBrewersReplaced(authoredStep.brewers().stream()
-                .filter(uuid -> players.stream().noneMatch(player -> player.getUniqueId().equals(uuid)))
-                .toList());
-    }
-
-    private static final BrewerAction SET = (sender, brew, stepIndexArg, players) -> {
-        List<UUID> brewers = players.stream().map(OfflinePlayer::getUniqueId).toList();
-        if (stepIndexArg.isPresent()) {
-            int stepIndex = stepIndexArg.get();
-            if (!(brew.getSteps().get(stepIndex) instanceof BrewingStep.AuthoredStep<?>)) {
-                MessageUtil.message(sender, "tbp.command.brewer.step-invalid");
-                return Optional.empty();
-            }
-            sendSuccessMessage("set", sender, players);
-            return Optional.of(brew.withModifiedStep(stepIndex, step ->
-                    ((BrewingStep.AuthoredStep<?>) step).withBrewersReplaced(brewers)));
-
-        } else {
-            Optional<Integer> resolvedStepIndex = lastAuthoredStepIndex(brew);
-            if (resolvedStepIndex.isEmpty()) {
-                MessageUtil.message(sender, "tbp.command.brewer.empty");
-                return Optional.empty();
-            }
-            int lastStepIndex = resolvedStepIndex.get();
-            sendSuccessMessage("set", sender, players);
-            List<BrewingStep> steps = new ArrayList<>();
-            for (int i = 0; i < brew.getSteps().size(); i++) {
-                BrewingStep step = brew.getSteps().get(i);
-                if (i == lastStepIndex) {
-                    BrewingStep modifiedStep = ((BrewingStep.AuthoredStep<?>) step).withBrewersReplaced(brewers);
-                    steps.add(modifiedStep);
-                } else {
-                    BrewingStep modifiedStep = step instanceof BrewingStep.AuthoredStep<?> authoredStep ?
-                            authoredStep.withBrewersReplaced(List.of()) :
-                            step;
-                    steps.add(modifiedStep);
-                }
-            }
-            return Optional.of(brew.withStepsReplaced(steps));
-        }
-    };
-
-    private static final BrewerAction CLEAR = (sender, brew, stepIndexArg, ignored) -> {
-        if (stepIndexArg.isPresent()) {
-            int stepIndex = stepIndexArg.get();
-            if (!(brew.getSteps().get(stepIndex) instanceof BrewingStep.AuthoredStep<?>)) {
-                MessageUtil.message(sender, "tbp.command.brewer.step-invalid");
-                return Optional.empty();
-            }
-            sendClearSuccessMessage(sender);
-            return Optional.of(brew.withModifiedStep(stepIndex, step ->
-                    ((BrewingStep.AuthoredStep<?>) step).withBrewersReplaced(List.of())));
-
-        } else {
-            sendClearSuccessMessage(sender);
-            List<BrewingStep> steps = brew.getSteps().stream()
-                    .map(step -> {
-                        if (step instanceof BrewingStep.AuthoredStep<?> authoredStep) {
-                            return authoredStep.withBrewersReplaced(List.of());
-                        }
-                        return step;
-                    })
-                    .toList();
-            return Optional.of(brew.withStepsReplaced(steps));
-        }
-    };
-
-    private static Optional<Integer> lastAuthoredStepIndex(Brew brew) {
-        for (int i = brew.getSteps().size() - 1; i >= 0; i--) {
-            BrewingStep step = brew.getSteps().get(i);
-            if (step instanceof BrewingStep.AuthoredStep<?>) {
-                return Optional.of(i);
-            }
-        }
-        return Optional.empty();
-    }
-
-    private static void sendSuccessMessage(String commandType, CommandSender sender, List<OfflinePlayer> brewers) {
-        if (brewers.size() == 1) {
-            MessageUtil.message(sender, "tbp.command.brewer." + commandType + "_one",
-                    Placeholder.unparsed("brewer", getName(brewers.getFirst())));
-        } else {
-            MessageUtil.message(sender, "tbp.command.brewer." + commandType + "_many",
-                    Placeholder.unparsed("count", String.valueOf(brewers.size())));
-        }
-    }
-    private static void sendClearSuccessMessage(CommandSender sender) {
-        MessageUtil.message(sender, "tbp.command.brewer.clear");
     }
 
     private static String getName(OfflinePlayer player) {
