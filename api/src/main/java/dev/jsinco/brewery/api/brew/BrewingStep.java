@@ -8,8 +8,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import net.kyori.adventure.text.minimessage.translation.Argument;
 
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 
 public interface BrewingStep {
 
@@ -38,6 +37,12 @@ public interface BrewingStep {
     Map<ScoreType, PartialBrewScore> failedScores();
 
     /**
+     * All players who contributed to this brewing step, in their order of contribution.
+     * @return All brewers, may be empty
+     */
+    SequencedSet<UUID> brewers();
+
+    /**
      * @param state    The state of the brew
      * @param resolver A tag resolver for this step
      * @return A translatable component for displaying this step
@@ -50,21 +55,36 @@ public interface BrewingStep {
         }, Argument.tagResolver(resolver));
     }
 
-    interface TimedStep {
+    interface TimedStep extends BrewingStep {
         /**
          * @return The time for this step (ticks)
          */
         Moment time();
     }
 
-    interface IngredientsStep {
+    interface IngredientsStep extends BrewingStep {
         /**
          * @return The ingredients for this step
          */
         Map<? extends Ingredient, Integer> ingredients();
     }
 
-    interface Cook extends BrewingStep, TimedStep, IngredientsStep {
+    interface AuthoredStep<SELF extends AuthoredStep<SELF>> extends BrewingStep {
+
+        /**
+         * @param brewer A brewer's UUID
+         * @return A new instance of this step with the specified brewer
+         */
+        SELF withBrewer(UUID brewer);
+
+        /**
+         * @param brewers A collection of brewer UUIDs
+         * @return A new instance of this step with the specified brewers
+         */
+        SELF withBrewers(Collection<UUID> brewers);
+    }
+
+    interface Cook extends TimedStep, IngredientsStep, AuthoredStep<Cook> {
 
         /**
          * @return The type of the cauldron
@@ -84,7 +104,7 @@ public interface BrewingStep {
         Cook withIngredients(Map<? extends Ingredient, Integer> ingredients);
     }
 
-    interface Distill extends BrewingStep {
+    interface Distill extends AuthoredStep<Distill> {
 
         /**
          * @return The amount of distill runs for this step
@@ -97,7 +117,7 @@ public interface BrewingStep {
         Distill incrementRuns();
     }
 
-    interface Age extends BrewingStep, TimedStep {
+    interface Age extends TimedStep, AuthoredStep<Age> {
 
         /**
          * @return The type of the barrel
@@ -111,7 +131,7 @@ public interface BrewingStep {
         Age withAge(Moment age);
     }
 
-    interface Mix extends BrewingStep, TimedStep, IngredientsStep {
+    interface Mix extends TimedStep, IngredientsStep, AuthoredStep<Mix> {
 
         /**
          * @param ingredients A map of ingredients with amount

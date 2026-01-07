@@ -7,8 +7,7 @@ import dev.jsinco.brewery.api.recipe.RecipeRegistry;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -53,6 +52,20 @@ public interface Brew extends MetaContainer<Brew> {
     Brew withStep(BrewingStep step);
 
     /**
+     * @param steps A collection of brewing steps
+     * @return A new brew instance with the brewing steps overwriting the existing steps
+     */
+    Brew withSteps(Collection<BrewingStep> steps);
+
+    /**
+     * @param index Index of the step in {@link #getSteps()}
+     * @param modifier Function that modifies the step
+     * @return A new brew instance with the modified step
+     * @throws IndexOutOfBoundsException If the index is out of bounds
+     */
+    Brew withModifiedStep(int index, Function<BrewingStep, BrewingStep> modifier);
+
+    /**
      * @param modifier Function that modifies the last step
      * @return A new brew instance with the modified last step
      */
@@ -86,6 +99,13 @@ public interface Brew extends MetaContainer<Brew> {
      * @return All steps
      */
     List<BrewingStep> getSteps();
+
+    /**
+     * All players who contributed to this brew, in their order of contribution.
+     *
+     * @return All brewers, may be empty
+     */
+    SequencedSet<UUID> getBrewers();
 
     /**
      * A state of a brew, mainly indicates how the data should be written when converting into an item

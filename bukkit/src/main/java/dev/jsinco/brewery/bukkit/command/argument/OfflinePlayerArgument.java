@@ -16,14 +16,22 @@ import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 public class OfflinePlayerArgument implements CustomArgumentType<OfflinePlayerSelectorArgumentResolver, PlayerSelectorArgumentResolver> {
 
+    public static final OfflinePlayerArgument SINGLE = new OfflinePlayerArgument(ArgumentTypes.player());
+    public static final OfflinePlayerArgument MULTIPLE = new OfflinePlayerArgument(ArgumentTypes.players());
+
     private static final DynamicCommandExceptionType ERROR_INVALID_PLAYER = new DynamicCommandExceptionType(invalidPlayer ->
             BukkitMessageUtil.toBrigadier("tbp.command.unknown-player", Placeholder.unparsed("player_name", invalidPlayer.toString()))
     );
-    private final ArgumentType<PlayerSelectorArgumentResolver> backing = ArgumentTypes.player();
+    private final ArgumentType<PlayerSelectorArgumentResolver> backing;
+
+    private OfflinePlayerArgument(ArgumentType<PlayerSelectorArgumentResolver> backing) {
+        this.backing = backing;
+    }
 
     @Override
     public <S> CompletableFuture<Suggestions> listSuggestions(@NotNull CommandContext<S> context, SuggestionsBuilder builder) {
@@ -37,18 +45,20 @@ public class OfflinePlayerArgument implements CustomArgumentType<OfflinePlayerSe
             PlayerSelectorArgumentResolver playerSelectorArgumentResolver = backing.parse(reader);
             return commandSourceStack -> playerSelectorArgumentResolver
                     .resolve(commandSourceStack)
-                    .getFirst();
+                    .stream()
+                    .map(player -> (OfflinePlayer) player)
+                    .toList();
         }
         String playerName = reader.readString();
         OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayerIfCached(playerName);
         if(offlinePlayer == null) {
             throw ERROR_INVALID_PLAYER.create(playerName);
         }
-        return ignored -> offlinePlayer;
+        return ignored -> List.of(offlinePlayer);
     }
 
     @Override
     public @NotNull ArgumentType<PlayerSelectorArgumentResolver> getNativeType() {
-        return ArgumentTypes.player();
+        return backing;
     }
 }

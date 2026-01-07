@@ -48,6 +48,8 @@ public class BreweryCommand {
                         .requires(commandSourceStack -> commandSourceStack.getSender().hasPermission("brewery.command.debug")))
                 .then(SealCommand.command()
                         .requires(commandSourceStack -> commandSourceStack.getSender().hasPermission("brewery.command.seal")))
+                .then(BrewerCommand.command()
+                        .requires(commandSourceStack -> commandSourceStack.getSender().hasPermission("brewery.command.brewer")))
                 .then(StatusCommand.command()
                         .requires(commandSourceStack -> commandSourceStack.getSender().hasPermission("brewery.command.status")))
                 .then(Commands.literal("reload")
@@ -89,7 +91,7 @@ public class BreweryCommand {
     }
 
     public static ArgumentBuilder<CommandSourceStack, ?> offlinePlayerBranch(Consumer<ArgumentBuilder<CommandSourceStack, ?>> childAction) {
-        ArgumentBuilder<CommandSourceStack, ?> child = Commands.argument("player", new OfflinePlayerArgument());
+        ArgumentBuilder<CommandSourceStack, ?> child = Commands.argument("player", OfflinePlayerArgument.SINGLE);
         childAction.accept(child);
         return Commands.literal("for")
                 .then(child)
@@ -99,8 +101,10 @@ public class BreweryCommand {
 
     public static OfflinePlayer getOfflinePlayer(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         try {
-            return context.getArgument("player", OfflinePlayerSelectorArgumentResolver.class)
+            List<OfflinePlayer> resolved = context.getArgument("player", OfflinePlayerSelectorArgumentResolver.class)
                     .resolve(context.getSource());
+            if (resolved.isEmpty()) throw ERROR_UNDEFINED_PLAYER.create();
+            return resolved.getFirst();
         } catch (IllegalArgumentException ignored) {}
         if (context.getSource().getSender() instanceof OfflinePlayer player) return player;
         throw ERROR_UNDEFINED_PLAYER.create();
@@ -108,9 +112,8 @@ public class BreweryCommand {
 
     public static Player getPlayer(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         try {
-            PlayerSelectorArgumentResolver resolver =
-                    context.getArgument("player", PlayerSelectorArgumentResolver.class);
-            List<Player> resolved = resolver.resolve(context.getSource());
+            List<Player> resolved = context.getArgument("player", PlayerSelectorArgumentResolver.class)
+                    .resolve(context.getSource());
             if (resolved.isEmpty()) throw ERROR_UNDEFINED_PLAYER.create();
             return resolved.getFirst();
         } catch (IllegalArgumentException e) {
