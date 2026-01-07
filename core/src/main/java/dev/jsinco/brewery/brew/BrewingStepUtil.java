@@ -15,8 +15,8 @@ public class BrewingStepUtil {
 
     public static double getIngredientsScore(Map<Ingredient, Integer> target, Map<Ingredient, Integer> actual) {
         List<Pair<Double, Integer>> customScores = actual.entrySet().stream()
-                .filter(entry -> entry.getKey() instanceof ScoredIngredient)
-                .map(entry -> new Pair<>(((ScoredIngredient) entry.getKey()).score(), entry.getValue()))
+                .filter(entry -> entry.getKey() instanceof IngredientWithMeta ingredientWithMeta && ingredientWithMeta.get(IngredientMeta.SCORE) != null)
+                .map(entry -> new Pair<>(((IngredientWithMeta) entry.getKey()).get(IngredientMeta.SCORE), entry.getValue()))
                 .toList();
         Pair<Double, Integer> scoredIngredientPair = customScores.stream().reduce(new Pair<>(1D, 1),
                 (pair1, pair2) -> new Pair<>(pair1.first() * Math.pow(pair2.first(), pair2.second()), pair1.second() + pair2.second()));
@@ -56,9 +56,10 @@ public class BrewingStepUtil {
         int amountOfScoredIngredients = 0;
         List<Ingredient> postProcess = new ArrayList<>();
         for (Ingredient ingredient : ingredientGroup.alternatives()) {
-            if (ingredient instanceof ScoredIngredient(Ingredient baseIngredient, double score)) {
-                ingredient = baseIngredient;
-                if (!targetIngredients.containsKey(ingredient) && modifiedActual.containsKey(ingredient)) {
+            if (ingredient instanceof IngredientWithMeta ingredientWithMeta) {
+                Double score = ingredientWithMeta.get(IngredientMeta.SCORE);
+                ingredient = ingredientWithMeta.derivatives().getFirst();
+                if (score != null) {
                     int amount = modifiedActual.get(ingredient);
                     ingredientScoreSum += score * amount;
                     amountOfScoredIngredients += amount;
@@ -81,9 +82,9 @@ public class BrewingStepUtil {
 
             int amount = modifiedActual.getOrDefault(ingredient, 0);
             int increase = Math.min(amount, target - ingredientAmount);
-            if (ingredient instanceof ScoredIngredient(Ingredient baseIngredient, double score)) {
+            if (ingredient instanceof IngredientWithMeta ingredientWithMeta && ingredientWithMeta.get(IngredientMeta.SCORE) instanceof Double score) {
                 ingredientScoreSum += score * increase;
-                ingredient = baseIngredient;
+                ingredient = ingredientWithMeta.derivatives().getFirst();
                 amountOfScoredIngredients += increase;
             }
             ingredientAmount += increase;
@@ -102,7 +103,7 @@ public class BrewingStepUtil {
                 .stream()
                 .map(entry -> {
                     if (entry.getKey() instanceof ComplexIngredient complexIngredient) {
-                        return new Pair<>(complexIngredient.derivatives().getFirst(), entry.getValue());
+                        return new Pair<>((Ingredient) complexIngredient.derivatives().getFirst(), entry.getValue());
                     } else {
                         return new Pair<>(entry.getKey(), entry.getValue());
                     }

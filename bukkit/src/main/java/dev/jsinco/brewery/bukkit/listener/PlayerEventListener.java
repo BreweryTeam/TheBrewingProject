@@ -9,7 +9,6 @@ import dev.jsinco.brewery.api.effect.ModifierConsume;
 import dev.jsinco.brewery.api.effect.modifier.ModifierDisplay;
 import dev.jsinco.brewery.api.ingredient.ComplexIngredient;
 import dev.jsinco.brewery.api.ingredient.Ingredient;
-import dev.jsinco.brewery.api.ingredient.ScoredIngredient;
 import dev.jsinco.brewery.api.util.BreweryKey;
 import dev.jsinco.brewery.api.util.Logger;
 import dev.jsinco.brewery.api.vector.BreweryLocation;
