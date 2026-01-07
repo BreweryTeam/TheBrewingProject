@@ -27,6 +27,8 @@ import org.bukkit.inventory.PlayerInventory;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 public class InfoCommand {
     private static final int PLAYER_INVENTORY_SIZE = 41;
@@ -78,19 +80,27 @@ public class InfoCommand {
             );
             return;
         }
-        brewOptional
-                .ifPresent(brew -> MessageUtil.message(sender,
-                        "tbp.command.info.message",
-                        MessageUtil.getScoreTagResolver(brew.closestRecipe(TheBrewingProject.getInstance().getRecipeRegistry())
-                                .map(brew::score)
-                                .orElse(BrewScoreImpl.failed(brew))),
-                        Placeholder.component("brewing_step_info", MessageUtil.compileBrewInfo(brew, true, TheBrewingProject.getInstance().getRecipeRegistry())
-                                .collect(Component.toComponent(Component.text("\n")))
-                        ))
-                );
+        brewOptional.ifPresent(brew -> MessageUtil.message(sender,
+                "tbp.command.info.message",
+                MessageUtil.getScoreTagResolver(brew.closestRecipe(TheBrewingProject.getInstance().getRecipeRegistry())
+                        .map(brew::score)
+                        .orElse(BrewScoreImpl.failed(brew))),
+                Placeholder.component("brewing_step_info", MessageUtil.compileBrewInfo(brew, true, TheBrewingProject.getInstance().getRecipeRegistry())
+                        .collect(Component.toComponent(Component.text("\n")))
+                ))
+        );
         Optional<RecipeEffectsImpl> recipeEffectsOptional = RecipeEffectsImpl.fromItem(itemStack);
         recipeEffectsOptional.ifPresent(effects -> {
             MessageUtil.message(sender, "tbp.command.info.effect-message", BukkitMessageUtil.recipeEffectResolver(effects));
+        });
+        brewOptional.ifPresent(brew -> {
+            if (brew.getBrewers().isEmpty()) {
+                return;
+            }
+            String brewers = brew.getBrewers().stream()
+                    .map(InfoCommand::uuidToPlayerName)
+                    .collect(Collectors.joining(", "));
+            MessageUtil.message(sender, "tbp.command.info.brewer-message", Placeholder.unparsed("brewers", brewers));
         });
         if (brewOptional.isEmpty() && recipeEffectsOptional.isEmpty()) {
             MessageUtil.message(sender, "tbp.command.info.not-a-brew");
@@ -105,5 +115,13 @@ public class InfoCommand {
                 Component.translatable("tbp.command.copy", NamedTextColor.AQUA).clickEvent(ClickEvent.copyToClipboard(brewStr)),
                 Component.text(")", NamedTextColor.GRAY)
         );
+    }
+
+    private static String uuidToPlayerName(UUID uuid) {
+        String name = TheBrewingProject.getInstance().getServer().getOfflinePlayer(uuid).getName();
+        if (name != null) {
+            return name;
+        }
+        return uuid.toString();
     }
 }
