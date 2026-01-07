@@ -124,7 +124,7 @@ public class BrewingStepPdcType implements PersistentDataType<byte[], BrewingSte
 
                 if (ivLen == 0) { // brew isn't encrypted
                     try (DataInputStream dis = new DataInputStream(in)) {
-                        return readPayload(dis);
+                        return readPayload(dis, version);
                     }
                 }
 
