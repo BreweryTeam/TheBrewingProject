@@ -23,7 +23,11 @@ public class BreweryXMigrationListener implements Listener {
         if (!Config.config().migrateFromBreweryX()) return;
         Inventory inventory = event.getPlayer().getInventory();
         for (int slot = 0; slot < inventory.getSize(); slot++) {
-            inventory.setItem(slot, migrate(inventory.getItem(slot)));
+            ItemStack itemStack = inventory.getItem(slot);
+            if(itemStack == null) {
+                continue;
+            }
+            inventory.setItem(slot, migrate(itemStack));
         }
     }
 
@@ -33,7 +37,11 @@ public class BreweryXMigrationListener implements Listener {
         Inventory inventory = event.getInventory();
         if (inventory.getType() == InventoryType.PLAYER) return;
         for (int slot = 0; slot < inventory.getSize(); slot++) {
-            inventory.setItem(slot, migrate(inventory.getItem(slot)));
+            ItemStack itemStack = inventory.getItem(slot);
+            if(itemStack == null) {
+                continue;
+            }
+            inventory.setItem(slot, migrate(itemStack));
         }
     }
 
