@@ -49,7 +49,7 @@ public class ReplicateCommand {
         ItemStack brewItem = recipe.getRecipeResult(quality).newBrewItem(score, brew, new Brew.State.Other());
         brewItem.editPersistentDataContainer(pdc -> {
             BrewAdapter.applyBrewTags(pdc, recipe, score.score(), ((BukkitRecipeResult) recipe.getRecipeResult(quality)).getName());
-            BrewAdapter.applyBrewStepsData(pdc, brew);
+            BrewAdapter.applyBrewData(pdc, brew);
         });
         if (!target.getInventory().addItem(brewItem).isEmpty()) {
             target.getLocation().getWorld().dropItem(target.getLocation(), brewItem);

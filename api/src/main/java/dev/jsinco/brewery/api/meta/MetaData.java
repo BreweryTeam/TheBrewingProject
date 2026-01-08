@@ -42,6 +42,11 @@ public final class MetaData implements MetaContainer<MetaData> {
     }
 
     @Override
+    public MetaData meta() {
+        return this;
+    }
+
+    @Override
     public <P, C> C meta(Key key, MetaDataType<P, C> type) {
         Object value = meta.get(key);
         if (value == null) {
