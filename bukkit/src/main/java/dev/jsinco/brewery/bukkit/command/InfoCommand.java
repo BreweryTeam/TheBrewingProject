@@ -28,46 +28,53 @@ import java.util.Optional;
 public class InfoCommand {
     private static final int PLAYER_INVENTORY_SIZE = 41;
 
-    public static ArgumentBuilder<CommandSourceStack, ?> command() {
+    public static ArgumentBuilder<CommandSourceStack, ?> command(String name, boolean debug) {
         ArgumentBuilder<CommandSourceStack, ?> withIndex = Commands.argument("inventory_slot", IntegerArgumentType.integer(0, PLAYER_INVENTORY_SIZE - 1))
                 .executes(context -> {
                     Player target = BreweryCommand.getPlayer(context);
                     int slot = context.getArgument("inventory_slot", int.class);
                     PlayerInventory inventory = target.getInventory();
-                    showInfo(inventory.getItem(slot), context.getSource().getSender());
+                    showInfo(inventory.getItem(slot), context.getSource().getSender(), debug);
                     return 1;
                 });
         ArgumentBuilder<CommandSourceStack, ?> withNamedSlot = Commands.argument("equipment_slot", new EnumArgument<>(EquipmentSlot.class))
                 .executes(context -> {
                     Player target = BreweryCommand.getPlayer(context);
                     PlayerInventory inventory = target.getInventory();
-                    showInfo(inventory.getItem(context.getArgument("equipment_slot", EquipmentSlot.class)), context.getSource().getSender());
+                    showInfo(inventory.getItem(context.getArgument("equipment_slot", EquipmentSlot.class)), context.getSource().getSender(), debug);
                     return 1;
                 });
-        return Commands.literal("info")
+        return Commands.literal(name)
                 .then(withNamedSlot)
                 .then(withIndex)
                 .then(BreweryCommand.playerBranch(argument -> {
                     argument.then(withNamedSlot);
                     argument.then(withIndex);
-                    argument.executes(InfoCommand::showHeldItemInfo);
+                    argument.executes(context -> showHeldItemInfo(context, debug));
                 }))
-                .executes(InfoCommand::showHeldItemInfo);
+                .executes(context -> showHeldItemInfo(context, debug));
     }
 
-    private static int showHeldItemInfo(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+    private static int showHeldItemInfo(CommandContext<CommandSourceStack> context, boolean debug) throws CommandSyntaxException {
         Player target = BreweryCommand.getPlayer(context);
         PlayerInventory inventory = target.getInventory();
-        showInfo(inventory.getItemInMainHand(), context.getSource().getSender());
+        showInfo(inventory.getItemInMainHand(), context.getSource().getSender(), debug);
         return 1;
     }
 
-    private static void showInfo(@Nullable ItemStack itemStack, CommandSender sender) {
+    private static void showInfo(@Nullable ItemStack itemStack, CommandSender sender, boolean debug) {
         if (itemStack == null) {
             MessageUtil.message(sender, "tbp.command.info.not-a-brew");
             return;
         }
         Optional<Brew> brewOptional = BrewAdapter.fromItem(itemStack);
+        if (debug) {
+            brewOptional.ifPresentOrElse(
+                    brew -> sender.sendMessage(brew.toString()),
+                    () -> MessageUtil.message(sender, "tbp.command.info.not-a-brew")
+            );
+            return;
+        }
         brewOptional
                 .ifPresent(brew -> MessageUtil.message(sender,
                         "tbp.command.info.message",

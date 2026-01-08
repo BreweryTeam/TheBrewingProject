@@ -168,4 +168,12 @@ public class BrewImpl implements Brew {
         return steps.equals(brew.steps);
     }
 
+    @Override
+    public String toString() {
+        return "BrewImpl{" +
+                "steps=" + steps +
+                ", meta=" + meta +
+                '}';
+    }
+
 }

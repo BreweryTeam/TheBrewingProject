@@ -225,6 +225,9 @@ bukkit {
         register("brewery.command.info") {
             description = "Allows the user to use the /tbp info command."
         }
+        register("brewery.command.debug") {
+            description = "Allows the user to use the /tbp debug command."
+        }
         register("brewery.command.seal") {
             description = "Allows the user to use the /tbp seal command."
         }
@@ -247,6 +250,7 @@ bukkit {
                 "brewery.command.event" to true,
                 "brewery.command.reload" to true,
                 "brewery.command.info" to true,
+                "brewery.command.debug" to true,
                 "brewery.command.seal" to true,
                 "brewery.command.other" to true,
                 "brewery.command.replicate" to true,
