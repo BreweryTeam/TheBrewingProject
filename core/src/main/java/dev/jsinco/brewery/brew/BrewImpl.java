@@ -41,23 +41,29 @@ public class BrewImpl implements Brew {
     }
 
     public BrewImpl withStep(BrewingStep step) {
-        return new BrewImpl(Stream.concat(steps.stream(), Stream.of(step)).toList());
+        return new BrewImpl(Stream.concat(steps.stream(), Stream.of(step)).toList(), meta);
     }
 
     public BrewImpl witModifiedLastStep(Function<BrewingStep, BrewingStep> modifier) {
         BrewingStep newStep = modifier.apply(steps.getLast());
-        return new BrewImpl(Stream.concat(
-                steps.subList(0, steps.size() - 1).stream(),
-                Stream.of(newStep)).toList()
+        return new BrewImpl(
+                Stream.concat(
+                        steps.subList(0, steps.size() - 1).stream(),
+                        Stream.of(newStep)
+                ).toList(),
+                meta
         );
     }
 
     public <B extends BrewingStep> BrewImpl withLastStep(Class<B> bClass, Function<B, B> modifier, Supplier<B> stepSupplier) {
         if (!steps.isEmpty() && bClass.isInstance(lastStep())) {
             BrewingStep newStep = modifier.apply(bClass.cast(lastStep()));
-            return new BrewImpl(Stream.concat(
-                    steps.subList(0, steps.size() - 1).stream(),
-                    Stream.of(newStep)).toList()
+            return new BrewImpl(
+                    Stream.concat(
+                            steps.subList(0, steps.size() - 1).stream(),
+                            Stream.of(newStep)
+                    ).toList(),
+                    meta
             );
         }
         return withStep(stepSupplier.get());
