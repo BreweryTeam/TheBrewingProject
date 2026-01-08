@@ -8,10 +8,11 @@ import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.Nullable;
 
 public class BreweryXMigrationListener implements Listener {
 
-    private ItemStack migrate(ItemStack item) {
+    private @Nullable ItemStack migrate(@Nullable ItemStack item) {
         if (item == null) return null;
         ItemStack migrated = BreweryXMigrationUtils.migrate(item);
         if (migrated == null) return item;
