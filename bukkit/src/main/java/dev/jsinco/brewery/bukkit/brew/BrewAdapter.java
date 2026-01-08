@@ -6,6 +6,7 @@ import dev.jsinco.brewery.api.brew.BrewScore;
 import dev.jsinco.brewery.api.brew.BrewingStep;
 import dev.jsinco.brewery.api.ingredient.Ingredient;
 import dev.jsinco.brewery.api.ingredient.IngredientManager;
+import dev.jsinco.brewery.api.meta.MetaData;
 import dev.jsinco.brewery.api.recipe.DefaultRecipe;
 import dev.jsinco.brewery.api.recipe.Recipe;
 import dev.jsinco.brewery.api.recipe.RecipeResult;
@@ -13,6 +14,7 @@ import dev.jsinco.brewery.api.util.BreweryKey;
 import dev.jsinco.brewery.api.util.Pair;
 import dev.jsinco.brewery.brew.BrewImpl;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
+import dev.jsinco.brewery.bukkit.meta.MetaDataPdcType;
 import dev.jsinco.brewery.bukkit.util.BukkitIngredientUtil;
 import dev.jsinco.brewery.bukkit.util.ListPersistentDataType;
 import dev.jsinco.brewery.configuration.Config;
@@ -49,6 +51,7 @@ public class BrewAdapter {
     private static final NamespacedKey BREWING_STEPS = TheBrewingProject.key("steps");
     private static final NamespacedKey BREWERY_DATA_VERSION = TheBrewingProject.key("version");
     private static final NamespacedKey BREWERY_CIPHERED = TheBrewingProject.key("ciphered");
+    private static final NamespacedKey BREWERY_META = TheBrewingProject.key("meta");
     public static final NamespacedKey BREWERY_TAG = TheBrewingProject.key("tag");
     public static final NamespacedKey BREWERY_SCORE = TheBrewingProject.key("score");
     public static final NamespacedKey BREWERY_DISPLAY_NAME = TheBrewingProject.key("display_name");
@@ -82,7 +85,7 @@ public class BrewAdapter {
         }
         if (!(state instanceof BrewImpl.State.Seal)) {
             itemStack.editPersistentDataContainer(pdc ->
-                    applyBrewStepsData(pdc, brew)
+                    applyBrewData(pdc, brew)
             );
         }
         return itemStack;
@@ -145,7 +148,7 @@ public class BrewAdapter {
         return defaultRecipes.getLast().result().newBrewItem(BrewScoreImpl.PLACEHOLDER, brew, state);
     }
 
-    public static void applyBrewStepsData(PersistentDataContainer pdc, Brew brew) {
+    public static void applyBrewData(PersistentDataContainer pdc, Brew brew) {
         pdc.set(BREWERY_DATA_VERSION, PersistentDataType.INTEGER, DATA_VERSION);
         if (Config.config().encryptSensitiveData()) {
             pdc.set(BREWERY_CIPHERED, PersistentDataType.BOOLEAN, true);
@@ -154,6 +157,7 @@ public class BrewAdapter {
             pdc.remove(BREWERY_CIPHERED);
             pdc.set(BREWING_STEPS, ListPersistentDataType.BREWING_STEP_LIST, brew.getSteps());
         }
+        pdc.set(BREWERY_META, MetaDataPdcType.INSTANCE, brew.meta());
     }
 
     public static Optional<Brew> fromItem(ItemStack itemStack) {
@@ -162,13 +166,17 @@ public class BrewAdapter {
         if (!Objects.equals(dataVersion, DATA_VERSION)) {
             return Optional.empty();
         }
-        if (data.has(BREWERY_CIPHERED, PersistentDataType.BOOLEAN)) {
-            return Optional.ofNullable(data.get(BREWING_STEPS, ListPersistentDataType.BREWING_STEP_CIPHERED_LIST))
-                    .map(BrewImpl::new);
-        } else {
-            return Optional.ofNullable(data.get(BREWING_STEPS, ListPersistentDataType.BREWING_STEP_LIST))
-                    .map(BrewImpl::new);
+        List<BrewingStep> steps = data.has(BREWERY_CIPHERED, PersistentDataType.BOOLEAN)
+                ? data.get(BREWING_STEPS, ListPersistentDataType.BREWING_STEP_CIPHERED_LIST)
+                : data.get(BREWING_STEPS, ListPersistentDataType.BREWING_STEP_LIST);
+        if (steps == null) {
+            return Optional.empty();
         }
+        MetaData meta = data.get(BREWERY_META, MetaDataPdcType.INSTANCE);
+        if (meta == null) {
+            meta = new MetaData();
+        }
+        return Optional.of(new BrewImpl(steps, meta));
     }
 
     public static void hideTooltips(ItemStack itemStack) {

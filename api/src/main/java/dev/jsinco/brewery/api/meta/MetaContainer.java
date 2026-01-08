@@ -23,6 +23,12 @@ public interface MetaContainer<SELF extends MetaContainer<SELF>> {
     SELF withoutMeta(Key key);
 
     /**
+     * Gets all metadata stored in this container.
+     * @return All metadata
+     */
+    MetaData meta();
+
+    /**
      * Gets metadata under the provided key.
      * @param key The key to look up
      * @param type The type of the metadata value

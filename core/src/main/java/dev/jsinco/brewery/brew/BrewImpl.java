@@ -35,7 +35,7 @@ public class BrewImpl implements Brew {
         this(steps, new MetaData());
     }
 
-    private BrewImpl(List<BrewingStep> steps, MetaData meta) {
+    public BrewImpl(List<BrewingStep> steps, MetaData meta) {
         this.steps = steps;
         this.meta = meta;
     }
@@ -88,6 +88,11 @@ public class BrewImpl implements Brew {
     @Override
     public Brew withoutMeta(Key key) {
         return new BrewImpl(steps, meta.withoutMeta(key));
+    }
+
+    @Override
+    public MetaData meta() {
+        return meta;
     }
 
     @Override
