@@ -4,8 +4,6 @@ import dev.jsinco.brewery.api.brew.*;
 import dev.jsinco.brewery.api.breweries.BarrelType;
 import dev.jsinco.brewery.api.breweries.CauldronType;
 import dev.jsinco.brewery.api.ingredient.Ingredient;
-import dev.jsinco.brewery.api.ingredient.IngredientGroup;
-import dev.jsinco.brewery.api.ingredient.ScoredIngredient;
 import dev.jsinco.brewery.api.moment.PassedMoment;
 import dev.jsinco.brewery.api.recipe.Recipe;
 import dev.jsinco.brewery.api.util.Logger;
@@ -48,6 +46,7 @@ public class BreweryXMigrationUtils {
             BarrelType.COPPER,
             BarrelType.PALE_OAK
     );
+    private static boolean noSeedIssueOccurred = true;
 
     public static @Nullable ItemStack migrate(@NotNull ItemStack item) {
         ItemMeta meta = item.getItemMeta();
@@ -75,7 +74,14 @@ public class BreweryXMigrationUtils {
             }
             return brewManager.toItem(data.brew, state);
 
-        } catch (IOException | InvalidKeyException e) {
+        } catch (InvalidKeyException e) {
+            if (noSeedIssueOccurred) {
+                Logger.logErr("Failed to convert a BreweryX Brew:");
+                Logger.logErr("Brew is encrypted in unknown key, or invalid format.");
+                Logger.logWarn("Hiding any following seed issues...");
+            }
+            noSeedIssueOccurred = false;
+        } catch (IOException e) {
             Logger.logErr("Failed to convert a BreweryX Brew:");
             Logger.logErr(e);
         }
