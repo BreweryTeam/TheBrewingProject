@@ -7,6 +7,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.List;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -79,6 +80,38 @@ public class MetaDataTest {
         MetaData withoutMeta = meta.withoutMeta(testKey);
 
         assertNull(withoutMeta.meta(testKey, MetaDataType.STRING));
+    }
+
+    @Test
+    void testHasMetaNothing() {
+        Key testKey = Key.key("test", "nothing");
+        MetaData meta = new MetaData();
+
+        assertFalse(meta.hasMeta(testKey, MetaDataType.STRING));
+    }
+
+    @Test
+    void testHasMetaSomething() {
+        Key testKey = Key.key("test", "string");
+        MetaData meta = new MetaData().withMeta(testKey, MetaDataType.STRING, "example");
+
+        assertTrue(meta.hasMeta(testKey, MetaDataType.STRING));
+        assertFalse(meta.hasMeta(testKey, MetaDataType.INTEGER));
+        assertFalse(meta.hasMeta(testKey, MetaDataType.BYTE_ARRAY));
+        assertFalse(meta.hasMeta(testKey, MetaDataType.STRING_LIST));
+    }
+
+    @Test
+    void testMetaKeys() {
+        Key key1 = Key.key("test", "one");
+        Key key2 = Key.key("test", "two");
+        Key key3 = Key.key("test", "three");
+        MetaData meta = new MetaData()
+                .withMeta(key1, MetaDataType.STRING, "a")
+                .withMeta(key2, MetaDataType.STRING, "b")
+                .withMeta(key3, MetaDataType.STRING, "c");
+
+        assertEquals(Set.of(key1, key2, key3), meta.metaKeys());
     }
 
     @Test
