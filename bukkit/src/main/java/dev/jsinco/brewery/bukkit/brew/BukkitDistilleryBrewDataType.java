@@ -39,7 +39,7 @@ public class BukkitDistilleryBrewDataType implements
             while (resultSet.next()) {
                 int pos = resultSet.getInt("pos");
                 boolean isDistillate = resultSet.getBoolean("is_distillate");
-                CompletableFuture<Brew> brewFuture = BrewImpl.SERIALIZER.deserialize(JsonParser.parseString(resultSet.getString("brew")).getAsJsonArray(), BukkitIngredientManager.INSTANCE);
+                CompletableFuture<Brew> brewFuture = BrewImpl.SERIALIZER.deserialize(JsonParser.parseString(resultSet.getString("brew")), BukkitIngredientManager.INSTANCE);
                 output.add(brewFuture.thenApplyAsync(brew ->
                         new Pair<>(brew, new DistilleryContext(searchObject.x(), searchObject.y(), searchObject.z(), searchObject.worldUuid(), pos, isDistillate))
                 ));

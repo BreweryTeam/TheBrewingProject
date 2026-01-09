@@ -60,7 +60,7 @@ public abstract class BarrelBrewDataType<I> implements
     }
 
     private CompletableFuture<Brew> brewFromResultSet(ResultSet resultSet) throws SQLException {
-        return BrewImpl.SERIALIZER.deserialize(JsonParser.parseString(resultSet.getString("brew")).getAsJsonArray(), getIngredientManager());
+        return BrewImpl.SERIALIZER.deserialize(JsonParser.parseString(resultSet.getString("brew")), getIngredientManager());
     }
 
     protected abstract IngredientManager<I> getIngredientManager();
