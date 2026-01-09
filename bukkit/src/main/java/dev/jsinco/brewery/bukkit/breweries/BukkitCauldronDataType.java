@@ -78,7 +78,7 @@ public class BukkitCauldronDataType implements SqlStoredData.Findable<Completabl
                 int x = resultSet.getInt("cauldron_x");
                 int y = resultSet.getInt("cauldron_y");
                 int z = resultSet.getInt("cauldron_z");
-                CompletableFuture<Brew> brewFuture = BrewImpl.SERIALIZER.deserialize(JsonParser.parseString(resultSet.getString("brew")).getAsJsonArray(), BukkitIngredientManager.INSTANCE);
+                CompletableFuture<Brew> brewFuture = BrewImpl.SERIALIZER.deserialize(JsonParser.parseString(resultSet.getString("brew")), BukkitIngredientManager.INSTANCE);
                 cauldrons.add(brewFuture.thenApplyAsync(brew -> new BukkitCauldron(brew, new BreweryLocation(x, y, z, worldUuid))));
             }
             return cauldrons;
