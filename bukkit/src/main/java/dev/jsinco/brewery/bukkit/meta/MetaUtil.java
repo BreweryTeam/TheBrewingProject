@@ -28,16 +28,7 @@ import java.util.List;
             PersistentDataType.INTEGER_ARRAY,
             PersistentDataType.LONG_ARRAY,
             PersistentDataType.TAG_CONTAINER,
-            PersistentDataType.LIST.bytes(),
-            PersistentDataType.LIST.shorts(),
-            PersistentDataType.LIST.integers(),
-            PersistentDataType.LIST.longs(),
-            PersistentDataType.LIST.floats(),
-            PersistentDataType.LIST.doubles(),
-            PersistentDataType.LIST.byteArrays(),
-            PersistentDataType.LIST.integerArrays(),
-            PersistentDataType.LIST.longArrays(),
-            PersistentDataType.LIST.dataContainers()
+            UntypedListDataType.INSTANCE
     );
 
     /* internal */ static PersistentDataType<?, ?> findType(PersistentDataContainer pdc, NamespacedKey key) {
