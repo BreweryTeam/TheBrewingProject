@@ -40,6 +40,7 @@ dependencies {
     testImplementation(libs.junit.jupiter)
     testRuntimeOnly(libs.junit.platform.launcher)
 
+    testImplementation(testFixtures(project(":api")))
     testImplementation(libs.gson)
     testImplementation(libs.joml)
     testImplementation(libs.guava)
