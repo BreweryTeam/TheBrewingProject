@@ -16,6 +16,7 @@ import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.bukkit.api.BukkitAdapter;
 import dev.jsinco.brewery.api.util.CancelState;
 import dev.jsinco.brewery.bukkit.api.event.CauldronExtractEvent;
+import dev.jsinco.brewery.bukkit.api.event.DrinkEvent;
 import dev.jsinco.brewery.bukkit.api.integration.IntegrationTypes;
 import dev.jsinco.brewery.bukkit.api.transaction.ItemSource;
 import dev.jsinco.brewery.bukkit.brew.BrewAdapter;
@@ -322,8 +323,16 @@ public class PlayerEventListener implements Listener {
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
     public void onPlayerItemConsume(PlayerItemConsumeEvent event) {
-        RecipeEffects.fromItem(event.getItem())
-                .ifPresent(effect -> effect.applyTo(event.getPlayer()));
+        Optional<RecipeEffects> effects = RecipeEffects.fromItem(event.getItem());
+        if (effects.isPresent()) {
+            DrinkEvent drinkEvent = new DrinkEvent(event.getPlayer(), event.getItem());
+            if (!drinkEvent.callEvent()) {
+                event.setCancelled(true);
+                return;
+            }
+            effects.get().applyTo(event.getPlayer());
+        }
+
         Ingredient ingredient = BukkitIngredientManager.INSTANCE.getIngredient(event.getItem());
         for (ConsumableSerializer.Consumable consumable : DrunkenModifierSection.modifiers().consumables()) {
             String key = consumable.type().contains(":") ? consumable.type() : "minecraft:" + consumable.type();
