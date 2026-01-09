@@ -29,7 +29,7 @@ public final class MetaData implements MetaContainer<MetaData> {
         return new MetaData(Stream.concat(
                 meta.entrySet().stream(),
                 Stream.of(Map.entry(key, type.toPrimitive(value)))
-        ).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+        ).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (oldValue, newValue) -> newValue)));
     }
 
     @Override
