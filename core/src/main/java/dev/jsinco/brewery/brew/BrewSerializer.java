@@ -40,7 +40,7 @@ public class BrewSerializer {
             return deserializeVersion0(jsonElement, ingredientManager);
         }
         JsonObject jsonObject = jsonElement.getAsJsonObject();
-        int version = jsonObject.has("version") ? 0 : jsonObject.get("version").getAsInt();
+        int version = jsonObject.has("version") ? jsonObject.get("version").getAsInt() : 0;
         if (version < 1 || version > VERSION) {
             throw new RuntimeException("Unsupported version: " + version);
         }
