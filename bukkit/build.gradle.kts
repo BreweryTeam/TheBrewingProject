@@ -82,6 +82,7 @@ dependencies {
     testImplementation(libs.junit.jupiter)
     testRuntimeOnly(libs.junit.platform.launcher)
 
+    testImplementation(testFixtures(project(":api")))
     testImplementation(libs.adventure.nbt)
     testImplementation(libs.mockbukkit)
     testImplementation(libs.sqlite.jdbc)

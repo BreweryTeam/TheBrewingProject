@@ -1,5 +1,6 @@
 plugins {
     `tbp-module`
+    id("java-test-fixtures")
 }
 
 repositories {
@@ -20,6 +21,9 @@ dependencies {
     testImplementation(libs.gson)
     testImplementation(libs.guava)
     testImplementation(libs.adventure.api)
+
+    testFixturesImplementation(libs.junit.jupiter)
+    testFixturesImplementation(libs.adventure.api)
 }
 
 tasks.test {

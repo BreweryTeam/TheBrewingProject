@@ -2,15 +2,13 @@ package dev.jsinco.brewery.api.meta;
 
 import net.kyori.adventure.key.Key;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
  * A basic metadata container, and the primitive type for nested metadata containers ({@link MetaDataType#CONTAINER}).
+ * Not suitable for use as a key in a hash-based collection.
  */
 public final class MetaData implements MetaContainer<MetaData> {
 
@@ -74,18 +72,55 @@ public final class MetaData implements MetaContainer<MetaData> {
 
     @Override
     public boolean equals(Object o) {
-        return o instanceof MetaData metaData && Objects.equals(meta, metaData.meta);
+        return o instanceof MetaData metaData && areMapsEqual(meta, metaData.meta);
     }
-    @Override
-    public int hashCode() {
-        return Objects.hashCode(meta);
+
+    // Version of map.equals that properly checks for array equality
+    private static <K, V> boolean areMapsEqual(Map<K, V> map1, Map<K, V> map2) {
+        return map1.size() == map2.size() && map1.entrySet().stream()
+                .allMatch(entry -> areEqual(entry.getValue(), map2.get(entry.getKey())));
+    }
+    private static boolean areListsEqual(List<?> list1, List<?> list2) {
+        if (list1.size() != list2.size()) {
+            return false;
+        }
+        for (int i = 0; i < list1.size(); i++) {
+            if (!areEqual(list1.get(i), list2.get(i))) {
+                return false;
+            }
+        }
+        return true;
+    }
+    private static boolean areEqual(Object obj1, Object obj2) {
+        if (obj1 instanceof byte[] arr1 && obj2 instanceof byte[] arr2) {
+            return Arrays.equals(arr1, arr2);
+        }
+        if (obj1 instanceof int[] arr1 && obj2 instanceof int[] arr2) {
+            return Arrays.equals(arr1, arr2);
+        }
+        if (obj1 instanceof long[] arr1 && obj2 instanceof long[] arr2) {
+            return Arrays.equals(arr1, arr2);
+        }
+        if (obj1 instanceof List<?> list1 && obj2 instanceof List<?> list2) {
+            return areListsEqual(list1, list2);
+        }
+        return obj1.equals(obj2);
     }
 
     @Override
     public String toString() {
         return meta.entrySet().stream()
-                .map(entry -> entry.getKey() + "=" + entry.getValue())
+                .map(entry -> entry.getKey() + "=" + asString(entry.getValue()))
                 .collect(Collectors.joining(", ", "MetaData{", "}"));
+    }
+    private String asString(Object value) {
+        return switch (value) {
+            case byte[] arr -> Arrays.toString(arr);
+            case int[] arr -> Arrays.toString(arr);
+            case long[] arr -> Arrays.toString(arr);
+            case List<?> list -> list.stream().map(this::asString).collect(Collectors.joining(", "));
+            default -> value.toString();
+        };
     }
 
 }
