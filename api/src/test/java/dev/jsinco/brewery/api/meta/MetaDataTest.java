@@ -54,6 +54,24 @@ public class MetaDataTest {
     }
 
     @Test
+    void testOverwriteKey() {
+        Key testKey = Key.key("test", "overwrite");
+        MetaData meta = new MetaData()
+                .withMeta(testKey, MetaDataType.STRING, "first")
+                .withMeta(testKey, MetaDataType.STRING, "second");
+        assertEquals("second", meta.meta(testKey, MetaDataType.STRING));
+    }
+
+    @Test
+    void testOverwriteKeyDifferentType() {
+        Key testKey = Key.key("test", "overwrite");
+        MetaData meta = new MetaData()
+                .withMeta(testKey, MetaDataType.STRING, "first")
+                .withMeta(testKey, MetaDataType.INTEGER, 2);
+        assertEquals(2, meta.meta(testKey, MetaDataType.INTEGER));
+    }
+
+    @Test
     void testWithoutMeta() {
         Key testKey = Key.key("test", "string");
         MetaData meta = new MetaData().withMeta(testKey, MetaDataType.STRING, "value");
