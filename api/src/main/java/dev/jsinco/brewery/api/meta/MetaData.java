@@ -1,5 +1,6 @@
 package dev.jsinco.brewery.api.meta;
 
+import com.google.errorprone.annotations.Immutable;
 import net.kyori.adventure.key.Key;
 
 import java.util.*;
@@ -10,6 +11,7 @@ import java.util.stream.Stream;
  * A basic metadata container, and the primitive type for nested metadata containers ({@link MetaDataType#CONTAINER}).
  * Not suitable for use as a key in a hash-based collection.
  */
+@Immutable
 public final class MetaData implements MetaContainer<MetaData> {
 
     private final Map<Key, Object> meta;
@@ -50,20 +52,43 @@ public final class MetaData implements MetaContainer<MetaData> {
         if (value == null) {
             return null;
         }
-        if (type.getPrimitiveType().isInstance(value)) {
-            if (type instanceof ListMetaDataType<?,?> listType) {
-                List<?> list = (List<?>) value;
-                if (!list.isEmpty() && !listType.getElementDataType().getPrimitiveType().isInstance(list.getFirst())) {
-                    throw new IllegalArgumentException("Meta for " + key + " is not of List with element type " +
-                            listType.getElementDataType().getPrimitiveType().getSimpleName());
-                }
-            }
-            return type.toComplex(type.getPrimitiveType().cast(value));
+        if (!type.getPrimitiveType().isInstance(value)) {
+            throw new IllegalArgumentException("Meta for " + key + " is not of type " + type.getPrimitiveType().getSimpleName());
         }
-        throw new IllegalArgumentException("Meta for " + key + " is not of type " + type.getPrimitiveType().getSimpleName());
+        if (type instanceof ListMetaDataType<?, ?> listType) {
+            List<?> list = (List<?>) value;
+            if (!list.isEmpty() && !listType.getElementDataType().getPrimitiveType().isInstance(list.getFirst())) {
+                throw new IllegalArgumentException("Meta for " + key + " is not of List with element type " +
+                        listType.getElementDataType().getPrimitiveType().getSimpleName());
+            }
+        }
+        return type.toComplex(type.getPrimitiveType().cast(value));
+    }
+
+    @Override
+    public <P, C> boolean hasMeta(Key key, MetaDataType<P, C> type) {
+        Object value = meta.get(key);
+        if (value == null) {
+            return false;
+        }
+        if (!type.getPrimitiveType().isInstance(value)) {
+            return false;
+        }
+        if (type instanceof ListMetaDataType<?,?> listType) {
+            List<?> list = (List<?>) value;
+            return list.isEmpty() || listType.getElementDataType().getPrimitiveType().isInstance(list.getFirst());
+        }
+        return true;
+    }
+
+    @Override
+    public Set<Key> metaKeys() {
+        return meta.keySet();
     }
 
     /**
+     * Gets the raw metadata mapping. This method is mainly meant to help with serialization,
+     * prefer the type-safe {@link #meta(Key, MetaDataType)} method instead.
      * @return An unmodifiable map of keys to metadata values as their primitive types
      */
     public Map<Key, Object> primitiveMap() {

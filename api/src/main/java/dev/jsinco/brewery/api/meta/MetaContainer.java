@@ -2,6 +2,8 @@ package dev.jsinco.brewery.api.meta;
 
 import net.kyori.adventure.key.Key;
 
+import java.util.Set;
+
 public interface MetaContainer<SELF extends MetaContainer<SELF>> {
 
     /**
@@ -38,5 +40,21 @@ public interface MetaContainer<SELF extends MetaContainer<SELF>> {
      * @throws IllegalArgumentException If the value is not of the expected type
      */
     <P, C> C meta(Key key, MetaDataType<P, C> type);
+
+    /**
+     * Checks if this container has metadata of the specified type under the provided key.
+     * @param key The key to look up
+     * @param type The type of the metadata value
+     * @return True if {@link #meta(Key, MetaDataType)} will return a value
+     * @param <P> The primitive type the value is stored as when serialized
+     * @param <C> The type of the value to retrieve
+     */
+    <P, C> boolean hasMeta(Key key, MetaDataType<P, C> type);
+
+    /**
+     * Gets all keys in this container.
+     * @return An immutable set of keys
+     */
+    Set<Key> metaKeys();
 
 }

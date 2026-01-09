@@ -100,6 +100,16 @@ public class BrewImpl implements Brew {
         return meta.meta(key, type);
     }
 
+    @Override
+    public <P, C> boolean hasMeta(Key key, MetaDataType<P, C> type) {
+        return meta.hasMeta(key, type);
+    }
+
+    @Override
+    public Set<Key> metaKeys() {
+        return meta.metaKeys();
+    }
+
     public <I> Optional<Recipe<I>> closestRecipe(RecipeRegistry<I> registry) {
         double bestScore = 0;
         Recipe<I> bestMatch = null;
