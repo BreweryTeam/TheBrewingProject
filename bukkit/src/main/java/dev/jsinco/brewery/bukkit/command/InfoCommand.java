@@ -15,6 +15,9 @@ import dev.jsinco.brewery.util.MessageUtil;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.JoinConfiguration;
+import net.kyori.adventure.text.event.ClickEvent;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -70,7 +73,7 @@ public class InfoCommand {
         Optional<Brew> brewOptional = BrewAdapter.fromItem(itemStack);
         if (debug) {
             brewOptional.ifPresentOrElse(
-                    brew -> sender.sendMessage(brew.toString()),
+                    brew -> sender.sendMessage(debugInfo(brew)),
                     () -> MessageUtil.message(sender, "tbp.command.info.not-a-brew")
             );
             return;
@@ -92,5 +95,15 @@ public class InfoCommand {
         if (brewOptional.isEmpty() && recipeEffectsOptional.isEmpty()) {
             MessageUtil.message(sender, "tbp.command.info.not-a-brew");
         }
+    }
+
+    private static Component debugInfo(Brew brew) {
+        String brewStr = brew.toString();
+        return Component.join(JoinConfiguration.noSeparators(),
+                Component.text(brewStr),
+                Component.text(" (", NamedTextColor.GRAY),
+                Component.translatable("tbp.command.copy", NamedTextColor.AQUA).clickEvent(ClickEvent.copyToClipboard(brewStr)),
+                Component.text(")", NamedTextColor.GRAY)
+        );
     }
 }
