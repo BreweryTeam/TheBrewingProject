@@ -17,6 +17,7 @@ import dev.jsinco.brewery.api.vector.BreweryLocation;
 import dev.jsinco.brewery.brew.AgeStepImpl;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.bukkit.api.BukkitAdapter;
+import dev.jsinco.brewery.bukkit.api.event.BrewAgeEvent;
 import dev.jsinco.brewery.bukkit.brew.BrewAdapter;
 import dev.jsinco.brewery.bukkit.breweries.BrewInventoryImpl;
 import dev.jsinco.brewery.bukkit.structure.PlacedBreweryStructure;
@@ -165,22 +166,33 @@ public class BukkitBarrel implements Barrel<BukkitBarrel, ItemStack, Inventory>,
             if (brew == null) {
                 continue;
             }
+            int idx = i;
             if (!(brew.lastStep() instanceof BrewingStep.Age age) || age.barrelType() != type) {
-                brew = brew.withStep(new AgeStepImpl(new Interval(time, time), this.type));
-                inventory.store(brew, i);
+                Brew aged = brew.withStep(new AgeStepImpl(new Interval(time, time), this.type));
+                callAgeEvent(brew, aged).ifPresent(result -> inventory.store(result, idx));
                 continue;
             }
+            Brew aged;
             if (Objects.equals(previousBrews[i], brew)) {
-                brews[i] = brew.withLastStep(BrewingStep.Age.class,
+                aged = brew.withLastStep(BrewingStep.Age.class,
                         age1 -> age1.withAge(age.time().withLastStep(time)),
                         () -> new AgeStepImpl(new Interval(time, time), this.type));
             } else {
-                brews[i] = brew.withLastStep(BrewingStep.Age.class,
+                aged = brew.withLastStep(BrewingStep.Age.class,
                         age1 -> age1.withAge(age.time().withMovedEnding(time)),
                         () -> new AgeStepImpl(new Interval(time, time), this.type));
             }
+            callAgeEvent(brew, aged).ifPresent(result -> brews[idx] = result);
 
         }
+    }
+
+    private Optional<Brew> callAgeEvent(Brew source, Brew result) {
+        BrewAgeEvent event = new BrewAgeEvent(this, source, result);
+        if (!event.callEvent()) {
+            return Optional.empty();
+        }
+        return Optional.of(event.getResult());
     }
 
     @Override
