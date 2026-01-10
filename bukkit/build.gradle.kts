@@ -232,6 +232,9 @@ bukkit {
         register("brewery.command.seal") {
             description = "Allows the user to use the /tbp seal command."
         }
+        register("brewery.command.brewer") {
+            description = "Allows the user to use the /tbp brewer command."
+        }
         register("brewery.command.other") {
             description = "Allows the user to use other /tbp commands."
         }
@@ -253,6 +256,7 @@ bukkit {
                 "brewery.command.info" to true,
                 "brewery.command.debug" to true,
                 "brewery.command.seal" to true,
+                "brewery.command.brewer" to true,
                 "brewery.command.other" to true,
                 "brewery.command.replicate" to true,
                 "brewery.command.version" to true,
