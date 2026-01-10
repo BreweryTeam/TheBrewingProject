@@ -17,6 +17,7 @@ import dev.jsinco.brewery.brew.MixStepImpl;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.bukkit.api.BukkitAdapter;
 import dev.jsinco.brewery.api.util.CancelState;
+import dev.jsinco.brewery.bukkit.api.event.BrewMixEvent;
 import dev.jsinco.brewery.bukkit.api.event.CauldronInsertEvent;
 import dev.jsinco.brewery.bukkit.api.transaction.ItemSource;
 import dev.jsinco.brewery.bukkit.ingredient.BukkitIngredientManager;
@@ -147,37 +148,39 @@ public class BukkitCauldron implements Cauldron {
     }
 
     public boolean addIngredient(@NotNull ItemStack item, Player player) {
-        CauldronInsertEvent event = new CauldronInsertEvent(this,
+        CauldronInsertEvent insertEvent = new CauldronInsertEvent(this,
                 new ItemSource.ItemBasedSource(item),
                 player.hasPermission("brewery.cauldron.access") ?
                         new CancelState.Allowed() : new CancelState.PermissionDenied(Component.translatable("tbp.cauldron.access-denied")),
                 player
         );
-        if (!event.callEvent()) {
-            if(event.getCancelState() instanceof CancelState.PermissionDenied(Component denyMessage)) {
+        if (!insertEvent.callEvent()) {
+            if(insertEvent.getCancelState() instanceof CancelState.PermissionDenied(Component denyMessage)) {
                 player.sendMessage(denyMessage);
             }
             return false;
         }
-        ItemStack addedItem = event.getItemSource().get();
+        ItemStack addedItem = insertEvent.getItemSource().get();
         if (!brewExtracted && addedItem.getType() == Material.POTION) {
             BukkitCauldron.incrementLevel(getBlock());
         }
         this.hot = isHeatSource(getBlock().getRelative(BlockFace.DOWN));
+        CauldronType cauldronType = findCauldronType(getBlock());
         long time = TheBrewingProject.getInstance().getTime();
         Ingredient ingredient = BukkitIngredientManager.INSTANCE.getIngredient(addedItem);
+        Brew mixed;
         if (hot) {
-            brew = brew.withLastStep(BrewingStep.Cook.class,
+            mixed = brew.withLastStep(BrewingStep.Cook.class,
                     cook -> {
                         Map<Ingredient, Integer> ingredients = new HashMap<>(cook.ingredients());
                         int amount = ingredients.computeIfAbsent(ingredient, ignored -> 0);
                         ingredients.put(ingredient, amount + 1);
                         return cook.withIngredients(ingredients);
                     },
-                    () -> new CookStepImpl(new Interval(time, time), Map.of(BukkitIngredientManager.INSTANCE.getIngredient(addedItem), 1), findCauldronType(getBlock()))
+                    () -> new CookStepImpl(new Interval(time, time), Map.of(BukkitIngredientManager.INSTANCE.getIngredient(addedItem), 1), cauldronType)
             );
         } else {
-            brew = brew.withLastStep(BrewingStep.Mix.class,
+            mixed = brew.withLastStep(BrewingStep.Mix.class,
                     mix -> {
                         Map<Ingredient, Integer> ingredients = new HashMap<>(mix.ingredients());
                         int amount = ingredients.computeIfAbsent(ingredient, ignored -> 0);
@@ -187,6 +190,11 @@ public class BukkitCauldron implements Cauldron {
                     () -> new MixStepImpl(new Interval(time, time), Map.of(BukkitIngredientManager.INSTANCE.getIngredient(addedItem), 1))
             );
         }
+        BrewMixEvent mixEvent = new BrewMixEvent(this, cauldronType, hot, brew, mixed);
+        if (!mixEvent.callEvent()) {
+            return true;
+        }
+        brew = mixEvent.getResult();
         this.recipe = brew.closestRecipe(TheBrewingProject.getInstance().getRecipeRegistry())
                 .orElse(null);
 

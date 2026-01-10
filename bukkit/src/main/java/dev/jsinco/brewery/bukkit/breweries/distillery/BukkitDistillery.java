@@ -12,6 +12,7 @@ import dev.jsinco.brewery.api.vector.BreweryLocation;
 import dev.jsinco.brewery.brew.DistillStepImpl;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.bukkit.api.BukkitAdapter;
+import dev.jsinco.brewery.bukkit.api.event.BrewDistillEvent;
 import dev.jsinco.brewery.bukkit.brew.BrewAdapter;
 import dev.jsinco.brewery.bukkit.breweries.BrewInventoryImpl;
 import dev.jsinco.brewery.bukkit.structure.BreweryStructure;
@@ -378,12 +379,16 @@ public class BukkitDistillery implements Distillery<BukkitDistillery, ItemStack,
             }
             Pair<Brew, Integer> nextBrewToTransfer = brewsToTransfer.poll();
             Brew mixtureBrew = nextBrewToTransfer.first();
+            Brew distillateBrew = mixtureBrew.withLastStep(
+                    BrewingStep.Distill.class,
+                    BrewingStep.Distill::incrementRuns,
+                    () -> new DistillStepImpl(1));
+            BrewDistillEvent event = new BrewDistillEvent(this, mixtureBrew, distillateBrew);
+            if (!event.callEvent()) {
+                continue;
+            }
             inventory1.store(null, nextBrewToTransfer.second());
-            inventory2.store(mixtureBrew.withLastStep(
-                            BrewingStep.Distill.class,
-                            BrewingStep.Distill::incrementRuns,
-                            () -> new DistillStepImpl(1))
-                    , i);
+            inventory2.store(event.getResult(), i);
         }
     }
 
