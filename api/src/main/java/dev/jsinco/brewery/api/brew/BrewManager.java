@@ -1,5 +1,7 @@
 package dev.jsinco.brewery.api.brew;
 
+import dev.jsinco.brewery.api.meta.MetaData;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -10,6 +12,8 @@ public interface BrewManager<I> {
      * @return A new brew instance with the given steps
      */
     Brew createBrew(List<BrewingStep> steps);
+
+    Brew createBrew(List<BrewingStep> steps, MetaData meta);
 
     /**
      * @param cookStep A cook step
