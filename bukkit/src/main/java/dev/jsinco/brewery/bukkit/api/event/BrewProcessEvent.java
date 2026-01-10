@@ -1,0 +1,26 @@
+package dev.jsinco.brewery.bukkit.api.event;
+
+import dev.jsinco.brewery.api.brew.Brew;
+import lombok.Getter;
+import lombok.Setter;
+import org.bukkit.event.Cancellable;
+import org.bukkit.event.Event;
+
+public abstract class BrewProcessEvent extends Event implements Cancellable {
+
+    @Getter
+    @Setter
+    private boolean cancelled;
+
+    @Getter
+    private final Brew source;
+    @Getter
+    @Setter
+    private Brew result;
+
+    public BrewProcessEvent(Brew source, Brew result) {
+        this.source = source;
+        this.result = result;
+    }
+
+}
