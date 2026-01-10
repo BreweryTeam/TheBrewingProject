@@ -61,6 +61,14 @@ public interface Brew extends MetaContainer<Brew> {
     /**
      * @param bClass       The type of the brewing step
      * @param modifier     The modifier of the brewing step
+     * @param <B>          The type of the brewing step
+     * @return A new brewing step with the applied modifier if already existed with type, or a new step from the step supplier
+     */
+    <B extends BrewingStep> Brew withModifiedLastStep(Class<B> bClass, Function<B, B> modifier);
+
+    /**
+     * @param bClass       The type of the brewing step
+     * @param modifier     The modifier of the brewing step
      * @param stepSupplier A supplier of new brewing step
      * @param <B>          The type of the brewing step
      * @return A new brewing step with the applied modifier if already existed with type, or a new step from the step supplier

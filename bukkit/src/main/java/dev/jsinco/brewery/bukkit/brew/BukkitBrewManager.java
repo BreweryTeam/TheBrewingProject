@@ -1,6 +1,7 @@
 package dev.jsinco.brewery.bukkit.brew;
 
 import dev.jsinco.brewery.api.brew.Brew;
+import dev.jsinco.brewery.api.meta.MetaData;
 import dev.jsinco.brewery.brew.BrewImpl;
 import dev.jsinco.brewery.api.brew.BrewManager;
 import dev.jsinco.brewery.api.brew.BrewingStep;
@@ -13,6 +14,11 @@ public class BukkitBrewManager implements BrewManager<ItemStack> {
     @Override
     public Brew createBrew(List<BrewingStep> steps) {
         return new BrewImpl(steps);
+    }
+
+    @Override
+    public Brew createBrew(List<BrewingStep> steps, MetaData meta) {
+        return new BrewImpl(steps, meta);
     }
 
     @Override
