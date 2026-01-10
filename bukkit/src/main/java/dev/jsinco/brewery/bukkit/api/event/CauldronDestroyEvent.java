@@ -9,7 +9,7 @@ import org.bukkit.event.HandlerList;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class CauldronDestroyEvent extends PermissibleBreweryEvent {
+public class CauldronDestroyEvent extends BreweryDestroyEvent {
 
     private static final HandlerList HANDLERS = new HandlerList();
 
@@ -18,23 +18,10 @@ public class CauldronDestroyEvent extends PermissibleBreweryEvent {
      */
     @Getter
     private final Cauldron cauldron;
-    /**
-     * The player that destroyed the cauldron. Will be null if the cauldron was destroyed by an explosion, piston,
-     * or any non-player source.
-     */
-    @Getter
-    private final @Nullable Player player;
-    /**
-     * The location of the cauldron.
-     */
-    @Getter
-    private final Location location;
 
     public CauldronDestroyEvent(CancelState state, Cauldron cauldron, @Nullable Player player, Location location) {
-        super(state);
+        super(state, player, location);
         this.cauldron = cauldron;
-        this.player = player;
-        this.location = location;
     }
 
     @Override

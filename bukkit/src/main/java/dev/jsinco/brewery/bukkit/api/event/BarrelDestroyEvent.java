@@ -14,7 +14,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-public class BarrelDestroyEvent extends PermissibleBreweryEvent {
+public class BarrelDestroyEvent extends BreweryDestroyEvent {
 
     private static final HandlerList HANDLERS = new HandlerList();
 
@@ -24,28 +24,14 @@ public class BarrelDestroyEvent extends PermissibleBreweryEvent {
     @Getter
     private final BarrelAccess barrel;
     /**
-     * The player that destroyed the barrel. Will be null if the barrel was destroyed by an explosion, piston,
-     * or any non-player source.
-     */
-    @Getter
-    private final @Nullable Player player;
-    /**
-     * The location of the block that was destroyed or changed. If multiple blocks were destroyed,
-     * such as by an explosion, then an arbitrary block is chosen.
-     */
-    @Getter
-    private final Location location;
-    /**
      * The brews that will be dropped when the barrel is broken. Can be modified.
      */
     @Getter
     private List<Brew> drops;
 
     public BarrelDestroyEvent(CancelState state, BarrelAccess barrel, @Nullable Player player, Location location, Collection<Brew> drops) {
-        super(state);
+        super(state, player, location);
         this.barrel = barrel;
-        this.player = player;
-        this.location = location;
         setDrops(drops);
     }
 
