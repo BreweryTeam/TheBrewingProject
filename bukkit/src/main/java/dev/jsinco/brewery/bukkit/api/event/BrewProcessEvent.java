@@ -12,8 +12,14 @@ public abstract class BrewProcessEvent extends Event implements Cancellable {
     @Setter
     private boolean cancelled;
 
+    /**
+     * The brew that is being processed.
+     */
     @Getter
     private final Brew source;
+    /**
+     * The brew that will be created.
+     */
     @Getter
     @Setter
     private Brew result;

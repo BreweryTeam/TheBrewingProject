@@ -16,7 +16,7 @@ import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.bukkit.api.BukkitAdapter;
 import dev.jsinco.brewery.api.util.CancelState;
 import dev.jsinco.brewery.bukkit.api.event.CauldronExtractEvent;
-import dev.jsinco.brewery.bukkit.api.event.DrinkEvent;
+import dev.jsinco.brewery.bukkit.api.event.TBPConsumeEvent;
 import dev.jsinco.brewery.bukkit.api.integration.IntegrationTypes;
 import dev.jsinco.brewery.bukkit.api.transaction.ItemSource;
 import dev.jsinco.brewery.bukkit.brew.BrewAdapter;
@@ -325,12 +325,13 @@ public class PlayerEventListener implements Listener {
     public void onPlayerItemConsume(PlayerItemConsumeEvent event) {
         Optional<RecipeEffects> effects = RecipeEffects.fromItem(event.getItem());
         if (effects.isPresent()) {
-            DrinkEvent drinkEvent = new DrinkEvent(event.getPlayer(), event.getItem());
-            if (!drinkEvent.callEvent()) {
+            TBPConsumeEvent consumeEvent = new TBPConsumeEvent(event.getPlayer(), event.getItem(), event.getHand(), event.getReplacement());
+            if (!consumeEvent.callEvent()) {
                 event.setCancelled(true);
                 return;
             }
             effects.get().applyTo(event.getPlayer());
+            event.setReplacement(consumeEvent.getReplacement());
         }
 
         Ingredient ingredient = BukkitIngredientManager.INSTANCE.getIngredient(event.getItem());
