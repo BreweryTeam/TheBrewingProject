@@ -25,6 +25,7 @@ import lombok.Getter;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import net.kyori.adventure.text.minimessage.translation.Argument;
@@ -99,6 +100,11 @@ public class BukkitRecipeResult implements RecipeResult<ItemStack> {
         ItemStack itemStack = new ItemStack(Material.POTION);
         applyData(itemStack);
         return itemStack;
+    }
+
+    @Override
+    public Component displayName() {
+        return MiniMessage.miniMessage().deserialize(name);
     }
 
     private @Nullable ItemStack createCustomItem() {

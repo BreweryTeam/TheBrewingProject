@@ -2,6 +2,7 @@ package dev.jsinco.brewery.api.recipe;
 
 import dev.jsinco.brewery.api.brew.Brew;
 import dev.jsinco.brewery.api.brew.BrewScore;
+import net.kyori.adventure.text.Component;
 
 /**
  * @param <I> An item stack type
@@ -20,4 +21,6 @@ public interface RecipeResult<I> {
      * @return The recipe item without any meta lore
      */
     I newLorelessItem();
+
+    Component displayName();
 }
