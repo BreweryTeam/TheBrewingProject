@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 public interface IngredientManager<I> {
 
     Pattern INGREDIENT_META_DATA_RE = Pattern.compile("\\{(.+)\\}");
-    Pattern INGREDIENT_META_DATA_ELEMENT_RE = Pattern.compile("([^,{}]+)=([^,{}])");
+    Pattern INGREDIENT_META_DATA_ELEMENT_RE = Pattern.compile("([^,{}]+)=([^,]+)");
 
     /**
      * Don't use this method on startup, expect unexpected behavior if you do
@@ -57,8 +57,8 @@ public interface IngredientManager<I> {
         if (!matcher.find()) {
             return getIngredient(serializedIngredient);
         }
-        String id = matcher.replaceAll("");
         String meta = matcher.group(1);
+        String id = matcher.replaceAll("");
         ImmutableMap.Builder<IngredientMeta<?>, Object> metaBuilder = new ImmutableMap.Builder<>();
         for (String extraElement : meta.split(",")) {
             Matcher elementMatcher = INGREDIENT_META_DATA_ELEMENT_RE.matcher(extraElement);
@@ -103,6 +103,9 @@ public interface IngredientManager<I> {
      */
     CompletableFuture<Pair<Ingredient, Integer>> getIngredientWithAmount(String ingredientStr) throws IllegalArgumentException;
 
+    CompletableFuture<Pair<Ingredient, Integer>> getIngredientWithAmount(String ingredientStr, boolean withMeta) throws
+            IllegalArgumentException;
+
     /**
      * Parse a list of strings into a map of ingredients with runs
      *
@@ -134,4 +137,17 @@ public interface IngredientManager<I> {
         int amount = mutableIngredientsMap.computeIfAbsent(ingredient.first(), ignored -> 0);
         mutableIngredientsMap.put(ingredient.first(), amount + ingredient.second());
     }
+
+
+
+    /**
+     * Parse a list of strings into a map of ingredients with runs
+     *
+     * @param stringList A list of strings with valid formatting, see {@link #getIngredientWithAmount(String)}
+     * @param withMeta True if meta parsing is allowed
+     * @return A map representing ingredients with runs
+     * @throws IllegalArgumentException if there's any invalid ingredient string
+     */
+    CompletableFuture<Map<Ingredient, Integer>> getIngredientsWithAmount(List<String> stringList, boolean withMeta) throws
+            IllegalArgumentException;
 }

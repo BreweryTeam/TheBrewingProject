@@ -48,7 +48,7 @@ public class BrewSerializerTest {
     @ParameterizedTest
     @MethodSource("brews")
     void roundTrip(Brew brew) {
-        JsonElement serialized = BrewImpl.SERIALIZER.serialize(brew);
+        JsonElement serialized = BrewImpl.SERIALIZER.serialize(brew, BukkitIngredientManager.INSTANCE);
 
         CompletableFuture<Brew> future = BrewImpl.SERIALIZER.deserialize(serialized, BukkitIngredientManager.INSTANCE);
         Brew deserialized = assertTimeout(Duration.ofSeconds(5), () -> future.get());

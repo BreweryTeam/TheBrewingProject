@@ -22,7 +22,7 @@ public class IngredientUtil {
 
         List<CompletableFuture<Pair<Ingredient, Integer>>> ingredientsFuture = json.entrySet()
                 .stream()
-                .map(jsonEntry -> ingredientManager.getIngredient(jsonEntry.getKey())
+                .map(jsonEntry -> ingredientManager.deserializeIngredient(jsonEntry.getKey())
                         .thenApplyAsync(optionalIngredient -> optionalIngredient
                                 .map(ingredient -> new Pair<>(ingredient, jsonEntry.getValue().getAsInt()))
                                 .orElseThrow(() -> new IllegalArgumentException(jsonEntry.getKey() + " is not a valid ingredient"))
@@ -36,10 +36,10 @@ public class IngredientUtil {
                 });
     }
 
-    public static JsonObject ingredientsToJson(Map<Ingredient, Integer> ingredients) {
+    public static JsonObject ingredientsToJson(Map<Ingredient, Integer> ingredients, IngredientManager<?> ingredientManager) {
         JsonObject output = new JsonObject();
         for (Map.Entry<Ingredient, Integer> entry : ingredients.entrySet()) {
-            output.add(entry.getKey().getKey(), new JsonPrimitive(entry.getValue()));
+            output.add(ingredientManager.serializeIngredient(entry.getKey()), new JsonPrimitive(entry.getValue()));
         }
         return output;
     }

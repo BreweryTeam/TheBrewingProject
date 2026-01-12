@@ -19,18 +19,18 @@ public class BrewSerializer {
     public static final BrewSerializer INSTANCE = new BrewSerializer();
     private static final int VERSION = 1;
 
-    public JsonElement serialize(Brew brew) {
+    public JsonElement serialize(Brew brew, IngredientManager<?> ingredientManager) {
         JsonObject obj = new JsonObject();
         obj.addProperty("version", VERSION);
-        obj.add("steps", steps(brew));
+        obj.add("steps", steps(brew, ingredientManager));
         obj.add("meta", MetaSerializer.INSTANCE.serialize(brew.meta()));
         return obj;
     }
 
-    private static JsonArray steps(Brew brew) {
+    private static JsonArray steps(Brew brew, IngredientManager<?> ingredientManager) {
         JsonArray array = new JsonArray();
         for (BrewingStep step : brew.getSteps()) {
-            array.add(BrewingStepSerializer.INSTANCE.serialize(step));
+            array.add(BrewingStepSerializer.INSTANCE.serialize(step, ingredientManager));
         }
         return array;
     }

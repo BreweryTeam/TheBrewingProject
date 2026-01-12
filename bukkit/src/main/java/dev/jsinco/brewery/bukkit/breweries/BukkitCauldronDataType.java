@@ -32,7 +32,7 @@ public class BukkitCauldronDataType implements SqlStoredData.Findable<Completabl
             preparedStatement.setInt(2, location.y());
             preparedStatement.setInt(3, location.z());
             preparedStatement.setBytes(4, DecoderEncoder.asBytes(location.worldUuid()));
-            preparedStatement.setString(5, BrewImpl.SERIALIZER.serialize(value.getBrew()).toString());
+            preparedStatement.setString(5, BrewImpl.SERIALIZER.serialize(value.getBrew(), BukkitIngredientManager.INSTANCE).toString());
             preparedStatement.execute();
         } catch (SQLException e) {
             throw new PersistenceException(e);
@@ -43,7 +43,7 @@ public class BukkitCauldronDataType implements SqlStoredData.Findable<Completabl
     public void update(BukkitCauldron newValue, Connection connection) throws PersistenceException {
         try (PreparedStatement preparedStatement = connection.prepareStatement(statements.get(SqlStatements.Type.UPDATE))) {
             BreweryLocation location = newValue.position();
-            preparedStatement.setString(1, BrewImpl.SERIALIZER.serialize(newValue.getBrew()).toString());
+            preparedStatement.setString(1, BrewImpl.SERIALIZER.serialize(newValue.getBrew(), BukkitIngredientManager.INSTANCE).toString());
             preparedStatement.setInt(2, location.x());
             preparedStatement.setInt(3, location.y());
             preparedStatement.setInt(4, location.z());

@@ -20,7 +20,7 @@ public class BrewingStepSerializer {
 
     public static final BrewingStepSerializer INSTANCE = new BrewingStepSerializer();
 
-    public JsonObject serialize(BrewingStep step) {
+    public JsonObject serialize(BrewingStep step, IngredientManager<?> ingredientManager) {
         JsonObject object = new JsonObject();
         object.addProperty("type", step.stepType().name().toLowerCase(Locale.ROOT));
         switch (step) {
@@ -34,13 +34,13 @@ public class BrewingStepSerializer {
             ) -> {
                 object.add("brew_time", Moment.SERIALIZER.serialize(brewTime));
                 object.addProperty("cauldron_type", cauldronType.key().toString());
-                object.add("ingredients", IngredientUtil.ingredientsToJson((Map<Ingredient, Integer>) ingredients));
+                object.add("ingredients", IngredientUtil.ingredientsToJson((Map<Ingredient, Integer>) ingredients, ingredientManager));
             }
             case DistillStepImpl(int runs) -> {
                 object.addProperty("runs", runs);
             }
             case MixStepImpl(Moment time, Map<? extends Ingredient, Integer> ingredients) -> {
-                object.add("ingredients", IngredientUtil.ingredientsToJson((Map<Ingredient, Integer>) ingredients));
+                object.add("ingredients", IngredientUtil.ingredientsToJson((Map<Ingredient, Integer>) ingredients, ingredientManager));
                 object.add("mix_time", Moment.SERIALIZER.serialize(time));
             }
             default -> throw new IllegalStateException("Unexpected value: " + step);

@@ -11,6 +11,7 @@ import dev.jsinco.brewery.configuration.IngredientsSection;
 import dev.jsinco.brewery.util.MessageUtil;
 import io.papermc.paper.persistence.PersistentDataContainerView;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
@@ -62,10 +63,10 @@ public class BreweryIngredient implements BaseIngredient {
             return Optional.empty();
         }
         Double score = dataContainer.get(BrewAdapter.BREWERY_SCORE, PersistentDataType.DOUBLE);
-        String displayName = dataContainer.get(BrewAdapter.BREWERY_DISPLAY_NAME, PersistentDataType.STRING);
+        String displayNameString = dataContainer.get(BrewAdapter.BREWERY_DISPLAY_NAME, PersistentDataType.STRING);
         BreweryKey breweryKey = BreweryKey.parse(key);
-        displayName = displayName == null ? breweryKey.key() : displayName;
-        BaseIngredient baseIngredient = new BreweryIngredient(breweryKey, displayName);
+        Component displayName = displayNameString == null ? Component.text(breweryKey.key()) : MiniMessage.miniMessage().deserialize(displayNameString);
+        BaseIngredient baseIngredient = new BreweryIngredient(breweryKey, displayNameString);
         ImmutableMap.Builder<IngredientMeta<?>, Object> extraBuilder = new ImmutableMap.Builder<>();
         extraBuilder.put(IngredientMeta.DISPLAY_NAME_OVERRIDE, displayName);
         if (score != null) {

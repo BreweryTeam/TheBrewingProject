@@ -61,7 +61,7 @@ public class BukkitDistilleryBrewDataType implements
             preparedStatement.setBytes(4, DecoderEncoder.asBytes(distilleryContext.worldUuid()));
             preparedStatement.setInt(5, distilleryContext.inventoryPos());
             preparedStatement.setBoolean(6, distilleryContext.distillate());
-            preparedStatement.setString(7, BrewImpl.SERIALIZER.serialize(brew).toString());
+            preparedStatement.setString(7, BrewImpl.SERIALIZER.serialize(brew, BukkitIngredientManager.INSTANCE).toString());
             preparedStatement.execute();
         } catch (SQLException e) {
             throw new PersistenceException(e);
@@ -89,7 +89,7 @@ public class BukkitDistilleryBrewDataType implements
         try (PreparedStatement preparedStatement = connection.prepareStatement(statements.get(SqlStatements.Type.UPDATE))) {
             Brew brew = newValue.first();
             DistilleryContext distilleryContext = newValue.second();
-            preparedStatement.setString(1, BrewImpl.SERIALIZER.serialize(brew).toString());
+            preparedStatement.setString(1, BrewImpl.SERIALIZER.serialize(brew, BukkitIngredientManager.INSTANCE).toString());
             preparedStatement.setInt(2, distilleryContext.uniqueX());
             preparedStatement.setInt(3, distilleryContext.uniqueY());
             preparedStatement.setInt(4, distilleryContext.uniqueZ());
