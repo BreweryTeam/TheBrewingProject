@@ -227,7 +227,7 @@ public class BrewingStepPdcType implements PersistentDataType<byte[], BrewingSte
 
     public void encodeIngredients(@NotNull Map<? extends Ingredient, Integer> ingredients, OutputStream outputStream) {
         byte[][] bytesArray = ingredients.entrySet().stream()
-                .map(entry -> entry.getKey().getKey() + "/" + entry.getValue())
+                .map(entry -> BukkitIngredientManager.INSTANCE.serializeIngredient(entry.getKey()) + "/" + entry.getValue())
                 .map(string -> string.getBytes(StandardCharsets.UTF_8))
                 .toArray(byte[][]::new);
         try {
@@ -248,7 +248,7 @@ public class BrewingStepPdcType implements PersistentDataType<byte[], BrewingSte
         }
         Arrays.stream(bytesArray)
                 .map(bytes -> new String(bytes, StandardCharsets.UTF_8))
-                .map(BukkitIngredientManager.INSTANCE::getIngredientWithAmount)
+                .map(ingredientString -> BukkitIngredientManager.INSTANCE.getIngredientWithAmount(ingredientString, true))
                 .forEach(ingredientAmountPair -> IngredientManager.insertIngredientIntoMap(ingredients, ingredientAmountPair.join()));
         return ingredients;
     }

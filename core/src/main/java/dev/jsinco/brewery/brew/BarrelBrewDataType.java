@@ -37,7 +37,7 @@ public abstract class BarrelBrewDataType<I> implements
             preparedStatement.setInt(3, context.uniqueZ);
             preparedStatement.setBytes(4, DecoderEncoder.asBytes(context.worldUuid));
             preparedStatement.setInt(5, context.inventoryPos);
-            preparedStatement.setString(6, BrewImpl.SERIALIZER.serialize(brew).toString());
+            preparedStatement.setString(6, BrewImpl.SERIALIZER.serialize(brew, getIngredientManager()).toString());
             preparedStatement.execute();
         } catch (SQLException e) {
             throw new PersistenceException(e);
@@ -93,7 +93,7 @@ public abstract class BarrelBrewDataType<I> implements
         try (PreparedStatement preparedStatement = connection.prepareStatement(statements.get(SqlStatements.Type.UPDATE))) {
             BarrelContext context = newValue.second();
             Brew brew = newValue.first();
-            preparedStatement.setString(1, BrewImpl.SERIALIZER.serialize(brew).toString());
+            preparedStatement.setString(1, BrewImpl.SERIALIZER.serialize(brew, getIngredientManager()).toString());
             preparedStatement.setInt(2, context.uniqueX);
             preparedStatement.setInt(3, context.uniqueY);
             preparedStatement.setInt(4, context.uniqueZ);
