@@ -1,14 +1,16 @@
 package dev.jsinco.brewery.bukkit.ingredient;
 
 import com.google.common.collect.ImmutableMap;
+import dev.jsinco.brewery.api.brew.BrewQuality;
 import dev.jsinco.brewery.api.ingredient.BaseIngredient;
-import dev.jsinco.brewery.api.ingredient.IngredientMeta;
 import dev.jsinco.brewery.api.ingredient.Ingredient;
+import dev.jsinco.brewery.api.ingredient.IngredientMeta;
 import dev.jsinco.brewery.api.ingredient.IngredientWithMeta;
+import dev.jsinco.brewery.api.recipe.RecipeResult;
 import dev.jsinco.brewery.api.util.BreweryKey;
+import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.bukkit.brew.BrewAdapter;
 import dev.jsinco.brewery.configuration.IngredientsSection;
-import dev.jsinco.brewery.util.MessageUtil;
 import io.papermc.paper.persistence.PersistentDataContainerView;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
@@ -22,11 +24,9 @@ import java.util.concurrent.CompletableFuture;
 
 public class BreweryIngredient implements BaseIngredient {
     protected final BreweryKey ingredientKey;
-    private final String displayName;
 
-    public BreweryIngredient(BreweryKey ingredientKey, String displayName) {
+    public BreweryIngredient(BreweryKey ingredientKey) {
         this.ingredientKey = ingredientKey;
-        this.displayName = displayName;
     }
 
     @Override
@@ -36,7 +36,10 @@ public class BreweryIngredient implements BaseIngredient {
 
     @Override
     public @NotNull Component displayName() {
-        return MessageUtil.miniMessage(displayName);
+        return TheBrewingProject.getInstance().getRecipeRegistry().getRecipe(ingredientKey.minimalized())
+                .map(recipe -> recipe.getRecipeResult(BrewQuality.EXCELLENT))
+                .map(RecipeResult::displayName)
+                .orElseGet(() -> Component.text(ingredientKey.minimalized()));
     }
 
     @Override
@@ -63,12 +66,14 @@ public class BreweryIngredient implements BaseIngredient {
             return Optional.empty();
         }
         Double score = dataContainer.get(BrewAdapter.BREWERY_SCORE, PersistentDataType.DOUBLE);
-        String displayNameString = dataContainer.get(BrewAdapter.BREWERY_DISPLAY_NAME, PersistentDataType.STRING);
         BreweryKey breweryKey = BreweryKey.parse(key);
-        Component displayName = displayNameString == null ? Component.text(breweryKey.key()) : MiniMessage.miniMessage().deserialize(displayNameString);
-        BaseIngredient baseIngredient = new BreweryIngredient(breweryKey, displayNameString);
+        BaseIngredient baseIngredient = new BreweryIngredient(breweryKey);
         ImmutableMap.Builder<IngredientMeta<?>, Object> extraBuilder = new ImmutableMap.Builder<>();
-        extraBuilder.put(IngredientMeta.DISPLAY_NAME, displayName);
+        String displayNameString = dataContainer.get(BrewAdapter.BREWERY_DISPLAY_NAME, PersistentDataType.STRING);
+        if(displayNameString != null) {
+            Component displayName = MiniMessage.miniMessage().deserialize(displayNameString);
+            extraBuilder.put(IngredientMeta.DISPLAY_NAME, displayName);
+        }
         if (score != null) {
             extraBuilder.put(IngredientMeta.SCORE, score);
         }
@@ -83,7 +88,7 @@ public class BreweryIngredient implements BaseIngredient {
             return Optional.of(IngredientsSection.ingredients()
                     .getIngredient(id));
         }
-        return Optional.<Ingredient>of(new BreweryIngredient(id, id.key()))
+        return Optional.<Ingredient>of(new BreweryIngredient(id))
                 .map(Optional::of)
                 .map(CompletableFuture::completedFuture);
     }
