@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
  */
 public interface IngredientManager<I> {
 
-    Pattern INGREDIENT_META_DATA_RE = Pattern.compile("\\{(.+)\\}");
+    Pattern INGREDIENT_META_DATA_RE = Pattern.compile("\\{(.*)\\}");
     Pattern INGREDIENT_META_DATA_ELEMENT_RE = Pattern.compile("([^,{}]+)=(.+)");
 
     /**
