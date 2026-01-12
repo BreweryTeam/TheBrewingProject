@@ -68,7 +68,7 @@ public class BreweryIngredient implements BaseIngredient {
         Component displayName = displayNameString == null ? Component.text(breweryKey.key()) : MiniMessage.miniMessage().deserialize(displayNameString);
         BaseIngredient baseIngredient = new BreweryIngredient(breweryKey, displayNameString);
         ImmutableMap.Builder<IngredientMeta<?>, Object> extraBuilder = new ImmutableMap.Builder<>();
-        extraBuilder.put(IngredientMeta.DISPLAY_NAME_OVERRIDE, displayName);
+        extraBuilder.put(IngredientMeta.DISPLAY_NAME, displayName);
         if (score != null) {
             extraBuilder.put(IngredientMeta.SCORE, score);
         }

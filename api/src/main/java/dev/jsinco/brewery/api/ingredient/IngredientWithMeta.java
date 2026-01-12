@@ -25,7 +25,7 @@ public record IngredientWithMeta(Ingredient ingredient,
 
     @Override
     public @NotNull Component displayName() {
-        Component override = get(IngredientMeta.DISPLAY_NAME_OVERRIDE);
+        Component override = get(IngredientMeta.DISPLAY_NAME);
         if (override == null) {
             return ingredient.displayName();
         }

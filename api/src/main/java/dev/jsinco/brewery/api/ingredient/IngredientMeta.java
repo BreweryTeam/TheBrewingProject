@@ -12,8 +12,8 @@ public record IngredientMeta<T>(BreweryKey key, Serializer<T> serializer) implem
             BreweryKey.parse("score"),
             Serializer.compile(String::valueOf, Double::parseDouble, Double.class::isInstance)
     );
-    public static IngredientMeta<Component> DISPLAY_NAME_OVERRIDE = new IngredientMeta<>(
-            BreweryKey.parse("display_name_override"),
+    public static IngredientMeta<Component> DISPLAY_NAME = new IngredientMeta<>(
+            BreweryKey.parse("display_name"),
             Serializer.compile(MiniMessage.miniMessage()::serialize, MiniMessage.miniMessage()::deserialize, Component.class::isInstance)
     );
 }
