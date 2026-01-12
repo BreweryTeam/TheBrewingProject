@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 public interface IngredientManager<I> {
 
     Pattern INGREDIENT_META_DATA_RE = Pattern.compile("\\{(.+)\\}");
-    Pattern INGREDIENT_META_DATA_ELEMENT_RE = Pattern.compile("([^,{}]+)=([^,]+)");
+    Pattern INGREDIENT_META_DATA_ELEMENT_RE = Pattern.compile("([^,{}]+)=(.+)");
 
     /**
      * Don't use this method on startup, expect unexpected behavior if you do
@@ -59,21 +59,59 @@ public interface IngredientManager<I> {
         }
         String meta = matcher.group(1);
         String id = matcher.replaceAll("");
+        if(meta.isBlank()) {
+            return getIngredient(id);
+        }
         ImmutableMap.Builder<IngredientMeta<?>, Object> metaBuilder = new ImmutableMap.Builder<>();
-        for (String extraElement : meta.split(",")) {
-            Matcher elementMatcher = INGREDIENT_META_DATA_ELEMENT_RE.matcher(extraElement);
-            Preconditions.checkArgument(elementMatcher.matches(), "Invalid meta ingredient data, invalid pattern: " + extraElement);
-            String key = elementMatcher.group(1).strip();
-            String value = elementMatcher.group(2).strip();
-            IngredientMeta<?> ingredientMeta = BreweryRegistry.INGREDIENT_META.get(BreweryKey.parse(key));
-            Preconditions.checkArgument(ingredientMeta != null, "Invalid meta ingredient data, unknown key: " + key);
-            Object deserialized = ingredientMeta.serializer().deserialize(value);
-            metaBuilder.put(ingredientMeta, deserialized);
+        StringBuilder metaElementBuilder = new StringBuilder();
+        boolean inQuotes = false;
+        boolean escaping = false;
+        int curlyBracketsDepth = 0;
+        for (char character : meta.toCharArray()) {
+            if (character == '\\' && inQuotes) {
+                escaping = true;
+                continue;
+            }
+            if (!escaping && character == '"') {
+                inQuotes = !inQuotes;
+                continue;
+            }
+            if (!inQuotes && character == '{') {
+                curlyBracketsDepth++;
+            }
+            if (!inQuotes && character == '}') {
+                curlyBracketsDepth--;
+            }
+            if (curlyBracketsDepth < 0) {
+                throw new IllegalArgumentException("Invalid syntax, expected leading curly brace");
+            }
+            escaping = false;
+            if(!inQuotes && curlyBracketsDepth == 0 && character == ',') {
+                String metaElement = metaElementBuilder.toString();
+                addMeta(metaElement, metaBuilder);
+                metaElementBuilder = new StringBuilder();
+                continue;
+            }
+            metaElementBuilder.append(character);
+        }
+        if(!metaElementBuilder.isEmpty()) {
+            addMeta(metaElementBuilder.toString(), metaBuilder);
         }
         return getIngredient(id)
                 .thenApply(ingredientOptional -> ingredientOptional
                         .map(ingredient -> new IngredientWithMeta(ingredient, metaBuilder.build()))
                 );
+    }
+
+    private void addMeta(String metaElement, ImmutableMap.Builder<IngredientMeta<?>, Object> metaBuilder){
+        Matcher elementMatcher = INGREDIENT_META_DATA_ELEMENT_RE.matcher(metaElement);
+        Preconditions.checkArgument(elementMatcher.matches(), "Invalid ingredient meta pattern: " + metaElement);
+        String key = elementMatcher.group(1).strip();
+        String value = elementMatcher.group(2).strip();
+        IngredientMeta<?> ingredientMeta = BreweryRegistry.INGREDIENT_META.get(BreweryKey.parse(key));
+        Preconditions.checkArgument(ingredientMeta != null, "Invalid ingredient meta, unknown key: " + key);
+        Object deserialized = ingredientMeta.serializer().deserialize(value);
+        metaBuilder.put(ingredientMeta, deserialized);
     }
 
     /**
@@ -139,12 +177,11 @@ public interface IngredientManager<I> {
     }
 
 
-
     /**
      * Parse a list of strings into a map of ingredients with runs
      *
      * @param stringList A list of strings with valid formatting, see {@link #getIngredientWithAmount(String)}
-     * @param withMeta True if meta parsing is allowed
+     * @param withMeta   True if meta parsing is allowed
      * @return A map representing ingredients with runs
      * @throws IllegalArgumentException if there's any invalid ingredient string
      */
