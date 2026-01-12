@@ -14,6 +14,7 @@ public record IngredientMeta<T>(BreweryKey key, Serializer<T> serializer) implem
     );
     public static IngredientMeta<Component> DISPLAY_NAME = new IngredientMeta<>(
             BreweryKey.parse("display_name"),
-            Serializer.compile(MiniMessage.miniMessage()::serialize, MiniMessage.miniMessage()::deserialize, Component.class::isInstance)
+            Serializer.fork(MiniMessage.miniMessage()::serialize, MiniMessage.miniMessage()::deserialize, Component.class::isInstance,
+                    new Serializer.StringSerializer())
     );
 }
