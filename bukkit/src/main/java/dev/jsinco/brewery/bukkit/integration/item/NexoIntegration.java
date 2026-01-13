@@ -35,18 +35,17 @@ public class NexoIntegration implements ItemIntegration, Listener {
         return NexoItems.itemFromId(id) != null;
     }
 
-    public @Nullable Component displayName(String itemsAdderId) {
+    public @Nullable Component displayName(String nexoId) {
         if (!ENABLED) {
             return null;
         }
-        ItemBuilder itemBuilder = NexoItems.itemFromId(itemsAdderId);
+        ItemBuilder itemBuilder = NexoItems.itemFromId(nexoId);
         if (itemBuilder == null) {
             return null;
         }
-        return ClassUtil.<Component>invoke(itemBuilder, "getDisplayName")
-                .or(() -> Optional.ofNullable(itemBuilder.getCustomName()))
+        return Optional.ofNullable(itemBuilder.getCustomName())
                 .or(() -> Optional.ofNullable(itemBuilder.getItemName()))
-                .orElseGet(() -> Component.text(itemsAdderId));
+                .orElseGet(() -> Component.text(nexoId));
     }
 
     @Override
