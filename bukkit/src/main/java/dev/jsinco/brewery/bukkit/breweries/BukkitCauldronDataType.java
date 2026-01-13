@@ -9,6 +9,8 @@ import dev.jsinco.brewery.database.sql.SqlStatements;
 import dev.jsinco.brewery.database.sql.SqlStoredData;
 import dev.jsinco.brewery.util.DecoderEncoder;
 import dev.jsinco.brewery.api.vector.BreweryLocation;
+import dev.jsinco.brewery.util.FileUtil;
+import dev.jsinco.brewery.util.FutureUtil;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -19,7 +21,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
-public class BukkitCauldronDataType implements SqlStoredData.Findable<CompletableFuture<BukkitCauldron>, UUID>, SqlStoredData.Insertable<BukkitCauldron>, SqlStoredData.Updateable<BukkitCauldron>, SqlStoredData.Removable<BukkitCauldron> {
+public class BukkitCauldronDataType implements SqlStoredData.Findable<BukkitCauldron, UUID>, SqlStoredData.Insertable<BukkitCauldron>, SqlStoredData.Updateable<BukkitCauldron>, SqlStoredData.Removable<BukkitCauldron> {
 
     public static final BukkitCauldronDataType INSTANCE = new BukkitCauldronDataType();
     private final SqlStatements statements = new SqlStatements("/database/generic/cauldrons");
@@ -69,7 +71,7 @@ public class BukkitCauldronDataType implements SqlStoredData.Findable<Completabl
     }
 
     @Override
-    public List<CompletableFuture<BukkitCauldron>> find(UUID worldUuid, Connection connection) throws PersistenceException {
+    public List<BukkitCauldron> find(UUID worldUuid, Connection connection) throws PersistenceException {
         try (PreparedStatement preparedStatement = connection.prepareStatement(statements.get(SqlStatements.Type.FIND))) {
             preparedStatement.setBytes(1, DecoderEncoder.asBytes(worldUuid));
             ResultSet resultSet = preparedStatement.executeQuery();
@@ -81,7 +83,7 @@ public class BukkitCauldronDataType implements SqlStoredData.Findable<Completabl
                 CompletableFuture<Brew> brewFuture = BrewImpl.SERIALIZER.deserialize(JsonParser.parseString(resultSet.getString("brew")), BukkitIngredientManager.INSTANCE);
                 cauldrons.add(brewFuture.thenApplyAsync(brew -> new BukkitCauldron(brew, new BreweryLocation(x, y, z, worldUuid))));
             }
-            return cauldrons;
+            return FutureUtil.mergeFutures(cauldrons).join();
         } catch (SQLException e) {
             throw new PersistenceException(e);
         }
