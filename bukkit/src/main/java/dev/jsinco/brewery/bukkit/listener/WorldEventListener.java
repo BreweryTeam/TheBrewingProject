@@ -1,5 +1,7 @@
 package dev.jsinco.brewery.bukkit.listener;
 
+import dev.jsinco.brewery.api.util.Logger;
+import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.bukkit.breweries.BreweryRegistry;
 import dev.jsinco.brewery.bukkit.breweries.BukkitCauldron;
 import dev.jsinco.brewery.bukkit.breweries.BukkitCauldronDataType;
@@ -11,7 +13,6 @@ import dev.jsinco.brewery.database.PersistenceException;
 import dev.jsinco.brewery.database.sql.Database;
 import dev.jsinco.brewery.structure.PlacedStructureRegistryImpl;
 import dev.jsinco.brewery.util.FutureUtil;
-import dev.jsinco.brewery.api.util.Logger;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.event.EventHandler;
@@ -22,12 +23,14 @@ import org.bukkit.event.world.WorldUnloadEvent;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
 
 public class WorldEventListener implements Listener {
 
     private final Database database;
     private final PlacedStructureRegistryImpl placedStructureRegistry;
     private final BreweryRegistry registry;
+    private final Executor globalThread = runnable -> Bukkit.getGlobalRegionScheduler().run(TheBrewingProject.getInstance(), ignored -> runnable.run());
 
     public WorldEventListener(Database database, PlacedStructureRegistryImpl placedStructureRegistry, BreweryRegistry registry) {
         this.database = database;
@@ -50,19 +53,22 @@ public class WorldEventListener implements Listener {
 
     private void loadWorld(World world) {
         try {
-            List<BukkitBarrel> barrelList = database.findNow(BukkitBarrelDataType.INSTANCE, world.getUID());
-            for (BukkitBarrel barrel : barrelList) {
-                placedStructureRegistry.registerStructure(barrel.getStructure());
-                registry.registerInventory(barrel);
-            }
-            List<CompletableFuture<BukkitCauldron>> cauldronsFuture = database.findNow(BukkitCauldronDataType.INSTANCE, world.getUID());
-            FutureUtil.mergeFutures(cauldronsFuture)
-                            .thenAcceptAsync(cauldrons -> cauldrons.forEach(registry::addActiveSinglePositionStructure));
-            List<BukkitDistillery> distilleries = database.findNow(BukkitDistilleryDataType.INSTANCE, world.getUID());
-            distilleries.stream()
-                    .map(BukkitDistillery::getStructure)
-                    .forEach(placedStructureRegistry::registerStructure);
-            distilleries.forEach(registry::registerInventory);
+            CompletableFuture<List<BukkitBarrel>> barrelsFuture = database.find(BukkitBarrelDataType.INSTANCE, world.getUID());
+            CompletableFuture<List<BukkitCauldron>> cauldronsFuture = database.find(BukkitCauldronDataType.INSTANCE, world.getUID());
+            CompletableFuture<List<BukkitDistillery>> distilleriesFuture = database.find(BukkitDistilleryDataType.INSTANCE, world.getUID());
+            CompletableFuture.allOf(barrelsFuture, distilleriesFuture, cauldronsFuture)
+                    .thenAcceptAsync(ignored -> {
+                        for (BukkitBarrel barrel : barrelsFuture.join()) {
+                            placedStructureRegistry.registerStructure(barrel.getStructure());
+                            registry.registerInventory(barrel);
+                        }
+                        cauldronsFuture.join().forEach(registry::addActiveSinglePositionStructure);
+                        for(BukkitDistillery distillery : distilleriesFuture.join()) {
+                            placedStructureRegistry.registerStructure(distillery.getStructure());
+                            registry.registerInventory(distillery);
+                        }
+                    }, globalThread);
+
         } catch (PersistenceException e) {
             Logger.logErr(e);
         }
