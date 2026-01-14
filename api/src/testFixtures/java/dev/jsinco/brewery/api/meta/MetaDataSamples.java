@@ -36,6 +36,7 @@ public class MetaDataSamples {
                 // Nested list
                 Arguments.of(named("StringListList", ListMetaDataType.from(MetaDataType.STRING_LIST)), List.of()),
                 Arguments.of(named("StringListList", ListMetaDataType.from(MetaDataType.STRING_LIST)), List.of(List.of("a", "b", "c"), List.of())),
+                Arguments.of(named("DeeplyNestedStringList", deeplyNestedListType()), deeplyNestedList()),
                 // Custom
                 Arguments.of(named("Boolean", BooleanMetaDataType.INSTANCE), true),
                 Arguments.of(named("ComplexObject", ComplexObjectMetaDataType.INSTANCE), new ComplexObject(5, new SimpleObject(7))),
@@ -47,6 +48,20 @@ public class MetaDataSamples {
         return new MetaData()
                 .withMeta(Key.key("test", "string"), MetaDataType.STRING, sampleValue)
                 .withMeta(Key.key("test", "integer"), MetaDataType.INTEGER, 68);
+    }
+    private static Object deeplyNestedList() {
+        Object list = "why";
+        for (int i = 0; i < ListMetaDataType.MAX_DEPTH; i++) {
+            list = List.of(list);
+        }
+        return list;
+    }
+    private static MetaDataType<?, ?> deeplyNestedListType() {
+        MetaDataType<?, ?> type = MetaDataType.STRING;
+        for (int i = 0; i < ListMetaDataType.MAX_DEPTH; i++) {
+            type = ListMetaDataType.from(type);
+        }
+        return type;
     }
     private static List<ComplexObject> sampleComplexList() {
         return List.of(

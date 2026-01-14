@@ -18,7 +18,6 @@ public class MetaSerializerTest {
         MetaData meta = new MetaData().withMeta(testKey, type, testValue);
 
         JsonObject json = MetaSerializer.INSTANCE.serialize(meta);
-        System.out.println(json);
         MetaData retrievedMeta = MetaSerializer.INSTANCE.deserialize(json);
 
         assertEquals(meta, retrievedMeta, "Retrieved meta should match the written meta");

@@ -12,8 +12,11 @@ import net.kyori.adventure.key.Key;
  *     Users can implement this interface to store custom, more complex types.
  *     See {@link BooleanMetaDataType} for an example.
  * </p>
- * @param <P> The primitive Java type that is stored when serialized,
- *           <strong>must absolutely be one of the primitive types listed in this interface!</strong>
+ * <p>
+ *     The primitive Java type {@code <P>} <strong>must absolutely be one of the primitive types listed in this
+ *     interface!</strong> Additionally, List primitives <strong>must</strong> be instances of {@link ListMetaDataType}.
+ * </p>
+ * @param <P> The primitive Java type that is stored when serialized
  * @param <C> The Java type that is retrieved when using {@link MetaContainer#meta(Key, MetaDataType)}
  */
 public interface MetaDataType<P, C> {
