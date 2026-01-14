@@ -59,7 +59,7 @@ public class BrewingStepUtil {
             if (ingredient instanceof IngredientWithMeta ingredientWithMeta) {
                 Double score = ingredientWithMeta.get(IngredientMeta.SCORE);
                 ingredient = ingredientWithMeta.derivatives().getFirst();
-                if (score != null) {
+                if (score != null && modifiedActual.containsKey(ingredient)) {
                     int amount = modifiedActual.get(ingredient);
                     ingredientScoreSum += score * amount;
                     amountOfScoredIngredients += amount;
@@ -102,8 +102,8 @@ public class BrewingStepUtil {
         ingredients.entrySet()
                 .stream()
                 .map(entry -> {
-                    if (entry.getKey() instanceof ComplexIngredient complexIngredient) {
-                        return new Pair<>((Ingredient) complexIngredient.derivatives().getFirst(), entry.getValue());
+                    if (entry.getKey() instanceof IngredientWithMeta ingredientWithMeta) {
+                        return new Pair<>((Ingredient) ingredientWithMeta.derivatives().getFirst(), entry.getValue());
                     } else {
                         return new Pair<>(entry.getKey(), entry.getValue());
                     }
