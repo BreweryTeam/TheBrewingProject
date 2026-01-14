@@ -17,7 +17,6 @@ import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -29,7 +28,7 @@ import java.util.regex.Pattern;
 
 public class IngredientsArgument implements CustomArgumentType.Converted<Map<Ingredient, Integer>, String> {
 
-    private static final Pattern INGREDIENTS_PATTERN = Pattern.compile("(([^ ,]+[ ,])*)([^ ,]*)");
+    private static final Pattern INGREDIENTS_PATTERN = Pattern.compile("(([^ ,]+[ ,] ?)*)([^ ,]*)");
     private static final SimpleCommandExceptionType TIMEOUT = new SimpleCommandExceptionType(
             MessageComponentSerializer.message().serialize(Component.text("Command timed out, another integrated plugin probably failed on startup"))
     );
@@ -69,6 +68,7 @@ public class IngredientsArgument implements CustomArgumentType.Converted<Map<Ing
                 if (!next.isEmpty()) {
                     output.add(next);
                 }
+                continue;
             }
             if (character == '{') {
                 curlyBracketsDepth++;
@@ -84,7 +84,7 @@ public class IngredientsArgument implements CustomArgumentType.Converted<Map<Ing
         if (curlyBracketsDepth > 0) {
             throw INVALID_SYNTAX.create();
         }
-        if(!builder.isEmpty()) {
+        if (!builder.isEmpty()) {
             output.add(builder.toString());
         }
         return output;
@@ -115,9 +115,7 @@ public class IngredientsArgument implements CustomArgumentType.Converted<Map<Ing
                 .map(ingredientKey -> ingredientKey.replaceAll("^minecraft:", ""))
                 .filter(ingredientKey -> ingredientKey.startsWith(remainingLowerCase))
                 .map(string -> "\"" + (beforeRemaining == null ? "" : beforeRemaining) + string)
-                .forEach(string -> {
-                    builder.suggest(string);
-                });
+                .forEach(builder::suggest);
         return builder.buildFuture();
     }
 }
