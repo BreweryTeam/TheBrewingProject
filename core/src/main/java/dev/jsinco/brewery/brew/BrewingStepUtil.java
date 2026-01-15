@@ -2,9 +2,13 @@ package dev.jsinco.brewery.brew;
 
 import dev.jsinco.brewery.api.ingredient.*;
 import dev.jsinco.brewery.api.util.Pair;
+import dev.jsinco.brewery.util.IngredientUtil;
 import org.jspecify.annotations.Nullable;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 public class BrewingStepUtil {
 
@@ -14,101 +18,97 @@ public class BrewingStepUtil {
     }
 
     public static double getIngredientsScore(Map<Ingredient, Integer> target, Map<Ingredient, Integer> actual) {
-        List<Pair<Double, Integer>> customScores = actual.entrySet().stream()
-                .filter(entry -> entry.getKey() instanceof IngredientWithMeta ingredientWithMeta && ingredientWithMeta.get(IngredientMeta.SCORE) != null)
-                .map(entry -> new Pair<>(((IngredientWithMeta) entry.getKey()).get(IngredientMeta.SCORE), entry.getValue()))
-                .toList();
-        Pair<Double, Integer> scoredIngredientPair = customScores.stream().reduce(new Pair<>(1D, 1),
-                (pair1, pair2) -> new Pair<>(pair1.first() * Math.pow(pair2.first(), pair2.second()), pair1.second() + pair2.second()));
-        // Average out t
-        double output = Math.pow(scoredIngredientPair.first(), (double) 1 / scoredIngredientPair.second());
-        Map<Ingredient, Integer> modifiedTarget = compressIngredients(target);
-        Map<Ingredient, Integer> modifiedActual = compressIngredients(actual);
-
-        List<@Nullable Double> ingredientScores = new ArrayList<>();
-        for (Map.Entry<Ingredient, Integer> targetEntry : List.copyOf(modifiedTarget.entrySet())) {
+        Pair<Double, Integer> actualIngredientsScore = actual.entrySet()
+                .stream()
+                .flatMap(entry ->
+                        IngredientUtil.score(entry.getKey()).map(score -> new Pair<>(score * entry.getValue(), entry.getValue())).stream()
+                ).reduce(new Pair<>(0D, 0), (pair1, pair2) -> new Pair<>(pair1.first() + pair2.first(), pair1.second() + pair2.second()));
+        Map<BaseIngredient, Integer> modifiedActual = IngredientUtil.sanitizeIngredients(actual);
+        double ingredientScoreCumulativeSum = actualIngredientsScore.first();
+        int scoredIngredientAmount = actualIngredientsScore.second();
+        double output = 1D;
+        for (Map.Entry<Ingredient, Integer> targetEntry : List.copyOf(target.entrySet())) {
             Ingredient ingredient = targetEntry.getKey();
-            int actualAmount;
-            if (ingredient instanceof IngredientGroup ingredientGroup) {
-                Pair<Integer, Double> ingredientGroupMatch = computeIngredientGroupMatch(ingredientGroup, modifiedActual, modifiedTarget, targetEntry.getValue());
-                actualAmount = ingredientGroupMatch.first();
-                ingredientScores.add(ingredientGroupMatch.second());
-            } else {
-                actualAmount = modifiedActual.containsKey(ingredient) ? modifiedActual.remove(ingredient) : 0;
-            }
-            if (actualAmount == 0) {
+            Pair<Integer, @Nullable Double> matchResult = computeScoreAndAmount(ingredient, modifiedActual, target, targetEntry.getValue());
+            if (matchResult.first() == 0) {
                 return 0;
             }
-            output *= nearbyValueScore(targetEntry.getValue(), actualAmount);
+            Double score = matchResult.second();
+            if (score != null) {
+                ingredientScoreCumulativeSum += score * matchResult.first();
+                scoredIngredientAmount += matchResult.first();
+            }
+            output *= nearbyValueScore(targetEntry.getValue(), matchResult.first());
         }
         if (!modifiedActual.isEmpty()) {
             return 0D;
         }
-        double ingredientScore = ingredientScores.isEmpty() ? 1D : ingredientScores.stream()
-                .filter(Objects::nonNull)
-                .reduce(1D, (aDouble, aDouble2) -> aDouble * aDouble2);
+        double ingredientScore = Math.pow(ingredientScoreCumulativeSum / scoredIngredientAmount, 1);
         return output * ingredientScore;
     }
 
-    private static Pair<Integer, @Nullable Double> computeIngredientGroupMatch(IngredientGroup ingredientGroup, Map<Ingredient, Integer> modifiedActual, Map<Ingredient, Integer> targetIngredients, int target) {
+    private static Pair<Integer, @Nullable Double> computeScoreAndAmount(Ingredient ingredient, Map<BaseIngredient, Integer> actual, Map<Ingredient, Integer> target, int targetAmount) {
+        if (ingredient instanceof IngredientGroup ingredientGroup) {
+            return computeIngredientGroupMatch(ingredientGroup, actual, target, targetAmount);
+        }
+        Optional<? extends Ingredient> ingredientMatchOptional = ingredient.findMatch(actual.keySet());
+        if (ingredientMatchOptional.isPresent()) {
+            Ingredient ingredientMatch = ingredientMatchOptional.get();
+            int amount = actual.remove(ingredientMatch.toBaseIngredient());
+            return new Pair<>(amount,
+                    IngredientUtil.score(ingredientMatch)
+                            .orElse(null)
+            );
+        }
+        return new Pair<>(0, null);
+    }
+
+    private static Pair<Integer, @Nullable Double> computeIngredientGroupMatch(IngredientGroup ingredientGroup, Map<BaseIngredient, Integer> actual, Map<Ingredient, Integer> target, int targetAmount) {
         int ingredientAmount = 0;
         double ingredientScoreSum = 0D;
         int amountOfScoredIngredients = 0;
         List<Ingredient> postProcess = new ArrayList<>();
         for (Ingredient ingredient : ingredientGroup.alternatives()) {
-            if (ingredient instanceof IngredientWithMeta ingredientWithMeta) {
+            Optional<? extends Ingredient> optionalIngredient = ingredient.findMatch(actual.keySet());
+            if (optionalIngredient.isEmpty()) {
+                continue;
+            }
+            Ingredient ingredientMatch = optionalIngredient.get();
+            BaseIngredient baseIngredient = ingredientMatch.toBaseIngredient();
+            if (ingredientMatch instanceof IngredientWithMeta ingredientWithMeta) {
                 Double score = ingredientWithMeta.get(IngredientMeta.SCORE);
-                ingredient = ingredientWithMeta.derivatives().getFirst();
-                if (score != null && modifiedActual.containsKey(ingredient)) {
-                    int amount = modifiedActual.get(ingredient);
+                if (score != null && actual.containsKey(baseIngredient)) {
+                    int amount = actual.get(baseIngredient);
                     ingredientScoreSum += score * amount;
                     amountOfScoredIngredients += amount;
                 }
             }
-            if (!modifiedActual.containsKey(ingredient)) {
-                continue;
-            }
-            if (targetIngredients.containsKey(ingredient)) {
+
+            if (target.containsKey(ingredient)) {
                 // Prioritize explicitly specified ingredients first
                 postProcess.add(ingredient);
                 continue;
             }
-            ingredientAmount += modifiedActual.remove(ingredient);
+            ingredientAmount += actual.remove(baseIngredient);
         }
         for (Ingredient ingredient : postProcess) {
-            if (target <= ingredientAmount) {
+            if (targetAmount <= ingredientAmount) {
                 break;
             }
-
-            int amount = modifiedActual.getOrDefault(ingredient, 0);
-            int increase = Math.min(amount, target - ingredientAmount);
+            BaseIngredient baseIngredient = ingredient.toBaseIngredient();
+            int amount = actual.getOrDefault(baseIngredient, 0);
+            int increase = Math.min(amount, targetAmount - ingredientAmount);
             if (ingredient instanceof IngredientWithMeta ingredientWithMeta && ingredientWithMeta.get(IngredientMeta.SCORE) instanceof Double score) {
                 ingredientScoreSum += score * increase;
-                ingredient = ingredientWithMeta.derivatives().getFirst();
                 amountOfScoredIngredients += increase;
             }
             ingredientAmount += increase;
             if (amount == increase) {
-                modifiedActual.remove(ingredient);
+                actual.remove(baseIngredient);
             } else {
-                modifiedActual.put(ingredient, amount - increase);
+                actual.put(baseIngredient, amount - increase);
             }
         }
         return new Pair<>(ingredientAmount, amountOfScoredIngredients == 0 ? null : ingredientScoreSum / amountOfScoredIngredients);
-    }
-
-    private static Map<Ingredient, Integer> compressIngredients(Map<Ingredient, Integer> ingredients) {
-        Map<Ingredient, Integer> output = new HashMap<>();
-        ingredients.entrySet()
-                .stream()
-                .map(entry -> {
-                    if (entry.getKey() instanceof IngredientWithMeta ingredientWithMeta) {
-                        return new Pair<>((Ingredient) ingredientWithMeta.derivatives().getFirst(), entry.getValue());
-                    } else {
-                        return new Pair<>(entry.getKey(), entry.getValue());
-                    }
-                })
-                .forEach(pair -> IngredientManager.insertIngredientIntoMap(output, pair));
-        return output;
     }
 }

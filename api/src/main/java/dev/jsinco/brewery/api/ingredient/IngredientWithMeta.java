@@ -7,15 +7,16 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 
 public record IngredientWithMeta(Ingredient ingredient,
-                                 Map<IngredientMeta<?>, Object> meta) implements ComplexIngredient {
+                                 Map<IngredientMeta<?>, Object> meta) implements Ingredient {
 
     public IngredientWithMeta {
         for (Map.Entry<IngredientMeta<?>, Object> entry : meta.entrySet()) {
             Preconditions.checkArgument(entry.getKey().serializer().appliesTo(entry.getValue()), "Invalid meta ingredient data '" + entry.getKey().key().minimalized(), "' for: " + entry.getValue());
         }
-        Preconditions.checkArgument(ingredient instanceof BaseIngredient || ingredient instanceof ComplexIngredient, "Ingredient has to extend complex or base ingredient");
     }
 
     @Override
@@ -32,18 +33,32 @@ public record IngredientWithMeta(Ingredient ingredient,
         return override;
     }
 
-    public <T> @Nullable T get(IngredientMeta<T> tKey) {
-        return (T) meta.get(tKey);
+    @Override
+    public Optional<? extends Ingredient> findMatch(Set<BaseIngredient> baseIngredientSet) {
+        return ingredient.findMatch(baseIngredientSet)
+                .map(this::applyTo);
     }
 
     @Override
-    public List<BaseIngredient> derivatives() {
-       if(ingredient instanceof BaseIngredient baseIngredient) {
-           return List.of(baseIngredient);
-       }
-       if(ingredient instanceof ComplexIngredient complexIngredient) {
-           return complexIngredient.derivatives();
-       }
-       throw new IllegalStateException("Unknown ingredient class, has to be base or complex ingredient");
+    public BaseIngredient toBaseIngredient() {
+        return null;
+    }
+
+    /**
+     * Wrap this ingredient with an ingredient with meta instance
+     * @param ingredient Ingredient to wrap
+     * @return Ingredient with meta wrapping the ingredient
+     */
+    public IngredientWithMeta applyTo(Ingredient ingredient) {
+        return new IngredientWithMeta(ingredient, meta);
+    }
+
+    /**
+     * @param metaKey ingredientMetaKey
+     * @return Ingredient meta value, or null if not present
+     * @param <T> Ingredient meta value
+     */
+    public <T> @Nullable T get(IngredientMeta<T> metaKey) {
+        return (T) meta.get(metaKey);
     }
 }

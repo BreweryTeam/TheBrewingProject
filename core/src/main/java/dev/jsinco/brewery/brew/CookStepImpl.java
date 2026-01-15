@@ -25,7 +25,7 @@ public record CookStepImpl(Moment time, Map<? extends Ingredient, Integer> ingre
     }
 
     @Override
-    public CookStepImpl withIngredients(Map<Ingredient, Integer> ingredients) {
+    public CookStepImpl withIngredients(Map<? extends Ingredient, Integer> ingredients) {
         return new CookStepImpl(this.time, ingredients, this.cauldronType);
     }
 

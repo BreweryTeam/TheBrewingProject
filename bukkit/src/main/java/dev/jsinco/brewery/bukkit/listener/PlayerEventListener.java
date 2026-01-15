@@ -7,7 +7,6 @@ import dev.jsinco.brewery.api.breweries.StructureHolder;
 import dev.jsinco.brewery.api.effect.DrunkState;
 import dev.jsinco.brewery.api.effect.ModifierConsume;
 import dev.jsinco.brewery.api.effect.modifier.ModifierDisplay;
-import dev.jsinco.brewery.api.ingredient.ComplexIngredient;
 import dev.jsinco.brewery.api.ingredient.Ingredient;
 import dev.jsinco.brewery.api.util.BreweryKey;
 import dev.jsinco.brewery.api.util.Logger;
@@ -306,13 +305,7 @@ public class PlayerEventListener implements Listener {
         if (Config.config().allowUnregisteredIngredients()) {
             return true;
         }
-        Ingredient ingredient = BukkitIngredientManager.INSTANCE.getIngredient(itemStack);
-        if (ingredient instanceof ComplexIngredient complexIngredient) {
-            return complexIngredient.derivatives()
-                    .stream()
-                    .anyMatch(recipeRegistry::isRegisteredIngredient);
-        }
-        return recipeRegistry.isRegisteredIngredient(ingredient);
+        return recipeRegistry.isRegisteredIngredient(BukkitIngredientManager.INSTANCE.getIngredient(itemStack));
     }
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.LOW)

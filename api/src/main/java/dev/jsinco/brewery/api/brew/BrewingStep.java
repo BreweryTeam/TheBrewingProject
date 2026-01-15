@@ -81,7 +81,7 @@ public interface BrewingStep {
          * @param ingredients A map of ingredients with amount
          * @return A new instance of this step with the specified ingredients
          */
-        Cook withIngredients(Map<Ingredient, Integer> ingredients);
+        Cook withIngredients(Map<? extends Ingredient, Integer> ingredients);
     }
 
     interface Distill extends BrewingStep {
@@ -117,7 +117,7 @@ public interface BrewingStep {
          * @param ingredients A map of ingredients with amount
          * @return A new instance of this step with specified ingredients
          */
-        Mix withIngredients(Map<Ingredient, Integer> ingredients);
+        Mix withIngredients(Map<? extends Ingredient, Integer> ingredients);
 
         /**
          * @param time A time (ticks)

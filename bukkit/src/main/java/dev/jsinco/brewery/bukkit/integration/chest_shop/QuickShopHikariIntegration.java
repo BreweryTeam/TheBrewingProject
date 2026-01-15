@@ -2,13 +2,12 @@ package dev.jsinco.brewery.bukkit.integration.chest_shop;
 
 import com.ghostchu.quickshop.api.event.general.ShopItemMatchEvent;
 import dev.jsinco.brewery.api.ingredient.Ingredient;
-import dev.jsinco.brewery.api.ingredient.IngredientMeta;
-import dev.jsinco.brewery.api.ingredient.IngredientWithMeta;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.bukkit.api.integration.ChestShopIntegration;
-import dev.jsinco.brewery.bukkit.ingredient.BreweryIngredient;
+import dev.jsinco.brewery.bukkit.brew.BrewAdapter;
 import dev.jsinco.brewery.bukkit.ingredient.BukkitIngredientManager;
 import dev.jsinco.brewery.util.ClassUtil;
+import dev.jsinco.brewery.util.IngredientUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -32,28 +31,18 @@ public class QuickShopHikariIntegration implements ChestShopIntegration, Listene
 
     @EventHandler(ignoreCancelled = true)
     public void onShopItemMatch(ShopItemMatchEvent event) {
-        event.matches(matches(event.original(), event.comparison()));
+        if (BrewAdapter.isBrew(event.original())) {
+            event.matches(matches(event.original(), event.comparison()));
+        }
     }
 
     private boolean matches(ItemStack originalItem, ItemStack comparisonItem) {
         Ingredient original = BukkitIngredientManager.INSTANCE.getIngredient(originalItem);
-        double originalScore = 1D;
-        if (original instanceof IngredientWithMeta ingredientWithMeta && ingredientWithMeta.get(IngredientMeta.SCORE) instanceof Double score) {
-            originalScore = score;
-            original = ingredientWithMeta.derivatives().getFirst();
-        }
-        if (!(original instanceof BreweryIngredient origininalBreweryIngredient)) {
-            return false;
-        }
+        double originalScore = IngredientUtil.score(original)
+                .orElse(1D);
         Ingredient comparison = BukkitIngredientManager.INSTANCE.getIngredient(comparisonItem);
-        double comparisonScore = 1D;
-        if (comparison instanceof IngredientWithMeta ingredientWithMeta && ingredientWithMeta.get(IngredientMeta.SCORE) instanceof Double score) {
-            comparisonScore = score;
-            comparison = ingredientWithMeta.derivatives().getFirst();
-        }
-        if (!(comparison instanceof BreweryIngredient comparisonBreweryIngredient)) {
-            return false;
-        }
-        return origininalBreweryIngredient.equals(comparisonBreweryIngredient) && comparisonScore > originalScore;
+        double comparisonScore = IngredientUtil.score(comparison)
+                .orElse(1D);
+        return original.toBaseIngredient().equals(original.toBaseIngredient()) && comparisonScore > originalScore;
     }
 }
