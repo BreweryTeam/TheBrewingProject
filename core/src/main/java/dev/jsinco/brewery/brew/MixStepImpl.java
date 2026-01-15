@@ -18,7 +18,7 @@ public record MixStepImpl(Moment time, Map<? extends Ingredient, Integer> ingred
     ).collect(Collectors.toUnmodifiableMap(PartialBrewScore::type, partial -> partial));
 
     @Override
-    public MixStepImpl withIngredients(Map<Ingredient, Integer> ingredients) {
+    public MixStepImpl withIngredients(Map<? extends Ingredient, Integer> ingredients) {
         return new MixStepImpl(this.time, ingredients);
     }
 

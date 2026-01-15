@@ -1,11 +1,13 @@
 package dev.jsinco.brewery.api.recipe;
 
+import dev.jsinco.brewery.api.ingredient.BaseIngredient;
 import dev.jsinco.brewery.api.ingredient.Ingredient;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 import java.util.Optional;
 import java.util.Set;
+import java.util.prefs.BackingStoreException;
 
 /**
  * Some recipes are loaded on a delay, therefore <b>NO RECIPE SHOULD BE ACCESSED ON STARTUP</b>
@@ -66,5 +68,5 @@ public interface RecipeRegistry<I> {
     /**
      * @return All ingredients registered in a recipe
      */
-    Set<Ingredient> registeredIngredients();
+    Set<BaseIngredient> registeredIngredients();
 }

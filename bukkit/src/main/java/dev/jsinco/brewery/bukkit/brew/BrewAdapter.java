@@ -194,8 +194,12 @@ public class BrewAdapter {
     }
 
     public static void applyBrewTags(PersistentDataContainer pdc, Recipe<ItemStack> recipe, double score, String miniMessageName) {
-        pdc.set(BREWERY_TAG, PersistentDataType.STRING, BreweryKey.parse(recipe.getRecipeName()).toString());
+        pdc.set(BREWERY_TAG, PersistentDataType.STRING, BreweryKey.parse(recipe.getRecipeName()).minimalized());
         pdc.set(BREWERY_SCORE, PersistentDataType.DOUBLE, score);
         pdc.set(BREWERY_DISPLAY_NAME, PersistentDataType.STRING, miniMessageName);
+    }
+
+    public static boolean isBrew(ItemStack itemStack) {
+        return itemStack.getPersistentDataContainer().has(BREWERY_TAG, PersistentDataType.STRING);
     }
 }

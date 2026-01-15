@@ -3,10 +3,7 @@ package dev.jsinco.brewery.util;
 import dev.jsinco.brewery.api.brew.BrewingStep;
 import dev.jsinco.brewery.api.ingredient.*;
 
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class IngredientUtil {
 
@@ -14,23 +11,19 @@ public class IngredientUtil {
         throw new UnsupportedOperationException("Utility class");
     }
 
-    public static Map<Ingredient, Integer> sanitizeIngredients(Map<? extends Ingredient, Integer> ingredients) {
-        Map<Ingredient, Integer> output = new HashMap<>();
+    public static Map<BaseIngredient, Integer> sanitizeIngredients(Map<? extends Ingredient, Integer> ingredients) {
+        Map<BaseIngredient, Integer> output = new HashMap<>();
         for (Map.Entry<? extends Ingredient, Integer> entry : ingredients.entrySet()) {
             Ingredient ingredient = entry.getKey();
             if (ingredient instanceof IngredientGroup ingredientGroup) {
                 ingredient = ingredientGroup.alternatives().stream().max(Comparator.comparing(groupIngredient ->
-                        groupIngredient instanceof IngredientWithMeta ingredientWithMeta &&
-                                ingredientWithMeta.get(IngredientMeta.SCORE) instanceof Double score
-                                ? score : 1D
+                        IngredientUtil.score(groupIngredient).orElse(1D)
                 )).orElse(null);
-            } else if (ingredient instanceof ComplexIngredient complexIngredient) {
-                ingredient = complexIngredient.derivatives().getFirst();
             }
             if (ingredient == null) {
                 continue;
             }
-            output.put(ingredient, entry.getValue());
+            output.put(ingredient.toBaseIngredient(), entry.getValue());
         }
         return output;
     }
@@ -47,5 +40,12 @@ public class IngredientUtil {
             case BrewingStep.Cook cook -> cook.withIngredients(sanitizeIngredients(cook.ingredients()));
             default -> step;
         };
+    }
+
+    public static Optional<Double> score(Ingredient ingredient) {
+        if (ingredient instanceof IngredientWithMeta ingredientWithMeta) {
+            return Optional.ofNullable(ingredientWithMeta.get(IngredientMeta.SCORE));
+        }
+        return Optional.empty();
     }
 }

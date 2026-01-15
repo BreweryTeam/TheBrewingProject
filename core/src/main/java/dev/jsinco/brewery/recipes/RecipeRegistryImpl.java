@@ -2,7 +2,7 @@ package dev.jsinco.brewery.recipes;
 
 import com.google.common.base.Preconditions;
 import dev.jsinco.brewery.api.brew.BrewingStep;
-import dev.jsinco.brewery.api.ingredient.ComplexIngredient;
+import dev.jsinco.brewery.api.ingredient.BaseIngredient;
 import dev.jsinco.brewery.api.ingredient.Ingredient;
 import dev.jsinco.brewery.api.ingredient.IngredientGroup;
 import dev.jsinco.brewery.api.recipe.DefaultRecipe;
@@ -21,7 +21,7 @@ public class RecipeRegistryImpl<I> implements RecipeRegistry<I> {
     private Map<String, Recipe<I>> recipes = new ConcurrentHashMap<>();
     private Map<String, DefaultRecipe<I>> defaultRecipes = new HashMap<>();
     private List<DefaultRecipe<I>> defaultRecipeList = new ArrayList<>();
-    private Set<Ingredient> allIngredients = Collections.newSetFromMap(new ConcurrentHashMap<>());
+    private Set<BaseIngredient> allIngredients = Collections.newSetFromMap(new ConcurrentHashMap<>());
 
     public void registerRecipes(@NotNull Map<String, Recipe<I>> recipes) {
         this.recipes = new ConcurrentHashMap<>(recipes);
@@ -78,7 +78,7 @@ public class RecipeRegistryImpl<I> implements RecipeRegistry<I> {
         return Optional.ofNullable(defaultRecipes.get(recipeName));
     }
 
-    private List<Ingredient> getRecipeIngredients(Recipe<?> recipe) {
+    private List<BaseIngredient> getRecipeIngredients(Recipe<?> recipe) {
         return recipe.getSteps()
                 .stream()
                 .filter(BrewingStep.IngredientsStep.class::isInstance)
@@ -88,12 +88,12 @@ public class RecipeRegistryImpl<I> implements RecipeRegistry<I> {
                 .flatMap(Collection::stream)
                 .flatMap(ingredient -> {
                     if (ingredient instanceof IngredientGroup ingredientGroup) {
-                        return ingredientGroup.alternatives().stream();
+                        return ingredientGroup.alternatives().stream()
+                                .map(Ingredient::toBaseIngredient);
                     }
-                    return Stream.of(ingredient);
+                    return Stream.of(ingredient.toBaseIngredient());
                 })
-                .flatMap(ingredient -> ingredient instanceof ComplexIngredient complexIngredient ? complexIngredient.derivatives().stream() : Stream.of(ingredient))
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Override
@@ -118,11 +118,12 @@ public class RecipeRegistryImpl<I> implements RecipeRegistry<I> {
 
     @Override
     public boolean isRegisteredIngredient(Ingredient ingredient) {
-        return allIngredients.contains(ingredient);
+        return ingredient.findMatch(allIngredients)
+                .isPresent();
     }
 
     @Override
-    public Set<Ingredient> registeredIngredients() {
+    public Set<BaseIngredient> registeredIngredients() {
         return allIngredients;
     }
 
