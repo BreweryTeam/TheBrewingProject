@@ -129,7 +129,7 @@ public interface IngredientManager<I> {
         return String.format("%s{%s}", metaIngredient.getKey(),
                 meta.entrySet()
                         .stream()
-                        .map(entry -> entry.getKey().key().minimalized() + "=" + entry.getKey().serializer().serializeSafely(entry.getValue()))
+                        .map(entry -> entry.getKey().key().minimalized() + "=" + entry.getKey().serializer().serialize(entry.getValue()))
                         .collect(Collectors.joining(","))
         );
     }

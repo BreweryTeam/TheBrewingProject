@@ -8,10 +8,12 @@ import java.util.Set;
  */
 public interface BaseIngredient extends Ingredient {
 
+    @Override
     default BaseIngredient toBaseIngredient() {
         return this;
     }
 
+    @Override
     default Optional<? extends Ingredient> findMatch(Set<BaseIngredient> baseIngredientSet) {
         return Optional.of(this)
                 .filter(baseIngredientSet::contains);
