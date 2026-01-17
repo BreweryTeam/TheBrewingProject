@@ -43,7 +43,7 @@ public class BrewingStepUtil {
         if (!modifiedActual.isEmpty()) {
             return 0D;
         }
-        double ingredientScore = Math.pow(ingredientScoreCumulativeSum / scoredIngredientAmount, 1);
+        double ingredientScore = ingredientScoreCumulativeSum > 0 ? ingredientScoreCumulativeSum / scoredIngredientAmount : 1D;
         return output * ingredientScore;
     }
 
@@ -75,9 +75,12 @@ public class BrewingStepUtil {
             }
             Ingredient ingredientMatch = optionalIngredient.get();
             BaseIngredient baseIngredient = ingredientMatch.toBaseIngredient();
+            if (!actual.containsKey(baseIngredient)) {
+                continue;
+            }
             if (ingredientMatch instanceof IngredientWithMeta ingredientWithMeta) {
                 Double score = ingredientWithMeta.get(IngredientMeta.SCORE);
-                if (score != null && actual.containsKey(baseIngredient)) {
+                if (score != null) {
                     int amount = actual.get(baseIngredient);
                     ingredientScoreSum += score * amount;
                     amountOfScoredIngredients += amount;
