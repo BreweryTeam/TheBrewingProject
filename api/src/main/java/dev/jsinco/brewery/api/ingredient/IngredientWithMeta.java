@@ -41,7 +41,7 @@ public record IngredientWithMeta(Ingredient ingredient,
 
     @Override
     public BaseIngredient toBaseIngredient() {
-        return null;
+        return ingredient.toBaseIngredient();
     }
 
     /**
