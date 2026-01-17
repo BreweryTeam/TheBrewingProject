@@ -1,4 +1,4 @@
-package dev.jsinco.brewery.bukkit.api.event;
+package dev.jsinco.brewery.bukkit.api.event.process;
 
 import dev.jsinco.brewery.api.brew.Brew;
 import dev.jsinco.brewery.api.breweries.Cauldron;
@@ -7,7 +7,7 @@ import lombok.Getter;
 import org.bukkit.event.HandlerList;
 import org.jetbrains.annotations.NotNull;
 
-public class BrewMixEvent extends BrewProcessEvent {
+public class BrewCauldronProcessEvent extends BrewProcessEvent {
     private static final HandlerList HANDLERS = new HandlerList();
 
     @Getter
@@ -17,7 +17,7 @@ public class BrewMixEvent extends BrewProcessEvent {
     @Getter
     private final boolean heated;
 
-    public BrewMixEvent(Cauldron cauldron, CauldronType cauldronType, boolean heated, Brew source, Brew result) {
+    public BrewCauldronProcessEvent(Cauldron cauldron, CauldronType cauldronType, boolean heated, Brew source, Brew result) {
         super(source, result);
         this.cauldron = cauldron;
         this.cauldronType = cauldronType;

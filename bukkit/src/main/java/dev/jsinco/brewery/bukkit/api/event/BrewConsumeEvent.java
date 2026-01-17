@@ -16,7 +16,7 @@ import org.jetbrains.annotations.Nullable;
  * This event is not called when a player consumes vanilla items with added modifiers
  * (such as bread reducing alcohol and toxins).
  */
-public class TBPConsumeEvent extends Event implements Cancellable {
+public class BrewConsumeEvent extends Event implements Cancellable {
     private static final HandlerList HANDLERS = new HandlerList();
 
     @Getter
@@ -45,7 +45,7 @@ public class TBPConsumeEvent extends Event implements Cancellable {
     @Setter
     private @Nullable ItemStack replacement;
 
-    public TBPConsumeEvent(Player player, ItemStack item, EquipmentSlot hand, @Nullable ItemStack replacement) {
+    public BrewConsumeEvent(Player player, ItemStack item, EquipmentSlot hand, @Nullable ItemStack replacement) {
         this.player = player;
         this.item = item;
         this.hand = hand;

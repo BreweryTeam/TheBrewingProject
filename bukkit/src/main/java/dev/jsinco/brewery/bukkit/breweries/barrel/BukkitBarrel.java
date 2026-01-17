@@ -17,7 +17,7 @@ import dev.jsinco.brewery.api.vector.BreweryLocation;
 import dev.jsinco.brewery.brew.AgeStepImpl;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.bukkit.api.BukkitAdapter;
-import dev.jsinco.brewery.bukkit.api.event.BrewAgeEvent;
+import dev.jsinco.brewery.bukkit.api.event.process.BrewAgeEvent;
 import dev.jsinco.brewery.bukkit.brew.BrewAdapter;
 import dev.jsinco.brewery.bukkit.breweries.BrewInventoryImpl;
 import dev.jsinco.brewery.bukkit.structure.PlacedBreweryStructure;
@@ -166,7 +166,7 @@ public class BukkitBarrel implements Barrel<BukkitBarrel, ItemStack, Inventory>,
             if (brew == null) {
                 continue;
             }
-            int idx = i;
+            final int idx = i;
             if (!(brew.lastStep() instanceof BrewingStep.Age age) || age.barrelType() != type) {
                 Brew aged = brew.withStep(new AgeStepImpl(new Interval(time, time), this.type));
                 callAgeEvent(brew, aged).ifPresent(result -> inventory.store(result, idx));

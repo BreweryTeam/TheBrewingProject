@@ -17,8 +17,8 @@ import dev.jsinco.brewery.brew.MixStepImpl;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.bukkit.api.BukkitAdapter;
 import dev.jsinco.brewery.api.util.CancelState;
-import dev.jsinco.brewery.bukkit.api.event.BrewMixEvent;
-import dev.jsinco.brewery.bukkit.api.event.CauldronInsertEvent;
+import dev.jsinco.brewery.bukkit.api.event.process.BrewCauldronProcessEvent;
+import dev.jsinco.brewery.bukkit.api.event.transaction.CauldronInsertEvent;
 import dev.jsinco.brewery.bukkit.api.transaction.ItemSource;
 import dev.jsinco.brewery.bukkit.ingredient.BukkitIngredientManager;
 import dev.jsinco.brewery.bukkit.listener.ListenerUtil;
@@ -190,7 +190,7 @@ public class BukkitCauldron implements Cauldron {
                     () -> new MixStepImpl(new Interval(time, time), Map.of(BukkitIngredientManager.INSTANCE.getIngredient(addedItem), 1))
             );
         }
-        BrewMixEvent mixEvent = new BrewMixEvent(this, cauldronType, hot, brew, mixed);
+        BrewCauldronProcessEvent mixEvent = new BrewCauldronProcessEvent(this, cauldronType, hot, brew, mixed);
         if (!mixEvent.callEvent()) {
             return true;
         }
