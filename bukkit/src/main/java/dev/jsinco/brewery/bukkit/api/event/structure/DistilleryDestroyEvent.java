@@ -1,4 +1,4 @@
-package dev.jsinco.brewery.bukkit.api.event;
+package dev.jsinco.brewery.bukkit.api.event.structure;
 
 import dev.jsinco.brewery.api.brew.Brew;
 import dev.jsinco.brewery.api.breweries.DistilleryAccess;

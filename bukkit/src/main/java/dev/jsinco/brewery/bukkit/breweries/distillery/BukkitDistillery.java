@@ -12,7 +12,7 @@ import dev.jsinco.brewery.api.vector.BreweryLocation;
 import dev.jsinco.brewery.brew.DistillStepImpl;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.bukkit.api.BukkitAdapter;
-import dev.jsinco.brewery.bukkit.api.event.BrewDistillEvent;
+import dev.jsinco.brewery.bukkit.api.event.process.BrewDistillEvent;
 import dev.jsinco.brewery.bukkit.brew.BrewAdapter;
 import dev.jsinco.brewery.bukkit.breweries.BrewInventoryImpl;
 import dev.jsinco.brewery.bukkit.structure.BreweryStructure;
