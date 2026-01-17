@@ -1,4 +1,4 @@
-package dev.jsinco.brewery.bukkit.api.event;
+package dev.jsinco.brewery.bukkit.api.event.process;
 
 import dev.jsinco.brewery.api.brew.Brew;
 import dev.jsinco.brewery.api.breweries.BarrelAccess;

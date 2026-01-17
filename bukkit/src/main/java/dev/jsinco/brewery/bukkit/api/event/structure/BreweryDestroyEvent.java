@@ -1,6 +1,7 @@
-package dev.jsinco.brewery.bukkit.api.event;
+package dev.jsinco.brewery.bukkit.api.event.structure;
 
 import dev.jsinco.brewery.api.util.CancelState;
+import dev.jsinco.brewery.bukkit.api.event.PermissibleBreweryEvent;
 import lombok.Getter;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;

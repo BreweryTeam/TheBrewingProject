@@ -3,7 +3,7 @@ package dev.jsinco.brewery.bukkit.listener;
 import dev.jsinco.brewery.api.brew.Brew;
 import dev.jsinco.brewery.api.breweries.InventoryAccessible;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
-import dev.jsinco.brewery.bukkit.api.event.*;
+import dev.jsinco.brewery.bukkit.api.event.transaction.*;
 import dev.jsinco.brewery.bukkit.api.transaction.ItemSource;
 import dev.jsinco.brewery.bukkit.api.transaction.ItemTransaction;
 import dev.jsinco.brewery.bukkit.api.transaction.ItemTransactionSession;

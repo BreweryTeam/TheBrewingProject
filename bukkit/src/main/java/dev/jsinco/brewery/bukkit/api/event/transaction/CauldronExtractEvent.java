@@ -1,8 +1,9 @@
-package dev.jsinco.brewery.bukkit.api.event;
+package dev.jsinco.brewery.bukkit.api.event.transaction;
 
 import com.google.common.base.Preconditions;
 import dev.jsinco.brewery.api.brew.Brew;
 import dev.jsinco.brewery.api.breweries.Cauldron;
+import dev.jsinco.brewery.bukkit.api.event.PermissibleBreweryEvent;
 import dev.jsinco.brewery.bukkit.api.transaction.ItemSource;
 import lombok.Getter;
 import org.bukkit.entity.Player;
