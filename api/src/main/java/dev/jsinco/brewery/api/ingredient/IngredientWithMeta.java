@@ -15,7 +15,7 @@ public record IngredientWithMeta(Ingredient ingredient,
 
     public IngredientWithMeta {
         for (Map.Entry<IngredientMeta<?>, Object> entry : meta.entrySet()) {
-            Preconditions.checkArgument(entry.getKey().serializer().appliesTo(entry.getValue()), "Invalid meta ingredient data '" + entry.getKey().key().minimalized(), "' for: " + entry.getValue());
+            Preconditions.checkArgument(entry.getKey().serializer().appliesTo(entry.getValue()), "Invalid meta ingredient data '" + entry.getKey().key().minimalized() + "' for: " + entry.getValue());
         }
     }
 
