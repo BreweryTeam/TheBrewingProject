@@ -18,7 +18,6 @@ import org.bukkit.potion.PotionEffectType;
 import org.simpleyaml.configuration.ConfigurationSection;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -54,14 +53,14 @@ public class BukkitRecipeResultReader implements RecipeResultReader<ItemStack> {
         return qualityDataBuilder.build();
     }
 
-    private static QualityData<RecipeEffects> getRecipeEffects(ConfigurationSection configurationSection) {
-        QualityDataBuilder<RecipeEffects, RecipeEffects.Builder> qualityDataBuilder = new QualityDataBuilder<>(RecipeEffects.Builder::new);
-        qualityDataBuilder.addOptionalString(configurationSection.getString("messages.action-bar"), RecipeEffects.Builder::actionBar);
-        qualityDataBuilder.addOptionalString(configurationSection.getString("messages.title"), RecipeEffects.Builder::title);
-        qualityDataBuilder.addOptionalString(configurationSection.getString("messages.message"), RecipeEffects.Builder::message);
-        qualityDataBuilder.addOptionalList(configurationSection.getStringList("effects"), BukkitRecipeResultReader::getEffect, RecipeEffects.Builder::effects);
-        qualityDataBuilder.addOptionalList(configurationSection.getStringList("events"), BreweryKey::parse, RecipeEffects.Builder::events);
-        qualityDataBuilder.add(parseModifiers(configurationSection), RecipeEffects.Builder::addModifiers);
+    private static QualityData<RecipeEffectsImpl> getRecipeEffects(ConfigurationSection configurationSection) {
+        QualityDataBuilder<RecipeEffectsImpl, RecipeEffectsImpl.Builder> qualityDataBuilder = new QualityDataBuilder<>(RecipeEffectsImpl.Builder::new);
+        qualityDataBuilder.addOptionalString(configurationSection.getString("messages.action-bar"), RecipeEffectsImpl.Builder::actionBar);
+        qualityDataBuilder.addOptionalString(configurationSection.getString("messages.title"), RecipeEffectsImpl.Builder::title);
+        qualityDataBuilder.addOptionalString(configurationSection.getString("messages.message"), RecipeEffectsImpl.Builder::message);
+        qualityDataBuilder.addOptionalList(configurationSection.getStringList("effects"), BukkitRecipeResultReader::getEffect, RecipeEffectsImpl.Builder::effects);
+        qualityDataBuilder.addOptionalList(configurationSection.getStringList("events"), BreweryKey::parse, RecipeEffectsImpl.Builder::events);
+        qualityDataBuilder.add(parseModifiers(configurationSection), RecipeEffectsImpl.Builder::addModifiers);
         return qualityDataBuilder.build();
     }
 
@@ -80,11 +79,11 @@ public class BukkitRecipeResultReader implements RecipeResultReader<ItemStack> {
         return output.map(Map::copyOf);
     }
 
-    private static RecipeEffect getEffect(String string) {
+    private static RecipeEffectImpl getEffect(String string) {
         if (!string.contains("/")) {
             PotionEffectType type = Registry.EFFECT.get(NamespacedKey.fromString(string.toLowerCase(Locale.ROOT)));
             Preconditions.checkNotNull(type);
-            return new RecipeEffect(type, new Interval(1, 1), new Interval(1, 1));
+            return new RecipeEffectImpl(type, new Interval(1, 1), new Interval(1, 1));
         }
 
         String[] parts = string.split("/");
@@ -104,7 +103,7 @@ public class BukkitRecipeResultReader implements RecipeResultReader<ItemStack> {
                 amplifierBounds = new Interval(0, 0);
             }
         }
-        return new RecipeEffect(type, durationBounds, amplifierBounds);
+        return new RecipeEffectImpl(type, durationBounds, amplifierBounds);
     }
 
 }

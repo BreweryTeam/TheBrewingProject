@@ -23,6 +23,11 @@ public interface RecipeResult<I> {
     I newLorelessItem();
 
     /**
+     * @return The effects of this recipe result
+     */
+    RecipeEffects effects();
+
+    /**
      * @return The display name of the output item
      */
     Component displayName();
