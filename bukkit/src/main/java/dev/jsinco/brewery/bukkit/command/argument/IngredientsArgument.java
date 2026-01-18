@@ -23,12 +23,9 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class IngredientsArgument implements CustomArgumentType.Converted<Map<Ingredient, Integer>, String> {
 
-    private static final Pattern INGREDIENTS_PATTERN = Pattern.compile("(([^ ,]+[ ,] ?)*)([^ ,]*)");
     private static final SimpleCommandExceptionType TIMEOUT = new SimpleCommandExceptionType(
             MessageComponentSerializer.message().serialize(Component.text("Command timed out, another integrated plugin probably failed on startup"))
     );
@@ -104,17 +101,25 @@ public class IngredientsArgument implements CustomArgumentType.Converted<Map<Ing
         if (!builder.getRemainingLowerCase().startsWith("\"")) {
             return builder.buildFuture();
         }
-        Matcher matcher = INGREDIENTS_PATTERN.matcher(builder.getRemainingLowerCase().substring(1));
-        if (!matcher.matches()) {
+        List<String> splitIngredients;
+        String remainingLowerCase = builder.getRemainingLowerCase().substring(1);
+        try {
+            splitIngredients = splitIngredients(remainingLowerCase);
+        } catch (Exception e) {
             return builder.buildFuture();
         }
-        String remainingLowerCase = matcher.group(3);
-        String beforeRemaining = matcher.group(1);
+        String last;
+        if (remainingLowerCase.endsWith(",") || remainingLowerCase.endsWith(" ") || remainingLowerCase.isEmpty()) {
+            last = "";
+        } else {
+            last = splitIngredients.getLast();
+            splitIngredients.removeLast();
+        }
         TheBrewingProject.getInstance().getRecipeRegistry().registeredIngredients().stream()
                 .map(Ingredient::getKey)
                 .map(ingredientKey -> ingredientKey.replaceAll("^minecraft:", ""))
-                .filter(ingredientKey -> ingredientKey.startsWith(remainingLowerCase))
-                .map(string -> "\"" + (beforeRemaining == null ? "" : beforeRemaining) + string)
+                .filter(ingredientKey -> ingredientKey.startsWith(last))
+                .map(string -> "\"" + (splitIngredients.isEmpty() ? "" : String.join(",", splitIngredients) + ",") + string)
                 .forEach(builder::suggest);
         return builder.buildFuture();
     }
