@@ -55,6 +55,15 @@ public class BrewImpl implements Brew {
         );
     }
 
+    @Override
+    @SuppressWarnings("unchecked")
+    public <B extends BrewingStep> Brew withModifiedLastStep(Class<B> bClass, Function<B, B> modifier) {
+        if (!steps.isEmpty() && bClass.isInstance(lastStep())) {
+            return witModifiedLastStep((Function<BrewingStep, BrewingStep>) modifier);
+        }
+        return this;
+    }
+
     public <B extends BrewingStep> BrewImpl withLastStep(Class<B> bClass, Function<B, B> modifier, Supplier<B> stepSupplier) {
         if (!steps.isEmpty() && bClass.isInstance(lastStep())) {
             BrewingStep newStep = modifier.apply(bClass.cast(lastStep()));

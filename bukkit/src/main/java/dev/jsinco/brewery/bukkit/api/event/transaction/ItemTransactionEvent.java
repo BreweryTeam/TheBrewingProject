@@ -1,4 +1,4 @@
-package dev.jsinco.brewery.bukkit.api.event;
+package dev.jsinco.brewery.bukkit.api.event.transaction;
 
 import dev.jsinco.brewery.bukkit.api.transaction.ItemSource;
 import dev.jsinco.brewery.bukkit.api.transaction.ItemTransactionSession;

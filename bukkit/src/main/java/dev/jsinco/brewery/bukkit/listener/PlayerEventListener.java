@@ -15,7 +15,8 @@ import dev.jsinco.brewery.brew.BrewImpl;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.bukkit.api.BukkitAdapter;
 import dev.jsinco.brewery.api.util.CancelState;
-import dev.jsinco.brewery.bukkit.api.event.CauldronExtractEvent;
+import dev.jsinco.brewery.bukkit.api.event.transaction.CauldronExtractEvent;
+import dev.jsinco.brewery.bukkit.api.event.BrewConsumeEvent;
 import dev.jsinco.brewery.bukkit.api.integration.IntegrationTypes;
 import dev.jsinco.brewery.bukkit.api.transaction.ItemSource;
 import dev.jsinco.brewery.bukkit.brew.BrewAdapter;
@@ -322,8 +323,17 @@ public class PlayerEventListener implements Listener {
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
     public void onPlayerItemConsume(PlayerItemConsumeEvent event) {
-        RecipeEffects.fromItem(event.getItem())
-                .ifPresent(effect -> effect.applyTo(event.getPlayer()));
+        Optional<RecipeEffects> effects = RecipeEffects.fromItem(event.getItem());
+        if (effects.isPresent()) {
+            BrewConsumeEvent consumeEvent = new BrewConsumeEvent(event.getPlayer(), event.getItem(), event.getHand(), event.getReplacement());
+            if (!consumeEvent.callEvent()) {
+                event.setCancelled(true);
+                return;
+            }
+            effects.get().applyTo(event.getPlayer());
+            event.setReplacement(consumeEvent.getReplacement());
+        }
+
         Ingredient ingredient = BukkitIngredientManager.INSTANCE.getIngredient(event.getItem());
         for (ConsumableSerializer.Consumable consumable : DrunkenModifierSection.modifiers().consumables()) {
             String key = consumable.type().contains(":") ? consumable.type() : "minecraft:" + consumable.type();

@@ -1,6 +1,7 @@
-package dev.jsinco.brewery.bukkit.api.event;
+package dev.jsinco.brewery.bukkit.api.event.transaction;
 
 import dev.jsinco.brewery.api.breweries.DistilleryAccess;
+import dev.jsinco.brewery.bukkit.api.event.PermissibleBreweryEvent;
 import dev.jsinco.brewery.bukkit.api.transaction.ItemSource;
 import dev.jsinco.brewery.bukkit.api.transaction.ItemTransactionSession;
 import lombok.Getter;
