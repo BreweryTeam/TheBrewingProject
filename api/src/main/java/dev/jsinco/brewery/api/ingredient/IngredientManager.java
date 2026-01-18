@@ -105,9 +105,7 @@ public interface IngredientManager<I> {
 
     private void addMeta(String metaElement, ImmutableMap.Builder<IngredientMeta<?>, Object> metaBuilder){
         String[] split = metaElement.split("=", 2);
-        if(split.length < 2) {
-            throw new IllegalArgumentException("Invalid ingredient meta pattern, missing '=' sign: " + metaElement);
-        }
+        Preconditions.checkArgument(split.length == 2, "Invalid ingredient meta pattern, missing '=' sign: " + metaElement);
         String key = split[0].strip();
         Preconditions.checkArgument(INGREDIENT_META_DATA_KEY_RE.matcher(key).matches(), "Invalid ingredient meta key pattern, disallowed symbol: " + key);
         String value = split[1].strip();
