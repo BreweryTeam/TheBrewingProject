@@ -325,7 +325,7 @@ public class PlayerEventListener implements Listener {
     public void onPlayerItemConsume(PlayerItemConsumeEvent event) {
         Optional<RecipeEffectsImpl> effects = RecipeEffectsImpl.fromItem(event.getItem());
         if (effects.isPresent()) {
-            BrewConsumeEvent consumeEvent = new BrewConsumeEvent(event.getPlayer(), event.getItem(), event.getHand(), event.getReplacement());
+            BrewConsumeEvent consumeEvent = new BrewConsumeEvent(event.getPlayer(), event.getItem(), event.getHand(), event.getReplacement(), effects.get());
             if (!consumeEvent.callEvent()) {
                 event.setCancelled(true);
                 return;

@@ -1,5 +1,6 @@
 package dev.jsinco.brewery.bukkit.api.event;
 
+import dev.jsinco.brewery.api.recipe.RecipeEffects;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.entity.Player;
@@ -32,6 +33,12 @@ public class BrewConsumeEvent extends Event implements Cancellable {
      */
     @Getter
     private final ItemStack item;
+
+    /**
+     * The effects of the consumed item
+     */
+    @Getter
+    private final RecipeEffects recipeEffects;
     /**
      * The hand used to consume the item.
      */
@@ -45,11 +52,12 @@ public class BrewConsumeEvent extends Event implements Cancellable {
     @Setter
     private @Nullable ItemStack replacement;
 
-    public BrewConsumeEvent(Player player, ItemStack item, EquipmentSlot hand, @Nullable ItemStack replacement) {
+    public BrewConsumeEvent(Player player, ItemStack item, EquipmentSlot hand, @Nullable ItemStack replacement, RecipeEffects effects) {
         this.player = player;
         this.item = item;
         this.hand = hand;
         this.replacement = replacement;
+        this.recipeEffects = effects;
     }
 
     @Override
