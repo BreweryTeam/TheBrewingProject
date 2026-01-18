@@ -8,9 +8,13 @@ import dev.jsinco.brewery.api.effect.modifier.DrunkenModifier;
 import dev.jsinco.brewery.api.effect.modifier.ModifierDisplay;
 import dev.jsinco.brewery.api.event.CustomEventRegistry;
 import dev.jsinco.brewery.api.event.DrunkEvent;
+import dev.jsinco.brewery.api.recipe.RecipeEffect;
+import dev.jsinco.brewery.api.recipe.RecipeEffects;
 import dev.jsinco.brewery.api.util.BreweryKey;
 import dev.jsinco.brewery.api.util.BreweryRegistry;
+import dev.jsinco.brewery.api.util.Holder;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
+import dev.jsinco.brewery.bukkit.api.BukkitAdapter;
 import dev.jsinco.brewery.bukkit.effect.ConsumedModifierDisplay;
 import dev.jsinco.brewery.bukkit.effect.ModifierConsumePdcType;
 import dev.jsinco.brewery.bukkit.util.BukkitMessageUtil;
@@ -36,7 +40,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Getter
-public class RecipeEffects {
+public class RecipeEffectsImpl implements RecipeEffects {
 
     public static final NamespacedKey COMMANDS = TheBrewingProject.key("commands");
     public static final NamespacedKey MESSAGE = TheBrewingProject.key("message");
@@ -49,19 +53,19 @@ public class RecipeEffects {
     public static final NamespacedKey EFFECTS = TheBrewingProject.key("effects");
     private static final List<NamespacedKey> PDC_TYPES = List.of(COMMANDS, MESSAGE, ACTION_BAR, TITLE, ALCOHOL, TOXINS, EVENTS);
 
-    public static final RecipeEffects GENERIC = new Builder()
+    public static final RecipeEffectsImpl GENERIC = new Builder()
             .effects(List.of())
             .build();
 
-    private final @NotNull List<RecipeEffect> effects;
+    private final @NotNull List<RecipeEffectImpl> effects;
     private final @Nullable String title;
     private final @Nullable String message;
     private final @Nullable String actionBar;
     private final @NotNull Map<DrunkenModifier, Double> modifiers;
     private final @NotNull List<BreweryKey> events;
 
-    private RecipeEffects(@NotNull List<RecipeEffect> effects, @Nullable String title, @Nullable String message,
-                          @Nullable String actionBar, @NotNull List<BreweryKey> events, @NotNull Map<DrunkenModifier, Double> modifiers) {
+    private RecipeEffectsImpl(@NotNull List<RecipeEffectImpl> effects, @Nullable String title, @Nullable String message,
+                              @Nullable String actionBar, @NotNull List<BreweryKey> events, @NotNull Map<DrunkenModifier, Double> modifiers) {
         this.effects = effects;
         this.title = title;
         this.message = message;
@@ -115,12 +119,12 @@ public class RecipeEffects {
         }
     }
 
-    public static Optional<RecipeEffects> fromEntity(Entity entity) {
+    public static Optional<RecipeEffectsImpl> fromEntity(Entity entity) {
         return fromPdc(entity.getPersistentDataContainer());
     }
 
-    private static Optional<RecipeEffects> fromPdc(PersistentDataContainerView persistentDataContainer) {
-        RecipeEffects.Builder builder = new RecipeEffects.Builder();
+    private static Optional<RecipeEffectsImpl> fromPdc(PersistentDataContainerView persistentDataContainer) {
+        RecipeEffectsImpl.Builder builder = new RecipeEffectsImpl.Builder();
         Map<DrunkenModifier, Double> modifiers = new HashMap<>();
         DrunkenModifierSection.modifiers()
                 .optionalModifier("alcohol")
@@ -152,7 +156,7 @@ public class RecipeEffects {
         if (persistentDataContainer.has(EFFECTS, RecipeEffectPersistentDataType.INSTANCE)) {
             builder.effects(persistentDataContainer.get(EFFECTS, RecipeEffectPersistentDataType.INSTANCE));
         }
-        RecipeEffects output = builder.build();
+        RecipeEffectsImpl output = builder.build();
         if (output.effects.isEmpty() && output.modifiers.isEmpty() && output.events.isEmpty()
                 && output.actionBar == null && output.message == null && output.title == null) {
             return Optional.empty();
@@ -160,7 +164,7 @@ public class RecipeEffects {
         return Optional.of(builder.build());
     }
 
-    public static Optional<RecipeEffects> fromItem(@NotNull ItemStack item) {
+    public static Optional<RecipeEffectsImpl> fromItem(@NotNull ItemStack item) {
         return fromPdc(item.getPersistentDataContainer());
     }
 
@@ -190,8 +194,7 @@ public class RecipeEffects {
         if (message != null) {
             player.sendMessage(MessageUtil.miniMessage(message,
                     BukkitMessageUtil.getPlayerTagResolver(player),
-                    MessageUtil.numberedModifierTagResolver(modifiers, "consumed")
-            ));
+                    MessageUtil.numberedModifierTagResolver(modifiers, "consumed")));
         } else {
             ConsumedModifierDisplay.renderConsumeDisplay(player, ModifierDisplay.DisplayWindow.CHAT,
                     beforeState, afterState, modifiers);
@@ -210,7 +213,7 @@ public class RecipeEffects {
         }
         getEvents().forEach(drunkEvent -> TheBrewingProject.getInstance().getDrunkEventExecutor().doDrunkEvent(player.getUniqueId(), drunkEvent));
         getEffects().stream()
-                .map(RecipeEffect::newPotionEffect)
+                .map(RecipeEffectImpl::newPotionEffect)
                 .forEach(player::addPotionEffect);
     }
 
@@ -219,16 +222,59 @@ public class RecipeEffects {
         applyTo(persistentDataContainer);
     }
 
-    public static class Builder implements dev.jsinco.brewery.api.util.Builder<RecipeEffects> {
+    @Override
+    public List<? extends RecipeEffect> effects() {
+        return effects;
+    }
 
-        private List<RecipeEffect> effects = List.of();
+    @Nullable
+    @Override
+    public String titleMessage() {
+        return title;
+    }
+
+    @Nullable
+    @Override
+    public String chatMessage() {
+        return message;
+    }
+
+    @Nullable
+    @Override
+    public String actionBarMessage() {
+        return actionBar;
+    }
+
+    @Override
+    public Map<DrunkenModifier, Double> modifiersChange() {
+        return modifiers;
+    }
+
+    @Override
+    public List<BreweryKey> events() {
+        return events;
+    }
+
+    @Override
+    public @Nullable Component formatMessage(String message, Holder.Player playerHolder) {
+        return BukkitAdapter.toPlayer(playerHolder)
+                .map(player ->
+                        MessageUtil.miniMessage(message,
+                                BukkitMessageUtil.getPlayerTagResolver(player),
+                                MessageUtil.numberedModifierTagResolver(modifiers, "consumed"))
+                ).orElse(null);
+    }
+
+    public static class Builder implements dev.jsinco.brewery.api.util.Builder<RecipeEffectsImpl> {
+
+        private List<RecipeEffectImpl> effects = List.of();
         private @Nullable String title;
         private @Nullable String message;
         private @Nullable String actionBar;
         private @NotNull List<BreweryKey> events = List.of();
         private final ImmutableMap.Builder<DrunkenModifier, Double> modifiers = new ImmutableMap.Builder<>();
 
-        public Builder effects(@NotNull List<RecipeEffect> effects) {
+        public Builder effects(@NotNull List<RecipeEffectImpl> effects) {
             Preconditions.checkNotNull(effects);
             this.effects = effects;
             return this;
@@ -260,8 +306,8 @@ public class RecipeEffects {
             return this;
         }
 
-        public RecipeEffects build() {
-            return new RecipeEffects(effects, title, message, actionBar, events, modifiers.build());
+        public RecipeEffectsImpl build() {
+            return new RecipeEffectsImpl(effects, title, message, actionBar, events, modifiers.build());
         }
 
     }

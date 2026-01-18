@@ -1,6 +1,6 @@
 package dev.jsinco.brewery.bukkit.effect.step;
 
-import dev.jsinco.brewery.bukkit.recipe.RecipeEffect;
+import dev.jsinco.brewery.bukkit.recipe.RecipeEffectImpl;
 import dev.jsinco.brewery.api.event.EventPropertyExecutable;
 import dev.jsinco.brewery.api.event.EventStep;
 import dev.jsinco.brewery.api.moment.Interval;
@@ -34,7 +34,7 @@ public class ApplyPotionEffectExecutable implements EventPropertyExecutable {
             return ExecutionResult.CONTINUE;
         }
 
-        PotionEffect potionEffect = new RecipeEffect(
+        PotionEffect potionEffect = new RecipeEffectImpl(
                 Registry.EFFECT.get(NamespacedKey.fromString(potionEffectName)),
                 durationBounds,
                 amplifierBounds

@@ -26,7 +26,7 @@ import dev.jsinco.brewery.bukkit.breweries.BukkitCauldronDataType;
 import dev.jsinco.brewery.bukkit.effect.ConsumedModifierDisplay;
 import dev.jsinco.brewery.bukkit.effect.event.DrunkEventExecutor;
 import dev.jsinco.brewery.bukkit.ingredient.BukkitIngredientManager;
-import dev.jsinco.brewery.bukkit.recipe.RecipeEffects;
+import dev.jsinco.brewery.bukkit.recipe.RecipeEffectsImpl;
 import dev.jsinco.brewery.bukkit.util.SoundPlayer;
 import dev.jsinco.brewery.configuration.Config;
 import dev.jsinco.brewery.configuration.DrunkenModifierSection;
@@ -323,7 +323,7 @@ public class PlayerEventListener implements Listener {
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
     public void onPlayerItemConsume(PlayerItemConsumeEvent event) {
-        Optional<RecipeEffects> effects = RecipeEffects.fromItem(event.getItem());
+        Optional<RecipeEffectsImpl> effects = RecipeEffectsImpl.fromItem(event.getItem());
         if (effects.isPresent()) {
             BrewConsumeEvent consumeEvent = new BrewConsumeEvent(event.getPlayer(), event.getItem(), event.getHand(), event.getReplacement());
             if (!consumeEvent.callEvent()) {
@@ -376,7 +376,7 @@ public class PlayerEventListener implements Listener {
 
     @EventHandler(ignoreCancelled = true)
     public void onPlayerProjectileLaunch(PlayerLaunchProjectileEvent event) {
-        RecipeEffects.fromItem(event.getItemStack())
+        RecipeEffectsImpl.fromItem(event.getItemStack())
                 .ifPresent(recipeEffects -> recipeEffects.applyTo(event.getProjectile()));
     }
 }

@@ -5,8 +5,8 @@ import dev.jsinco.brewery.api.effect.modifier.DrunkenModifier;
 import dev.jsinco.brewery.api.event.DrunkEvent;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.bukkit.api.integration.IntegrationTypes;
-import dev.jsinco.brewery.bukkit.recipe.RecipeEffect;
-import dev.jsinco.brewery.bukkit.recipe.RecipeEffects;
+import dev.jsinco.brewery.bukkit.recipe.RecipeEffectImpl;
+import dev.jsinco.brewery.bukkit.recipe.RecipeEffectsImpl;
 import io.papermc.paper.command.brigadier.MessageComponentSerializer;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -33,13 +33,13 @@ public class BukkitMessageUtil {
         );
     }
 
-    public static TagResolver recipeEffectResolver(RecipeEffects effects) {
+    public static TagResolver recipeEffectResolver(RecipeEffectsImpl effects) {
         List<DrunkenModifier> modifiers = effects.getModifiers().keySet().stream()
                 .sorted(Comparator.comparing(DrunkenModifier::name, String::compareTo))
                 .toList();
         TagResolver.Builder builder = TagResolver.builder()
                 .resolver(Placeholder.component("potion_effects", effects.getEffects().stream()
-                        .map(RecipeEffect::displayName)
+                        .map(RecipeEffectImpl::displayName)
                         .collect(Component.toComponent(Component.text(", ")))
                 ))
                 .resolver(Placeholder.parsed("effect_title_message", effects.getTitle() == null ? "" : effects.getTitle()))
