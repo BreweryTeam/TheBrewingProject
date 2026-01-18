@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 public interface IngredientManager<I> {
 
     Pattern INGREDIENT_META_DATA_RE = Pattern.compile("\\{(.*)\\}");
-    Pattern INGREDIENT_META_DATA_ELEMENT_RE = Pattern.compile("([^,{}]+)=(.+)");
+    Pattern INGREDIENT_META_DATA_KEY_RE = Pattern.compile("[^,{}]+");
 
     /**
      * Don't use this method on startup, expect unexpected behavior if you do
@@ -104,10 +104,14 @@ public interface IngredientManager<I> {
     }
 
     private void addMeta(String metaElement, ImmutableMap.Builder<IngredientMeta<?>, Object> metaBuilder){
-        Matcher elementMatcher = INGREDIENT_META_DATA_ELEMENT_RE.matcher(metaElement);
-        Preconditions.checkArgument(elementMatcher.matches(), "Invalid ingredient meta pattern: " + metaElement);
-        String key = elementMatcher.group(1).strip();
-        String value = elementMatcher.group(2).strip();
+        String[] split = metaElement.split("=", 2);
+        if(split.length < 2) {
+            throw new IllegalArgumentException("Invalid ingredient meta pattern, missing '=' sign: " + metaElement);
+        }
+        String key = split[0].strip();
+        Preconditions.checkArgument(INGREDIENT_META_DATA_KEY_RE.matcher(key).matches(), "Invalid ingredient meta key pattern, disallowed symbol: " + key);
+        String value = split[1].strip();
+
         IngredientMeta<?> ingredientMeta = BreweryRegistry.INGREDIENT_META.get(BreweryKey.parse(key));
         Preconditions.checkArgument(ingredientMeta != null, "Invalid ingredient meta, unknown key: " + key);
         Object deserialized = ingredientMeta.serializer().deserialize(value);
