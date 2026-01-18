@@ -10,10 +10,10 @@ import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.potion.PotionEffectType;
 import org.jetbrains.annotations.NotNull;
 
-public class RecipeEffectPersistentDataType implements PersistentDataType<String, RecipeEffect> {
+public class RecipeEffectPersistentDataType implements PersistentDataType<String, RecipeEffectImpl> {
 
     private static final RecipeEffectPersistentDataType SINGLETON_INSTANCE = new RecipeEffectPersistentDataType();
-    public static final ListPersistentDataType<String, RecipeEffect> INSTANCE = ListPersistentDataType.LIST.listTypeFrom(SINGLETON_INSTANCE);
+    public static final ListPersistentDataType<String, RecipeEffectImpl> INSTANCE = ListPersistentDataType.LIST.listTypeFrom(SINGLETON_INSTANCE);
 
     @Override
     public @NotNull Class<String> getPrimitiveType() {
@@ -21,22 +21,22 @@ public class RecipeEffectPersistentDataType implements PersistentDataType<String
     }
 
     @Override
-    public @NotNull Class<RecipeEffect> getComplexType() {
-        return RecipeEffect.class;
+    public @NotNull Class<RecipeEffectImpl> getComplexType() {
+        return RecipeEffectImpl.class;
     }
 
     @Override
-    public @NotNull String toPrimitive(@NotNull RecipeEffect complex, @NotNull PersistentDataAdapterContext context) {
+    public @NotNull String toPrimitive(@NotNull RecipeEffectImpl complex, @NotNull PersistentDataAdapterContext context) {
         return complex.type().key().asString() + "/" + complex.durationRange().asString() + "/" + complex.amplifierRange().asString();
     }
 
     @Override
-    public @NotNull RecipeEffect fromPrimitive(@NotNull String primitive, @NotNull PersistentDataAdapterContext context) {
+    public @NotNull RecipeEffectImpl fromPrimitive(@NotNull String primitive, @NotNull PersistentDataAdapterContext context) {
         String[] split = primitive.split("/");
         PotionEffectType effectType = Registry.EFFECT.get(NamespacedKey.fromString(split[0]));
         Preconditions.checkArgument(effectType != null, "Effect type can not be null");
         Interval duration = Interval.parseString(split[1]);
         Interval amplifier = Interval.parseString(split[2]);
-        return new RecipeEffect(effectType, duration, amplifier);
+        return new RecipeEffectImpl(effectType, duration, amplifier);
     }
 }

@@ -20,4 +20,6 @@ public interface RecipeResult<I> {
      * @return The recipe item without any extra lore
      */
     I newLorelessItem();
+
+    RecipeEffects effects();
 }

@@ -8,7 +8,7 @@ import dev.jsinco.brewery.api.brew.Brew;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.bukkit.brew.BrewAdapter;
 import dev.jsinco.brewery.bukkit.command.argument.EnumArgument;
-import dev.jsinco.brewery.bukkit.recipe.RecipeEffects;
+import dev.jsinco.brewery.bukkit.recipe.RecipeEffectsImpl;
 import dev.jsinco.brewery.bukkit.util.BukkitMessageUtil;
 import dev.jsinco.brewery.recipes.BrewScoreImpl;
 import dev.jsinco.brewery.util.MessageUtil;
@@ -88,7 +88,7 @@ public class InfoCommand {
                                 .collect(Component.toComponent(Component.text("\n")))
                         ))
                 );
-        Optional<RecipeEffects> recipeEffectsOptional = RecipeEffects.fromItem(itemStack);
+        Optional<RecipeEffectsImpl> recipeEffectsOptional = RecipeEffectsImpl.fromItem(itemStack);
         recipeEffectsOptional.ifPresent(effects -> {
             MessageUtil.message(sender, "tbp.command.info.effect-message", BukkitMessageUtil.recipeEffectResolver(effects));
         });

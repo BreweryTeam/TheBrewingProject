@@ -4,6 +4,7 @@ import dev.jsinco.brewery.api.brew.Brew;
 import dev.jsinco.brewery.api.brew.BrewScore;
 import dev.jsinco.brewery.api.brew.BrewingStep;
 import dev.jsinco.brewery.api.integration.Integration;
+import dev.jsinco.brewery.api.recipe.RecipeEffects;
 import dev.jsinco.brewery.api.recipe.RecipeResult;
 import dev.jsinco.brewery.api.util.BreweryKey;
 import dev.jsinco.brewery.api.util.Logger;
@@ -48,7 +49,7 @@ public class BukkitRecipeResult implements RecipeResult<ItemStack> {
     public static final @NotNull RecipeResult<ItemStack> GENERIC = new Builder()
             .lore(List.of())
             .name("Generic")
-            .recipeEffects(RecipeEffects.GENERIC)
+            .recipeEffects(RecipeEffectsImpl.GENERIC)
             .build();
     private final boolean glint;
     private final int customModelData;
@@ -61,12 +62,12 @@ public class BukkitRecipeResult implements RecipeResult<ItemStack> {
     private final List<String> lore;
 
     @Getter
-    private final RecipeEffects recipeEffects;
+    private final RecipeEffectsImpl recipeEffects;
     @Getter
     private final Color color;
     private final boolean appendBrewInfoLore;
 
-    private BukkitRecipeResult(boolean glint, int customModelData, @Nullable NamespacedKey itemModel, RecipeEffects recipeEffects, String name, List<String> lore, Color color, boolean appendBrewInfoLore, @Nullable BreweryKey customId) {
+    private BukkitRecipeResult(boolean glint, int customModelData, @Nullable NamespacedKey itemModel, RecipeEffectsImpl recipeEffects, String name, List<String> lore, Color color, boolean appendBrewInfoLore, @Nullable BreweryKey customId) {
         this.glint = glint;
         this.customModelData = customModelData;
         this.itemModel = itemModel;
@@ -99,6 +100,11 @@ public class BukkitRecipeResult implements RecipeResult<ItemStack> {
         ItemStack itemStack = new ItemStack(Material.POTION);
         applyData(itemStack);
         return itemStack;
+    }
+
+    @Override
+    public RecipeEffects effects() {
+        return recipeEffects;
     }
 
     private @Nullable ItemStack createCustomItem() {
@@ -220,7 +226,7 @@ public class BukkitRecipeResult implements RecipeResult<ItemStack> {
         private NamespacedKey itemModel;
         private String name;
         private List<String> lore;
-        private RecipeEffects recipeEffects;
+        private RecipeEffectsImpl recipeEffects;
         private Color color = Color.BLUE;
         private boolean appendBrewInfoLore = true;
         private BreweryKey customId;
@@ -245,7 +251,7 @@ public class BukkitRecipeResult implements RecipeResult<ItemStack> {
             return this;
         }
 
-        public Builder recipeEffects(@NotNull RecipeEffects recipeEffects) {
+        public Builder recipeEffects(@NotNull RecipeEffectsImpl recipeEffects) {
             this.recipeEffects = Objects.requireNonNull(recipeEffects);
             return this;
         }

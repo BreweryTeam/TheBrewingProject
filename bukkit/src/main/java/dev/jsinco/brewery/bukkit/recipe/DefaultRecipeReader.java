@@ -65,7 +65,7 @@ public class DefaultRecipeReader {
                 .color(ColorUtil.parseColorString(defaultRecipe.getString("color", "BLUE")))
                 .customModelData(defaultRecipe.getInt("custom-model-data", -1))
                 .glint(defaultRecipe.getBoolean("glint", false))
-                .recipeEffects(RecipeEffects.GENERIC)
+                .recipeEffects(RecipeEffectsImpl.GENERIC)
                 .appendBrewInfoLore(false)
                 .build();
     }
