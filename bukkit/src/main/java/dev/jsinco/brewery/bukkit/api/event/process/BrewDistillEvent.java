@@ -6,6 +6,9 @@ import lombok.Getter;
 import org.bukkit.event.HandlerList;
 import org.jetbrains.annotations.NotNull;
 
+/**
+ * An event that triggers whenever a brew distills. Will only trigger when an inventory is open.
+ */
 public class BrewDistillEvent extends BrewProcessEvent {
     private static final HandlerList HANDLERS = new HandlerList();
 
