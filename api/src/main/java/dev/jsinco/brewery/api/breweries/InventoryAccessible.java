@@ -1,5 +1,6 @@
 package dev.jsinco.brewery.api.breweries;
 
+import dev.jsinco.brewery.api.brew.Brew;
 import dev.jsinco.brewery.api.vector.BreweryLocation;
 import org.jetbrains.annotations.NotNull;
 
@@ -53,4 +54,11 @@ public interface InventoryAccessible<IS, I> {
      * @return An optionally present inventory if any were linked to the location
      */
     Optional<I> access(@NotNull BreweryLocation breweryLocation);
+
+    /**
+     * Initialize this brew for this inventory, possibly adding another brewing step
+     * @param brew The brew to initialize
+     * @return A new modified brew ready to be used in this inventory
+     */
+    Brew initializeBrew(Brew brew);
 }

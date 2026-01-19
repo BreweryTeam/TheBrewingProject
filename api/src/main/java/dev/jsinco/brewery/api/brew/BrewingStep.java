@@ -7,6 +7,7 @@ import dev.jsinco.brewery.api.moment.Moment;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import net.kyori.adventure.text.minimessage.translation.Argument;
+import org.jetbrains.annotations.Range;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -126,6 +127,7 @@ public interface BrewingStep {
         /**
          * @return The amount of distill runs for this step
          */
+        @Range(from = 0, to = Integer.MAX_VALUE)
         int runs();
 
         /**

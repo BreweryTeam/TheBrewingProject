@@ -3,9 +3,9 @@ package dev.jsinco.brewery.brew;
 import dev.jsinco.brewery.api.brew.*;
 import dev.jsinco.brewery.api.meta.MetaData;
 import dev.jsinco.brewery.api.meta.MetaDataType;
-import dev.jsinco.brewery.configuration.Config;
 import dev.jsinco.brewery.api.recipe.Recipe;
 import dev.jsinco.brewery.api.recipe.RecipeRegistry;
+import dev.jsinco.brewery.configuration.Config;
 import dev.jsinco.brewery.recipes.BrewScoreImpl;
 import lombok.Getter;
 import net.kyori.adventure.key.Key;
@@ -125,7 +125,10 @@ public class BrewImpl implements Brew {
     }
 
     private boolean isCompleted(BrewingStep step) {
-        return !(step instanceof BrewingStep.Age age) || age.time().moment() > Config.config().barrels().agingYearTicks() / 2;
+        if (step instanceof BrewingStep.Age age) {
+            return age.time().moment() > Config.config().barrels().agingYearTicks() / 2;
+        }
+        return !(step instanceof BrewingStep.Distill distill) || distill.runs() > 0;
     }
 
     @Override
