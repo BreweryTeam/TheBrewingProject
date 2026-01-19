@@ -7,6 +7,9 @@ import lombok.Getter;
 import org.bukkit.event.HandlerList;
 import org.jetbrains.annotations.NotNull;
 
+/**
+ * Will only trigger whenever an ingredient is added to the cauldron
+ */
 public class BrewCauldronProcessEvent extends BrewProcessEvent {
     private static final HandlerList HANDLERS = new HandlerList();
 
