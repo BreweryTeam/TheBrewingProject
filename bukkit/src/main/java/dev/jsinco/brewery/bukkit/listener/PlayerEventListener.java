@@ -2,6 +2,7 @@ package dev.jsinco.brewery.bukkit.listener;
 
 import com.destroystokyo.paper.event.player.PlayerLaunchProjectileEvent;
 import dev.jsinco.brewery.api.brew.Brew;
+import dev.jsinco.brewery.api.brew.BrewingStep;
 import dev.jsinco.brewery.api.breweries.InventoryAccessible;
 import dev.jsinco.brewery.api.breweries.StructureHolder;
 import dev.jsinco.brewery.api.effect.DrunkState;
@@ -9,14 +10,14 @@ import dev.jsinco.brewery.api.effect.ModifierConsume;
 import dev.jsinco.brewery.api.effect.modifier.ModifierDisplay;
 import dev.jsinco.brewery.api.ingredient.Ingredient;
 import dev.jsinco.brewery.api.util.BreweryKey;
+import dev.jsinco.brewery.api.util.CancelState;
 import dev.jsinco.brewery.api.util.Logger;
 import dev.jsinco.brewery.api.vector.BreweryLocation;
 import dev.jsinco.brewery.brew.BrewImpl;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.bukkit.api.BukkitAdapter;
-import dev.jsinco.brewery.api.util.CancelState;
-import dev.jsinco.brewery.bukkit.api.event.transaction.CauldronExtractEvent;
 import dev.jsinco.brewery.bukkit.api.event.BrewConsumeEvent;
+import dev.jsinco.brewery.bukkit.api.event.transaction.CauldronExtractEvent;
 import dev.jsinco.brewery.bukkit.api.integration.IntegrationTypes;
 import dev.jsinco.brewery.bukkit.api.transaction.ItemSource;
 import dev.jsinco.brewery.bukkit.brew.BrewAdapter;
@@ -234,7 +235,11 @@ public class PlayerEventListener implements Listener {
 
     private void handleCauldronExtract(PlayerInteractEvent event, Block block, BukkitCauldron cauldron) {
         Player player = event.getPlayer();
-        Brew brew = cauldron.getUpdatedBrew();
+        Brew brew = cauldron.getUpdatedBrew()
+                .witModifiedLastStep(step ->
+                        step instanceof BrewingStep.AuthoredStep<?> authoredStep
+                                ? authoredStep.withBrewer(player.getUniqueId()) : step
+                );
 
         CauldronExtractEvent extractEvent = new CauldronExtractEvent(
                 cauldron,

@@ -193,7 +193,11 @@ public class BukkitCauldron implements Cauldron {
         if (!mixEvent.callEvent()) {
             return true;
         }
-        brew = mixEvent.getResult();
+        brew = mixEvent.getResult()
+                .witModifiedLastStep(step ->
+                        step instanceof BrewingStep.AuthoredStep<?> authoredStep
+                                ? authoredStep.withBrewer(player.getUniqueId()) : step
+                );
         this.recipe = brew.closestRecipe(TheBrewingProject.getInstance().getRecipeRegistry())
                 .orElse(null);
 
