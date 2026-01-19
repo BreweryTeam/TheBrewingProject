@@ -41,18 +41,22 @@ public class BrewImpl implements Brew {
         this.meta = meta;
     }
 
+    @Override
     public BrewImpl withStep(BrewingStep step) {
         return new BrewImpl(Stream.concat(steps.stream(), Stream.of(step)).toList(), meta);
     }
 
+    @Override
     public BrewImpl withSteps(Collection<BrewingStep> steps) {
         return new BrewImpl(Stream.concat(this.steps.stream(), steps.stream()).toList(), meta);
     }
 
+    @Override
     public BrewImpl withStepsReplaced(Collection<BrewingStep> steps) {
         return new BrewImpl(List.copyOf(steps), meta);
     }
 
+    @Override
     public BrewImpl withModifiedStep(int index, Function<BrewingStep, BrewingStep> modifier) {
         BrewingStep newStep = modifier.apply(steps.get(index));
         return new BrewImpl(
@@ -64,6 +68,7 @@ public class BrewImpl implements Brew {
         );
     }
 
+    @Override
     public BrewImpl witModifiedLastStep(Function<BrewingStep, BrewingStep> modifier) {
         BrewingStep newStep = modifier.apply(steps.getLast());
         return new BrewImpl(
@@ -84,6 +89,7 @@ public class BrewImpl implements Brew {
         return this;
     }
 
+    @Override
     public <B extends BrewingStep> BrewImpl withLastStep(Class<B> bClass, Function<B, B> modifier, Supplier<B> stepSupplier) {
         if (!steps.isEmpty() && bClass.isInstance(lastStep())) {
             BrewingStep newStep = modifier.apply(bClass.cast(lastStep()));
@@ -152,6 +158,7 @@ public class BrewImpl implements Brew {
         return meta.metaKeys();
     }
 
+    @Override
     public <I> Optional<Recipe<I>> closestRecipe(RecipeRegistry<I> registry) {
         double bestScore = 0;
         Recipe<I> bestMatch = null;
@@ -165,6 +172,7 @@ public class BrewImpl implements Brew {
         return Optional.ofNullable(bestMatch);
     }
 
+    @Override
     public @NotNull BrewScore score(Recipe<?> recipe) {
         List<BrewingStep> recipeSteps = recipe.getSteps();
         List<Map<ScoreType, PartialBrewScore>> scores = new ArrayList<>();
@@ -189,6 +197,7 @@ public class BrewImpl implements Brew {
         return brewScore;
     }
 
+    @Override
     public Optional<BrewQuality> quality(Recipe<?> recipe) {
         return Optional.ofNullable(score(recipe).brewQuality());
     }
@@ -204,6 +213,7 @@ public class BrewImpl implements Brew {
         throw new IndexOutOfBoundsException();
     }
 
+    @Override
     public @NotNull BrewingStep lastStep() {
         return steps.getLast();
     }
