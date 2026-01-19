@@ -64,22 +64,6 @@ public record AgeStepImpl(Moment time, BarrelType barrelType, SequencedSet<UUID>
     }
 
     @Override
-    public Age withBrewer(UUID brewer) {
-        return new AgeStepImpl(this.time, this.barrelType, Stream.concat(
-                this.brewers.stream(),
-                Stream.of(brewer)
-        ).collect(Collectors.toCollection(LinkedHashSet::new)));
-    }
-
-    @Override
-    public Age withBrewers(SequencedCollection<UUID> brewers) {
-        return new AgeStepImpl(this.time, this.barrelType, Stream.concat(
-                this.brewers.stream(),
-                brewers.stream()
-        ).collect(Collectors.toCollection(LinkedHashSet::new)));
-    }
-
-    @Override
     public Age withBrewersReplaced(SequencedCollection<UUID> brewers) {
         return new AgeStepImpl(this.time, this.barrelType, new LinkedHashSet<>(brewers));
     }

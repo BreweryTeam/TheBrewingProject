@@ -64,22 +64,6 @@ public record MixStepImpl(Moment time, Map<? extends Ingredient, Integer> ingred
     }
 
     @Override
-    public Mix withBrewer(UUID brewer) {
-        return new MixStepImpl(this.time, this.ingredients, Stream.concat(
-                this.brewers.stream(),
-                Stream.of(brewer)
-        ).collect(Collectors.toCollection(LinkedHashSet::new)));
-    }
-
-    @Override
-    public Mix withBrewers(SequencedCollection<UUID> brewers) {
-        return new MixStepImpl(this.time, this.ingredients, Stream.concat(
-                this.brewers.stream(),
-                brewers.stream()
-        ).collect(Collectors.toCollection(LinkedHashSet::new)));
-    }
-
-    @Override
     public Mix withBrewersReplaced(SequencedCollection<UUID> brewers) {
         return new MixStepImpl(this.time, this.ingredients, new LinkedHashSet<>(brewers));
     }

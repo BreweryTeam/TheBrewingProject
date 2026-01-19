@@ -55,22 +55,6 @@ public record DistillStepImpl(int runs, SequencedSet<UUID> brewers) implements B
     }
 
     @Override
-    public Distill withBrewer(UUID brewer) {
-        return new DistillStepImpl(this.runs, Stream.concat(
-                this.brewers.stream(),
-                Stream.of(brewer)
-        ).collect(Collectors.toCollection(LinkedHashSet::new)));
-    }
-
-    @Override
-    public Distill withBrewers(SequencedCollection<UUID> brewers) {
-        return new DistillStepImpl(this.runs, Stream.concat(
-                this.brewers.stream(),
-                brewers.stream()
-        ).collect(Collectors.toCollection(LinkedHashSet::new)));
-    }
-
-    @Override
     public Distill withBrewersReplaced(SequencedCollection<UUID> brewers) {
         return new DistillStepImpl(this.runs, new LinkedHashSet<>(brewers));
     }

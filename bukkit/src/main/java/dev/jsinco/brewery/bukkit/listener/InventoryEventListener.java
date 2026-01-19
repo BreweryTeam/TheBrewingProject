@@ -1,6 +1,7 @@
 package dev.jsinco.brewery.bukkit.listener;
 
 import dev.jsinco.brewery.api.brew.Brew;
+import dev.jsinco.brewery.api.brew.BrewingStep;
 import dev.jsinco.brewery.api.breweries.InventoryAccessible;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.bukkit.api.event.transaction.*;
@@ -77,7 +78,9 @@ public class InventoryEventListener implements Listener {
         List<? extends ItemTransactionEvent<?>> transactions = compileTransactionsFromClick(event, upperInventoryIsClicked, inventoryAccessible);
         for (ItemTransactionEvent<?> transactionEvent : transactions) {
             if (!transactionEvent.callEvent()) {
-                if (transactionEvent.getCancelState() instanceof dev.jsinco.brewery.api.util.CancelState.PermissionDenied(Component denyMessage)) {
+                if (transactionEvent.getCancelState() instanceof dev.jsinco.brewery.api.util.CancelState.PermissionDenied(
+                        Component denyMessage
+                )) {
                     event.getWhoClicked().sendMessage(denyMessage);
                 }
                 event.setResult(Event.Result.DENY);
@@ -265,6 +268,12 @@ public class InventoryEventListener implements Listener {
                                                               ItemStack item, boolean insertion, @Nullable Player player) {
         ItemTransaction transaction = new ItemTransaction(from, to, item, insertion);
         Optional<Brew> brewOptional = BrewAdapter.fromItem(item);
+        if (player != null) {
+            brewOptional = brewOptional.map(brew -> brew.witModifiedLastStep(step ->
+                    step instanceof BrewingStep.AuthoredStep<?> authoredStep
+                            ? authoredStep.withBrewer(player.getUniqueId()) : step)
+            );
+        }
         if (inventoryAccessible instanceof BukkitDistillery distillery) {
             dev.jsinco.brewery.api.util.CancelState cancelState = brewOptional.isEmpty() ? new dev.jsinco.brewery.api.util.CancelState.Cancelled() :
                     player == null || player.hasPermission("brewery.distillery.access") ? new dev.jsinco.brewery.api.util.CancelState.Allowed() :
