@@ -10,13 +10,13 @@ import dev.jsinco.brewery.api.ingredient.Ingredient;
 import dev.jsinco.brewery.api.moment.Interval;
 import dev.jsinco.brewery.api.recipe.Recipe;
 import dev.jsinco.brewery.api.util.BreweryRegistry;
+import dev.jsinco.brewery.api.util.CancelState;
 import dev.jsinco.brewery.api.vector.BreweryLocation;
 import dev.jsinco.brewery.brew.BrewImpl;
 import dev.jsinco.brewery.brew.CookStepImpl;
 import dev.jsinco.brewery.brew.MixStepImpl;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.bukkit.api.BukkitAdapter;
-import dev.jsinco.brewery.api.util.CancelState;
 import dev.jsinco.brewery.bukkit.api.event.process.BrewCauldronProcessEvent;
 import dev.jsinco.brewery.bukkit.api.event.transaction.CauldronInsertEvent;
 import dev.jsinco.brewery.bukkit.api.transaction.ItemSource;
@@ -75,12 +75,11 @@ public class BukkitCauldron implements Cauldron {
         this.brew = brew;
     }
 
-    private static CauldronType findCauldronType(Block block) {
+    private static Optional<CauldronType> findCauldronType(Block block) {
         return BreweryRegistry.CAULDRON_TYPE.values()
                 .stream()
                 .filter(cauldronType -> block.getType().getKey().toString().equals(cauldronType.materialKey()))
-                .findAny()
-                .orElseThrow(() -> new IllegalArgumentException("Expected cauldron"));
+                .findAny();
     }
 
     @Override
@@ -155,7 +154,7 @@ public class BukkitCauldron implements Cauldron {
                 player
         );
         if (!insertEvent.callEvent()) {
-            if(insertEvent.getCancelState() instanceof CancelState.PermissionDenied(Component denyMessage)) {
+            if (insertEvent.getCancelState() instanceof CancelState.PermissionDenied(Component denyMessage)) {
                 player.sendMessage(denyMessage);
             }
             return false;
@@ -165,7 +164,7 @@ public class BukkitCauldron implements Cauldron {
             BukkitCauldron.incrementLevel(getBlock());
         }
         this.hot = isHeatSource(getBlock().getRelative(BlockFace.DOWN));
-        CauldronType cauldronType = findCauldronType(getBlock());
+        CauldronType cauldronType = getType().orElseThrow(() -> new IllegalStateException("Expected cauldron block type for cauldron"));
         long time = TheBrewingProject.getInstance().getTime();
         Ingredient ingredient = BukkitIngredientManager.INSTANCE.getIngredient(addedItem);
         Brew mixed;
@@ -298,7 +297,13 @@ public class BukkitCauldron implements Cauldron {
         if (hot) {
             brew = brew.withLastStep(BrewingStep.Cook.class,
                     cook -> cook.withBrewTime(cook.time().withLastStep(time)),
-                    () -> new CookStepImpl(new Interval(time, time), Map.of(), findCauldronType(getBlock())));
+                    () -> new CookStepImpl(
+                            new Interval(time, time),
+                            Map.of(),
+                            getType()
+                                    .orElseThrow(() -> new IllegalStateException("Expected cauldron block type for cauldron"))
+                    )
+            );
         } else {
             brew = brew.withLastStep(BrewingStep.Mix.class,
                     mix -> mix.withTime(mix.time().withLastStep(time)),
@@ -352,5 +357,22 @@ public class BukkitCauldron implements Cauldron {
             return mix.time().moment();
         }
         return 0L;
+    }
+
+    @NotNull
+    @Override
+    public Optional<CauldronType> getType() {
+        return findCauldronType(getBlock());
+    }
+
+    @Override
+    public int getLevel() {
+        if (getBlock().getType() == Material.LAVA_CAULDRON) {
+            return 1;
+        }
+        if (getBlock().getBlockData() instanceof Levelled levelled) {
+            return levelled.getLevel();
+        }
+        return 0;
     }
 }
