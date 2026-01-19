@@ -74,6 +74,10 @@ public class Config extends OkaeriConfig implements Configuration{
     @Comment("Empty any drink when right-clicking a hopper. If false, only applies to failed brews")
     private boolean emptyAnyDrinkUsingHopper = false;
 
+    @CustomKey("brewers-display")
+    @Comment({"How a brewer should be displayed on the brew", "Values = [none, first_step, last_step, lead_brewer, all]"})
+    private BrewersDisplay brewersDisplay = BrewersDisplay.NONE;
+
     @CustomKey("cauldrons")
     private CauldronSection cauldrons = new CauldronSection();
 

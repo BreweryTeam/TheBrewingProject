@@ -13,12 +13,14 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import net.kyori.adventure.text.minimessage.translation.Argument;
+import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.UUID;
 
 public class BukkitMessageUtil {
 
@@ -78,5 +80,13 @@ public class BukkitMessageUtil {
                         .toArray(TagResolver[]::new)
         ));
         return output.build();
+    }
+
+    public static Component uuidToPlayerName(UUID uuid) {
+        String name = Bukkit.getOfflinePlayer(uuid).getName();
+        if (name != null) {
+            return Component.text(name);
+        }
+        return Component.text(uuid.toString());
     }
 }

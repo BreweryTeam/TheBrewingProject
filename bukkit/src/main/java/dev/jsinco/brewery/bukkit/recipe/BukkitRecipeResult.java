@@ -13,6 +13,7 @@ import dev.jsinco.brewery.bukkit.api.BukkitAdapter;
 import dev.jsinco.brewery.bukkit.api.integration.IntegrationTypes;
 import dev.jsinco.brewery.bukkit.api.integration.ItemIntegration;
 import dev.jsinco.brewery.bukkit.brew.BrewAdapter;
+import dev.jsinco.brewery.bukkit.util.BukkitMessageUtil;
 import dev.jsinco.brewery.configuration.Config;
 import dev.jsinco.brewery.configuration.DrunkenModifierSection;
 import dev.jsinco.brewery.effect.DrunkStateImpl;
@@ -41,8 +42,7 @@ import org.bukkit.inventory.ItemType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Stream;
 
 public class BukkitRecipeResult implements RecipeResult<ItemStack> {
@@ -178,11 +178,13 @@ public class BukkitRecipeResult implements RecipeResult<ItemStack> {
             case Brew.State.Brewing ignored -> {
                 streamBuilder.add(Component.translatable("tbp.brew.tooltip.quality-brewing", Argument.tagResolver(resolver)));
                 MessageUtil.compileBrewInfo(brew, score, false).forEach(streamBuilder::add);
+                applyBrewersTooltip(brew, streamBuilder);
                 applyDrunkenTooltips(state, streamBuilder, resolver);
             }
             case Brew.State.Other ignored -> {
                 streamBuilder.add(Component.translatable("tbp.brew.tooltip.quality", Argument.tagResolver(resolver)));
                 addLastStepLore(brew, streamBuilder, score, state);
+                applyBrewersTooltip(brew, streamBuilder);
                 applyDrunkenTooltips(state, streamBuilder, resolver);
             }
             case Brew.State.Seal seal -> {
@@ -193,10 +195,32 @@ public class BukkitRecipeResult implements RecipeResult<ItemStack> {
                 }
                 streamBuilder.add(Component.translatable("tbp.brew.tooltip.quality-sealed", Argument.tagResolver(resolver)));
                 addLastStepLore(brew, streamBuilder, score, state);
+                applyBrewersTooltip(brew, streamBuilder);
                 applyDrunkenTooltips(state, streamBuilder, resolver);
             }
         }
         return streamBuilder.build();
+    }
+
+    private void applyBrewersTooltip(Brew brew, Stream.Builder<Component> streamBuilder) {
+        Collection<UUID> brewers = switch (Config.config().brewersDisplay()) {
+            case NONE -> List.of();
+            case FIRST_STEP -> brew.getCompletedSteps().stream().findFirst()
+                    .map(BrewingStep::brewers)
+                    .orElseGet(LinkedHashSet::new);
+            case LEAD_BREWER -> brew.leadBrewer().stream().toList();
+            case LAST_STEP -> brew.lastCompletedStep()
+                    .brewers();
+            case ALL -> brew.getBrewers();
+        };
+        if (!brewers.isEmpty()) {
+            streamBuilder.add(
+                    MessageUtil.translated("tbp.brew.tooltip.brewer",
+                            Placeholder.component("brewers", brewers.stream()
+                                    .map(BukkitMessageUtil::uuidToPlayerName)
+                                    .collect(Component.toComponent()))
+                    ));
+        }
     }
 
     private void addLastStepLore(Brew brew, Stream.Builder<Component> streamBuilder, BrewScore score, Brew.State state) {
@@ -291,7 +315,7 @@ public class BukkitRecipeResult implements RecipeResult<ItemStack> {
         public BukkitRecipeResult build() {
             Objects.requireNonNull(name, "Names not initialized, a recipe has to have names");
             Objects.requireNonNull(recipeEffects, "Effects not initialized, a recipe has to have effects");
-            if(lore == null) {
+            if (lore == null) {
                 lore = List.of();
             }
             return new BukkitRecipeResult(glint, customModelData, itemModel, recipeEffects, name, lore, color, appendBrewInfoLore, customId);
