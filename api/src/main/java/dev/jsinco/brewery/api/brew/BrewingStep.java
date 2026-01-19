@@ -9,6 +9,8 @@ import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import net.kyori.adventure.text.minimessage.translation.Argument;
 
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public interface BrewingStep {
 
@@ -75,13 +77,26 @@ public interface BrewingStep {
          * @param brewer A brewer's UUID
          * @return A new instance of this step with the specified brewer
          */
-        SELF withBrewer(UUID brewer);
+        default SELF withBrewer(UUID brewer) {
+            if(brewers().contains(brewer)) {
+                return (SELF) this;
+            }
+            return withBrewersReplaced(Stream.concat(
+                    brewers().stream(),
+                    Stream.of(brewer)
+            ).collect(Collectors.toCollection(LinkedHashSet::new)));
+        }
 
         /**
          * @param brewers A collection of brewer UUIDs
          * @return A new instance of this step with the specified brewers
          */
-        SELF withBrewers(SequencedCollection<UUID> brewers);
+        default SELF withBrewers(SequencedCollection<UUID> brewers) {
+            return withBrewersReplaced(Stream.concat(
+                    brewers().stream(),
+                    brewers.stream()
+            ).collect(Collectors.toCollection(LinkedHashSet::new)));
+        }
 
         SELF withBrewersReplaced(SequencedCollection<UUID> brewers);
     }
