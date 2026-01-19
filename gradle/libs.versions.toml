@@ -31,6 +31,7 @@ quickshop = "6.2.0.10"
 mythic = "5.10.1"
 mythic-crucible = "2.2.0-SNAPSHOT"
 griefdefender = "2.1.1-SNAPSHOT"
+gsit = "3.0.2"
 
 # other
 jetbrainsAnnotations = "26.0.2-1"
@@ -80,6 +81,7 @@ quickshop-hikari = { group = "com.ghostchu", name = "quickshop-api", version.ref
 mythic = { group = "io.lumine", name = "Mythic-Dist", version.ref = "mythic" }
 mythic-crucible = { group = "io.lumine", name = "MythicCrucible-Dist", version.ref = "mythic-crucible" }
 griefdefender = {group = "com.griefdefender", name = "api", version.ref = "griefdefender"}
+gsit = { group = "com.github.gecolay.GSit",  name = "core", version.ref = "gsit"}
 # other
 jetbrains-annotations = { group = "org.jetbrains", name = "annotations", version.ref = "jetbrainsAnnotations" }
 lombok = { group = "org.projectlombok", name = "lombok", version.ref = "lombok" }

@@ -72,6 +72,7 @@ dependencies {
     compileOnly(libs.mythic)
     compileOnly(libs.mythic.crucible)
     compileOnly(libs.griefdefender)
+    compileOnly(libs.gsit)
 
     // other
     compileOnly(libs.jetbrains.annotations)
