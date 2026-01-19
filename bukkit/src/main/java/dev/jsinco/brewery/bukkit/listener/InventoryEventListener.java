@@ -268,7 +268,8 @@ public class InventoryEventListener implements Listener {
                                                               ItemStack item, boolean insertion, @Nullable Player player) {
         ItemTransaction transaction = new ItemTransaction(from, to, item, insertion);
         Optional<Brew> brewOptional = BrewAdapter.fromItem(item);
-        if (player != null) {
+        // Don't modify this on insertion, as the structure brewing step has not been added yet
+        if (player != null && !insertion) {
             brewOptional = brewOptional.map(brew -> brew.witModifiedLastStep(step ->
                     step instanceof BrewingStep.AuthoredStep<?> authoredStep
                             ? authoredStep.withBrewer(player.getUniqueId()) : step)
