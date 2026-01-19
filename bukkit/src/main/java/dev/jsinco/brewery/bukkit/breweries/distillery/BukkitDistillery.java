@@ -342,6 +342,14 @@ public class BukkitDistillery implements Distillery<BukkitDistillery, ItemStack,
         return Optional.empty();
     }
 
+    @Override
+    public Brew initializeBrew(Brew brew) {
+        if(brew.lastStep() instanceof BrewingStep.Distill) {
+            return brew;
+        }
+        return brew.withStep(new DistillStepImpl(0));
+    }
+
     private long getTimeProcessed() {
         return TheBrewingProject.getInstance().getTime() - startTime;
     }

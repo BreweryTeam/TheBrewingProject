@@ -205,6 +205,15 @@ public class BukkitBarrel implements Barrel<BukkitBarrel, ItemStack, Inventory>,
         return Optional.of(inventory.getInventory());
     }
 
+    @Override
+    public Brew initializeBrew(Brew brew) {
+        long time = TheBrewingProject.getInstance().getTime();
+        if (!(brew.lastStep() instanceof BrewingStep.Age age) || age.barrelType() != type) {
+            return brew.withStep(new AgeStepImpl(new Interval(time, time), this.type));
+        }
+        return brew;
+    }
+
     /**
      * Ensures that the barrel's inventory is up-to-date before the barrel is destroyed.
      * @return A snapshot of the brews that should drop from the barrel
