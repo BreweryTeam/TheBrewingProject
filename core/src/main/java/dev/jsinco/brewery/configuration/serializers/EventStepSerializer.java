@@ -4,6 +4,7 @@ import com.google.common.base.Preconditions;
 import dev.jsinco.brewery.api.effect.modifier.DrunkenModifier;
 import dev.jsinco.brewery.api.event.EventStep;
 import dev.jsinco.brewery.api.event.EventStepProperty;
+import dev.jsinco.brewery.api.event.IntegrationEvent;
 import dev.jsinco.brewery.api.event.NamedDrunkEvent;
 import dev.jsinco.brewery.api.event.step.*;
 import dev.jsinco.brewery.api.moment.Interval;
@@ -64,8 +65,8 @@ public class EventStepSerializer implements ObjectSerializer<EventStep> {
                 case Teleport teleport -> Map.of(
                         "location", teleport.location()
                 );
-                case WaitStep waitStep ->
-                        Map.of("wait-duration", TimeUtil.minimalString(waitStep.durationTicks()));
+                case IntegrationEvent integrationEvent -> Map.of("integration-event", integrationEvent);
+                case WaitStep waitStep -> Map.of("wait-duration", TimeUtil.minimalString(waitStep.durationTicks()));
                 default -> throw new IllegalArgumentException("Unsupported event step: " + property);
             });
         }
@@ -160,6 +161,9 @@ public class EventStepSerializer implements ObjectSerializer<EventStep> {
         }
         if (!modifiers.isEmpty()) {
             eventStepBuilder.addProperty(new ConsumeStep(modifiers));
+        }
+        if (data.containsKey("integration-event")) {
+            eventStepBuilder.addProperty(data.get("integration-event", IntegrationEvent.class));
         }
         EventStep eventStep = eventStepBuilder.build();
         if (eventStep.properties().isEmpty()) {
