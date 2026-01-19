@@ -113,6 +113,8 @@ public interface Brew extends MetaContainer<Brew> {
      */
     SequencedSet<UUID> getBrewers();
 
+    Optional<UUID> leadBrewer();
+
     /**
      * @return The amount of steps in this brew
      */

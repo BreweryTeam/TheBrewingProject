@@ -97,10 +97,10 @@ public class InfoCommand {
             if (brew.getBrewers().isEmpty()) {
                 return;
             }
-            String brewers = brew.getBrewers().stream()
-                    .map(InfoCommand::uuidToPlayerName)
-                    .collect(Collectors.joining(", "));
-            MessageUtil.message(sender, "tbp.command.info.brewer-message", Placeholder.unparsed("brewers", brewers));
+            Component brewers = brew.getBrewers().stream()
+                    .map(BukkitMessageUtil::uuidToPlayerName)
+                    .collect(Component.toComponent());
+            MessageUtil.message(sender, "tbp.brew.tooltip.brewer", Placeholder.component("brewers", brewers));
         });
         if (brewOptional.isEmpty() && recipeEffectsOptional.isEmpty()) {
             MessageUtil.message(sender, "tbp.command.info.not-a-brew");
@@ -115,13 +115,5 @@ public class InfoCommand {
                 Component.translatable("tbp.command.copy", NamedTextColor.AQUA).clickEvent(ClickEvent.copyToClipboard(brewStr)),
                 Component.text(")", NamedTextColor.GRAY)
         );
-    }
-
-    private static String uuidToPlayerName(UUID uuid) {
-        String name = TheBrewingProject.getInstance().getServer().getOfflinePlayer(uuid).getName();
-        if (name != null) {
-            return name;
-        }
-        return uuid.toString();
     }
 }

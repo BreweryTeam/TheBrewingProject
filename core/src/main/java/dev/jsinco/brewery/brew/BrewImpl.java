@@ -120,6 +120,19 @@ public class BrewImpl implements Brew {
     }
 
     @Override
+    public Optional<UUID> leadBrewer() {
+        Map<UUID, Integer> scores = new HashMap<>();
+        getCompletedSteps().stream()
+                .map(BrewingStep::brewers)
+                .flatMap(Collection::stream)
+                .forEach(uuid -> scores.compute(uuid, (ignored, value) -> value == null ? 1 : value + 1));
+        return scores.entrySet()
+                .stream()
+                .max(Map.Entry.comparingByValue())
+                .map(Map.Entry::getKey);
+    }
+
+    @Override
     public int stepAmount() {
         return steps.size();
     }
