@@ -43,12 +43,12 @@ public class BrewImpl implements Brew {
 
     @Override
     public BrewImpl withStep(BrewingStep step) {
-        return new BrewImpl(Stream.concat(steps.stream(), Stream.of(step)).toList(), meta);
+        return new BrewImpl(Stream.concat(steps.stream().filter(this::isCompleted), Stream.of(step)).toList(), meta);
     }
 
     @Override
     public BrewImpl withSteps(Collection<BrewingStep> steps) {
-        return new BrewImpl(Stream.concat(this.steps.stream(), steps.stream()).toList(), meta);
+        return new BrewImpl(Stream.concat(this.steps.stream().filter(this::isCompleted), steps.stream()).toList(), meta);
     }
 
     @Override
