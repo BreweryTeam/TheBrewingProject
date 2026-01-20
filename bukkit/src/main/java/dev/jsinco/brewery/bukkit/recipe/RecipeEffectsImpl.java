@@ -18,6 +18,7 @@ import dev.jsinco.brewery.bukkit.api.BukkitAdapter;
 import dev.jsinco.brewery.bukkit.effect.ConsumedModifierDisplay;
 import dev.jsinco.brewery.bukkit.effect.ModifierConsumePdcType;
 import dev.jsinco.brewery.bukkit.util.BukkitMessageUtil;
+import dev.jsinco.brewery.bukkit.util.EventUtil;
 import dev.jsinco.brewery.bukkit.util.ListPersistentDataType;
 import dev.jsinco.brewery.configuration.DrunkenModifierSection;
 import dev.jsinco.brewery.effect.DrunksManagerImpl;
@@ -75,17 +76,10 @@ public class RecipeEffectsImpl implements RecipeEffects {
     }
 
     public List<DrunkEvent> getEvents() {
-        CustomEventRegistry customEventRegistry = TheBrewingProject.getInstance().getCustomDrunkEventRegistry();
         return events
                 .stream()
-                .map(eventKey -> {
-                    if (BreweryRegistry.DRUNK_EVENT.containsKey(eventKey)) {
-                        return BreweryRegistry.DRUNK_EVENT.get(eventKey);
-                    } else {
-                        return customEventRegistry.getCustomEvent(eventKey);
-                    }
-                })
-                .filter(Objects::nonNull)
+                .map(EventUtil::fromKey)
+                .flatMap(Optional::stream)
                 .toList();
     }
 
