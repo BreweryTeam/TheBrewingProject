@@ -5,7 +5,6 @@ import dev.jsinco.brewery.api.meta.MetaData;
 import dev.jsinco.brewery.api.meta.MetaDataType;
 import dev.jsinco.brewery.api.recipe.Recipe;
 import dev.jsinco.brewery.api.recipe.RecipeRegistry;
-import dev.jsinco.brewery.configuration.Config;
 import dev.jsinco.brewery.recipes.BrewScoreImpl;
 import lombok.Getter;
 import net.kyori.adventure.key.Key;
@@ -43,12 +42,12 @@ public class BrewImpl implements Brew {
 
     @Override
     public BrewImpl withStep(BrewingStep step) {
-        return new BrewImpl(Stream.concat(steps.stream().filter(this::isCompleted), Stream.of(step)).toList(), meta);
+        return new BrewImpl(Stream.concat(steps.stream().filter(BrewingStep::isCompleted), Stream.of(step)).toList(), meta);
     }
 
     @Override
     public BrewImpl withSteps(Collection<BrewingStep> steps) {
-        return new BrewImpl(Stream.concat(this.steps.stream().filter(this::isCompleted), steps.stream()).toList(), meta);
+        return new BrewImpl(Stream.concat(this.steps.stream().filter(BrewingStep::isCompleted), steps.stream()).toList(), meta);
     }
 
     @Override
@@ -107,13 +106,14 @@ public class BrewImpl implements Brew {
     @Override
     public List<BrewingStep> getCompletedSteps() {
         return steps.stream()
-                .filter(this::isCompleted)
+                .filter(BrewingStep::isCompleted)
                 .toList();
     }
 
     @Override
     public SequencedSet<UUID> getBrewers() {
         return steps.stream()
+                .filter(BrewingStep::isCompleted)
                 .map(BrewingStep::brewers)
                 .flatMap(Collection::stream)
                 .collect(Collectors.toCollection(LinkedHashSet::new));
@@ -122,7 +122,8 @@ public class BrewImpl implements Brew {
     @Override
     public Optional<UUID> leadBrewer() {
         Map<UUID, Integer> scores = new HashMap<>();
-        getCompletedSteps().stream()
+        steps.stream()
+                .filter(BrewingStep::isCompleted)
                 .map(BrewingStep::brewers)
                 .flatMap(Collection::stream)
                 .forEach(uuid -> scores.compute(uuid, (ignored, value) -> value == null ? 1 : value + 1));
@@ -135,13 +136,6 @@ public class BrewImpl implements Brew {
     @Override
     public int stepAmount() {
         return steps.size();
-    }
-
-    private boolean isCompleted(BrewingStep step) {
-        if (step instanceof BrewingStep.Age age) {
-            return age.time().moment() > Config.config().barrels().agingYearTicks() / 2;
-        }
-        return !(step instanceof BrewingStep.Distill distill) || distill.runs() > 0;
     }
 
     @Override
@@ -222,7 +216,7 @@ public class BrewImpl implements Brew {
     public @NotNull BrewingStep lastCompletedStep() {
         for (int i = steps.size() - 1; i >= 0; i--) {
             BrewingStep step = steps.get(i);
-            if (isCompleted(step)) {
+            if (step.isCompleted()) {
                 return step;
             }
         }

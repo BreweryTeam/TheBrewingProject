@@ -46,6 +46,14 @@ public interface BrewingStep {
     SequencedSet<UUID> brewers();
 
     /**
+     * Example of incomplete steps is distilling step with 0 runs and age step with less than half
+     * an aging year of aging.
+     *
+     * @return True if the step is completed
+     */
+    boolean isCompleted();
+
+    /**
      * @param state    The state of the brew
      * @param resolver A tag resolver for this step
      * @return A translatable component for displaying this step

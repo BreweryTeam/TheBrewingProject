@@ -28,10 +28,7 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 public class InventoryEventListener implements Listener {
 
@@ -270,10 +267,15 @@ public class InventoryEventListener implements Listener {
         Optional<Brew> brewOptional = BrewAdapter.fromItem(item)
                 .map(inventoryAccessible::initializeBrew);
         if (player != null) {
-            brewOptional = brewOptional.map(brew -> brew.witModifiedLastStep(step ->
-                    step instanceof BrewingStep.AuthoredStep<?> authoredStep
-                            ? authoredStep.withBrewer(player.getUniqueId()) : step)
-            );
+            brewOptional = brewOptional
+                    .map(brew -> brew.witModifiedLastStep(step ->
+                            step instanceof BrewingStep.AuthoredStep<?> authoredStep && !authoredStep.isCompleted()
+                                    ? authoredStep.withBrewersReplaced(new LinkedList<>()) : step
+                    ))
+                    .map(brew -> brew.witModifiedLastStep(step ->
+                            step instanceof BrewingStep.AuthoredStep<?> authoredStep
+                                    ? authoredStep.withBrewer(player.getUniqueId()) : step
+                    ));
         }
         if (inventoryAccessible instanceof BukkitDistillery distillery) {
             dev.jsinco.brewery.api.util.CancelState cancelState = brewOptional.isEmpty() ? new dev.jsinco.brewery.api.util.CancelState.Cancelled() :

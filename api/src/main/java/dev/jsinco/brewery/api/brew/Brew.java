@@ -113,6 +113,10 @@ public interface Brew extends MetaContainer<Brew> {
      */
     SequencedSet<UUID> getBrewers();
 
+    /**
+     *
+     * @return The brewer most prominent in the brew process, if any
+     */
     Optional<UUID> leadBrewer();
 
     /**
