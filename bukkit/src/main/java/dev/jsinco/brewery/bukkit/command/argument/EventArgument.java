@@ -8,8 +8,6 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
-import dev.jsinco.brewery.api.event.IntegrationEvent;
-import dev.jsinco.brewery.api.integration.IntegrationType;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.bukkit.api.integration.EventIntegration;
 import dev.jsinco.brewery.bukkit.api.integration.IntegrationTypes;
@@ -22,6 +20,7 @@ import dev.jsinco.brewery.api.util.BreweryRegistry;
 import io.papermc.paper.command.brigadier.argument.CustomArgumentType;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 import java.util.Collection;
 import java.util.Optional;
@@ -69,7 +68,7 @@ public class EventArgument implements CustomArgumentType.Converted<DrunkEvent, S
     }
 
     @Override
-    public <S> CompletableFuture<Suggestions> listSuggestions(@NotNull CommandContext<S> context, SuggestionsBuilder builder) {
+    public <S> @NonNull CompletableFuture<Suggestions> listSuggestions(@NotNull CommandContext<S> context, SuggestionsBuilder builder) {
         Stream.Builder<BreweryKey> keyBuilder = Stream.builder();
         Streams.concat(TheBrewingProject.getInstance().getCustomDrunkEventRegistry().events().stream(), BreweryRegistry.DRUNK_EVENT.values().stream())
                 .map(DrunkEvent::key)
