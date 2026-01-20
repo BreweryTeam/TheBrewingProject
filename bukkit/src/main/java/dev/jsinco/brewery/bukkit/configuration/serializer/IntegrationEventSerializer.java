@@ -14,9 +14,6 @@ import java.util.regex.Pattern;
 
 public record IntegrationEventSerializer<E extends IntegrationEvent>(
         EventIntegration<E> integration) implements ObjectSerializer<E> {
-
-    private static final Pattern EVENT_META_GREEDY_RE = Pattern.compile("([^{}]+)\\{(.*)}");
-
     @Override
     public boolean supports(@NonNull Class<? super E> type) {
         return integration.eClass().isAssignableFrom(type);
@@ -34,18 +31,7 @@ public record IntegrationEventSerializer<E extends IntegrationEvent>(
         if (serialized == null) {
             return null;
         }
-        Matcher matcher = EVENT_META_GREEDY_RE.matcher(serialized);
-        BreweryKey key;
-        String meta;
-        if (matcher.matches()) {
-            String group2 = matcher.group(2);
-            meta = group2.isBlank() ? null : group2;
-            key = BreweryKey.parse(matcher.group(1));
-        } else {
-            key = BreweryKey.parse(serialized);
-            meta = null;
-        }
-        return integration.deserialize(new EventIntegration.SerializedEvent(key, meta))
+        return integration.deserialize(EventIntegration.parseEvent(serialized))
                 .orElse(null);
     }
 }

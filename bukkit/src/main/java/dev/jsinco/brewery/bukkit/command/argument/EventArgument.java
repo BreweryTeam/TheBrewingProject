@@ -1,6 +1,5 @@
 package dev.jsinco.brewery.bukkit.command.argument;
 
-import com.google.common.collect.Streams;
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
@@ -17,23 +16,20 @@ import dev.jsinco.brewery.api.event.DrunkEvent;
 import dev.jsinco.brewery.api.event.NamedDrunkEvent;
 import dev.jsinco.brewery.api.util.BreweryKey;
 import dev.jsinco.brewery.api.util.BreweryRegistry;
+import dev.jsinco.brewery.bukkit.util.EventUtil;
 import io.papermc.paper.command.brigadier.argument.CustomArgumentType;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import org.jetbrains.annotations.NotNull;
 import org.jspecify.annotations.NonNull;
 
-import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Stream;
 
 public class EventArgument implements CustomArgumentType.Converted<DrunkEvent, String> {
     private static final DynamicCommandExceptionType ERROR_INVALID_EVENT = new DynamicCommandExceptionType(event ->
             BukkitMessageUtil.toBrigadier("tbp.command.illegal-argument-detailed", Placeholder.unparsed("arguments", event.toString()))
     );
-    private static final Pattern EVENT_META_GREEDY_RE = Pattern.compile("([^{}]+)\\{(.*)}");
 
     @Override
     public DrunkEvent convert(String nativeType) throws CommandSyntaxException {
@@ -46,17 +42,7 @@ public class EventArgument implements CustomArgumentType.Converted<DrunkEvent, S
         if (customEvent != null) {
             return customEvent;
         }
-        Matcher matcher = EVENT_META_GREEDY_RE.matcher(nativeType);
-        String meta;
-        if (matcher.matches()) {
-            String group2 = matcher.group(2);
-            meta = group2.isBlank() ? null : group2;
-            key = BreweryKey.parse(matcher.group(1));
-        } else {
-            key = BreweryKey.parse(nativeType);
-            meta = null;
-        }
-        EventIntegration.SerializedEvent serializedEvent = new EventIntegration.SerializedEvent(key, meta);
+        EventIntegration.SerializedEvent serializedEvent = EventIntegration.parseEvent(nativeType);
         return TheBrewingProject.getInstance().getIntegrationManager()
                 .getIntegrationRegistry()
                 .getIntegrations(IntegrationTypes.EVENT)
@@ -69,18 +55,9 @@ public class EventArgument implements CustomArgumentType.Converted<DrunkEvent, S
 
     @Override
     public <S> @NonNull CompletableFuture<Suggestions> listSuggestions(@NotNull CommandContext<S> context, SuggestionsBuilder builder) {
-        Stream.Builder<BreweryKey> keyBuilder = Stream.builder();
-        Streams.concat(TheBrewingProject.getInstance().getCustomDrunkEventRegistry().events().stream(), BreweryRegistry.DRUNK_EVENT.values().stream())
-                .map(DrunkEvent::key)
-                .forEach(keyBuilder);
-        TheBrewingProject.getInstance().getIntegrationManager().getIntegrationRegistry()
-                .getIntegrations(IntegrationTypes.EVENT)
-                .stream()
-                .map(EventIntegration::listEventKeys)
-                .flatMap(Collection::stream)
-                .forEach(keyBuilder);
+        List<BreweryKey> all = EventUtil.listAll();
         String remaining = ArgumentUtil.escapeQuotes(builder.getRemainingLowerCase());
-        keyBuilder.build()
+        all.stream()
                 .map(BreweryKey::minimalized)
                 .filter(event -> event.startsWith(remaining))
                 .map(ArgumentUtil::sanitizeName)
