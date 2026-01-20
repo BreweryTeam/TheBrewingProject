@@ -8,19 +8,34 @@ import dev.jsinco.brewery.brew.CookStepImpl;
 import dev.jsinco.brewery.brew.DistillStepImpl;
 import dev.jsinco.brewery.api.breweries.BarrelType;
 import dev.jsinco.brewery.api.breweries.CauldronType;
+import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.bukkit.ingredient.SimpleIngredient;
 import dev.jsinco.brewery.api.moment.PassedMoment;
+import dev.jsinco.brewery.bukkit.testutil.TBPServerMock;
 import dev.jsinco.brewery.util.CollectionUtil;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockbukkit.mockbukkit.MockBukkit;
 import org.mockbukkit.mockbukkit.MockBukkitExtension;
 
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@ExtendWith(MockBukkitExtension.class)
 public class BrewTest {
+
+    @BeforeEach
+    void setUp() {
+        MockBukkit.mock(new TBPServerMock());
+        MockBukkit.load(TheBrewingProject.class);
+    }
+
+    @AfterEach
+    void tearDown(){
+        MockBukkit.unmock();
+    }
 
     @Test
     void brewers_empty() {
@@ -43,7 +58,7 @@ public class BrewTest {
                                 CollectionUtil.sequencedSetOf(UUID.fromString("144ce39d-301b-40a9-9788-0ca8cb23daf4"))
                         ),
                         new AgeStepImpl(
-                                new PassedMoment(20),
+                                new PassedMoment(2000000),
                                 BarrelType.ACACIA,
                                 CollectionUtil.sequencedSetOf(UUID.fromString("d2b440c3-edde-4443-899e-6825c31d0919"))
                         )
