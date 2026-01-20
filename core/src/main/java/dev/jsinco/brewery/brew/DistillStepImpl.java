@@ -55,6 +55,11 @@ public record DistillStepImpl(int runs, SequencedSet<UUID> brewers) implements B
     }
 
     @Override
+    public boolean isCompleted() {
+        return runs() > 0;
+    }
+
+    @Override
     public Distill withBrewersReplaced(SequencedCollection<UUID> brewers) {
         return new DistillStepImpl(this.runs, new LinkedHashSet<>(brewers));
     }

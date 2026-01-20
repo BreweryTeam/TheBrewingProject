@@ -5,6 +5,7 @@ import dev.jsinco.brewery.api.brew.PartialBrewScore;
 import dev.jsinco.brewery.api.brew.ScoreType;
 import dev.jsinco.brewery.api.breweries.BarrelType;
 import dev.jsinco.brewery.api.moment.Moment;
+import dev.jsinco.brewery.configuration.Config;
 import dev.jsinco.brewery.util.CollectionUtil;
 
 import java.util.*;
@@ -61,6 +62,11 @@ public record AgeStepImpl(Moment time, BarrelType barrelType, SequencedSet<UUID>
     @Override
     public Map<ScoreType, PartialBrewScore> failedScores() {
         return BREW_STEP_MISMATCH;
+    }
+
+    @Override
+    public boolean isCompleted() {
+        return time().moment() > Config.config().barrels().agingYearTicks() / 2;
     }
 
     @Override

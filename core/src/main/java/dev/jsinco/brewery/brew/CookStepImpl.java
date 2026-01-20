@@ -68,6 +68,11 @@ public record CookStepImpl(Moment time, Map<? extends Ingredient, Integer> ingre
     }
 
     @Override
+    public boolean isCompleted() {
+        return true;
+    }
+
+    @Override
     public Cook withBrewersReplaced(SequencedCollection<UUID> brewers) {
         return new CookStepImpl(this.time, this.ingredients, this.cauldronType, new LinkedHashSet<>(brewers));
     }

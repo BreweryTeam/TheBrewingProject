@@ -59,6 +59,11 @@ public record MixStepImpl(Moment time, Map<? extends Ingredient, Integer> ingred
     }
 
     @Override
+    public boolean isCompleted() {
+        return true;
+    }
+
+    @Override
     public MixStepImpl withTime(Moment time) {
         return new MixStepImpl(time, this.ingredients, this.brewers);
     }
