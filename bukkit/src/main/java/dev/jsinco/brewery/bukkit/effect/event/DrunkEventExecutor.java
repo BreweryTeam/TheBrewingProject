@@ -50,12 +50,12 @@ public class DrunkEventExecutor {
         if (!eventInitiateEvent.callEvent()) {
             return;
         }
-        if (event instanceof NamedDrunkEvent namedDrunkEvent) {
-            doDrunkEvents(playerUuid, List.of(
-                    new EventStep.Builder().addProperty(namedDrunkEvent).build()
-            ));
-        } else if (event instanceof CustomEvent.Keyed customEvent) {
+        if (event instanceof CustomEvent.Keyed customEvent) {
             doDrunkEvents(playerUuid, customEvent.getSteps());
+        } else if (event instanceof EventStepProperty eventStepProperty) {
+            doDrunkEvents(playerUuid, List.of(
+                    new EventStep.Builder().addProperty(eventStepProperty).build()
+            ));
         }
     }
 

@@ -24,7 +24,6 @@ public class RecipeArgument implements CustomArgumentType.Converted<Recipe<ItemS
             BukkitMessageUtil.toBrigadier("tbp.command.illegal-argument-detailed", Placeholder.unparsed("argument", event.toString()))
     );
 
-    private static final Pattern WORD_ARGUMENT = Pattern.compile("[a-zA-Z0-9+\\-_.]+");
 
     @Override
     public Recipe<ItemStack> convert(String nativeType) throws CommandSyntaxException {
@@ -35,21 +34,15 @@ public class RecipeArgument implements CustomArgumentType.Converted<Recipe<ItemS
 
     @Override
     public <S> CompletableFuture<Suggestions> listSuggestions(@NotNull CommandContext<S> context, SuggestionsBuilder builder) {
+        String remaining = ArgumentUtil.escapeQuotes(builder.getRemainingLowerCase());
         TheBrewingProject.getInstance().getRecipeRegistry()
                 .getRecipes()
                 .stream()
                 .map(Recipe::getRecipeName)
-                .filter(recipeName -> recipeName.startsWith(builder.getRemainingLowerCase()))
-                .map(this::sanitizeName)
+                .filter(recipeName -> recipeName.startsWith(remaining))
+                .map(ArgumentUtil::sanitizeName)
                 .forEach(builder::suggest);
         return builder.buildFuture();
-    }
-
-    private String sanitizeName(String name) {
-        if (WORD_ARGUMENT.matcher(name).matches()) {
-            return name;
-        }
-        return "\"" + name + "\"";
     }
 
     @Override

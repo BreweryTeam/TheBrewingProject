@@ -1,6 +1,8 @@
 package dev.jsinco.brewery.bukkit.integration.event;
 
 import dev.geco.gsit.api.GSitAPI;
+import dev.geco.gsit.api.event.PrePlayerStopCrawlEvent;
+import dev.geco.gsit.api.event.PrePlayerStopPoseEvent;
 import dev.geco.gsit.model.Crawl;
 import dev.geco.gsit.model.Pose;
 import dev.geco.gsit.model.PoseType;
@@ -14,19 +16,31 @@ import dev.jsinco.brewery.bukkit.api.BukkitAdapter;
 import dev.jsinco.brewery.bukkit.api.integration.EventIntegration;
 import dev.jsinco.brewery.util.ClassUtil;
 import net.kyori.adventure.text.Component;
+import org.bukkit.Bukkit;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
 
-import java.util.Locale;
-import java.util.Optional;
+import java.util.*;
 
-public class GSitIntegration implements EventIntegration<GSitIntegration.GSitEvent> {
+public class GSitIntegration implements EventIntegration<GSitIntegration.GSitEvent>, Listener {
 
     private static final String GSIT = "gsit";
 
     @Override
     public Class<GSitEvent> eClass() {
         return GSitEvent.class;
+    }
+
+    @Override
+    public List<BreweryKey> listEventKeys() {
+        List<BreweryKey> output = new ArrayList<>();
+        for (PoseType poseType : PoseType.values()) {
+            output.add(BreweryKey.parse(poseType.name(), GSIT));
+        }
+        output.add(BreweryKey.parse("crawl", GSIT));
+        return output;
     }
 
     @Override
@@ -55,8 +69,7 @@ public class GSitIntegration implements EventIntegration<GSitIntegration.GSitEve
     @Override
     public SerializedEvent serialize(GSitEvent event) {
         return switch (event) {
-            case GSitCrawlEvent(long duration) ->
-                    new SerializedEvent(event.key(), String.valueOf(duration));
+            case GSitCrawlEvent(long duration) -> new SerializedEvent(event.key(), String.valueOf(duration));
             case GSitPoseEvent(PoseType ignored, long duration) ->
                     new SerializedEvent(event.key(), String.valueOf(duration));
         };
@@ -64,12 +77,31 @@ public class GSitIntegration implements EventIntegration<GSitIntegration.GSitEve
 
     @Override
     public String getId() {
-        return "gsit";
+        return GSIT;
     }
 
     @Override
     public boolean isEnabled() {
         return ClassUtil.exists("dev.geco.gsit.api.GSitAPI");
+    }
+
+    @Override
+    public void onEnable() {
+        Bukkit.getPluginManager().registerEvents(this, TheBrewingProject.getInstance());
+    }
+
+    @EventHandler
+    public void onPreStopPose(PrePlayerStopPoseEvent stopPoseEvent) {
+        if (stopPoseEvent.getReason() == StopReason.GET_UP && GSitPoseEvent.active.contains(stopPoseEvent.getPose())) {
+            stopPoseEvent.setCancelled(true);
+        }
+    }
+
+    @EventHandler
+    public void onPreStopPose(PrePlayerStopCrawlEvent stopCrawlEvent) {
+        if (stopCrawlEvent.getReason() == StopReason.GET_UP && GSitCrawlEvent.active.contains(stopCrawlEvent.getCrawl())) {
+            stopCrawlEvent.setCancelled(true);
+        }
     }
 
     public sealed interface GSitEvent extends IntegrationEvent {
@@ -84,6 +116,8 @@ public class GSitIntegration implements EventIntegration<GSitIntegration.GSitEve
 
     public record GSitPoseEvent(PoseType poseType, long duration) implements GSitEvent {
 
+        private static final Set<Pose> active = new HashSet<>();
+
         @Override
         public void run(Player player) {
             if (GSitAPI.isPlayerPosing(player)) {
@@ -93,8 +127,11 @@ public class GSitIntegration implements EventIntegration<GSitIntegration.GSitEve
             if (pose == null) {
                 return;
             }
-            pose.spawn();
-            player.getScheduler().runDelayed(TheBrewingProject.getInstance(), ignored -> pose.remove(), () -> {
+            active.add(pose);
+            player.getScheduler().runDelayed(TheBrewingProject.getInstance(), ignored -> {
+                GSitAPI.removePose(pose, StopReason.PLUGIN);
+                active.remove(pose);
+            }, () -> {
             }, duration);
         }
 
@@ -116,6 +153,8 @@ public class GSitIntegration implements EventIntegration<GSitIntegration.GSitEve
 
     public record GSitCrawlEvent(long duration) implements GSitEvent {
 
+        private static final Set<Crawl> active = new HashSet<>();
+
         @Override
         public void run(Player player) {
             if (GSitAPI.isPlayerCrawling(player)) {
@@ -125,7 +164,11 @@ public class GSitIntegration implements EventIntegration<GSitIntegration.GSitEve
             if (crawl == null) {
                 return;
             }
-            player.getScheduler().runDelayed(TheBrewingProject.getInstance(), ignored -> GSitAPI.stopCrawl(crawl, StopReason.PLUGIN), () -> {
+            active.add(crawl);
+            player.getScheduler().runDelayed(TheBrewingProject.getInstance(), ignored -> {
+                GSitAPI.stopCrawl(crawl, StopReason.PLUGIN);
+                active.remove(crawl);
+            }, () -> {
             }, duration);
         }
 
