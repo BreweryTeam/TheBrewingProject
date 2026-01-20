@@ -15,7 +15,7 @@ import java.util.regex.Pattern;
 public record IntegrationEventSerializer<E extends IntegrationEvent>(
         EventIntegration<E> integration) implements ObjectSerializer<E> {
 
-    private static final Pattern EVENT_META_GREEDY_RE = Pattern.compile("([^{}]+)\\{(.*)}]");
+    private static final Pattern EVENT_META_GREEDY_RE = Pattern.compile("([^{}]+)\\{(.*)}");
 
     @Override
     public boolean supports(@NonNull Class<? super E> type) {
