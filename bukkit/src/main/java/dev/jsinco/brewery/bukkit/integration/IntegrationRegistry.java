@@ -5,6 +5,7 @@ import dev.jsinco.brewery.api.integration.IntegrationType;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class IntegrationRegistry {
     private final Map<IntegrationType<?>, Set<? extends Integration>> integrations = new HashMap<>();
@@ -35,6 +36,13 @@ public class IntegrationRegistry {
         }
 
         return (Set<T>) integrations.get(type);
+    }
+
+    @ApiStatus.Internal
+    public Set<? extends Integration> getAllIntegrations() {
+        return integrations.values().stream()
+                .flatMap(Collection::stream)
+                .collect(Collectors.toSet());
     }
 
     @ApiStatus.Internal

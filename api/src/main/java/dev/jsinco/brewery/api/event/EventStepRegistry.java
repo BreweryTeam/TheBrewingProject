@@ -48,7 +48,9 @@ public final class EventStepRegistry {
         if (step instanceof NamedDrunkEvent namedDrunkEvent) {
             return toExecutable(namedDrunkEvent);
         }
-
+        if (step instanceof IntegrationEvent integrationEvent) {
+            return integrationEvent.toExecutable();
+        }
         EventStepFactory<T> factory = (EventStepFactory<T>) factories.get(step.getClass());
         Preconditions.checkArgument(factory != null, "No ExecutableEventStep found for EventStep: " + step.getClass().getName());
         return factory.create(step);

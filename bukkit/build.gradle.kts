@@ -107,6 +107,7 @@ tasks {
                 url("https://github.com/EssentialsX/Essentials/releases/download/2.21.1/EssentialsX-2.21.1.jar")
                 modrinth("bolt", "1f2gAAFO")
                 modrinth("quickshop-hikari", "6.2.0.10")
+                url("https://api.spiget.org/v2/resources/62325/download")
             }
         }
     }
@@ -299,7 +300,8 @@ bukkit {
         "MythicMobs",
         "MiniPlaceholders",
         "QuickShop",
-        "GriefDefender"
+        "GriefDefender",
+        "GSit"
     )
 }
 
