@@ -142,7 +142,7 @@ public class GSitIntegration implements EventIntegration<GSitIntegration.GSitEve
 
         @Override
         public Component displayName() {
-            return Component.translatable("tbp.integrations.gsit.pose." + poseType.name().toLowerCase(Locale.ROOT));
+            return Component.translatable("tbp.integration.gsit.pose." + poseType.name().toLowerCase(Locale.ROOT));
         }
 
         @Override
@@ -179,7 +179,7 @@ public class GSitIntegration implements EventIntegration<GSitIntegration.GSitEve
 
         @Override
         public Component displayName() {
-            return Component.translatable("tbp.integrations.gsit.crawl");
+            return Component.translatable("tbp.integration.gsit.crawl");
         }
 
         @Override
