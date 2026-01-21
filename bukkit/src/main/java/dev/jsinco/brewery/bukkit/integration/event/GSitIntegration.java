@@ -7,14 +7,17 @@ import dev.geco.gsit.model.Crawl;
 import dev.geco.gsit.model.Pose;
 import dev.geco.gsit.model.PoseType;
 import dev.geco.gsit.model.StopReason;
+import dev.jsinco.brewery.api.effect.modifier.ModifierExpression;
 import dev.jsinco.brewery.api.event.EventProbability;
 import dev.jsinco.brewery.api.event.IntegrationEvent;
+import dev.jsinco.brewery.api.meta.MetaDataType;
 import dev.jsinco.brewery.api.util.BreweryKey;
 import dev.jsinco.brewery.api.util.Holder;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.bukkit.api.BukkitAdapter;
 import dev.jsinco.brewery.bukkit.api.integration.EventIntegration;
 import dev.jsinco.brewery.util.ClassUtil;
+import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.block.BlockFace;
@@ -27,6 +30,8 @@ import java.util.*;
 public class GSitIntegration implements EventIntegration<GSitIntegration.GSitEvent>, Listener {
 
     private static final String GSIT = "gsit";
+    private static final Key DURATION_KEY = TheBrewingProject.key("duration");
+    private static final Key PROBABILITY_KEY = TheBrewingProject.key("probability");
 
     @Override
     public Class<GSitEvent> eClass() {
@@ -44,34 +49,41 @@ public class GSitIntegration implements EventIntegration<GSitIntegration.GSitEve
     }
 
     @Override
-    public Optional<GSitEvent> deserialize(SerializedEvent event) {
+    public Optional<GSitEvent> convertToEvent(EventData event) {
         long duration;
         try {
-            if (event.meta() == null) {
-                duration = 20L;
-            } else {
-                duration = Long.parseLong(event.meta());
-            }
-        } catch (IllegalArgumentException ignored) {
+            Long temp = event.data(DURATION_KEY, MetaDataType.STRING_TO_LONG);
+            duration = temp == null ? 20L : temp;
+        } catch (Exception e) {
             duration = 20L;
+        }
+        ModifierExpression modifierExpression;
+        try {
+            String temp = event.data(PROBABILITY_KEY, MetaDataType.STRING);
+            modifierExpression = temp == null ? ModifierExpression.ZERO : new ModifierExpression(temp);
+        } catch (Exception e) {
+            modifierExpression = ModifierExpression.ZERO;
         }
         for (PoseType poseType : PoseType.values()) {
             if (event.key().equals(BreweryKey.parse(poseType.name(), GSIT))) {
-                return Optional.of(new GSitPoseEvent(poseType, duration));
+                return Optional.of(new GSitPoseEvent(poseType, duration, new EventProbability(modifierExpression, Map.of())));
             }
         }
         if (event.key().equals(BreweryKey.parse("crawl", GSIT))) {
-            return Optional.of(new GSitCrawlEvent(duration));
+            return Optional.of(new GSitCrawlEvent(duration,  new EventProbability(modifierExpression, Map.of())));
         }
         return Optional.empty();
     }
 
     @Override
-    public SerializedEvent serialize(GSitEvent event) {
+    public EventData ConvertToData(GSitEvent event) {
         return switch (event) {
-            case GSitCrawlEvent(long duration) -> new SerializedEvent(event.key(), String.valueOf(duration));
-            case GSitPoseEvent(PoseType ignored, long duration) ->
-                    new SerializedEvent(event.key(), String.valueOf(duration));
+            case GSitCrawlEvent(long duration, EventProbability eventProbability) -> new EventData(event.key())
+                    .withData(DURATION_KEY, MetaDataType.STRING_TO_LONG,duration)
+                    .withData(PROBABILITY_KEY, MetaDataType.STRING, eventProbability.probabilityExpression().function());
+            case GSitPoseEvent(PoseType ignored, long duration, EventProbability eventProbability) -> new EventData(event.key())
+                    .withData(DURATION_KEY, MetaDataType.STRING_TO_LONG, duration)
+                    .withData(PROBABILITY_KEY, MetaDataType.STRING, eventProbability.probabilityExpression().function());
         };
     }
 
@@ -114,7 +126,7 @@ public class GSitIntegration implements EventIntegration<GSitIntegration.GSitEve
         void run(Player player);
     }
 
-    public record GSitPoseEvent(PoseType poseType, long duration) implements GSitEvent {
+    public record GSitPoseEvent(PoseType poseType, long duration, EventProbability eventProbability) implements GSitEvent {
 
         private static final Set<Pose> active = new HashSet<>();
 
@@ -147,11 +159,11 @@ public class GSitIntegration implements EventIntegration<GSitIntegration.GSitEve
 
         @Override
         public EventProbability probability() {
-            return EventProbability.NONE;
+            return eventProbability;
         }
     }
 
-    public record GSitCrawlEvent(long duration) implements GSitEvent {
+    public record GSitCrawlEvent(long duration, EventProbability eventProbability) implements GSitEvent {
 
         private static final Set<Crawl> active = new HashSet<>();
 
@@ -184,7 +196,7 @@ public class GSitIntegration implements EventIntegration<GSitIntegration.GSitEve
 
         @Override
         public EventProbability probability() {
-            return EventProbability.NONE;
+            return eventProbability;
         }
     }
 }

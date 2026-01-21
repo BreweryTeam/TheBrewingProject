@@ -42,12 +42,12 @@ public class EventArgument implements CustomArgumentType.Converted<DrunkEvent, S
         if (customEvent != null) {
             return customEvent;
         }
-        EventIntegration.SerializedEvent serializedEvent = EventIntegration.parseEvent(nativeType);
+        EventIntegration.EventData eventData = EventIntegration.parseEvent(nativeType);
         return TheBrewingProject.getInstance().getIntegrationManager()
                 .getIntegrationRegistry()
                 .getIntegrations(IntegrationTypes.EVENT)
                 .stream()
-                .map(eventIntegration -> eventIntegration.deserialize(serializedEvent))
+                .map(eventIntegration -> eventIntegration.convertToEvent(eventData))
                 .flatMap(Optional::stream)
                 .findFirst()
                 .orElseThrow(() -> ERROR_INVALID_EVENT.create(nativeType));

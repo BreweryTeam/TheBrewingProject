@@ -20,11 +20,11 @@ public class EventUtil {
         return Optional.<DrunkEvent>ofNullable(BreweryRegistry.DRUNK_EVENT.get(key))
                 .or(() -> Optional.ofNullable(theBrewingProject.getCustomDrunkEventRegistry().getCustomEvent(key)))
                 .or(() -> {
-                            EventIntegration.SerializedEvent serialized = EventIntegration.parseEvent(key.toString());
+                            EventIntegration.EventData serialized = EventIntegration.parseEvent(key.toString());
                             return theBrewingProject.getIntegrationManager().getIntegrationRegistry()
                                     .getIntegrations(IntegrationTypes.EVENT)
                                     .stream()
-                                    .map(eventIntegration -> eventIntegration.deserialize(serialized))
+                                    .map(eventIntegration -> eventIntegration.convertToEvent(serialized))
                                     .flatMap(Optional::stream)
                                     .findFirst();
                         }

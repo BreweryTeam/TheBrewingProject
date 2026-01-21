@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableMap;
 import dev.jsinco.brewery.api.util.BreweryKey;
 import dev.jsinco.brewery.api.util.BreweryRegistry;
 import dev.jsinco.brewery.api.util.Pair;
+import dev.jsinco.brewery.api.util.StringUtil;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -63,40 +64,8 @@ public interface IngredientManager<I> {
             return getIngredient(id);
         }
         ImmutableMap.Builder<IngredientMeta<?>, Object> metaBuilder = new ImmutableMap.Builder<>();
-        StringBuilder metaElementBuilder = new StringBuilder();
-        boolean inQuotes = false;
-        boolean escaping = false;
-        int curlyBracketsDepth = 0;
-        for (char character : meta.toCharArray()) {
-            if (character == '\\' && inQuotes) {
-                escaping = true;
-                continue;
-            }
-            if (!escaping && character == '"') {
-                inQuotes = !inQuotes;
-                continue;
-            }
-            if (!inQuotes && character == '{') {
-                curlyBracketsDepth++;
-            }
-            if (!inQuotes && character == '}') {
-                curlyBracketsDepth--;
-            }
-            if (curlyBracketsDepth < 0) {
-                throw new IllegalArgumentException("Invalid syntax, expected leading curly brace");
-            }
-            escaping = false;
-            if(!inQuotes && curlyBracketsDepth == 0 && character == ',') {
-                String metaElement = metaElementBuilder.toString();
-                addMeta(metaElement, metaBuilder);
-                metaElementBuilder = new StringBuilder();
-                continue;
-            }
-            metaElementBuilder.append(character);
-        }
-        if(!metaElementBuilder.isEmpty()) {
-            addMeta(metaElementBuilder.toString(), metaBuilder);
-        }
+        StringUtil.complexSplit(meta)
+                .forEach(metaElement -> addMeta(metaElement, metaBuilder));
         return getIngredient(id)
                 .thenApply(ingredientOptional -> ingredientOptional
                         .map(ingredient -> new IngredientWithMeta(ingredient, metaBuilder.build()))
