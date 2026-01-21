@@ -23,9 +23,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.BiConsumer;
-import java.util.function.LongSupplier;
-import java.util.function.Predicate;
+import java.util.function.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -35,6 +33,7 @@ public class DrunksManagerImpl<C> implements DrunksManager {
     private final PersistenceHandler<C> persistenceHandler;
     private final DrunkStateDataType<C> drunkStateDataType;
     private final DrunkenModifierDataType<C> drunkenModifierDataType;
+    private final Function<BreweryKey, Optional<DrunkEvent>> eventSupplier;
     private Set<BreweryKey> allowedEvents;
     private List<NamedDrunkEvent> namedDrunkEvents = initializeDrunkEventsWithOverrides();
     private Map<UUID, DrunkState> drunks = new HashMap<>();
@@ -45,7 +44,7 @@ public class DrunksManagerImpl<C> implements DrunksManager {
 
     private static final Random RANDOM = new Random();
 
-    public DrunksManagerImpl(CustomEventRegistry registry, Set<BreweryKey> allowedEvents, LongSupplier timeSupplier,
+    public DrunksManagerImpl(CustomEventRegistry registry, Set<BreweryKey> allowedEvents, Function<BreweryKey, Optional<DrunkEvent>> eventSupplier, LongSupplier timeSupplier,
                              PersistenceHandler<C> persistenceHandler, DrunkStateDataType<C> drunkStateDataType, DrunkenModifierDataType<C> drunkenModifierDataType) {
         this.eventRegistry = registry;
         this.allowedEvents = allowedEvents;
@@ -53,6 +52,7 @@ public class DrunksManagerImpl<C> implements DrunksManager {
         this.persistenceHandler = persistenceHandler;
         this.drunkStateDataType = drunkStateDataType;
         this.drunkenModifierDataType = drunkenModifierDataType;
+        this.eventSupplier = eventSupplier;
         loadDrunkStates();
     }
 
@@ -230,10 +230,9 @@ public class DrunksManagerImpl<C> implements DrunksManager {
         if (drunkState == null) {
             return;
         }
-        List<Pair<DrunkEvent, Double>> drunkEvents = Stream.concat(
-                        namedDrunkEvents.stream(),
-                        eventRegistry.events().stream())
-                .filter(event -> allowedEvents.contains(event.key()))
+        List<Pair<DrunkEvent, Double>> drunkEvents = allowedEvents.stream()
+                .map(eventSupplier)
+                .flatMap(Optional::stream)
                 .map(drunkEvent -> new Pair<>(drunkEvent, drunkEvent.probability().evaluate(DrunkStateImpl.compileVariables(drunkState.modifiers(), null, 0D))))
                 .filter(drunkEvent -> drunkEvent.second().enabled())
                 .map(drunkEvent -> new Pair<>(drunkEvent.first(), drunkEvent.second().probability()))

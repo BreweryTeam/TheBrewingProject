@@ -1,6 +1,7 @@
 package dev.jsinco.brewery.api.meta;
 
 import net.kyori.adventure.key.Key;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Set;
 
@@ -39,7 +40,7 @@ public interface MetaContainer<SELF extends MetaContainer<SELF>> {
      * @param <C> The type of the value to retrieve
      * @throws IllegalArgumentException If the value is not of the expected type
      */
-    <P, C> C meta(Key key, MetaDataType<P, C> type);
+    <P, C> @Nullable C meta(Key key, MetaDataType<P, C> type);
 
     /**
      * Checks if this container has metadata of the specified type under the provided key.

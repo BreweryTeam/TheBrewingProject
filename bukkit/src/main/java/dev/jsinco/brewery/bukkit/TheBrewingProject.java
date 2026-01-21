@@ -43,6 +43,7 @@ import dev.jsinco.brewery.bukkit.structure.StructureRegistry;
 import dev.jsinco.brewery.bukkit.structure.serializer.*;
 import dev.jsinco.brewery.bukkit.util.BreweryTimeDataType;
 import dev.jsinco.brewery.bukkit.util.BukkitIngredientUtil;
+import dev.jsinco.brewery.bukkit.util.EventUtil;
 import dev.jsinco.brewery.configuration.*;
 import dev.jsinco.brewery.configuration.locale.BreweryTranslator;
 import dev.jsinco.brewery.configuration.serializers.*;
@@ -319,7 +320,7 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
             throw new RuntimeException(e); // Hard exit if any issues here
         }
         this.drunksManager = new DrunksManagerImpl<>(customDrunkEventRegistry, EventSection.events().enabledRandomEvents().stream().map(BreweryKey::parse).collect(Collectors.toSet()),
-                () -> this.time, database, SqlDrunkStateDataType.INSTANCE, SqlDrunkenModifierDataType.INSTANCE);
+                EventUtil::fromKey, () -> this.time, database, SqlDrunkStateDataType.INSTANCE, SqlDrunkenModifierDataType.INSTANCE);
         PluginManager pluginManager = Bukkit.getPluginManager();
         pluginManager.registerEvents(new BrewMigrationListener(), this);
         pluginManager.registerEvents(new BlockEventListener(this.structureRegistry, placedStructureRegistry, this.database, this.breweryRegistry), this);
@@ -412,7 +413,17 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
         }
     }
 
+    /**
+     * Defaults to the brewery namespace
+     *
+     * @param key Key string with optional namespace
+     * @return Namespaced key
+     */
     public static NamespacedKey key(String key) {
+        if (key.contains(":")) {
+            String[] split = key.split(":", 2);
+            return new NamespacedKey(split[0], split[1]);
+        }
         return new NamespacedKey("brewery", key);
     }
 

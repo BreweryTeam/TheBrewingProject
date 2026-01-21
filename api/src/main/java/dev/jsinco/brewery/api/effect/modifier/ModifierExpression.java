@@ -3,6 +3,7 @@ package dev.jsinco.brewery.api.effect.modifier;
 import net.objecthunter.exp4j.Expression;
 import net.objecthunter.exp4j.ExpressionBuilder;
 import net.objecthunter.exp4j.function.Function;
+import net.objecthunter.exp4j.function.Functions;
 
 import java.util.Map;
 
@@ -17,6 +18,25 @@ public record ModifierExpression(String function) {
             @Override
             public double apply(double... doubles) {
                 return 0.04 / (110 - Math.max(0D, Math.min(doubles[0], 100D)));
+            }
+        });
+        // Lowercased
+        builder.function(new Function("probabilityweight", 1) {
+            @Override
+            public double apply(double... doubles) {
+                return 0.04 / (110 - Math.max(0D, Math.min(doubles[0], 100D)));
+            }
+        });
+        builder.function(new Function("max", 2) {
+            @Override
+            public double apply(double... doubles) {
+                return Math.max(doubles[0], doubles[1]);
+            }
+        });
+        builder.function(new Function("min", 2) {
+            @Override
+            public double apply(double... doubles) {
+                return Math.min(doubles[0], doubles[1]);
             }
         });
         Expression expression = builder.build();

@@ -2,6 +2,8 @@ package dev.jsinco.brewery.api.meta;
 
 import com.google.errorprone.annotations.Immutable;
 import net.kyori.adventure.key.Key;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -47,7 +49,7 @@ public final class MetaData implements MetaContainer<MetaData> {
     }
 
     @Override
-    public <P, C> C meta(Key key, MetaDataType<P, C> type) {
+    public <P, C> @Nullable C meta(Key key, MetaDataType<P, C> type) {
         Object value = meta.get(key);
         if (value == null) {
             return null;
