@@ -2,6 +2,7 @@ package dev.jsinco.brewery.api.meta;
 
 import com.google.errorprone.annotations.Immutable;
 import net.kyori.adventure.key.Key;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -93,6 +94,7 @@ public final class MetaData implements MetaContainer<MetaData> {
      * prefer the type-safe {@link #meta(Key, MetaDataType)} method instead.
      * @return An unmodifiable map of keys to metadata values as their primitive types
      */
+    @ApiStatus.Internal
     public Map<Key, Object> primitiveMap() {
         return meta;
     }
