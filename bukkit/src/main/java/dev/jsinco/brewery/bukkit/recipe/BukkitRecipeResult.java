@@ -14,6 +14,7 @@ import dev.jsinco.brewery.bukkit.api.integration.IntegrationTypes;
 import dev.jsinco.brewery.bukkit.api.integration.ItemIntegration;
 import dev.jsinco.brewery.bukkit.brew.BrewAdapter;
 import dev.jsinco.brewery.bukkit.util.BukkitMessageUtil;
+import dev.jsinco.brewery.configuration.BrewTooltipType;
 import dev.jsinco.brewery.configuration.Config;
 import dev.jsinco.brewery.configuration.DrunkenModifierSection;
 import dev.jsinco.brewery.effect.DrunkStateImpl;
@@ -155,51 +156,58 @@ public class BukkitRecipeResult implements RecipeResult<ItemStack> {
     }
 
     private void applyLore(ItemStack itemStack, BrewScore score, Brew brew, Brew.State state) {
+        Stream.Builder<Component> fullLoreBuilder = Stream.builder();
+        TagResolver resolver = getResolver(score);
+        for (BrewTooltipType tooltipType : Config.config().brewTooltipOrder()) {
+            if (!appendBrewInfoLore && BrewTooltipType.RECIPE_LORE != tooltipType) {
+                continue;
+            }
+            switch (tooltipType) {
+                case RECIPE_LORE -> lore.stream()
+                        .map(line -> MessageUtil.miniMessage(line, MessageUtil.getScoreTagResolver(score)))
+                        .forEach(fullLoreBuilder);
+                case SCORE -> {
+                    switch (state) {
+                        case Brew.State.Brewing() ->
+                                fullLoreBuilder.add(Component.translatable("tbp.brew.tooltip.quality-brewing", Argument.tagResolver(resolver)));
+                        case Brew.State.Other() ->
+                                fullLoreBuilder.add(Component.translatable("tbp.brew.tooltip.quality", Argument.tagResolver(resolver)));
+                        case Brew.State.Seal(String ignored) ->
+                                fullLoreBuilder.add(Component.translatable("tbp.brew.tooltip.quality-sealed", Argument.tagResolver(resolver)));
+                    }
+                }
+                case MODIFIER -> applyDrunkenTooltips(state, fullLoreBuilder, resolver);
+                case SEALED_TEXT -> {
+                    if (state instanceof Brew.State.Seal(String message) && message != null) {
+                        fullLoreBuilder.add(Component.translatable("tbp.brew.tooltip.volume", Argument.tagResolver(
+                                TagResolver.resolver(resolver, Placeholder.parsed("volume", message)))
+                        ));
+                    }
+                }
+                case BREWERS -> applyBrewersTooltip(brew, fullLoreBuilder);
+                case STEPS -> {
+                    switch (state) {
+                        case Brew.State.Brewing ignored -> {
+                            MessageUtil.compileBrewInfo(brew, score, false).forEach(fullLoreBuilder::add);
+                        }
+                        case Brew.State.Other ignored -> {
+                            addLastStepLore(brew, fullLoreBuilder, score, state);
+                        }
+                        case Brew.State.Seal ignored -> {
+                            addLastStepLore(brew, fullLoreBuilder, score, state);
+                        }
+                    }
+                }
+                case EMPTY_LINE -> fullLoreBuilder.add(Component.empty());
+            }
+        }
         itemStack.setData(DataComponentTypes.LORE, ItemLore.lore(
-                Stream.concat(lore.stream()
-                                        .map(line -> MessageUtil.miniMessage(line, MessageUtil.getScoreTagResolver(score))),
-                                compileExtraLore(score, brew, state)
-                        )
-                        .map(component -> component.decoration(TextDecoration.ITALIC, false))
+                fullLoreBuilder.build()
+                        .map(component -> component.decorationIfAbsent(TextDecoration.ITALIC, TextDecoration.State.FALSE))
                         .map(component -> component.colorIfAbsent(NamedTextColor.GRAY))
                         .map(component -> GlobalTranslator.render(component, Config.config().language()))
                         .toList()
         ));
-    }
-
-    private Stream<? extends Component> compileExtraLore(BrewScore score, Brew brew, Brew.State state) {
-        if (!appendBrewInfoLore) {
-            return Stream.empty();
-        }
-        Stream.Builder<Component> streamBuilder = Stream.builder();
-        streamBuilder.add(Component.empty());
-        TagResolver resolver = getResolver(score);
-        switch (state) {
-            case Brew.State.Brewing ignored -> {
-                streamBuilder.add(Component.translatable("tbp.brew.tooltip.quality-brewing", Argument.tagResolver(resolver)));
-                MessageUtil.compileBrewInfo(brew, score, false).forEach(streamBuilder::add);
-                applyBrewersTooltip(brew, streamBuilder);
-                applyDrunkenTooltips(state, streamBuilder, resolver);
-            }
-            case Brew.State.Other ignored -> {
-                streamBuilder.add(Component.translatable("tbp.brew.tooltip.quality", Argument.tagResolver(resolver)));
-                addLastStepLore(brew, streamBuilder, score, state);
-                applyBrewersTooltip(brew, streamBuilder);
-                applyDrunkenTooltips(state, streamBuilder, resolver);
-            }
-            case Brew.State.Seal seal -> {
-                if (seal.message() != null) {
-                    streamBuilder.add(Component.translatable("tbp.brew.tooltip.volume", Argument.tagResolver(
-                            TagResolver.resolver(resolver, Placeholder.parsed("volume", seal.message())))
-                    ));
-                }
-                streamBuilder.add(Component.translatable("tbp.brew.tooltip.quality-sealed", Argument.tagResolver(resolver)));
-                addLastStepLore(brew, streamBuilder, score, state);
-                applyBrewersTooltip(brew, streamBuilder);
-                applyDrunkenTooltips(state, streamBuilder, resolver);
-            }
-        }
-        return streamBuilder.build();
     }
 
     private void applyBrewersTooltip(Brew brew, Stream.Builder<Component> streamBuilder) {
