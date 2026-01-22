@@ -1,5 +1,6 @@
 package dev.jsinco.brewery.configuration;
 
+import dev.jsinco.brewery.api.config.Configuration;
 import eu.okaeri.configs.ConfigManager;
 import eu.okaeri.configs.OkaeriConfig;
 import eu.okaeri.configs.annotation.Comment;
@@ -18,11 +19,9 @@ import java.security.SecureRandom;
 import java.util.List;
 import java.util.Locale;
 
-import dev.jsinco.brewery.api.config.Configuration;
-
 @Getter
 @Accessors(fluent = true)
-public class Config extends OkaeriConfig implements Configuration{
+public class Config extends OkaeriConfig implements Configuration {
 
     @Comment("Config version. Don't change this")
     @CustomKey("config-version")
@@ -77,6 +76,18 @@ public class Config extends OkaeriConfig implements Configuration{
     @CustomKey("brewers-display")
     @Comment({"How a brewer should be displayed on the brew", "Values = [none, first_step, last_step, lead_brewer, all]"})
     private BrewersDisplay brewersDisplay = BrewersDisplay.NONE;
+
+    @CustomKey("brew-tooltip-order")
+    @Comment("Define the order to display the brew tooltip in the item lore")
+    private List<BrewTooltipType> brewTooltipOrder = List.of(
+            BrewTooltipType.RECIPE_LORE,
+            BrewTooltipType.EMPTY_LINE,
+            BrewTooltipType.SEALED_TEXT,
+            BrewTooltipType.SCORE,
+            BrewTooltipType.STEPS,
+            BrewTooltipType.BREWERS,
+            BrewTooltipType.MODIFIER
+    );
 
     @CustomKey("cauldrons")
     private CauldronSection cauldrons = new CauldronSection();
