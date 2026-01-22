@@ -9,12 +9,12 @@ import dev.jsinco.brewery.api.breweries.Tickable;
 import dev.jsinco.brewery.api.config.Configuration;
 import dev.jsinco.brewery.api.effect.modifier.ModifierManager;
 import dev.jsinco.brewery.api.event.CustomEventRegistry;
+import dev.jsinco.brewery.api.event.EventData;
 import dev.jsinco.brewery.api.event.EventStepRegistry;
 import dev.jsinco.brewery.api.structure.BlockMatcherReplacement;
 import dev.jsinco.brewery.api.structure.MultiblockStructure;
 import dev.jsinco.brewery.api.structure.StructureMeta;
 import dev.jsinco.brewery.api.structure.StructureType;
-import dev.jsinco.brewery.api.util.BreweryKey;
 import dev.jsinco.brewery.api.util.Logger;
 import dev.jsinco.brewery.bukkit.api.TheBrewingProjectApi;
 import dev.jsinco.brewery.bukkit.api.event.TBPReloadEvent;
@@ -215,7 +215,7 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
         } catch (IOException | SQLException e) {
             throw new RuntimeException(e); // Hard exit if any issues here
         }
-        this.drunksManager.reset(EventSection.events().enabledRandomEvents().stream().map(BreweryKey::parse).collect(Collectors.toSet()));
+        this.drunksManager.reset(EventSection.events().enabledRandomEvents().stream().map(EventData::deserialize).collect(Collectors.toSet()));
         worldEventListener.init();
         recipeRegistry.clear();
         RecipeReader<ItemStack> recipeReader = new RecipeReader<>(this.getDataFolder(), new BukkitRecipeResultReader(), BukkitIngredientManager.INSTANCE);
@@ -319,8 +319,8 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
         } catch (IOException | PersistenceException | SQLException e) {
             throw new RuntimeException(e); // Hard exit if any issues here
         }
-        this.drunksManager = new DrunksManagerImpl<>(customDrunkEventRegistry, EventSection.events().enabledRandomEvents().stream().map(BreweryKey::parse).collect(Collectors.toSet()),
-                EventUtil::fromKey, () -> this.time, database, SqlDrunkStateDataType.INSTANCE, SqlDrunkenModifierDataType.INSTANCE);
+        this.drunksManager = new DrunksManagerImpl<>(customDrunkEventRegistry, EventSection.events().enabledRandomEvents().stream().map(EventData::deserialize).collect(Collectors.toSet()),
+                EventUtil::fromData, () -> this.time, database, SqlDrunkStateDataType.INSTANCE, SqlDrunkenModifierDataType.INSTANCE);
         PluginManager pluginManager = Bukkit.getPluginManager();
         pluginManager.registerEvents(new BrewMigrationListener(), this);
         pluginManager.registerEvents(new BlockEventListener(this.structureRegistry, placedStructureRegistry, this.database, this.breweryRegistry), this);

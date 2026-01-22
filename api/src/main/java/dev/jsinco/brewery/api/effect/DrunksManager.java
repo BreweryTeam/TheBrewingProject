@@ -1,8 +1,10 @@
 package dev.jsinco.brewery.api.effect;
 
 import dev.jsinco.brewery.api.event.DrunkEvent;
+import dev.jsinco.brewery.api.event.EventData;
 import dev.jsinco.brewery.api.util.BreweryKey;
 import dev.jsinco.brewery.api.util.Pair;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -20,7 +22,8 @@ public interface DrunksManager {
 
     @Nullable DrunkState getDrunkState(UUID playerUuid);
 
-    void reset(Set<BreweryKey> allowedEvents);
+    @ApiStatus.Internal
+    void reset(Set<EventData> allowedEvents);
 
     void clear(UUID playerUuid);
 

@@ -2,6 +2,7 @@ package dev.jsinco.brewery.bukkit.recipe;
 
 import com.google.common.base.Preconditions;
 import dev.jsinco.brewery.api.effect.modifier.DrunkenModifier;
+import dev.jsinco.brewery.api.event.EventData;
 import dev.jsinco.brewery.api.moment.Interval;
 import dev.jsinco.brewery.api.moment.Moment;
 import dev.jsinco.brewery.api.recipe.QualityData;
@@ -59,7 +60,7 @@ public class BukkitRecipeResultReader implements RecipeResultReader<ItemStack> {
         qualityDataBuilder.addOptionalString(configurationSection.getString("messages.title"), RecipeEffectsImpl.Builder::title);
         qualityDataBuilder.addOptionalString(configurationSection.getString("messages.message"), RecipeEffectsImpl.Builder::message);
         qualityDataBuilder.addOptionalList(configurationSection.getStringList("effects"), BukkitRecipeResultReader::getEffect, RecipeEffectsImpl.Builder::effects);
-        qualityDataBuilder.addOptionalList(configurationSection.getStringList("events"), BreweryKey::parse, RecipeEffectsImpl.Builder::events);
+        qualityDataBuilder.addOptionalList(configurationSection.getStringList("events"), EventData::deserialize, RecipeEffectsImpl.Builder::eventData);
         qualityDataBuilder.add(parseModifiers(configurationSection), RecipeEffectsImpl.Builder::addModifiers);
         return qualityDataBuilder.build();
     }
