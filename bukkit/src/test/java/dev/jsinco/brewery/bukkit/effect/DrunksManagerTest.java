@@ -3,10 +3,12 @@ package dev.jsinco.brewery.bukkit.effect;
 import dev.jsinco.brewery.api.effect.ModifierConsume;
 import dev.jsinco.brewery.api.effect.modifier.DrunkenModifier;
 import dev.jsinco.brewery.api.event.CustomEventRegistry;
+import dev.jsinco.brewery.api.event.EventData;
 import dev.jsinco.brewery.api.event.NamedDrunkEvent;
 import dev.jsinco.brewery.api.util.BreweryRegistry;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.bukkit.testutil.TBPServerMock;
+import dev.jsinco.brewery.bukkit.util.EventUtil;
 import dev.jsinco.brewery.configuration.DrunkenModifierSection;
 import dev.jsinco.brewery.database.sql.Database;
 import dev.jsinco.brewery.effect.DrunkStateImpl;
@@ -30,7 +32,7 @@ class DrunksManagerTest {
 
     private DrunksManagerImpl<Connection> drunksManager;
     private UUID playerUuid = UUID.randomUUID();
-    private AtomicLong time = new AtomicLong();
+    private final AtomicLong time = new AtomicLong();
     private DrunkenModifier alcohol;
 
     @BeforeEach
@@ -39,7 +41,9 @@ class DrunksManagerTest {
         Database database = MockBukkit.load(TheBrewingProject.class).getDatabase();
         this.drunksManager = new DrunksManagerImpl<>(new CustomEventRegistry(), BreweryRegistry.DRUNK_EVENT.values().stream()
                 .map(NamedDrunkEvent::key)
+                .map(EventData::new)
                 .collect(Collectors.toSet()),
+                EventUtil::fromData,
                 time::get,
                 database,
                 SqlDrunkStateDataType.INSTANCE,

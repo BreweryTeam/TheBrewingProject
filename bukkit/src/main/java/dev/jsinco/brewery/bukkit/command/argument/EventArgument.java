@@ -8,7 +8,7 @@ import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
-import dev.jsinco.brewery.bukkit.api.integration.EventIntegration;
+import dev.jsinco.brewery.api.event.EventData;
 import dev.jsinco.brewery.bukkit.api.integration.IntegrationTypes;
 import dev.jsinco.brewery.bukkit.util.BukkitMessageUtil;
 import dev.jsinco.brewery.api.event.CustomEvent;
@@ -42,7 +42,7 @@ public class EventArgument implements CustomArgumentType.Converted<DrunkEvent, S
         if (customEvent != null) {
             return customEvent;
         }
-        EventIntegration.EventData eventData = EventIntegration.parseEvent(nativeType);
+        EventData eventData = EventData.deserialize(nativeType);
         return TheBrewingProject.getInstance().getIntegrationManager()
                 .getIntegrationRegistry()
                 .getIntegrations(IntegrationTypes.EVENT)

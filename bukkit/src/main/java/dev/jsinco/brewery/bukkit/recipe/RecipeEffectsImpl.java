@@ -6,12 +6,11 @@ import dev.jsinco.brewery.api.effect.DrunkState;
 import dev.jsinco.brewery.api.effect.ModifierConsume;
 import dev.jsinco.brewery.api.effect.modifier.DrunkenModifier;
 import dev.jsinco.brewery.api.effect.modifier.ModifierDisplay;
-import dev.jsinco.brewery.api.event.CustomEventRegistry;
 import dev.jsinco.brewery.api.event.DrunkEvent;
+import dev.jsinco.brewery.api.event.EventData;
 import dev.jsinco.brewery.api.recipe.RecipeEffect;
 import dev.jsinco.brewery.api.recipe.RecipeEffects;
 import dev.jsinco.brewery.api.util.BreweryKey;
-import dev.jsinco.brewery.api.util.BreweryRegistry;
 import dev.jsinco.brewery.api.util.Holder;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.bukkit.api.BukkitAdapter;
@@ -63,10 +62,10 @@ public class RecipeEffectsImpl implements RecipeEffects {
     private final @Nullable String message;
     private final @Nullable String actionBar;
     private final @NotNull Map<DrunkenModifier, Double> modifiers;
-    private final @NotNull List<BreweryKey> events;
+    private final @NotNull List<EventData> events;
 
     private RecipeEffectsImpl(@NotNull List<RecipeEffectImpl> effects, @Nullable String title, @Nullable String message,
-                              @Nullable String actionBar, @NotNull List<BreweryKey> events, @NotNull Map<DrunkenModifier, Double> modifiers) {
+                              @Nullable String actionBar, @NotNull List<EventData> events, @NotNull Map<DrunkenModifier, Double> modifiers) {
         this.effects = effects;
         this.title = title;
         this.message = message;
@@ -78,7 +77,7 @@ public class RecipeEffectsImpl implements RecipeEffects {
     public List<DrunkEvent> getEvents() {
         return events
                 .stream()
-                .map(EventUtil::fromKey)
+                .map(EventUtil::fromData)
                 .flatMap(Optional::stream)
                 .toList();
     }
@@ -106,7 +105,7 @@ public class RecipeEffectsImpl implements RecipeEffects {
             );
         }
         if (!events.isEmpty()) {
-            container.set(EVENTS, ListPersistentDataType.STRING_LIST, events.stream().map(BreweryKey::toString).toList());
+            container.set(EVENTS, ListPersistentDataType.STRING_LIST, events.stream().map(EventData::serialized).toList());
         }
         if (!effects.isEmpty()) {
             container.set(EFFECTS, RecipeEffectPersistentDataType.INSTANCE, effects);
@@ -142,9 +141,9 @@ public class RecipeEffectsImpl implements RecipeEffects {
             consumeModifiers.stream().filter(Objects::nonNull).forEach(modifierConsume -> modifiers.put(modifierConsume.modifier(), modifierConsume.value()));
         }
         builder.addModifiers(modifiers);
-        builder.events(persistentDataContainer.getOrDefault(EVENTS, ListPersistentDataType.STRING_LIST, List.of())
+        builder.eventData(persistentDataContainer.getOrDefault(EVENTS, ListPersistentDataType.STRING_LIST, List.of())
                 .stream()
-                .map(BreweryKey::parse)
+                .map(EventData::deserialize)
                 .collect(Collectors.toList())
         );
         if (persistentDataContainer.has(EFFECTS, RecipeEffectPersistentDataType.INSTANCE)) {
@@ -246,7 +245,7 @@ public class RecipeEffectsImpl implements RecipeEffects {
 
     @Override
     public List<BreweryKey> events() {
-        return events;
+        return events.stream().map(EventData::key).toList();
     }
 
     @Override
@@ -265,7 +264,7 @@ public class RecipeEffectsImpl implements RecipeEffects {
         private @Nullable String title;
         private @Nullable String message;
         private @Nullable String actionBar;
-        private @NotNull List<BreweryKey> events = List.of();
+        private @NotNull List<EventData> events = List.of();
         private final ImmutableMap.Builder<DrunkenModifier, Double> modifiers = new ImmutableMap.Builder<>();
 
         public Builder effects(@NotNull List<RecipeEffectImpl> effects) {
@@ -275,6 +274,12 @@ public class RecipeEffectsImpl implements RecipeEffects {
         }
 
         public Builder events(@NotNull List<BreweryKey> events) {
+            Preconditions.checkNotNull(events);
+            this.events = events.stream().map(EventData::new).toList();
+            return this;
+        }
+
+        public Builder eventData(@NotNull List<EventData> events) {
             Preconditions.checkNotNull(events);
             this.events = List.copyOf(events);
             return this;

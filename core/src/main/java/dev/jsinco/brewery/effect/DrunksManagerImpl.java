@@ -7,6 +7,7 @@ import dev.jsinco.brewery.api.effect.ModifierConsume;
 import dev.jsinco.brewery.api.effect.modifier.DrunkenModifier;
 import dev.jsinco.brewery.api.event.CustomEventRegistry;
 import dev.jsinco.brewery.api.event.DrunkEvent;
+import dev.jsinco.brewery.api.event.EventData;
 import dev.jsinco.brewery.api.event.NamedDrunkEvent;
 import dev.jsinco.brewery.api.util.BreweryKey;
 import dev.jsinco.brewery.api.util.BreweryRegistry;
@@ -33,8 +34,8 @@ public class DrunksManagerImpl<C> implements DrunksManager {
     private final PersistenceHandler<C> persistenceHandler;
     private final DrunkStateDataType<C> drunkStateDataType;
     private final DrunkenModifierDataType<C> drunkenModifierDataType;
-    private final Function<BreweryKey, Optional<DrunkEvent>> eventSupplier;
-    private Set<BreweryKey> allowedEvents;
+    private final Function<EventData, Optional<DrunkEvent>> eventSupplier;
+    private Set<EventData> allowedEvents;
     private List<NamedDrunkEvent> namedDrunkEvents = initializeDrunkEventsWithOverrides();
     private Map<UUID, DrunkState> drunks = new HashMap<>();
     @Getter
@@ -44,7 +45,7 @@ public class DrunksManagerImpl<C> implements DrunksManager {
 
     private static final Random RANDOM = new Random();
 
-    public DrunksManagerImpl(CustomEventRegistry registry, Set<BreweryKey> allowedEvents, Function<BreweryKey, Optional<DrunkEvent>> eventSupplier, LongSupplier timeSupplier,
+    public DrunksManagerImpl(CustomEventRegistry registry, Set<EventData> allowedEvents, Function<EventData, Optional<DrunkEvent>> eventSupplier, LongSupplier timeSupplier,
                              PersistenceHandler<C> persistenceHandler, DrunkStateDataType<C> drunkStateDataType, DrunkenModifierDataType<C> drunkenModifierDataType) {
         this.eventRegistry = registry;
         this.allowedEvents = allowedEvents;
@@ -165,7 +166,7 @@ public class DrunksManagerImpl<C> implements DrunksManager {
     }
 
     @Override
-    public void reset(@NotNull Set<BreweryKey> allowedEvents) {
+    public void reset(@NotNull Set<EventData> allowedEvents) {
         plannedEvents.clear();
         drunks.clear();
         this.allowedEvents = allowedEvents;
