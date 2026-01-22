@@ -10,6 +10,7 @@ import dev.jsinco.brewery.recipes.BrewScoreImpl;
 import lombok.Getter;
 import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.function.Function;
@@ -105,7 +106,7 @@ public class BrewImpl implements Brew {
     }
 
     @Override
-    public <P, C> C meta(Key key, MetaDataType<P, C> type) {
+    public <P, C> @Nullable C meta(Key key, MetaDataType<P, C> type) {
         return meta.meta(key, type);
     }
 
