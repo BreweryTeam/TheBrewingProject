@@ -45,14 +45,14 @@ class BukkitBukkitCauldronDataTypeTest {
         BreweryLocation position = BukkitAdapter.toBreweryLocation(block);
         BukkitCauldron cauldron = new BukkitCauldron(position, true);
         database.insertValue(BukkitCauldronDataType.INSTANCE, cauldron);
-        List<BukkitCauldron> cauldrons = FutureUtil.mergeFutures(database.findNow(BukkitCauldronDataType.INSTANCE, world.getUID())).join();
+        List<BukkitCauldron> cauldrons = database.findNow(BukkitCauldronDataType.INSTANCE, world.getUID());
         assertEquals(1, cauldrons.size());
         BukkitCauldron retrievedCauldron = cauldrons.get(0);
         assertEquals(cauldron.getBrew(), retrievedCauldron.getBrew());
         assertEquals(cauldron.position(), retrievedCauldron.position());
         BukkitCauldron updatedValue = new BukkitCauldron(position, true);
         database.updateValue(BukkitCauldronDataType.INSTANCE, updatedValue);
-        List<BukkitCauldron> updatedCauldrons = FutureUtil.mergeFutures(database.findNow(BukkitCauldronDataType.INSTANCE, world.getUID())).join();
+        List<BukkitCauldron> updatedCauldrons = database.findNow(BukkitCauldronDataType.INSTANCE, world.getUID());
         assertEquals(1, updatedCauldrons.size());
         database.remove(BukkitCauldronDataType.INSTANCE, cauldron);
         assertEquals(0, database.findNow(BukkitCauldronDataType.INSTANCE, world.getUID()).size());
