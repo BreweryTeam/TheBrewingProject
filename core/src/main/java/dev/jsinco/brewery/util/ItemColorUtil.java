@@ -10,7 +10,7 @@ import java.util.Map;
 
 public class ItemColorUtil {
 
-    private static Map<String, Color> itemColors = compileItemColors();
+    private static final Map<String, Color> ITEM_COLORS = compileItemColors();
 
     private ItemColorUtil() {
         throw new IllegalStateException("Utility class");
@@ -26,6 +26,6 @@ public class ItemColorUtil {
     }
 
     public static @Nullable Color getItemColor(String itemId) {
-        return itemColors.get(itemId);
+        return ITEM_COLORS.get(itemId);
     }
 }

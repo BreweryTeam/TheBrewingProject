@@ -24,6 +24,7 @@ import dev.jsinco.brewery.bukkit.breweries.barrel.BukkitBarrel;
 import dev.jsinco.brewery.bukkit.breweries.distillery.BukkitDistillery;
 import dev.jsinco.brewery.bukkit.command.BreweryCommand;
 import dev.jsinco.brewery.bukkit.configuration.serializer.BreweryLocationSerializer;
+import dev.jsinco.brewery.bukkit.configuration.serializer.ColorSerializer;
 import dev.jsinco.brewery.bukkit.configuration.serializer.MaterialSerializer;
 import dev.jsinco.brewery.bukkit.effect.SqlDrunkStateDataType;
 import dev.jsinco.brewery.bukkit.effect.SqlDrunkenModifierDataType;
@@ -183,6 +184,7 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
                 .add(new SecretKeySerializer())
                 .add(new MinutesDurationSerializer())
                 .add(new TicksDurationSerializer())
+                .add(new ColorSerializer())
                 .build();
     }
 
@@ -288,16 +290,13 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
         Stream.of(structureRoot.listFiles())
                 .filter(file -> file.getName().endsWith(".json"))
                 .map(File::toPath)
-                .map(path -> {
-
-                    return ConfigManager.create(BreweryStructureConfig.class, it -> {
-                        it.withConfigurer(new JsonGsonConfigurer(), pack);
-                        it.withBindFile(path);
-                        it.withRemoveOrphans(true);
-                        it.saveDefaults();
-                        it.load(true);
-                    }).toStructure(path);
-                })
+                .map(path -> ConfigManager.create(BreweryStructureConfig.class, it -> {
+                    it.withConfigurer(new JsonGsonConfigurer(), pack);
+                    it.withBindFile(path);
+                    it.withRemoveOrphans(true);
+                    it.saveDefaults();
+                    it.load(true);
+                }).toStructure(path))
                 .forEach(structure -> {
                     if (structure.getMetaOrDefault(StructureMeta.USE_BARREL_SUBSTITUTION, false)) {
                         structureRegistry.addStructure(structure, BarrelBlockDataMatcher.INSTANCE, BarrelType.PLACEABLE_TYPES);
