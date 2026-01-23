@@ -8,7 +8,9 @@ import eu.okaeri.configs.annotation.Comment;
 import eu.okaeri.configs.annotation.CustomKey;
 import lombok.Getter;
 import lombok.experimental.Accessors;
+import net.kyori.adventure.text.format.NamedTextColor;
 
+import java.awt.*;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -32,4 +34,19 @@ public class CauldronSection extends OkaeriConfig implements Configuration.Cauld
     @CustomKey("cooking-minute-ticks")
     private long cookingMinuteTicks = Moment.MINUTE;
 
+    @Comment("The base color lava cauldrons have")
+    @CustomKey("lava-base-particle-color")
+    private Color lavaBaseParticleColor = new Color(Integer.parseInt("d45a12", 16));
+
+    @Comment("The base color water cauldrons have")
+    @CustomKey("water-base-particle-color")
+    private Color waterBaseParticleColor = new Color(NamedTextColor.AQUA.value());
+
+    @Comment("The base color snow cauldrons have")
+    @CustomKey("snow-base-particle-color")
+    private Color snowBaseParticleColor = new Color(Integer.parseInt("f8fdfd", 16));
+
+    @Comment("The base color snow cauldrons have")
+    @CustomKey("failed-particle-color")
+    private Color failedParticleColor = new Color(NamedTextColor.GRAY.value());
 }

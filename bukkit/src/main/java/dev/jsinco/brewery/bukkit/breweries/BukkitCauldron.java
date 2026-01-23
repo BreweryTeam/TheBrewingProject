@@ -57,10 +57,6 @@ public class BukkitCauldron implements Cauldron {
     private boolean hot = false;
     @Getter
     private Brew brew;
-    private static final Color LAVA_COLOR = Color.fromRGB(Integer.parseInt("d45a12", 16));
-    private static final Color WATER_COLOR = Color.AQUA;
-    private static final Color SNOW_COLOR = Color.fromRGB(Integer.parseInt("f8fdfd", 16));
-    private static final Color FAILED_COLOR = Color.GRAY;
     private boolean brewExtracted = false;
     private Color particleColor = Color.AQUA;
     private @Nullable Recipe<ItemStack> recipe;
@@ -105,7 +101,7 @@ public class BukkitCauldron implements Cauldron {
         Color resultColor = computeResultColor(recipeOptional);
         Color baseParticleColor = computeBaseParticleColor(getBlock());
         this.particleColor = recipeOptional.map(recipe -> computeParticleColor(baseParticleColor, resultColor, recipe))
-                .orElseGet(() -> ColorUtil.getNextColor(baseParticleColor, FAILED_COLOR, getBrewTime(), Moment.MINUTE * 3));
+                .orElseGet(() -> ColorUtil.getNextColor(baseParticleColor, convert(Config.config().cauldrons().failedParticleColor()), getBrewTime(), Moment.MINUTE * 3));
         this.playBrewingEffects();
     }
 
@@ -129,7 +125,7 @@ public class BukkitCauldron implements Cauldron {
 
     private Color computeResultColor(Optional<Recipe<ItemStack>> recipeOptional) {
         if (recipeOptional.isEmpty()) {
-            return FAILED_COLOR;
+            return convert(Config.config().cauldrons().failedParticleColor());
         }
         Map<? extends Ingredient, Integer> ingredients;
         if (brew.lastStep() instanceof BrewingStep.Cook cook) {
@@ -141,8 +137,8 @@ public class BukkitCauldron implements Cauldron {
         }
         BrewScore score = brew.score(recipeOptional.get());
         BrewQuality brewQuality = score.brewQuality();
-        if(brewQuality == null) {
-            return FAILED_COLOR;
+        if (brewQuality == null) {
+            return convert(Config.config().cauldrons().failedParticleColor());
         }
         return !score.completed() ?
                 BukkitIngredientUtil.ingredientData(ingredients).first() :
@@ -215,9 +211,9 @@ public class BukkitCauldron implements Cauldron {
 
     private Color computeBaseParticleColor(Block block) {
         return switch (block.getType()) {
-            case WATER_CAULDRON -> WATER_COLOR;
-            case LAVA_CAULDRON -> LAVA_COLOR;
-            case POWDER_SNOW_CAULDRON -> SNOW_COLOR;
+            case WATER_CAULDRON -> convert(Config.config().cauldrons().waterBaseParticleColor());
+            case LAVA_CAULDRON -> convert(Config.config().cauldrons().lavaBaseParticleColor());
+            case POWDER_SNOW_CAULDRON -> convert(Config.config().cauldrons().snowBaseParticleColor());
             default -> throw new IllegalStateException("Expected block to be cauldron type");
         };
     }
@@ -386,5 +382,9 @@ public class BukkitCauldron implements Cauldron {
             return levelled.getLevel();
         }
         return 0;
+    }
+
+    private Color convert(java.awt.Color awtColor) {
+        return Color.fromRGB(awtColor.getRGB() & 0xFFFFFF);
     }
 }
