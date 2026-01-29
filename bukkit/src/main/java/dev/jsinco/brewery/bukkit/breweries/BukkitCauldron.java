@@ -221,9 +221,7 @@ public class BukkitCauldron implements Cauldron {
         ItemDisplay itemDisplay = player.getWorld().spawn(player.getLocation(), ItemDisplay.class, entity -> {
             entity.setPersistent(false);
             entity.setItemStack(addedItem);
-            entity.setTransformation(
-                    new Transformation(new Vector3f(), new Quaternionf(), new Vector3f(0.5F, 0.5F, 0.5F), new Quaternionf())
-            );
+            entity.setItemDisplayTransform(ItemDisplay.ItemDisplayTransform.GROUND);
         });
         itemDisplay.getScheduler().runAtFixedRate(
                 TheBrewingProject.getInstance(),
