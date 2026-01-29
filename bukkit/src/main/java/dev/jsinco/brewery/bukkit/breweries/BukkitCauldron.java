@@ -210,7 +210,9 @@ public class BukkitCauldron implements Cauldron {
         this.recipe = brew.closestRecipe(TheBrewingProject.getInstance().getRecipeRegistry())
                 .orElse(null);
 
-        playIngredientAnimation(addedItem, player);
+        if (Config.config().cauldrons().ingredientAddedAnimation()) {
+            playIngredientAnimation(addedItem, player);
+        }
         playIngredientAddedEffects(addedItem);
         return true;
     }
@@ -281,7 +283,7 @@ public class BukkitCauldron implements Cauldron {
                     if (bukkitLocation.getBlock().getType() == Material.WATER_CAULDRON) {
                         world.spawnParticle(Particle.SPLASH, bukkitLocation.add(0.0, 0.5, 0.0), 50, 0.1, 0.05, 0.1, 1.0);
                     }
-                }, ItemAddAnimation.T_END));
+                }, Config.config().cauldrons().ingredientAddedAnimation() ? ItemAddAnimation.T_END : 1L));
     }
 
     public void playBrewExtractedEffects() {
