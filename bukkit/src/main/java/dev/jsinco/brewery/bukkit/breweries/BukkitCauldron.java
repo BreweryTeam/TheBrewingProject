@@ -17,6 +17,7 @@ import dev.jsinco.brewery.brew.BrewImpl;
 import dev.jsinco.brewery.brew.CookStepImpl;
 import dev.jsinco.brewery.brew.MixStepImpl;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
+import dev.jsinco.brewery.bukkit.animation.ItemAddAnimation;
 import dev.jsinco.brewery.bukkit.api.BukkitAdapter;
 import dev.jsinco.brewery.bukkit.api.event.process.BrewCauldronProcessEvent;
 import dev.jsinco.brewery.bukkit.api.event.transaction.CauldronInsertEvent;
@@ -40,10 +41,14 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockType;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.Levelled;
+import org.bukkit.entity.ItemDisplay;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.util.Transformation;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Quaternionf;
+import org.joml.Vector3f;
 
 import java.util.*;
 
@@ -205,8 +210,26 @@ public class BukkitCauldron implements Cauldron {
         this.recipe = brew.closestRecipe(TheBrewingProject.getInstance().getRecipeRegistry())
                 .orElse(null);
 
+        playIngredientAnimation(addedItem, player);
         playIngredientAddedEffects(addedItem);
         return true;
+    }
+
+    private void playIngredientAnimation(ItemStack addedItem, Player player) {
+        ItemDisplay itemDisplay = player.getWorld().spawn(player.getLocation(), ItemDisplay.class, entity -> {
+            entity.setPersistent(false);
+            entity.setItemStack(addedItem);
+            entity.setTransformation(
+                    new Transformation(new Vector3f(), new Quaternionf(), new Vector3f(0.5F, 0.5F, 0.5F), new Quaternionf())
+            );
+        });
+        itemDisplay.getScheduler().runAtFixedRate(
+                TheBrewingProject.getInstance(),
+                new ItemAddAnimation(player.getLocation(), getBlock().getLocation().toCenterLocation(), itemDisplay),
+                itemDisplay::remove,
+                1,
+                1
+        );
     }
 
     private Color computeBaseParticleColor(Block block) {
@@ -249,7 +272,7 @@ public class BukkitCauldron implements Cauldron {
         BukkitAdapter.toLocation(this.location)
                 .map(Location::toCenterLocation)
                 .filter(Location::isChunkLoaded)
-                .ifPresent(bukkitLocation -> {
+                .ifPresent(bukkitLocation -> Bukkit.getGlobalRegionScheduler().runDelayed(TheBrewingProject.getInstance(), ignored -> {
                     World world = bukkitLocation.getWorld();
 
                     SoundDefinition sound = item.getType() == Material.POTION ? Config.config().sounds().cauldronIngredientAddBrew() : Config.config().sounds().cauldronIngredientAdd();
@@ -258,7 +281,7 @@ public class BukkitCauldron implements Cauldron {
                     if (bukkitLocation.getBlock().getType() == Material.WATER_CAULDRON) {
                         world.spawnParticle(Particle.SPLASH, bukkitLocation.add(0.0, 0.5, 0.0), 50, 0.1, 0.05, 0.1, 1.0);
                     }
-                });
+                }, ItemAddAnimation.T_END));
     }
 
     public void playBrewExtractedEffects() {
