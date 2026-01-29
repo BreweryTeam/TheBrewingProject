@@ -28,6 +28,7 @@ import io.papermc.paper.datacomponent.item.TooltipDisplay;
 import io.papermc.paper.persistence.PersistentDataContainerView;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.translation.Argument;
 import net.kyori.adventure.translation.GlobalTranslator;
@@ -80,7 +81,7 @@ public class BrewAdapter {
             RecipeResult<ItemStack> recipeResult = recipe.get().getRecipeResult(quality.get());
             itemStack = recipeResult.newBrewItem(score.get(), brew, state);
             itemStack.editPersistentDataContainer(pdc -> {
-
+                    applyBrewTags(pdc, recipe.get(), score.get().score(), MiniMessage.miniMessage().serialize(recipeResult.displayName()));
             });
         }
         if (!(state instanceof BrewImpl.State.Seal)) {
