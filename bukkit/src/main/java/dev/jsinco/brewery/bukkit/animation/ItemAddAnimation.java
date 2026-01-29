@@ -3,7 +3,9 @@ package dev.jsinco.brewery.bukkit.animation;
 import io.papermc.paper.threadedregions.scheduler.ScheduledTask;
 import org.bukkit.Location;
 import org.bukkit.entity.ItemDisplay;
+import org.bukkit.util.Transformation;
 import org.bukkit.util.Vector;
+import org.joml.AxisAngle4f;
 
 import java.util.function.Consumer;
 
@@ -14,7 +16,7 @@ public class ItemAddAnimation implements Consumer<ScheduledTask> {
     private final Vector offsetDirection;
     private final ItemDisplay entity;
     private long time = 0;
-    private static final double Y_MAX = 2D;
+    private static final double Y_MAX = 1D;
     private static final double X_END = 1D;
     private static final double G = 9.82;
     private static final double V0Y = Math.sqrt(Y_MAX * G * 2);
@@ -61,6 +63,10 @@ public class ItemAddAnimation implements Consumer<ScheduledTask> {
             scheduledTask.cancel();
             return;
         }
+        Transformation previous = entity.getTransformation();
+        entity.setTransformation(
+                new Transformation(previous.getTranslation(), previous.getLeftRotation().rotationAxis(new AxisAngle4f((float) Math.PI * time / 10, 0, 1, 0)), previous.getScale(), previous.getRightRotation())
+        );
         time++;
         double timeSeconds = time / 20D;
         Vector travelingPoint = offsetDirection.clone().multiply(-1);
