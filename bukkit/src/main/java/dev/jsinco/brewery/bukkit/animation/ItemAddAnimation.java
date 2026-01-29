@@ -18,7 +18,7 @@ public class ItemAddAnimation implements Consumer<ScheduledTask> {
     private static final double X_END = 1D;
     private static final double G = 9.82;
     private static final double V0Y = Math.sqrt(Y_MAX * G * 2);
-    private static final double V0X = V0Y / G;
+    private static final double V0X = G * X_END / (V0Y * 2);
     public static final long T_END = (long) Math.ceil(X_END / V0X * 20);
 
     public ItemAddAnimation(Location from, Location to, ItemDisplay entity) {
@@ -49,7 +49,7 @@ public class ItemAddAnimation implements Consumer<ScheduledTask> {
          * -> v0y = sqrt(ymax * g * 2) [5]
          *
          * [2 + 4]
-         * v0x = v0y / g
+         * v0x = xend / (2 * v0y / g)
          */
     }
 
