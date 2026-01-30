@@ -1,5 +1,6 @@
 package dev.jsinco.brewery.api.util;
 
+import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Locale;
@@ -51,6 +52,10 @@ public record BreweryKey(String namespace, String key) {
                     split[1] : split[1].toLowerCase(Locale.ROOT));
         }
         throw new IllegalArgumentException("Invalid Brewery Key: " + input);
+    }
+
+    public static BreweryKey minecraft(String value) {
+        return new BreweryKey(Key.MINECRAFT_NAMESPACE, value);
     }
 
     @Override

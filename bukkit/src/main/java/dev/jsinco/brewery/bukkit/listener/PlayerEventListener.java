@@ -28,6 +28,7 @@ import dev.jsinco.brewery.bukkit.effect.ConsumedModifierDisplay;
 import dev.jsinco.brewery.bukkit.effect.event.DrunkEventExecutor;
 import dev.jsinco.brewery.bukkit.ingredient.BukkitIngredientManager;
 import dev.jsinco.brewery.bukkit.recipe.RecipeEffectsImpl;
+import dev.jsinco.brewery.bukkit.util.BukkitIngredientUtil;
 import dev.jsinco.brewery.bukkit.util.SoundPlayer;
 import dev.jsinco.brewery.configuration.Config;
 import dev.jsinco.brewery.configuration.DrunkenModifierSection;
@@ -190,11 +191,9 @@ public class PlayerEventListener implements Listener {
         if (player.getGameMode() == GameMode.CREATIVE && !Config.config().consumeItemsInCreative()) {
             return itemStack;
         }
-        if (itemStack.getType() == Material.POTION) {
-            return new ItemStack(Material.GLASS_BOTTLE);
-        }
-        if (itemStack.getType() == Material.MILK_BUCKET) {
-            return new ItemStack(Material.BUCKET);
+        Optional<ItemStack> transformedItem = BukkitIngredientUtil.computeTransform(itemStack);
+        if (transformedItem.isPresent()) {
+            return transformedItem.get();
         }
         itemStack.setAmount(itemStack.getAmount() - 1);
         return itemStack;
