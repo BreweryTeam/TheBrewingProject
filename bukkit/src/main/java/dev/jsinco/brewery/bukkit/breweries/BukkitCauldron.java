@@ -17,7 +17,8 @@ import dev.jsinco.brewery.brew.BrewImpl;
 import dev.jsinco.brewery.brew.CookStepImpl;
 import dev.jsinco.brewery.brew.MixStepImpl;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
-import dev.jsinco.brewery.bukkit.animation.ItemAddAnimation;
+import dev.jsinco.brewery.bukkit.animation.AnimationManager;
+import dev.jsinco.brewery.bukkit.animation.IngredientAddAnimation;
 import dev.jsinco.brewery.bukkit.api.BukkitAdapter;
 import dev.jsinco.brewery.bukkit.api.event.process.BrewCauldronProcessEvent;
 import dev.jsinco.brewery.bukkit.api.event.transaction.CauldronInsertEvent;
@@ -41,14 +42,10 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockType;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.Levelled;
-import org.bukkit.entity.ItemDisplay;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.util.Transformation;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.joml.Quaternionf;
-import org.joml.Vector3f;
 
 import java.util.*;
 
@@ -209,27 +206,14 @@ public class BukkitCauldron implements Cauldron {
                 );
         this.recipe = brew.closestRecipe(TheBrewingProject.getInstance().getRecipeRegistry())
                 .orElse(null);
-
+        long delay;
         if (Config.config().cauldrons().ingredientAddedAnimation()) {
-            playIngredientAnimation(addedItem, player);
+            delay = AnimationManager.playIngredientAddAnimation(addedItem, player, getBlock().getLocation().toCenterLocation());
+        } else {
+            delay = 1;
         }
-        playIngredientAddedEffects(addedItem);
+        playIngredientAddedEffects(addedItem, delay);
         return true;
-    }
-
-    private void playIngredientAnimation(ItemStack addedItem, Player player) {
-        ItemDisplay itemDisplay = player.getWorld().spawn(player.getLocation(), ItemDisplay.class, entity -> {
-            entity.setPersistent(false);
-            entity.setItemStack(addedItem);
-            entity.setItemDisplayTransform(ItemDisplay.ItemDisplayTransform.GROUND);
-        });
-        itemDisplay.getScheduler().runAtFixedRate(
-                TheBrewingProject.getInstance(),
-                new ItemAddAnimation(player.getLocation(), getBlock().getLocation().toCenterLocation(), itemDisplay),
-                itemDisplay::remove,
-                1,
-                1
-        );
     }
 
     private Color computeBaseParticleColor(Block block) {
@@ -268,7 +252,7 @@ public class BukkitCauldron implements Cauldron {
         }
     }
 
-    public void playIngredientAddedEffects(ItemStack item) {
+    public void playIngredientAddedEffects(ItemStack item, long delay) {
         BukkitAdapter.toLocation(this.location)
                 .map(Location::toCenterLocation)
                 .filter(Location::isChunkLoaded)
@@ -281,7 +265,7 @@ public class BukkitCauldron implements Cauldron {
                     if (bukkitLocation.getBlock().getType() == Material.WATER_CAULDRON) {
                         world.spawnParticle(Particle.SPLASH, bukkitLocation.add(0.0, 0.5, 0.0), 50, 0.1, 0.05, 0.1, 1.0);
                     }
-                }, Config.config().cauldrons().ingredientAddedAnimation() ? ItemAddAnimation.T_END : 1L));
+                }, delay));
     }
 
     public void playBrewExtractedEffects() {

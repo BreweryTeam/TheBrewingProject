@@ -10,10 +10,9 @@ import org.joml.AxisAngle4f;
 import java.util.Random;
 import java.util.function.Consumer;
 
-public class ItemAddAnimation implements Consumer<ScheduledTask> {
+public class IngredientAddAnimation implements Consumer<ScheduledTask> {
 
     private final Location from;
-    private final Location to;
     private final Vector offset;
     private final Vector travelingDirection;
     private final ItemDisplay entity;
@@ -27,7 +26,7 @@ public class ItemAddAnimation implements Consumer<ScheduledTask> {
     private static final double V0Y = Math.sqrt(Y_MAX * G * 2);
     public static final long T_END = (long) Math.ceil((V0Y * 2) / G * 20);
 
-    public ItemAddAnimation(Location from, Location to, ItemDisplay entity) {
+    public IngredientAddAnimation(Location from, Location to, ItemDisplay entity) {
         double xRandom = RANDOM.nextDouble(-0.4, 0.4);
         double zRandom = RANDOM.nextDouble(-0.4, 0.4);
         double yawRadians = (from.getYaw() - 90) / 360 * Math.PI * 2;
@@ -43,7 +42,6 @@ public class ItemAddAnimation implements Consumer<ScheduledTask> {
         );
         this.travelingDirection = offset.clone().normalize().multiply(-1);
         this.v0x = G * (offset.clone().subtract(randomZX)).length() / (V0Y * 2);
-        this.to = to.clone().add(randomZX);
         this.entity = entity;
         this.from = to.clone().add(offset);
         /*
