@@ -1,10 +1,8 @@
 package dev.jsinco.brewery.bukkit.api.ingredient;
 
 import dev.jsinco.brewery.api.ingredient.BaseIngredient;
-import dev.jsinco.brewery.api.ingredient.Ingredient;
 import dev.jsinco.brewery.api.util.BreweryKey;
 import dev.jsinco.brewery.bukkit.api.integration.ItemIntegration;
-import dev.jsinco.brewery.bukkit.ingredient.SimpleIngredient;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.Style;
 import org.jetbrains.annotations.NotNull;
@@ -29,6 +27,13 @@ public class PluginIngredient implements BaseIngredient {
     public @NotNull Component displayName() {
         Component displayName = itemIntegration.displayName(key.key());
         return displayName == null ? Component.text(key.key()) : displayName.style(Style.empty());
+    }
+
+    /**
+     * @return The item integration this ingredient is linked to
+     */
+    public @NotNull ItemIntegration itemIntegration() {
+        return itemIntegration;
     }
 
     @Override
