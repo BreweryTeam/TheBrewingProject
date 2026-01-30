@@ -69,6 +69,10 @@ public class CauldronSection extends OkaeriConfig implements Configuration.Cauld
             .put(UncheckedIngredient.minecraft("lava_bucket"), UncheckedIngredient.minecraft("bucket"))
             .put(UncheckedIngredient.minecraft("water_bucket"), UncheckedIngredient.minecraft("bucket"))
             .put(UncheckedIngredient.minecraft("powder_snow_bucket"), UncheckedIngredient.minecraft("bucket"))
+            .put(UncheckedIngredient.minecraft("beetroot_soup"), UncheckedIngredient.minecraft("bowl"))
+            .put(UncheckedIngredient.minecraft("mushroom_stew"), UncheckedIngredient.minecraft("bowl"))
+            .put(UncheckedIngredient.minecraft("rabbit_stew"), UncheckedIngredient.minecraft("bowl"))
+            .put(UncheckedIngredient.minecraft("suspicious_stew"), UncheckedIngredient.minecraft("bowl"))
             .build();
 
 }
