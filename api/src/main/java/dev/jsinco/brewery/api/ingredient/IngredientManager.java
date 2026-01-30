@@ -36,6 +36,12 @@ public interface IngredientManager<I> {
     Ingredient getIngredient(@NotNull I itemStack);
 
     /**
+     * @param ingredient An ingredient
+     * @return An item stack representation of that ingredient
+     */
+    Optional<I> toItem(Ingredient ingredient);
+
+    /**
      * Pretty much all items plugins initialize items on a delay. This is therefore a necessary measure to use on enable
      * <p>
      * Startup friendly :)
