@@ -2,6 +2,9 @@ package dev.jsinco.brewery.configuration;
 
 import com.google.common.collect.ImmutableMap;
 import dev.jsinco.brewery.api.config.Configuration;
+import dev.jsinco.brewery.api.ingredient.IngredientInput;
+import dev.jsinco.brewery.api.ingredient.UncheckedIngredient;
+import dev.jsinco.brewery.api.ingredient.WildcardIngredient;
 import dev.jsinco.brewery.api.moment.Moment;
 import dev.jsinco.brewery.api.util.Holder;
 import eu.okaeri.configs.OkaeriConfig;
@@ -58,8 +61,8 @@ public class CauldronSection extends OkaeriConfig implements Configuration.Cauld
 
     @Comment("What items should be transformed into another item when added as an ingredient")
     @CustomKey("ingredient-empty-transforms")
-    private Map<UncheckedIngredient, UncheckedIngredient> ingredientEmptyTransforms = new ImmutableMap.Builder<UncheckedIngredient, UncheckedIngredient>()
-            .put(UncheckedIngredient.minecraft("brewery.*"), UncheckedIngredient.minecraft("glass_bottle"))
+    private Map<IngredientInput, UncheckedIngredient> ingredientEmptyTransforms = new ImmutableMap.Builder<IngredientInput, UncheckedIngredient>()
+            .put(WildcardIngredient.get("brewery:*"), UncheckedIngredient.minecraft("glass_bottle"))
             .put(UncheckedIngredient.minecraft("potion"), UncheckedIngredient.minecraft("glass_bottle"))
             .put(UncheckedIngredient.minecraft("lingering_potion"), UncheckedIngredient.minecraft("glass_bottle"))
             .put(UncheckedIngredient.minecraft("honey_bottle"), UncheckedIngredient.minecraft("glass_bottle"))

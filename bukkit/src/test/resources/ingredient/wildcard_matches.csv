@@ -1,0 +1,6 @@
+hello:* hello:world
+*:apple minecraft:apple
+hello:*:world hello:beautiful:world
+hello:beautiful:* hello:beautiful:world
+hello:*:*:yes hello:beautiful:world:yes
+hello:* hello:beautiful:world
