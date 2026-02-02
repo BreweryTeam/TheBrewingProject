@@ -16,13 +16,7 @@ import java.util.Optional;
 /**
  * Represents a simple ingredient that only consists of a material
  */
-public class SimpleIngredient implements BaseIngredient {
-
-    private final Material material;
-
-    public SimpleIngredient(Material material) {
-        this.material = material;
-    }
+public record SimpleIngredient(Material material) implements BaseIngredient {
 
     @Override
     public @NotNull String getKey() {
@@ -38,28 +32,6 @@ public class SimpleIngredient implements BaseIngredient {
         }
 
         return Component.translatable(translationKey);
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        SimpleIngredient that = (SimpleIngredient) o;
-        return material == that.material;
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hashCode(material);
-    }
-
-    @Override
-    public String toString() {
-        return "SimpleIngredient(" + getKey() + ")";
     }
 
     public static SimpleIngredient from(@NotNull ItemStack itemStack) {

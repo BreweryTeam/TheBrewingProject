@@ -23,9 +23,7 @@ import dev.jsinco.brewery.bukkit.breweries.BreweryRegistry;
 import dev.jsinco.brewery.bukkit.breweries.barrel.BukkitBarrel;
 import dev.jsinco.brewery.bukkit.breweries.distillery.BukkitDistillery;
 import dev.jsinco.brewery.bukkit.command.BreweryCommand;
-import dev.jsinco.brewery.bukkit.configuration.serializer.BreweryLocationSerializer;
-import dev.jsinco.brewery.bukkit.configuration.serializer.ColorSerializer;
-import dev.jsinco.brewery.bukkit.configuration.serializer.MaterialSerializer;
+import dev.jsinco.brewery.bukkit.configuration.serializer.*;
 import dev.jsinco.brewery.bukkit.effect.SqlDrunkStateDataType;
 import dev.jsinco.brewery.bukkit.effect.SqlDrunkenModifierDataType;
 import dev.jsinco.brewery.bukkit.effect.event.ActiveEventsRegistry;
@@ -185,6 +183,8 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
                 .add(new MinutesDurationSerializer())
                 .add(new TicksDurationSerializer())
                 .add(new ColorSerializer())
+                .add(new UncheckedIngredientSerializer())
+                .add(new IngredientInputSerializer())
                 .build();
     }
 

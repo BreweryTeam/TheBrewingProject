@@ -1,8 +1,12 @@
 package dev.jsinco.brewery.configuration;
 
+import com.google.common.collect.ImmutableMap;
+import dev.jsinco.brewery.api.config.Configuration;
+import dev.jsinco.brewery.api.ingredient.IngredientInput;
+import dev.jsinco.brewery.api.ingredient.UncheckedIngredient;
+import dev.jsinco.brewery.api.ingredient.WildcardIngredient;
 import dev.jsinco.brewery.api.moment.Moment;
 import dev.jsinco.brewery.api.util.Holder;
-import dev.jsinco.brewery.api.config.Configuration;
 import eu.okaeri.configs.OkaeriConfig;
 import eu.okaeri.configs.annotation.Comment;
 import eu.okaeri.configs.annotation.CustomKey;
@@ -12,6 +16,7 @@ import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.awt.*;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Stream;
 
 @Getter
@@ -49,4 +54,28 @@ public class CauldronSection extends OkaeriConfig implements Configuration.Cauld
     @Comment("The base color snow cauldrons have")
     @CustomKey("failed-particle-color")
     private Color failedParticleColor = new Color(NamedTextColor.GRAY.value());
+
+    @Comment("If an animation should be run when adding an ingredient")
+    @CustomKey("ingredient-added-animation")
+    private boolean ingredientAddedAnimation = true;
+
+    @Comment("What items should be transformed into another item when added as an ingredient")
+    @CustomKey("ingredient-empty-transforms")
+    private Map<IngredientInput, UncheckedIngredient> ingredientEmptyTransforms = new ImmutableMap.Builder<IngredientInput, UncheckedIngredient>()
+            .put(WildcardIngredient.get("brewery:*"), UncheckedIngredient.minecraft("glass_bottle"))
+            .put(UncheckedIngredient.minecraft("potion"), UncheckedIngredient.minecraft("glass_bottle"))
+            .put(UncheckedIngredient.minecraft("lingering_potion"), UncheckedIngredient.minecraft("glass_bottle"))
+            .put(UncheckedIngredient.minecraft("honey_bottle"), UncheckedIngredient.minecraft("glass_bottle"))
+            .put(UncheckedIngredient.minecraft("ominous_bottle"), UncheckedIngredient.minecraft("glass_bottle"))
+            .put(UncheckedIngredient.minecraft("dragons_breath"), UncheckedIngredient.minecraft("glass_bottle"))
+            .put(UncheckedIngredient.minecraft("milk_bucket"), UncheckedIngredient.minecraft("bucket"))
+            .put(UncheckedIngredient.minecraft("lava_bucket"), UncheckedIngredient.minecraft("bucket"))
+            .put(UncheckedIngredient.minecraft("water_bucket"), UncheckedIngredient.minecraft("bucket"))
+            .put(UncheckedIngredient.minecraft("powder_snow_bucket"), UncheckedIngredient.minecraft("bucket"))
+            .put(UncheckedIngredient.minecraft("beetroot_soup"), UncheckedIngredient.minecraft("bowl"))
+            .put(UncheckedIngredient.minecraft("mushroom_stew"), UncheckedIngredient.minecraft("bowl"))
+            .put(UncheckedIngredient.minecraft("rabbit_stew"), UncheckedIngredient.minecraft("bowl"))
+            .put(UncheckedIngredient.minecraft("suspicious_stew"), UncheckedIngredient.minecraft("bowl"))
+            .build();
+
 }

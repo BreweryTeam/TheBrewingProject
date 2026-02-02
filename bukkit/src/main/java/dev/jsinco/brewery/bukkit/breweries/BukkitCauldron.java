@@ -17,6 +17,8 @@ import dev.jsinco.brewery.brew.BrewImpl;
 import dev.jsinco.brewery.brew.CookStepImpl;
 import dev.jsinco.brewery.brew.MixStepImpl;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
+import dev.jsinco.brewery.bukkit.animation.AnimationManager;
+import dev.jsinco.brewery.bukkit.animation.IngredientAddAnimation;
 import dev.jsinco.brewery.bukkit.api.BukkitAdapter;
 import dev.jsinco.brewery.bukkit.api.event.process.BrewCauldronProcessEvent;
 import dev.jsinco.brewery.bukkit.api.event.transaction.CauldronInsertEvent;
@@ -204,8 +206,13 @@ public class BukkitCauldron implements Cauldron {
                 );
         this.recipe = brew.closestRecipe(TheBrewingProject.getInstance().getRecipeRegistry())
                 .orElse(null);
-
-        playIngredientAddedEffects(addedItem);
+        long delay;
+        if (Config.config().cauldrons().ingredientAddedAnimation()) {
+            delay = AnimationManager.playIngredientAddAnimation(addedItem, player, getBlock().getLocation().toCenterLocation());
+        } else {
+            delay = 1;
+        }
+        playIngredientAddedEffects(addedItem, delay);
         return true;
     }
 
@@ -245,11 +252,11 @@ public class BukkitCauldron implements Cauldron {
         }
     }
 
-    public void playIngredientAddedEffects(ItemStack item) {
+    public void playIngredientAddedEffects(ItemStack item, long delay) {
         BukkitAdapter.toLocation(this.location)
                 .map(Location::toCenterLocation)
                 .filter(Location::isChunkLoaded)
-                .ifPresent(bukkitLocation -> {
+                .ifPresent(bukkitLocation -> Bukkit.getGlobalRegionScheduler().runDelayed(TheBrewingProject.getInstance(), ignored -> {
                     World world = bukkitLocation.getWorld();
 
                     SoundDefinition sound = item.getType() == Material.POTION ? Config.config().sounds().cauldronIngredientAddBrew() : Config.config().sounds().cauldronIngredientAdd();
@@ -258,7 +265,7 @@ public class BukkitCauldron implements Cauldron {
                     if (bukkitLocation.getBlock().getType() == Material.WATER_CAULDRON) {
                         world.spawnParticle(Particle.SPLASH, bukkitLocation.add(0.0, 0.5, 0.0), 50, 0.1, 0.05, 0.1, 1.0);
                     }
-                });
+                }, delay));
     }
 
     public void playBrewExtractedEffects() {

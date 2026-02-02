@@ -1,15 +1,27 @@
 package dev.jsinco.brewery.bukkit.ingredient;
 
+import com.google.common.collect.ImmutableMap;
 import dev.jsinco.brewery.api.ingredient.Ingredient;
 import dev.jsinco.brewery.api.ingredient.IngredientManager;
+import dev.jsinco.brewery.api.ingredient.IngredientMeta;
+import dev.jsinco.brewery.api.ingredient.IngredientWithMeta;
 import dev.jsinco.brewery.api.integration.Integration;
+import dev.jsinco.brewery.api.recipe.RecipeResult;
 import dev.jsinco.brewery.api.util.BreweryKey;
 import dev.jsinco.brewery.api.util.Pair;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
+import dev.jsinco.brewery.bukkit.api.ingredient.PluginIngredient;
 import dev.jsinco.brewery.bukkit.api.integration.IntegrationTypes;
+import dev.jsinco.brewery.bukkit.brew.BrewAdapter;
 import dev.jsinco.brewery.bukkit.integration.IntegrationManagerImpl;
+import dev.jsinco.brewery.recipes.BrewScoreImpl;
+import io.papermc.paper.persistence.PersistentDataContainerView;
 import me.clip.placeholderapi.libs.kyori.adventure.key.Key;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.MiniMessage;
+import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
@@ -26,7 +38,7 @@ public class BukkitIngredientManager implements IngredientManager<ItemStack> {
     @Override
     public Ingredient getIngredient(@NotNull ItemStack itemStack) {
         IntegrationManagerImpl integrationManager = TheBrewingProject.getInstance().getIntegrationManager();
-        return integrationManager.getIntegrationRegistry().getIntegrations(IntegrationTypes.ITEM)
+        Ingredient ingredient = integrationManager.getIntegrationRegistry().getIntegrations(IntegrationTypes.ITEM)
                 .stream()
                 .filter(Integration::isEnabled)
                 .map(integration -> integration.getIngredient(itemStack))
@@ -34,6 +46,53 @@ public class BukkitIngredientManager implements IngredientManager<ItemStack> {
                 .findAny()
                 .or(() -> BreweryIngredient.from(itemStack))
                 .orElse(SimpleIngredient.from(itemStack));
+        PersistentDataContainerView dataContainer = itemStack.getPersistentDataContainer();
+        Double score = dataContainer.get(BrewAdapter.BREWERY_SCORE, PersistentDataType.DOUBLE);
+        ImmutableMap.Builder<IngredientMeta<?>, Object> extraBuilder = new ImmutableMap.Builder<>();
+        String displayNameString = dataContainer.get(BrewAdapter.BREWERY_DISPLAY_NAME, PersistentDataType.STRING);
+        if (displayNameString != null) {
+            Component displayName = MiniMessage.miniMessage().deserialize(displayNameString);
+            extraBuilder.put(IngredientMeta.DISPLAY_NAME, displayName);
+        }
+        if (score != null) {
+            extraBuilder.put(IngredientMeta.SCORE, score);
+        }
+        Map<IngredientMeta<?>, Object> extra = extraBuilder.build();
+        return extra.isEmpty() ? ingredient : new IngredientWithMeta(ingredient, extraBuilder.build());
+    }
+
+    @Override
+    public Optional<ItemStack> toItem(Ingredient ingredient) {
+        double score;
+        if (ingredient instanceof IngredientWithMeta ingredientWithMeta && ingredientWithMeta.get(IngredientMeta.SCORE) instanceof Double scoreOverride) {
+            score = scoreOverride;
+        } else {
+            score = 1D;
+        }
+        Optional<ItemStack> itemStackOptional = switch (ingredient.toBaseIngredient()) {
+            case SimpleIngredient(Material material) -> Optional.of(material.asItemType().createItemStack());
+            case BreweryIngredient(BreweryKey breweryKey) -> TheBrewingProject.getInstance().getRecipeRegistry().getRecipe(breweryKey.minimalized())
+                    .map(recipe -> {
+                        RecipeResult<ItemStack> result = recipe.getRecipeResult(BrewScoreImpl.quality(score));
+                        ItemStack itemStack = result.newLorelessItem();
+                        itemStack.editPersistentDataContainer(pdc -> BrewAdapter.applyBrewTags(pdc, recipe, score, ""));
+                        return itemStack;
+                    });
+            case PluginIngredient pluginIngredient ->
+                    pluginIngredient.itemIntegration().createItem(pluginIngredient.getKey());
+            default -> Optional.empty();
+        };
+        if (ingredient instanceof IngredientWithMeta ingredientWithMeta) {
+            itemStackOptional.ifPresent(itemStack -> itemStack.editPersistentDataContainer(pdc -> {
+                if (ingredientWithMeta.get(IngredientMeta.SCORE) instanceof Double scoreOverride) {
+                    pdc.set(BrewAdapter.BREWERY_SCORE, PersistentDataType.DOUBLE, scoreOverride);
+                }
+                if (ingredientWithMeta.get(IngredientMeta.DISPLAY_NAME) instanceof Component displayName) {
+                    pdc.set(BrewAdapter.BREWERY_DISPLAY_NAME, PersistentDataType.STRING, MiniMessage.miniMessage().serialize(displayName));
+                }
+            }));
+        }
+        return itemStackOptional;
     }
 
     @Override
