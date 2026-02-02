@@ -1,8 +1,9 @@
 package dev.jsinco.brewery.bukkit.configuration.serializer;
 
+import dev.jsinco.brewery.api.ingredient.UncheckedIngredient;
+import dev.jsinco.brewery.api.ingredient.WildcardIngredient;
 import dev.jsinco.brewery.api.util.BreweryKey;
-import dev.jsinco.brewery.bukkit.configuration.UncheckedIngredientImpl;
-import dev.jsinco.brewery.configuration.UncheckedIngredient;
+import dev.jsinco.brewery.bukkit.ingredient.UncheckedIngredientImpl;
 import eu.okaeri.configs.schema.GenericsDeclaration;
 import eu.okaeri.configs.serdes.DeserializationData;
 import eu.okaeri.configs.serdes.ObjectSerializer;
@@ -29,10 +30,6 @@ public class UncheckedIngredientSerializer implements ObjectSerializer<Unchecked
             return null;
         }
         BreweryKey key = BreweryKey.parse(stringKey, Key.MINECRAFT_NAMESPACE);
-        // Wildcard
-        if(key.key().equals("*")) {
-            return new UncheckedIngredient.NeverCompleting(key);
-        }
         return new UncheckedIngredientImpl(key);
     }
 }

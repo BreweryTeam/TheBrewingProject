@@ -1,12 +1,13 @@
 package dev.jsinco.brewery.bukkit.util;
 
 import dev.jsinco.brewery.api.ingredient.Ingredient;
+import dev.jsinco.brewery.api.ingredient.WildcardIngredient;
 import dev.jsinco.brewery.api.util.BreweryKey;
 import dev.jsinco.brewery.api.util.Pair;
-import dev.jsinco.brewery.bukkit.configuration.UncheckedIngredientImpl;
+import dev.jsinco.brewery.bukkit.ingredient.UncheckedIngredientImpl;
 import dev.jsinco.brewery.bukkit.ingredient.BukkitIngredientManager;
 import dev.jsinco.brewery.configuration.Config;
-import dev.jsinco.brewery.configuration.UncheckedIngredient;
+import dev.jsinco.brewery.api.ingredient.UncheckedIngredient;
 import dev.jsinco.brewery.util.ItemColorUtil;
 import net.kyori.adventure.key.Key;
 import org.bukkit.*;
@@ -74,16 +75,19 @@ public class BukkitIngredientUtil {
 
 
     public static Optional<ItemStack> computeTransform(ItemStack ingredientItem) {
-        Ingredient ingredient = BukkitIngredientManager.INSTANCE.getIngredient(ingredientItem);
+        UncheckedIngredientImpl ingredient = new UncheckedIngredientImpl(BukkitIngredientManager.INSTANCE.getIngredient(ingredientItem));
         UncheckedIngredient ingredientTransform = Config.config().cauldrons().ingredientEmptyTransforms()
-                .get(new UncheckedIngredientImpl(ingredient));
+                .get(ingredient);
         if (ingredientTransform != null) {
             return ingredientTransform.retrieve()
                     .flatMap(BukkitIngredientManager.INSTANCE::toItem);
         }
-        BreweryKey key = BreweryKey.parse(ingredient.getKey(), Key.MINECRAFT_NAMESPACE);
-        ingredientTransform = Config.config().cauldrons().ingredientEmptyTransforms()
-                .get(new UncheckedIngredient.NeverCompleting(new BreweryKey(key.namespace(), "*")));
+        ingredientTransform = Config.config().cauldrons().ingredientEmptyTransforms().entrySet()
+                .stream()
+                .filter(entry -> entry.getKey().matches(ingredient))
+                .findAny()
+                .map(Map.Entry::getValue)
+                .orElse(null);
         if (ingredientTransform != null) {
             return ingredientTransform.retrieve()
                     .flatMap(BukkitIngredientManager.INSTANCE::toItem);
