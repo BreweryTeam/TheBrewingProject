@@ -1,13 +1,13 @@
-package dev.jsinco.brewery.bukkit.configuration;
+package dev.jsinco.brewery.bukkit.ingredient;
 
 import dev.jsinco.brewery.api.ingredient.Ingredient;
+import dev.jsinco.brewery.api.ingredient.IngredientInput;
+import dev.jsinco.brewery.api.ingredient.UncheckedIngredient;
+import dev.jsinco.brewery.api.ingredient.WildcardIngredient;
 import dev.jsinco.brewery.api.util.BreweryKey;
 import dev.jsinco.brewery.api.util.Logger;
-import dev.jsinco.brewery.bukkit.ingredient.BukkitIngredientManager;
-import dev.jsinco.brewery.configuration.UncheckedIngredient;
 import net.kyori.adventure.key.Key;
 
-import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
@@ -51,15 +51,15 @@ public final class UncheckedIngredientImpl implements UncheckedIngredient {
 
     @Override
     public boolean equals(Object obj) {
-        if (obj == this) return true;
-        if (obj == null || obj.getClass() != this.getClass()) return false;
-        var that = (UncheckedIngredientImpl) obj;
-        return Objects.equals(this.key, that.key);
+        if (!(obj instanceof UncheckedIngredient otherUnchecked)) {
+            return false;
+        }
+        return otherUnchecked.key().equals(key());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(key);
+        return key.hashCode();
     }
 
     @Override
@@ -69,4 +69,11 @@ public final class UncheckedIngredientImpl implements UncheckedIngredient {
     }
 
 
+    @Override
+    public boolean matches(IngredientInput other) {
+        if (other instanceof WildcardIngredient) {
+            return other.matches(this);
+        }
+        return other.equals(this);
+    }
 }
