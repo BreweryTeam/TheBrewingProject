@@ -13,6 +13,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
 
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -20,7 +21,7 @@ import java.util.concurrent.CompletableFuture;
 public class CraftEngineIntegration implements ItemIntegration, Listener {
 
     private static final boolean ENABLED = ClassUtil.exists("net.momirealms.craftengine.bukkit.plugin.BukkitCraftEngine");
-    private CompletableFuture<Void> initializedFuture;
+    private final CompletableFuture<Void> initializedFuture = new CompletableFuture<>();
 
     public @Nullable String getItemId(ItemStack itemStack) {
         Item<ItemStack> customItem = BukkitCraftEngine.instance().itemManager().wrap(itemStack);
@@ -30,7 +31,7 @@ public class CraftEngineIntegration implements ItemIntegration, Listener {
     }
 
     @Override
-    public CompletableFuture<Void> initialized() {
+    public @NonNull CompletableFuture<Void> initialized() {
         return initializedFuture;
     }
 
@@ -62,7 +63,6 @@ public class CraftEngineIntegration implements ItemIntegration, Listener {
 
     @Override
     public void onEnable() {
-        this.initializedFuture = new CompletableFuture<>();
         Bukkit.getPluginManager().registerEvents(this, TheBrewingProject.getInstance());
     }
 

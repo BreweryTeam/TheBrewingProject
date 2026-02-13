@@ -12,6 +12,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
 
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -19,7 +20,7 @@ import java.util.concurrent.CompletableFuture;
 public class OraxenIntegration implements ItemIntegration, Listener {
 
     private static final boolean ENABLED = ClassUtil.exists("io.th0rgal.oraxen.api.OraxenItem");
-    private CompletableFuture<Void> initializedFuture;
+    private final CompletableFuture<Void> initializedFuture = new CompletableFuture<>();
 
     @Override
     public Optional<ItemStack> createItem(String id) {
@@ -45,7 +46,7 @@ public class OraxenIntegration implements ItemIntegration, Listener {
     }
 
     @Override
-    public CompletableFuture<Void> initialized() {
+    public @NonNull CompletableFuture<Void> initialized() {
         return initializedFuture;
     }
 
@@ -62,7 +63,6 @@ public class OraxenIntegration implements ItemIntegration, Listener {
     @Override
     public void onEnable() {
         Bukkit.getPluginManager().registerEvents(this, TheBrewingProject.getInstance());
-        this.initializedFuture = new CompletableFuture<>();
     }
 
     @EventHandler

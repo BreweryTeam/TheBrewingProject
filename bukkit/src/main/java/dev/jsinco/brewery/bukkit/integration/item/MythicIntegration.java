@@ -13,12 +13,13 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
 
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 public class MythicIntegration implements ItemIntegration, Listener {
-    CompletableFuture<Void> initialized = new CompletableFuture<>();
+    private final CompletableFuture<Void> initialized = new CompletableFuture<>();
 
     @Override
     public Optional<ItemStack> createItem(String id) {
@@ -53,7 +54,7 @@ public class MythicIntegration implements ItemIntegration, Listener {
     }
 
     @Override
-    public CompletableFuture<Void> initialized() {
+    public @NonNull CompletableFuture<Void> initialized() {
         return initialized;
     }
 
@@ -70,7 +71,6 @@ public class MythicIntegration implements ItemIntegration, Listener {
     @Override
     public void onEnable() {
         Bukkit.getPluginManager().registerEvents(this, TheBrewingProject.getInstance());
-        this.initialized = new CompletableFuture<>();
     }
 
     @EventHandler
