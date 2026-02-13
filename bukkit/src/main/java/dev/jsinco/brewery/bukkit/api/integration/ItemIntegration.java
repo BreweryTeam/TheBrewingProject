@@ -58,7 +58,7 @@ public interface ItemIntegration extends Integration {
     /**
      * Completes when the integration has finished initializing
      */
-    CompletableFuture<Void> initialized();
+    @NotNull CompletableFuture<Void> initialized();
 
     /**
      * Gets the Ingredient representation of the given ItemStack
