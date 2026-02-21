@@ -2,6 +2,8 @@ package dev.jsinco.brewery.bukkit.animation;
 
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.bukkit.util.BukkitIngredientUtil;
+import dev.jsinco.brewery.configuration.AnimationDisplay;
+import dev.jsinco.brewery.configuration.Config;
 import org.bukkit.Location;
 import org.bukkit.entity.ItemDisplay;
 import org.bukkit.entity.Player;
@@ -13,6 +15,7 @@ import org.joml.Vector3f;
 
 import java.util.Optional;
 import java.util.Random;
+import java.util.function.Function;
 
 public class AnimationManager {
 
@@ -37,16 +40,21 @@ public class AnimationManager {
 
 
     private static long ingredientThrowAnimation(ItemStack ingredient, Player player, Location toLocation) {
-        ItemDisplay itemDisplay = player.getWorld().spawn(player.getLocation(), ItemDisplay.class, entity -> {
+        Function<Location, ItemDisplay> itemDisplay = (location) -> player.getWorld().spawn(location, ItemDisplay.class, entity -> {
             entity.setPersistent(false);
             entity.setItemStack(ingredient);
             entity.setItemDisplayTransform(ItemDisplay.ItemDisplayTransform.GROUND);
             entity.setTeleportDuration(1);
+            if (Config.config().cauldrons().ingredientAddedAnimation() == AnimationDisplay.BREWER) {
+                entity.setVisibleByDefault(false);
+                player.showEntity(TheBrewingProject.getInstance(), entity);
+            }
         });
-        itemDisplay.getScheduler().runAtFixedRate(
+        IngredientAddAnimation ingredientAddAnimation = new IngredientAddAnimation(player.getLocation(), toLocation, itemDisplay);
+        player.getScheduler().runAtFixedRate(
                 TheBrewingProject.getInstance(),
-                new IngredientAddAnimation(player.getLocation(), toLocation, itemDisplay),
-                itemDisplay::remove,
+                ingredientAddAnimation,
+                ingredientAddAnimation::close,
                 1,
                 1
         );
@@ -76,7 +84,13 @@ public class AnimationManager {
                             new Quaternionf()
                     ));
                     entity.setInterpolationDuration(BOTTLE_EMPTY_DURATION / 4);
+                    if (Config.config().cauldrons().ingredientAddedAnimation() == AnimationDisplay.BREWER) {
+                        entity.setVisibleByDefault(false);
+                    }
                 });
+        if (Config.config().cauldrons().ingredientAddedAnimation() == AnimationDisplay.BREWER) {
+            player.showEntity(TheBrewingProject.getInstance(), itemDisplay);
+        }
         Quaternionf tilting = new AxisAngle4f(
                 (float) Math.PI * 2 / 3,
                 (float) Math.cos(yawRadians),

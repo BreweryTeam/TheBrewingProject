@@ -6,9 +6,11 @@ import org.bukkit.entity.ItemDisplay;
 import org.bukkit.util.Transformation;
 import org.bukkit.util.Vector;
 import org.joml.AxisAngle4f;
+import org.joml.Vector3f;
 
 import java.util.Random;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 public class IngredientAddAnimation implements Consumer<ScheduledTask> {
 
@@ -26,7 +28,7 @@ public class IngredientAddAnimation implements Consumer<ScheduledTask> {
     private static final double V0Y = Math.sqrt(Y_MAX * G * 2);
     public static final long T_END = (long) Math.ceil((V0Y * 2) / G * 20);
 
-    public IngredientAddAnimation(Location from, Location to, ItemDisplay entity) {
+    public IngredientAddAnimation(Location from, Location to, Function<Location, ItemDisplay> entityProvider) {
         double xRandom = RANDOM.nextDouble(-0.4, 0.4);
         double zRandom = RANDOM.nextDouble(-0.4, 0.4);
         double yawRadians = (from.getYaw() - 90) / 360 * Math.PI * 2;
@@ -42,8 +44,8 @@ public class IngredientAddAnimation implements Consumer<ScheduledTask> {
         );
         this.travelingDirection = offset.clone().normalize().multiply(-1);
         this.v0x = G * (offset.clone().subtract(randomZX)).length() / (V0Y * 2);
-        this.entity = entity;
         this.from = to.clone().add(offset);
+        this.entity = entityProvider.apply(from);
         /*
          * Equation definitions are defined within square brackets []
          * Equation of movement under gravity in 2d
@@ -73,6 +75,9 @@ public class IngredientAddAnimation implements Consumer<ScheduledTask> {
 
     @Override
     public void accept(ScheduledTask scheduledTask) {
+        if(entity.isDead()) {
+            scheduledTask.cancel();
+        }
         if (time >= T_END) {
             entity.remove();
             scheduledTask.cancel();
@@ -88,5 +93,9 @@ public class IngredientAddAnimation implements Consumer<ScheduledTask> {
                 .multiply(timeSeconds * v0x)
                 .setY((V0Y - G * timeSeconds / 2) * timeSeconds);
         entity.teleport(from.clone().add(travelingPoint));
+    }
+
+    public void close() {
+        entity.remove();
     }
 }
