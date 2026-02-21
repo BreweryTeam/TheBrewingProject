@@ -30,6 +30,7 @@ import dev.jsinco.brewery.bukkit.util.BlockUtil;
 import dev.jsinco.brewery.bukkit.util.BukkitIngredientUtil;
 import dev.jsinco.brewery.bukkit.util.ColorUtil;
 import dev.jsinco.brewery.bukkit.util.SoundPlayer;
+import dev.jsinco.brewery.configuration.AnimationDisplay;
 import dev.jsinco.brewery.configuration.Config;
 import dev.jsinco.brewery.sound.SoundDefinition;
 import lombok.Getter;
@@ -207,7 +208,7 @@ public class BukkitCauldron implements Cauldron {
         this.recipe = brew.closestRecipe(TheBrewingProject.getInstance().getRecipeRegistry())
                 .orElse(null);
         long delay;
-        if (Config.config().cauldrons().ingredientAddedAnimation()) {
+        if (Config.config().cauldrons().ingredientAddedAnimation() != AnimationDisplay.NONE) {
             delay = AnimationManager.playIngredientAddAnimation(addedItem, player, getBlock().getLocation().toCenterLocation());
         } else {
             delay = 1;

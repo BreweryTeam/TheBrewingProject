@@ -55,9 +55,9 @@ public class CauldronSection extends OkaeriConfig implements Configuration.Cauld
     @CustomKey("failed-particle-color")
     private Color failedParticleColor = new Color(NamedTextColor.GRAY.value());
 
-    @Comment("If an animation should be run when adding an ingredient")
-    @CustomKey("ingredient-added-animation")
-    private boolean ingredientAddedAnimation = true;
+    @Comment("To whom animations should be rendered when adding items [none, brewer, everyone]")
+    @CustomKey("ingredient-added-animation-display")
+    private AnimationDisplay ingredientAddedAnimation = AnimationDisplay.NONE;
 
     @Comment("What items should be transformed into another item when added as an ingredient")
     @CustomKey("ingredient-empty-transforms")
