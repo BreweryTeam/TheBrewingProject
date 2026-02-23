@@ -21,6 +21,7 @@ import net.kyori.adventure.text.minimessage.tag.resolver.Formatter;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import net.kyori.adventure.text.minimessage.translation.Argument;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.kyori.adventure.translation.GlobalTranslator;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -102,7 +103,13 @@ public class MessageUtil {
     }
 
     public static @NotNull StyleBuilderApplicable[] resolveQualityColor(@Nullable BrewQuality quality) {
-        return quality != null ? new StyleBuilderApplicable[]{TextColor.color(quality.getColor())} : new StyleBuilderApplicable[]{NamedTextColor.GRAY, TextDecoration.STRIKETHROUGH};
+        if (quality != null) {
+            String hexValue = getTranslatedStringRaw(quality.colorKey(), null);
+            TextColor translatedColor = hexValue != null ? TextColor.fromCSSHexString(hexValue) : null;
+            TextColor color = translatedColor != null ? translatedColor : TextColor.color(quality.getColor());
+            return new StyleBuilderApplicable[]{color};
+        }
+        return new StyleBuilderApplicable[]{NamedTextColor.GRAY, TextDecoration.STRIKETHROUGH};
     }
 
     public static @NotNull Stream<Component> compileBrewInfo(Brew brew, BrewScore score, boolean detailed) {
@@ -160,16 +167,20 @@ public class MessageUtil {
     }
 
     private static @NotNull Component compileStars(double level) {
+        String fullStar = getTranslatedStringRaw("tbp.brew.star.full", String.valueOf(FULL_STAR));
+        String halfStar = getTranslatedStringRaw("tbp.brew.star.half", String.valueOf(HALF_STAR));
+        String emptyStar = getTranslatedStringRaw("tbp.brew.star.empty", String.valueOf(EMPTY_STAR));
+
         StringBuilder builder = new StringBuilder();
         int score = (int) (level / 10);
         int fullStars = score / 2;
         int remainder = score % 2;
-        builder.repeat(FULL_STAR, fullStars);
+        builder.repeat(fullStar, fullStars);
         if (remainder == 1) {
-            builder.append(HALF_STAR);
-            builder.repeat(EMPTY_STAR, 4 - fullStars);
+            builder.append(halfStar);
+            builder.repeat(emptyStar, 4 - fullStars);
         } else {
-            builder.repeat(EMPTY_STAR, 5 - fullStars);
+            builder.repeat(emptyStar, 5 - fullStars);
         }
         return Component.text(builder.toString());
     }
@@ -188,5 +199,11 @@ public class MessageUtil {
             builder.resolver(Formatter.number((prefix == null ? "" : prefix + "_") + modifier.name(), value));
         }
         return builder.build();
+    }
+
+    private static @Nullable String getTranslatedStringRaw(String key, @Nullable String fallback) {
+        Component rendered = GlobalTranslator.render(Component.translatable(key), Config.config().language());
+        String text = PlainTextComponentSerializer.plainText().serialize(rendered);
+        return key.equals(text) || text.isBlank() ? fallback : text;
     }
 }

@@ -30,6 +30,7 @@ dependencies {
     implementation(libs.simple.yaml)
     implementation(libs.hikaricp)
     implementation(libs.exp4j)
+    implementation(libs.adventure.text.serializer.plain)
 
     // other
     compileOnly(libs.jetbrains.annotations)
