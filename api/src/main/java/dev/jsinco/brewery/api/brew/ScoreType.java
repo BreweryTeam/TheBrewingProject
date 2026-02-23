@@ -4,7 +4,7 @@ import java.util.Arrays;
 import java.util.Locale;
 
 public enum ScoreType {
-    TIME("cook-time", "mix-time", "age-years"),
+    TIME("cook-time", "mix-time", "age-years", "time"),
     INGREDIENTS("ingredients"),
     DISTILL_AMOUNT("runs"),
     BARREL_TYPE("barrel-type");
