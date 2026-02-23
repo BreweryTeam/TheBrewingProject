@@ -12,14 +12,15 @@ import dev.jsinco.brewery.brew.CookStepImpl;
 import dev.jsinco.brewery.brew.DistillStepImpl;
 import dev.jsinco.brewery.brew.MixStepImpl;
 import dev.jsinco.brewery.configuration.Config;
-import dev.jsinco.brewery.util.FutureUtil;
 import dev.jsinco.brewery.time.TimeUtil;
+import dev.jsinco.brewery.util.FutureUtil;
 import org.jetbrains.annotations.NotNull;
 import org.simpleyaml.configuration.ConfigurationSection;
 import org.simpleyaml.configuration.file.YamlFile;
 
 import java.io.File;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -97,7 +98,7 @@ public class RecipeReader<I> {
         return switch (type) {
             case COOK -> ingredientManager.getIngredientsWithAmount((List<String>) map.get("ingredients"))
                     .thenApplyAsync(ingredients -> new CookStepImpl(
-                            new PassedMoment(TimeUtil.parse(map.get("cook-time").toString(), TimeUtil.TimeUnit.COOKING_MINUTES)),
+                            parseTime(map, TimeUtil.TimeUnit.COOKING_MINUTES, "time", "cook-time"),
                             ingredients,
                             BreweryRegistry.CAULDRON_TYPE.get(BreweryKey.parse(map.containsKey("cauldron-type") ? map.get("cauldron-type").toString().toLowerCase(Locale.ROOT) : "water"))
                     ));
@@ -105,21 +106,40 @@ public class RecipeReader<I> {
                     (int) map.get("runs")
             ));
             case AGE -> CompletableFuture.completedFuture(new AgeStepImpl(
-                    new PassedMoment(TimeUtil.parse(map.get("age-years").toString(), TimeUtil.TimeUnit.AGING_YEARS)),
+                    parseTime(map, TimeUtil.TimeUnit.AGING_YEARS, "age-years", "time"),
                     BreweryRegistry.BARREL_TYPE.get(BreweryKey.parse(map.get("barrel-type").toString()))
             ));
             case MIX -> ingredientManager.getIngredientsWithAmount((List<String>) map.get("ingredients"))
                     .thenApplyAsync(ingredients -> new MixStepImpl(
-                            new PassedMoment(TimeUtil.parse(map.get("mix-time").toString(), TimeUtil.TimeUnit.COOKING_MINUTES)),
+                            parseTime(map, TimeUtil.TimeUnit.COOKING_MINUTES, "mix-time", "time"),
                             ingredients
                     ));
         };
     }
 
+    private PassedMoment parseTime(Map<?, ?> map, TimeUtil.TimeUnit timeUnit, String... aliases) {
+        for (String alias : aliases) {
+            if (map.containsKey(alias)) {
+                return new PassedMoment(TimeUtil.parse(map.get(alias).toString(), timeUnit));
+            }
+        }
+        throw new IllegalArgumentException("Could not parse time, missing key: " + Arrays.toString(aliases));
+    }
+
+    private void validTime(Map<?, ?> map, String... aliases) {
+        for (String alias : aliases) {
+            if (map.containsKey(alias)) {
+                Preconditions.checkArgument(TimeUtil.validTime(map.get(alias).toString()), "Expected a number, or a time format for '" + alias + "' in cooking step!");
+                return;
+            }
+        }
+        throw new IllegalArgumentException("Expected a time with any of the following keys " + Arrays.toString(aliases));
+    }
+
     private void checkStep(BrewingStep.StepType type, Map<?, ?> map) throws IllegalArgumentException {
         switch (type) {
             case COOK -> {
-                Preconditions.checkArgument(map.containsKey("cook-time") && TimeUtil.validTime(map.get("cook-time").toString()), "Expected a number, or a time format for 'cook-time' in cooking step!");
+                validTime(map, "time", "cook-time");
                 Preconditions.checkArgument(map.get("ingredients") instanceof List, "Expected string list value for 'ingredients' in cook step!");
                 Preconditions.checkArgument(!map.containsKey("cauldron-type") || map.get("cauldron-type") instanceof String, "Expected string value for 'cauldron-type' in cook step!");
                 String cauldronType = map.containsKey("cauldron-type") ? (String) map.get("cauldron-type") : "water";
@@ -128,13 +148,14 @@ public class RecipeReader<I> {
             case DISTILL ->
                     Preconditions.checkArgument(map.get("runs") instanceof Integer integer && integer > 0, "Expected a positive integer value for 'runs' in distill step!");
             case AGE -> {
-                Preconditions.checkArgument(map.containsKey("age-years") && TimeUtil.parse(map.get("age-years").toString(), TimeUtil.TimeUnit.AGING_YEARS) > Config.config().barrels().agingYearTicks() / 2, "Expected a time longer than half an aging year for 'age-years' in age step!");
+                validTime(map, "time", "age-years");
+                Preconditions.checkArgument(parseTime(map, TimeUtil.TimeUnit.AGING_YEARS, "time", "age-years").moment() > Config.config().barrels().agingYearTicks() / 2, "Expected a time longer than half an aging year for 'age-years' in age step!");
                 Preconditions.checkArgument(!map.containsKey("barrel-type") || map.get("barrel-type") instanceof String, "Expected string value for 'barrel-type' in age step!");
                 String barrelType = map.containsKey("barrel-type") ? (String) map.get("barrel-type") : "any";
                 Preconditions.checkArgument(BreweryRegistry.BARREL_TYPE.containsKey(BreweryKey.parse(barrelType)), "Expected a valid barrel type for 'barrel-type' in age step!");
             }
             case MIX -> {
-                Preconditions.checkArgument(map.containsKey("mix-time") && TimeUtil.validTime(map.get("mix-time").toString()), "Expected a number, or a time format for 'mix-time' in mix step!");
+                validTime(map, "time", "mix-time");
                 Preconditions.checkArgument(map.get("ingredients") instanceof List, "Expected string list value for 'ingredients' in mix step!");
             }
         }
