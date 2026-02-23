@@ -3,16 +3,16 @@ package dev.jsinco.brewery.bukkit.recipe;
 import dev.jsinco.brewery.api.brew.Brew;
 import dev.jsinco.brewery.api.brew.BrewScore;
 import dev.jsinco.brewery.api.brew.BrewingStep;
-import dev.jsinco.brewery.api.integration.Integration;
 import dev.jsinco.brewery.api.recipe.RecipeEffects;
 import dev.jsinco.brewery.api.recipe.RecipeResult;
 import dev.jsinco.brewery.api.util.BreweryKey;
 import dev.jsinco.brewery.api.util.Logger;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
-import dev.jsinco.brewery.bukkit.api.BukkitAdapter;
 import dev.jsinco.brewery.bukkit.api.integration.IntegrationTypes;
 import dev.jsinco.brewery.bukkit.api.integration.ItemIntegration;
 import dev.jsinco.brewery.bukkit.brew.BrewAdapter;
+import dev.jsinco.brewery.bukkit.ingredient.UncheckedIngredientImpl;
+import dev.jsinco.brewery.bukkit.ingredient.BukkitIngredientManager;
 import dev.jsinco.brewery.bukkit.util.BukkitMessageUtil;
 import dev.jsinco.brewery.configuration.BrewTooltipType;
 import dev.jsinco.brewery.configuration.Config;
@@ -36,10 +36,8 @@ import net.kyori.adventure.translation.GlobalTranslator;
 import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
-import org.bukkit.Registry;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.ItemType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -56,7 +54,7 @@ public class BukkitRecipeResult implements RecipeResult<ItemStack> {
     private final boolean glint;
     private final int customModelData;
     private final @Nullable NamespacedKey itemModel;
-    private final @Nullable BreweryKey customId;
+    private final UncheckedIngredientImpl customId;
 
     @Getter
     private final String name;
@@ -78,7 +76,7 @@ public class BukkitRecipeResult implements RecipeResult<ItemStack> {
         this.lore = lore;
         this.color = color;
         this.appendBrewInfoLore = appendBrewInfoLore;
-        this.customId = customId;
+        this.customId = customId == null ? null : new UncheckedIngredientImpl(customId);
     }
 
     @Override
@@ -91,13 +89,15 @@ public class BukkitRecipeResult implements RecipeResult<ItemStack> {
     @Override
     public ItemStack newLorelessItem() {
         if (customId != null) {
-            ItemStack itemStack = createCustomItem();
+            ItemStack itemStack = customId.retrieve()
+                    .flatMap(BukkitIngredientManager.INSTANCE::toItem)
+                    .orElse(null);
 
             if (itemStack != null) {
                 applyData(itemStack);
                 return itemStack;
             }
-            Logger.logErr("Invalid item id '" + customId + "' for recipe: " + name);
+            Logger.logErr("Invalid or uninitialized customId for recipe: " + name);
         }
         ItemStack itemStack = new ItemStack(Material.POTION);
         applyData(itemStack);
@@ -112,26 +112,6 @@ public class BukkitRecipeResult implements RecipeResult<ItemStack> {
     @Override
     public Component displayName() {
         return MiniMessage.miniMessage().deserialize(name);
-    }
-
-    private @Nullable ItemStack createCustomItem() {
-        if (customId.namespace().equals("minecraft")) {
-            ItemType itemType = Registry.ITEM.get(BukkitAdapter.toNamespacedKey(customId));
-            if (itemType == null || itemType == ItemType.AIR) {
-                return null;
-            }
-            return itemType.createItemStack();
-        } else {
-            return TheBrewingProject.getInstance().getIntegrationManager().getIntegrationRegistry()
-                    .getIntegrations(IntegrationTypes.ITEM)
-                    .stream()
-                    .filter(Integration::isEnabled)
-                    .filter(integration -> customId.namespace().equals(integration.getId()))
-                    .findAny()
-                    .orElseThrow(() -> new IllegalStateException("Namespace should be within the supported items plugins"))
-                    .createItem(customId.key())
-                    .orElse(null);
-        }
     }
 
     private void applyData(ItemStack itemStack) {

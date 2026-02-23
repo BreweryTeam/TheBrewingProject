@@ -22,12 +22,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
-public class BreweryIngredient implements BaseIngredient {
-    protected final BreweryKey ingredientKey;
-
-    public BreweryIngredient(BreweryKey ingredientKey) {
-        this.ingredientKey = ingredientKey;
-    }
+public record BreweryIngredient(BreweryKey ingredientKey) implements BaseIngredient {
 
     @Override
     public @NotNull String getKey() {
@@ -42,42 +37,14 @@ public class BreweryIngredient implements BaseIngredient {
                 .orElseGet(() -> Component.text(ingredientKey.minimalized()));
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        BreweryIngredient that = (BreweryIngredient) o;
-        return Objects.equals(ingredientKey, that.ingredientKey);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hashCode(ingredientKey);
-    }
-
     public static Optional<Ingredient> from(ItemStack itemStack) {
         PersistentDataContainerView dataContainer = itemStack.getPersistentDataContainer();
         String key = dataContainer.get(BrewAdapter.BREWERY_TAG, PersistentDataType.STRING);
         if (key == null) {
             return Optional.empty();
         }
-        Double score = dataContainer.get(BrewAdapter.BREWERY_SCORE, PersistentDataType.DOUBLE);
         BreweryKey breweryKey = BreweryKey.parse(key);
-        BaseIngredient baseIngredient = new BreweryIngredient(breweryKey);
-        ImmutableMap.Builder<IngredientMeta<?>, Object> extraBuilder = new ImmutableMap.Builder<>();
-        String displayNameString = dataContainer.get(BrewAdapter.BREWERY_DISPLAY_NAME, PersistentDataType.STRING);
-        if(displayNameString != null) {
-            Component displayName = MiniMessage.miniMessage().deserialize(displayNameString);
-            extraBuilder.put(IngredientMeta.DISPLAY_NAME, displayName);
-        }
-        if (score != null) {
-            extraBuilder.put(IngredientMeta.SCORE, score);
-        }
-        return Optional.of(new IngredientWithMeta(baseIngredient, extraBuilder.build()));
+        return Optional.of(new BreweryIngredient(breweryKey));
     }
 
     public static Optional<CompletableFuture<Optional<Ingredient>>> from(BreweryKey id) {
