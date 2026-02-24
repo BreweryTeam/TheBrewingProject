@@ -26,4 +26,14 @@ public class BarrelSection extends OkaeriConfig implements Configuration.Barrels
     @CustomKey("sign-keywords")
     private List<String> signKeywords = List.of("barrel");
 
+    @Comment("Whether to always include prefabricated barrel types into barrel type selection")
+    @CustomKey("prefabricated-barrel-types")
+    private boolean prefabricatedBarrelTypes = true;
+
+    @Comment("Custom barrel types")
+    @CustomKey("barrel-types")
+    private List<BarrelTypeDefinition> barrelTypeDefinition = List.of(
+
+    );
+
 }
