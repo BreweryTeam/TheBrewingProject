@@ -18,4 +18,8 @@ public enum BrewQuality {
     public int getColor() {
         return color;
     }
+
+    public String colorKey() {
+        return "tbp.brew.quality-color." + name().toLowerCase();
+    }
 }
