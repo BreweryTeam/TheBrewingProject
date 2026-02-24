@@ -18,7 +18,6 @@ import dev.jsinco.brewery.brew.CookStepImpl;
 import dev.jsinco.brewery.brew.MixStepImpl;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.bukkit.animation.AnimationManager;
-import dev.jsinco.brewery.bukkit.animation.IngredientAddAnimation;
 import dev.jsinco.brewery.bukkit.api.BukkitAdapter;
 import dev.jsinco.brewery.bukkit.api.event.process.BrewCauldronProcessEvent;
 import dev.jsinco.brewery.bukkit.api.event.transaction.CauldronInsertEvent;
@@ -37,6 +36,7 @@ import lombok.Getter;
 import lombok.Setter;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -44,9 +44,13 @@ import org.bukkit.block.BlockType;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.Levelled;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.TextDisplay;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.util.Transformation;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.joml.AxisAngle4f;
+import org.joml.Vector3f;
 
 import java.util.*;
 
@@ -61,9 +65,10 @@ public class BukkitCauldron implements Cauldron {
     @Getter
     private Brew brew;
     private boolean brewExtracted = false;
-    private Color particleColor = Color.AQUA;
+    private Color particleColor = Color.fromRGB(0x3F76E4);
     private @Nullable Recipe<ItemStack> recipe;
     private boolean dirty = true;
+    private TextDisplay waterColorer = null;
 
 
     public BukkitCauldron(BreweryLocation location, boolean hot) {
@@ -90,11 +95,21 @@ public class BukkitCauldron implements Cauldron {
             return;
         }
         if (!Tag.CAULDRONS.isTagged(getBlock().getType()) || getBlock().getType() == Material.CAULDRON) {
-            ListenerUtil.removeActiveSinglePositionStructure(this, TheBrewingProject.getInstance().getBreweryRegistry(), TheBrewingProject.getInstance().getDatabase());
+            destroy();
             return;
         }
         this.hot = isHeatSource(getBlock().getRelative(BlockFace.DOWN));
         recalculateBrewTime();
+        Location bukkitLocation = BukkitAdapter.toLocation(location).orElse(null);
+        if (Config.config().cauldrons().coloredWater() && bukkitLocation != null && (waterColorer == null || waterColorer.isDead())) {
+            waterColorer = getBlock().getWorld().spawn(bukkitLocation.clone().add(0.5, 0, 0.5), TextDisplay.class, textDisplay -> {
+                textDisplay.text(Component.text("■").color(TextColor.color(particleColor.asRGB())));
+                textDisplay.setTransformation(compileTransformation());
+                textDisplay.setPersistent(false);
+                textDisplay.setTextOpacity(Config.config().cauldrons().waterColorOpacity());
+                textDisplay.setBackgroundColor(Color.fromARGB(0, 255, 255, 255));
+            });
+        }
         if (dirty || getBrewTime() % Config.config().cauldrons().cookingMinuteTicks() == 0) {
             this.recipe = brew.closestRecipe(TheBrewingProject.getInstance().getRecipeRegistry())
                     .orElse(null);
@@ -105,7 +120,26 @@ public class BukkitCauldron implements Cauldron {
         Color baseParticleColor = computeBaseParticleColor(getBlock());
         this.particleColor = recipeOptional.map(recipe -> computeParticleColor(baseParticleColor, resultColor, recipe))
                 .orElseGet(() -> ColorUtil.getNextColor(baseParticleColor, convert(Config.config().cauldrons().failedParticleColor()), getBrewTime(), Moment.MINUTE * 3));
+        if (waterColorer != null) {
+            waterColorer.text(Component.text("■").color(TextColor.color(particleColor.asRGB())));
+        }
         this.playBrewingEffects();
+    }
+
+    private Transformation compileTransformation() {
+        float levelOffset;
+        BlockData blockData = getBlock().getBlockData();
+        if (blockData instanceof Levelled levelled) {
+            levelOffset = 6F / 16 + 9F / 16 * levelled.getLevel() / levelled.getMaximumLevel();
+        } else {
+            levelOffset = 0;
+        }
+        return new Transformation(
+                new Vector3f(-1F / 16, levelOffset, 14F / 16),
+                new AxisAngle4f(),
+                new Vector3f(6.5F, 0, 6.5F),
+                new AxisAngle4f((float) -Math.PI / 2, 1F, 0, 0)
+        );
     }
 
     private long getBrewTime() {
@@ -146,11 +180,6 @@ public class BukkitCauldron implements Cauldron {
         return !score.completed() ?
                 BukkitIngredientUtil.ingredientData(ingredients).first() :
                 ((BukkitRecipeResult) recipeOptional.get().getRecipeResults().get(brewQuality)).getColor();
-    }
-
-
-    public void remove() {
-        ListenerUtil.removeActiveSinglePositionStructure(this, TheBrewingProject.getInstance().getBreweryRegistry(), TheBrewingProject.getInstance().getDatabase());
     }
 
     public boolean addIngredient(@NotNull ItemStack item, Player player) {
@@ -344,7 +373,8 @@ public class BukkitCauldron implements Cauldron {
         }
     }
 
-    public static boolean decrementLevel(Block block) {
+    public boolean decrementLevel() {
+        Block block = getBlock();
         if (!Tag.CAULDRONS.isTagged(block.getType())) {
             return true;
         }
@@ -358,6 +388,9 @@ public class BukkitCauldron implements Cauldron {
         }
         levelled.setLevel(levelled.getLevel() - 1);
         block.setBlockData(levelled);
+        if (waterColorer != null) {
+            waterColorer.setTransformation(compileTransformation());
+        }
         return false;
     }
 
@@ -390,6 +423,14 @@ public class BukkitCauldron implements Cauldron {
             return levelled.getLevel();
         }
         return 0;
+    }
+
+    @Override
+    public void destroy() {
+        if (waterColorer != null) {
+            waterColorer.remove();
+        }
+        ListenerUtil.removeActiveSinglePositionStructure(this, TheBrewingProject.getInstance().getBreweryRegistry(), TheBrewingProject.getInstance().getDatabase());
     }
 
     private Color convert(java.awt.Color awtColor) {

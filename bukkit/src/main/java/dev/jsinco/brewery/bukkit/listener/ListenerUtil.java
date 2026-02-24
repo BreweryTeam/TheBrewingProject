@@ -13,6 +13,7 @@ public class ListenerUtil {
 
     public static void removeActiveSinglePositionStructure(@NotNull SinglePositionStructure structure, BreweryRegistry registry, Database database) {
         registry.removeActiveSinglePositionStructure(structure);
+
         if (structure instanceof BukkitCauldron cauldron) {
             try {
                 database.remove(BukkitCauldronDataType.INSTANCE, cauldron);

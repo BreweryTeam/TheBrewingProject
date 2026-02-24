@@ -2,10 +2,16 @@ package dev.jsinco.brewery.api.structure;
 
 import dev.jsinco.brewery.api.vector.BreweryLocation;
 
-public interface SinglePositionStructure{
+public interface SinglePositionStructure {
 
     /**
      * @return The position
      */
     BreweryLocation position();
+
+
+    /**
+     * Destroy this structure and all components linked to it
+     */
+    void destroy();
 }

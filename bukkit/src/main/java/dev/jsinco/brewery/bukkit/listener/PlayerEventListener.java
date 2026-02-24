@@ -258,8 +258,8 @@ public class PlayerEventListener implements Listener {
         ItemStack brewItemStack = extractEvent.getBrewSource().get();
         updateHeldItem(decreaseItem(event.getItem(), player), player, event.getHand());
         player.getWorld().dropItem(player.getLocation(), brewItemStack);
-        if (BukkitCauldron.decrementLevel(block)) {
-            ListenerUtil.removeActiveSinglePositionStructure(cauldron, breweryRegistry, database);
+        if (cauldron.decrementLevel()) {
+            cauldron.destroy();
         }
     }
 
