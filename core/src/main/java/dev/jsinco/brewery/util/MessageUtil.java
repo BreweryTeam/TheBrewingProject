@@ -12,7 +12,9 @@ import dev.jsinco.brewery.recipes.BrewScoreImpl;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentLike;
+import net.kyori.adventure.text.TranslatableComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.StyleBuilderApplicable;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
@@ -102,7 +104,12 @@ public class MessageUtil {
     }
 
     public static @NotNull StyleBuilderApplicable[] resolveQualityColor(@Nullable BrewQuality quality) {
-        return quality != null ? new StyleBuilderApplicable[]{TextColor.color(quality.getColor())} : new StyleBuilderApplicable[]{NamedTextColor.GRAY, TextDecoration.STRIKETHROUGH};
+        if (quality != null) {
+            TextColor translatedColor = getTranslatedColor(quality.colorKey());
+            TextColor color = translatedColor != null ? translatedColor : TextColor.color(quality.getColor());
+            return new StyleBuilderApplicable[]{color};
+        }
+        return new StyleBuilderApplicable[]{NamedTextColor.GRAY, TextDecoration.STRIKETHROUGH};
     }
 
     public static @NotNull Stream<Component> compileBrewInfo(Brew brew, BrewScore score, boolean detailed) {
@@ -136,42 +143,47 @@ public class MessageUtil {
     }
 
     private static @NotNull ComponentLike compileSkulls(double level) {
+        Component skull = getTranslatedComponent("tbp.brew.skull", Component.text(SKULL));
+        TextColor skullColor = getTranslatedColor("tbp.brew.skull.color");
+
         int partition = (int) level / 20;
-        StringBuilder skulls = new StringBuilder();
-        skulls.repeat(SKULL, partition);
-        skulls.repeat("  ", 5 - partition);
-        return Component.text(skulls.toString()).color(NamedTextColor.GREEN);
+        Component result = Component.empty();
+        for (int i = 0; i < partition; i++) result = result.append(skull);
+        for (int i = 0; i < 5 - partition; i++) result = result.append(Component.text("  "));
+        return result.colorIfAbsent(skullColor != null ? skullColor : NamedTextColor.GREEN);
     }
 
     private static @NotNull ComponentLike compileBars(double level) {
+        TextColor ok = getTranslatedColor("tbp.brew.bar.color.ok");
+        TextColor warning = getTranslatedColor("tbp.brew.bar.color.warning");
+        TextColor severe = getTranslatedColor("tbp.brew.bar.color.severe");
+        TextColor empty = getTranslatedColor("tbp.brew.bar.color.empty");
+
         int partitionedLevel = (int) level / 5;
-        StringBuilder okLevel = new StringBuilder();
-        okLevel.repeat("|", Math.min(partitionedLevel, 4));
-        StringBuilder warningLevel = new StringBuilder();
-        warningLevel.repeat("|", Math.max(Math.min(partitionedLevel, 16) - 4, 0));
-        StringBuilder severeLevel = new StringBuilder();
-        severeLevel.repeat("|", Math.max(partitionedLevel - 16, 0));
-        StringBuilder remainder = new StringBuilder();
-        remainder.repeat("|", 20 - partitionedLevel);
-        return Component.text(okLevel.toString()).color(NamedTextColor.GREEN)
-                .append(Component.text(warningLevel.toString()).color(NamedTextColor.YELLOW))
-                .append(Component.text(severeLevel.toString()).color(NamedTextColor.GOLD))
-                .append(Component.text(remainder.toString()).color(NamedTextColor.BLACK));
+        return Component.text("|".repeat(Math.min(partitionedLevel, 4))).color(ok != null ? ok : NamedTextColor.GREEN)
+                .append(Component.text("|".repeat(Math.max(Math.min(partitionedLevel, 16) - 4, 0))).color(warning != null ? warning : NamedTextColor.YELLOW))
+                .append(Component.text("|".repeat(Math.max(partitionedLevel - 16, 0))).color(severe != null ? severe : NamedTextColor.GOLD))
+                .append(Component.text("|".repeat(20 - partitionedLevel)).color(empty != null ? empty : NamedTextColor.BLACK));
     }
 
     private static @NotNull Component compileStars(double level) {
-        StringBuilder builder = new StringBuilder();
+        Component fullStar = getTranslatedComponent("tbp.brew.star.full", Component.text(FULL_STAR));
+        Component halfStar = getTranslatedComponent("tbp.brew.star.half", Component.text(HALF_STAR));
+        Component emptyStar = getTranslatedComponent("tbp.brew.star.empty", Component.text(EMPTY_STAR));
+
         int score = (int) (level / 10);
         int fullStars = score / 2;
         int remainder = score % 2;
-        builder.repeat(FULL_STAR, fullStars);
+
+        Component result = Component.empty();
+        for (int i = 0; i < fullStars; i++) result = result.append(fullStar);
         if (remainder == 1) {
-            builder.append(HALF_STAR);
-            builder.repeat(EMPTY_STAR, 4 - fullStars);
+            result = result.append(halfStar);
+            for (int i = 0; i < 4 - fullStars; i++) result = result.append(emptyStar);
         } else {
-            builder.repeat(EMPTY_STAR, 5 - fullStars);
+            for (int i = 0; i < 5 - fullStars; i++) result = result.append(emptyStar);
         }
-        return Component.text(builder.toString());
+        return result;
     }
 
     public static @NotNull TagResolver getTimeTagResolver(long timeTicks) {
@@ -188,5 +200,25 @@ public class MessageUtil {
             builder.resolver(Formatter.number((prefix == null ? "" : prefix + "_") + modifier.name(), value));
         }
         return builder.build();
+    }
+
+    private static @NotNull Component getTranslatedComponent(String key, Component fallback) {
+        Component rendered = GlobalTranslator.render(Component.translatable(key), Config.config().language());
+        return rendered instanceof TranslatableComponent ? fallback : rendered;
+    }
+
+    private static @Nullable TextColor getTranslatedColor(String key) {
+        Component rendered = GlobalTranslator.render(Component.translatable(key), Config.config().language());
+        if (rendered instanceof TranslatableComponent) {
+            return null;
+        }
+        Style style = rendered.style();
+        if (style.color() != null) {
+            return style.color();
+        }
+        if (!rendered.children().isEmpty()) {
+            return rendered.children().get(0).color();
+        }
+        return null;
     }
 }
