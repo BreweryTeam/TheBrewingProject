@@ -55,6 +55,14 @@ public class CauldronSection extends OkaeriConfig implements Configuration.Cauld
     @CustomKey("failed-particle-color")
     private Color failedParticleColor = new Color(NamedTextColor.GRAY.value());
 
+    @Comment("Whether to color the water in cauldrons using a text display")
+    @CustomKey("colored-water")
+    private boolean coloredWater = true;
+
+    @Comment("The water color is a text display, this defines the opacity of the text display (0 - 255)")
+    @CustomKey("water-color-opacity")
+    private byte waterColorOpacity = (byte) 128;
+
     @Comment("To whom animations should be rendered when adding items [none, brewer, everyone]")
     @CustomKey("ingredient-added-animation-display")
     private AnimationDisplay ingredientAddedAnimation = AnimationDisplay.NONE;
