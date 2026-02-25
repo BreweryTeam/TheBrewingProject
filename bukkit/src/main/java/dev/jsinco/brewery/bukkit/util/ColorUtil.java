@@ -1,6 +1,5 @@
 package dev.jsinco.brewery.bukkit.util;
 
-import org.bukkit.ChatColor;
 import org.bukkit.Color;
 
 import java.util.HashMap;
@@ -9,7 +8,6 @@ import java.util.Map;
 public class ColorUtil {
 
 
-    private static final String WITH_DELIMITER = "((?<=%1$s)|(?=%1$s))";
     public static final Map<String, Color> NAME_TO_COLOR_MAP = new HashMap<>();
 
     static {
@@ -36,6 +34,18 @@ public class ColorUtil {
         NAME_TO_COLOR_MAP.put("DARK_RED", Color.fromRGB(128, 0, 0));
     }
 
+    public static Color closestColorLimitedOpacity(Color target, Color background, int maxOpacity) {
+        int r = target.getRed() * maxOpacity - background.getRed() * (255 - maxOpacity);
+        int g = target.getGreen() * maxOpacity - background.getGreen() * (255 - maxOpacity);
+        int b = target.getBlue() * maxOpacity - background.getBlue() * (255 - maxOpacity);
+        int a = Math.max(0, 255 - Math.max(r, Math.max(g, b)) / 255);
+        return Color.fromARGB(
+                a,
+                Math.max(0, Math.min(255, r / a)),
+                Math.max(0, Math.min(255, g / a)),
+                Math.max(0, Math.min(255, b / a))
+        );
+    }
 
     public static Color parseColorString(String hexOrValue) {
         hexOrValue = hexOrValue.replace("&", "").replace("#", "").toUpperCase();
@@ -50,27 +60,6 @@ public class ColorUtil {
         } catch (NumberFormatException e) {
             throw new IllegalArgumentException("Invalid color string: " + hexOrValue);
         }
-    }
-
-    public static String colorText(String msg) {
-        String[] texts = msg.split(String.format(WITH_DELIMITER, "&"));
-
-        StringBuilder finalText = new StringBuilder();
-
-        for (int i = 0; i < texts.length; i++) {
-            if (texts[i].equalsIgnoreCase("&")) {
-                //get the next string
-                i++;
-                if (texts[i].charAt(0) == '#') {
-                    finalText.append(net.md_5.bungee.api.ChatColor.of(texts[i].substring(0, 7))).append(texts[i].substring(7));
-                } else {
-                    finalText.append(ChatColor.translateAlternateColorCodes('&', "&" + texts[i]));
-                }
-            } else {
-                finalText.append(texts[i]);
-            }
-        }
-        return finalText.toString();
     }
 
     // Returns a color closer to the destination color based on the interval and totalDuration
