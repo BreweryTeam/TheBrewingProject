@@ -45,7 +45,7 @@ public class CauldronSection extends OkaeriConfig implements Configuration.Cauld
 
     @Comment("The base color water cauldrons have")
     @CustomKey("water-base-particle-color")
-    private Color waterBaseParticleColor = new Color(NamedTextColor.AQUA.value());
+    private Color waterBaseParticleColor = new Color(Integer.parseInt("3F76E4", 16));
 
     @Comment("The base color snow cauldrons have")
     @CustomKey("snow-base-particle-color")
@@ -61,7 +61,7 @@ public class CauldronSection extends OkaeriConfig implements Configuration.Cauld
 
     @Comment("The water color is a text display, this defines the opacity of the text display (0 - 255)")
     @CustomKey("water-color-opacity")
-    private byte waterColorOpacity = (byte) 128;
+    private int waterColorOpacity = (128 & 0xFF);
 
     @Comment("To whom animations should be rendered when adding items [none, brewer, everyone]")
     @CustomKey("ingredient-added-animation-display")
