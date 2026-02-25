@@ -103,10 +103,10 @@ public class BukkitCauldron implements Cauldron {
         Location bukkitLocation = BukkitAdapter.toLocation(location).orElse(null);
         if (Config.config().cauldrons().coloredWater() && bukkitLocation != null && (waterColorer == null || waterColorer.isDead())) {
             waterColorer = getBlock().getWorld().spawn(bukkitLocation.clone().add(0.5, 0, 0.5), TextDisplay.class, textDisplay -> {
-                textDisplay.text(Component.text("■").color(TextColor.color(particleColor.asRGB())));
+                textDisplay.text(Component.text("█").color(TextColor.color(particleColor.asRGB())));
+                textDisplay.setTextOpacity((byte) (Config.config().cauldrons().waterColorOpacity() & 0xFF));
                 textDisplay.setTransformation(compileTransformation());
                 textDisplay.setPersistent(false);
-                textDisplay.setTextOpacity(Config.config().cauldrons().waterColorOpacity());
                 textDisplay.setBackgroundColor(Color.fromARGB(0, 255, 255, 255));
             });
         }
@@ -121,7 +121,7 @@ public class BukkitCauldron implements Cauldron {
         this.particleColor = recipeOptional.map(recipe -> computeParticleColor(baseParticleColor, resultColor, recipe))
                 .orElseGet(() -> ColorUtil.getNextColor(baseParticleColor, convert(Config.config().cauldrons().failedParticleColor()), getBrewTime(), Moment.MINUTE * 3));
         if (waterColorer != null) {
-            waterColorer.text(Component.text("■").color(TextColor.color(particleColor.asRGB())));
+            waterColorer.text(Component.text("█").color(TextColor.color(particleColor.asRGB())));
         }
         this.playBrewingEffects();
     }
@@ -135,9 +135,9 @@ public class BukkitCauldron implements Cauldron {
             levelOffset = 0;
         }
         return new Transformation(
-                new Vector3f(-1F / 16, levelOffset, 14F / 16),
+                new Vector3f(-1F / 16, levelOffset, 8F / 16),
                 new AxisAngle4f(),
-                new Vector3f(6.5F, 0, 6.5F),
+                new Vector3f(4F, 0, 4F),
                 new AxisAngle4f((float) -Math.PI / 2, 1F, 0, 0)
         );
     }
