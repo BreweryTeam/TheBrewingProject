@@ -103,8 +103,7 @@ public class BukkitCauldron implements Cauldron {
         Location bukkitLocation = BukkitAdapter.toLocation(location).orElse(null);
         if (Config.config().cauldrons().coloredWater() && bukkitLocation != null && (waterColorer == null || waterColorer.isDead())) {
             waterColorer = getBlock().getWorld().spawn(bukkitLocation.clone().add(0.5, 0, 0.5), TextDisplay.class, textDisplay -> {
-                textDisplay.text(Component.text("█").color(TextColor.color(particleColor.asRGB())));
-                textDisplay.setTextOpacity((byte) (Config.config().cauldrons().waterColorOpacity() & 0xFF));
+                setWaterText(textDisplay);
                 textDisplay.setTransformation(compileTransformation());
                 textDisplay.setPersistent(false);
                 textDisplay.setBackgroundColor(Color.fromARGB(0, 255, 255, 255));
@@ -121,9 +120,15 @@ public class BukkitCauldron implements Cauldron {
         this.particleColor = recipeOptional.map(recipe -> computeParticleColor(baseParticleColor, resultColor, recipe))
                 .orElseGet(() -> ColorUtil.getNextColor(baseParticleColor, convert(Config.config().cauldrons().failedParticleColor()), getBrewTime(), Moment.MINUTE * 3));
         if (waterColorer != null) {
-            waterColorer.text(Component.text("█").color(TextColor.color(particleColor.asRGB())));
+            setWaterText(waterColorer);
         }
         this.playBrewingEffects();
+    }
+
+    private void setWaterText(TextDisplay textDisplay) {
+        Color newColor = ColorUtil.closestColorLimitedOpacity(particleColor, computeBaseParticleColor(getBlock()), Config.config().cauldrons().waterColorOpacity() & 0xFF);
+        textDisplay.text(Component.text("█").color(TextColor.color(newColor.asRGB())));
+        textDisplay.setTextOpacity((byte) (newColor.getAlpha() & 0xFF));
     }
 
     private Transformation compileTransformation() {
