@@ -154,8 +154,8 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
     public void onLoad() {
         saveResources();
         Migrations.migrateAllConfigFiles(this.getDataFolder());
-        integrationManager.loadIntegrations();
         integrationManager.registerIntegrations();
+        integrationManager.loadIntegrations();
         initialize();
         Bukkit.getServicesManager().register(TheBrewingProjectApi.class, this, this, ServicePriority.Normal);
         this.successfullLoad = true;
