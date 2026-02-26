@@ -137,7 +137,7 @@ public class BukkitCauldron implements Cauldron {
         if (blockData instanceof Levelled levelled) {
             levelOffset = 6F / 16 + 9F / 16 * levelled.getLevel() / levelled.getMaximumLevel();
         } else {
-            levelOffset = 0;
+            levelOffset = 15F / 16;
         }
         return new Transformation(
                 new Vector3f(-1F / 16, levelOffset, 8F / 16),

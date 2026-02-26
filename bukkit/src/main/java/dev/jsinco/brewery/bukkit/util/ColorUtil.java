@@ -35,16 +35,24 @@ public class ColorUtil {
     }
 
     public static Color closestColorLimitedOpacity(Color target, Color background, int maxOpacity) {
-        int r = target.getRed() * maxOpacity - background.getRed() * (255 - maxOpacity);
-        int g = target.getGreen() * maxOpacity - background.getGreen() * (255 - maxOpacity);
-        int b = target.getBlue() * maxOpacity - background.getBlue() * (255 - maxOpacity);
-        int a = Math.max(0, 255 - Math.max(r, Math.max(g, b)) / 255);
+        int r = Math.abs(target.getRed() - background.getRed());
+        int g = Math.abs(target.getGreen() - background.getGreen());
+        int b = Math.abs(target.getBlue() - background.getBlue());
+        int a = Math.min(maxOpacity, Math.max(r, Math.max(g, b)));
         return Color.fromARGB(
                 a,
-                Math.max(0, Math.min(255, r / a)),
-                Math.max(0, Math.min(255, g / a)),
-                Math.max(0, Math.min(255, b / a))
+                calculateColor(target.getRed(), background.getRed(), a),
+                calculateColor(target.getGreen(), background.getGreen(), a),
+                calculateColor(target.getBlue(), background.getBlue(), a)
         );
+    }
+
+    private static int calculateColor(int colorBand, int backgroundBand, int alpha) {
+        if (alpha == 0) {
+            return 255;
+        }
+        int modifiedBand = colorBand * alpha - backgroundBand * (255 - alpha);
+        return Math.max(0, Math.min(255, modifiedBand / alpha));
     }
 
     public static Color parseColorString(String hexOrValue) {
