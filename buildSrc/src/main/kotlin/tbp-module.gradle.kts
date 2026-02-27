@@ -4,8 +4,8 @@ plugins {
 
 group = "dev.jsinco.brewery"
 version = System.getenv("VERSION")?.let {
-    if (!it.matches("v{0,1}\\d+\\.\\d+\\.\\d+".toRegex())) {
-        throw IllegalArgumentException("Invalid version name")
+    if (!it.matches("^v\\d+\\.\\d+\\.\\d+(-[a-z]+)?".toRegex())) {
+        throw IllegalArgumentException("Invalid version name, needs to follow convention v*.*.*")
     }
     it.replace("^v".toRegex(), "")
 } ?: getGitHash()
