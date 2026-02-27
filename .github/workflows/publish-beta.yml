@@ -1,0 +1,41 @@
+name: Publish Plugin Beta
+
+on:
+  release:
+    types:
+      - prereleased
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: 21
+          distribution: 'temurin'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Publish to Hangar
+        run: "./gradlew :bukkit:publishAllPublicationsToHangar -Prelease.type=beta"
+        env:
+          VERSION: ${{github.event.release.tag_name}}
+          RELEASE_NOTES: ${{ github.event.release.body }}
+          API_KEY: ${{ secrets.HANGAR_PUBLISH_KEY }}
+      - name: Publish to Modrinth
+        run: "./gradlew :bukkit:modrinth -Prelease.type=beta"
+        env:
+          VERSION: ${{github.event.release.tag_name}}
+          RELEASE_NOTES: ${{ github.event.release.body }}
+          MODRINTH_TOKEN: ${{ secrets.MODRINTH_PUBLISH_KEY }}
+      - name: Display in discord
+        run: "./gradlew :bukkit:postDiscordMessage"
+        env:
+          VERSION: ${{github.event.release.tag_name}}
+          RELEASE_NOTES: ${{ github.event.release.body }}
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}

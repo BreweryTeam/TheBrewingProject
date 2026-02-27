@@ -322,7 +322,10 @@ modrinth {
     })
     projectId.set("4zxCmDBL") // This can be the project ID or the slug. Either will work!
     versionNumber.set(project.version.toString())
-    versionType.set("release") // This is the default -- can also be `beta` or `alpha`
+    // versionType.set("release") // This is the default -- can also be `beta` or `alpha`
+    rootProject.findProperty("release.type")?.toString()?.let {
+        versionType.set(it)
+    }
     uploadFile.set(tasks.shadowJar)
     loaders.addAll("paper", "purpur")
     gameVersions.addAll(supportedPaperVersions)
@@ -334,7 +337,7 @@ hangarPublish {
     publications.register("plugin") {
         version = project.version as String // use project version as publication version
         id = "thebrewingproject"
-        channel = "Release"
+        channel = rootProject.findProperty("release.type")?.toString() ?: "Release"
         changelog = System.getenv("RELEASE_NOTES") // optional
 
         // your api key.
