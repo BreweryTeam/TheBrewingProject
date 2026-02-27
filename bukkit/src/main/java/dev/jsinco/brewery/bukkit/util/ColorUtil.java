@@ -38,21 +38,23 @@ public class ColorUtil {
         int r = Math.abs(target.getRed() - background.getRed());
         int g = Math.abs(target.getGreen() - background.getGreen());
         int b = Math.abs(target.getBlue() - background.getBlue());
+        int brightness = (target.getRed() + target.getGreen() + target.getBlue()) / 3;
+
         int a = Math.min(maxOpacity, Math.max(r, Math.max(g, b)));
         return Color.fromARGB(
                 a,
-                calculateColor(target.getRed(), background.getRed(), a),
-                calculateColor(target.getGreen(), background.getGreen(), a),
-                calculateColor(target.getBlue(), background.getBlue(), a)
+                calculateColor(target.getRed(), background.getRed(), a, brightness),
+                calculateColor(target.getGreen(), background.getGreen(), a, brightness),
+                calculateColor(target.getBlue(), background.getBlue(), a, brightness)
         );
     }
 
-    private static int calculateColor(int colorBand, int backgroundBand, int alpha) {
+    private static int calculateColor(int colorBand, int backgroundBand, int alpha, int brightness) {
         if (alpha == 0) {
             return 255;
         }
-        int modifiedBand = colorBand * alpha - backgroundBand * (255 - alpha);
-        return Math.max(0, Math.min(255, modifiedBand / alpha));
+        int modifiedBand = 2 * colorBand * alpha - backgroundBand * (255 - alpha);
+        return Math.max(0, Math.min(255, modifiedBand / 255));
     }
 
     public static Color parseColorString(String hexOrValue) {
