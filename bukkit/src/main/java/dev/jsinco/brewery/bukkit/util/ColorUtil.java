@@ -38,18 +38,17 @@ public class ColorUtil {
         int r = Math.abs(target.getRed() - background.getRed());
         int g = Math.abs(target.getGreen() - background.getGreen());
         int b = Math.abs(target.getBlue() - background.getBlue());
-        int brightness = (target.getRed() + target.getGreen() + target.getBlue()) / 3;
 
         int a = Math.min(maxOpacity, Math.max(r, Math.max(g, b)));
         return Color.fromARGB(
                 a,
-                calculateColor(target.getRed(), background.getRed(), a, brightness),
-                calculateColor(target.getGreen(), background.getGreen(), a, brightness),
-                calculateColor(target.getBlue(), background.getBlue(), a, brightness)
+                calculateColor(target.getRed(), background.getRed(), a),
+                calculateColor(target.getGreen(), background.getGreen(), a),
+                calculateColor(target.getBlue(), background.getBlue(), a)
         );
     }
 
-    private static int calculateColor(int colorBand, int backgroundBand, int alpha, int brightness) {
+    private static int calculateColor(int colorBand, int backgroundBand, int alpha) {
         if (alpha == 0) {
             return 255;
         }
