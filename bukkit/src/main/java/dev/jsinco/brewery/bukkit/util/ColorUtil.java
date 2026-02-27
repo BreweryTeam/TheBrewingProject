@@ -52,7 +52,7 @@ public class ColorUtil {
         if (alpha == 0) {
             return 255;
         }
-        int modifiedBand = 2 * colorBand * alpha - backgroundBand * (255 - alpha);
+        int modifiedBand = colorBand * (2 * 255 - alpha) - backgroundBand * (255 - alpha);
         return Math.max(0, Math.min(255, modifiedBand / 255));
     }
 
