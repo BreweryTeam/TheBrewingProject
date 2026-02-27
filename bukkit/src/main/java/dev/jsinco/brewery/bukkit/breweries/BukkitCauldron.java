@@ -95,7 +95,7 @@ public class BukkitCauldron implements Cauldron {
             return;
         }
         if (!Tag.CAULDRONS.isTagged(getBlock().getType()) || getBlock().getType() == Material.CAULDRON) {
-            destroy();
+            ListenerUtil.removeActiveSinglePositionStructure(this);
             return;
         }
         this.hot = isHeatSource(getBlock().getRelative(BlockFace.DOWN));
@@ -435,7 +435,6 @@ public class BukkitCauldron implements Cauldron {
         if (waterColorer != null) {
             waterColorer.remove();
         }
-        ListenerUtil.removeActiveSinglePositionStructure(this, TheBrewingProject.getInstance().getBreweryRegistry(), TheBrewingProject.getInstance().getDatabase());
     }
 
     private Color convert(java.awt.Color awtColor) {

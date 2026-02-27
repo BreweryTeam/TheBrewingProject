@@ -259,7 +259,7 @@ public class PlayerEventListener implements Listener {
         updateHeldItem(decreaseItem(event.getItem(), player), player, event.getHand());
         player.getWorld().dropItem(player.getLocation(), brewItemStack);
         if (cauldron.decrementLevel()) {
-            cauldron.destroy();
+            ListenerUtil.removeActiveSinglePositionStructure(cauldron);
         }
     }
 

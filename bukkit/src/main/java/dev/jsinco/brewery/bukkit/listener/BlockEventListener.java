@@ -284,7 +284,7 @@ public class BlockEventListener implements Listener {
             });
         }
 
-        singlePositionStructures.forEach(SinglePositionStructure::destroy);
+        singlePositionStructures.forEach(ListenerUtil::removeActiveSinglePositionStructure);
         multiblockStructures.forEach(placedStructureRegistry::unregisterStructure);
         Location location = locations.getFirst();
         for (Map.Entry<StructureHolder<?>, List<Brew>> entry : holdersToDrops.entrySet()) {
