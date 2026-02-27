@@ -69,6 +69,7 @@ public final class BreweryRegistry {
     }
 
     public void clear() {
+        activeSingleBlockStructures.forEach((ignored, structure) -> structure.destroy());
         activeSingleBlockStructures.clear();
         opened.clear();
         inventories.clear();

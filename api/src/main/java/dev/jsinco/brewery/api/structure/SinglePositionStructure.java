@@ -11,7 +11,7 @@ public interface SinglePositionStructure {
 
 
     /**
-     * Destroy this structure and all components linked to it
+     * Destroy this structure and all components linked to it. Not persistent
      */
     void destroy();
 }
