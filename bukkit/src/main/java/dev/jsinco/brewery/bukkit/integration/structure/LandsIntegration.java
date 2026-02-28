@@ -61,13 +61,6 @@ public class LandsIntegration implements StructureIntegration {
             return;
         }
         landsIntegration = me.angeschossen.lands.api.LandsIntegration.of(TheBrewingProject.getInstance());
-    }
-
-    @Override
-    public void onEnable() {
-        if (!ENABLED) {
-            return;
-        }
         barrelAccessFlag = registerFlag("barrel_access", Material.BARREL, "barrel-access");
         distilleryAccessFlag = registerFlag("distillery_access", Material.BREWING_STAND, "distillery-access");
         cauldronAccessFlag = registerFlag("cauldron_access", Material.CAULDRON, "cauldron-access");
