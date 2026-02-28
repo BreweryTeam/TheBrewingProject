@@ -129,6 +129,7 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
     public void initialize() {
         EventSection.migrateEvents(getDataFolder());
         Config.load(this.getDataFolder(), serializers());
+        this.translator = new BreweryTranslator(new File(this.getDataFolder(), "locale"));
         DrunkenModifierSection.load(this.getDataFolder(), serializers());
         integrationManager.loadIntegrations();
         EventSection.load(getDataFolder(), serializers());
@@ -136,7 +137,6 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
         EventSection.validate();
         IngredientsSection.load(this.getDataFolder(), serializers());
         IngredientsSection.validate(BukkitIngredientManager.INSTANCE, BukkitIngredientUtil::tagValuesFromString);
-        this.translator = new BreweryTranslator(new File(this.getDataFolder(), "locale"));
         translator.reload();
         GlobalTranslator.translator().addSource(translator);
         this.structureRegistry = new StructureRegistry();
