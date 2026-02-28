@@ -1,10 +1,10 @@
 package dev.jsinco.brewery.bukkit.integration.structure;
 
+import dev.jsinco.brewery.api.util.BreweryKey;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.bukkit.api.integration.StructureIntegration;
 import dev.jsinco.brewery.bukkit.util.ComponentUtil;
 import dev.jsinco.brewery.configuration.Config;
-import dev.jsinco.brewery.api.util.BreweryKey;
 import dev.jsinco.brewery.util.ClassUtil;
 import me.angeschossen.lands.api.flags.enums.FlagTarget;
 import me.angeschossen.lands.api.flags.enums.RoleFlagCategory;
@@ -61,6 +61,13 @@ public class LandsIntegration implements StructureIntegration {
             return;
         }
         landsIntegration = me.angeschossen.lands.api.LandsIntegration.of(TheBrewingProject.getInstance());
+    }
+
+    @Override
+    public void onEnable() {
+        if (!ENABLED) {
+            return;
+        }
         barrelAccessFlag = registerFlag("barrel_access", Material.BARREL, "barrel-access");
         distilleryAccessFlag = registerFlag("distillery_access", Material.BREWING_STAND, "distillery-access");
         cauldronAccessFlag = registerFlag("cauldron_access", Material.CAULDRON, "cauldron-access");
