@@ -130,6 +130,7 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
         EventSection.migrateEvents(getDataFolder());
         Config.load(this.getDataFolder(), serializers());
         DrunkenModifierSection.load(this.getDataFolder(), serializers());
+        integrationManager.loadIntegrations();
         EventSection.load(getDataFolder(), serializers());
         DrunkenModifierSection.validate();
         EventSection.validate();
@@ -155,7 +156,6 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
         saveResources();
         Migrations.migrateAllConfigFiles(this.getDataFolder());
         integrationManager.registerIntegrations();
-        integrationManager.loadIntegrations();
         initialize();
         Bukkit.getServicesManager().register(TheBrewingProjectApi.class, this, this, ServicePriority.Normal);
         this.successfullLoad = true;
