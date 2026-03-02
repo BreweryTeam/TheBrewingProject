@@ -58,12 +58,10 @@ public class BrewImpl implements Brew {
 
     @Override
     public BrewImpl withModifiedStep(int index, Function<BrewingStep, BrewingStep> modifier) {
-        BrewingStep newStep = modifier.apply(steps.get(index));
+        List<BrewingStep> brewingStepsList = new ArrayList<>(steps);
+        brewingStepsList.set(index, modifier.apply(steps.get(index)));
         return new BrewImpl(
-                Stream.concat(
-                        steps.subList(0, steps.size() - 1).stream(),
-                        Stream.of(newStep)
-                ).toList(),
+                Collections.unmodifiableList(brewingStepsList),
                 meta
         );
     }

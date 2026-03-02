@@ -99,7 +99,7 @@ public class InfoCommand {
             }
             Component brewers = brew.getBrewers().stream()
                     .map(BukkitMessageUtil::uuidToPlayerName)
-                    .collect(Component.toComponent());
+                    .collect(Component.toComponent(Component.text(", ")));
             MessageUtil.message(sender, "tbp.brew.tooltip.brewer", Placeholder.component("brewers", brewers));
         });
         if (brewOptional.isEmpty() && recipeEffectsOptional.isEmpty()) {
