@@ -191,7 +191,7 @@ public class BrewerCommand {
                 .toList();
         Optional<Brew> brewOptional = BrewAdapter.fromItem(itemStack);
         if (stepIndex.isPresent() && brewOptional.isPresent() && brewOptional.get().stepAmount() <= stepIndex.get()) {
-            throw INDEX_OUT_OF_BOUNDS.create(brewOptional.get().stepAmount() - 1);
+            throw INDEX_OUT_OF_BOUNDS.create(brewOptional.get().stepAmount());
         }
         if(brewOptional.map(Brew::stepAmount).filter(stepAmount -> stepAmount <= 0).isPresent()){
             MessageUtil.message(sender, "tbp.command.brewer.empty");
