@@ -14,7 +14,11 @@ public class PlacedStructureRegistryImpl implements PlacedStructureRegistry {
     private final Map<UUID, Map<BreweryVector, MultiblockStructure<? extends StructureHolder<?>>>> structures = new HashMap<>();
     private final Map<StructureType, Set<MultiblockStructure<?>>> typedMultiBlockStructureMap = new HashMap<>();
 
-    public void registerStructure(MultiblockStructure<?> multiblockStructure) {
+    public synchronized void registerStructures(Collection<? extends MultiblockStructure<?>> multiblockStructures) {
+        multiblockStructures.forEach(this::registerStructure);
+    }
+
+    public synchronized void registerStructure(MultiblockStructure<?> multiblockStructure) {
         for (BreweryLocation location : multiblockStructure.positions()) {
             UUID worldUuid = location.worldUuid();
             structures.computeIfAbsent(worldUuid, ignored -> new HashMap<>()).put(location.toVector(), multiblockStructure);
@@ -22,7 +26,7 @@ public class PlacedStructureRegistryImpl implements PlacedStructureRegistry {
         typedMultiBlockStructureMap.computeIfAbsent(multiblockStructure.getHolder().getStructureType(), ignored -> new HashSet<>()).add(multiblockStructure);
     }
 
-    public void unregisterStructure(MultiblockStructure<?> structure) {
+    public synchronized void unregisterStructure(MultiblockStructure<?> structure) {
         for (BreweryLocation location : structure.positions()) {
             UUID worldUuid = location.worldUuid();
             structures.computeIfAbsent(worldUuid, ignored -> new HashMap<>()).remove(location.toVector());
