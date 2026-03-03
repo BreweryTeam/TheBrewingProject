@@ -30,8 +30,7 @@ public class DrunkenWalkNamedExecutable implements EventPropertyExecutable {
 
         int duration = RANDOM.nextInt(DRUNKEN_WALK_DURATION / 2, DRUNKEN_WALK_DURATION * 3 / 2);
         DrunkenWalkHandler drunkenWalkHandler = new DrunkenWalkHandler(duration, player);
-        player.getScheduler().runAtFixedRate(TheBrewingProject.getInstance(), drunkenWalkHandler::tick, () -> {
-        }, 1, 1);
+        player.getScheduler().runAtFixedRate(TheBrewingProject.getInstance(), drunkenWalkHandler::tick, null, 1, 1);
         TheBrewingProject.getInstance().getActiveEventsRegistry().registerActiveEvent(player.getUniqueId(), NamedDrunkEvent.fromKey("drunken_walk"), duration);
         return ExecutionResult.CONTINUE;
     }

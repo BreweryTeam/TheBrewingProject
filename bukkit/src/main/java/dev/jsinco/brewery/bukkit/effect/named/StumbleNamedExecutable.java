@@ -28,8 +28,7 @@ public class StumbleNamedExecutable implements EventPropertyExecutable {
         int duration = RANDOM.nextInt(STUMBLE_DURATION / 2, STUMBLE_DURATION * 3 / 2 + 1);
         StumbleHandler stumbleHandler = new StumbleHandler(duration, player);
         TheBrewingProject.getInstance().getActiveEventsRegistry().registerActiveEvent(player.getUniqueId(), NamedDrunkEvent.fromKey("stumble"), duration);
-        player.getScheduler().runAtFixedRate(TheBrewingProject.getInstance(), stumbleHandler::tick, () -> {
-        }, 1, 1);
+        player.getScheduler().runAtFixedRate(TheBrewingProject.getInstance(), stumbleHandler::tick, null, 1, 1);
         return ExecutionResult.CONTINUE;
     }
 
