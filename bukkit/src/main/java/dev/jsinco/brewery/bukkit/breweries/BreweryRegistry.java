@@ -10,10 +10,11 @@ import org.jspecify.annotations.Nullable;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
 
 public final class BreweryRegistry {
 
@@ -35,10 +36,6 @@ public final class BreweryRegistry {
 
     public Collection<SinglePositionStructure> getActiveSinglePositionStructure() {
         return activeSingleBlockStructures.values();
-    }
-
-    public <H extends InventoryAccessible<ItemStack, Inventory>> Collection<H> getOpened(StructureType structureType) {
-        return (Collection<H>) opened.computeIfAbsent(structureType, ignored -> new HashSet<>());
     }
 
     public synchronized <H extends InventoryAccessible<ItemStack, Inventory>> void registerOpened(H holder) {
@@ -77,5 +74,13 @@ public final class BreweryRegistry {
         activeSingleBlockStructures.clear();
         opened.clear();
         inventories.clear();
+    }
+
+    public synchronized void iterate(StructureType type, Consumer<InventoryAccessible<ItemStack, Inventory>> inventoryAccessibleAction) {
+        Set<InventoryAccessible<ItemStack, Inventory>> inventoryAccessible = opened.get(type);
+        if (inventoryAccessible == null) {
+            return;
+        }
+        inventoryAccessible.forEach(inventoryAccessibleAction);
     }
 }
