@@ -277,23 +277,24 @@ public class BukkitDistillery implements Distillery<BukkitDistillery, ItemStack,
                 || distillate.isFull()) {
             return;
         }
-        checkDirty();
-        if (timeProcessed % processTime == 0 && timeProcessed != 0) {
-            BukkitAdapter.toWorld(unique)
-                    .ifPresent(world -> SoundPlayer.playSoundEffect(
-                            Config.config().sounds().distilleryProcess(),
-                            Sound.Source.BLOCK,
-                            world, unique.x() + 0.5, unique.y() + 0.5, unique.z() + 0.5
-                    ));
-        }
-        long particleEffectInterval = Math.max(processTime / 4L, 10L);
-        if (timeProcessed % particleEffectInterval < 5 && mixture.brewAmount() > processedBrews) {
-            distillateContainerLocations.stream()
-                    .map(BukkitAdapter::toLocation)
-                    .flatMap(Optional::stream)
-                    .map(location -> location.add(0.5, 1.3, 0.5))
-                    .forEach(location -> location.getWorld().spawnParticle(Particle.ENTITY_EFFECT, location, 2, Color.WHITE));
-        }
+        BukkitAdapter.scheduleIfLoaded(unique, location -> {
+            checkDirty();
+            if (timeProcessed % processTime == 0 && timeProcessed != 0) {
+                SoundPlayer.playSoundEffect(
+                        Config.config().sounds().distilleryProcess(),
+                        Sound.Source.BLOCK,
+                        location.getWorld(), unique.x() + 0.5, unique.y() + 0.5, unique.z() + 0.5
+                );
+            }
+            long particleEffectInterval = Math.max(processTime / 4L, 10L);
+            if (timeProcessed % particleEffectInterval < 5 && mixture.brewAmount() > processedBrews) {
+                distillateContainerLocations.stream()
+                        .map(BukkitAdapter::toLocation)
+                        .flatMap(Optional::stream)
+                        .map(containerLocation -> containerLocation.add(0.5, 1.3, 0.5))
+                        .forEach(containerLocation -> containerLocation.getWorld().spawnParticle(Particle.ENTITY_EFFECT, containerLocation, 2, Color.WHITE));
+            }
+        });
     }
 
     public void tickInventory() {
