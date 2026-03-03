@@ -12,7 +12,6 @@ import dev.jsinco.brewery.bukkit.breweries.distillery.BukkitDistilleryDataType;
 import dev.jsinco.brewery.database.PersistenceException;
 import dev.jsinco.brewery.database.sql.Database;
 import dev.jsinco.brewery.structure.PlacedStructureRegistryImpl;
-import dev.jsinco.brewery.util.FutureUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.event.EventHandler;
@@ -30,7 +29,6 @@ public class WorldEventListener implements Listener {
     private final Database database;
     private final PlacedStructureRegistryImpl placedStructureRegistry;
     private final BreweryRegistry registry;
-    private final Executor globalThread = runnable -> Bukkit.getGlobalRegionScheduler().run(TheBrewingProject.getInstance(), ignored -> runnable.run());
 
     public WorldEventListener(Database database, PlacedStructureRegistryImpl placedStructureRegistry, BreweryRegistry registry) {
         this.database = database;
@@ -57,17 +55,15 @@ public class WorldEventListener implements Listener {
             CompletableFuture<List<BukkitCauldron>> cauldronsFuture = database.find(BukkitCauldronDataType.INSTANCE, world.getUID());
             CompletableFuture<List<BukkitDistillery>> distilleriesFuture = database.find(BukkitDistilleryDataType.INSTANCE, world.getUID());
             CompletableFuture.allOf(barrelsFuture, distilleriesFuture, cauldronsFuture)
-                    .thenAcceptAsync(ignored -> {
-                        for (BukkitBarrel barrel : barrelsFuture.join()) {
-                            placedStructureRegistry.registerStructure(barrel.getStructure());
-                            registry.registerInventory(barrel);
-                        }
+                    .thenAccept(ignored -> {
+                        List<BukkitBarrel> barrels = barrelsFuture.join();
+                        placedStructureRegistry.registerStructures(barrels.stream().map(BukkitBarrel::getStructure).toList());
+                        barrels.forEach(registry::registerInventory);
+                        List<BukkitDistillery> distilleries = distilleriesFuture.join();
+                        placedStructureRegistry.registerStructures(distilleries.stream().map(BukkitDistillery::getStructure).toList());
+                        distilleries.forEach(registry::registerInventory);
                         cauldronsFuture.join().forEach(registry::addActiveSinglePositionStructure);
-                        for(BukkitDistillery distillery : distilleriesFuture.join()) {
-                            placedStructureRegistry.registerStructure(distillery.getStructure());
-                            registry.registerInventory(distillery);
-                        }
-                    }, globalThread);
+                    });
 
         } catch (PersistenceException e) {
             Logger.logAndTrackErr(e);
