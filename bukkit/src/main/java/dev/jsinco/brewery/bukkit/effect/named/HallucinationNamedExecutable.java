@@ -2,6 +2,7 @@ package dev.jsinco.brewery.bukkit.effect.named;
 
 import dev.jsinco.brewery.api.event.EventPropertyExecutable;
 import dev.jsinco.brewery.api.event.EventStep;
+import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.bukkit.util.BlockUtil;
 import dev.jsinco.brewery.bukkit.util.LocationUtil;
 import org.bukkit.*;
@@ -63,17 +64,19 @@ public class HallucinationNamedExecutable implements EventPropertyExecutable {
             return ExecutionResult.CONTINUE;
         }
 
-        Block lookingAt = player.getTargetBlock(null, BLOCK_RANGE);
-        Hallucination hallucination = attemptHallucination(lookingAt);
-        if (hallucination == null) {
-            return ExecutionResult.CONTINUE;
-        }
-        Block target = hallucination.target();
-        BlockType replacement = hallucination.replacement();
+        player.getScheduler().run(TheBrewingProject.getInstance(), task -> {
+            Block lookingAt = player.getTargetBlock(null, BLOCK_RANGE);
+            Hallucination hallucination = attemptHallucination(lookingAt);
+            if (hallucination == null) {
+                return; // continue
+            }
+            Block target = hallucination.target();
+            BlockType replacement = hallucination.replacement();
 
-        BlockData blockData = replacement.createBlockData();
-        player.sendBlockChange(target.getLocation(), blockData);
-        player.spawnParticle(Particle.DUST, target.getLocation().toCenterLocation(), 10, 0.5, 0.5, 0.5, new Particle.DustOptions(blockData.getMapColor(), 1f));
+            BlockData blockData = replacement.createBlockData();
+            player.sendBlockChange(target.getLocation(), blockData);
+            player.spawnParticle(Particle.DUST, target.getLocation().toCenterLocation(), 10, 0.5, 0.5, 0.5, new Particle.DustOptions(blockData.getMapColor(), 1f));
+        }, null);
         return ExecutionResult.CONTINUE;
     }
 
@@ -116,7 +119,7 @@ public class HallucinationNamedExecutable implements EventPropertyExecutable {
 
     private static @Nullable BlockType getReplacementBlock(Block target) {
         BlockType targetType = Objects.requireNonNull(target.getType().asBlockType());
-        List<BlockType> candidates = getReplacementBlocks(target.getWorld()).stream()
+        List<BlockType> candidates = getReplacementBlocks(target.getLocation()).stream()
                 .filter(replacement -> isSensibleReplacement(replacement, targetType))
                 .toList();
         if (candidates.isEmpty()) {
@@ -142,24 +145,24 @@ public class HallucinationNamedExecutable implements EventPropertyExecutable {
                 BlockUtil.getFasterTools(target).containsAll(BlockUtil.getFasterTools(replacement));
     }
 
-    private static List<BlockType> getReplacementBlocks(World world) {
+    private static List<BlockType> getReplacementBlocks(Location location) {
         if (REPLACEMENT_BLOCKS == null) {
-            REPLACEMENT_BLOCKS = computeReplacementBlocks(world);
+            REPLACEMENT_BLOCKS = computeReplacementBlocks(location);
         }
         return REPLACEMENT_BLOCKS;
     }
 
-    private static List<BlockType> computeReplacementBlocks(World world) {
+    private static List<BlockType> computeReplacementBlocks(Location location) {
         return Arrays.stream(Material.values())
                 .filter(material -> !PROBLEMATIC_REPLACEMENT_BLOCKS.contains(material))
                 // Replacing with full, solid, opaque blocks ensures no physics desyncs,
                 // and no transparent blocks replacing non-transparent blocks for accidental x-ray
-                .filter(material -> isFullSolidOpaqueBlock(material, world))
+                .filter(material -> isFullSolidOpaqueBlock(material, location))
                 .map(Material::asBlockType)
                 .toList();
     }
 
-    private static boolean isFullSolidOpaqueBlock(Material material, World world) {
+    private static boolean isFullSolidOpaqueBlock(Material material, Location sampleLocation) {
         if (material.isAir() || material.isLegacy()) {
             return false;
         }
@@ -170,7 +173,6 @@ public class HallucinationNamedExecutable implements EventPropertyExecutable {
         if (!blockType.isSolid() || !blockType.isOccluding()) {
             return false;
         }
-        Location sampleLocation = new Location(world, 0, 0, 0);
         return BlockUtil.isFullBlock(material.createBlockData().getCollisionShape(sampleLocation));
     }
 

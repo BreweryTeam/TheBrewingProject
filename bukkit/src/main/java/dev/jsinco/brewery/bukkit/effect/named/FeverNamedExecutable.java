@@ -6,11 +6,11 @@ import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.configuration.EventSection;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
-import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class FeverNamedExecutable implements EventPropertyExecutable {
 
@@ -20,23 +20,20 @@ public class FeverNamedExecutable implements EventPropertyExecutable {
         if (player == null) {
             return ExecutionResult.CONTINUE;
         }
-
-        new BukkitRunnable() {
-            int ticksRan = 0;
-
-            @Override
-            public void run() {
-                if (ticksRan++ >= EventSection.events().feverFreezingTime().durationTicks()) {
-                    cancel();
-                    return;
-                }
-                if (!player.isOnline()) {
-                    return;
-                }
-                player.setFreezeTicks(player.getMaxFreezeTicks());
+        AtomicInteger ticksRan = new AtomicInteger(0);
+        player.getScheduler().runAtFixedRate(TheBrewingProject.getInstance(), task -> {
+            if (ticksRan.get() == 0) {
+                player.setFireTicks((int) EventSection.events().feverBurnTime().durationTicks());
             }
-        }.runTaskTimer(TheBrewingProject.getInstance(), 0, 1);
-        player.setFireTicks((int) EventSection.events().feverBurnTime().durationTicks());
+            if (ticksRan.incrementAndGet() >= EventSection.events().feverFreezingTime().durationTicks()) {
+                task.cancel();
+                return;
+            }
+            if (!player.isOnline()) {
+                return;
+            }
+            player.setFreezeTicks(player.getMaxFreezeTicks());
+        }, null, 1, 1);
         return ExecutionResult.CONTINUE;
     }
 
