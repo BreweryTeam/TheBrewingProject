@@ -9,7 +9,7 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
 
 public final class BreweryRegistry {
 
@@ -32,11 +32,7 @@ public final class BreweryRegistry {
     public Collection<SinglePositionStructure> getActiveSinglePositionStructure() {
         return activeSingleBlockStructures.values();
     }
-
-    public <H extends InventoryAccessible<ItemStack, Inventory>> Collection<H> getOpened(StructureType structureType) {
-        return (Collection<H>) opened.computeIfAbsent(structureType, ignored -> new HashSet<>());
-    }
-
+    
     public synchronized <H extends InventoryAccessible<ItemStack, Inventory>> void registerOpened(H holder) {
         StructureType structureType = getStructureType(holder);
         opened.computeIfAbsent(structureType, ignored -> new HashSet<>()).add(holder);
@@ -73,5 +69,13 @@ public final class BreweryRegistry {
         activeSingleBlockStructures.clear();
         opened.clear();
         inventories.clear();
+    }
+
+    public synchronized void iterate(StructureType type, Consumer<InventoryAccessible<ItemStack, Inventory>> inventoryAccessibleAction) {
+        Set<InventoryAccessible<ItemStack, Inventory>> inventoryAccessible = opened.get(type);
+        if (inventoryAccessible == null) {
+            return;
+        }
+        inventoryAccessible.forEach(inventoryAccessibleAction);
     }
 }

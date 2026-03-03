@@ -2,9 +2,8 @@ package dev.jsinco.brewery.bukkit;
 
 import com.google.common.base.Preconditions;
 import dev.jsinco.brewery.api.brew.BrewManager;
-import dev.jsinco.brewery.api.breweries.Barrel;
 import dev.jsinco.brewery.api.breweries.BarrelType;
-import dev.jsinco.brewery.api.breweries.Distillery;
+import dev.jsinco.brewery.api.breweries.InventoryAccessible;
 import dev.jsinco.brewery.api.breweries.Tickable;
 import dev.jsinco.brewery.api.config.Configuration;
 import dev.jsinco.brewery.api.effect.modifier.ModifierManager;
@@ -20,8 +19,6 @@ import dev.jsinco.brewery.bukkit.api.TheBrewingProjectApi;
 import dev.jsinco.brewery.bukkit.api.event.TBPReloadEvent;
 import dev.jsinco.brewery.bukkit.brew.BukkitBrewManager;
 import dev.jsinco.brewery.bukkit.breweries.BreweryRegistry;
-import dev.jsinco.brewery.bukkit.breweries.barrel.BukkitBarrel;
-import dev.jsinco.brewery.bukkit.breweries.distillery.BukkitDistillery;
 import dev.jsinco.brewery.bukkit.command.BreweryCommand;
 import dev.jsinco.brewery.bukkit.configuration.serializer.*;
 import dev.jsinco.brewery.bukkit.effect.SqlDrunkStateDataType;
@@ -78,7 +75,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -357,8 +353,8 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
 
     private void closeDatabase() {
         try {
-            breweryRegistry.<BukkitBarrel>getOpened(StructureType.BARREL).forEach(barrel -> barrel.close(true));
-            breweryRegistry.<BukkitDistillery>getOpened(StructureType.DISTILLERY).forEach(distillery -> distillery.close(true));
+            breweryRegistry.iterate(StructureType.BARREL, inventoryAccessible -> inventoryAccessible.close(true));
+            breweryRegistry.iterate(StructureType.DISTILLERY, inventoryAccessible -> inventoryAccessible.close(true));
         } catch (Throwable e) {
             Logger.logErr(e);
         }
@@ -392,10 +388,10 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
                 .forEach(Tickable::tick);
         placedStructureRegistry.getStructures(StructureType.DISTILLERY).stream()
                 .map(MultiblockStructure::getHolder)
-                .map(Distillery.class::cast)
-                .forEach(Distillery::tick);
-        List.copyOf(breweryRegistry.<BukkitBarrel>getOpened(StructureType.BARREL)).forEach(Barrel::tickInventory);
-        List.copyOf(breweryRegistry.<BukkitDistillery>getOpened(StructureType.DISTILLERY)).forEach(Distillery::tickInventory);
+                .map(Tickable.class::cast)
+                .forEach(Tickable::tick);
+        breweryRegistry.iterate(StructureType.BARREL, InventoryAccessible::tickInventory);
+        breweryRegistry.iterate(StructureType.DISTILLERY, InventoryAccessible::tickInventory);
     }
 
     private void otherTicking(ScheduledTask ignored) {
