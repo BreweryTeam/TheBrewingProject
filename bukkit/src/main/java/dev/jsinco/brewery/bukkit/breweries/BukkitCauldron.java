@@ -91,38 +91,36 @@ public class BukkitCauldron implements Cauldron {
 
     @Override
     public void tick() {
-        if (!BlockUtil.isChunkLoaded(location)) {
-            return;
-        }
-        if (!Tag.CAULDRONS.isTagged(getBlock().getType()) || getBlock().getType() == Material.CAULDRON) {
-            ListenerUtil.removeActiveSinglePositionStructure(this);
-            return;
-        }
-        this.hot = isHeatSource(getBlock().getRelative(BlockFace.DOWN));
-        recalculateBrewTime();
-        Location bukkitLocation = BukkitAdapter.toLocation(location).orElse(null);
-        if (Config.config().cauldrons().coloredWater() && bukkitLocation != null && (waterColorer == null || waterColorer.isDead())) {
-            waterColorer = getBlock().getWorld().spawn(bukkitLocation.clone().add(0.5, 0, 0.5), TextDisplay.class, textDisplay -> {
-                setWaterText(textDisplay);
-                textDisplay.setTransformation(compileTransformation());
-                textDisplay.setPersistent(false);
-                textDisplay.setBackgroundColor(Color.fromARGB(0, 255, 255, 255));
-            });
-        }
-        if (dirty || getBrewTime() % Config.config().cauldrons().cookingMinuteTicks() == 0) {
-            this.recipe = brew.closestRecipe(TheBrewingProject.getInstance().getRecipeRegistry())
-                    .orElse(null);
-            dirty = false;
-        }
-        Optional<Recipe<ItemStack>> recipeOptional = Optional.ofNullable(recipe);
-        Color resultColor = computeResultColor(recipeOptional);
-        Color baseParticleColor = computeBaseParticleColor(getBlock());
-        this.particleColor = recipeOptional.map(recipe -> computeParticleColor(baseParticleColor, resultColor, recipe))
-                .orElseGet(() -> ColorUtil.getNextColor(baseParticleColor, convert(Config.config().cauldrons().failedParticleColor()), getBrewTime(), Moment.MINUTE * 3));
-        if (waterColorer != null) {
-            setWaterText(waterColorer);
-        }
-        this.playBrewingEffects();
+        BukkitAdapter.scheduleIfLoaded(location, bukkitLocation -> {
+            if (!Tag.CAULDRONS.isTagged(bukkitLocation.getBlock().getType()) || getBlock().getType() == Material.CAULDRON) {
+                ListenerUtil.removeActiveSinglePositionStructure(this);
+                return;
+            }
+            this.hot = isHeatSource(getBlock().getRelative(BlockFace.DOWN));
+            recalculateBrewTime();
+            if (Config.config().cauldrons().coloredWater() && (waterColorer == null || waterColorer.isDead())) {
+                waterColorer = getBlock().getWorld().spawn(bukkitLocation.clone().add(0.5, 0, 0.5), TextDisplay.class, textDisplay -> {
+                    setWaterText(textDisplay);
+                    textDisplay.setTransformation(compileTransformation());
+                    textDisplay.setPersistent(false);
+                    textDisplay.setBackgroundColor(Color.fromARGB(0, 255, 255, 255));
+                });
+            }
+            if (dirty || getBrewTime() % Config.config().cauldrons().cookingMinuteTicks() == 0) {
+                this.recipe = brew.closestRecipe(TheBrewingProject.getInstance().getRecipeRegistry())
+                        .orElse(null);
+                dirty = false;
+            }
+            Optional<Recipe<ItemStack>> recipeOptional = Optional.ofNullable(recipe);
+            Color resultColor = computeResultColor(recipeOptional);
+            Color baseParticleColor = computeBaseParticleColor(getBlock());
+            this.particleColor = recipeOptional.map(recipe -> computeParticleColor(baseParticleColor, resultColor, recipe))
+                    .orElseGet(() -> ColorUtil.getNextColor(baseParticleColor, convert(Config.config().cauldrons().failedParticleColor()), getBrewTime(), Moment.MINUTE * 3));
+            if (waterColorer != null) {
+                setWaterText(waterColorer);
+            }
+            this.playBrewingEffects();
+        });
     }
 
     private void setWaterText(TextDisplay textDisplay) {
