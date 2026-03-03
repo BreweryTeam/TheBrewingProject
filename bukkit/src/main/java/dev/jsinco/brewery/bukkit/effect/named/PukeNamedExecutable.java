@@ -31,8 +31,7 @@ public class PukeNamedExecutable implements EventPropertyExecutable {
         int pukeTimeTicks = (int) EventSection.events().puke().pukeTime().durationTicks();
         PukeHandler pukeHandler = new PukeHandler(pukeTimeTicks, player);
         TheBrewingProject.getInstance().getActiveEventsRegistry().registerActiveEvent(player.getUniqueId(), NamedDrunkEvent.fromKey("puke"), pukeTimeTicks);
-        player.getScheduler().runAtFixedRate(TheBrewingProject.getInstance(), pukeHandler::tick, () -> {
-        }, 1, 1);
+        player.getScheduler().runAtFixedRate(TheBrewingProject.getInstance(), pukeHandler::tick, null, 1, 1);
         return ExecutionResult.CONTINUE;
     }
 
