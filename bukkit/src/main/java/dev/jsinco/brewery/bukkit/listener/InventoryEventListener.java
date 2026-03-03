@@ -20,7 +20,6 @@ import dev.jsinco.brewery.bukkit.effect.named.PukeNamedExecutable;
 import dev.jsinco.brewery.configuration.Config;
 import dev.jsinco.brewery.database.sql.Database;
 import net.kyori.adventure.text.Component;
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
@@ -97,8 +96,9 @@ public class InventoryEventListener implements Listener {
                 return;
             }
         }
-        Bukkit.getScheduler().runTask(TheBrewingProject.getInstance(), () ->
-                displayEventResult(event.getView(), transactions)
+        event.getWhoClicked().getScheduler().run(TheBrewingProject.getInstance(), ignored ->
+                        displayEventResult(event.getView(), transactions),
+                null
         );
     }
 
@@ -371,8 +371,9 @@ public class InventoryEventListener implements Listener {
             return;
         }
 
-        Bukkit.getScheduler().runTask(TheBrewingProject.getInstance(), () ->
-                displayEventResult(inventoryView, transactionEvents)
+        dragEvent.getWhoClicked().getScheduler().run(TheBrewingProject.getInstance(), ignored ->
+                        displayEventResult(inventoryView, transactionEvents),
+                null
         );
     }
 

@@ -294,7 +294,7 @@ public class BukkitCauldron implements Cauldron {
         BukkitAdapter.toLocation(this.location)
                 .map(Location::toCenterLocation)
                 .filter(Location::isChunkLoaded)
-                .ifPresent(bukkitLocation -> Bukkit.getGlobalRegionScheduler().runDelayed(TheBrewingProject.getInstance(), ignored -> {
+                .ifPresent(bukkitLocation -> Bukkit.getRegionScheduler().runDelayed(TheBrewingProject.getInstance(), bukkitLocation, ignored -> {
                     World world = bukkitLocation.getWorld();
 
                     SoundDefinition sound = item.getType() == Material.POTION ? Config.config().sounds().cauldronIngredientAddBrew() : Config.config().sounds().cauldronIngredientAdd();
