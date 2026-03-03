@@ -164,7 +164,7 @@ tasks {
 
 bukkit {
     main = "dev.jsinco.brewery.bukkit.TheBrewingProject"
-    foliaSupported = false
+    foliaSupported = true
     apiVersion = "1.21"
     authors = listOf("Jsinco", "Mitality", "Thorinwasher", "Nadwey")
     name = rootProject.name
