@@ -1,5 +1,6 @@
 package dev.jsinco.brewery.bukkit.effect.step;
 
+import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.bukkit.recipe.RecipeEffectImpl;
 import dev.jsinco.brewery.api.event.EventPropertyExecutable;
 import dev.jsinco.brewery.api.event.EventStep;
@@ -39,7 +40,7 @@ public class ApplyPotionEffectExecutable implements EventPropertyExecutable {
                 durationBounds,
                 amplifierBounds
         ).newPotionEffect();
-        player.addPotionEffect(potionEffect);
+        player.getScheduler().run(TheBrewingProject.getInstance(), ignored -> player.addPotionEffect(potionEffect), null);
         return ExecutionResult.CONTINUE;
     }
 
