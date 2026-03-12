@@ -37,15 +37,19 @@ public class MythicIntegration implements ItemIntegration, Listener {
     @Override
     public @Nullable Component displayName(String id) {
         return createItem(id)
-                .map(ItemStack::displayName)
+                .map(ItemStack::effectiveName)
                 .orElse(null);
     }
 
     private Optional<MythicItem> getMythicItem(String name) {
-        Optional<MythicItem> result = MythicBukkit.inst().getItemManager().getItem(name);
+        MythicBukkit bukkit = MythicBukkit.inst();
+        Optional<MythicItem> result = bukkit.getItemManager().getItem(name);
         if (result.isPresent()) return result;
-        return MythicBukkit.inst().getItemManager().getItems().stream()
-                .filter(item -> item.getInternalName().equalsIgnoreCase(name)).findFirst();
+
+        return bukkit.getItemManager().getItems().stream()
+                .filter(item -> item.getInternalName().equalsIgnoreCase(name))
+                .findFirst();
+
     }
 
     @Override
@@ -60,7 +64,7 @@ public class MythicIntegration implements ItemIntegration, Listener {
 
     @Override
     public boolean isEnabled() {
-        return ClassUtil.exists("io.lumine.mythiccrucible.events.MythicCrucibleLoadedEvent");
+        return ClassUtil.exists("io.lumine.mythic.bukkit.MythicBukkit");
     }
 
     @Override
@@ -70,7 +74,11 @@ public class MythicIntegration implements ItemIntegration, Listener {
 
     @Override
     public void onEnable() {
-        Bukkit.getPluginManager().registerEvents(this, TheBrewingProject.getInstance());
+        if (ClassUtil.exists("io.lumine.mythiccrucible.events.MythicCrucibleLoadedEvent")) {
+            Bukkit.getPluginManager().registerEvents(this, TheBrewingProject.getInstance());
+        } else {
+            initialized.completeAsync(() -> null);
+        }
     }
 
     @EventHandler
