@@ -3,6 +3,7 @@ package dev.jsinco.brewery.bukkit.api;
 import dev.jsinco.brewery.api.util.BreweryKey;
 import dev.jsinco.brewery.api.util.Holder;
 import dev.jsinco.brewery.api.vector.BreweryLocation;
+import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
@@ -10,6 +11,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.function.Consumer;
 
 public class BukkitAdapter {
 
@@ -24,6 +27,19 @@ public class BukkitAdapter {
 
     public static BreweryLocation toBreweryLocation(Block block) {
         return new BreweryLocation(block.getX(), block.getY(), block.getZ(), block.getWorld().getUID());
+    }
+
+    public static CompletableFuture<Void> scheduleIfLoaded(BreweryLocation location, Consumer<Location> locationConsumer) {
+        Optional<Location> locationOptional = toLocation(location);
+        if (!locationOptional.map(Location::isChunkLoaded).orElse(false)) {
+            return CompletableFuture.completedFuture(null);
+        }
+        CompletableFuture<Void> output = new CompletableFuture<>();
+        Bukkit.getRegionScheduler().run(TheBrewingProject.getInstance(), locationOptional.get(), ignored -> {
+            locationConsumer.accept(locationOptional.get());
+            output.complete(null);
+        });
+        return output;
     }
 
     public static Optional<Block> toBlock(BreweryLocation location) {
