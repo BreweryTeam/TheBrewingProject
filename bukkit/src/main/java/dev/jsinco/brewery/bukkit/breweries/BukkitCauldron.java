@@ -104,7 +104,7 @@ public class BukkitCauldron implements Cauldron {
         if (Config.config().cauldrons().coloredWater() && bukkitLocation != null && (waterColorer == null || waterColorer.isDead())) {
             waterColorer = getBlock().getWorld().spawn(bukkitLocation.clone().add(0.5, 0, 0.5), TextDisplay.class, textDisplay -> {
                 setWaterText(textDisplay);
-                textDisplay.setTransformation(compileTransformation());
+                textDisplay.setTransformation(compileTransformation(bukkitLocation.getBlock().getBlockData()));
                 textDisplay.setPersistent(false);
                 textDisplay.setBackgroundColor(Color.fromARGB(0, 255, 255, 255));
             });
@@ -131,9 +131,8 @@ public class BukkitCauldron implements Cauldron {
         textDisplay.setTextOpacity((byte) (newColor.getAlpha() & 0xFF));
     }
 
-    private Transformation compileTransformation() {
+    private Transformation compileTransformation(BlockData blockData) {
         float levelOffset;
-        BlockData blockData = getBlock().getBlockData();
         if (blockData instanceof Levelled levelled) {
             levelOffset = 6F / 16 + 9F / 16 * levelled.getLevel() / levelled.getMaximumLevel();
         } else {
@@ -393,10 +392,13 @@ public class BukkitCauldron implements Cauldron {
         }
         levelled.setLevel(levelled.getLevel() - 1);
         block.setBlockData(levelled);
-        if (waterColorer != null) {
-            waterColorer.setTransformation(compileTransformation());
-        }
         return false;
+    }
+
+    public void updateLevel(BlockData newLevelData) {
+        if (waterColorer != null) {
+            waterColorer.setTransformation(compileTransformation(newLevelData));
+        }
     }
 
     @Override

@@ -15,6 +15,7 @@ import dev.jsinco.brewery.bukkit.api.event.structure.BarrelDestroyEvent;
 import dev.jsinco.brewery.bukkit.api.event.structure.CauldronDestroyEvent;
 import dev.jsinco.brewery.bukkit.api.event.structure.DistilleryDestroyEvent;
 import dev.jsinco.brewery.bukkit.breweries.BreweryRegistry;
+import dev.jsinco.brewery.bukkit.breweries.BukkitCauldron;
 import dev.jsinco.brewery.bukkit.breweries.barrel.BukkitBarrel;
 import dev.jsinco.brewery.bukkit.breweries.barrel.BukkitBarrelDataType;
 import dev.jsinco.brewery.bukkit.breweries.distillery.BukkitDistillery;
@@ -239,6 +240,16 @@ public class BlockEventListener implements Listener {
         inventoryAccessibleOptional
                 .flatMap(inventoryAccessible -> inventoryAccessible.access(breweryLocation))
                 .ifPresent(event::setInventory);
+    }
+
+
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
+    public void onCauldronLevelChange(CauldronLevelChangeEvent event) {
+        BreweryLocation breweryLocation = BukkitAdapter.toBreweryLocation(event.getBlock());
+        breweryRegistry.getActiveSinglePositionStructure(breweryLocation)
+                .filter(BukkitCauldron.class::isInstance)
+                .map(BukkitCauldron.class::cast)
+                .ifPresent(bukkitCauldron -> bukkitCauldron.updateLevel(event.getNewState().getBlockData()));
     }
 
     /**
