@@ -6,10 +6,8 @@ import dev.jsinco.brewery.util.ClassUtil;
 import io.lumine.mythic.bukkit.MythicBukkit;
 import io.lumine.mythic.bukkit.adapters.BukkitItemStack;
 import io.lumine.mythic.core.items.MythicItem;
-import io.lumine.mythiccrucible.events.MythicCrucibleLoadedEvent;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
-import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Nullable;
@@ -37,15 +35,19 @@ public class MythicIntegration implements ItemIntegration, Listener {
     @Override
     public @Nullable Component displayName(String id) {
         return createItem(id)
-                .map(ItemStack::displayName)
+                .map(ItemStack::effectiveName)
                 .orElse(null);
     }
 
     private Optional<MythicItem> getMythicItem(String name) {
-        Optional<MythicItem> result = MythicBukkit.inst().getItemManager().getItem(name);
+        MythicBukkit bukkit = MythicBukkit.inst();
+        Optional<MythicItem> result = bukkit.getItemManager().getItem(name);
         if (result.isPresent()) return result;
-        return MythicBukkit.inst().getItemManager().getItems().stream()
-                .filter(item -> item.getInternalName().equalsIgnoreCase(name)).findFirst();
+
+        return bukkit.getItemManager().getItems().stream()
+                .filter(item -> item.getInternalName().equalsIgnoreCase(name))
+                .findFirst();
+
     }
 
     @Override
@@ -60,7 +62,7 @@ public class MythicIntegration implements ItemIntegration, Listener {
 
     @Override
     public boolean isEnabled() {
-        return ClassUtil.exists("io.lumine.mythiccrucible.events.MythicCrucibleLoadedEvent");
+        return ClassUtil.exists("io.lumine.mythic.bukkit.MythicBukkit");
     }
 
     @Override
@@ -70,11 +72,7 @@ public class MythicIntegration implements ItemIntegration, Listener {
 
     @Override
     public void onEnable() {
-        Bukkit.getPluginManager().registerEvents(this, TheBrewingProject.getInstance());
-    }
-
-    @EventHandler
-    public void onMythicReload(MythicCrucibleLoadedEvent event) {
-        initialized.completeAsync(() -> null);
+        Bukkit.getGlobalRegionScheduler()
+                .run(TheBrewingProject.getInstance(), ignored -> initialized.completeAsync(() -> null));
     }
 }

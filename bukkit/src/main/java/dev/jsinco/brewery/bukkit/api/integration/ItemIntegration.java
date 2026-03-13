@@ -37,7 +37,7 @@ public interface ItemIntegration extends Integration {
                                 return Optional.empty();
                             }
                             if (!isIngredient(id)) {
-                                Logger.logErr("Couldn't create PluginIngredient '" + id + "' for item integration " + getId());
+                                Logger.logErr("Unknown PluginIngredient '" + id + "' for item integration " + getId());
                                 return Optional.empty();
                             }
                             return Optional.of(new PluginIngredient(new BreweryKey(getId(), id), this));
