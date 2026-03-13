@@ -6,10 +6,8 @@ import dev.jsinco.brewery.util.ClassUtil;
 import io.lumine.mythic.bukkit.MythicBukkit;
 import io.lumine.mythic.bukkit.adapters.BukkitItemStack;
 import io.lumine.mythic.core.items.MythicItem;
-import io.lumine.mythiccrucible.events.MythicCrucibleLoadedEvent;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
-import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Nullable;
@@ -74,15 +72,7 @@ public class MythicIntegration implements ItemIntegration, Listener {
 
     @Override
     public void onEnable() {
-        if (ClassUtil.exists("io.lumine.mythiccrucible.events.MythicCrucibleLoadedEvent")) {
-            Bukkit.getPluginManager().registerEvents(this, TheBrewingProject.getInstance());
-        } else {
-            initialized.completeAsync(() -> null);
-        }
-    }
-
-    @EventHandler
-    public void onMythicReload(MythicCrucibleLoadedEvent event) {
-        initialized.completeAsync(() -> null);
+        Bukkit.getGlobalRegionScheduler()
+                .run(TheBrewingProject.getInstance(), ignored -> initialized.completeAsync(() -> null));
     }
 }
