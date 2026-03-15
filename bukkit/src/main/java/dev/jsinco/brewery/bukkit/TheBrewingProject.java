@@ -129,12 +129,9 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
         Config.load(this.getDataFolder(), serializers());
         this.translator = new BreweryTranslator(new File(this.getDataFolder(), "locale"));
         DrunkenModifierSection.load(this.getDataFolder(), serializers());
-        integrationManager.loadIntegrations();
         EventSection.load(getDataFolder(), serializers());
         DrunkenModifierSection.validate();
         EventSection.validate();
-        IngredientsSection.load(this.getDataFolder(), serializers());
-        IngredientsSection.validate(BukkitIngredientManager.INSTANCE, BukkitIngredientUtil::tagValuesFromString);
         translator.reload();
         GlobalTranslator.translator().addSource(translator);
         this.structureRegistry = new StructureRegistry();
@@ -155,6 +152,7 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
         Migrations.migrateAllConfigFiles(this.getDataFolder());
         integrationManager.registerIntegrations();
         initialize();
+        integrationManager.loadIntegrations();
         Bukkit.getServicesManager().register(TheBrewingProjectApi.class, this, this, ServicePriority.Normal);
         this.successfullLoad = true;
     }
@@ -339,6 +337,8 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
         pluginManager.registerEvents(new BreweryXMigrationListener(), this);
         Bukkit.getGlobalRegionScheduler().runAtFixedRate(this, this::updateStructures, 1, 1);
         Bukkit.getGlobalRegionScheduler().runAtFixedRate(this, this::otherTicking, 1, 1);
+        IngredientsSection.load(this.getDataFolder(), serializers());
+        IngredientsSection.validate(BukkitIngredientManager.INSTANCE, BukkitIngredientUtil::tagValuesFromString);
         RecipeReader<ItemStack> recipeReader = new RecipeReader<>(this.getDataFolder(), new BukkitRecipeResultReader(), BukkitIngredientManager.INSTANCE);
 
         recipeReader.readRecipes().forEach(recipeFuture -> recipeFuture.thenAcceptAsync(recipe -> recipeRegistry.registerRecipe(recipe)));
