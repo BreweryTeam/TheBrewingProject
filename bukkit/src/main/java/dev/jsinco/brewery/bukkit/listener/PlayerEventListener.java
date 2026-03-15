@@ -255,7 +255,7 @@ public class PlayerEventListener implements Listener {
         }
 
         cauldron.extractBrew();
-        ItemStack brewItemStack = extractEvent.getBrewSource().get();
+        ItemStack brewItemStack = extractEvent.getItemResult().get();
         updateHeldItem(decreaseItem(event.getItem(), player), player, event.getHand());
         player.getWorld().dropItem(player.getLocation(), brewItemStack);
         if (cauldron.decrementLevel()) {
