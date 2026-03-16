@@ -55,7 +55,6 @@ public class EventSection extends OkaeriConfig {
     @Comment("What events will be randomly chosen over time when the player is drunk")
     @CustomKey("enabled-random-events")
     private List<String> enabledRandomEvents = List.of(
-            "puke",
             "memory_loss",
             "stumble",
             "chicken",
@@ -63,8 +62,9 @@ public class EventSection extends OkaeriConfig {
             "tunnel_vision",
             "repeating_drunken_walk",
             "hallucination",
-            "fever",
-            "kaboom"
+            "puke_advanced",
+            "kaboom",
+            "hangover"
     );
 
     @Comment("Teleport destinations for the 'teleport' event")
@@ -125,9 +125,9 @@ public class EventSection extends OkaeriConfig {
             ).addEvent(new CustomEvent.Builder()
                     .displayName(Component.text("get tunnel vision"))
                     .probability(new EventProbability(new ModifierExpression("probabilityWeight(alcohol)"), Map.of("alcohol", new RangeD(40D, null))))
-                    .addStep(new EventStep.Builder().addProperty(new ApplyPotionEffect("darkness",
+                    .addStep(new ApplyPotionEffect("darkness",
                                     new Interval(1, 1), new Interval(20, 20)
-                            )).build()
+                            )
                     )
                     .build(BreweryKey.parse("tunnel_vision"))
             ).addEvent(new CustomEvent.Builder()
@@ -147,10 +147,33 @@ public class EventSection extends OkaeriConfig {
                             Map.of("alcohol", new RangeD(60D, null))
                     ))
                     .addStep(NamedDrunkEvent.fromKey("drunken_walk"))
-                    .addStep(new WaitStep(21))
+                    .addStep(new WaitStep(401))
                     .addStep(new ConditionalStep(new Condition.ModifierAbove("alcohol", 60)))
                     .addStep(new CustomEventStep(BreweryKey.parse("repeating_drunken_walk")))
                     .build(BreweryKey.parse("repeating_drunken_walk"))
+            ).addEvent(new CustomEvent.Builder()
+                    .displayName(Component.text("puke"))
+                    .probability(new EventProbability(
+                            new ModifierExpression("4*probabilityWeight(toxins)"),
+                            Map.of("toxins", new RangeD(50D, null))
+                    ))
+                    .addStep(NamedDrunkEvent.fromKey("nausea"))
+                    .addStep(NamedDrunkEvent.fromKey("fever"))
+                    .addStep(new WaitStep(200))
+                    .addStep(NamedDrunkEvent.fromKey("puke"))
+                    .addStep(new ApplyPotionEffect("darkness", Interval.parseString("1"), Interval.parseString("100")))
+                    .build(BreweryKey.parse("puke_advanced"))
+            ).addEvent(new CustomEvent.Builder()
+                    .displayName(Component.text("get hangover"))
+                    .probability(new EventProbability(
+                            new ModifierExpression("4*probabilityWeight(hangover)"),
+                            Map.of("hangover", new RangeD(50D, null))
+                    ))
+                    .addStep(new ApplyPotionEffect("slowness", Interval.parseString("1"), Interval.parseString("20")))
+                    .addStep(new WaitStep(19))
+                    .addStep(new ConditionalStep(new Condition.ModifierAbove("hangover", 50)))
+                    .addStep(new CustomEventStep(BreweryKey.parse("hangover")))
+                    .build(BreweryKey.parse("hangover"))
             ).build();
 
     @Comment("Change the properties of premade events")
