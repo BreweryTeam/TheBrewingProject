@@ -583,3 +583,20 @@ recipes:
           - brewery:apple_juice/1
           - brewery:gin/2
           - sugar/4
+  hangover_detox:
+    modifiers:
+      hangover: -20
+      toxins: -10
+    brew-difficulty: 8
+    potion-attributes.color: 32CD32
+    potion-attributes.name: Hangover detox
+    steps:
+      - type: mix
+        mix-time: 3
+        ingredients:
+          - apple/1
+          - chorus_fruit/1
+          - melon/1
+          - cooked_rabbit/1
+          - golden_carrot/1
+          - cake/1
