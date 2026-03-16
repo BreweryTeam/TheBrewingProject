@@ -65,6 +65,11 @@ public final class CustomEvent {
             return this;
         }
 
+        public Builder addStep(EventStepProperty property) {
+            steps.add(new EventStep.Builder().addProperty(property).build());
+            return this;
+        }
+
         public Builder displayName(Component displayName) {
             this.displayName = displayName;
             return this;

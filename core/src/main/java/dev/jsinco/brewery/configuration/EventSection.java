@@ -54,7 +54,18 @@ public class EventSection extends OkaeriConfig {
 
     @Comment("What events will be randomly chosen over time when the player is drunk")
     @CustomKey("enabled-random-events")
-    private List<String> enabledRandomEvents = List.of("puke", "memory_loss", "stumble", "chicken", "nausea", "tunnel_vision", "drunken_walk", "hallucination", "fever", "kaboom");
+    private List<String> enabledRandomEvents = List.of(
+            "puke",
+            "memory_loss",
+            "stumble",
+            "chicken",
+            "nausea",
+            "tunnel_vision",
+            "repeating_drunken_walk",
+            "hallucination",
+            "fever",
+            "kaboom"
+    );
 
     @Comment("Teleport destinations for the 'teleport' event")
     @CustomKey("teleport-destinations")
@@ -129,6 +140,17 @@ public class EventSection extends OkaeriConfig {
                                     .addProperty(new SendCommand("title @player_name@ actionbar {text:\"You are experiencing alcohol withdrawal\",color:\"gray\"}", SendCommand.CommandSenderType.SERVER))
                                     .build()
                     ).build(BreweryKey.parse("drinking_addiction"))
+            ).addEvent(new CustomEvent.Builder()
+                    .displayName(Component.text("walk unsteadily"))
+                    .probability(new EventProbability(
+                            new ModifierExpression("4*probabilityWeight(alcohol)"),
+                            Map.of("alcohol", new RangeD(60D, null))
+                    ))
+                    .addStep(NamedDrunkEvent.fromKey("drunken_walk"))
+                    .addStep(new WaitStep(21))
+                    .addStep(new ConditionalStep(new Condition.ModifierAbove("alcohol", 60)))
+                    .addStep(new CustomEventStep(BreweryKey.parse("repeating_drunken_walk")))
+                    .build(BreweryKey.parse("repeating_drunken_walk"))
             ).build();
 
     @Comment("Change the properties of premade events")
