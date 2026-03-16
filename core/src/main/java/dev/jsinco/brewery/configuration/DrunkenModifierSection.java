@@ -39,7 +39,7 @@ public class DrunkenModifierSection extends OkaeriConfig {
     })
     private List<DrunkenModifier> drunkenModifiers = List.of(
             new DrunkenModifier("alcohol", new ModifierExpression("consumed_alcohol * (110 - alcohol_addiction) / 110"), new ModifierExpression("400"), 0D, 100D, Component.text("Alcohol")),
-            new DrunkenModifier("alcohol_addiction", new ModifierExpression("0.01 * consumed_alcohol"), new ModifierExpression("1000"), 0D, 100D, Component.text("Alcohol addiction")),
+            new DrunkenModifier("alcohol_addiction", new ModifierExpression("0.01 * consumed_alcohol"), new ModifierExpression("10000"), 0D, 100D, Component.text("Alcohol addiction")),
             new DrunkenModifier("toxins", new ModifierExpression("consumed_toxins"), new ModifierExpression("800"), 0D, 100D, Component.text("Toxins")),
             new DrunkenModifier("hangover", new ModifierExpression("0"), new ModifierExpression("400*signum(25 - toxins)"), 0D, 100D, Component.text("Hangover"))
     );
