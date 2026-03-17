@@ -1,12 +1,14 @@
 package dev.jsinco.brewery.bukkit.api;
 
 import dev.jsinco.brewery.api.brew.BrewManager;
-import dev.jsinco.brewery.api.effect.modifier.ModifierManager;
-import dev.jsinco.brewery.api.integration.IntegrationManager;
+import dev.jsinco.brewery.api.config.Configuration;
 import dev.jsinco.brewery.api.effect.DrunksManager;
+import dev.jsinco.brewery.api.effect.modifier.ModifierManager;
+import dev.jsinco.brewery.api.ingredient.IngredientManager;
+import dev.jsinco.brewery.api.integration.IntegrationManager;
 import dev.jsinco.brewery.api.recipe.RecipeRegistry;
 import dev.jsinco.brewery.api.structure.PlacedStructureRegistry;
-import dev.jsinco.brewery.api.config.Configuration;
+import dev.jsinco.brewery.bukkit.ingredient.BukkitIngredientManager;
 import org.bukkit.inventory.ItemStack;
 
 public interface TheBrewingProjectApi {
@@ -22,7 +24,7 @@ public interface TheBrewingProjectApi {
     ModifierManager getModifierManager();
 
     /**
-     * @return A drunks manager that helps you manage player drunkeness and plan events
+     * @return A drunks manager that helps you manage player drunkenness and plan events
      */
     DrunksManager getDrunksManager();
 
@@ -40,6 +42,13 @@ public interface TheBrewingProjectApi {
      * @return An integration manager, that allows you to register integrations
      */
     IntegrationManager getIntegrationManager();
+
+    /**
+     * @return An ingredient manager, that allows you to create ingredients
+     */
+    default IngredientManager<ItemStack> getIngredientManager() {
+        return BukkitIngredientManager.INSTANCE;
+    }
 
     /**
      * @return Access to some configuration options
