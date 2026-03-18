@@ -7,7 +7,11 @@ import dev.jsinco.brewery.api.breweries.DistilleryAccess;
 import dev.jsinco.brewery.api.moment.Moment;
 import dev.jsinco.brewery.api.structure.MaterialTag;
 import dev.jsinco.brewery.api.structure.StructureMeta;
-import dev.jsinco.brewery.api.util.*;
+import dev.jsinco.brewery.api.util.CancelState;
+import dev.jsinco.brewery.api.util.Holder;
+import dev.jsinco.brewery.api.util.HolderProviderHolder;
+import dev.jsinco.brewery.api.util.Logger;
+import dev.jsinco.brewery.api.util.Pair;
 import dev.jsinco.brewery.api.vector.BreweryLocation;
 import dev.jsinco.brewery.brew.DistillStepImpl;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
@@ -24,7 +28,6 @@ import dev.jsinco.brewery.bukkit.util.VectorUtil;
 import dev.jsinco.brewery.configuration.Config;
 import dev.jsinco.brewery.database.PersistenceException;
 import dev.jsinco.brewery.util.MessageUtil;
-import lombok.Getter;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
@@ -37,25 +40,27 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.joml.Vector3i;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Optional;
+import java.util.Queue;
+import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class BukkitDistillery implements Distillery<BukkitDistillery, ItemStack, Inventory>, DistilleryAccess {
 
-    @Getter
     private final PlacedBreweryStructure<BukkitDistillery> structure;
-    @Getter
     private long startTime;
-    @Getter
     private final BrewInventoryImpl mixture;
-    @Getter
     private final BrewInventoryImpl distillate;
     private boolean dirty = true;
     private final Set<BreweryLocation> mixtureContainerLocations = new HashSet<>();
     private final Set<BreweryLocation> distillateContainerLocations = new HashSet<>();
     private long recentlyAccessed = -1L;
-
 
     public BukkitDistillery(@NotNull PlacedBreweryStructure<BukkitDistillery> structure) {
         this(structure, TheBrewingProject.getInstance().getTime());
@@ -344,7 +349,7 @@ public class BukkitDistillery implements Distillery<BukkitDistillery, ItemStack,
 
     @Override
     public Brew initializeBrew(Brew brew) {
-        if(brew.lastStep() instanceof BrewingStep.Distill) {
+        if (brew.lastStep() instanceof BrewingStep.Distill) {
             return brew;
         }
         return brew.withStep(new DistillStepImpl(0));
@@ -402,6 +407,7 @@ public class BukkitDistillery implements Distillery<BukkitDistillery, ItemStack,
 
     /**
      * Ensures that the distillery's inventory is up-to-date before the distillery is destroyed.
+     *
      * @return A snapshot of the brews that should drop from the distillery
      */
     public List<Brew> calculateDestroyDrops() {
@@ -430,4 +436,19 @@ public class BukkitDistillery implements Distillery<BukkitDistillery, ItemStack,
         LocationUtil.dropBrews(breweryLocation, drops);
     }
 
+    public PlacedBreweryStructure<BukkitDistillery> getStructure() {
+        return this.structure;
+    }
+
+    public long getStartTime() {
+        return this.startTime;
+    }
+
+    public BrewInventoryImpl getMixture() {
+        return this.mixture;
+    }
+
+    public BrewInventoryImpl getDistillate() {
+        return this.distillate;
+    }
 }

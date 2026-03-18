@@ -5,11 +5,7 @@ import dev.jsinco.brewery.time.Duration;
 import eu.okaeri.configs.OkaeriConfig;
 import eu.okaeri.configs.annotation.Comment;
 import eu.okaeri.configs.annotation.CustomKey;
-import lombok.Getter;
-import lombok.experimental.Accessors;
 
-@Getter
-@Accessors(fluent = true)
 public class PukeSection extends OkaeriConfig {
 
     @Comment("How long should the puke items live")
@@ -19,4 +15,12 @@ public class PukeSection extends OkaeriConfig {
     @Comment("How long should the player puke")
     @CustomKey("puke-time")
     private Duration.Ticks pukeTime = new Duration.Ticks(4 * Moment.SECOND);
+
+    public Duration.Ticks pukeDespawnTime() {
+        return pukeDespawnTime;
+    }
+
+    public Duration.Ticks pukeTime() {
+        return pukeTime;
+    }
 }

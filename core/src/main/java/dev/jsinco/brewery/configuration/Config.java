@@ -8,8 +8,6 @@ import eu.okaeri.configs.annotation.CustomKey;
 import eu.okaeri.configs.annotation.Exclude;
 import eu.okaeri.configs.serdes.OkaeriSerdesPack;
 import eu.okaeri.configs.yaml.snakeyaml.YamlSnakeYamlConfigurer;
-import lombok.Getter;
-import lombok.experimental.Accessors;
 
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
@@ -19,8 +17,6 @@ import java.security.SecureRandom;
 import java.util.List;
 import java.util.Locale;
 
-@Getter
-@Accessors(fluent = true)
 public class Config extends OkaeriConfig implements Configuration {
 
     @Comment("Config version. Don't change this")
@@ -108,7 +104,6 @@ public class Config extends OkaeriConfig implements Configuration {
     @CustomKey("sounds")
     private SoundSection sounds = new SoundSection();
 
-
     @CustomKey("command-aliases")
     @Comment("The aliases for the 'tbp' command")
     private List<String> commandAliases = List.of("brewery", "brew");
@@ -150,5 +145,81 @@ public class Config extends OkaeriConfig implements Configuration {
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public int configVersion() {
+        return this.configVersion;
+    }
+
+    public Locale language() {
+        return this.language;
+    }
+
+    public boolean automation() {
+        return this.automation;
+    }
+
+    public boolean allowUnregisteredIngredients() {
+        return this.allowUnregisteredIngredients;
+    }
+
+    public boolean consumeItemsInCreative() {
+        return this.consumeItemsInCreative;
+    }
+
+    public boolean clientSideTranslations() {
+        return this.clientSideTranslations;
+    }
+
+    public boolean encryptSensitiveData() {
+        return this.encryptSensitiveData;
+    }
+
+    public SecretKey encryptionKey() {
+        return this.encryptionKey;
+    }
+
+    public List<SecretKey> previousEncryptionKeys() {
+        return this.previousEncryptionKeys;
+    }
+
+    public boolean reencryptItemsInInventories() {
+        return this.reencryptItemsInInventories;
+    }
+
+    public boolean migrateFromBreweryX() {
+        return this.migrateFromBreweryX;
+    }
+
+    public List<Long> breweryxMigrationSeeds() {
+        return this.breweryxMigrationSeeds;
+    }
+
+    public boolean emptyAnyDrinkUsingHopper() {
+        return this.emptyAnyDrinkUsingHopper;
+    }
+
+    public BrewersDisplay brewersDisplay() {
+        return this.brewersDisplay;
+    }
+
+    public List<BrewTooltipType> brewTooltipOrder() {
+        return this.brewTooltipOrder;
+    }
+
+    public CauldronSection cauldrons() {
+        return this.cauldrons;
+    }
+
+    public BarrelSection barrels() {
+        return this.barrels;
+    }
+
+    public SoundSection sounds() {
+        return this.sounds;
+    }
+
+    public List<String> commandAliases() {
+        return this.commandAliases;
     }
 }

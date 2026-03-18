@@ -5,7 +5,7 @@ import eu.okaeri.configs.schema.GenericsDeclaration;
 import eu.okaeri.configs.serdes.DeserializationData;
 import eu.okaeri.configs.serdes.ObjectSerializer;
 import eu.okaeri.configs.serdes.SerializationData;
-import lombok.NonNull;
+import org.jspecify.annotations.NonNull;
 
 import java.util.Arrays;
 
@@ -17,7 +17,7 @@ public class BreweryLocationSerializer implements ObjectSerializer<BreweryLocati
     }
 
     @Override
-    public void serialize(@NonNull BreweryLocation.Uncompiled object, @NonNull SerializationData data, @NonNull GenericsDeclaration generics) {
+    public void serialize(BreweryLocation.@NonNull Uncompiled object, @NonNull SerializationData data, @NonNull GenericsDeclaration generics) {
         data.setValue(
                 String.format("%s, %d, %d, %d", object.worldIdentifier(), object.x(), object.y(), object.z())
         );

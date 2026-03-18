@@ -32,12 +32,16 @@ import dev.jsinco.brewery.bukkit.util.SoundPlayer;
 import dev.jsinco.brewery.configuration.AnimationDisplay;
 import dev.jsinco.brewery.configuration.Config;
 import dev.jsinco.brewery.sound.SoundDefinition;
-import lombok.Getter;
-import lombok.Setter;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
-import org.bukkit.*;
+import org.bukkit.Bukkit;
+import org.bukkit.Color;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.Particle;
+import org.bukkit.Tag;
+import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockType;
@@ -52,24 +56,24 @@ import org.jetbrains.annotations.Nullable;
 import org.joml.AxisAngle4f;
 import org.joml.Vector3f;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Random;
 
 public class BukkitCauldron implements Cauldron {
 
     private static final Random RANDOM = new Random();
 
     private final BreweryLocation location;
-    @Getter
-    @Setter
     private boolean hot = false;
-    @Getter
     private Brew brew;
     private boolean brewExtracted = false;
     private Color particleColor = Color.fromRGB(0x3F76E4);
     private @Nullable Recipe<ItemStack> recipe;
     private boolean dirty = true;
     private TextDisplay waterColorer = null;
-
 
     public BukkitCauldron(BreweryLocation location, boolean hot) {
         this.location = location;
@@ -266,7 +270,6 @@ public class BukkitCauldron implements Cauldron {
 
         block.getWorld().spawnParticle(Particle.ENTITY_EFFECT, particleLoc, 0, particleColor);
 
-
         if (!Config.config().cauldrons().minimalParticles() || !hot) {
             return;
         }
@@ -441,5 +444,17 @@ public class BukkitCauldron implements Cauldron {
 
     private Color convert(java.awt.Color awtColor) {
         return Color.fromRGB(awtColor.getRGB() & 0xFFFFFF);
+    }
+
+    public boolean isHot() {
+        return this.hot;
+    }
+
+    public Brew getBrew() {
+        return this.brew;
+    }
+
+    public void setHot(boolean hot) {
+        this.hot = hot;
     }
 }

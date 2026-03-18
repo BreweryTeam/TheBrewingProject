@@ -3,7 +3,6 @@ package dev.jsinco.brewery.bukkit.api.event.structure;
 import dev.jsinco.brewery.api.brew.Brew;
 import dev.jsinco.brewery.api.breweries.BarrelAccess;
 import dev.jsinco.brewery.api.util.CancelState;
-import lombok.Getter;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
@@ -21,12 +20,10 @@ public class BarrelDestroyEvent extends BreweryDestroyEvent {
     /**
      * The barrel that was destroyed.
      */
-    @Getter
     private final BarrelAccess barrel;
     /**
      * The brews that will be dropped when the barrel is broken. Can be modified.
      */
-    @Getter
     private List<Brew> drops;
 
     public BarrelDestroyEvent(CancelState state, BarrelAccess barrel, @Nullable Player player, Location location, Collection<Brew> drops) {
@@ -37,6 +34,7 @@ public class BarrelDestroyEvent extends BreweryDestroyEvent {
 
     /**
      * Replaces the list of drops with the provided collection.
+     *
      * @param drops collection of brews to drop
      */
     public void setDrops(Collection<Brew> drops) {
@@ -52,4 +50,11 @@ public class BarrelDestroyEvent extends BreweryDestroyEvent {
         return HANDLERS;
     }
 
+    public BarrelAccess getBarrel() {
+        return this.barrel;
+    }
+
+    public List<Brew> getDrops() {
+        return this.drops;
+    }
 }

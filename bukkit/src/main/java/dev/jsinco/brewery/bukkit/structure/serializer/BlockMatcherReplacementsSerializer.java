@@ -5,8 +5,8 @@ import eu.okaeri.configs.schema.GenericsDeclaration;
 import eu.okaeri.configs.serdes.DeserializationData;
 import eu.okaeri.configs.serdes.ObjectSerializer;
 import eu.okaeri.configs.serdes.SerializationData;
-import lombok.NonNull;
 import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 public class BlockMatcherReplacementsSerializer implements ObjectSerializer<BlockMatcherReplacement.List> {
     @Override

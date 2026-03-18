@@ -3,7 +3,6 @@ package dev.jsinco.brewery.bukkit.api.event.structure;
 import dev.jsinco.brewery.api.brew.Brew;
 import dev.jsinco.brewery.api.breweries.DistilleryAccess;
 import dev.jsinco.brewery.api.util.CancelState;
-import lombok.Getter;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
@@ -21,12 +20,10 @@ public class DistilleryDestroyEvent extends BreweryDestroyEvent {
     /**
      * The distillery that was destroyed.
      */
-    @Getter
     private final DistilleryAccess distillery;
     /**
      * The brews that will be dropped when the distillery is broken. Can be modified.
      */
-    @Getter
     private List<Brew> drops;
 
     public DistilleryDestroyEvent(CancelState state, DistilleryAccess distillery, @Nullable Player player, Location location, Collection<Brew> drops) {
@@ -37,6 +34,7 @@ public class DistilleryDestroyEvent extends BreweryDestroyEvent {
 
     /**
      * Replaces the list of drops with the provided collection.
+     *
      * @param drops collection of brews to drop
      */
     public void setDrops(Collection<Brew> drops) {
@@ -52,4 +50,11 @@ public class DistilleryDestroyEvent extends BreweryDestroyEvent {
         return HANDLERS;
     }
 
+    public DistilleryAccess getDistillery() {
+        return this.distillery;
+    }
+
+    public List<Brew> getDrops() {
+        return this.drops;
+    }
 }

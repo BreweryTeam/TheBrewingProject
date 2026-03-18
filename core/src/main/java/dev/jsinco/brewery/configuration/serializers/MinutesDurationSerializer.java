@@ -6,7 +6,7 @@ import eu.okaeri.configs.schema.GenericsDeclaration;
 import eu.okaeri.configs.serdes.DeserializationData;
 import eu.okaeri.configs.serdes.ObjectSerializer;
 import eu.okaeri.configs.serdes.SerializationData;
-import lombok.NonNull;
+import org.jspecify.annotations.NonNull;
 
 import java.util.Set;
 
@@ -17,7 +17,7 @@ public class MinutesDurationSerializer implements ObjectSerializer<Duration.Minu
     }
 
     @Override
-    public void serialize(@NonNull Duration.Minutes object, @NonNull SerializationData data, @NonNull GenericsDeclaration generics) {
+    public void serialize(Duration.@NonNull Minutes object, @NonNull SerializationData data, @NonNull GenericsDeclaration generics) {
         data.setValue(TimeUtil.minimalString(object.durationTicks(), TimeUtil.TimeUnit.MINUTES, Set.of(TimeUtil.TimeUnit.AGING_YEARS, TimeUtil.TimeUnit.COOKING_MINUTES)));
     }
 

@@ -6,10 +6,10 @@ import eu.okaeri.configs.schema.GenericsDeclaration;
 import eu.okaeri.configs.serdes.DeserializationData;
 import eu.okaeri.configs.serdes.ObjectSerializer;
 import eu.okaeri.configs.serdes.SerializationData;
-import lombok.NonNull;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Registry;
+import org.jspecify.annotations.NonNull;
 
 public class MaterialSerializer implements ObjectSerializer<Holder.Material> {
 

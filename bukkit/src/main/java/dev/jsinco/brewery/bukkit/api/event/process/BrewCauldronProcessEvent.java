@@ -3,7 +3,6 @@ package dev.jsinco.brewery.bukkit.api.event.process;
 import dev.jsinco.brewery.api.brew.Brew;
 import dev.jsinco.brewery.api.breweries.Cauldron;
 import dev.jsinco.brewery.api.breweries.CauldronType;
-import lombok.Getter;
 import org.bukkit.event.HandlerList;
 import org.jetbrains.annotations.NotNull;
 
@@ -13,11 +12,8 @@ import org.jetbrains.annotations.NotNull;
 public class BrewCauldronProcessEvent extends BrewProcessEvent {
     private static final HandlerList HANDLERS = new HandlerList();
 
-    @Getter
     private final Cauldron cauldron;
-    @Getter
     private final CauldronType cauldronType;
-    @Getter
     private final boolean heated;
 
     public BrewCauldronProcessEvent(Cauldron cauldron, CauldronType cauldronType, boolean heated, Brew source, Brew result) {
@@ -34,5 +30,17 @@ public class BrewCauldronProcessEvent extends BrewProcessEvent {
 
     public static HandlerList getHandlerList() {
         return HANDLERS;
+    }
+
+    public Cauldron getCauldron() {
+        return this.cauldron;
+    }
+
+    public CauldronType getCauldronType() {
+        return this.cauldronType;
+    }
+
+    public boolean isHeated() {
+        return this.heated;
     }
 }

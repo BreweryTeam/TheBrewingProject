@@ -5,23 +5,18 @@ import dev.jsinco.brewery.api.brew.BrewingStep;
 import dev.jsinco.brewery.api.recipe.QualityData;
 import dev.jsinco.brewery.api.recipe.Recipe;
 import dev.jsinco.brewery.api.recipe.RecipeResult;
-import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
-@Getter
 public class RecipeImpl<I> implements Recipe<I> {
 
-    @Getter
     private final String recipeName;
-    @Getter
     private final double brewDifficulty;
     @NotNull
     private final List<BrewingStep> steps;
     @NotNull
     private final QualityData<RecipeResult<I>> recipeResults;
-
 
     private RecipeImpl(String recipeName, double brewDifficulty, List<BrewingStep> steps,
                        @NotNull QualityData<RecipeResult<I>> recipeResults) {
@@ -29,6 +24,22 @@ public class RecipeImpl<I> implements Recipe<I> {
         this.brewDifficulty = brewDifficulty;
         this.steps = steps;
         this.recipeResults = recipeResults;
+    }
+
+    public @NotNull List<BrewingStep> getSteps() {
+        return this.steps;
+    }
+
+    public @NotNull QualityData<RecipeResult<I>> getRecipeResults() {
+        return this.recipeResults;
+    }
+
+    public String getRecipeName() {
+        return this.recipeName;
+    }
+
+    public double getBrewDifficulty() {
+        return this.brewDifficulty;
     }
 
     public static class Builder<I> {

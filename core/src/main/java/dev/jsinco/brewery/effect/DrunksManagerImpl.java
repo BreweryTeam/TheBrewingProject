@@ -9,7 +9,6 @@ import dev.jsinco.brewery.api.event.CustomEventRegistry;
 import dev.jsinco.brewery.api.event.DrunkEvent;
 import dev.jsinco.brewery.api.event.EventData;
 import dev.jsinco.brewery.api.event.NamedDrunkEvent;
-import dev.jsinco.brewery.api.util.BreweryKey;
 import dev.jsinco.brewery.api.util.BreweryRegistry;
 import dev.jsinco.brewery.api.util.Logger;
 import dev.jsinco.brewery.api.util.Pair;
@@ -18,13 +17,24 @@ import dev.jsinco.brewery.configuration.EventSection;
 import dev.jsinco.brewery.database.PersistenceException;
 import dev.jsinco.brewery.database.PersistenceHandler;
 import dev.jsinco.brewery.util.RandomUtil;
-import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Random;
+import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.*;
+import java.util.function.BiConsumer;
+import java.util.function.Function;
+import java.util.function.LongSupplier;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -38,7 +48,6 @@ public class DrunksManagerImpl<C> implements DrunksManager {
     private Set<EventData> allowedEvents;
     private List<NamedDrunkEvent> namedDrunkEvents = initializeDrunkEventsWithOverrides();
     private Map<UUID, DrunkState> drunks = new HashMap<>();
-    @Getter
     private LongSupplier timeSupplier;
     private Map<Long, Map<UUID, DrunkEvent>> events = new HashMap<>();
     private Map<UUID, Long> plannedEvents = new HashMap<>();
@@ -92,8 +101,8 @@ public class DrunksManagerImpl<C> implements DrunksManager {
         boolean alreadyDrunk = drunks.containsKey(playerUuid);
         DrunkState initialState = (alreadyDrunk ? drunks.get(playerUuid).recalculate(timestamp) : new DrunkStateImpl(
                 timestamp, -1, DrunkenModifierSection.modifiers()
-                .drunkenModifiers().stream()
-                .collect(Collectors.toUnmodifiableMap(temp -> temp, DrunkenModifier::minValue))
+                               .drunkenModifiers().stream()
+                               .collect(Collectors.toUnmodifiableMap(temp -> temp, DrunkenModifier::minValue))
         ));
         DrunkState newState = initialState;
         // Behave exactly the same when a modifier is changing
@@ -283,5 +292,9 @@ public class DrunksManagerImpl<C> implements DrunksManager {
             return null;
         }
         return new Pair<>(events.get(time).get(playerUUID), time);
+    }
+
+    public LongSupplier getTimeSupplier() {
+        return this.timeSupplier;
     }
 }

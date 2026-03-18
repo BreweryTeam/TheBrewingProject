@@ -3,7 +3,6 @@ package dev.jsinco.brewery.bukkit.breweries;
 import dev.jsinco.brewery.api.brew.Brew;
 import dev.jsinco.brewery.api.breweries.BrewInventory;
 import dev.jsinco.brewery.bukkit.brew.BrewAdapter;
-import lombok.Getter;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.HumanEntity;
@@ -13,14 +12,12 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
 public class BrewInventoryImpl implements InventoryHolder, BrewInventory {
 
     private final Inventory inventory;
-    @Getter
     private final Brew[] brews;
     private final BrewPersistenceHandler store;
 
@@ -113,5 +110,9 @@ public class BrewInventoryImpl implements InventoryHolder, BrewInventory {
         List.copyOf(inventory.getViewers()).forEach(HumanEntity::closeInventory);
         this.inventory.clear();
         return getBrewSnapshot();
+    }
+
+    public Brew[] getBrews() {
+        return this.brews;
     }
 }

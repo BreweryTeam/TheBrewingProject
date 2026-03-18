@@ -11,8 +11,8 @@ import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.bukkit.api.integration.IntegrationTypes;
 import dev.jsinco.brewery.bukkit.api.integration.ItemIntegration;
 import dev.jsinco.brewery.bukkit.brew.BrewAdapter;
-import dev.jsinco.brewery.bukkit.ingredient.UncheckedIngredientImpl;
 import dev.jsinco.brewery.bukkit.ingredient.BukkitIngredientManager;
+import dev.jsinco.brewery.bukkit.ingredient.UncheckedIngredientImpl;
 import dev.jsinco.brewery.bukkit.util.BukkitMessageUtil;
 import dev.jsinco.brewery.configuration.BrewTooltipType;
 import dev.jsinco.brewery.configuration.Config;
@@ -24,7 +24,6 @@ import io.papermc.paper.datacomponent.item.CustomModelData;
 import io.papermc.paper.datacomponent.item.ItemEnchantments;
 import io.papermc.paper.datacomponent.item.ItemLore;
 import io.papermc.paper.datacomponent.item.PotionContents;
-import lombok.Getter;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
@@ -41,7 +40,11 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Objects;
+import java.util.UUID;
 import java.util.stream.Stream;
 
 public class BukkitRecipeResult implements RecipeResult<ItemStack> {
@@ -56,14 +59,10 @@ public class BukkitRecipeResult implements RecipeResult<ItemStack> {
     private final @Nullable NamespacedKey itemModel;
     private final UncheckedIngredientImpl customId;
 
-    @Getter
     private final String name;
-    @Getter
     private final List<String> lore;
 
-    @Getter
     private final RecipeEffectsImpl recipeEffects;
-    @Getter
     private final Color color;
     private final boolean appendBrewInfoLore;
 
@@ -236,6 +235,21 @@ public class BukkitRecipeResult implements RecipeResult<ItemStack> {
         return output.build();
     }
 
+    public String getName() {
+        return this.name;
+    }
+
+    public List<String> getLore() {
+        return this.lore;
+    }
+
+    public RecipeEffectsImpl getRecipeEffects() {
+        return this.recipeEffects;
+    }
+
+    public Color getColor() {
+        return this.color;
+    }
 
     public static class Builder implements dev.jsinco.brewery.api.util.Builder<RecipeResult<ItemStack>> {
 

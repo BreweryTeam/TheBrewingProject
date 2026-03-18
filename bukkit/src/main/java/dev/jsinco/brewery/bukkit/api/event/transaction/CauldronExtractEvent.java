@@ -5,7 +5,6 @@ import dev.jsinco.brewery.api.brew.Brew;
 import dev.jsinco.brewery.api.breweries.Cauldron;
 import dev.jsinco.brewery.bukkit.api.event.PermissibleBreweryEvent;
 import dev.jsinco.brewery.bukkit.api.transaction.ItemSource;
-import lombok.Getter;
 import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
 import org.bukkit.inventory.ItemStack;
@@ -14,17 +13,13 @@ import org.jetbrains.annotations.Nullable;
 
 public class CauldronExtractEvent extends PermissibleBreweryEvent {
 
-    @Getter
     private final Cauldron cauldron;
     /**
      * Use {@link #getItemResult()} instead. Will cause weird issues with newer api
      */
-    @Getter
     @Deprecated(forRemoval = true)
     private ItemSource.BrewBasedSource brewSource;
-    @Getter
     private ItemSource itemResult;
-    @Getter
     private final @Nullable Player player;
 
     public CauldronExtractEvent(Cauldron cauldron, ItemSource.BrewBasedSource brewSource,
@@ -64,5 +59,23 @@ public class CauldronExtractEvent extends PermissibleBreweryEvent {
 
     public static HandlerList getHandlerList() {
         return HANDLERS;
+    }
+
+    public Cauldron getCauldron() {
+        return this.cauldron;
+    }
+
+    @Deprecated
+    public ItemSource.BrewBasedSource getBrewSource() {
+        return this.brewSource;
+    }
+
+    public ItemSource getItemResult() {
+        return this.itemResult;
+    }
+
+    @Nullable
+    public Player getPlayer() {
+        return this.player;
     }
 }

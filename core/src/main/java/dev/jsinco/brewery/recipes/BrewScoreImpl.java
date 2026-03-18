@@ -1,9 +1,12 @@
 package dev.jsinco.brewery.recipes;
 
-import dev.jsinco.brewery.api.brew.*;
+import dev.jsinco.brewery.api.brew.Brew;
+import dev.jsinco.brewery.api.brew.BrewQuality;
+import dev.jsinco.brewery.api.brew.BrewScore;
+import dev.jsinco.brewery.api.brew.BrewingStep;
+import dev.jsinco.brewery.api.brew.PartialBrewScore;
+import dev.jsinco.brewery.api.brew.ScoreType;
 import dev.jsinco.brewery.util.MessageUtil;
-import lombok.Getter;
-import lombok.Setter;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.translation.Argument;
 import org.jetbrains.annotations.Nullable;
@@ -16,7 +19,7 @@ public class BrewScoreImpl implements BrewScore {
 
     public static final BrewScoreImpl PLACEHOLDER = new BrewScoreImpl(1D);
 
-    @Getter @Setter private BrewQuality qualityOverride;
+    private BrewQuality qualityOverride;
     private final List<Map<ScoreType, PartialBrewScore>> scores;
     private final boolean completed;
     private final double brewDifficulty;
@@ -124,5 +127,13 @@ public class BrewScoreImpl implements BrewScore {
 
     public boolean hasQualityOverride() {
         return qualityOverride != null;
+    }
+
+    public BrewQuality getQualityOverride() {
+        return this.qualityOverride;
+    }
+
+    public void setQualityOverride(BrewQuality qualityOverride) {
+        this.qualityOverride = qualityOverride;
     }
 }

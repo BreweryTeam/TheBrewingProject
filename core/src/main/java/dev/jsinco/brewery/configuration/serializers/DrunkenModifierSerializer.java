@@ -7,8 +7,8 @@ import eu.okaeri.configs.schema.GenericsDeclaration;
 import eu.okaeri.configs.serdes.DeserializationData;
 import eu.okaeri.configs.serdes.ObjectSerializer;
 import eu.okaeri.configs.serdes.SerializationData;
-import lombok.NonNull;
 import net.kyori.adventure.text.Component;
+import org.jspecify.annotations.NonNull;
 
 public class DrunkenModifierSerializer implements ObjectSerializer<DrunkenModifier> {
     @Override

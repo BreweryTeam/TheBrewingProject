@@ -10,17 +10,13 @@ import dev.jsinco.brewery.api.util.Holder;
 import eu.okaeri.configs.OkaeriConfig;
 import eu.okaeri.configs.annotation.Comment;
 import eu.okaeri.configs.annotation.CustomKey;
-import lombok.Getter;
-import lombok.experimental.Accessors;
 import net.kyori.adventure.text.format.NamedTextColor;
 
-import java.awt.*;
+import java.awt.Color;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
-@Getter
-@Accessors(fluent = true)
 public class CauldronSection extends OkaeriConfig implements Configuration.Cauldrons {
     @Comment({"Reduce the number of particles that spawn while cauldrons brew.",
             "This won't affect performance, but it will make the particles less obtrusive."})
@@ -86,4 +82,47 @@ public class CauldronSection extends OkaeriConfig implements Configuration.Cauld
             .put(UncheckedIngredient.minecraft("suspicious_stew"), UncheckedIngredient.minecraft("bowl"))
             .build();
 
+    public boolean minimalParticles() {
+        return this.minimalParticles;
+    }
+
+    public List<Holder.Material> heatSources() {
+        return this.heatSources;
+    }
+
+    public long cookingMinuteTicks() {
+        return this.cookingMinuteTicks;
+    }
+
+    public Color lavaBaseParticleColor() {
+        return this.lavaBaseParticleColor;
+    }
+
+    public Color waterBaseParticleColor() {
+        return this.waterBaseParticleColor;
+    }
+
+    public Color snowBaseParticleColor() {
+        return this.snowBaseParticleColor;
+    }
+
+    public Color failedParticleColor() {
+        return this.failedParticleColor;
+    }
+
+    public boolean coloredWater() {
+        return this.coloredWater;
+    }
+
+    public int waterColorOpacity() {
+        return this.waterColorOpacity;
+    }
+
+    public AnimationDisplay ingredientAddedAnimation() {
+        return this.ingredientAddedAnimation;
+    }
+
+    public Map<IngredientInput, UncheckedIngredient> ingredientEmptyTransforms() {
+        return this.ingredientEmptyTransforms;
+    }
 }

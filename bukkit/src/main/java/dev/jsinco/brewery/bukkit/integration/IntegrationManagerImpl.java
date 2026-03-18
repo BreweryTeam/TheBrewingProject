@@ -7,16 +7,25 @@ import dev.jsinco.brewery.api.util.Logger;
 import dev.jsinco.brewery.bukkit.api.integration.IntegrationTypes;
 import dev.jsinco.brewery.bukkit.integration.chest_shop.QuickShopHikariIntegration;
 import dev.jsinco.brewery.bukkit.integration.event.GSitIntegration;
-import dev.jsinco.brewery.bukkit.integration.item.*;
+import dev.jsinco.brewery.bukkit.integration.item.CraftEngineIntegration;
+import dev.jsinco.brewery.bukkit.integration.item.ItemsAdderIntegration;
+import dev.jsinco.brewery.bukkit.integration.item.MmoItemsIntegration;
+import dev.jsinco.brewery.bukkit.integration.item.MythicIntegration;
+import dev.jsinco.brewery.bukkit.integration.item.NexoIntegration;
+import dev.jsinco.brewery.bukkit.integration.item.OraxenIntegration;
 import dev.jsinco.brewery.bukkit.integration.placeholder.MiniPlaceholdersIntegration;
 import dev.jsinco.brewery.bukkit.integration.placeholder.PlaceholderApiIntegration;
-import dev.jsinco.brewery.bukkit.integration.structure.*;
-import lombok.Getter;
+import dev.jsinco.brewery.bukkit.integration.structure.BoltIntegration;
+import dev.jsinco.brewery.bukkit.integration.structure.GriefDefenderIntegration;
+import dev.jsinco.brewery.bukkit.integration.structure.GriefPreventionIntegration;
+import dev.jsinco.brewery.bukkit.integration.structure.HuskClaimsIntegration;
+import dev.jsinco.brewery.bukkit.integration.structure.LandsIntegration;
+import dev.jsinco.brewery.bukkit.integration.structure.TownyIntegration;
+import dev.jsinco.brewery.bukkit.integration.structure.WorldGuardIntegration;
 
 import java.util.Set;
 
 public class IntegrationManagerImpl implements IntegrationManager {
-    @Getter
     private final IntegrationRegistry integrationRegistry = new IntegrationRegistry();
 
     public void registerIntegrations() {
@@ -41,7 +50,7 @@ public class IntegrationManagerImpl implements IntegrationManager {
 
     public void loadIntegrations() {
         integrationRegistry.getAllIntegrations()
-                        .forEach(Integration::onLoad);
+                .forEach(Integration::onLoad);
     }
 
     public void enableIntegrations() {
@@ -69,5 +78,9 @@ public class IntegrationManagerImpl implements IntegrationManager {
             return Set.of();
         }
         return integrations;
+    }
+
+    public IntegrationRegistry getIntegrationRegistry() {
+        return this.integrationRegistry;
     }
 }

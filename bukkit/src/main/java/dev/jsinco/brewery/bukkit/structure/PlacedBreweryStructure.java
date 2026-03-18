@@ -4,8 +4,6 @@ import dev.jsinco.brewery.api.breweries.StructureHolder;
 import dev.jsinco.brewery.api.structure.MultiblockStructure;
 import dev.jsinco.brewery.api.util.Pair;
 import dev.jsinco.brewery.api.vector.BreweryLocation;
-import lombok.Getter;
-import lombok.Setter;
 import org.bukkit.Location;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix3d;
@@ -15,15 +13,12 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-@Getter
 public class PlacedBreweryStructure<H extends StructureHolder<H>> implements MultiblockStructure<H> {
     private static final List<Matrix3d> ALLOWED_TRANSFORMATIONS = compileAllowedTransformations();
     private final BreweryStructure structure;
     private final Matrix3d transformation;
     private final Location worldOrigin;
     private final BreweryLocation unique;
-    @Setter
-    @Getter
     private @Nullable H holder = null;
 
     public PlacedBreweryStructure(BreweryStructure structure, Matrix3d transformation,
@@ -99,5 +94,26 @@ public class PlacedBreweryStructure<H extends StructureHolder<H>> implements Mul
             return -1;
         }
         return 0;
+    }
+
+    public BreweryStructure getStructure() {
+        return this.structure;
+    }
+
+    public Matrix3d getTransformation() {
+        return this.transformation;
+    }
+
+    public Location getWorldOrigin() {
+        return this.worldOrigin;
+    }
+
+    @Nullable
+    public H getHolder() {
+        return this.holder;
+    }
+
+    public void setHolder(@Nullable H holder) {
+        this.holder = holder;
     }
 }

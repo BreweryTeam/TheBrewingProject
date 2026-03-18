@@ -4,13 +4,9 @@ import dev.jsinco.brewery.configuration.serializers.SoundDefinitionSerializer;
 import dev.jsinco.brewery.sound.SoundDefinition;
 import eu.okaeri.configs.OkaeriConfig;
 import eu.okaeri.configs.annotation.CustomKey;
-import lombok.Getter;
-import lombok.experimental.Accessors;
 
 import java.util.List;
 
-@Getter
-@Accessors(fluent = true)
 public class SoundSection extends OkaeriConfig {
 
     @CustomKey("barrel-close")
@@ -42,5 +38,41 @@ public class SoundSection extends OkaeriConfig {
 
     private static SoundDefinition parseSoundSetting(String string) {
         return new SoundDefinition(List.of(SoundDefinitionSerializer.parseSoundSetting(string)));
+    }
+
+    public SoundDefinition barrelClose() {
+        return this.barrelClose;
+    }
+
+    public SoundDefinition barrelOpen() {
+        return this.barrelOpen;
+    }
+
+    public SoundDefinition cauldronIngredientAddBrew() {
+        return this.cauldronIngredientAddBrew;
+    }
+
+    public SoundDefinition cauldronIngredientAdd() {
+        return this.cauldronIngredientAdd;
+    }
+
+    public SoundDefinition cauldronBrewExtract() {
+        return this.cauldronBrewExtract;
+    }
+
+    public SoundDefinition distilleryAccess() {
+        return this.distilleryAccess;
+    }
+
+    public SoundDefinition distilleryProcess() {
+        return this.distilleryProcess;
+    }
+
+    public SoundDefinition kaboom() {
+        return this.kaboom;
+    }
+
+    public SoundDefinition emptyFailedDrink() {
+        return this.emptyFailedDrink;
     }
 }

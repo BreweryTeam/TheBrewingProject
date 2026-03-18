@@ -25,7 +25,6 @@ import dev.jsinco.brewery.bukkit.util.LocationUtil;
 import dev.jsinco.brewery.bukkit.util.SoundPlayer;
 import dev.jsinco.brewery.configuration.Config;
 import dev.jsinco.brewery.util.MessageUtil;
-import lombok.Getter;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
@@ -36,16 +35,19 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Random;
+import java.util.Set;
+import java.util.UUID;
 
-@Getter
 public class BukkitBarrel implements Barrel<BukkitBarrel, ItemStack, Inventory>, BarrelAccess {
     private final PlacedBreweryStructure<BukkitBarrel> structure;
-    @Getter
     private final int size;
-    @Getter
     private final BarrelType type;
-    @Getter
     private final Location uniqueLocation;
     private final BrewInventoryImpl inventory;
     private long recentlyAccessed = -1L;
@@ -216,6 +218,7 @@ public class BukkitBarrel implements Barrel<BukkitBarrel, ItemStack, Inventory>,
 
     /**
      * Ensures that the barrel's inventory is up-to-date before the barrel is destroyed.
+     *
      * @return A snapshot of the brews that should drop from the barrel
      */
     public List<Brew> calculateDestroyDrops() {
@@ -264,7 +267,31 @@ public class BukkitBarrel implements Barrel<BukkitBarrel, ItemStack, Inventory>,
         return recentlyAccessed == -1L;
     }
 
-    private boolean shouldUnpopulateInventory(){
+    private boolean shouldUnpopulateInventory() {
         return recentlyAccessed == -1L || recentlyAccessed + Moment.SECOND <= TheBrewingProject.getInstance().getTime();
+    }
+
+    public BrewInventoryImpl getInventory() {
+        return this.inventory;
+    }
+
+    public long getRecentlyAccessed() {
+        return this.recentlyAccessed;
+    }
+
+    public long getTicksUntilNextCheck() {
+        return this.ticksUntilNextCheck;
+    }
+
+    public int getSize() {
+        return this.size;
+    }
+
+    public BarrelType getType() {
+        return this.type;
+    }
+
+    public Location getUniqueLocation() {
+        return this.uniqueLocation;
     }
 }

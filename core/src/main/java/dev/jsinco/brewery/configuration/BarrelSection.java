@@ -1,17 +1,13 @@
 package dev.jsinco.brewery.configuration;
 
+import dev.jsinco.brewery.api.config.Configuration;
 import dev.jsinco.brewery.api.moment.Moment;
 import eu.okaeri.configs.OkaeriConfig;
 import eu.okaeri.configs.annotation.Comment;
 import eu.okaeri.configs.annotation.CustomKey;
-import lombok.Getter;
-import lombok.experimental.Accessors;
-import dev.jsinco.brewery.api.config.Configuration;
 
 import java.util.List;
 
-@Getter
-@Accessors(fluent = true)
 public class BarrelSection extends OkaeriConfig implements Configuration.Barrels {
 
     @Comment("How many ticks it will take to age a brew one year")
@@ -26,4 +22,16 @@ public class BarrelSection extends OkaeriConfig implements Configuration.Barrels
     @CustomKey("sign-keywords")
     private List<String> signKeywords = List.of("barrel");
 
+    @Override
+    public long agingYearTicks() {
+        return this.agingYearTicks;
+    }
+
+    public boolean requireSignKeyword() {
+        return this.requireSignKeyword;
+    }
+
+    public List<String> signKeywords() {
+        return this.signKeywords;
+    }
 }

@@ -16,15 +16,15 @@ import eu.okaeri.configs.annotation.Exclude;
 import eu.okaeri.configs.annotation.Header;
 import eu.okaeri.configs.serdes.OkaeriSerdesPack;
 import eu.okaeri.configs.yaml.snakeyaml.YamlSnakeYamlConfigurer;
-import lombok.Getter;
-import lombok.experimental.Accessors;
 import net.kyori.adventure.text.Component;
 
 import java.io.File;
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 
-@Getter
-@Accessors(fluent = true)
 @Header({
         "A drunken modifier represents the state of a player.",
         "Depending on the state of the player, it will experience different effects, see ''./events.yml''.",
@@ -86,7 +86,6 @@ public class DrunkenModifierSection extends OkaeriConfig {
                     "toxins", -1D
             ))
     );
-
 
     @Exclude
     private static DrunkenModifierSection instance;
@@ -157,5 +156,21 @@ public class DrunkenModifierSection extends OkaeriConfig {
         return drunkenModifiers.stream()
                 .filter(modifier -> modifier.name().equals(modifierName))
                 .findFirst();
+    }
+
+    public List<DrunkenModifier> drunkenModifiers() {
+        return this.drunkenModifiers;
+    }
+
+    public List<ModifierDisplay> drunkenDisplays() {
+        return this.drunkenDisplays;
+    }
+
+    public List<ModifierTooltip> drunkenTooltips() {
+        return this.drunkenTooltips;
+    }
+
+    public List<ConsumableSerializer.Consumable> consumables() {
+        return this.consumables;
     }
 }

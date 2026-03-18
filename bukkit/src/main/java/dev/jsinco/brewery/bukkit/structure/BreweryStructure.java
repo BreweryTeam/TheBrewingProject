@@ -1,11 +1,8 @@
 package dev.jsinco.brewery.bukkit.structure;
 
 import com.google.common.base.Preconditions;
-import dev.jsinco.brewery.api.structure.MaterialTag;
 import dev.jsinco.brewery.api.structure.StructureMeta;
 import dev.thorinwasher.schem.Schematic;
-import eu.okaeri.configs.OkaeriConfig;
-import lombok.Getter;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.block.data.BlockData;
@@ -15,18 +12,20 @@ import org.joml.Matrix3d;
 import org.joml.Vector3d;
 import org.joml.Vector3i;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 
-public class BreweryStructure  {
+public class BreweryStructure {
 
     private final Schematic schem;
-    @Getter
     private final EntryPoints entryPoints;
-    @Getter
     private final String name;
-    @Getter
     private final Meta meta;
-    @Getter
     private final String schemFileName;
 
     /**
@@ -119,6 +118,22 @@ public class BreweryStructure  {
 
     public boolean hasMeta(StructureMeta<?> metaKey) {
         return meta.data().containsKey(metaKey);
+    }
+
+    public EntryPoints getEntryPoints() {
+        return this.entryPoints;
+    }
+
+    public String getName() {
+        return this.name;
+    }
+
+    public Meta getMeta() {
+        return this.meta;
+    }
+
+    public String getSchemFileName() {
+        return this.schemFileName;
     }
 
     public record EntryPoints(List<Vector3i> entryPoints, boolean customDefinition) {

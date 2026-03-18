@@ -2,7 +2,6 @@ package dev.jsinco.brewery.bukkit.api.event.structure;
 
 import dev.jsinco.brewery.api.breweries.Cauldron;
 import dev.jsinco.brewery.api.util.CancelState;
-import lombok.Getter;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
@@ -16,7 +15,6 @@ public class CauldronDestroyEvent extends BreweryDestroyEvent {
     /**
      * The cauldron that was destroyed.
      */
-    @Getter
     private final Cauldron cauldron;
 
     public CauldronDestroyEvent(CancelState state, Cauldron cauldron, @Nullable Player player, Location location) {
@@ -33,4 +31,7 @@ public class CauldronDestroyEvent extends BreweryDestroyEvent {
         return HANDLERS;
     }
 
+    public Cauldron getCauldron() {
+        return this.cauldron;
+    }
 }

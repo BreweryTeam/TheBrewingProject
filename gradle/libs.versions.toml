@@ -35,7 +35,6 @@ gsit = "3.0.2"
 
 # other
 jetbrainsAnnotations = "26.0.2-1"
-lombok = "1.18.42"
 
 # test
 adventure = "4.23.0"
@@ -84,7 +83,6 @@ griefdefender = {group = "com.griefdefender", name = "api", version.ref = "grief
 gsit = { group = "com.github.gecolay.GSit",  name = "core", version.ref = "gsit"}
 # other
 jetbrains-annotations = { group = "org.jetbrains", name = "annotations", version.ref = "jetbrainsAnnotations" }
-lombok = { group = "org.projectlombok", name = "lombok", version.ref = "lombok" }
 
 # test
 adventure-api = { group = "net.kyori", name = "adventure-api", version.ref = "adventure" }

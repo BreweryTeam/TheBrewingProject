@@ -23,7 +23,6 @@ import dev.jsinco.brewery.configuration.DrunkenModifierSection;
 import dev.jsinco.brewery.effect.DrunksManagerImpl;
 import dev.jsinco.brewery.util.MessageUtil;
 import io.papermc.paper.persistence.PersistentDataContainerView;
-import lombok.Getter;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.title.Title;
 import org.bukkit.NamespacedKey;
@@ -36,10 +35,13 @@ import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
-@Getter
 public class RecipeEffectsImpl implements RecipeEffects {
 
     public static final NamespacedKey COMMANDS = TheBrewingProject.key("commands");
@@ -256,6 +258,31 @@ public class RecipeEffectsImpl implements RecipeEffects {
                                 BukkitMessageUtil.getPlayerTagResolver(player),
                                 MessageUtil.numberedModifierTagResolver(modifiers, "consumed"))
                 ).orElse(null);
+    }
+
+    @NotNull
+    public List<RecipeEffectImpl> getEffects() {
+        return this.effects;
+    }
+
+    @Nullable
+    public String getTitle() {
+        return this.title;
+    }
+
+    @Nullable
+    public String getMessage() {
+        return this.message;
+    }
+
+    @Nullable
+    public String getActionBar() {
+        return this.actionBar;
+    }
+
+    @NotNull
+    public Map<DrunkenModifier, Double> getModifiers() {
+        return this.modifiers;
     }
 
     public static class Builder implements dev.jsinco.brewery.api.util.Builder<RecipeEffectsImpl> {

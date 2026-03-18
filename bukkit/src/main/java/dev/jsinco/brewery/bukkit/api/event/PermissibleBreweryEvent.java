@@ -1,15 +1,13 @@
 package dev.jsinco.brewery.bukkit.api.event;
 
 import com.google.common.base.Preconditions;
-import lombok.Getter;
+import dev.jsinco.brewery.api.util.CancelState;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
 import org.jetbrains.annotations.NotNull;
 
-
 public abstract class PermissibleBreweryEvent extends Event implements Cancellable {
 
-    @Getter
     private dev.jsinco.brewery.api.util.CancelState cancelState;
 
     public PermissibleBreweryEvent(@NotNull dev.jsinco.brewery.api.util.CancelState cancelState) {
@@ -36,5 +34,7 @@ public abstract class PermissibleBreweryEvent extends Event implements Cancellab
         this.cancelState = Preconditions.checkNotNull(state);
     }
 
-
+    public CancelState getCancelState() {
+        return this.cancelState;
+    }
 }

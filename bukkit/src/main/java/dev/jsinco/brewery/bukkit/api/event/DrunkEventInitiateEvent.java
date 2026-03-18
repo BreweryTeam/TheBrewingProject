@@ -1,8 +1,6 @@
 package dev.jsinco.brewery.bukkit.api.event;
 
 import dev.jsinco.brewery.api.event.DrunkEvent;
-import lombok.Getter;
-import lombok.Setter;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
@@ -13,12 +11,8 @@ import org.jetbrains.annotations.Nullable;
 public class DrunkEventInitiateEvent extends Event implements Cancellable {
     private static final HandlerList HANDLERS = new HandlerList();
 
-    @Getter
     private final DrunkEvent drunkenEvent;
-    @Getter
-    @Setter
     private boolean cancelled;
-    @Getter
     private final @Nullable Player player;
 
     public DrunkEventInitiateEvent(DrunkEvent event, Player player) {
@@ -33,5 +27,22 @@ public class DrunkEventInitiateEvent extends Event implements Cancellable {
 
     public static HandlerList getHandlerList() {
         return HANDLERS;
+    }
+
+    public DrunkEvent getDrunkenEvent() {
+        return this.drunkenEvent;
+    }
+
+    public boolean isCancelled() {
+        return this.cancelled;
+    }
+
+    @Nullable
+    public Player getPlayer() {
+        return this.player;
+    }
+
+    public void setCancelled(boolean cancelled) {
+        this.cancelled = cancelled;
     }
 }

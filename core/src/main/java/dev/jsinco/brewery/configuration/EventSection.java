@@ -2,8 +2,16 @@ package dev.jsinco.brewery.configuration;
 
 import com.google.common.base.Preconditions;
 import dev.jsinco.brewery.api.effect.modifier.ModifierExpression;
-import dev.jsinco.brewery.api.event.*;
-import dev.jsinco.brewery.api.event.step.*;
+import dev.jsinco.brewery.api.event.CustomEvent;
+import dev.jsinco.brewery.api.event.CustomEventRegistry;
+import dev.jsinco.brewery.api.event.EventProbability;
+import dev.jsinco.brewery.api.event.EventStep;
+import dev.jsinco.brewery.api.event.NamedDrunkEvent;
+import dev.jsinco.brewery.api.event.step.ApplyPotionEffect;
+import dev.jsinco.brewery.api.event.step.Condition;
+import dev.jsinco.brewery.api.event.step.ConditionalWaitStep;
+import dev.jsinco.brewery.api.event.step.ConsumeStep;
+import dev.jsinco.brewery.api.event.step.SendCommand;
 import dev.jsinco.brewery.api.math.RangeD;
 import dev.jsinco.brewery.api.moment.Interval;
 import dev.jsinco.brewery.api.util.BreweryKey;
@@ -20,18 +28,21 @@ import eu.okaeri.configs.annotation.CustomKey;
 import eu.okaeri.configs.annotation.Exclude;
 import eu.okaeri.configs.serdes.OkaeriSerdesPack;
 import eu.okaeri.configs.yaml.snakeyaml.YamlSnakeYamlConfigurer;
-import lombok.Getter;
-import lombok.experimental.Accessors;
 import net.kyori.adventure.text.Component;
 import org.yaml.snakeyaml.Yaml;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 
-@Getter
-@Accessors(fluent = true)
 public class EventSection extends OkaeriConfig {
 
     @CustomKey("kick-event")
@@ -165,8 +176,74 @@ public class EventSection extends OkaeriConfig {
         }
     }
 
-    @Getter
-    @Accessors(fluent = true)
+    public KickEventSection kickEvent() {
+        return this.kickEvent;
+    }
+
+    public Duration.Minutes passOutTime() {
+        return this.passOutTime;
+    }
+
+    public List<String> drunkMessages() {
+        return this.drunkMessages;
+    }
+
+    public PukeSection puke() {
+        return this.puke;
+    }
+
+    public List<String> enabledRandomEvents() {
+        return this.enabledRandomEvents;
+    }
+
+    public List<BreweryLocation.Uncompiled> teleportDestinations() {
+        return this.teleportDestinations;
+    }
+
+    public boolean ensureSafeLocation() {
+        return this.ensureSafeLocation;
+    }
+
+    public int randomOffsetRadius() {
+        return this.randomOffsetRadius;
+    }
+
+    public int undergroundChance() {
+        return this.undergroundChance;
+    }
+
+    public DrunkenJoinEvent drunkenJoinDeny() {
+        return this.drunkenJoinDeny;
+    }
+
+    public boolean blurredSpeech() {
+        return this.blurredSpeech;
+    }
+
+    public double kaboomVelocity() {
+        return this.kaboomVelocity;
+    }
+
+    public double kaboomHealth() {
+        return this.kaboomHealth;
+    }
+
+    public Duration.Ticks feverFreezingTime() {
+        return this.feverFreezingTime;
+    }
+
+    public Duration.Ticks feverBurnTime() {
+        return this.feverBurnTime;
+    }
+
+    public CustomEventRegistry customEvents() {
+        return this.customEvents;
+    }
+
+    public List<NamedDrunkEvent> namedDrunkEventsOverride() {
+        return this.namedDrunkEventsOverride;
+    }
+
     public static class KickEventSection extends OkaeriConfig {
         @CustomKey("kick-event-message")
         @Comment("The message to send to the player when getting kicked through the passout event")
@@ -175,13 +252,27 @@ public class EventSection extends OkaeriConfig {
         @CustomKey("kick-server-message")
         @Comment("THe message to send to all players when a player gets kicked through the passout event")
         private String kickServerMessage = null;
+
+        public String kickEventMessage() {
+            return this.kickEventMessage;
+        }
+
+        public String kickServerMessage() {
+            return this.kickServerMessage;
+        }
     }
 
-    @Getter
-    @Accessors(fluent = true)
     public static class DrunkenJoinEvent extends OkaeriConfig {
         private boolean enabled = true;
         private EventProbability probability = new EventProbability(new ModifierExpression("85 - alcohol"), Map.of("alcohol", new RangeD(85D, null)));
+
+        public boolean enabled() {
+            return this.enabled;
+        }
+
+        public EventProbability probability() {
+            return this.probability;
+        }
     }
 
     public static EventSection events() {

@@ -76,8 +76,6 @@ dependencies {
 
     // other
     compileOnly(libs.jetbrains.annotations)
-    compileOnly(libs.lombok)
-    annotationProcessor(libs.lombok)
 
     // test
     testImplementation(libs.junit.jupiter)
@@ -87,8 +85,6 @@ dependencies {
     testImplementation(libs.adventure.nbt)
     testImplementation(libs.mockbukkit)
     testImplementation(libs.sqlite.jdbc)
-
-    testAnnotationProcessor(libs.lombok)
 }
 
 tasks {

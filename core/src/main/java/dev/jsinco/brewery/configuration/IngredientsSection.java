@@ -1,9 +1,12 @@
 package dev.jsinco.brewery.configuration;
 
-
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
-import dev.jsinco.brewery.api.ingredient.*;
+import dev.jsinco.brewery.api.ingredient.Ingredient;
+import dev.jsinco.brewery.api.ingredient.IngredientGroup;
+import dev.jsinco.brewery.api.ingredient.IngredientManager;
+import dev.jsinco.brewery.api.ingredient.IngredientMeta;
+import dev.jsinco.brewery.api.ingredient.IngredientWithMeta;
 import dev.jsinco.brewery.api.util.BreweryKey;
 import dev.jsinco.brewery.api.util.Logger;
 import dev.jsinco.brewery.util.FutureUtil;
@@ -14,19 +17,21 @@ import eu.okaeri.configs.annotation.CustomKey;
 import eu.okaeri.configs.annotation.Exclude;
 import eu.okaeri.configs.serdes.OkaeriSerdesPack;
 import eu.okaeri.configs.yaml.snakeyaml.YamlSnakeYamlConfigurer;
-import lombok.Getter;
-import lombok.experimental.Accessors;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 
-@Accessors(fluent = true)
-@Getter
 public class IngredientsSection extends OkaeriConfig {
 
     @CustomKey("ingredient-groups")
@@ -87,9 +92,11 @@ public class IngredientsSection extends OkaeriConfig {
                 .orElse(CompletableFuture.completedFuture(Optional.empty()));
     }
 
-    @Accessors(fluent = true)
+    public List<IngredientGroupSection> ingredientGroups() {
+        return this.ingredientGroups;
+    }
+
     public static class IngredientGroupSection extends OkaeriConfig {
-        @Getter
         private String key;
         @CustomKey("display-name")
         private Component displayName;
@@ -164,6 +171,10 @@ public class IngredientsSection extends OkaeriConfig {
                 return new IngredientWithMeta(ingredient, Map.of(IngredientMeta.SCORE, 0.3));
             }
             return ingredient;
+        }
+
+        public String key() {
+            return this.key;
         }
     }
 }

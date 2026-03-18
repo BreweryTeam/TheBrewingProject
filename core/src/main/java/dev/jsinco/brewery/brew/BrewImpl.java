@@ -6,7 +6,6 @@ import dev.jsinco.brewery.api.meta.MetaDataType;
 import dev.jsinco.brewery.api.recipe.Recipe;
 import dev.jsinco.brewery.api.recipe.RecipeRegistry;
 import dev.jsinco.brewery.recipes.BrewScoreImpl;
-import lombok.Getter;
 import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -19,7 +18,6 @@ import java.util.stream.Stream;
 
 public class BrewImpl implements Brew {
 
-    @Getter
     private final List<BrewingStep> steps;
     private final MetaData meta;
     public static final BrewSerializer SERIALIZER = new BrewSerializer();
@@ -107,6 +105,11 @@ public class BrewImpl implements Brew {
         return steps.stream()
                 .filter(BrewingStep::isCompleted)
                 .toList();
+    }
+
+    @Override
+    public List<BrewingStep> getSteps() {
+        return steps;
     }
 
     @Override

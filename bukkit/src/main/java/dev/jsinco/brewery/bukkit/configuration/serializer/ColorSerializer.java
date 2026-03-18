@@ -4,8 +4,8 @@ import eu.okaeri.configs.schema.GenericsDeclaration;
 import eu.okaeri.configs.serdes.DeserializationData;
 import eu.okaeri.configs.serdes.ObjectSerializer;
 import eu.okaeri.configs.serdes.SerializationData;
-import lombok.NonNull;
 import net.kyori.adventure.text.format.NamedTextColor;
+import org.jspecify.annotations.NonNull;
 
 import java.awt.*;
 import java.util.HexFormat;

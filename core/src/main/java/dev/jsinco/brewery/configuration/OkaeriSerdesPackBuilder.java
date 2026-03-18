@@ -4,7 +4,7 @@ import com.google.common.collect.ImmutableList;
 import eu.okaeri.configs.serdes.ObjectSerializer;
 import eu.okaeri.configs.serdes.OkaeriSerdesPack;
 import eu.okaeri.configs.serdes.SerdesRegistry;
-import lombok.NonNull;
+import org.jspecify.annotations.NonNull;
 
 import java.util.List;
 
