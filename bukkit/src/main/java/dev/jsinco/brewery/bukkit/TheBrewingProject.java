@@ -1,6 +1,8 @@
 package dev.jsinco.brewery.bukkit;
 
 import com.google.common.base.Preconditions;
+import dev.faststats.bukkit.BukkitMetrics;
+import dev.faststats.core.ErrorTracker;
 import dev.jsinco.brewery.api.brew.BrewManager;
 import dev.jsinco.brewery.api.breweries.Barrel;
 import dev.jsinco.brewery.api.breweries.BarrelType;
@@ -348,6 +350,10 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
         this.getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS, BreweryCommand::register);
         loadDrunkenReplacements();
         loadTimeFormats();
+        BukkitMetrics.factory()
+                .token("2ee682246967303e517be0d593fe7a01")
+                .errorTracker(ErrorTracker.contextAware())
+                .create(this);
     }
 
     @Override

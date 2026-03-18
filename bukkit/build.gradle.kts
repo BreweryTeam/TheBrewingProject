@@ -37,6 +37,7 @@ repositories {
     maven("https://nexus.phoenixdevt.fr/repository/maven-public/")
     maven("https://mvn.lumine.io/repository/maven-public/")
     maven("https://storehouse.okaeri.eu/repository/maven-public/")
+    maven("https://repo.faststats.dev/releases")
 }
 
 dependencies {
@@ -50,6 +51,9 @@ dependencies {
     implementation(libs.schem.reader)
     implementation(libs.simple.yaml)
     implementation(libs.okaeri.json)
+    implementation("dev.faststats.metrics:bukkit:0.18.1") {
+        exclude("com.google.code.gson", "gson")
+    }
 
     // integrations
     compileOnly(libs.bolt.bukkit)
@@ -144,7 +148,8 @@ tasks {
             "org.simpleyaml",
             "org.yaml.snakeyaml",
             "eu.okaeri",
-            "net.objecthunter.exp4j"
+            "net.objecthunter.exp4j",
+            "dev.faststats"
         ).forEach { relocate(it, "${project.group}.lib.$it") }
     }
 
