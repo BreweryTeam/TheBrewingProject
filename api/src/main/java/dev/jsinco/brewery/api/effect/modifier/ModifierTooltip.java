@@ -1,7 +1,7 @@
 package dev.jsinco.brewery.api.effect.modifier;
 
 import dev.jsinco.brewery.api.brew.Brew;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public record ModifierTooltip(ModifierExpression filter, @Nullable String brewingTooltip,
                               @Nullable String defaultTooltip, @Nullable String sealedTooltip) {

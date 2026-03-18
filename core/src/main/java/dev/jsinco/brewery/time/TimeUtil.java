@@ -2,7 +2,7 @@ package dev.jsinco.brewery.time;
 
 import dev.jsinco.brewery.configuration.Config;
 import org.intellij.lang.annotations.RegExp;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Comparator;
 import java.util.List;

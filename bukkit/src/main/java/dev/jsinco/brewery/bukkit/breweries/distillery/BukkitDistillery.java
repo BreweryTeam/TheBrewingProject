@@ -37,8 +37,8 @@ import org.bukkit.Particle;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.jetbrains.annotations.NotNull;
 import org.joml.Vector3i;
+import org.jspecify.annotations.NonNull;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -62,11 +62,11 @@ public class BukkitDistillery implements Distillery<BukkitDistillery, ItemStack,
     private final Set<BreweryLocation> distillateContainerLocations = new HashSet<>();
     private long recentlyAccessed = -1L;
 
-    public BukkitDistillery(@NotNull PlacedBreweryStructure<BukkitDistillery> structure) {
+    public BukkitDistillery(@NonNull PlacedBreweryStructure<BukkitDistillery> structure) {
         this(structure, TheBrewingProject.getInstance().getTime());
     }
 
-    public BukkitDistillery(@NotNull PlacedBreweryStructure<BukkitDistillery> structure, long startTime) {
+    public BukkitDistillery(@NonNull PlacedBreweryStructure<BukkitDistillery> structure, long startTime) {
         this.structure = structure;
         this.startTime = startTime;
         BreweryLocation unique = structure.getUnique();
@@ -75,7 +75,7 @@ public class BukkitDistillery implements Distillery<BukkitDistillery, ItemStack,
     }
 
     @Override
-    public CancelState open(@NotNull BreweryLocation location, @NotNull Holder.Player playerHolder) {
+    public CancelState open(@NonNull BreweryLocation location, Holder.@NonNull Player playerHolder) {
         checkDirty();
         Player player = BukkitAdapter.toPlayer(playerHolder).orElse(null);
         if (player == null) {
@@ -93,7 +93,7 @@ public class BukkitDistillery implements Distillery<BukkitDistillery, ItemStack,
     }
 
     @Override
-    public boolean open(@NotNull BreweryLocation breweryLocation, @NotNull UUID playerUuid) {
+    public boolean open(@NonNull BreweryLocation breweryLocation, @NonNull UUID playerUuid) {
         Optional<Holder.Player> playerHolder = HolderProviderHolder.instance().player(playerUuid);
         CancelState cancelState = playerHolder
                 .map(player -> open(breweryLocation, player))
@@ -143,7 +143,7 @@ public class BukkitDistillery implements Distillery<BukkitDistillery, ItemStack,
     }
 
     @Override
-    public boolean inventoryAllows(@NotNull UUID playerUuid, @NotNull ItemStack item) {
+    public boolean inventoryAllows(@NonNull UUID playerUuid, @NonNull ItemStack item) {
         Player player = Bukkit.getPlayer(playerUuid);
         if (player == null) {
             return false;
@@ -156,7 +156,7 @@ public class BukkitDistillery implements Distillery<BukkitDistillery, ItemStack,
     }
 
     @Override
-    public boolean inventoryAllows(@NotNull ItemStack item) {
+    public boolean inventoryAllows(@NonNull ItemStack item) {
         return BrewAdapter.fromItem(item).isPresent();
     }
 
@@ -330,7 +330,7 @@ public class BukkitDistillery implements Distillery<BukkitDistillery, ItemStack,
     }
 
     @Override
-    public Optional<Inventory> access(@NotNull BreweryLocation breweryLocation) {
+    public Optional<Inventory> access(@NonNull BreweryLocation breweryLocation) {
         if (inventoryUnpopulated()
                 && (mixtureContainerLocations.contains(breweryLocation) || distillateContainerLocations.contains(breweryLocation))) {
             mixture.updateInventoryFromBrews();

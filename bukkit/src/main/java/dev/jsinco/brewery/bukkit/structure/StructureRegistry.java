@@ -5,9 +5,14 @@ import dev.jsinco.brewery.api.structure.StructureMeta;
 import dev.jsinco.brewery.api.structure.StructureType;
 import org.bukkit.Material;
 import org.bukkit.block.data.BlockData;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 
 public class StructureRegistry {
 
@@ -15,17 +20,17 @@ public class StructureRegistry {
     private final Map<StructureType, Map<Material, Set<BreweryStructure>>> structuresWithMaterials = new HashMap<>();
     private final Map<StructureType, Set<BreweryStructure>> structures = new HashMap<>();
 
-    public Optional<BreweryStructure> getStructure(@NotNull String key) {
+    public Optional<BreweryStructure> getStructure(@NonNull String key) {
         Preconditions.checkNotNull(key);
         return Optional.ofNullable(structureNames.get(key));
     }
 
-    public Set<BreweryStructure> getPossibleStructures(@NotNull Material material, StructureType structureType) {
+    public Set<BreweryStructure> getPossibleStructures(@NonNull Material material, StructureType structureType) {
         Preconditions.checkNotNull(material);
         return structuresWithMaterials.computeIfAbsent(structureType, ignored -> new HashMap<>()).getOrDefault(material, Set.of());
     }
 
-    public <T> void addStructure(@NotNull BreweryStructure structure, BlockDataMatcher<T> blockDataMatcher, T[] matcherTypes) {
+    public <T> void addStructure(@NonNull BreweryStructure structure, BlockDataMatcher<T> blockDataMatcher, T[] matcherTypes) {
         Preconditions.checkNotNull(structure);
         structureNames.put(structure.getName(), structure);
         structures.computeIfAbsent(structure.getMeta(StructureMeta.TYPE), ignored -> new HashSet<>()).add(structure);
@@ -37,7 +42,7 @@ public class StructureRegistry {
 
     }
 
-    public void addStructure(@NotNull BreweryStructure structure) {
+    public void addStructure(@NonNull BreweryStructure structure) {
         Preconditions.checkNotNull(structure);
         structureNames.put(structure.getName(), structure);
         structures.computeIfAbsent(structure.getMeta(StructureMeta.TYPE), ignored -> new HashSet<>()).add(structure);

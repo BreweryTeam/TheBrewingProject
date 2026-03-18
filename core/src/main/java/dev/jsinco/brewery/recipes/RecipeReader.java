@@ -14,7 +14,7 @@ import dev.jsinco.brewery.brew.MixStepImpl;
 import dev.jsinco.brewery.configuration.Config;
 import dev.jsinco.brewery.time.TimeUtil;
 import dev.jsinco.brewery.util.FutureUtil;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 import org.simpleyaml.configuration.ConfigurationSection;
 import org.simpleyaml.configuration.file.YamlFile;
 
@@ -86,7 +86,7 @@ public class RecipeReader<I> {
         }
     }
 
-    private @NotNull CompletableFuture<List<BrewingStep>> parseSteps(List<Map<?, ?>> steps) {
+    private @NonNull CompletableFuture<List<BrewingStep>> parseSteps(List<Map<?, ?>> steps) {
         return FutureUtil.mergeFutures(steps.stream()
                 .map(this::parseStep)
                 .toList());

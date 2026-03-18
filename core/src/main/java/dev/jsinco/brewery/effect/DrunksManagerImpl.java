@@ -17,8 +17,8 @@ import dev.jsinco.brewery.configuration.EventSection;
 import dev.jsinco.brewery.database.PersistenceException;
 import dev.jsinco.brewery.database.PersistenceHandler;
 import dev.jsinco.brewery.util.RandomUtil;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -175,7 +175,7 @@ public class DrunksManagerImpl<C> implements DrunksManager {
     }
 
     @Override
-    public void reset(@NotNull Set<EventData> allowedEvents) {
+    public void reset(@NonNull Set<EventData> allowedEvents) {
         plannedEvents.clear();
         drunks.clear();
         this.allowedEvents = allowedEvents;
@@ -198,7 +198,7 @@ public class DrunksManagerImpl<C> implements DrunksManager {
     }
 
     @Override
-    public void clear(@NotNull UUID playerUuid) {
+    public void clear(@NonNull UUID playerUuid) {
         Long plannedEventTime = plannedEvents.remove(playerUuid);
         drunks.remove(playerUuid);
         try {
@@ -235,7 +235,7 @@ public class DrunksManagerImpl<C> implements DrunksManager {
     }
 
     @Override
-    public void planEvent(@NotNull UUID playerUuid) {
+    public void planEvent(@NonNull UUID playerUuid) {
         DrunkState drunkState = getDrunkState(playerUuid);
         if (drunkState == null) {
             return;
@@ -268,12 +268,12 @@ public class DrunksManagerImpl<C> implements DrunksManager {
     }
 
     @Override
-    public void registerPassedOut(@NotNull UUID playerUuid) {
+    public void registerPassedOut(@NonNull UUID playerUuid) {
         drunks.computeIfPresent(playerUuid, (ignored, drunkState) -> drunkState.withPassOut(timeSupplier.getAsLong()));
     }
 
     @Override
-    public boolean isPassedOut(@NotNull UUID playerUUID) {
+    public boolean isPassedOut(@NonNull UUID playerUUID) {
         return drunks.containsKey(playerUUID) && isPassedOut(drunks.get(playerUUID));
     }
 
@@ -286,7 +286,7 @@ public class DrunksManagerImpl<C> implements DrunksManager {
     }
 
     @Override
-    public @Nullable Pair<DrunkEvent, Long> getPlannedEvent(@NotNull UUID playerUUID) {
+    public @Nullable Pair<DrunkEvent, Long> getPlannedEvent(@NonNull UUID playerUUID) {
         Long time = plannedEvents.get(playerUUID);
         if (time == null) {
             return null;

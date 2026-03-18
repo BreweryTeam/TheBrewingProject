@@ -24,11 +24,9 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Optional;
-import java.util.UUID;
-import java.util.stream.Collectors;
 
 public class InfoCommand {
     private static final int PLAYER_INVENTORY_SIZE = 41;

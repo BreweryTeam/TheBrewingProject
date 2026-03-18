@@ -9,8 +9,8 @@ import org.bukkit.entity.HumanEntity;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 import java.util.Objects;
@@ -27,7 +27,7 @@ public class BrewInventoryImpl implements InventoryHolder, BrewInventory {
         this.store = store;
     }
 
-    @NotNull
+    @NonNull
     @Override
     public Inventory getInventory() {
         return inventory;

@@ -2,7 +2,7 @@ package dev.jsinco.brewery.effect.text;
 
 import dev.jsinco.brewery.api.effect.modifier.DrunkenModifier;
 import dev.jsinco.brewery.api.util.Pair;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,7 +18,7 @@ public record DrunkTextPattern(Pattern pattern, String text, int percentage, Dru
     private static final Random RANDOM = new Random();
 
     @Override
-    public @NotNull List<TextTransformation> findTransform(String initial) {
+    public @NonNull List<TextTransformation> findTransform(String initial) {
         Matcher matcher = pattern.matcher(initial);
         List<TextTransformation> output = new ArrayList<>();
         while (matcher.find()) {

@@ -5,7 +5,7 @@ import dev.jsinco.brewery.bukkit.brew.BrewingStepPdcType;
 import dev.jsinco.brewery.util.DecoderEncoder;
 import org.bukkit.persistence.PersistentDataAdapterContext;
 import org.bukkit.persistence.PersistentDataType;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -26,21 +26,21 @@ public class ListPersistentDataType<T> implements PersistentDataType<byte[], Lis
         this.persistentDataType = persistentDataType;
     }
 
-    @NotNull
+    @NonNull
     @Override
     public Class<byte[]> getPrimitiveType() {
         return byte[].class;
     }
 
-    @NotNull
+    @NonNull
     @Override
     public Class<List<T>> getComplexType() {
         return (Class<List<T>>) List.of().getClass();
     }
 
-    @NotNull
+    @NonNull
     @Override
-    public byte[] toPrimitive(@NotNull List<T> complex, @NotNull PersistentDataAdapterContext context) {
+    public byte[] toPrimitive(@NonNull List<T> complex, @NonNull PersistentDataAdapterContext context) {
         byte[][] byteArrayArray = complex.stream()
                 .map(complexElement -> persistentDataType.toPrimitive(complexElement, context))
                 .toArray(byte[][]::new);
@@ -54,7 +54,7 @@ public class ListPersistentDataType<T> implements PersistentDataType<byte[], Lis
     }
 
     @Override
-    public @NotNull List<T> fromPrimitive(@NotNull byte[] primitive, @NotNull PersistentDataAdapterContext context) {
+    public @NonNull List<T> fromPrimitive(@NonNull byte[] primitive, @NonNull PersistentDataAdapterContext context) {
         try {
             byte[][] byteArrayArray = DecoderEncoder.decode(new ByteArrayInputStream(primitive));
             return Arrays.stream(byteArrayArray)

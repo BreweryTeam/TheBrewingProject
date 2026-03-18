@@ -14,7 +14,7 @@ import dev.jsinco.brewery.bukkit.util.BukkitMessageUtil;
 import io.papermc.paper.command.brigadier.MessageComponentSerializer;
 import io.papermc.paper.command.brigadier.argument.CustomArgumentType;
 import net.kyori.adventure.text.Component;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -93,7 +93,7 @@ public class IngredientsArgument implements CustomArgumentType.Converted<Map<Ing
     }
 
     @Override
-    public <S> CompletableFuture<Suggestions> listSuggestions(@NotNull CommandContext<S> context, SuggestionsBuilder builder) {
+    public <S> CompletableFuture<Suggestions> listSuggestions(@NonNull CommandContext<S> context, SuggestionsBuilder builder) {
         if (builder.getRemainingLowerCase().isBlank()) {
             builder.suggest("\"");
             return builder.buildFuture();

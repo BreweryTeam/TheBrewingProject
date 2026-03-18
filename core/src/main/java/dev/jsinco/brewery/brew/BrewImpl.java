@@ -1,16 +1,31 @@
 package dev.jsinco.brewery.brew;
 
-import dev.jsinco.brewery.api.brew.*;
+import dev.jsinco.brewery.api.brew.Brew;
+import dev.jsinco.brewery.api.brew.BrewQuality;
+import dev.jsinco.brewery.api.brew.BrewScore;
+import dev.jsinco.brewery.api.brew.BrewingStep;
+import dev.jsinco.brewery.api.brew.PartialBrewScore;
+import dev.jsinco.brewery.api.brew.ScoreType;
 import dev.jsinco.brewery.api.meta.MetaData;
 import dev.jsinco.brewery.api.meta.MetaDataType;
 import dev.jsinco.brewery.api.recipe.Recipe;
 import dev.jsinco.brewery.api.recipe.RecipeRegistry;
 import dev.jsinco.brewery.recipes.BrewScoreImpl;
 import net.kyori.adventure.key.Key;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.SequencedSet;
+import java.util.Set;
+import java.util.UUID;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -30,7 +45,7 @@ public class BrewImpl implements Brew {
         this(List.of(mix));
     }
 
-    public BrewImpl(@NotNull List<BrewingStep> steps) {
+    public BrewImpl(@NonNull List<BrewingStep> steps) {
         this(steps, new MetaData());
     }
 
@@ -185,7 +200,7 @@ public class BrewImpl implements Brew {
     }
 
     @Override
-    public @NotNull BrewScore score(Recipe<?> recipe) {
+    public @NonNull BrewScore score(Recipe<?> recipe) {
         List<BrewingStep> recipeSteps = recipe.getSteps();
         List<Map<ScoreType, PartialBrewScore>> scores = new ArrayList<>();
         List<BrewingStep> completedSteps = getCompletedSteps();
@@ -215,7 +230,7 @@ public class BrewImpl implements Brew {
     }
 
     @Override
-    public @NotNull BrewingStep lastCompletedStep() {
+    public @NonNull BrewingStep lastCompletedStep() {
         for (int i = steps.size() - 1; i >= 0; i--) {
             BrewingStep step = steps.get(i);
             if (step.isCompleted()) {
@@ -226,7 +241,7 @@ public class BrewImpl implements Brew {
     }
 
     @Override
-    public @NotNull BrewingStep lastStep() {
+    public @NonNull BrewingStep lastStep() {
         return steps.getLast();
     }
 

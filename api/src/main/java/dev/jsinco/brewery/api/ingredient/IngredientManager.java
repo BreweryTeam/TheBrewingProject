@@ -6,7 +6,7 @@ import dev.jsinco.brewery.api.util.BreweryKey;
 import dev.jsinco.brewery.api.util.BreweryRegistry;
 import dev.jsinco.brewery.api.util.Pair;
 import dev.jsinco.brewery.api.util.StringUtil;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 import java.util.List;
 import java.util.Map;
@@ -33,7 +33,7 @@ public interface IngredientManager<I> {
      * @param itemStack An item stack
      * @return An ingredient of the item stack
      */
-    Ingredient getIngredient(@NotNull I itemStack);
+    Ingredient getIngredient(@NonNull I itemStack);
 
     /**
      * @param ingredient An ingredient
@@ -50,7 +50,7 @@ public interface IngredientManager<I> {
      * @param ingredientStr A string representing the ingredient
      * @return A completable future with an optionally present ingredient
      */
-    CompletableFuture<Optional<Ingredient>> getIngredient(@NotNull String ingredientStr);
+    CompletableFuture<Optional<Ingredient>> getIngredient(@NonNull String ingredientStr);
 
     /**
      * Deserialize the ingredient with meta data. Meta data is within curly brackets
@@ -59,7 +59,7 @@ public interface IngredientManager<I> {
      * @return A completable future with an optionally present ingredient
      * @throws IllegalArgumentException if the ingredient meta in the string was invalid
      */
-    default CompletableFuture<Optional<Ingredient>> deserializeIngredient(@NotNull String serializedIngredient) throws IllegalArgumentException {
+    default CompletableFuture<Optional<Ingredient>> deserializeIngredient(@NonNull String serializedIngredient) throws IllegalArgumentException {
         Matcher matcher = INGREDIENT_META_DATA_RE.matcher(serializedIngredient);
         if (!matcher.find()) {
             return getIngredient(serializedIngredient);

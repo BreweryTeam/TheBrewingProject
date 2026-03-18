@@ -37,8 +37,8 @@ import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Collection;
 import java.util.LinkedHashSet;
@@ -49,7 +49,7 @@ import java.util.stream.Stream;
 
 public class BukkitRecipeResult implements RecipeResult<ItemStack> {
 
-    public static final @NotNull RecipeResult<ItemStack> GENERIC = new Builder()
+    public static final @NonNull RecipeResult<ItemStack> GENERIC = new Builder()
             .lore(List.of())
             .name("Generic")
             .recipeEffects(RecipeEffectsImpl.GENERIC)
@@ -79,7 +79,7 @@ public class BukkitRecipeResult implements RecipeResult<ItemStack> {
     }
 
     @Override
-    public ItemStack newBrewItem(@NotNull BrewScore score, @NotNull Brew brew, @NotNull Brew.State state) {
+    public ItemStack newBrewItem(@NonNull BrewScore score, @NonNull Brew brew, Brew.@NonNull State state) {
         ItemStack itemStack = newLorelessItem();
         applyLore(itemStack, score, brew, state);
         return itemStack;
@@ -226,7 +226,7 @@ public class BukkitRecipeResult implements RecipeResult<ItemStack> {
                 .forEach(streamBuilder::add);
     }
 
-    private @NotNull TagResolver getResolver(BrewScore score) {
+    private @NonNull TagResolver getResolver(BrewScore score) {
         TagResolver.Builder output = TagResolver.builder();
         output.resolvers(
                 MessageUtil.numberedModifierTagResolver(recipeEffects.getModifiers(), null),
@@ -283,12 +283,12 @@ public class BukkitRecipeResult implements RecipeResult<ItemStack> {
             return this;
         }
 
-        public Builder recipeEffects(@NotNull RecipeEffectsImpl recipeEffects) {
+        public Builder recipeEffects(@NonNull RecipeEffectsImpl recipeEffects) {
             this.recipeEffects = Objects.requireNonNull(recipeEffects);
             return this;
         }
 
-        public Builder color(@NotNull Color color) {
+        public Builder color(@NonNull Color color) {
             this.color = color;
             return this;
         }

@@ -7,8 +7,8 @@ import dev.jsinco.brewery.api.util.Logger;
 import dev.jsinco.brewery.bukkit.api.ingredient.PluginIngredient;
 import net.kyori.adventure.text.Component;
 import org.bukkit.inventory.ItemStack;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -58,12 +58,12 @@ public interface ItemIntegration extends Integration {
     /**
      * Completes when the integration has finished initializing
      */
-    @NotNull CompletableFuture<Void> initialized();
+    @NonNull CompletableFuture<Void> initialized();
 
     /**
      * Gets the Ingredient representation of the given ItemStack
      */
-    default Optional<Ingredient> getIngredient(@NotNull ItemStack itemStack) {
+    default Optional<Ingredient> getIngredient(@NonNull ItemStack itemStack) {
         return Optional.ofNullable(getItemId(itemStack))
                 .map(id -> new PluginIngredient(new BreweryKey(getId(), id), this));
     }

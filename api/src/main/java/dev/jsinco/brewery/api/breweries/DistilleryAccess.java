@@ -4,9 +4,7 @@ import dev.jsinco.brewery.api.structure.MultiblockStructure;
 import dev.jsinco.brewery.api.util.CancelState;
 import dev.jsinco.brewery.api.util.Holder;
 import dev.jsinco.brewery.api.vector.BreweryLocation;
-import org.jetbrains.annotations.NotNull;
-
-import java.util.UUID;
+import org.jspecify.annotations.NonNull;
 
 public interface DistilleryAccess {
     /**
@@ -15,7 +13,7 @@ public interface DistilleryAccess {
      * @param player The player UUID
      * @return True if canceled
      */
-    CancelState open(@NotNull BreweryLocation location, @NotNull Holder.Player player);
+    CancelState open(@NonNull BreweryLocation location, Holder.@NonNull Player player);
 
     /**
      * Closes the distillery inventory for all viewers

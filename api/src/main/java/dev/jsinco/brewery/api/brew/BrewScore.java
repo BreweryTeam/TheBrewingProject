@@ -1,7 +1,7 @@
 package dev.jsinco.brewery.api.brew;
 
 import net.kyori.adventure.text.Component;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Map;
 

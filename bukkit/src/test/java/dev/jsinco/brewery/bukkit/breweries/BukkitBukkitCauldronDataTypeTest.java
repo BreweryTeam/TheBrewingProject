@@ -1,15 +1,14 @@
 package dev.jsinco.brewery.bukkit.breweries;
 
+import dev.jsinco.brewery.api.vector.BreweryLocation;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.bukkit.api.BukkitAdapter;
 import dev.jsinco.brewery.bukkit.testutil.TBPServerMock;
 import dev.jsinco.brewery.database.PersistenceException;
 import dev.jsinco.brewery.database.sql.Database;
-import dev.jsinco.brewery.util.FutureUtil;
-import dev.jsinco.brewery.api.vector.BreweryLocation;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -23,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class BukkitBukkitCauldronDataTypeTest {
 
-    private @NotNull WorldMock world;
+    private @NonNull WorldMock world;
     private Database database;
 
     @BeforeEach

@@ -5,7 +5,7 @@ import dev.jsinco.brewery.api.effect.modifier.DrunkenModifier;
 import dev.jsinco.brewery.api.event.EventPropertyExecutable;
 import dev.jsinco.brewery.api.event.EventStep;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 import java.util.List;
 import java.util.Map;
@@ -20,7 +20,7 @@ public class ConsumeStepExecutable implements EventPropertyExecutable {
     }
 
     @Override
-    public @NotNull ExecutionResult execute(UUID contextPlayer, List<? extends EventStep> events, int index) {
+    public @NonNull ExecutionResult execute(UUID contextPlayer, List<? extends EventStep> events, int index) {
         TheBrewingProject.getInstance().getDrunksManager().consume(contextPlayer, consumeModifiers.entrySet().stream()
                 .map(entry -> new ModifierConsume(entry.getKey(), entry.getValue()))
                 .toList()

@@ -14,7 +14,7 @@ import io.papermc.paper.command.brigadier.argument.resolvers.selector.PlayerSele
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -34,7 +34,7 @@ public class OfflinePlayerArgument implements CustomArgumentType<OfflinePlayerSe
     }
 
     @Override
-    public <S> CompletableFuture<Suggestions> listSuggestions(@NotNull CommandContext<S> context, SuggestionsBuilder builder) {
+    public <S> CompletableFuture<Suggestions> listSuggestions(@NonNull CommandContext<S> context, SuggestionsBuilder builder) {
         return backing.listSuggestions(context, builder);
     }
 
@@ -58,7 +58,7 @@ public class OfflinePlayerArgument implements CustomArgumentType<OfflinePlayerSe
     }
 
     @Override
-    public @NotNull ArgumentType<PlayerSelectorArgumentResolver> getNativeType() {
+    public @NonNull ArgumentType<PlayerSelectorArgumentResolver> getNativeType() {
         return backing;
     }
 }

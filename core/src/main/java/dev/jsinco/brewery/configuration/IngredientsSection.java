@@ -18,7 +18,7 @@ import eu.okaeri.configs.annotation.Exclude;
 import eu.okaeri.configs.serdes.OkaeriSerdesPack;
 import eu.okaeri.configs.yaml.snakeyaml.YamlSnakeYamlConfigurer;
 import net.kyori.adventure.text.Component;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -77,7 +77,7 @@ public class IngredientsSection extends OkaeriConfig {
 
     public static void validate(IngredientManager<?> ingredientManager, Function<String, List<String>> tagResolver) {
         Set<String> keys = new HashSet<>();
-        ImmutableMap.Builder<@NotNull BreweryKey, @NotNull CompletableFuture<Optional<Ingredient>>> ingredientsFutures = new ImmutableMap.Builder<>();
+        ImmutableMap.Builder<@NonNull BreweryKey, @NonNull CompletableFuture<Optional<Ingredient>>> ingredientsFutures = new ImmutableMap.Builder<>();
         for (IngredientGroupSection ingredientGroup : instance.ingredientGroups()) {
             String key = ingredientGroup.key;
             Preconditions.checkArgument(!keys.contains(key), "Can't have two ingredient groups with the same key (ingredients.yml): " + key);

@@ -6,8 +6,8 @@ import dev.jsinco.brewery.bukkit.api.transaction.ItemSource;
 import dev.jsinco.brewery.bukkit.api.transaction.ItemTransactionSession;
 import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 public class BarrelInsertEvent extends PermissibleBreweryEvent implements ItemTransactionEvent<ItemSource.BrewBasedSource> {
 
@@ -17,7 +17,7 @@ public class BarrelInsertEvent extends PermissibleBreweryEvent implements ItemTr
     private final ItemTransactionSession<ItemSource.BrewBasedSource> transactionSession;
 
     public BarrelInsertEvent(BarrelAccess barrel, ItemTransactionSession<ItemSource.BrewBasedSource> transactionSession,
-                             @NotNull dev.jsinco.brewery.api.util.CancelState state, @Nullable Player player) {
+                             dev.jsinco.brewery.api.util.@NonNull CancelState state, @Nullable Player player) {
         super(state);
         this.barrel = barrel;
         this.transactionSession = transactionSession;
@@ -25,7 +25,7 @@ public class BarrelInsertEvent extends PermissibleBreweryEvent implements ItemTr
     }
 
     @Override
-    public @NotNull HandlerList getHandlers() {
+    public @NonNull HandlerList getHandlers() {
         return HANDLERS;
     }
 

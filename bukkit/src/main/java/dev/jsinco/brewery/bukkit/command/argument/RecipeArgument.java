@@ -14,10 +14,9 @@ import dev.jsinco.brewery.bukkit.util.BukkitMessageUtil;
 import io.papermc.paper.command.brigadier.argument.CustomArgumentType;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import org.bukkit.inventory.ItemStack;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 import java.util.concurrent.CompletableFuture;
-import java.util.regex.Pattern;
 
 public class RecipeArgument implements CustomArgumentType.Converted<Recipe<ItemStack>, String> {
     private static final DynamicCommandExceptionType ERROR_INVALID_RECIPE = new DynamicCommandExceptionType(event ->
@@ -33,7 +32,7 @@ public class RecipeArgument implements CustomArgumentType.Converted<Recipe<ItemS
     }
 
     @Override
-    public <S> CompletableFuture<Suggestions> listSuggestions(@NotNull CommandContext<S> context, SuggestionsBuilder builder) {
+    public <S> CompletableFuture<Suggestions> listSuggestions(@NonNull CommandContext<S> context, SuggestionsBuilder builder) {
         String remaining = ArgumentUtil.escapeQuotes(builder.getRemainingLowerCase());
         TheBrewingProject.getInstance().getRecipeRegistry()
                 .getRecipes()

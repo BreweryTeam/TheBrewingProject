@@ -33,7 +33,7 @@ import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -54,7 +54,7 @@ public class BukkitBarrel implements Barrel<BukkitBarrel, ItemStack, Inventory>,
     private long ticksUntilNextCheck = 0L;
     private static final Random RANDOM = new Random();
 
-    public BukkitBarrel(Location uniqueLocation, @NotNull PlacedBreweryStructure<BukkitBarrel> structure, int size, @NotNull BarrelType type) {
+    public BukkitBarrel(Location uniqueLocation, @NonNull PlacedBreweryStructure<BukkitBarrel> structure, int size, @NonNull BarrelType type) {
         this.structure = Preconditions.checkNotNull(structure);
         this.size = size;
         this.type = Preconditions.checkNotNull(type);
@@ -63,7 +63,7 @@ public class BukkitBarrel implements Barrel<BukkitBarrel, ItemStack, Inventory>,
     }
 
     @Override
-    public CancelState open(@NotNull BreweryLocation location, @NotNull Holder.Player playerHolder) {
+    public CancelState open(@NonNull BreweryLocation location, Holder.@NonNull Player playerHolder) {
         Player player = BukkitAdapter.toPlayer(playerHolder)
                 .orElse(null);
         if (player == null) {
@@ -84,7 +84,7 @@ public class BukkitBarrel implements Barrel<BukkitBarrel, ItemStack, Inventory>,
     }
 
     @Override
-    public boolean inventoryAllows(@NotNull UUID playerUuid, @NotNull ItemStack item) {
+    public boolean inventoryAllows(@NonNull UUID playerUuid, @NonNull ItemStack item) {
         Player player = Bukkit.getPlayer(playerUuid);
         if (player == null) {
             return false;
@@ -97,7 +97,7 @@ public class BukkitBarrel implements Barrel<BukkitBarrel, ItemStack, Inventory>,
     }
 
     @Override
-    public boolean inventoryAllows(@NotNull ItemStack item) {
+    public boolean inventoryAllows(@NonNull ItemStack item) {
         return BrewAdapter.fromItem(item).isPresent();
     }
 
@@ -107,7 +107,7 @@ public class BukkitBarrel implements Barrel<BukkitBarrel, ItemStack, Inventory>,
     }
 
     @Override
-    public boolean open(@NotNull BreweryLocation breweryLocation, @NotNull UUID playerUuid) {
+    public boolean open(@NonNull BreweryLocation breweryLocation, @NonNull UUID playerUuid) {
         Optional<Holder.Player> playerOptional = HolderProviderHolder.instance().player(playerUuid);
         CancelState cancelState = playerOptional
                 .map(player -> open(breweryLocation, player))
@@ -198,7 +198,7 @@ public class BukkitBarrel implements Barrel<BukkitBarrel, ItemStack, Inventory>,
     }
 
     @Override
-    public Optional<Inventory> access(@NotNull BreweryLocation breweryLocation) {
+    public Optional<Inventory> access(@NonNull BreweryLocation breweryLocation) {
         if (inventoryUnpopulated()) {
             inventory.updateInventoryFromBrews();
             TheBrewingProject.getInstance().getBreweryRegistry().registerOpened(this);

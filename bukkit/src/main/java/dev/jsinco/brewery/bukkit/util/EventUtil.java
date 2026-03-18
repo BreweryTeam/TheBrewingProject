@@ -3,16 +3,25 @@ package dev.jsinco.brewery.bukkit.util;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Streams;
 import dev.jsinco.brewery.api.effect.modifier.ModifierExpression;
-import dev.jsinco.brewery.api.event.*;
+import dev.jsinco.brewery.api.event.CustomEvent;
+import dev.jsinco.brewery.api.event.DrunkEvent;
+import dev.jsinco.brewery.api.event.EventData;
+import dev.jsinco.brewery.api.event.EventProbability;
+import dev.jsinco.brewery.api.event.EventStep;
+import dev.jsinco.brewery.api.event.EventStepProperty;
 import dev.jsinco.brewery.api.meta.MetaDataType;
 import dev.jsinco.brewery.api.util.BreweryKey;
 import dev.jsinco.brewery.api.util.BreweryRegistry;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.bukkit.api.integration.EventIntegration;
 import dev.jsinco.brewery.bukkit.api.integration.IntegrationTypes;
+import org.jspecify.annotations.Nullable;
 
-import javax.annotation.Nullable;
-import java.util.*;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 
 public class EventUtil {
 
@@ -41,9 +50,9 @@ public class EventUtil {
 
     private static DrunkEvent applyProbability(DrunkEvent drunkEvent, @Nullable ModifierExpression probability) {
         return probability == null || !(drunkEvent instanceof EventStepProperty property) ? drunkEvent : new CustomEvent.Builder()
-                .probability(new EventProbability(probability, Map.of()))
-                .addStep(new EventStep.Builder().addProperty(property).build())
-                .build(drunkEvent.key());
+                                                                                                         .probability(new EventProbability(probability, Map.of()))
+                                                                                                         .addStep(new EventStep.Builder().addProperty(property).build())
+                                                                                                         .build(drunkEvent.key());
     }
 
     public static List<BreweryKey> listAll() {

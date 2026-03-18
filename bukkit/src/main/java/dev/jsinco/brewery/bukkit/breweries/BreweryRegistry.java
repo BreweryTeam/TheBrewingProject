@@ -6,9 +6,13 @@ import dev.jsinco.brewery.api.structure.StructureType;
 import dev.jsinco.brewery.api.vector.BreweryLocation;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 public final class BreweryRegistry {

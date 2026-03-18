@@ -8,7 +8,6 @@ import org.bukkit.persistence.ListPersistentDataType;
 import org.bukkit.persistence.PersistentDataAdapterContext;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
-import org.jetbrains.annotations.NotNull;
 import org.jspecify.annotations.NonNull;
 
 import java.util.Map;
@@ -19,13 +18,13 @@ public class MetaDataPdcType implements PersistentDataType<PersistentDataContain
     public static final MetaDataPdcType INSTANCE = new MetaDataPdcType();
     public static final ListPersistentDataType<PersistentDataContainer, MetaData> LIST = PersistentDataType.LIST.listTypeFrom(INSTANCE);
 
-    @NotNull
+    @NonNull
     @Override
     public Class<PersistentDataContainer> getPrimitiveType() {
         return PersistentDataContainer.class;
     }
 
-    @NotNull
+    @NonNull
     @Override
     public Class<MetaData> getComplexType() {
         return MetaData.class;
@@ -33,7 +32,7 @@ public class MetaDataPdcType implements PersistentDataType<PersistentDataContain
 
     @Override
     @SuppressWarnings("unchecked") // typeof check ensures safety
-    public @NonNull PersistentDataContainer toPrimitive(@NonNull MetaData complex, @NotNull PersistentDataAdapterContext context) {
+    public @NonNull PersistentDataContainer toPrimitive(@NonNull MetaData complex, @NonNull PersistentDataAdapterContext context) {
         PersistentDataContainer pdc = context.newPersistentDataContainer();
         for (Map.Entry<Key, Object> entry : complex.primitiveMap().entrySet()) {
             NamespacedKey key = new NamespacedKey(entry.getKey().namespace(), entry.getKey().value());
@@ -45,7 +44,7 @@ public class MetaDataPdcType implements PersistentDataType<PersistentDataContain
 
     @Override
     @SuppressWarnings("unchecked") // typeof check ensures safety
-    public @NonNull MetaData fromPrimitive(@NonNull PersistentDataContainer primitive, @NotNull PersistentDataAdapterContext context) {
+    public @NonNull MetaData fromPrimitive(@NonNull PersistentDataContainer primitive, @NonNull PersistentDataAdapterContext context) {
         MetaData meta = new MetaData();
         for (NamespacedKey key : primitive.getKeys()) {
             Object value = Objects.requireNonNull(primitive.get(key, MetaUtil.findType(primitive, key)));

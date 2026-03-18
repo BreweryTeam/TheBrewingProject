@@ -11,8 +11,8 @@ import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 import java.util.UUID;
@@ -25,7 +25,7 @@ public class LocationUtil {
      * @param worldNameOrUUID The world name or UUID
      * @return A valid World UUID
      */
-    public static @NotNull UUID resolveWorld(String worldNameOrUUID) {
+    public static @NonNull UUID resolveWorld(String worldNameOrUUID) {
         World world;
         try {
             world = Bukkit.getWorld(UUID.fromString(worldNameOrUUID));
@@ -38,7 +38,7 @@ public class LocationUtil {
         return world.getUID();
     }
 
-    public static @NotNull Location safeLocationInRadius(Location location, int radius) {
+    public static @NonNull Location safeLocationInRadius(Location location, int radius) {
         Location center = location.clone();
         World world = center.getWorld();
 

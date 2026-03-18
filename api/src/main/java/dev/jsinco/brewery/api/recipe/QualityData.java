@@ -2,10 +2,14 @@ package dev.jsinco.brewery.api.recipe;
 
 import com.google.common.base.Preconditions;
 import dev.jsinco.brewery.api.brew.BrewQuality;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -56,7 +60,7 @@ public class QualityData<T> {
      * @param brewQuality Quality data
      * @return The data for specified
      */
-    public @NotNull T get(BrewQuality brewQuality) {
+    public @NonNull T get(BrewQuality brewQuality) {
         return backing.get(brewQuality);
     }
 
@@ -66,7 +70,7 @@ public class QualityData<T> {
      * @return The data for specified
      */
     @Deprecated(forRemoval = true)
-    public @NotNull T get(BrewQuality brewQuality, T ignored) {
+    public @NonNull T get(BrewQuality brewQuality, T ignored) {
         return backing.get(brewQuality);
     }
 
@@ -75,7 +79,7 @@ public class QualityData<T> {
                 .collect(Collectors.toMap(quality -> quality, mapper)));
     }
 
-    public static QualityData<String> readQualityFactoredString(@NotNull String string) {
+    public static QualityData<String> readQualityFactoredString(@NonNull String string) {
         String[] list = split(string);
         if (list.length == 1) {
             return new QualityData<>(Map.of(BrewQuality.BAD, string, BrewQuality.GOOD, string, BrewQuality.EXCELLENT, string));

@@ -32,8 +32,8 @@ import org.bukkit.entity.Projectile;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.List;
@@ -59,15 +59,15 @@ public class RecipeEffectsImpl implements RecipeEffects {
             .effects(List.of())
             .build();
 
-    private final @NotNull List<RecipeEffectImpl> effects;
+    private final @NonNull List<RecipeEffectImpl> effects;
     private final @Nullable String title;
     private final @Nullable String message;
     private final @Nullable String actionBar;
-    private final @NotNull Map<DrunkenModifier, Double> modifiers;
-    private final @NotNull List<EventData> events;
+    private final @NonNull Map<DrunkenModifier, Double> modifiers;
+    private final @NonNull List<EventData> events;
 
-    private RecipeEffectsImpl(@NotNull List<RecipeEffectImpl> effects, @Nullable String title, @Nullable String message,
-                              @Nullable String actionBar, @NotNull List<EventData> events, @NotNull Map<DrunkenModifier, Double> modifiers) {
+    private RecipeEffectsImpl(@NonNull List<RecipeEffectImpl> effects, @Nullable String title, @Nullable String message,
+                              @Nullable String actionBar, @NonNull List<EventData> events, @NonNull Map<DrunkenModifier, Double> modifiers) {
         this.effects = effects;
         this.title = title;
         this.message = message;
@@ -159,7 +159,7 @@ public class RecipeEffectsImpl implements RecipeEffects {
         return Optional.of(builder.build());
     }
 
-    public static Optional<RecipeEffectsImpl> fromItem(@NotNull ItemStack item) {
+    public static Optional<RecipeEffectsImpl> fromItem(@NonNull ItemStack item) {
         return fromPdc(item.getPersistentDataContainer());
     }
 
@@ -260,7 +260,7 @@ public class RecipeEffectsImpl implements RecipeEffects {
                 ).orElse(null);
     }
 
-    @NotNull
+    @NonNull
     public List<RecipeEffectImpl> getEffects() {
         return this.effects;
     }
@@ -280,7 +280,7 @@ public class RecipeEffectsImpl implements RecipeEffects {
         return this.actionBar;
     }
 
-    @NotNull
+    @NonNull
     public Map<DrunkenModifier, Double> getModifiers() {
         return this.modifiers;
     }
@@ -291,22 +291,22 @@ public class RecipeEffectsImpl implements RecipeEffects {
         private @Nullable String title;
         private @Nullable String message;
         private @Nullable String actionBar;
-        private @NotNull List<EventData> events = List.of();
+        private @NonNull List<EventData> events = List.of();
         private final ImmutableMap.Builder<DrunkenModifier, Double> modifiers = new ImmutableMap.Builder<>();
 
-        public Builder effects(@NotNull List<RecipeEffectImpl> effects) {
+        public Builder effects(@NonNull List<RecipeEffectImpl> effects) {
             Preconditions.checkNotNull(effects);
             this.effects = effects;
             return this;
         }
 
-        public Builder events(@NotNull List<BreweryKey> events) {
+        public Builder events(@NonNull List<BreweryKey> events) {
             Preconditions.checkNotNull(events);
             this.events = events.stream().map(EventData::new).toList();
             return this;
         }
 
-        public Builder eventData(@NotNull List<EventData> events) {
+        public Builder eventData(@NonNull List<EventData> events) {
             Preconditions.checkNotNull(events);
             this.events = List.copyOf(events);
             return this;

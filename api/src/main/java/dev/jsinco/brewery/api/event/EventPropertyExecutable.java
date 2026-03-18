@@ -1,6 +1,7 @@
 package dev.jsinco.brewery.api.event;
 
-import org.jetbrains.annotations.NotNull;
+
+import org.jspecify.annotations.NonNull;
 
 import java.util.List;
 import java.util.Random;
@@ -16,7 +17,7 @@ public interface EventPropertyExecutable {
      * @param index         Current index of the run events
      * @return Information whether further execution should occur
      */
-    @NotNull ExecutionResult execute(UUID contextPlayer, List<? extends EventStep> events, int index);
+    @NonNull ExecutionResult execute(UUID contextPlayer, List<? extends EventStep> events, int index);
 
     /**
      * Priority of the step, just used to make the execution order deterministic

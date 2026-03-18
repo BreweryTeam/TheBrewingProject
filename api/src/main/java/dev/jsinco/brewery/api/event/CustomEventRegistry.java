@@ -2,8 +2,8 @@ package dev.jsinco.brewery.api.event;
 
 import com.google.common.base.Preconditions;
 import dev.jsinco.brewery.api.util.BreweryKey;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -24,7 +24,7 @@ public class CustomEventRegistry {
         customEvents.put(customEvent.key(), customEvent);
     }
 
-    public @Nullable CustomEvent.Keyed getCustomEvent(BreweryKey key) {
+    public CustomEvent.@Nullable Keyed getCustomEvent(BreweryKey key) {
         Preconditions.checkNotNull(key);
         return customEvents.get(key);
     }
@@ -42,7 +42,7 @@ public class CustomEventRegistry {
 
         List<CustomEvent.Keyed> customEvents = new ArrayList<>();
 
-        public Builder addEvent(@NotNull CustomEvent.Keyed event) {
+        public Builder addEvent(CustomEvent.@NonNull Keyed event) {
             Preconditions.checkNotNull(event);
             customEvents.add(event);
             return this;

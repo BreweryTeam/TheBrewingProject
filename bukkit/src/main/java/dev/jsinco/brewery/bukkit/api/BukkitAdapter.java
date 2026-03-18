@@ -3,11 +3,16 @@ package dev.jsinco.brewery.bukkit.api;
 import dev.jsinco.brewery.api.util.BreweryKey;
 import dev.jsinco.brewery.api.util.Holder;
 import dev.jsinco.brewery.api.vector.BreweryLocation;
-import org.bukkit.*;
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
+import org.bukkit.Registry;
+import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Optional;
 
@@ -47,23 +52,23 @@ public class BukkitAdapter {
         return Registry.MATERIAL.get(toNamespacedKey(material.value()));
     }
 
-    public static @NotNull Holder.Material toMaterialHolder(Material material) {
+    public static Holder.@NonNull Material toMaterialHolder(Material material) {
         return new Holder.Material(toBreweryKey(material.getKey()));
     }
 
-    public static Holder.Player toPlayerHolder(@NotNull Player player) {
+    public static Holder.Player toPlayerHolder(@NonNull Player player) {
         return new Holder.Player(player.getUniqueId());
     }
 
-    public static Optional<Player> toPlayer(@NotNull Holder.Player player) {
+    public static Optional<Player> toPlayer(Holder.@NonNull Player player) {
         return Optional.ofNullable(Bukkit.getPlayer(player.value()));
     }
 
-    public static Holder.World toWorldHolder(@NotNull World world) {
+    public static Holder.World toWorldHolder(@NonNull World world) {
         return new Holder.World(world.getUID());
     }
 
-    public static Optional<World> toWorldHolder(@NotNull Holder.World world) {
+    public static Optional<World> toWorldHolder(Holder.@NonNull World world) {
         return Optional.ofNullable(Bukkit.getWorld(world.value()));
     }
 }

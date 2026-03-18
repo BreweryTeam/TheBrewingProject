@@ -1,6 +1,7 @@
 package dev.jsinco.brewery.bukkit.migration.breweryx;
 
-import org.jetbrains.annotations.NotNull;
+
+import org.jspecify.annotations.NonNull;
 
 import java.io.FilterInputStream;
 import java.io.IOException;
@@ -110,7 +111,7 @@ public class XORUnscrambleStream extends FilterInputStream {
     }
 
     @Override
-    public int read(@NotNull byte[] b, int off, int len) throws IOException {
+    public int read(@NonNull byte[] b, int off, int len) throws IOException {
         if (!running) {
             return in.read(b, off, len);
         }

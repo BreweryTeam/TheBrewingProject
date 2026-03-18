@@ -4,7 +4,7 @@ import dev.jsinco.brewery.api.util.CancelState;
 import dev.jsinco.brewery.bukkit.api.event.PermissibleBreweryEvent;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public abstract class BreweryDestroyEvent extends PermissibleBreweryEvent {
 

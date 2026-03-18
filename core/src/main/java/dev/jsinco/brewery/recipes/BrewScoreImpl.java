@@ -9,7 +9,7 @@ import dev.jsinco.brewery.api.brew.ScoreType;
 import dev.jsinco.brewery.util.MessageUtil;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.translation.Argument;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Collection;
 import java.util.List;

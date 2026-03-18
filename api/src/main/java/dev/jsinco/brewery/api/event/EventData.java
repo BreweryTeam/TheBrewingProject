@@ -6,7 +6,7 @@ import dev.jsinco.brewery.api.util.BreweryKey;
 import dev.jsinco.brewery.api.util.KeyUtil;
 import dev.jsinco.brewery.api.util.StringUtil;
 import net.kyori.adventure.key.Key;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Set;
 import java.util.regex.Matcher;

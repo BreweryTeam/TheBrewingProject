@@ -1,7 +1,7 @@
 package dev.jsinco.brewery.database.sql;
 
 import com.google.common.collect.Streams;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Arrays;
 import java.util.List;

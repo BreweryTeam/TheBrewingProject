@@ -5,7 +5,7 @@ import dev.jsinco.brewery.api.util.BreweryKey;
 import dev.jsinco.brewery.bukkit.api.integration.ItemIntegration;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.Style;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 import java.util.Objects;
 
@@ -19,12 +19,12 @@ public class PluginIngredient implements BaseIngredient {
     }
 
     @Override
-    public @NotNull String getKey() {
+    public @NonNull String getKey() {
         return key.toString();
     }
 
     @Override
-    public @NotNull Component displayName() {
+    public @NonNull Component displayName() {
         Component displayName = itemIntegration.displayName(key.key());
         return displayName == null ? Component.text(key.key()) : displayName.style(Style.empty());
     }
@@ -32,7 +32,7 @@ public class PluginIngredient implements BaseIngredient {
     /**
      * @return The item integration this ingredient is linked to
      */
-    public @NotNull ItemIntegration itemIntegration() {
+    public @NonNull ItemIntegration itemIntegration() {
         return itemIntegration;
     }
 

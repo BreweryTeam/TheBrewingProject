@@ -2,34 +2,34 @@ package dev.jsinco.brewery.bukkit.util;
 
 import org.bukkit.persistence.PersistentDataAdapterContext;
 import org.bukkit.persistence.PersistentDataType;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 import java.nio.charset.StandardCharsets;
 
 public class StringPdcType implements PersistentDataType<byte[], String> {
 
-    @NotNull
+    @NonNull
     @Override
     public Class<byte[]> getPrimitiveType() {
         return byte[].class;
     }
 
-    @NotNull
+    @NonNull
     @Override
     public Class<String> getComplexType() {
         return String.class;
     }
 
 
-    @NotNull
+    @NonNull
     @Override
-    public byte[] toPrimitive(@NotNull String complex, @NotNull PersistentDataAdapterContext context) {
+    public byte[] toPrimitive(@NonNull String complex, @NonNull PersistentDataAdapterContext context) {
         return complex.getBytes(StandardCharsets.UTF_8);
     }
 
-    @NotNull
+    @NonNull
     @Override
-    public String fromPrimitive(@NotNull byte[] primitive, @NotNull PersistentDataAdapterContext context) {
+    public String fromPrimitive(@NonNull byte[] primitive, @NonNull PersistentDataAdapterContext context) {
         return new String(primitive, StandardCharsets.UTF_8);
     }
 }

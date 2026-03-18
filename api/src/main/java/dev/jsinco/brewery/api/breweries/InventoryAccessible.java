@@ -2,7 +2,7 @@ package dev.jsinco.brewery.api.breweries;
 
 import dev.jsinco.brewery.api.brew.Brew;
 import dev.jsinco.brewery.api.vector.BreweryLocation;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 import java.util.Optional;
 import java.util.Set;
@@ -19,7 +19,7 @@ public interface InventoryAccessible<IS, I> {
      * @param playerUuid      The uuid of the player accessing the inventory
      * @return True if an inventory opened
      */
-    boolean open(@NotNull BreweryLocation breweryLocation, @NotNull UUID playerUuid);
+    boolean open(@NonNull BreweryLocation breweryLocation, @NonNull UUID playerUuid);
 
     /**
      * @param silent Don't play any sounds if silent
@@ -31,13 +31,13 @@ public interface InventoryAccessible<IS, I> {
      * @param item       An item stack
      * @return True if the item stack and player is allowed to inside this inventory (IS Usually gets wiped otherwise)
      */
-    boolean inventoryAllows(@NotNull UUID playerUuid, @NotNull IS item);
+    boolean inventoryAllows(@NonNull UUID playerUuid, @NonNull IS item);
 
     /**
      * @param item An item stack
      * @return True if the item stack is allowed inside the inventory (IS Usually gets wiped otherwise)
      */
-    boolean inventoryAllows(@NotNull IS item);
+    boolean inventoryAllows(@NonNull IS item);
 
     /**
      * @return A set of all inventories for this
@@ -53,7 +53,7 @@ public interface InventoryAccessible<IS, I> {
      * @param breweryLocation The location to access the inventory from
      * @return An optionally present inventory if any were linked to the location
      */
-    Optional<I> access(@NotNull BreweryLocation breweryLocation);
+    Optional<I> access(@NonNull BreweryLocation breweryLocation);
 
     /**
      * Initialize this brew for this inventory, possibly adding another brewing step

@@ -5,7 +5,7 @@ import dev.jsinco.brewery.api.event.EventStep;
 import dev.jsinco.brewery.api.event.step.Condition;
 import dev.jsinco.brewery.api.event.step.ConditionalWaitStep;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 import java.util.List;
 import java.util.UUID;
@@ -21,7 +21,7 @@ public class ConditionalWaitStepExecutable implements EventPropertyExecutable {
 
 
     @Override
-    public @NotNull ExecutionResult execute(UUID contextPlayer, List<? extends EventStep> events, int index) {
+    public @NonNull ExecutionResult execute(UUID contextPlayer, List<? extends EventStep> events, int index) {
         EventStep.Builder builder = new EventStep.Builder();
         // As multiple event properties can be executed in the same step, we have to consider the remainder
         events.get(index).properties().stream()

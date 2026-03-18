@@ -3,9 +3,7 @@ package dev.jsinco.brewery.api.breweries;
 import dev.jsinco.brewery.api.util.BreweryKey;
 import dev.jsinco.brewery.api.util.BreweryKeyed;
 import dev.jsinco.brewery.api.util.BreweryRegistry;
-import org.jetbrains.annotations.Nullable;
-
-import java.util.Locale;
+import org.jspecify.annotations.Nullable;
 
 public enum CauldronType implements BreweryKeyed {
 

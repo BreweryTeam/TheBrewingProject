@@ -22,7 +22,7 @@ import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 import java.util.HashMap;
 import java.util.List;
@@ -36,7 +36,7 @@ public class BukkitIngredientManager implements IngredientManager<ItemStack> {
     public static final BukkitIngredientManager INSTANCE = new BukkitIngredientManager();
 
     @Override
-    public Ingredient getIngredient(@NotNull ItemStack itemStack) {
+    public Ingredient getIngredient(@NonNull ItemStack itemStack) {
         IntegrationManagerImpl integrationManager = TheBrewingProject.getInstance().getIntegrationManager();
         Ingredient ingredient = integrationManager.getIntegrationRegistry().getIntegrations(IntegrationTypes.ITEM)
                 .stream()
@@ -96,7 +96,7 @@ public class BukkitIngredientManager implements IngredientManager<ItemStack> {
     }
 
     @Override
-    public CompletableFuture<Optional<Ingredient>> getIngredient(@NotNull String id) {
+    public CompletableFuture<Optional<Ingredient>> getIngredient(@NonNull String id) {
         BreweryKey breweryKey = BreweryKey.parse(id, Key.MINECRAFT_NAMESPACE);
         IntegrationManagerImpl integrationManager = TheBrewingProject.getInstance().getIntegrationManager();
         return integrationManager.getIntegrationRegistry().getIntegrations(IntegrationTypes.ITEM)
@@ -158,7 +158,7 @@ public class BukkitIngredientManager implements IngredientManager<ItemStack> {
                 .thenApplyAsync(ignored -> ingredientMap);
     }
 
-    public boolean isValidIngredient(@NotNull String ingredientWithAmount) {
+    public boolean isValidIngredient(@NonNull String ingredientWithAmount) {
         try {
             this.getIngredientWithAmount(ingredientWithAmount);
             return true;

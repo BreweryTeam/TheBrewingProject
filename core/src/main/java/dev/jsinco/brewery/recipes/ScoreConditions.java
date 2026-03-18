@@ -4,7 +4,7 @@ import dev.jsinco.brewery.api.brew.BrewingStep;
 import dev.jsinco.brewery.api.brew.ScoreType;
 import dev.jsinco.brewery.api.ingredient.Ingredient;
 import dev.jsinco.brewery.api.recipe.ScoreCondition;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Map;
 

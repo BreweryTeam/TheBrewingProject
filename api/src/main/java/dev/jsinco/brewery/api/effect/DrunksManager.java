@@ -2,11 +2,10 @@ package dev.jsinco.brewery.api.effect;
 
 import dev.jsinco.brewery.api.event.DrunkEvent;
 import dev.jsinco.brewery.api.event.EventData;
-import dev.jsinco.brewery.api.util.BreweryKey;
 import dev.jsinco.brewery.api.util.Pair;
 import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 import java.util.Set;
@@ -29,9 +28,9 @@ public interface DrunksManager {
 
     void planEvent(UUID playerUuid);
 
-    void registerPassedOut(@NotNull UUID playerUUID);
+    void registerPassedOut(@NonNull UUID playerUUID);
 
-    boolean isPassedOut(@NotNull UUID playerUUID);
+    boolean isPassedOut(@NonNull UUID playerUUID);
 
     @Nullable Pair<DrunkEvent, Long> getPlannedEvent(UUID playerUUID);
 }

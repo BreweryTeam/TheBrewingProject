@@ -2,7 +2,7 @@ package dev.jsinco.brewery.bukkit.testutil;
 
 import org.bukkit.Material;
 import org.bukkit.persistence.PersistentDataContainer;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 import org.mockbukkit.mockbukkit.inventory.ItemStackMock;
 
 import java.util.function.Consumer;
@@ -13,7 +13,7 @@ public class ItemStackMockPDC extends ItemStackMock {
     }
 
     @Override
-    public boolean editPersistentDataContainer(@NotNull Consumer<PersistentDataContainer> consumer) {
+    public boolean editPersistentDataContainer(@NonNull Consumer<PersistentDataContainer> consumer) {
         return editMeta(meta -> consumer.accept(meta.getPersistentDataContainer()));
     }
 }

@@ -7,8 +7,8 @@ import dev.jsinco.brewery.bukkit.api.transaction.ItemSource;
 import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
 import org.bukkit.inventory.ItemStack;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 public class CauldronInsertEvent extends PermissibleBreweryEvent {
 
@@ -19,20 +19,20 @@ public class CauldronInsertEvent extends PermissibleBreweryEvent {
     private final @Nullable Player player;
 
     public CauldronInsertEvent(Cauldron cauldron, ItemSource.ItemBasedSource itemSource,
-                               @NotNull dev.jsinco.brewery.api.util.CancelState state, @Nullable Player player) {
+                               dev.jsinco.brewery.api.util.@NonNull CancelState state, @Nullable Player player) {
         super(state);
         this.cauldron = cauldron;
         this.itemSource = itemSource;
         this.player = player;
     }
 
-    public void setResult(@NotNull ItemStack item) {
+    public void setResult(@NonNull ItemStack item) {
         Preconditions.checkNotNull(item);
         itemSource = new ItemSource.ItemBasedSource(item.clone());
     }
 
     @Override
-    public @NotNull HandlerList getHandlers() {
+    public @NonNull HandlerList getHandlers() {
         return HANDLERS;
     }
 

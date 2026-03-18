@@ -2,7 +2,7 @@ package dev.jsinco.brewery.api.ingredient;
 
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 import java.util.Optional;
 import java.util.Set;
@@ -16,12 +16,12 @@ public interface Ingredient {
     /**
      * @return Key of the ingredient
      */
-    @NotNull String getKey();
+    @NonNull String getKey();
 
     /**
      * @return A component with a display name
      */
-    @NotNull Component displayName();
+    @NonNull Component displayName();
 
     /**
      *

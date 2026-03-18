@@ -3,7 +3,7 @@ package dev.jsinco.brewery.recipes;
 import dev.jsinco.brewery.api.brew.BrewingStep;
 import dev.jsinco.brewery.api.recipe.RecipeCondition;
 import dev.jsinco.brewery.api.recipe.ScoreCondition;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 

@@ -1,15 +1,17 @@
 package dev.jsinco.brewery.api.ingredient;
 
 import net.kyori.adventure.text.Component;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
-import java.util.*;
-import java.util.stream.Stream;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 public record IngredientGroup(String key, Component displayName,
                               List<Ingredient> alternatives) implements Ingredient {
     @Override
-    public @NotNull String getKey() {
+    public @NonNull String getKey() {
         return key;
     }
 

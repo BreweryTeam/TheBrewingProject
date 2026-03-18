@@ -2,10 +2,9 @@ package dev.jsinco.brewery.api.ingredient;
 
 import com.google.common.base.Preconditions;
 import net.kyori.adventure.text.Component;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -20,12 +19,12 @@ public record IngredientWithMeta(Ingredient ingredient,
     }
 
     @Override
-    public @NotNull String getKey() {
+    public @NonNull String getKey() {
         return ingredient.getKey();
     }
 
     @Override
-    public @NotNull Component displayName() {
+    public @NonNull Component displayName() {
         Component override = get(IngredientMeta.DISPLAY_NAME);
         if (override == null) {
             return ingredient.displayName();

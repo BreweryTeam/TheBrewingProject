@@ -1,7 +1,7 @@
 package dev.jsinco.brewery.api.moment;
 
 import net.kyori.adventure.text.Component;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 /**
  * An interval with start and stop time
@@ -31,7 +31,7 @@ public record Interval(long start, long stop) implements Moment {
      * @return The interval of the parsed value
      * @throws IllegalArgumentException If the contents could not be read
      */
-    public static Interval parse(@NotNull Object value) throws IllegalArgumentException {
+    public static Interval parse(@NonNull Object value) throws IllegalArgumentException {
         if (value instanceof String string) {
             return parseString(string);
         }
@@ -46,7 +46,7 @@ public record Interval(long start, long stop) implements Moment {
      * @return The interval of parsed string
      * @throws IllegalArgumentException If the contents could not be read
      */
-    public static Interval parseString(@NotNull String string) throws IllegalArgumentException {
+    public static Interval parseString(@NonNull String string) throws IllegalArgumentException {
         if (string.contains(";")) {
             String[] split = string.split(";");
             return new Interval(Integer.parseInt(split[0]), Integer.parseInt(split[1]));
@@ -60,7 +60,7 @@ public record Interval(long start, long stop) implements Moment {
     }
 
     @Override
-    public @NotNull String toString() {
+    public @NonNull String toString() {
         return start + ";" + stop;
     }
 
@@ -74,7 +74,7 @@ public record Interval(long start, long stop) implements Moment {
         return String.format("%d;%d", start, stop);
     }
 
-    public @NotNull Component displayName() {
+    public @NonNull Component displayName() {
         if (start == stop) {
             return Component.text(start);
         }

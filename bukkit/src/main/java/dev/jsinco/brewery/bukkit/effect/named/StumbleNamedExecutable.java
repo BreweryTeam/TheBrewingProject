@@ -1,14 +1,14 @@
 package dev.jsinco.brewery.bukkit.effect.named;
 
-import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.api.event.EventPropertyExecutable;
 import dev.jsinco.brewery.api.event.EventStep;
 import dev.jsinco.brewery.api.event.NamedDrunkEvent;
+import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import io.papermc.paper.threadedregions.scheduler.ScheduledTask;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 import java.util.List;
 import java.util.Random;
@@ -19,7 +19,7 @@ public class StumbleNamedExecutable implements EventPropertyExecutable {
     private static final int STUMBLE_DURATION = 10;
 
     @Override
-    public @NotNull ExecutionResult execute(UUID contextPlayer, List<? extends EventStep> events, int index) {
+    public @NonNull ExecutionResult execute(UUID contextPlayer, List<? extends EventStep> events, int index) {
         Player player = Bukkit.getPlayer(contextPlayer);
         if (player == null) {
             return ExecutionResult.CONTINUE;

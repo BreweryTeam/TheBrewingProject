@@ -19,7 +19,6 @@ import dev.jsinco.brewery.api.util.BreweryRegistry;
 import dev.jsinco.brewery.bukkit.util.EventUtil;
 import io.papermc.paper.command.brigadier.argument.CustomArgumentType;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
-import org.jetbrains.annotations.NotNull;
 import org.jspecify.annotations.NonNull;
 
 import java.util.List;
@@ -54,7 +53,7 @@ public class EventArgument implements CustomArgumentType.Converted<DrunkEvent, S
     }
 
     @Override
-    public <S> @NonNull CompletableFuture<Suggestions> listSuggestions(@NotNull CommandContext<S> context, SuggestionsBuilder builder) {
+    public <S> @NonNull CompletableFuture<Suggestions> listSuggestions(@NonNull CommandContext<S> context, SuggestionsBuilder builder) {
         List<BreweryKey> all = EventUtil.listAll();
         String remaining = ArgumentUtil.escapeQuotes(builder.getRemainingLowerCase());
         all.stream()

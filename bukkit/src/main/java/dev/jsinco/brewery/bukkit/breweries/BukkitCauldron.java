@@ -51,10 +51,10 @@ import org.bukkit.entity.Player;
 import org.bukkit.entity.TextDisplay;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.Transformation;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.joml.AxisAngle4f;
 import org.joml.Vector3f;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.List;
@@ -190,7 +190,7 @@ public class BukkitCauldron implements Cauldron {
                 ((BukkitRecipeResult) recipeOptional.get().getRecipeResults().get(brewQuality)).getColor();
     }
 
-    public boolean addIngredient(@NotNull ItemStack item, Player player) {
+    public boolean addIngredient(@NonNull ItemStack item, Player player) {
         CauldronInsertEvent insertEvent = new CauldronInsertEvent(this,
                 new ItemSource.ItemBasedSource(item),
                 player.hasPermission("brewery.cauldron.access") ?
@@ -418,7 +418,7 @@ public class BukkitCauldron implements Cauldron {
         return 0L;
     }
 
-    @NotNull
+    @NonNull
     @Override
     public Optional<CauldronType> getType() {
         return findCauldronType(getBlock());

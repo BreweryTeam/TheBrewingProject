@@ -1,7 +1,7 @@
 package dev.jsinco.brewery.api.util;
 
 import net.kyori.adventure.key.Key;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 import java.util.Locale;
 
@@ -31,7 +31,7 @@ public record BreweryKey(String namespace, String key) {
      * @return A new brewery key from the parsed string
      * @throws IllegalArgumentException If the key somehow was invalid
      */
-    public static @NotNull BreweryKey parse(@NotNull String input) {
+    public static @NonNull BreweryKey parse(@NonNull String input) {
         return parse(input, "brewery");
     }
 
@@ -41,7 +41,7 @@ public record BreweryKey(String namespace, String key) {
      * @return A new brewery key from the parsed string given the default namespace
      * @throws IllegalArgumentException If the key somehow was invalid
      */
-    public static @NotNull BreweryKey parse(@NotNull String input, @NotNull String defaultNamespace) {
+    public static @NonNull BreweryKey parse(@NonNull String input, @NonNull String defaultNamespace) {
         String[] split = input.split(":", 2); // Allow recursive namespaced keys
         if (split.length == 1) {
             return new BreweryKey(defaultNamespace, split[0].toLowerCase(Locale.ROOT));
@@ -59,7 +59,7 @@ public record BreweryKey(String namespace, String key) {
     }
 
     @Override
-    public @NotNull String toString() {
+    public @NonNull String toString() {
         return namespace + ":" + key;
     }
 }

@@ -4,10 +4,14 @@ import com.google.errorprone.annotations.Immutable;
 import dev.jsinco.brewery.api.meta.MetaContainer;
 import dev.jsinco.brewery.api.recipe.Recipe;
 import dev.jsinco.brewery.api.recipe.RecipeRegistry;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
+import java.util.SequencedSet;
+import java.util.UUID;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -25,7 +29,7 @@ public interface Brew extends MetaContainer<Brew> {
      * @param recipe The recipe to calculate the score on
      * @return The score on this brew for the specified score
      */
-    @NotNull BrewScore score(Recipe<?> recipe);
+    @NonNull BrewScore score(Recipe<?> recipe);
 
     /**
      * @param recipe The recipe to calculate the quality on

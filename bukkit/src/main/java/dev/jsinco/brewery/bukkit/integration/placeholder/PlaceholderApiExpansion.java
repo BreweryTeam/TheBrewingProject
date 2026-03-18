@@ -13,35 +13,35 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.util.stream.Collectors;
 
 public class PlaceholderApiExpansion extends PlaceholderExpansion {
 
     @Override
-    public @NotNull String getIdentifier() {
+    public @NonNull String getIdentifier() {
         return "tbp";
     }
 
     @Override
-    public @NotNull String getAuthor() {
+    public @NonNull String getAuthor() {
         return String.join(",", TheBrewingProject.getInstance().getPluginMeta().getAuthors());
     }
 
     @Override
-    public @NotNull String getVersion() {
+    public @NonNull String getVersion() {
         return TheBrewingProject.getInstance().getPluginMeta().getVersion();
     }
 
     @Override
-    public String onRequest(@Nullable OfflinePlayer player, @NotNull String params) {
+    public String onRequest(@Nullable OfflinePlayer player, @NonNull String params) {
         return readPlayer(player, params);
     }
 
     @Override
-    public String onPlaceholderRequest(@Nullable Player player, @NotNull String params) {
+    public String onPlaceholderRequest(@Nullable Player player, @NonNull String params) {
         return readPlayer(player, params);
     }
 

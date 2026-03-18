@@ -4,7 +4,11 @@ import dev.jsinco.brewery.api.brew.Brew;
 import dev.jsinco.brewery.api.brew.BrewingStep;
 import dev.jsinco.brewery.api.breweries.InventoryAccessible;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
-import dev.jsinco.brewery.bukkit.api.event.transaction.*;
+import dev.jsinco.brewery.bukkit.api.event.transaction.BarrelExtractEvent;
+import dev.jsinco.brewery.bukkit.api.event.transaction.BarrelInsertEvent;
+import dev.jsinco.brewery.bukkit.api.event.transaction.DistilleryExtractEvent;
+import dev.jsinco.brewery.bukkit.api.event.transaction.DistilleryInsertEvent;
+import dev.jsinco.brewery.bukkit.api.event.transaction.ItemTransactionEvent;
 import dev.jsinco.brewery.bukkit.api.transaction.ItemSource;
 import dev.jsinco.brewery.bukkit.api.transaction.ItemTransaction;
 import dev.jsinco.brewery.bukkit.api.transaction.ItemTransactionSession;
@@ -21,14 +25,23 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.inventory.*;
+import org.bukkit.event.inventory.ClickType;
+import org.bukkit.event.inventory.InventoryAction;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryDragEvent;
+import org.bukkit.event.inventory.InventoryMoveItemEvent;
+import org.bukkit.event.inventory.InventoryPickupItemEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 public class InventoryEventListener implements Listener {
 
@@ -89,7 +102,7 @@ public class InventoryEventListener implements Listener {
         );
     }
 
-    private void displayEventResult(@NotNull InventoryView view, List<? extends ItemTransactionEvent<?>> transactions) {
+    private void displayEventResult(@NonNull InventoryView view, List<? extends ItemTransactionEvent<?>> transactions) {
         for (ItemTransactionEvent<?> transactionEvent : transactions) {
             ItemTransactionSession<?> session = transactionEvent.getTransactionSession();
             ItemTransaction transaction = session.getTransaction();

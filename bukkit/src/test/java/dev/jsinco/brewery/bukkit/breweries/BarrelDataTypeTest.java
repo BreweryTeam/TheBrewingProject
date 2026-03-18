@@ -1,10 +1,15 @@
 package dev.jsinco.brewery.bukkit.breweries;
 
+import dev.jsinco.brewery.api.breweries.BarrelType;
+import dev.jsinco.brewery.api.breweries.CauldronType;
+import dev.jsinco.brewery.api.moment.Interval;
+import dev.jsinco.brewery.api.moment.Moment;
+import dev.jsinco.brewery.api.moment.PassedMoment;
+import dev.jsinco.brewery.api.structure.StructureType;
+import dev.jsinco.brewery.api.util.Pair;
 import dev.jsinco.brewery.brew.AgeStepImpl;
 import dev.jsinco.brewery.brew.BrewImpl;
 import dev.jsinco.brewery.brew.CookStepImpl;
-import dev.jsinco.brewery.api.breweries.BarrelType;
-import dev.jsinco.brewery.api.breweries.CauldronType;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.bukkit.breweries.barrel.BukkitBarrel;
 import dev.jsinco.brewery.bukkit.breweries.barrel.BukkitBarrelDataType;
@@ -14,13 +19,8 @@ import dev.jsinco.brewery.bukkit.structure.StructurePlacerUtils;
 import dev.jsinco.brewery.bukkit.testutil.TBPServerMock;
 import dev.jsinco.brewery.database.PersistenceException;
 import dev.jsinco.brewery.database.sql.Database;
-import dev.jsinco.brewery.api.moment.Interval;
-import dev.jsinco.brewery.api.moment.Moment;
-import dev.jsinco.brewery.api.moment.PassedMoment;
-import dev.jsinco.brewery.api.structure.StructureType;
-import dev.jsinco.brewery.api.util.Pair;
 import org.bukkit.Location;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -37,7 +37,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class BarrelDataTypeTest {
 
-    private @NotNull WorldMock world;
+    private @NonNull WorldMock world;
     private Database database;
 
     @BeforeEach

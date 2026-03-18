@@ -3,7 +3,7 @@ package dev.jsinco.brewery.bukkit.testutil;
 import io.papermc.paper.threadedregions.scheduler.GlobalRegionScheduler;
 import io.papermc.paper.threadedregions.scheduler.ScheduledTask;
 import org.bukkit.plugin.Plugin;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 import org.mockbukkit.mockbukkit.ServerMock;
 import org.mockbukkit.mockbukkit.exception.UnimplementedOperationException;
 
@@ -16,34 +16,34 @@ import java.util.function.Consumer;
 public class TBPServerMock extends ServerMock {
 
     @Override
-    public @NotNull GlobalRegionScheduler getGlobalRegionScheduler() {
+    public @NonNull GlobalRegionScheduler getGlobalRegionScheduler() {
         return new GlobalRegionSchedulerMock();
     }
 
     // Good enough for 99% of plugin functionality, simulating ticking will require a proper impl
     private static class GlobalRegionSchedulerMock implements GlobalRegionScheduler {
         @Override
-        public void execute(@NotNull Plugin plugin, @NotNull Runnable run) {
+        public void execute(@NonNull Plugin plugin, @NonNull Runnable run) {
             throw new UnimplementedOperationException("Cannot run tasks with TBPServerMock");
         }
 
         @Override
-        public @NotNull ScheduledTask run(@NotNull Plugin plugin, @NotNull Consumer<ScheduledTask> task) {
+        public @NonNull ScheduledTask run(@NonNull Plugin plugin, @NonNull Consumer<ScheduledTask> task) {
             return null;
         }
 
         @Override
-        public @NotNull ScheduledTask runDelayed(@NotNull Plugin plugin, @NotNull Consumer<ScheduledTask> task, long delayTicks) {
+        public @NonNull ScheduledTask runDelayed(@NonNull Plugin plugin, @NonNull Consumer<ScheduledTask> task, long delayTicks) {
             return null;
         }
 
         @Override
-        public @NotNull ScheduledTask runAtFixedRate(@NotNull Plugin plugin, @NotNull Consumer<ScheduledTask> task, long initialDelayTicks, long periodTicks) {
+        public @NonNull ScheduledTask runAtFixedRate(@NonNull Plugin plugin, @NonNull Consumer<ScheduledTask> task, long initialDelayTicks, long periodTicks) {
             return null;
         }
 
         @Override
-        public void cancelTasks(@NotNull Plugin plugin) {
+        public void cancelTasks(@NonNull Plugin plugin) {
             throw new UnimplementedOperationException("Cannot cancel tasks with TBPServerMock");
         }
     }

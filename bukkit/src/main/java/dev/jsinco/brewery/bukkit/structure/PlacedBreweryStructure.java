@@ -5,8 +5,8 @@ import dev.jsinco.brewery.api.structure.MultiblockStructure;
 import dev.jsinco.brewery.api.util.Pair;
 import dev.jsinco.brewery.api.vector.BreweryLocation;
 import org.bukkit.Location;
-import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix3d;
+import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Arrays;

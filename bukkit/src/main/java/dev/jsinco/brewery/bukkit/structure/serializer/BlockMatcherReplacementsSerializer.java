@@ -5,7 +5,6 @@ import eu.okaeri.configs.schema.GenericsDeclaration;
 import eu.okaeri.configs.serdes.DeserializationData;
 import eu.okaeri.configs.serdes.ObjectSerializer;
 import eu.okaeri.configs.serdes.SerializationData;
-import org.jetbrains.annotations.NotNull;
 import org.jspecify.annotations.NonNull;
 
 public class BlockMatcherReplacementsSerializer implements ObjectSerializer<BlockMatcherReplacement.List> {
@@ -15,7 +14,7 @@ public class BlockMatcherReplacementsSerializer implements ObjectSerializer<Bloc
     }
 
     @Override
-    public void serialize(@NotNull BlockMatcherReplacement.List object, @NonNull SerializationData data, @NonNull GenericsDeclaration generics) {
+    public void serialize(BlockMatcherReplacement.@NonNull List object, @NonNull SerializationData data, @NonNull GenericsDeclaration generics) {
         data.setValueCollection(object.elements(), BlockMatcherReplacement.class);
     }
 

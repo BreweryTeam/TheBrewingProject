@@ -2,8 +2,8 @@ package dev.jsinco.brewery.api.recipe;
 
 import com.google.common.base.Preconditions;
 import dev.jsinco.brewery.api.util.Builder;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 import java.util.Objects;
@@ -19,14 +19,14 @@ public class QualityDataBuilder<T, B extends Builder<T>> {
         this.elementBuilders = QualityData.fromValueMapper(ignored -> elementBuilderSupplier.get());
     }
 
-    public QualityDataBuilder<T, B> addString(@NotNull String value, String errorMessage, BiConsumer<B, String> action) {
+    public QualityDataBuilder<T, B> addString(@NonNull String value, String errorMessage, BiConsumer<B, String> action) {
         Preconditions.checkNotNull(value, errorMessage);
         QualityData<String> stringQualityData = QualityData.readQualityFactoredString(value);
         elementBuilders.forEach((quality, builder) -> action.accept(builder, stringQualityData.get(quality)));
         return this;
     }
 
-    public <U> QualityDataBuilder<T, B> add(@NotNull String value, String errorMessage, Function<String, U> uMapper, BiConsumer<B, U> action) {
+    public <U> QualityDataBuilder<T, B> add(@NonNull String value, String errorMessage, Function<String, U> uMapper, BiConsumer<B, U> action) {
         Preconditions.checkNotNull(value, errorMessage);
         QualityData<U> uQualityData = QualityData.readQualityFactoredString(value)
                 .map(uMapper);
@@ -53,7 +53,7 @@ public class QualityDataBuilder<T, B extends Builder<T>> {
         return this;
     }
 
-    public QualityDataBuilder<T, B> addStringList(@NotNull List<String> values, String errorMessage, BiConsumer<B, List<String>> action) {
+    public QualityDataBuilder<T, B> addStringList(@NonNull List<String> values, String errorMessage, BiConsumer<B, List<String>> action) {
         Preconditions.checkNotNull(values, errorMessage);
         QualityData<List<String>> uQualityData = QualityData.readQualityFactoredStringList(values);
         elementBuilders.forEach((quality, builder) -> action.accept(builder, uQualityData.get(quality)));

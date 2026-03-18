@@ -28,7 +28,7 @@ import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import net.kyori.adventure.text.minimessage.translation.Argument;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 import java.util.List;
 import java.util.Set;
@@ -87,7 +87,7 @@ public class StatusCommand {
         };
     }
 
-    private static Component compileModifiersMessage(@NotNull DrunkState drunkState) {
+    private static Component compileModifiersMessage(@NonNull DrunkState drunkState) {
         return DrunkenModifierSection.modifiers().drunkenModifiers()
                 .stream()
                 .map(modifier -> Component.translatable("tbp.command.status.info.modifier", Argument.tagResolver(

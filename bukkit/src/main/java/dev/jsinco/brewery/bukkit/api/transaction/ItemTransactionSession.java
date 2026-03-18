@@ -2,7 +2,7 @@ package dev.jsinco.brewery.bukkit.api.transaction;
 
 import com.google.common.base.Preconditions;
 import org.bukkit.inventory.ItemStack;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public class ItemTransactionSession<T extends ItemSource> {
 

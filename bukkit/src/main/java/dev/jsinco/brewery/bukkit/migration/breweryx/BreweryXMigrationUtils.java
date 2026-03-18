@@ -1,6 +1,10 @@
 package dev.jsinco.brewery.bukkit.migration.breweryx;
 
-import dev.jsinco.brewery.api.brew.*;
+import dev.jsinco.brewery.api.brew.Brew;
+import dev.jsinco.brewery.api.brew.BrewManager;
+import dev.jsinco.brewery.api.brew.BrewQuality;
+import dev.jsinco.brewery.api.brew.BrewScore;
+import dev.jsinco.brewery.api.brew.BrewingStep;
 import dev.jsinco.brewery.api.breweries.BarrelType;
 import dev.jsinco.brewery.api.breweries.CauldronType;
 import dev.jsinco.brewery.api.ingredient.Ingredient;
@@ -20,13 +24,18 @@ import dev.jsinco.brewery.util.IngredientUtil;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.security.InvalidKeyException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Optional;
 
 public class BreweryXMigrationUtils {
 
@@ -48,7 +57,7 @@ public class BreweryXMigrationUtils {
     );
     private static boolean noSeedIssueOccurred = true;
 
-    public static @Nullable ItemStack migrate(@NotNull ItemStack item) {
+    public static @Nullable ItemStack migrate(@NonNull ItemStack item) {
         ItemMeta meta = item.getItemMeta();
 
         NBTLoadStream nbtStream = new NBTLoadStream(meta);

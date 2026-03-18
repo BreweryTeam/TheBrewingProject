@@ -5,29 +5,29 @@ import dev.jsinco.brewery.configuration.DrunkenModifierSection;
 import org.bukkit.persistence.ListPersistentDataType;
 import org.bukkit.persistence.PersistentDataAdapterContext;
 import org.bukkit.persistence.PersistentDataType;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 public class ModifierConsumePdcType implements PersistentDataType<String, ModifierConsume> {
 
     public static final ListPersistentDataType<String, ModifierConsume> LIST_INSTANCE = ListPersistentDataType.LIST.listTypeFrom(new ModifierConsumePdcType());
 
     @Override
-    public @NotNull Class<String> getPrimitiveType() {
+    public @NonNull Class<String> getPrimitiveType() {
         return String.class;
     }
 
     @Override
-    public @NotNull Class<ModifierConsume> getComplexType() {
+    public @NonNull Class<ModifierConsume> getComplexType() {
         return ModifierConsume.class;
     }
 
     @Override
-    public @NotNull String toPrimitive(@NotNull ModifierConsume complex, @NotNull PersistentDataAdapterContext context) {
+    public @NonNull String toPrimitive(@NonNull ModifierConsume complex, @NonNull PersistentDataAdapterContext context) {
         return complex.modifier().name() + ";" + complex.value();
     }
 
     @Override
-    public @NotNull ModifierConsume fromPrimitive(@NotNull String primitive, @NotNull PersistentDataAdapterContext context) {
+    public @NonNull ModifierConsume fromPrimitive(@NonNull String primitive, @NonNull PersistentDataAdapterContext context) {
         String[] split = primitive.split(";");
         String modifierName = split[0];
         double value = Double.parseDouble(split[1]);

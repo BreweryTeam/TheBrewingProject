@@ -3,7 +3,7 @@ package dev.jsinco.brewery.api.event;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 import java.util.Set;
 
@@ -18,7 +18,7 @@ public interface EventStep {
 
         ImmutableSet.Builder<EventStepProperty> propertyBuilder = new ImmutableSet.Builder<>();
 
-        public Builder addProperty(@NotNull EventStepProperty property) {
+        public Builder addProperty(@NonNull EventStepProperty property) {
             Preconditions.checkNotNull(property);
             propertyBuilder.add(property);
             return this;

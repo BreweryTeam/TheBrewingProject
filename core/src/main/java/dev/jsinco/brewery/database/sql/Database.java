@@ -2,10 +2,17 @@ package dev.jsinco.brewery.database.sql;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
-import dev.jsinco.brewery.database.*;
-import dev.jsinco.brewery.util.FileUtil;
 import dev.jsinco.brewery.api.util.Logger;
-import org.jetbrains.annotations.NotNull;
+import dev.jsinco.brewery.database.FindableStoredData;
+import dev.jsinco.brewery.database.InsertableStoredData;
+import dev.jsinco.brewery.database.PersistenceException;
+import dev.jsinco.brewery.database.PersistenceHandler;
+import dev.jsinco.brewery.database.RemovableStoredData;
+import dev.jsinco.brewery.database.RetrievableStoredData;
+import dev.jsinco.brewery.database.SingletonStoredData;
+import dev.jsinco.brewery.database.UpdateableStoredData;
+import dev.jsinco.brewery.util.FileUtil;
+import org.jspecify.annotations.NonNull;
 
 import java.io.File;
 import java.io.IOException;
@@ -46,7 +53,7 @@ public class Database implements PersistenceHandler<Connection> {
         return hikariDataSource.getConnection();
     }
 
-    private static @NotNull HikariConfig getHikariConfigForSqlite(File dataFolder) throws IOException {
+    private static @NonNull HikariConfig getHikariConfigForSqlite(File dataFolder) throws IOException {
         File databaseFile = new File(dataFolder, "brewery.db");
         if (!databaseFile.exists() && !databaseFile.getParentFile().mkdirs() && !databaseFile.createNewFile()) {
             throw new IOException("Could not create file or dirs");

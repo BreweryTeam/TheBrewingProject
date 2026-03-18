@@ -7,7 +7,7 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.persistence.PersistentDataAdapterContext;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 import java.util.List;
 
@@ -142,23 +142,23 @@ import java.util.List;
 
         public static final UntypedListDataType INSTANCE = new UntypedListDataType();
 
-        @NotNull
+        @NonNull
         @Override
         @SuppressWarnings("unchecked")
         public Class<List<?>> getPrimitiveType() {
             return (Class<List<?>>) (Object) List.class;
         }
 
-        @NotNull
+        @NonNull
         @Override
         @SuppressWarnings("unchecked")
         public Class<List<?>> getComplexType() {
             return (Class<List<?>>) (Object) List.class;
         }
 
-        @NotNull
+        @NonNull
         @Override
-        public List<?> toPrimitive(@NotNull List<?> complex, @NotNull PersistentDataAdapterContext context) {
+        public List<?> toPrimitive(@NonNull List<?> complex, @NonNull PersistentDataAdapterContext context) {
             return complex;
         }
         @Override
@@ -166,9 +166,9 @@ import java.util.List;
             return complex;
         }
 
-        @NotNull
+        @NonNull
         @Override
-        public List<?> fromPrimitive(@NotNull List<?> primitive, @NotNull PersistentDataAdapterContext context) {
+        public List<?> fromPrimitive(@NonNull List<?> primitive, @NonNull PersistentDataAdapterContext context) {
             return primitive;
         }
         @Override

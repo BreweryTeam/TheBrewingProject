@@ -1,16 +1,12 @@
 package dev.jsinco.brewery.api.structure;
 
-import com.google.gson.JsonElement;
 import dev.jsinco.brewery.api.util.BreweryKey;
 import dev.jsinco.brewery.api.util.BreweryKeyed;
 import dev.jsinco.brewery.api.util.Holder;
-import dev.jsinco.brewery.api.util.HolderProviderHolder;
 import dev.jsinco.brewery.api.vector.BreweryVector;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * @param key          The key of the meta
@@ -65,7 +61,7 @@ public record StructureMeta<V>(BreweryKey key, Class<V> vClass, V defaultValue) 
     public static final StructureMeta<StructureType> TYPE = new StructureMeta<>(BreweryKey.parse("type"), StructureType.class, StructureType.BARREL);
 
     @Override
-    public @NotNull String toString() {
+    public @NonNull String toString() {
         return "StructureMeta(" + key + ")";
     }
 

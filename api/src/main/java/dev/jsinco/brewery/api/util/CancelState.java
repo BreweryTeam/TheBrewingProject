@@ -2,7 +2,7 @@ package dev.jsinco.brewery.api.util;
 
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public sealed interface CancelState {
 

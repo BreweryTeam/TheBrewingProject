@@ -1,17 +1,17 @@
 package dev.jsinco.brewery.bukkit.breweries.barrel;
 
-import dev.jsinco.brewery.brew.BarrelBrewDataType;
 import dev.jsinco.brewery.api.brew.Brew;
+import dev.jsinco.brewery.api.util.Logger;
+import dev.jsinco.brewery.api.util.Pair;
+import dev.jsinco.brewery.api.vector.BreweryLocation;
+import dev.jsinco.brewery.brew.BarrelBrewDataType;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.bukkit.brew.BukkitBarrelBrewDataType;
 import dev.jsinco.brewery.bukkit.breweries.BrewInventoryImpl;
 import dev.jsinco.brewery.bukkit.breweries.BrewPersistenceHandler;
 import dev.jsinco.brewery.database.PersistenceException;
-import dev.jsinco.brewery.api.util.Logger;
-import dev.jsinco.brewery.api.util.Pair;
-import dev.jsinco.brewery.api.vector.BreweryLocation;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Objects;
 
@@ -24,7 +24,7 @@ public class BarrelBrewPersistenceHandler implements BrewPersistenceHandler {
     }
 
     @Override
-    public void store(@Nullable Brew brew, int position, @NotNull BrewInventoryImpl inventory) {
+    public void store(@Nullable Brew brew, int position, @NonNull BrewInventoryImpl inventory) {
         if (Objects.equals(inventory.getBrews()[position], brew)) {
             return;
         }

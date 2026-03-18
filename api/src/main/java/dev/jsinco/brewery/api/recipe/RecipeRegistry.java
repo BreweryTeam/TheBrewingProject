@@ -2,12 +2,11 @@ package dev.jsinco.brewery.api.recipe;
 
 import dev.jsinco.brewery.api.ingredient.BaseIngredient;
 import dev.jsinco.brewery.api.ingredient.Ingredient;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 import java.util.Collection;
 import java.util.Optional;
 import java.util.Set;
-import java.util.prefs.BackingStoreException;
 
 /**
  * Some recipes are loaded on a delay, therefore <b>NO RECIPE SHOULD BE ACCESSED ON STARTUP</b>
@@ -20,7 +19,7 @@ public interface RecipeRegistry<I> {
      * @param recipeName The name of the recipe
      * @return An optional recipe, depending on if it existed
      */
-    Optional<Recipe<I>> getRecipe(@NotNull String recipeName);
+    Optional<Recipe<I>> getRecipe(@NonNull String recipeName);
 
     /**
      * @return All recipes registered at the moment
@@ -41,7 +40,7 @@ public interface RecipeRegistry<I> {
      * @param recipeName The key of the default recipe
      * @return A recipe result for the default recipe
      */
-    Optional<DefaultRecipe<I>> getDefaultRecipe(@NotNull String recipeName);
+    Optional<DefaultRecipe<I>> getDefaultRecipe(@NonNull String recipeName);
 
     /**
      * @return All default recipes

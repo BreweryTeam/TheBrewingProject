@@ -1,7 +1,7 @@
 package dev.jsinco.brewery.effect.text;
 
 import dev.jsinco.brewery.api.effect.modifier.DrunkenModifier;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,7 +13,7 @@ public record SingleDrunkTextElement(String text, int percentage, DrunkenModifie
 
 
     @Override
-    public @NotNull List<TextTransformation> findTransform(String initial) {
+    public @NonNull List<TextTransformation> findTransform(String initial) {
         if (percentage < RANDOM.nextInt(0, 101)) {
             return new ArrayList<>();
         }

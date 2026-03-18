@@ -6,11 +6,11 @@ import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.bukkit.breweries.BukkitCauldron;
 import dev.jsinco.brewery.bukkit.breweries.BukkitCauldronDataType;
 import dev.jsinco.brewery.database.PersistenceException;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 public class ListenerUtil {
 
-    public static void removeActiveSinglePositionStructure(@NotNull SinglePositionStructure structure) {
+    public static void removeActiveSinglePositionStructure(@NonNull SinglePositionStructure structure) {
         structure.destroy();
         TheBrewingProject.getInstance().getBreweryRegistry().removeActiveSinglePositionStructure(structure);
         if (structure instanceof BukkitCauldron cauldron) {

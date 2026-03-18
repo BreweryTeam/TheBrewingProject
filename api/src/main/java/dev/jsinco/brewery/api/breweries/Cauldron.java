@@ -2,7 +2,7 @@ package dev.jsinco.brewery.api.breweries;
 
 import dev.jsinco.brewery.api.brew.Brew;
 import dev.jsinco.brewery.api.structure.SinglePositionStructure;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 import java.util.Optional;
 
@@ -21,7 +21,7 @@ public interface Cauldron extends Tickable, SinglePositionStructure {
     /**
      * @return The brew that is being made
      */
-    @NotNull Brew getBrew();
+    @NonNull Brew getBrew();
 
     /**
      * The return value is optional, as this state is fetched from the world directly. Requires chunk loading

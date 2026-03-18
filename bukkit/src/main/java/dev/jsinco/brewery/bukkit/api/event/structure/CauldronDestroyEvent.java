@@ -5,8 +5,8 @@ import dev.jsinco.brewery.api.util.CancelState;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 public class CauldronDestroyEvent extends BreweryDestroyEvent {
 
@@ -23,7 +23,7 @@ public class CauldronDestroyEvent extends BreweryDestroyEvent {
     }
 
     @Override
-    public @NotNull HandlerList getHandlers() {
+    public @NonNull HandlerList getHandlers() {
         return HANDLERS;
     }
 

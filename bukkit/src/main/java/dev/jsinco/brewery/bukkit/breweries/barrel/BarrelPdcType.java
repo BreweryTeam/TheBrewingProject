@@ -5,32 +5,32 @@ import dev.jsinco.brewery.api.util.BreweryKey;
 import dev.jsinco.brewery.api.util.BreweryRegistry;
 import org.bukkit.persistence.PersistentDataAdapterContext;
 import org.bukkit.persistence.PersistentDataType;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 public class BarrelPdcType implements PersistentDataType<String, BarrelType> {
     public static final PersistentDataType<String, BarrelType> INSTANCE = new BarrelPdcType();
 
-    @NotNull
+    @NonNull
     @Override
     public Class<String> getPrimitiveType() {
         return String.class;
     }
 
-    @NotNull
+    @NonNull
     @Override
     public Class<BarrelType> getComplexType() {
         return BarrelType.class;
     }
 
-    @NotNull
+    @NonNull
     @Override
-    public String toPrimitive(@NotNull BarrelType complex, @NotNull PersistentDataAdapterContext context) {
+    public String toPrimitive(@NonNull BarrelType complex, @NonNull PersistentDataAdapterContext context) {
         return complex.key().toString();
     }
 
-    @NotNull
+    @NonNull
     @Override
-    public BarrelType fromPrimitive(@NotNull String primitive, @NotNull PersistentDataAdapterContext context) {
+    public BarrelType fromPrimitive(@NonNull String primitive, @NonNull PersistentDataAdapterContext context) {
         return BreweryRegistry.BARREL_TYPE.get(BreweryKey.parse(primitive));
     }
 }

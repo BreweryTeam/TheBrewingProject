@@ -1,7 +1,7 @@
 package dev.jsinco.brewery.api.event;
 
 import com.google.common.base.Preconditions;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -44,7 +44,7 @@ public final class EventStepRegistry {
      * @param <T>  Event step property type
      * @return An executable for the event step property
      */
-    public @NotNull <T extends EventStepProperty> EventPropertyExecutable toExecutable(T step) {
+    public @NonNull <T extends EventStepProperty> EventPropertyExecutable toExecutable(T step) {
         if (step instanceof NamedDrunkEvent namedDrunkEvent) {
             return toExecutable(namedDrunkEvent);
         }
@@ -60,7 +60,7 @@ public final class EventStepRegistry {
      * @param step A preset drunken event
      * @return an executable for the preset drunken event
      */
-    public @NotNull EventPropertyExecutable toExecutable(NamedDrunkEvent step) {
+    public @NonNull EventPropertyExecutable toExecutable(NamedDrunkEvent step) {
         NamedEventStepFactory factory = namedFactories.get(step);
         Preconditions.checkArgument(factory != null, "No ExecutableEventStep found for EventStep: " + step.getClass().getName());
         return factory.create();

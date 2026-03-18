@@ -1,11 +1,8 @@
 package dev.jsinco.brewery.bukkit.ingredient;
 
-import com.google.common.collect.ImmutableMap;
 import dev.jsinco.brewery.api.brew.BrewQuality;
 import dev.jsinco.brewery.api.ingredient.BaseIngredient;
 import dev.jsinco.brewery.api.ingredient.Ingredient;
-import dev.jsinco.brewery.api.ingredient.IngredientMeta;
-import dev.jsinco.brewery.api.ingredient.IngredientWithMeta;
 import dev.jsinco.brewery.api.recipe.RecipeResult;
 import dev.jsinco.brewery.api.util.BreweryKey;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
@@ -13,24 +10,22 @@ import dev.jsinco.brewery.bukkit.brew.BrewAdapter;
 import dev.jsinco.brewery.configuration.IngredientsSection;
 import io.papermc.paper.persistence.PersistentDataContainerView;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
-import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 public record BreweryIngredient(BreweryKey ingredientKey) implements BaseIngredient {
 
     @Override
-    public @NotNull String getKey() {
+    public @NonNull String getKey() {
         return ingredientKey.toString();
     }
 
     @Override
-    public @NotNull Component displayName() {
+    public @NonNull Component displayName() {
         return TheBrewingProject.getInstance().getRecipeRegistry().getRecipe(ingredientKey.minimalized())
                 .map(recipe -> recipe.getRecipeResult(BrewQuality.EXCELLENT))
                 .map(RecipeResult::displayName)

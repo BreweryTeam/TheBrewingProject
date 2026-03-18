@@ -9,7 +9,7 @@ import dev.jsinco.brewery.api.ingredient.IngredientManager;
 import dev.jsinco.brewery.api.meta.MetaData;
 import dev.jsinco.brewery.meta.MetaSerializer;
 import dev.jsinco.brewery.util.FutureUtil;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;

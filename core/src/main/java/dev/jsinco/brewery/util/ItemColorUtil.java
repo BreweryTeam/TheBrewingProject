@@ -3,9 +3,9 @@ package dev.jsinco.brewery.util;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
-import java.awt.*;
+import java.awt.Color;
 import java.util.Map;
 
 public class ItemColorUtil {

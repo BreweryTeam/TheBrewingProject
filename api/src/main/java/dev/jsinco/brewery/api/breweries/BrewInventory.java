@@ -1,7 +1,7 @@
 package dev.jsinco.brewery.api.breweries;
 
 import dev.jsinco.brewery.api.brew.Brew;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Arrays;
 import java.util.List;

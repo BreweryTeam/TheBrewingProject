@@ -1,7 +1,7 @@
 package dev.jsinco.brewery.api.ingredient;
 
 import net.kyori.adventure.text.Component;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 import java.util.Map;
 import java.util.Optional;
@@ -15,12 +15,12 @@ import java.util.Set;
 public record ScoredIngredient(Ingredient baseIngredient, double score) implements Ingredient {
 
     @Override
-    public @NotNull String getKey() {
+    public @NonNull String getKey() {
         return baseIngredient.getKey();
     }
 
     @Override
-    public @NotNull Component displayName() {
+    public @NonNull Component displayName() {
         return baseIngredient.displayName()
                 .append(Component.text("-"))
                 .append(Component.text(score));

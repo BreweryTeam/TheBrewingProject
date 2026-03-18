@@ -3,7 +3,7 @@ package dev.jsinco.brewery.bukkit.api.event.process;
 import dev.jsinco.brewery.api.brew.Brew;
 import dev.jsinco.brewery.api.breweries.DistilleryAccess;
 import org.bukkit.event.HandlerList;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 /**
  * An event that triggers whenever a brew distills. Will only trigger when an inventory is open.
@@ -19,7 +19,7 @@ public class BrewDistillEvent extends BrewProcessEvent {
     }
 
     @Override
-    public @NotNull HandlerList getHandlers() {
+    public @NonNull HandlerList getHandlers() {
         return HANDLERS;
     }
 

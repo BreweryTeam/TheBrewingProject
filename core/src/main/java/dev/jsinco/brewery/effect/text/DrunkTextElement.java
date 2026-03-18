@@ -1,13 +1,13 @@
 package dev.jsinco.brewery.effect.text;
 
 import dev.jsinco.brewery.api.effect.modifier.DrunkenModifier;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 import java.util.List;
 
 public interface DrunkTextElement {
 
-    @NotNull
+    @NonNull
     List<TextTransformation> findTransform(String initial);
 
     DrunkenModifier modifier();

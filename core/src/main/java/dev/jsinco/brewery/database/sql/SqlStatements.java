@@ -1,7 +1,7 @@
 package dev.jsinco.brewery.database.sql;
 
 import dev.jsinco.brewery.api.util.Logger;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -33,7 +33,7 @@ public class SqlStatements {
         }
     }
 
-    public @NotNull String get(Type type) {
+    public @NonNull String get(Type type) {
         if (!statements.containsKey(type)) {
             throw new IllegalArgumentException("Statement does not exists.");
         }

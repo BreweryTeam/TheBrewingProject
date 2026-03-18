@@ -17,15 +17,32 @@ import dev.jsinco.brewery.configuration.Config;
 import dev.jsinco.brewery.util.DecoderEncoder;
 import org.bukkit.persistence.PersistentDataAdapterContext;
 import org.bukkit.persistence.PersistentDataType;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
-import javax.crypto.*;
+import javax.crypto.Cipher;
+import javax.crypto.CipherInputStream;
+import javax.crypto.CipherOutputStream;
+import javax.crypto.NullCipher;
+import javax.crypto.SecretKey;
 import javax.crypto.spec.GCMParameterSpec;
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.security.SecureRandom;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.SequencedSet;
+import java.util.UUID;
 
 public class BrewingStepPdcType implements PersistentDataType<byte[], BrewingStep> {
 
@@ -41,18 +58,18 @@ public class BrewingStepPdcType implements PersistentDataType<byte[], BrewingSte
     }
 
     @Override
-    public @NotNull Class<byte[]> getPrimitiveType() {
+    public @NonNull Class<byte[]> getPrimitiveType() {
         return byte[].class;
     }
 
     @Override
-    public @NotNull Class<BrewingStep> getComplexType() {
+    public @NonNull Class<BrewingStep> getComplexType() {
         return BrewingStep.class;
     }
 
-    @NotNull
+    @NonNull
     @Override
-    public byte[] toPrimitive(@NotNull BrewingStep complex, @NotNull PersistentDataAdapterContext context) {
+    public byte[] toPrimitive(@NonNull BrewingStep complex, @NonNull PersistentDataAdapterContext context) {
         try {
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             DataOutputStream headerOut = new DataOutputStream(out);
@@ -88,7 +105,7 @@ public class BrewingStepPdcType implements PersistentDataType<byte[], BrewingSte
         }
     }
 
-    private void writePayload(@NotNull BrewingStep complex, @NotNull DataOutputStream dataOutputStream) throws IOException {
+    private void writePayload(@NonNull BrewingStep complex, @NonNull DataOutputStream dataOutputStream) throws IOException {
         dataOutputStream.writeUTF(complex.stepType().name());
         switch (complex) {
             case BrewingStep.Age age -> {
@@ -111,7 +128,7 @@ public class BrewingStepPdcType implements PersistentDataType<byte[], BrewingSte
     }
 
     @Override
-    public @NotNull BrewingStep fromPrimitive(@NotNull byte[] primitive, @NotNull PersistentDataAdapterContext context) {
+    public @NonNull BrewingStep fromPrimitive(@NonNull byte[] primitive, @NonNull PersistentDataAdapterContext context) {
         try (ByteArrayInputStream in = new ByteArrayInputStream(primitive);
              DataInputStream headerIn = new DataInputStream(in)) {
 
@@ -158,7 +175,7 @@ public class BrewingStepPdcType implements PersistentDataType<byte[], BrewingSte
         return new ByteArrayInputStream(all, offset, all.length - offset);
     }
 
-    private BrewingStep readPayload(@NotNull DataInputStream dataInputStream, int version) throws IOException {
+    private BrewingStep readPayload(@NonNull DataInputStream dataInputStream, int version) throws IOException {
         BrewingStep.StepType stepType = BrewingStep.StepType.valueOf(dataInputStream.readUTF());
         return switch (stepType) {
             case COOK -> new CookStepImpl(
@@ -232,7 +249,7 @@ public class BrewingStepPdcType implements PersistentDataType<byte[], BrewingSte
         }
     }
 
-    public void encodeIngredients(@NotNull Map<? extends Ingredient, Integer> ingredients, OutputStream outputStream) {
+    public void encodeIngredients(@NonNull Map<? extends Ingredient, Integer> ingredients, OutputStream outputStream) {
         byte[][] bytesArray = ingredients.entrySet().stream()
                 .map(entry -> BukkitIngredientManager.INSTANCE.serializeIngredient(entry.getKey()) + "/" + entry.getValue())
                 .map(string -> string.getBytes(StandardCharsets.UTF_8))
@@ -244,7 +261,7 @@ public class BrewingStepPdcType implements PersistentDataType<byte[], BrewingSte
         }
     }
 
-    @NotNull
+    @NonNull
     public Map<? extends Ingredient, Integer> decodeIngredients(InputStream inputStream) {
         Map<Ingredient, Integer> ingredients = new HashMap<>();
         byte[][] bytesArray;
@@ -260,7 +277,7 @@ public class BrewingStepPdcType implements PersistentDataType<byte[], BrewingSte
         return ingredients;
     }
 
-    private void encodeBrewers(@NotNull SequencedSet<UUID> brewers, OutputStream outputStream) throws IOException {
+    private void encodeBrewers(@NonNull SequencedSet<UUID> brewers, OutputStream outputStream) throws IOException {
         DecoderEncoder.writeVarInt(brewers.size(), outputStream);
         for (UUID uuid : brewers) {
             outputStream.write(DecoderEncoder.asBytes(uuid));

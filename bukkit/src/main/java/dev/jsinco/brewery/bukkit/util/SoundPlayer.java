@@ -4,11 +4,11 @@ import dev.jsinco.brewery.sound.SoundDefinition;
 import net.kyori.adventure.sound.Sound;
 import org.bukkit.Location;
 import org.bukkit.World;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 public final class SoundPlayer {
-    public static void playSoundEffect(@Nullable SoundDefinition sound, @NotNull Sound.Source source, @NotNull Location location) {
+    public static void playSoundEffect(@Nullable SoundDefinition sound, Sound.@NonNull Source source, @NonNull Location location) {
         if (sound == null) {
             return;
         }
@@ -17,7 +17,7 @@ public final class SoundPlayer {
         location.getWorld().playSound(builder.build(), location.x(), location.y(), location.z());
     }
 
-    public static void playSoundEffect(@Nullable SoundDefinition sound, @NotNull Sound.Source source, @NotNull World world, double x, double y, double z) {
+    public static void playSoundEffect(@Nullable SoundDefinition sound, Sound.@NonNull Source source, @NonNull World world, double x, double y, double z) {
         playSoundEffect(sound, source, new Location(world, x, y, z));
     }
 }

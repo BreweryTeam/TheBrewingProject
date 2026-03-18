@@ -6,11 +6,11 @@ import dev.thorinwasher.schem.Schematic;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.block.data.BlockData;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix3d;
 import org.joml.Vector3d;
 import org.joml.Vector3i;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -35,7 +35,7 @@ public class BreweryStructure {
      * @param name
      * @param structureMeta
      */
-    public BreweryStructure(@NotNull Schematic schem, @NotNull String name, Meta structureMeta, String schemFileName) {
+    public BreweryStructure(@NonNull Schematic schem, @NonNull String name, Meta structureMeta, String schemFileName) {
         this(schem, new EntryPoints(computeEntryPoints(schem), false), name, structureMeta, schemFileName);
     }
 
@@ -46,7 +46,7 @@ public class BreweryStructure {
      * @param name
      * @param structureMeta
      */
-    public BreweryStructure(@NotNull Schematic schem, @NotNull EntryPoints origins, @NotNull String name, Meta structureMeta, String schemFileName) {
+    public BreweryStructure(@NonNull Schematic schem, @NonNull EntryPoints origins, @NonNull String name, Meta structureMeta, String schemFileName) {
         this.schem = Objects.requireNonNull(schem);
         this.entryPoints = origins;
         this.name = Objects.requireNonNull(name);

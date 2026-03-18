@@ -2,7 +2,7 @@ package dev.jsinco.brewery.util;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -15,7 +15,7 @@ import java.nio.file.StandardCopyOption;
 
 public final class FileUtil {
 
-    public static void extractFile(@NotNull Class<?> clazz, @NotNull String filename, @NotNull Path outDir, boolean replace) {
+    public static void extractFile(@NonNull Class<?> clazz, @NonNull String filename, @NonNull Path outDir, boolean replace) {
         try (InputStream in = clazz.getResourceAsStream("/" + filename)) {
             if (in == null) {
                 throw new RuntimeException("Could not read file from jar! (" + filename + ")");

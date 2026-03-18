@@ -1,6 +1,11 @@
 package dev.jsinco.brewery.util;
 
-import dev.jsinco.brewery.api.brew.*;
+import dev.jsinco.brewery.api.brew.Brew;
+import dev.jsinco.brewery.api.brew.BrewQuality;
+import dev.jsinco.brewery.api.brew.BrewScore;
+import dev.jsinco.brewery.api.brew.BrewingStep;
+import dev.jsinco.brewery.api.brew.PartialBrewScore;
+import dev.jsinco.brewery.api.brew.ScoreType;
 import dev.jsinco.brewery.api.effect.modifier.DrunkenModifier;
 import dev.jsinco.brewery.api.recipe.RecipeRegistry;
 import dev.jsinco.brewery.configuration.Config;
@@ -24,8 +29,8 @@ import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import net.kyori.adventure.text.minimessage.translation.Argument;
 import net.kyori.adventure.translation.GlobalTranslator;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 import java.util.Locale;
@@ -54,7 +59,7 @@ public class MessageUtil {
         );
     }
 
-    public static TagResolver getScoreTagResolver(@NotNull BrewScore score) {
+    public static TagResolver getScoreTagResolver(@NonNull BrewScore score) {
         BrewQuality quality = score.brewQuality();
         return TagResolver.resolver(
                 Placeholder.component("quality", score.displayName()),
@@ -62,7 +67,7 @@ public class MessageUtil {
         );
     }
 
-    public static @NotNull TagResolver getBrewStepTagResolver(BrewingStep brewingStep, Map<ScoreType, PartialBrewScore> scores, double difficulty) {
+    public static @NonNull TagResolver getBrewStepTagResolver(BrewingStep brewingStep, Map<ScoreType, PartialBrewScore> scores, double difficulty) {
         TagResolver resolver = switch (brewingStep) {
             case BrewingStep.Age age -> TagResolver.resolver(
                     Placeholder.component("barrel_type", GlobalTranslator.render(Component.translatable("tbp.barrel.type." + age.barrelType().name().toLowerCase(Locale.ROOT)), Config.config().language())),
@@ -103,7 +108,7 @@ public class MessageUtil {
         );
     }
 
-    public static @NotNull StyleBuilderApplicable[] resolveQualityColor(@Nullable BrewQuality quality) {
+    public static @NonNull StyleBuilderApplicable[] resolveQualityColor(@Nullable BrewQuality quality) {
         if (quality != null) {
             TextColor translatedColor = getTranslatedColor(quality.colorKey());
             TextColor color = translatedColor != null ? translatedColor : TextColor.color(quality.getColor());
@@ -112,7 +117,7 @@ public class MessageUtil {
         return new StyleBuilderApplicable[]{NamedTextColor.GRAY, TextDecoration.STRIKETHROUGH};
     }
 
-    public static @NotNull Stream<Component> compileBrewInfo(Brew brew, BrewScore score, boolean detailed) {
+    public static @NonNull Stream<Component> compileBrewInfo(Brew brew, BrewScore score, boolean detailed) {
         List<BrewingStep> brewingSteps = brew.getCompletedSteps();
         Stream.Builder<Component> streamBuilder = Stream.builder();
         for (int i = 0; i < brewingSteps.size(); i++) {
@@ -127,14 +132,14 @@ public class MessageUtil {
         return streamBuilder.build();
     }
 
-    public static @NotNull Stream<Component> compileBrewInfo(Brew brew, boolean detailed, RecipeRegistry<?> registry) {
+    public static @NonNull Stream<Component> compileBrewInfo(Brew brew, boolean detailed, RecipeRegistry<?> registry) {
         BrewScore score = brew.closestRecipe(registry)
                 .map(brew::score)
                 .orElse(BrewScoreImpl.failed(brew));
         return compileBrewInfo(brew, score, detailed);
     }
 
-    public static @NotNull TagResolver getValueDisplayTagResolver(double displayValue) {
+    public static @NonNull TagResolver getValueDisplayTagResolver(double displayValue) {
         return TagResolver.resolver(
                 Placeholder.component("bars", compileBars(displayValue)),
                 Placeholder.component("skulls", compileSkulls(displayValue)),
@@ -142,7 +147,7 @@ public class MessageUtil {
         );
     }
 
-    private static @NotNull ComponentLike compileSkulls(double level) {
+    private static @NonNull ComponentLike compileSkulls(double level) {
         Component skull = getTranslatedComponent("tbp.brew.skull", Component.text(SKULL));
         TextColor skullColor = getTranslatedColor("tbp.brew.skull.color");
 
@@ -153,7 +158,7 @@ public class MessageUtil {
         return result.colorIfAbsent(skullColor != null ? skullColor : NamedTextColor.GREEN);
     }
 
-    private static @NotNull ComponentLike compileBars(double level) {
+    private static @NonNull ComponentLike compileBars(double level) {
         TextColor ok = getTranslatedColor("tbp.brew.bar.color.ok");
         TextColor warning = getTranslatedColor("tbp.brew.bar.color.warning");
         TextColor severe = getTranslatedColor("tbp.brew.bar.color.severe");
@@ -166,7 +171,7 @@ public class MessageUtil {
                 .append(Component.text("|".repeat(20 - partitionedLevel)).color(empty != null ? empty : NamedTextColor.BLACK));
     }
 
-    private static @NotNull Component compileStars(double level) {
+    private static @NonNull Component compileStars(double level) {
         Component fullStar = getTranslatedComponent("tbp.brew.star.full", Component.text(FULL_STAR));
         Component halfStar = getTranslatedComponent("tbp.brew.star.half", Component.text(HALF_STAR));
         Component emptyStar = getTranslatedComponent("tbp.brew.star.empty", Component.text(EMPTY_STAR));
@@ -186,14 +191,14 @@ public class MessageUtil {
         return result;
     }
 
-    public static @NotNull TagResolver getTimeTagResolver(long timeTicks) {
+    public static @NonNull TagResolver getTimeTagResolver(long timeTicks) {
         long cookingMinuteTicks = Config.config().cauldrons().cookingMinuteTicks();
         long seconds = (timeTicks % cookingMinuteTicks) * 60 / cookingMinuteTicks;
         long minutes = timeTicks / cookingMinuteTicks;
         return Placeholder.parsed("time", String.format("%d:%02d", minutes, seconds));
     }
 
-    public static TagResolver numberedModifierTagResolver(@NotNull Map<DrunkenModifier, Double> modifiers, @Nullable String prefix) {
+    public static TagResolver numberedModifierTagResolver(@NonNull Map<DrunkenModifier, Double> modifiers, @Nullable String prefix) {
         TagResolver.Builder builder = TagResolver.builder();
         for (DrunkenModifier modifier : DrunkenModifierSection.modifiers().drunkenModifiers()) {
             double value = modifiers.getOrDefault(modifier, modifier.minValue());
@@ -202,7 +207,7 @@ public class MessageUtil {
         return builder.build();
     }
 
-    private static @NotNull Component getTranslatedComponent(String key, Component fallback) {
+    private static @NonNull Component getTranslatedComponent(String key, Component fallback) {
         Component rendered = GlobalTranslator.render(Component.translatable(key), Config.config().language());
         return rendered instanceof TranslatableComponent ? fallback : rendered;
     }

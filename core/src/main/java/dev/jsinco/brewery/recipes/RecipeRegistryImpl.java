@@ -8,9 +8,16 @@ import dev.jsinco.brewery.api.ingredient.IngredientGroup;
 import dev.jsinco.brewery.api.recipe.DefaultRecipe;
 import dev.jsinco.brewery.api.recipe.Recipe;
 import dev.jsinco.brewery.api.recipe.RecipeRegistry;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -23,7 +30,7 @@ public class RecipeRegistryImpl<I> implements RecipeRegistry<I> {
     private List<DefaultRecipe<I>> defaultRecipeList = new ArrayList<>();
     private Set<BaseIngredient> allIngredients = Collections.newSetFromMap(new ConcurrentHashMap<>());
 
-    public void registerRecipes(@NotNull Map<String, Recipe<I>> recipes) {
+    public void registerRecipes(@NonNull Map<String, Recipe<I>> recipes) {
         this.recipes = new ConcurrentHashMap<>(recipes);
         recipes.values().stream()
                 .map(this::getRecipeIngredients)
@@ -33,7 +40,7 @@ public class RecipeRegistryImpl<I> implements RecipeRegistry<I> {
     }
 
     @Override
-    public Optional<Recipe<I>> getRecipe(@NotNull String recipeName) {
+    public Optional<Recipe<I>> getRecipe(@NonNull String recipeName) {
         Preconditions.checkNotNull(recipeName);
 
         // Try case-sensitive first
@@ -73,7 +80,7 @@ public class RecipeRegistryImpl<I> implements RecipeRegistry<I> {
     }
 
     @Override
-    public Optional<DefaultRecipe<I>> getDefaultRecipe(@NotNull String recipeName) {
+    public Optional<DefaultRecipe<I>> getDefaultRecipe(@NonNull String recipeName) {
         Preconditions.checkNotNull(recipeName);
         return Optional.ofNullable(defaultRecipes.get(recipeName));
     }

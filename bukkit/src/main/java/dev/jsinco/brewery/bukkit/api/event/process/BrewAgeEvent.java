@@ -3,7 +3,7 @@ package dev.jsinco.brewery.bukkit.api.event.process;
 import dev.jsinco.brewery.api.brew.Brew;
 import dev.jsinco.brewery.api.breweries.BarrelAccess;
 import org.bukkit.event.HandlerList;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 /**
  * An event that triggers whenever a brew ages. This event could be triggered multiple times for one brew when it's aging
@@ -20,7 +20,7 @@ public class BrewAgeEvent extends BrewProcessEvent {
     }
 
     @Override
-    public @NotNull HandlerList getHandlers() {
+    public @NonNull HandlerList getHandlers() {
         return HANDLERS;
     }
 

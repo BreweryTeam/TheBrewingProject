@@ -8,7 +8,7 @@ import org.bukkit.persistence.ListPersistentDataType;
 import org.bukkit.persistence.PersistentDataAdapterContext;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.potion.PotionEffectType;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 public class RecipeEffectPersistentDataType implements PersistentDataType<String, RecipeEffectImpl> {
 
@@ -16,22 +16,22 @@ public class RecipeEffectPersistentDataType implements PersistentDataType<String
     public static final ListPersistentDataType<String, RecipeEffectImpl> INSTANCE = ListPersistentDataType.LIST.listTypeFrom(SINGLETON_INSTANCE);
 
     @Override
-    public @NotNull Class<String> getPrimitiveType() {
+    public @NonNull Class<String> getPrimitiveType() {
         return String.class;
     }
 
     @Override
-    public @NotNull Class<RecipeEffectImpl> getComplexType() {
+    public @NonNull Class<RecipeEffectImpl> getComplexType() {
         return RecipeEffectImpl.class;
     }
 
     @Override
-    public @NotNull String toPrimitive(@NotNull RecipeEffectImpl complex, @NotNull PersistentDataAdapterContext context) {
+    public @NonNull String toPrimitive(@NonNull RecipeEffectImpl complex, @NonNull PersistentDataAdapterContext context) {
         return complex.type().key().asString() + "/" + complex.durationRange().asString() + "/" + complex.amplifierRange().asString();
     }
 
     @Override
-    public @NotNull RecipeEffectImpl fromPrimitive(@NotNull String primitive, @NotNull PersistentDataAdapterContext context) {
+    public @NonNull RecipeEffectImpl fromPrimitive(@NonNull String primitive, @NonNull PersistentDataAdapterContext context) {
         String[] split = primitive.split("/");
         PotionEffectType effectType = Registry.EFFECT.get(NamespacedKey.fromString(split[0]));
         Preconditions.checkArgument(effectType != null, "Effect type can not be null");

@@ -7,7 +7,7 @@ import dev.jsinco.brewery.api.event.step.Condition;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 import java.util.List;
 import java.util.UUID;
@@ -22,7 +22,7 @@ public class ConditionalStepExecutable implements EventPropertyExecutable {
 
 
     @Override
-    public @NotNull ExecutionResult execute(UUID contextPlayer, List<? extends EventStep> events, int index) {
+    public @NonNull ExecutionResult execute(UUID contextPlayer, List<? extends EventStep> events, int index) {
         return shouldCancel(contextPlayer, condition) ? ExecutionResult.STOP_EXECUTION : ExecutionResult.CONTINUE;
     }
 

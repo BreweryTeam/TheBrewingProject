@@ -7,10 +7,9 @@ import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Registry;
 import org.bukkit.inventory.ItemStack;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 import java.util.Locale;
-import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -19,12 +18,12 @@ import java.util.Optional;
 public record SimpleIngredient(Material material) implements BaseIngredient {
 
     @Override
-    public @NotNull String getKey() {
+    public @NonNull String getKey() {
         return material.getKey().toString();
     }
 
     @Override
-    public @NotNull Component displayName() {
+    public @NonNull Component displayName() {
         String translationKey = material.getItemTranslationKey();
 
         if (translationKey == null) {
@@ -34,7 +33,7 @@ public record SimpleIngredient(Material material) implements BaseIngredient {
         return Component.translatable(translationKey);
     }
 
-    public static SimpleIngredient from(@NotNull ItemStack itemStack) {
+    public static SimpleIngredient from(@NonNull ItemStack itemStack) {
         return new SimpleIngredient(itemStack.getType());
     }
 
