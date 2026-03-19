@@ -17,6 +17,10 @@ dependencies {
     implementation(libs.gson)
 }
 
+java.toolchain {
+    languageVersion = JavaLanguageVersion.of(21)
+}
+
 tasks {
     application {
         mainClass = "dev.jsinco.brewery.datagenerator.DataGenerator"

@@ -101,4 +101,4 @@ plugin-yml-bukkit = { id = "de.eldoria.plugin-yml.bukkit", version = "0.7.1" }
 hangar-publish = { id = "io.papermc.hangar-publish-plugin", version = "0.1.3" }
 modrinth-publish = { id = "com.modrinth.minotaur", version = "2.8.7"}
 
-neoforged-gradle-common = { id = "net.neoforged.gradle.common", version = "7.0.188" }
+neoforged-gradle-common = { id = "net.neoforged.gradle.common", version = "7.1.21" }
