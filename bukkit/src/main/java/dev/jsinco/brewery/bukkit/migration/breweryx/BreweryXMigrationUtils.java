@@ -21,6 +21,7 @@ import dev.jsinco.brewery.bukkit.ingredient.SimpleIngredient;
 import dev.jsinco.brewery.configuration.Config;
 import dev.jsinco.brewery.recipes.BrewScoreImpl;
 import dev.jsinco.brewery.util.IngredientUtil;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -79,7 +80,12 @@ public class BreweryXMigrationUtils {
             BrewManager<ItemStack> brewManager = TheBrewingProject.getInstance().getBrewManager();
             Brew.State state = data.sealed ? new Brew.State.Seal(null) : new Brew.State.Other();
             if (data.brew == null || data.sealed) {
-                return itemFromDataWithoutSteps(data, brewManager, state);
+                List<Component> previousLore = item.lore();
+                ItemStack output = itemFromDataWithoutSteps(data, brewManager, state);
+                if (previousLore != null && output != null) {
+                    output.lore(previousLore);
+                }
+                return output;
             }
             return brewManager.toItem(data.brew, state);
 
