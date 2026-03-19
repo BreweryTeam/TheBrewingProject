@@ -2,6 +2,7 @@ package dev.jsinco.brewery.configuration;
 
 import com.google.common.collect.ImmutableMap;
 import dev.jsinco.brewery.api.config.Configuration;
+import dev.jsinco.brewery.api.effect.modifier.ModifierDisplay;
 import dev.jsinco.brewery.api.ingredient.IngredientInput;
 import dev.jsinco.brewery.api.ingredient.UncheckedIngredient;
 import dev.jsinco.brewery.api.ingredient.WildcardIngredient;
@@ -62,6 +63,14 @@ public class CauldronSection extends OkaeriConfig implements Configuration.Cauld
     @Comment("To whom animations should be rendered when adding items [none, brewer, everyone]")
     @CustomKey("ingredient-added-animation-display")
     private AnimationDisplay ingredientAddedAnimation = AnimationDisplay.NONE;
+
+    @Comment("How to display the time [action_bar, chat, title]")
+    @CustomKey("clock-display")
+    public final ModifierDisplay.DisplayWindow clockDisplay = ModifierDisplay.DisplayWindow.ACTION_BAR;
+
+    @Comment("What items can be used to display time")
+    @CustomKey("clock-items")
+    public final List<IngredientInput> clockItems = List.of(UncheckedIngredient.minecraft("clock"));
 
     @Comment("What items should be transformed into another item when added as an ingredient")
     @CustomKey("ingredient-empty-transforms")

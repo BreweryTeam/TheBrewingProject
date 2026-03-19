@@ -9,6 +9,7 @@ import dev.jsinco.brewery.api.effect.DrunkState;
 import dev.jsinco.brewery.api.effect.ModifierConsume;
 import dev.jsinco.brewery.api.effect.modifier.ModifierDisplay;
 import dev.jsinco.brewery.api.ingredient.Ingredient;
+import dev.jsinco.brewery.api.ingredient.UncheckedIngredient;
 import dev.jsinco.brewery.api.util.BreweryKey;
 import dev.jsinco.brewery.api.util.CancelState;
 import dev.jsinco.brewery.api.util.Logger;
@@ -27,6 +28,7 @@ import dev.jsinco.brewery.bukkit.breweries.BukkitCauldronDataType;
 import dev.jsinco.brewery.bukkit.effect.ConsumedModifierDisplay;
 import dev.jsinco.brewery.bukkit.effect.event.DrunkEventExecutor;
 import dev.jsinco.brewery.bukkit.ingredient.BukkitIngredientManager;
+import dev.jsinco.brewery.bukkit.ingredient.UncheckedIngredientImpl;
 import dev.jsinco.brewery.bukkit.recipe.RecipeEffectsImpl;
 import dev.jsinco.brewery.bukkit.util.BukkitIngredientUtil;
 import dev.jsinco.brewery.bukkit.util.SoundPlayer;
@@ -51,6 +53,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.translation.Argument;
+import net.kyori.adventure.title.Title;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.Tag;
@@ -84,7 +87,7 @@ import java.util.Set;
 import java.util.UUID;
 
 public class PlayerEventListener implements Listener {
-    public static final Set<Material> DISALLOWED_INGREDIENT_MATERIALS = Set.of(Material.CLOCK, Material.BUCKET, Material.GLASS_BOTTLE);
+    public static final Set<Material> DISALLOWED_INGREDIENT_MATERIALS = Set.of(Material.BUCKET, Material.GLASS_BOTTLE);
     private static final Random RANDOM = new Random();
 
     private final PlacedStructureRegistryImpl placedStructureRegistry;
@@ -215,7 +218,10 @@ public class PlayerEventListener implements Listener {
         if (itemStack == null) {
             return;
         }
-        if (isIngredient(itemStack)) {
+        Ingredient ingredient = BukkitIngredientManager.INSTANCE.getIngredient(itemStack);
+        UncheckedIngredient wrapped = new UncheckedIngredientImpl(ingredient);
+        boolean isClockItem = Config.config().cauldrons().clockItems.stream().anyMatch(ingredientInput -> ingredientInput.matches(wrapped));
+        if (!isClockItem && isIngredient(itemStack)) {
             boolean addedIngredient = handleIngredientAddition(itemStack, block, cauldronOptional.orElse(null), event.getPlayer(), event.getHand());
             if (addedIngredient) {
                 event.setUseInteractedBlock(Event.Result.DENY);
@@ -229,12 +235,15 @@ public class PlayerEventListener implements Listener {
         if (itemStack.getType() == Material.GLASS_BOTTLE) {
             handleCauldronExtract(event, block, cauldron);
         }
-        if (itemStack.getType() == Material.CLOCK && event.getPlayer().hasPermission("brewery.cauldron.time")) {
-            event.getPlayer().sendMessage(
-                    Component.translatable("tbp.cauldron.clock-message", Argument.tagResolver(
-                            Placeholder.parsed("time", TimeFormatter.format(cauldron.getTime(), TimeFormat.CLOCK_MECHANIC, TimeModifier.COOKING))
-                    ))
-            );
+        if (isClockItem && event.getPlayer().hasPermission("brewery.cauldron.time")) {
+            Component message = Component.translatable("tbp.cauldron.clock-message", Argument.tagResolver(
+                    Placeholder.parsed("time", TimeFormatter.format(cauldron.getTime(), TimeFormat.CLOCK_MECHANIC, TimeModifier.COOKING))
+            ));
+            switch (Config.config().cauldrons().clockDisplay) {
+                case CHAT -> event.getPlayer().sendMessage(message);
+                case ACTION_BAR -> event.getPlayer().sendActionBar(message);
+                case TITLE -> event.getPlayer().showTitle(Title.title(Component.empty(), message));
+            }
         }
         event.setUseInteractedBlock(Event.Result.DENY);
         event.setUseItemInHand(Event.Result.DENY);
