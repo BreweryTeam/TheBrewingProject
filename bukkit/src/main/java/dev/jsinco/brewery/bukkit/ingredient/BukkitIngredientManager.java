@@ -30,10 +30,13 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class BukkitIngredientManager implements IngredientManager<ItemStack> {
 
     public static final BukkitIngredientManager INSTANCE = new BukkitIngredientManager();
+    private static final Pattern INGREDIENT_WITH_AMOUNT_RE = Pattern.compile("(.+)/([^/]+)");
 
     @Override
     public Ingredient getIngredient(@NonNull ItemStack itemStack) {
@@ -71,13 +74,14 @@ public class BukkitIngredientManager implements IngredientManager<ItemStack> {
         }
         Optional<ItemStack> itemStackOptional = switch (ingredient.toBaseIngredient()) {
             case SimpleIngredient(Material material) -> Optional.of(material.asItemType().createItemStack());
-            case BreweryIngredient(BreweryKey breweryKey) -> TheBrewingProject.getInstance().getRecipeRegistry().getRecipe(breweryKey.minimalized())
-                    .map(recipe -> {
-                        RecipeResult<ItemStack> result = recipe.getRecipeResult(BrewScoreImpl.quality(score));
-                        ItemStack itemStack = result.newLorelessItem();
-                        itemStack.editPersistentDataContainer(pdc -> BrewAdapter.applyBrewTags(pdc, recipe, score, ""));
-                        return itemStack;
-                    });
+            case BreweryIngredient(BreweryKey breweryKey) ->
+                    TheBrewingProject.getInstance().getRecipeRegistry().getRecipe(breweryKey.minimalized())
+                            .map(recipe -> {
+                                RecipeResult<ItemStack> result = recipe.getRecipeResult(BrewScoreImpl.quality(score));
+                                ItemStack itemStack = result.newLorelessItem();
+                                itemStack.editPersistentDataContainer(pdc -> BrewAdapter.applyBrewTags(pdc, recipe, score, ""));
+                                return itemStack;
+                            });
             case PluginIngredient pluginIngredient ->
                     pluginIngredient.itemIntegration().createItem(pluginIngredient.getKey());
             default -> Optional.empty();
@@ -118,17 +122,17 @@ public class BukkitIngredientManager implements IngredientManager<ItemStack> {
     @Override
     public CompletableFuture<Pair<Ingredient, Integer>> getIngredientWithAmount(String ingredientStr, boolean withMeta) throws
             IllegalArgumentException {
-        String[] ingredientSplit = ingredientStr.split("/");
-        if (ingredientSplit.length > 2) {
-            throw new IllegalArgumentException("Too many '/' separators for ingredientString, was: " + ingredientStr);
-        }
+        Matcher matcher = INGREDIENT_WITH_AMOUNT_RE.matcher(ingredientStr);
         int amount;
-        if (ingredientSplit.length == 1) {
-            amount = 1;
+        String ingredientString;
+        if (matcher.matches()) {
+            ingredientString = matcher.group(1);
+            amount = Integer.parseInt(matcher.group(2));
         } else {
-            amount = Integer.parseInt(ingredientSplit[1]);
+            ingredientString = ingredientStr;
+            amount = 1;
         }
-        return (withMeta ? this.deserializeIngredient(ingredientSplit[0]) : this.getIngredient(ingredientSplit[0]))
+        return (withMeta ? this.deserializeIngredient(ingredientString) : this.getIngredient(ingredientString))
                 .thenApplyAsync(ingredientOptional ->
                         ingredientOptional.map(ingredient -> new Pair<>(ingredient, amount))
                                 .orElseThrow(() -> new IllegalArgumentException("Invalid ingredient string '" + ingredientStr + "' could not parse type"))
