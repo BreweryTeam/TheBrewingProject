@@ -1,4 +1,4 @@
-package dev.jsinco.brewery.configuration;
+package dev.jsinco.brewery.configuration.structure;
 
 import dev.jsinco.brewery.api.config.Configuration;
 import dev.jsinco.brewery.api.moment.Moment;
@@ -22,6 +22,10 @@ public class BarrelSection extends OkaeriConfig implements Configuration.Barrels
     @CustomKey("sign-keywords")
     private List<String> signKeywords = List.of("barrel");
 
+    @Comment("Custom barrel types")
+    @CustomKey("custom-barrels")
+    private List<BarrelTypeDefinition> customBarrels = List.of();
+
     @Override
     public long agingYearTicks() {
         return this.agingYearTicks;
@@ -33,5 +37,9 @@ public class BarrelSection extends OkaeriConfig implements Configuration.Barrels
 
     public List<String> signKeywords() {
         return this.signKeywords;
+    }
+
+    public List<BarrelTypeDefinition> customBarrels() {
+        return this.customBarrels;
     }
 }
