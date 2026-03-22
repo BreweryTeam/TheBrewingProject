@@ -30,7 +30,7 @@ import java.util.List;
  */
 public class BreweryRegistry<T extends BreweryKeyed> {
 
-    public static final BreweryRegistry<BarrelType> BARREL_TYPE = fromEnums(BarrelType.class);
+    public static final BreweryRegistry<BarrelType> BARREL_TYPE = (BreweryRegistry<BarrelType>) fromFields(BarrelType.class);
     public static final BreweryRegistry<CauldronType> CAULDRON_TYPE = fromEnums(CauldronType.class);
     public static final BreweryRegistry<StructureMeta<?>> STRUCTURE_META = (BreweryRegistry<StructureMeta<?>>) fromFields(StructureMeta.class);
     public static final BreweryRegistry<IngredientMeta<?>> INGREDIENT_META = (BreweryRegistry<IngredientMeta<?>>) fromFields(IngredientMeta.class);
