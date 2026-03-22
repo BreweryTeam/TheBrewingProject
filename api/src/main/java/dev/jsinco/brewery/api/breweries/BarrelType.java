@@ -1,32 +1,42 @@
 package dev.jsinco.brewery.api.breweries;
 
 
-import dev.jsinco.brewery.api.util.BreweryKey;
 import dev.jsinco.brewery.api.util.BreweryKeyed;
 
-import java.util.Arrays;
-import java.util.Locale;
+public interface BarrelType extends BreweryKeyed {
 
-public enum BarrelType implements BreweryKeyed {
+    BarrelType ANY = BarrelTypeProviderHolder.builder("any")
+            .globalProximity(1D)
+            .build();
+    BarrelType OAK = BarrelTypeProviderHolder.predefined("oak");
+    BarrelType BIRCH = BarrelTypeProviderHolder.predefined("birch");
+    BarrelType SPRUCE = BarrelTypeProviderHolder.predefined("spruce");
+    BarrelType JUNGLE = BarrelTypeProviderHolder.predefined("jungle");
+    BarrelType ACACIA = BarrelTypeProviderHolder.predefined("acacia");
+    BarrelType DARK_OAK = BarrelTypeProviderHolder.predefined("dark_oak");
+    BarrelType CRIMSON = BarrelTypeProviderHolder.predefined("crimson");
+    BarrelType WARPED = BarrelTypeProviderHolder.predefined("warped");
+    BarrelType CHERRY = BarrelTypeProviderHolder.predefined("cherry");
+    BarrelType BAMBOO = BarrelTypeProviderHolder.predefined("bamboo");
+    BarrelType MANGROVE = BarrelTypeProviderHolder.predefined("mangrove");
+    BarrelType PALE_OAK = BarrelTypeProviderHolder.predefined("pale_oak");
+    BarrelType COPPER = BarrelTypeProviderHolder.predefined("copper");
 
-    ANY,
-    OAK,
-    BIRCH,
-    SPRUCE,
-    JUNGLE,
-    ACACIA,
-    DARK_OAK,
-    CRIMSON,
-    WARPED,
-    CHERRY,
-    BAMBOO,
-    MANGROVE,
-    PALE_OAK,
-    COPPER;
+    /**
+     * Evaluate the proximity of another barrel type.
+     *
+     * @param other Another barrel type
+     * @return A score between 0 and 1
+     */
+    double proximityScore(BarrelType other);
 
-    public static final BarrelType[] PLACEABLE_TYPES = Arrays.stream(values()).filter(barrelType -> barrelType != ANY).toArray(BarrelType[]::new);
+    interface Builder {
 
-    public BreweryKey key() {
-        return BreweryKey.parse(name());
+
+        Builder addProximity(BarrelType barrelType, double scoreMultiplier);
+
+        Builder globalProximity(double scoreMultiplier);
+
+        BarrelType build();
     }
 }
