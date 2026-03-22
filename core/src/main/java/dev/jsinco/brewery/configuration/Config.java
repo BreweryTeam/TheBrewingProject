@@ -1,6 +1,8 @@
 package dev.jsinco.brewery.configuration;
 
 import dev.jsinco.brewery.api.config.Configuration;
+import dev.jsinco.brewery.configuration.structure.BarrelSection;
+import dev.jsinco.brewery.configuration.structure.CauldronSection;
 import eu.okaeri.configs.ConfigManager;
 import eu.okaeri.configs.OkaeriConfig;
 import eu.okaeri.configs.annotation.Comment;
