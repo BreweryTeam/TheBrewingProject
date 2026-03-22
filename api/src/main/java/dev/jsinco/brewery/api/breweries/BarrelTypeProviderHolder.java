@@ -16,12 +16,4 @@ public class BarrelTypeProviderHolder {
         }
         return instance;
     }
-
-    static BarrelType.Builder builder(String name) {
-        return instance().builder(name);
-    }
-
-    static BarrelType predefined(String name) {
-        return instance().predefined(name);
-    }
 }
