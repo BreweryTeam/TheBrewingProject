@@ -168,7 +168,12 @@ public class BlockEventListener implements Listener {
         Material material = block.getType();
         Set<BreweryStructure> possibleStructures = structureRegistry.getPossibleStructures(material, StructureType.BARREL);
         for (BreweryStructure structure : possibleStructures) {
-            Optional<Pair<PlacedBreweryStructure<BukkitBarrel>, BarrelType>> placedBreweryStructure = PlacedBreweryStructure.findValid(structure, placedLocation, BarrelBlockDataMatcher.INSTANCE, BarrelType.PLACEABLE_TYPES);
+            Optional<Pair<PlacedBreweryStructure<BukkitBarrel>, BarrelType>> placedBreweryStructure = PlacedBreweryStructure.findValid(
+                    structure,
+                    placedLocation,
+                    BarrelBlockDataMatcher.INSTANCE,
+                    dev.jsinco.brewery.api.util.BreweryRegistry.BARREL_TYPE.values().toArray(BarrelType[]::new)
+            );
             if (placedBreweryStructure.isPresent()) {
                 return placedBreweryStructure;
             }

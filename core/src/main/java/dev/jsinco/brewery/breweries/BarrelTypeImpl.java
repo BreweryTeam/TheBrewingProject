@@ -21,6 +21,9 @@ public class BarrelTypeImpl implements BarrelType {
     @Override
     public double proximityScore(BarrelType other) {
         Preconditions.checkNotNull(other);
+        if (other.key().equals(this.key)) {
+            return 1D;
+        }
         Double proximity = this.proximity.get(other.key());
         return proximity == null ? backupProximity : proximity;
     }
