@@ -22,10 +22,6 @@ public class BarrelSection extends OkaeriConfig implements Configuration.Barrels
     @CustomKey("sign-keywords")
     private List<String> signKeywords = List.of("barrel");
 
-    @Comment("Custom barrel types")
-    @CustomKey("custom-barrels")
-    private List<BarrelTypeDefinition> customBarrels = List.of();
-
     @Override
     public long agingYearTicks() {
         return this.agingYearTicks;
@@ -39,7 +35,4 @@ public class BarrelSection extends OkaeriConfig implements Configuration.Barrels
         return this.signKeywords;
     }
 
-    public List<BarrelTypeDefinition> customBarrels() {
-        return this.customBarrels;
-    }
 }
