@@ -32,6 +32,7 @@ dependencies {
     }
     implementation(libs.hikaricp)
     implementation(libs.exp4j)
+    implementation(libs.warp.configs)
 
     // other
     compileOnly(libs.jetbrains.annotations)
