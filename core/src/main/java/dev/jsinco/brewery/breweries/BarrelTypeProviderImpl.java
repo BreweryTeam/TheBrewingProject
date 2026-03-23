@@ -2,15 +2,19 @@ package dev.jsinco.brewery.breweries;
 
 import dev.jsinco.brewery.api.breweries.BarrelType;
 import dev.jsinco.brewery.api.breweries.BarrelTypeProvider;
+import dev.jsinco.brewery.configuration.structure.BarrelTypes;
+
+import java.util.Collection;
 
 public class BarrelTypeProviderImpl implements BarrelTypeProvider {
+
     @Override
     public BarrelType.Builder builder(String name) {
         return new BarrelTypeBuilderImpl(name);
     }
 
     @Override
-    public BarrelType predefined(String name) {
-        return null;
+    public Collection<BarrelType> allBarrels() {
+        return BarrelTypes.allBarrelTypes();
     }
 }

@@ -145,7 +145,8 @@ tasks {
             "org.yaml.snakeyaml",
             "eu.okaeri",
             "net.objecthunter.exp4j",
-            "dev.faststats"
+            "dev.faststats",
+            "me.sparky983.warp"
         ).forEach { relocate(it, "${project.group}.lib.$it") }
     }
 
