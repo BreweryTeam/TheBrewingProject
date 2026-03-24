@@ -56,6 +56,11 @@ public record StructureMeta<V>(BreweryKey key, Class<V> vClass, V defaultValue) 
             BlockMatcherReplacement.List.class,
             new BlockMatcherReplacement.List()
     );
+    public static final StructureMeta<String> BLOCK_MATCHER = new StructureMeta<>(
+            BreweryKey.parse("block_matcher"),
+            String.class,
+            null
+    );
 
     // Keep this at the bottom, going to cause issues because of class initialization order otherwise
     public static final StructureMeta<StructureType> TYPE = new StructureMeta<>(BreweryKey.parse("type"), StructureType.class, StructureType.BARREL);

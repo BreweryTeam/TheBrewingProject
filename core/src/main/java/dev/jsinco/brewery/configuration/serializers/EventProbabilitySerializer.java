@@ -14,17 +14,17 @@ import java.util.stream.Collectors;
 
 public class EventProbabilitySerializer implements ObjectSerializer<EventProbability> {
     @Override
-    public boolean supports(@NonNull Class<? super EventProbability> type) {
+    public boolean supports(@NonNull Class<?> type) {
         return EventProbability.class == type;
     }
 
     @Override
     public void serialize(@NonNull EventProbability object, @NonNull SerializationData data, @NonNull GenericsDeclaration generics) {
         if (object.probabilityExpression() != ModifierExpression.ZERO) {
-            data.add("probability-expression", object.probabilityExpression());
+            data.set("probability-expression", object.probabilityExpression());
         }
         if (!object.allowedRanges().isEmpty()) {
-            data.add("allowed-ranges", object.allowedRanges());
+            data.set("allowed-ranges", object.allowedRanges());
         }
     }
 

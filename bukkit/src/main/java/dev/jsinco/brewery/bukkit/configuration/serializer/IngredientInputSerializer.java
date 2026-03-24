@@ -13,7 +13,7 @@ import org.jspecify.annotations.NonNull;
 
 public class IngredientInputSerializer implements ObjectSerializer<IngredientInput> {
     @Override
-    public boolean supports(@NonNull Class<? super IngredientInput> type) {
+    public boolean supports(@NonNull Class<?> type) {
         return IngredientInput.class.isAssignableFrom(type);
     }
 

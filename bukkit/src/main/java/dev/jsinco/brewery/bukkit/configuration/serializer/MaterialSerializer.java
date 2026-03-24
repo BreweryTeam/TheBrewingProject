@@ -14,7 +14,7 @@ import org.jspecify.annotations.NonNull;
 public class MaterialSerializer implements ObjectSerializer<Holder.Material> {
 
     @Override
-    public boolean supports(@NonNull Class<? super Holder.Material> type) {
+    public boolean supports(@NonNull Class<?> type) {
         return Holder.Material.class == type;
     }
 

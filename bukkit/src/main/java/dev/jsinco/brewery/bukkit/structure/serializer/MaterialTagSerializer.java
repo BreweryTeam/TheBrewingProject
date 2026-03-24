@@ -21,7 +21,7 @@ public class MaterialTagSerializer implements ObjectSerializer<MaterialTag> {
     private static final Pattern TAG_PATTERN = Pattern.compile("^#");
 
     @Override
-    public boolean supports(@NonNull Class<? super MaterialTag> type) {
+    public boolean supports(@NonNull Class<?> type) {
         return MaterialTag.class == type;
     }
 

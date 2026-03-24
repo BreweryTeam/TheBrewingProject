@@ -11,16 +11,16 @@ import org.jspecify.annotations.NonNull;
 
 public class ModifierDisplaySerializer implements ObjectSerializer<ModifierDisplay> {
     @Override
-    public boolean supports(@NonNull Class<? super ModifierDisplay> type) {
+    public boolean supports(@NonNull Class<?> type) {
         return ModifierDisplay.class == type;
     }
 
     @Override
     public void serialize(@NonNull ModifierDisplay object, @NonNull SerializationData data, @NonNull GenericsDeclaration generics) {
-        data.add("message", object.message());
-        data.add("filter", object.filter());
-        data.add("display-value", object.value());
-        data.add("display-window", object.displayWindow());
+        data.set("message", object.message());
+        data.set("filter", object.filter());
+        data.set("display-value", object.value());
+        data.set("display-window", object.displayWindow());
     }
 
     @Override

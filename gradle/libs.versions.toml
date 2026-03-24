@@ -1,11 +1,11 @@
 [versions]
-paper = "1.21.7-R0.1-SNAPSHOT"
+paper = "1.21.11-R0.1-SNAPSHOT"
 
 # libraries
-gson = "2.13.1"
+gson = "2.11.0"
 guava = "33.4.8-jre"
 hikaricp = "6.3.0"
-okaeri = "5.0.9"
+okaeri = "6.0.0-beta.27"
 joml = "1.10.8"
 protocolLib = "5.3.0"
 schem-reader = "1.0.0"
