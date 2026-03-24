@@ -9,7 +9,7 @@ import org.jspecify.annotations.NonNull;
 
 public class BreweryVectorListSerializer implements ObjectSerializer<BreweryVector.List> {
     @Override
-    public boolean supports(@NonNull Class<? super BreweryVector.List> type) {
+    public boolean supports(@NonNull Class<?> type) {
         return BreweryVector.List.class == type;
     }
 

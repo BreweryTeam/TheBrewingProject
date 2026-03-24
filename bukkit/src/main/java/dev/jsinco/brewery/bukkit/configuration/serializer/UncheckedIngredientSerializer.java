@@ -14,7 +14,7 @@ import org.jspecify.annotations.NonNull;
 public class UncheckedIngredientSerializer implements ObjectSerializer<UncheckedIngredient> {
 
     @Override
-    public boolean supports(@NonNull Class<? super UncheckedIngredient> type) {
+    public boolean supports(@NonNull Class<?> type) {
         return UncheckedIngredient.class.isAssignableFrom(type);
     }
 

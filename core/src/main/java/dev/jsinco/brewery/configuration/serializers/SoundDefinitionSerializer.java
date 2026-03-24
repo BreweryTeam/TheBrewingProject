@@ -40,7 +40,7 @@ public class SoundDefinitionSerializer implements ObjectSerializer<SoundDefiniti
     }
 
     @Override
-    public boolean supports(@NonNull Class<? super SoundDefinition> type) {
+    public boolean supports(@NonNull Class<?> type) {
         return SoundDefinition.class == type;
     }
 

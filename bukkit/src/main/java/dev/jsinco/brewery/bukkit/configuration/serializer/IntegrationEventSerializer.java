@@ -12,7 +12,7 @@ import org.jspecify.annotations.NonNull;
 public record IntegrationEventSerializer<E extends IntegrationEvent>(
         EventIntegration<E> integration) implements ObjectSerializer<E> {
     @Override
-    public boolean supports(@NonNull Class<? super E> type) {
+    public boolean supports(@NonNull Class<?> type) {
         return integration.eClass().isAssignableFrom(type);
     }
 

@@ -11,7 +11,7 @@ import java.util.Locale;
 public class LocaleSerializer implements ObjectSerializer<Locale> {
 
     @Override
-    public boolean supports(@NonNull Class<? super Locale> type) {
+    public boolean supports(@NonNull Class<?> type) {
         return Locale.class == type;
     }
 
