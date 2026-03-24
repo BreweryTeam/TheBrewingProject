@@ -27,7 +27,7 @@ import java.util.stream.Collectors;
 
 public class EventStepSerializer implements ObjectSerializer<EventStep> {
     @Override
-    public boolean supports(@NonNull Class<? super EventStep> type) {
+    public boolean supports(@NonNull Class<?> type) {
         return EventStep.class.isAssignableFrom(type);
     }
 

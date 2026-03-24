@@ -148,7 +148,7 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
     private PlayerWalkListener playerWalkListener;
     private ModifierManager modifierManager = new ModifierManagerImpl();
     private BreweryTranslator translator;
-    private boolean successfullLoad = false;
+    private boolean successfulLoad = false;
 
     public static TheBrewingProject getInstance() {
         return TheBrewingProject.instance;
@@ -160,8 +160,8 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
         this.translator = new BreweryTranslator(new File(this.getDataFolder(), "locale"));
         DrunkenModifierSection.load(this.getDataFolder(), serializers());
         EventSection.load(getDataFolder(), serializers());
-        DrunkenModifierSection.validate();
-        EventSection.validate();
+        DrunkenModifierSection.postValidate();
+        EventSection.postValidate();
         translator.reload();
         GlobalTranslator.translator().addSource(translator);
         this.structureRegistry = new StructureRegistry();
@@ -184,7 +184,7 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
         initialize();
         integrationManager.loadIntegrations();
         Bukkit.getServicesManager().register(TheBrewingProjectApi.class, this, this, ServicePriority.Normal);
-        this.successfullLoad = true;
+        this.successfulLoad = true;
     }
 
     private OkaeriSerdesPack serializers() {
@@ -223,8 +223,8 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
         Config.config().load(true);
         DrunkenModifierSection.modifiers().load(true);
         EventSection.events().load(true);
-        DrunkenModifierSection.validate();
-        EventSection.validate();
+        DrunkenModifierSection.postValidate();
+        EventSection.postValidate();
         IngredientsSection.ingredients().load(true);
         IngredientsSection.validate(BukkitIngredientManager.INSTANCE, BukkitIngredientUtil::tagValuesFromString);
         translator.reload();
@@ -336,7 +336,7 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
 
     @Override
     public void onEnable() {
-        Preconditions.checkState(successfullLoad, "Plugin loading failed, see above exception in load stage");
+        Preconditions.checkState(successfulLoad, "Plugin loading failed, see above exception in load stage");
         loadStructures();
         integrationManager.enableIntegrations();
         this.database = new Database(DatabaseDriver.SQLITE);

@@ -9,7 +9,7 @@ import org.jspecify.annotations.NonNull;
 
 public class BlockMatcherReplacementsSerializer implements ObjectSerializer<BlockMatcherReplacement.List> {
     @Override
-    public boolean supports(@NonNull Class<? super BlockMatcherReplacement.List> type) {
+    public boolean supports(@NonNull Class<?> type) {
         return BlockMatcherReplacement.List.class == type;
     }
 

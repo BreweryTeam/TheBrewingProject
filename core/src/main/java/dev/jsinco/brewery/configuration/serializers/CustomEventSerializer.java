@@ -18,19 +18,19 @@ import java.util.List;
 
 public class CustomEventSerializer implements ObjectSerializer<CustomEvent> {
     @Override
-    public boolean supports(@NonNull Class<? super CustomEvent> type) {
+    public boolean supports(@NonNull Class<?> type) {
         return CustomEvent.class == type;
     }
 
     @Override
     public void serialize(@NonNull CustomEvent object, @NonNull SerializationData data, @NonNull GenericsDeclaration generics) {
         if (object.probability() != EventProbability.NONE) {
-            data.add("probability", object.probability());
+            data.set("probability", object.probability());
         }
         if (!object.displayName().equals(Component.text("?"))) {
-            data.add("display-name", object.displayName());
+            data.set("display-name", object.displayName());
         }
-        data.add("steps", object.getSteps());
+        data.set("steps", object.getSteps());
     }
 
     @Override
