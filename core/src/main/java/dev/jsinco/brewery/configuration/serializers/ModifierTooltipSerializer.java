@@ -11,16 +11,16 @@ import org.jspecify.annotations.NonNull;
 
 public class ModifierTooltipSerializer implements ObjectSerializer<ModifierTooltip> {
     @Override
-    public boolean supports(@NonNull Class<? super ModifierTooltip> type) {
+    public boolean supports(@NonNull Class<?> type) {
         return type == ModifierTooltip.class;
     }
 
     @Override
     public void serialize(@NonNull ModifierTooltip object, @NonNull SerializationData data, @NonNull GenericsDeclaration generics) {
-        data.add("filter", object.filter());
-        data.add("brewing-tooltip", object.brewingTooltip());
-        data.add("default-tooltip", object.defaultTooltip());
-        data.add("sealed-tooltip", object.sealedTooltip());
+        data.set("filter", object.filter());
+        data.set("brewing-tooltip", object.brewingTooltip());
+        data.set("default-tooltip", object.defaultTooltip());
+        data.set("sealed-tooltip", object.sealedTooltip());
     }
 
     @Override

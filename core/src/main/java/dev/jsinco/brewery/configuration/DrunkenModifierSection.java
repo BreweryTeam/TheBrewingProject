@@ -105,7 +105,7 @@ public class DrunkenModifierSection extends OkaeriConfig {
         });
     }
 
-    public static void validate() {
+    public static void postValidate() {
         Preconditions.checkState(instance != null, "Instance can not be null");
         Map<String, Double> variables = new DrunkStateImpl(0, -1).asVariables();
         boolean noneFailed = true;

@@ -11,7 +11,7 @@ import org.jspecify.annotations.NonNull;
 
 public class StructureTypeSerializer implements ObjectSerializer<StructureType> {
     @Override
-    public boolean supports(@NonNull Class<? super StructureType> type) {
+    public boolean supports(@NonNull Class<?> type) {
         return StructureType.class.isAssignableFrom(type);
     }
 

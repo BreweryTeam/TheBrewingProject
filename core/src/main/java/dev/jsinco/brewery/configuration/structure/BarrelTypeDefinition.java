@@ -3,27 +3,26 @@ package dev.jsinco.brewery.configuration.structure;
 import dev.jsinco.brewery.api.breweries.BarrelType;
 import dev.jsinco.brewery.api.breweries.BarrelTypeProvider;
 import dev.jsinco.brewery.api.util.BreweryKey;
-import me.sparky983.warp.Configuration;
-import me.sparky983.warp.Property;
+import eu.okaeri.configs.OkaeriConfig;
+import eu.okaeri.configs.annotation.CustomKey;
 
 import java.util.Map;
 
-@Configuration
-public interface BarrelTypeDefinition {
+public class BarrelTypeDefinition extends OkaeriConfig {
 
-    @Property("name")
-    String name();
+    @CustomKey("name")
+    public final String name = null;
 
-    @Property("proximity-multipliers")
-    Map<String, Double> proximityMultipliers();
+    @CustomKey("proximity-multipliers")
+    public final Map<String, Double> proximityMultipliers = Map.of();
 
-    @Property("default-proximity-multipliers")
-    double defaultProximity();
+    @CustomKey("default-proximity-multipliers")
+    public final double defaultProximity = 0.7D;
 
-    default BarrelType toBarrelType() {
-        BarrelType.Builder builder = BarrelTypeProvider.builderStatic(name());
-        proximityMultipliers().forEach((key, value) -> builder.addProximity(BreweryKey.parse(key), value));
-        return builder.defaultProximity(defaultProximity())
+    public BarrelType toBarrelType() {
+        BarrelType.Builder builder = BarrelTypeProvider.builderStatic(name);
+        proximityMultipliers.forEach((key, value) -> builder.addProximity(BreweryKey.parse(key), value));
+        return builder.defaultProximity(defaultProximity)
                 .build();
     }
 }
