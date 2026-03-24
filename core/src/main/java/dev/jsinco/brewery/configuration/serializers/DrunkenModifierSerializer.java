@@ -12,18 +12,18 @@ import org.jspecify.annotations.NonNull;
 
 public class DrunkenModifierSerializer implements ObjectSerializer<DrunkenModifier> {
     @Override
-    public boolean supports(@NonNull Class<? super DrunkenModifier> type) {
+    public boolean supports(@NonNull Class<?> type) {
         return DrunkenModifier.class == type;
     }
 
     @Override
     public void serialize(@NonNull DrunkenModifier object, @NonNull SerializationData data, @NonNull GenericsDeclaration generics) {
-        data.add("name", object.name());
-        data.add("min-value", object.minValue());
-        data.add("max-value", object.maxValue());
-        data.add("decrement-time", object.decrementTime());
-        data.add("increment-dependency", object.dependency());
-        data.add("display-name", object.displayName());
+        data.set("name", object.name());
+        data.set("min-value", object.minValue());
+        data.set("max-value", object.maxValue());
+        data.set("decrement-time", object.decrementTime());
+        data.set("increment-dependency", object.dependency());
+        data.set("display-name", object.displayName());
     }
 
     @Override

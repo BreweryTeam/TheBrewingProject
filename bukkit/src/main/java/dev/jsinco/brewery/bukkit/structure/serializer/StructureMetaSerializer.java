@@ -21,7 +21,7 @@ import java.util.Set;
 public class StructureMetaSerializer implements ObjectSerializer<BreweryStructure.Meta> {
 
     @Override
-    public boolean supports(@NonNull Class<? super BreweryStructure.Meta> type) {
+    public boolean supports(@NonNull Class<?> type) {
         return BreweryStructure.Meta.class == type;
     }
 

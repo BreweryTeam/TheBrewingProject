@@ -75,7 +75,9 @@ dependencies {
     compileOnly(libs.oraxen)
     compileOnly(libs.placeholderapi)
     compileOnly(libs.towny)
-    compileOnly(libs.worldguard.bukkit)
+    compileOnly(libs.worldguard.bukkit) {
+        exclude("com.google.code.gson", "gson")
+    }
     compileOnly(libs.quickshop.hikari)
     compileOnly(libs.mythic)
     compileOnly(libs.mythic.crucible)
@@ -137,8 +139,7 @@ tasks {
             "org.yaml.snakeyaml",
             "eu.okaeri",
             "net.objecthunter.exp4j",
-            "dev.faststats",
-            "me.sparky983.warp"
+            "dev.faststats"
         ).forEach { relocate(it, "${project.group}.lib.$it") }
     }
 

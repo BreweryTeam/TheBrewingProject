@@ -14,15 +14,15 @@ import org.jspecify.annotations.NonNull;
 
 public class NamedDrunkEventSerializer implements ObjectSerializer<NamedDrunkEvent> {
     @Override
-    public boolean supports(@NonNull Class<? super NamedDrunkEvent> type) {
+    public boolean supports(@NonNull Class<?> type) {
         return type == NamedDrunkEvent.class;
     }
 
     @Override
     public void serialize(@NonNull NamedDrunkEvent object, @NonNull SerializationData data, @NonNull GenericsDeclaration generics) {
-        data.add("name", object.key().key());
+        data.set("name", object.key().key());
         if (object.probability() != EventProbability.NONE) {
-            data.add("probability", object.probability());
+            data.set("probability", object.probability());
         }
     }
 

@@ -12,7 +12,7 @@ import java.util.List;
 
 public class BreweryVectorSerializer implements ObjectSerializer<BreweryVector> {
     @Override
-    public boolean supports(@NonNull Class<? super BreweryVector> type) {
+    public boolean supports(@NonNull Class<?> type) {
         return BreweryVector.class == type;
     }
 

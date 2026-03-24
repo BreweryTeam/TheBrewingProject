@@ -12,7 +12,7 @@ import java.util.List;
 
 public class Vector3iSerializer implements ObjectSerializer<Vector3i> {
     @Override
-    public boolean supports(@NonNull Class<? super Vector3i> type) {
+    public boolean supports(@NonNull Class<?> type) {
         return Vector3i.class.isAssignableFrom(type);
     }
 

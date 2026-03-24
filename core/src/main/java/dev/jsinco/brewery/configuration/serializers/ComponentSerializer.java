@@ -13,7 +13,7 @@ public class ComponentSerializer implements ObjectSerializer<Component> {
     private final MiniMessage miniMessage = MiniMessage.miniMessage();
 
     @Override
-    public boolean supports(@NonNull Class<? super Component> type) {
+    public boolean supports(@NonNull Class<?> type) {
         return Component.class.isAssignableFrom(type);
     }
 

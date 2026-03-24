@@ -13,7 +13,7 @@ import java.util.Set;
 
 public class BlockMatcherReplacementSerializer implements ObjectSerializer<BlockMatcherReplacement> {
     @Override
-    public boolean supports(@NonNull Class<? super BlockMatcherReplacement> type) {
+    public boolean supports(@NonNull Class<?> type) {
         return BlockMatcherReplacement.class == type;
     }
 

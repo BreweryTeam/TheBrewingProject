@@ -15,7 +15,7 @@ import java.util.Collection;
 public class EventRegistrySerializer implements ObjectSerializer<CustomEventRegistry> {
 
     @Override
-    public boolean supports(@NonNull Class<? super CustomEventRegistry> type) {
+    public boolean supports(@NonNull Class<?> type) {
         return CustomEventRegistry.class == type;
     }
 
@@ -23,7 +23,7 @@ public class EventRegistrySerializer implements ObjectSerializer<CustomEventRegi
     public void serialize(@NonNull CustomEventRegistry object, @NonNull SerializationData data, @NonNull GenericsDeclaration generics) {
         for (CustomEvent.Keyed event : object.events()) {
             String key = event.key().namespace().equalsIgnoreCase("brewery") ? event.key().key() : event.key().toString();
-            data.add(key, event.event());
+            data.set(key, event.event());
         }
     }
 

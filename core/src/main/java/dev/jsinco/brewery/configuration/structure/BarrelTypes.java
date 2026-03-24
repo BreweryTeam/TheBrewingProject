@@ -1,12 +1,11 @@
 package dev.jsinco.brewery.configuration.structure;
 
 import dev.jsinco.brewery.api.breweries.BarrelType;
-import dev.jsinco.brewery.api.util.Logger;
-import me.sparky983.warp.Configuration;
-import me.sparky983.warp.ConfigurationException;
-import me.sparky983.warp.Property;
-import me.sparky983.warp.Warp;
-import me.sparky983.warp.yaml.YamlConfigurationSource;
+import eu.okaeri.configs.ConfigManager;
+import eu.okaeri.configs.OkaeriConfig;
+import eu.okaeri.configs.annotation.CustomKey;
+import eu.okaeri.configs.annotation.Exclude;
+import eu.okaeri.configs.yaml.snakeyaml.YamlSnakeYamlConfigurer;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -15,16 +14,20 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
-@Configuration
-public interface BarrelTypes {
+public class BarrelTypes extends OkaeriConfig {
 
-    @Property("barrel-types")
-    List<BarrelTypeDefinition> barrelTypes();
+    @CustomKey("barrel-types")
+    public final List<BarrelTypeDefinition> barrelTypes = List.of();
 
-    static List<BarrelType> allBarrelTypes() {
-        List<BarrelType> barrelTypes = new ArrayList<>();
+    @Exclude
+    private static BarrelTypes instance;
+    @Exclude
+    private static BarrelTypes defaultsInstance;
+
+    public static List<BarrelType> allBarrelTypes() {
         boolean newlySaved = false;
         File barrelTypesFile = new File("./plugins/TheBrewingProject", "barrel_types.yml");
         try (InputStream inputStream = BarrelTypeDefinition.class.getResourceAsStream("/barrel_types.yml")) {
@@ -43,28 +46,32 @@ public interface BarrelTypes {
                 newlySaved = true;
             }
             if (!newlySaved) {
-                Warp.builder(BarrelTypes.class)
-                        .source(YamlConfigurationSource.read(barrelTypesFile))
-                        .build()
-                        .barrelTypes()
-                        .stream()
-                        .map(BarrelTypeDefinition::toBarrelType)
-                        .forEach(barrelTypes::add);
+                instance = ConfigManager.create(BarrelTypes.class, it -> {
+                    it.configure(opts -> {
+                        opts.bindFile(barrelTypesFile);
+                        opts.configurer(new YamlSnakeYamlConfigurer());
+                    });
+                    it.load(false);
+                });
             }
-            Warp.builder(BarrelTypes.class)
-                    .source(YamlConfigurationSource.read(inputStream))
-                    .build()
-                    .barrelTypes()
-                    .stream()
+            defaultsInstance = ConfigManager.create(BarrelTypes.class, it -> {
+                it.configure(opts -> {
+                    opts.bindFile("/barrel_types.yml");
+                    opts.configurer(new YamlSnakeYamlConfigurer());
+                });
+                it.load(false);
+            });
+            List<BarrelType> barrelTypes = new ArrayList<>();
+            instance.barrelTypes.stream()
                     .map(BarrelTypeDefinition::toBarrelType)
-                    .filter(barrelType -> barrelTypes.stream().noneMatch(type -> type.key().equals(barrelType.key())))
                     .forEach(barrelTypes::add);
-            return barrelTypes;
+            defaultsInstance.barrelTypes.stream()
+                    .map(BarrelTypeDefinition::toBarrelType)
+                    .filter(barrelType -> barrelTypes.stream().noneMatch(barrelType1 -> barrelType1.key().equals(barrelType.key())))
+                    .forEach(barrelTypes::add);
+            return Collections.unmodifiableList(barrelTypes);
         } catch (IOException e) {
             throw new RuntimeException(e);
-        } catch (ConfigurationException e) {
-            Logger.logErr(e.getMessage());
-            throw new RuntimeException("Unable to read barrel types, read above exception");
         }
     }
 }

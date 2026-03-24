@@ -14,7 +14,7 @@ import java.util.Set;
 
 public class ConditionSerializer implements ObjectSerializer<Condition> {
     @Override
-    public boolean supports(@NonNull Class<? super Condition> type) {
+    public boolean supports(@NonNull Class<?> type) {
         return Condition.class.isAssignableFrom(type);
     }
 
@@ -22,17 +22,17 @@ public class ConditionSerializer implements ObjectSerializer<Condition> {
     public void serialize(@NonNull Condition object, @NonNull SerializationData data, @NonNull GenericsDeclaration generics) {
         switch (object) {
             case Condition.Died died -> data.setValue("died");
-            case Condition.HasPermission hasPermission -> data.add("has-permission", hasPermission.permission());
+            case Condition.HasPermission hasPermission -> data.set("has-permission", hasPermission.permission());
             case Condition.JoinedServer joinedServer -> data.setValue("joined-server");
-            case Condition.JoinedWorld joinedWorld -> data.add("joined-world", joinedWorld.worldName());
+            case Condition.JoinedWorld joinedWorld -> data.set("joined-world", joinedWorld.worldName());
             case Condition.TookDamage tookDamage -> data.setValue("took-damage");
             case Condition.ModifierAbove modifierAbove -> {
-                data.add("modifier-above", Map.of(
+                data.set("modifier-above", Map.of(
                         "modifier", modifierAbove.modifier(),
                         "value", modifierAbove.value())
                 );
             }
-            case Condition.NotCondition notCondition -> data.add("not", notCondition.toInvert());
+            case Condition.NotCondition notCondition -> data.set("not", notCondition.toInvert());
         }
     }
 

@@ -16,7 +16,7 @@ import java.util.Base64;
 public class SecretKeySerializer implements ObjectSerializer<SecretKey> {
 
     @Override
-    public boolean supports(@NonNull Class<? super SecretKey> type) {
+    public boolean supports(@NonNull Class<?> type) {
         return SecretKey.class.isAssignableFrom(type);
     }
 

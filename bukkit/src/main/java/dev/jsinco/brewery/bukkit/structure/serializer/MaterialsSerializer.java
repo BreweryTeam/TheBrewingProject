@@ -12,7 +12,7 @@ import org.jspecify.annotations.NonNull;
 
 public class MaterialsSerializer implements ObjectSerializer<Materials> {
     @Override
-    public boolean supports(@NonNull Class<? super Materials> type) {
+    public boolean supports(@NonNull Class<?> type) {
         return Materials.class.isAssignableFrom(type);
     }
 

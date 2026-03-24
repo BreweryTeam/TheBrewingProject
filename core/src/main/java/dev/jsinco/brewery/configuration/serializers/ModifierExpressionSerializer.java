@@ -9,7 +9,7 @@ import org.jspecify.annotations.NonNull;
 
 public class ModifierExpressionSerializer implements ObjectSerializer<ModifierExpression> {
     @Override
-    public boolean supports(@NonNull Class<? super ModifierExpression> type) {
+    public boolean supports(@NonNull Class<?> type) {
         return ModifierExpression.class == type;
     }
 
