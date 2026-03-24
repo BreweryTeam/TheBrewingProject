@@ -204,7 +204,13 @@ public class PlayerEventListener implements Listener {
         }
         Optional<ItemStack> transformedItem = BukkitIngredientUtil.computeTransform(itemStack);
         if (transformedItem.isPresent()) {
-            return transformedItem.get();
+            if (itemStack.getAmount() == 1) {
+                return transformedItem.get();
+            }
+            ItemStack transformed = transformedItem.get();
+            if (!player.getInventory().addItem(transformed).isEmpty()) {
+                player.getWorld().dropItem(player.getLocation(), transformed);
+            }
         }
         itemStack.setAmount(itemStack.getAmount() - 1);
         return itemStack;
