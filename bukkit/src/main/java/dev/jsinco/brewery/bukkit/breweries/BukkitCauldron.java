@@ -206,6 +206,7 @@ public class BukkitCauldron implements Cauldron {
         ItemStack addedItem = insertEvent.getItemSource().get();
         if (!brewExtracted && addedItem.getType() == Material.POTION) {
             BukkitCauldron.incrementLevel(getBlock());
+            updateLevel(getBlock().getBlockData());
         }
         this.hot = isHeatSource(getBlock().getRelative(BlockFace.DOWN));
         CauldronType cauldronType = getType().orElseThrow(() -> new IllegalStateException("Expected cauldron block type for cauldron"));
@@ -395,6 +396,7 @@ public class BukkitCauldron implements Cauldron {
         }
         levelled.setLevel(levelled.getLevel() - 1);
         block.setBlockData(levelled);
+        updateLevel(levelled);
         return false;
     }
 
