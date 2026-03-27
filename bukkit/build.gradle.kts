@@ -247,6 +247,9 @@ bukkit {
         register("brewery.command.encryption") {
             description = "Allows the user to use the /tbp encryption command."
         }
+        register("brewery.command.dump") {
+            description = "Allows the user to use the /tbp dump command."
+        }
         register("brewery.command") {
             childrenMap = mapOf(
                 "brewery.command.create" to true,
@@ -261,6 +264,7 @@ bukkit {
                 "brewery.command.replicate" to true,
                 "brewery.command.version" to true,
                 "brewery.command.encryption" to true,
+                "brewery.command.dump" to true,
             )
             default = BukkitPluginDescription.Permission.Default.OP
             description = "Allows the user to use /tbp commands."
