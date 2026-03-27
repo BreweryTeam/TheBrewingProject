@@ -78,6 +78,8 @@ public class BreweryCommand {
                 ).then(Commands.literal("encryption")
                         .requires(commandSourceStack -> commandSourceStack.getSender().hasPermission("brewery.command.encryption"))
                         .then(EncryptionCommand.command())
+                ).then(DebugDumpCommand.command()
+                        .requires(commandSourceStack -> commandSourceStack.getSender().hasPermission("brewery.command.dump"))
                 )
                 .build(), Config.config().commandAliases());
     }
