@@ -29,7 +29,7 @@ public class StructureMatcher {
     private Map<BlockType, Set<BlockType>> transformations;
     private Map<BlockType, List<String>> checkedBlockData;
 
-    private StructureMatcher(String name, @Nullable BreweryKey key, Map<BlockType, Set<BlockType>> transformations, Map<BlockType, List<String>> checkedBlockData) {
+    public StructureMatcher(String name, @Nullable BreweryKey key, Map<BlockType, Set<BlockType>> transformations, Map<BlockType, List<String>> checkedBlockData) {
         this.name = name;
         this.key = key;
         this.transformations = transformations;
