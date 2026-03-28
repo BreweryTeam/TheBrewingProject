@@ -1,6 +1,5 @@
 package dev.jsinco.brewery.bukkit.structure;
 
-import dev.jsinco.brewery.api.breweries.BarrelType;
 import dev.jsinco.brewery.api.structure.StructureMeta;
 import dev.jsinco.brewery.api.structure.StructureType;
 import dev.thorinwasher.schem.Schematic;
@@ -27,7 +26,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(MockBukkitExtension.class)
 class BreweryStructureTest {
@@ -53,7 +53,7 @@ class BreweryStructureTest {
     void fullMeta(Map<StructureMeta<?>, Object> structureMeta) throws URISyntaxException, IOException {
         URL url = PlacedBreweryStructure.class.getResource("/structures/test_barrel.schem");
         Schematic schematic = new SchematicReader().read(Paths.get(url.toURI()));
-        assertDoesNotThrow(() -> new BreweryStructure(schematic, "hello", new BreweryStructure.Meta(structureMeta), "hello.schem"));
+        assertDoesNotThrow(() -> new BreweryStructure(schematic, "hello", new BreweryStructure.Meta(structureMeta), "hello.schem", StructurePlacerUtils.matchers()));
     }
 
     private BreweryStructure getOakBarrel() throws URISyntaxException {
@@ -64,7 +64,7 @@ class BreweryStructureTest {
                 new BreweryStructure.Meta(Map.of(StructureMeta.INVENTORY_SIZE, 9,
                         StructureMeta.USE_BARREL_SUBSTITUTION, false,
                         StructureMeta.TYPE, StructureType.BARREL)
-                ), "test_barrel.schem");
+                ), "test_barrel.schem", StructurePlacerUtils.matchers());
     }
 
     /**
