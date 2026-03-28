@@ -8,6 +8,7 @@ import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import dev.jsinco.brewery.api.effect.DrunkState;
 import dev.jsinco.brewery.api.effect.modifier.DrunkenModifier;
 import dev.jsinco.brewery.api.event.DrunkEvent;
+import dev.jsinco.brewery.api.integration.Integration;
 import dev.jsinco.brewery.api.structure.StructureType;
 import dev.jsinco.brewery.api.util.Logger;
 import dev.jsinco.brewery.api.util.Pair;
@@ -18,6 +19,7 @@ import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import org.bukkit.Bukkit;
+import org.bukkit.Registry;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.attribute.AttributeModifier;
@@ -79,6 +81,10 @@ public class DebugDumpCommand {
         return token.equals("-a") || token.equals("-all");
     }
 
+    private static boolean isNoneFlag(String token) {
+        return token.equals("-n") || token.equals("-none");
+    }
+
     private static boolean isIncludeFlag(String token) {
         return token.equals("-i") || token.equals("-include");
     }
@@ -89,6 +95,20 @@ public class DebugDumpCommand {
 
     private static boolean isValueFlag(String token) {
         return isIncludeFlag(token) || isExcludeFlag(token);
+    }
+
+    private static boolean isSafeSpec(String spec, File dataFolder) {
+        if (spec.equals("*")) return true;
+        String pathPart = spec.endsWith("/*") ? spec.substring(0, spec.length() - 2) : spec;
+        try {
+            File resolved = new File(dataFolder, pathPart).getCanonicalFile();
+            File base = dataFolder.getCanonicalFile();
+            String resolvedPath = resolved.getPath();
+            String basePath = base.getPath();
+            return resolvedPath.equals(basePath) || resolvedPath.startsWith(basePath + File.separator);
+        } catch (IOException e) {
+            return false;
+        }
     }
 
     private static List<String> expandSpec(String spec, File dataFolder) {
@@ -110,14 +130,23 @@ public class DebugDumpCommand {
             if (isAllFlag(token)) {
                 files.addAll(allFiles(dataFolder));
                 i++;
+            } else if (isNoneFlag(token)) {
+                files.clear();
+                i++;
             } else if (isIncludeFlag(token) && i + 1 < tokens.length) {
                 for (String spec : tokens[++i].split(",")) {
-                    files.addAll(expandSpec(spec.trim(), dataFolder));
+                    String trimmed = spec.trim();
+                    if (isSafeSpec(trimmed, dataFolder)) {
+                        files.addAll(expandSpec(trimmed, dataFolder));
+                    }
                 }
                 i++;
             } else if (isExcludeFlag(token) && i + 1 < tokens.length) {
                 for (String spec : tokens[++i].split(",")) {
-                    files.removeAll(expandSpec(spec.trim(), dataFolder));
+                    String trimmed = spec.trim();
+                    if (isSafeSpec(trimmed, dataFolder)) {
+                        expandSpec(trimmed, dataFolder).forEach(files::remove);
+                    }
                 }
                 i++;
             } else {
@@ -167,7 +196,7 @@ public class DebugDumpCommand {
             String partial = current.substring(commaIdx + 1);
             suggestFileSpecs(currentBuilder, prefix, partial, dataFolder);
         } else {
-            for (String flag : List.of("-i", "-include", "-e", "-exclude", "-a", "-all")) {
+            for (String flag : List.of("-i", "-include", "-e", "-exclude", "-a", "-all", "-n", "-none")) {
                 if (flag.startsWith(current)) {
                     currentBuilder.suggest(flag);
                 }
@@ -327,7 +356,7 @@ public class DebugDumpCommand {
         tbp.set("tbp.internalTime", plugin.getTime());
         tbp.set("tbp.recipeCount", plugin.getRecipeRegistry().getRecipes().size());
         tbp.set("tbp.activeIntegrations", plugin.getIntegrationManager().getIntegrationRegistry().getAllIntegrations().stream()
-                .map(integration -> integration.getId())
+                .map(Integration::getId)
                 .sorted()
                 .toList());
         tbp.set("tbp.activeCauldrons", plugin.getBreweryRegistry().getActiveSinglePositionStructure().size());
@@ -395,11 +424,11 @@ public class DebugDumpCommand {
             }
 
             // Active attribute modifiers
-            for (Attribute attribute : Attribute.values()) {
+            for (Attribute attribute : Registry.ATTRIBUTE) {
                 AttributeInstance instance = player.getAttribute(attribute);
                 if (instance == null) continue;
                 for (AttributeModifier modifier : instance.getModifiers()) {
-                    String key = "players." + uuid + ".attributes." + attribute.name() + ".modifiers." + modifier.getName();
+                    String key = "players." + uuid + ".attributes." + attribute.getKey().getKey() + ".modifiers." + modifier.getName();
                     players.set(key + ".operation", modifier.getOperation().name());
                     players.set(key + ".amount", modifier.getAmount());
                 }
