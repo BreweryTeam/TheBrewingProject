@@ -55,9 +55,17 @@ public class StructureMetaSerializer implements ObjectSerializer<BreweryStructur
                 );
                 continue;
             }
+            if (breweryKey.equals(BreweryKey.parse("use_barrel_substitution"))) {
+                continue;
+            }
             StructureMeta<?> metaItem = BreweryRegistry.STRUCTURE_META.get(breweryKey);
             Preconditions.checkArgument(metaItem != null, "Unknown meta: " + key);
             meta.put(metaItem, data.get(key, metaItem.vClass()));
+        }
+        if (!meta.containsKey(StructureMeta.BLOCK_MATCHER)) {
+            meta.put(StructureMeta.BLOCK_MATCHER, data.getOr("use_barrel_substitution", Boolean.class, false) ?
+                    "default_distillery_type_matcher" : "default_barrel_type_matcher"
+            );
         }
         Preconditions.checkArgument(meta.containsKey(StructureMeta.TYPE), "Expected structure type to be present");
         StructureType type = (StructureType) meta.get(StructureMeta.TYPE);
