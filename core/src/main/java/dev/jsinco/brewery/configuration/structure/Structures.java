@@ -8,5 +8,5 @@ import java.util.List;
 public class Structures extends OkaeriConfig {
 
     @CustomKey("structure-matchers")
-    public final List<StructureMatcherDefinition> structureMatchers = List.of();
+    public final List<StructureMatcherDefinition> structureMatcherDefinitions = List.of();
 }

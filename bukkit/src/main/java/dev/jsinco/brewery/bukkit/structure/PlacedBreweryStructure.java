@@ -2,6 +2,7 @@ package dev.jsinco.brewery.bukkit.structure;
 
 import dev.jsinco.brewery.api.breweries.StructureHolder;
 import dev.jsinco.brewery.api.structure.MultiblockStructure;
+import dev.jsinco.brewery.api.util.BreweryKey;
 import dev.jsinco.brewery.api.util.Pair;
 import dev.jsinco.brewery.api.vector.BreweryLocation;
 import org.bukkit.Location;
@@ -29,13 +30,13 @@ public class PlacedBreweryStructure<H extends StructureHolder<H>> implements Mul
         this.unique = compileUnique();
     }
 
-    public static <T, H extends StructureHolder<H>> Optional<Pair<PlacedBreweryStructure<H>, T>> findValid(BreweryStructure structure, Location worldOrigin, BlockDataMatcher<T> blockDataMatcher, T[] types) {
+    public static <H extends StructureHolder<H>> Optional<Pair<PlacedBreweryStructure<H>, BreweryKey>> findValid(BreweryStructure structure, Location worldOrigin) {
         for (Matrix3d transformation : ALLOWED_TRANSFORMATIONS) {
-            for (T type : types) {
-                Optional<Location> possibleOrigin = structure.findValidOrigin(transformation, worldOrigin, blockDataMatcher, type);
+            for (StructureMatcher matcher : structure.getStructureMatchers()) {
+                Optional<Location> possibleOrigin = structure.findValidOrigin(transformation, worldOrigin, matcher);
                 if (possibleOrigin.isPresent()) {
                     return possibleOrigin
-                            .map(origin -> new Pair<>(new PlacedBreweryStructure<>(structure, transformation, origin), type));
+                            .map(origin -> new Pair<>(new PlacedBreweryStructure<>(structure, transformation, origin), matcher.typeKey()));
                 }
             }
         }

@@ -90,6 +90,6 @@ public class StructurePlacerUtils {
             it.withRemoveOrphans(true);
             it.saveDefaults();
             it.load(true);
-        }).toStructure(path);
+        }).toStructure(path, matchers);
     }
 }
