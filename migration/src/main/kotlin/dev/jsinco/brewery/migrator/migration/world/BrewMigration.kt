@@ -5,10 +5,11 @@ import com.dre.brewery.recipe.PluginItem
 import com.dre.brewery.recipe.SimpleItem
 import dev.jsinco.brewery.api.brew.Brew
 import dev.jsinco.brewery.api.brew.BrewingStep
-import dev.jsinco.brewery.api.breweries.BarrelType
 import dev.jsinco.brewery.api.breweries.CauldronType
 import dev.jsinco.brewery.api.ingredient.Ingredient
 import dev.jsinco.brewery.api.moment.PassedMoment
+import dev.jsinco.brewery.api.util.BreweryKey
+import dev.jsinco.brewery.api.util.BreweryRegistry
 import dev.jsinco.brewery.brew.AgeStepImpl
 import dev.jsinco.brewery.brew.BrewImpl
 import dev.jsinco.brewery.brew.CookStepImpl
@@ -44,7 +45,7 @@ object BrewMigration {
             brewingSteps.add(
                 AgeStepImpl(
                     PassedMoment((age * Config.config().barrels().agingYearTicks()).toLong()),
-                    BarrelType.valueOf(barrelType.name)
+                    BreweryRegistry.BARREL_TYPE.get(BreweryKey.parse(barrelType.name))
                 )
             )
         }

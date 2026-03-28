@@ -9,7 +9,6 @@ import dev.jsinco.brewery.bukkit.TheBrewingProject
 import dev.jsinco.brewery.bukkit.api.BukkitAdapter
 import dev.jsinco.brewery.bukkit.breweries.barrel.BukkitBarrel
 import dev.jsinco.brewery.bukkit.breweries.barrel.BukkitBarrelDataType
-import dev.jsinco.brewery.bukkit.structure.BarrelBlockDataMatcher
 import dev.jsinco.brewery.bukkit.structure.PlacedBreweryStructure
 import org.bukkit.Location
 import org.bukkit.World
@@ -71,9 +70,7 @@ object BarrelMigration {
             .map {
                 PlacedBreweryStructure.findValid(
                     it,
-                    pos,
-                    BarrelBlockDataMatcher.INSTANCE,
-                    BarrelType.PLACEABLE_TYPES
+                    pos
                 )
             }
             .flatMap { it.stream() }
