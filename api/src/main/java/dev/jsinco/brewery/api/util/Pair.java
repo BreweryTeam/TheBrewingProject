@@ -2,6 +2,8 @@ package dev.jsinco.brewery.api.util;
 
 import org.jetbrains.annotations.Contract;
 
+import java.util.function.Function;
+
 
 /**
  * @param a The first value in the tuple
@@ -56,5 +58,19 @@ public record Pair<A, B>(A a, B b) {
                 "a=" + a +
                 ", b=" + b +
                 '}';
+    }
+
+    public <T> Pair<T, B> mapFirst(Function<A, T> mapper) {
+        return new Pair<>(
+                mapper.apply(a),
+                b
+        );
+    }
+
+    public <T> Pair<A, T> mapSecond(Function<B, T> mapper) {
+        return new Pair<>(
+                a,
+                mapper.apply(b)
+        );
     }
 }
