@@ -45,7 +45,7 @@ class BreweryStructureTest {
     void findValidOrigin() throws URISyntaxException, IOException {
         BreweryStructure oakStructure = getOakBarrel();
         StructurePlacerUtils.constructSmallOakBarrel(worldMock);
-        assertTrue(PlacedBreweryStructure.findValid(oakStructure, new Location(worldMock, -3, 1, 1), BarrelBlockDataMatcher.INSTANCE, BarrelType.PLACEABLE_TYPES).isPresent());
+        assertTrue(PlacedBreweryStructure.findValid(oakStructure, new Location(worldMock, -3, 1, 1)).isPresent());
     }
 
     @ParameterizedTest

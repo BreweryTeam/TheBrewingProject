@@ -8,11 +8,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public final class GenericMatcherDefinition implements BlockReplacement {
+public final class GenericBlockReplacement implements BlockReplacement {
 
     private final Map<String, Materials> backing;
 
-    public GenericMatcherDefinition(Map<String, Materials> backing) {
+    public GenericBlockReplacement(Map<String, Materials> backing) {
         this.backing = backing;
     }
 

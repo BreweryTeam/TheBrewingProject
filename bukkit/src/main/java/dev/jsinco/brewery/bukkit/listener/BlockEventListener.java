@@ -5,11 +5,11 @@ import dev.jsinco.brewery.api.breweries.BarrelType;
 import dev.jsinco.brewery.api.breweries.Cauldron;
 import dev.jsinco.brewery.api.breweries.InventoryAccessible;
 import dev.jsinco.brewery.api.breweries.StructureHolder;
-import dev.jsinco.brewery.api.structure.BlockMatcherReplacement;
 import dev.jsinco.brewery.api.structure.MultiblockStructure;
 import dev.jsinco.brewery.api.structure.SinglePositionStructure;
 import dev.jsinco.brewery.api.structure.StructureMeta;
 import dev.jsinco.brewery.api.structure.StructureType;
+import dev.jsinco.brewery.api.util.BreweryKey;
 import dev.jsinco.brewery.api.util.CancelState;
 import dev.jsinco.brewery.api.util.Logger;
 import dev.jsinco.brewery.api.util.Pair;
@@ -24,9 +24,7 @@ import dev.jsinco.brewery.bukkit.breweries.barrel.BukkitBarrel;
 import dev.jsinco.brewery.bukkit.breweries.barrel.BukkitBarrelDataType;
 import dev.jsinco.brewery.bukkit.breweries.distillery.BukkitDistillery;
 import dev.jsinco.brewery.bukkit.breweries.distillery.BukkitDistilleryDataType;
-import dev.jsinco.brewery.bukkit.structure.BarrelBlockDataMatcher;
 import dev.jsinco.brewery.bukkit.structure.BreweryStructure;
-import dev.jsinco.brewery.bukkit.structure.GenericBlockDataMatcher;
 import dev.jsinco.brewery.bukkit.structure.PlacedBreweryStructure;
 import dev.jsinco.brewery.bukkit.structure.StructureRegistry;
 import dev.jsinco.brewery.bukkit.util.LocationUtil;
@@ -127,11 +125,9 @@ public class BlockEventListener implements Listener {
     public void onBlockPlace(BlockPlaceEvent placeEvent) {
         Block placed = placeEvent.getBlockPlaced();
         for (BreweryStructure breweryStructure : structureRegistry.getPossibleStructures(placed.getType(), StructureType.DISTILLERY)) {
-            Optional<Pair<PlacedBreweryStructure<BukkitDistillery>, Void>> placedBreweryStructureOptional = PlacedBreweryStructure.findValid(
+            Optional<Pair<PlacedBreweryStructure<BukkitDistillery>, BreweryKey>> placedBreweryStructureOptional = PlacedBreweryStructure.findValid(
                     breweryStructure,
-                    placed.getLocation(),
-                    new GenericBlockDataMatcher(breweryStructure.getMetaOrDefault(StructureMeta.BLOCK_REPLACEMENTS, new BlockMatcherReplacement.List()).elements()),
-                    new Void[1]
+                    placed.getLocation()
             );
             if (placedBreweryStructureOptional.isPresent()) {
                 if (!placedStructureRegistry.getStructures(placedBreweryStructureOptional.get().first().positions()).isEmpty()) {
@@ -167,14 +163,12 @@ public class BlockEventListener implements Listener {
         Material material = block.getType();
         Set<BreweryStructure> possibleStructures = structureRegistry.getPossibleStructures(material, StructureType.BARREL);
         for (BreweryStructure structure : possibleStructures) {
-            Optional<Pair<PlacedBreweryStructure<BukkitBarrel>, BarrelType>> placedBreweryStructure = PlacedBreweryStructure.findValid(
+            Optional<Pair<PlacedBreweryStructure<BukkitBarrel>, BreweryKey>> placedBreweryStructure = PlacedBreweryStructure.findValid(
                     structure,
-                    placedLocation,
-                    BarrelBlockDataMatcher.INSTANCE,
-                    dev.jsinco.brewery.api.util.BreweryRegistry.BARREL_TYPE.values().toArray(BarrelType[]::new)
+                    placedLocation
             );
-            if (placedBreweryStructure.isPresent()) {
-                return placedBreweryStructure;
+            if (placedBreweryStructure.isPresent() && dev.jsinco.brewery.api.util.BreweryRegistry.BARREL_TYPE.containsKey(placedBreweryStructure.get().second())) {
+                return placedBreweryStructure.map(pair -> pair.mapSecond(dev.jsinco.brewery.api.util.BreweryRegistry.BARREL_TYPE::get));
             }
         }
         return Optional.empty();

@@ -5,7 +5,6 @@ import dev.faststats.bukkit.BukkitMetrics;
 import dev.faststats.core.ErrorTracker;
 import dev.jsinco.brewery.api.brew.BrewManager;
 import dev.jsinco.brewery.api.breweries.Barrel;
-import dev.jsinco.brewery.api.breweries.BarrelType;
 import dev.jsinco.brewery.api.breweries.Distillery;
 import dev.jsinco.brewery.api.breweries.Tickable;
 import dev.jsinco.brewery.api.config.Configuration;
@@ -13,9 +12,7 @@ import dev.jsinco.brewery.api.effect.modifier.ModifierManager;
 import dev.jsinco.brewery.api.event.CustomEventRegistry;
 import dev.jsinco.brewery.api.event.EventData;
 import dev.jsinco.brewery.api.event.EventStepRegistry;
-import dev.jsinco.brewery.api.structure.BlockMatcherReplacement;
 import dev.jsinco.brewery.api.structure.MultiblockStructure;
-import dev.jsinco.brewery.api.structure.StructureMeta;
 import dev.jsinco.brewery.api.structure.StructureType;
 import dev.jsinco.brewery.api.util.Logger;
 import dev.jsinco.brewery.bukkit.api.TheBrewingProjectApi;
@@ -49,9 +46,8 @@ import dev.jsinco.brewery.bukkit.migration.Migrations;
 import dev.jsinco.brewery.bukkit.migration.breweryx.BreweryXMigrationListener;
 import dev.jsinco.brewery.bukkit.recipe.BukkitRecipeResultReader;
 import dev.jsinco.brewery.bukkit.recipe.DefaultRecipeReader;
-import dev.jsinco.brewery.bukkit.structure.BarrelBlockDataMatcher;
 import dev.jsinco.brewery.bukkit.structure.BreweryStructureConfig;
-import dev.jsinco.brewery.bukkit.structure.GenericBlockDataMatcher;
+import dev.jsinco.brewery.bukkit.structure.StructureMatcher;
 import dev.jsinco.brewery.bukkit.structure.StructureRegistry;
 import dev.jsinco.brewery.bukkit.structure.serializer.BlockMatcherReplacementSerializer;
 import dev.jsinco.brewery.bukkit.structure.serializer.BlockMatcherReplacementsSerializer;
@@ -91,6 +87,7 @@ import dev.jsinco.brewery.configuration.serializers.RangeDSerializer;
 import dev.jsinco.brewery.configuration.serializers.SecretKeySerializer;
 import dev.jsinco.brewery.configuration.serializers.SoundDefinitionSerializer;
 import dev.jsinco.brewery.configuration.serializers.TicksDurationSerializer;
+import dev.jsinco.brewery.configuration.structure.StructureMatchers;
 import dev.jsinco.brewery.database.PersistenceException;
 import dev.jsinco.brewery.database.sql.Database;
 import dev.jsinco.brewery.database.sql.DatabaseDriver;
@@ -122,6 +119,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -315,6 +313,11 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
                 .add(new BlockMatcherReplacementSerializer())
                 .add(new BlockMatcherReplacementsSerializer())
                 .build();
+        List<StructureMatcher> matchers = StructureMatchers.matchers(this.getDataFolder())
+                .stream()
+                .map(StructureMatcher::getMatchers)
+                .flatMap(Collection::stream)
+                .toList();
         Stream.of(structureRoot.listFiles())
                 .filter(file -> file.getName().endsWith(".json"))
                 .map(File::toPath)
@@ -324,14 +327,8 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
                     it.withRemoveOrphans(true);
                     it.saveDefaults();
                     it.load(true);
-                }).toStructure(path))
-                .forEach(structure -> {
-                    if (structure.getMetaOrDefault(StructureMeta.USE_BARREL_SUBSTITUTION, false)) {
-                        structureRegistry.addStructure(structure, BarrelBlockDataMatcher.INSTANCE, BarrelType.PLACEABLE_TYPES);
-                    } else {
-                        structureRegistry.addStructure(structure, new GenericBlockDataMatcher(structure.getMetaOrDefault(StructureMeta.BLOCK_REPLACEMENTS, new BlockMatcherReplacement.List()).elements()), new Void[1]);
-                    }
-                });
+                }).toStructure(path, matchers))
+                .forEach(structureRegistry::addStructure);
     }
 
     @Override
