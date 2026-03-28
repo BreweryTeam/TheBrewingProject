@@ -1,6 +1,6 @@
 structure-matchers:
   - type: barrel
-    name: default_barrel_type_matcher
+    name: barrel_type_matcher
     replacement-material:
       stairs: oak_stairs
       blocks: oak_planks
@@ -76,7 +76,7 @@ structure-matchers:
           - waxed_oxidized_cut_copper
         fences: [ "#wooden_fences" ]
   - type: distillery
-    name: default_distillery_type_matcher
+    name: distillery_type_matcher
     replacement-material:
       pot: decorated_pot
       fences: bamboo_fence

@@ -64,7 +64,7 @@ public class StructureMetaSerializer implements ObjectSerializer<BreweryStructur
         }
         if (!meta.containsKey(StructureMeta.BLOCK_MATCHER)) {
             meta.put(StructureMeta.BLOCK_MATCHER, data.getOr("use_barrel_substitution", Boolean.class, false) ?
-                    "default_distillery_type_matcher" : "default_barrel_type_matcher"
+                    "distillery_type_matcher" : "barrel_type_matcher"
             );
         }
         Preconditions.checkArgument(meta.containsKey(StructureMeta.TYPE), "Expected structure type to be present");
