@@ -2,6 +2,7 @@ package dev.jsinco.brewery.bukkit.brew;
 
 import dev.jsinco.brewery.api.brew.Brew;
 import dev.jsinco.brewery.api.brew.BrewingStep;
+import dev.jsinco.brewery.api.breweries.BarrelTypes;
 import dev.jsinco.brewery.brew.AgeStepImpl;
 import dev.jsinco.brewery.brew.BrewImpl;
 import dev.jsinco.brewery.brew.CookStepImpl;
@@ -59,7 +60,7 @@ public class BrewTest {
                         ),
                         new AgeStepImpl(
                                 new PassedMoment(2000000),
-                                BarrelType.ACACIA,
+                                BarrelTypes.ACACIA,
                                 CollectionUtil.sequencedSetOf(UUID.fromString("d2b440c3-edde-4443-899e-6825c31d0919"))
                         )
                 )
@@ -92,7 +93,7 @@ public class BrewTest {
                         ),
                         new AgeStepImpl(
                                 new PassedMoment(20),
-                                BarrelType.ACACIA,
+                                BarrelTypes.ACACIA,
                                 CollectionUtil.sequencedSetOf(UUID.fromString("d2b440c3-edde-4443-899e-6825c31d0919"))
                         )
                 )
@@ -119,7 +120,7 @@ public class BrewTest {
                 ),
                 new AgeStepImpl(
                         new PassedMoment(20),
-                        BarrelType.ACACIA
+                        BarrelTypes.ACACIA
                 )
         );
         Brew brew = new BrewImpl(List.of(new DistillStepImpl(1)));
@@ -138,7 +139,7 @@ public class BrewTest {
                 ),
                 new AgeStepImpl(
                         new PassedMoment(20),
-                        BarrelType.ACACIA
+                        BarrelTypes.ACACIA
                 )
         );
         List<BrewingStep> steps = List.of(
@@ -152,7 +153,7 @@ public class BrewTest {
                 ),
                 new AgeStepImpl(
                         new PassedMoment(20),
-                        BarrelType.ACACIA
+                        BarrelTypes.ACACIA
                 )
         );
         Brew brew = new BrewImpl(steps);
@@ -173,7 +174,7 @@ public class BrewTest {
                         ),
                         new AgeStepImpl(
                                 new PassedMoment(20),
-                                BarrelType.ACACIA
+                                BarrelTypes.ACACIA
                         )
                 )
         );
@@ -189,7 +190,7 @@ public class BrewTest {
                         ),
                         new AgeStepImpl(
                                 new PassedMoment(20),
-                                BarrelType.ACACIA
+                                BarrelTypes.ACACIA
                         )
                 )
         );
@@ -211,7 +212,7 @@ public class BrewTest {
                         ),
                         new AgeStepImpl(
                                 new PassedMoment(20),
-                                BarrelType.ACACIA
+                                BarrelTypes.ACACIA
                         )
                 )
         );
@@ -228,7 +229,7 @@ public class BrewTest {
                         ),
                         new AgeStepImpl(
                                 new PassedMoment(20),
-                                BarrelType.ACACIA
+                                BarrelTypes.ACACIA
                         )
                 )
         );
@@ -249,7 +250,7 @@ public class BrewTest {
                         ),
                         new AgeStepImpl(
                                 new PassedMoment(20),
-                                BarrelType.ACACIA
+                                BarrelTypes.ACACIA
                         )
                 )
         );
@@ -265,7 +266,7 @@ public class BrewTest {
                         ),
                         new AgeStepImpl(
                                 new PassedMoment(20),
-                                BarrelType.ACACIA
+                                BarrelTypes.ACACIA
                         )
                 )
         );
@@ -286,7 +287,7 @@ public class BrewTest {
                         ),
                         new AgeStepImpl(
                                 new PassedMoment(20),
-                                BarrelType.ACACIA
+                                BarrelTypes.ACACIA
                         )
                 )
         );
@@ -302,7 +303,7 @@ public class BrewTest {
                         ),
                         new AgeStepImpl(
                                 new PassedMoment(20),
-                                BarrelType.ACACIA
+                                BarrelTypes.ACACIA
                         )
                 )
         );
@@ -324,7 +325,7 @@ public class BrewTest {
                         ),
                         new AgeStepImpl(
                                 new PassedMoment(20),
-                                BarrelType.ACACIA
+                                BarrelTypes.ACACIA
                         )
                 )
         );
@@ -340,7 +341,7 @@ public class BrewTest {
                         ),
                         new AgeStepImpl(
                                 new PassedMoment(20),
-                                BarrelType.ACACIA
+                                BarrelTypes.ACACIA
                         )
                 )
         );

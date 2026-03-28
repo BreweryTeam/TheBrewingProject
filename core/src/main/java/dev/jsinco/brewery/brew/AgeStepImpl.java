@@ -4,11 +4,18 @@ import dev.jsinco.brewery.api.brew.BrewingStep;
 import dev.jsinco.brewery.api.brew.PartialBrewScore;
 import dev.jsinco.brewery.api.brew.ScoreType;
 import dev.jsinco.brewery.api.breweries.BarrelType;
+import dev.jsinco.brewery.api.breweries.BarrelTypes;
 import dev.jsinco.brewery.api.moment.Moment;
 import dev.jsinco.brewery.configuration.Config;
 import dev.jsinco.brewery.util.CollectionUtil;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.Map;
+import java.util.Objects;
+import java.util.SequencedCollection;
+import java.util.SequencedSet;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -33,7 +40,7 @@ public record AgeStepImpl(Moment time, BarrelType barrelType, SequencedSet<UUID>
         if (!(other instanceof AgeStepImpl(Moment otherAge, BarrelType otherType, SequencedSet<UUID> ignored))) {
             return BREW_STEP_MISMATCH;
         }
-        double barrelTypeScore = barrelType.equals(BarrelType.ANY) || barrelType.equals(otherType) ? 1D : 0.9D;
+        double barrelTypeScore = barrelType.equals(BarrelTypes.ANY) || barrelType.equals(otherType) ? 1D : 0.9D;
 
         return Stream.of(
                 new PartialBrewScore(Math.sqrt(BrewingStepUtil.nearbyValueScore(this.time.moment(), otherAge.moment())), ScoreType.TIME),
@@ -51,7 +58,7 @@ public record AgeStepImpl(Moment time, BarrelType barrelType, SequencedSet<UUID>
         if (!(other instanceof AgeStepImpl(Moment otherAge, BarrelType otherType, SequencedSet<UUID> ignored))) {
             return BREW_STEP_MISMATCH;
         }
-        double barrelTypeScore = barrelType.equals(BarrelType.ANY) || barrelType.equals(otherType) ? 1D : 0.9D;
+        double barrelTypeScore = barrelType.equals(BarrelTypes.ANY) || barrelType.equals(otherType) ? 1D : 0.9D;
         double timeScore = otherAge.moment() < this.time.moment() ? 1D : BrewingStepUtil.nearbyValueScore(this.time.moment(), otherAge.moment());
         return Stream.of(
                 new PartialBrewScore(timeScore, ScoreType.TIME),

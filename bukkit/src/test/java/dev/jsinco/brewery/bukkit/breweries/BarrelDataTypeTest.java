@@ -1,6 +1,7 @@
 package dev.jsinco.brewery.bukkit.breweries;
 
 import dev.jsinco.brewery.api.breweries.BarrelType;
+import dev.jsinco.brewery.api.breweries.BarrelTypes;
 import dev.jsinco.brewery.api.breweries.CauldronType;
 import dev.jsinco.brewery.api.moment.Interval;
 import dev.jsinco.brewery.api.moment.Moment;
@@ -67,19 +68,19 @@ class BarrelDataTypeTest {
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .findFirst();
-        BukkitBarrel barrel = new BukkitBarrel(new Location(world, 1, 2, 3), breweryStructureOptional.get().first(), 9, BarrelType.OAK);
+        BukkitBarrel barrel = new BukkitBarrel(new Location(world, 1, 2, 3), breweryStructureOptional.get().first(), 9, BarrelTypes.OAK);
         BrewInventoryImpl inventory = barrel.getInventory();
         inventory.set(new BrewImpl(
                 List.of(
                         new CookStepImpl(new PassedMoment(10), Map.of(), CauldronType.WATER),
-                        new AgeStepImpl(new Interval(10, 10 + Moment.DEFAULT_AGING_YEAR), BarrelType.OAK)
+                        new AgeStepImpl(new Interval(10, 10 + Moment.DEFAULT_AGING_YEAR), BarrelTypes.OAK)
                 )
         ), 4);
         inventory.set(
                 new BrewImpl(
                         List.of(
                                 new CookStepImpl(new PassedMoment(10), Map.of(), CauldronType.WATER),
-                                new AgeStepImpl(new Interval(10, 10 + Moment.DEFAULT_AGING_YEAR), BarrelType.OAK)
+                                new AgeStepImpl(new Interval(10, 10 + Moment.DEFAULT_AGING_YEAR), BarrelTypes.OAK)
                         )
                 ), 5
         );
