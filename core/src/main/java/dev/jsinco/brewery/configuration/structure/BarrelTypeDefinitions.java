@@ -17,36 +17,42 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class BarrelTypes extends OkaeriConfig {
+public class BarrelTypeDefinitions extends OkaeriConfig {
 
     @CustomKey("barrel-types")
     public final List<BarrelTypeDefinition> barrelTypes = List.of();
 
     @Exclude
-    private static BarrelTypes instance;
+    private static BarrelTypeDefinitions instance;
     @Exclude
-    private static BarrelTypes defaultsInstance;
+    private static BarrelTypeDefinitions defaultsInstance;
 
     public static List<BarrelType> allBarrelTypes() {
         boolean newlySaved = false;
-        File barrelTypesFile = new File("./plugins/TheBrewingProject", "barrel_types.yml");
-        try (InputStream inputStream = BarrelTypeDefinition.class.getResourceAsStream("/barrel_types.yml")) {
-            if (inputStream == null) {
-                throw new FileNotFoundException("Internal file '/barrel_types.yml' not found");
+        File barrelTypesFile = new File("plugins/TheBrewingProject", "barrel_types.yml");
+        try {
+            try (InputStream inputStream = BarrelTypeDefinition.class.getResourceAsStream("/barrel_types.yml")) {
+                if (inputStream == null) {
+                    throw new FileNotFoundException("Internal file '/barrel_types.yml' not found");
+                }
+                if (!barrelTypesFile.exists()) {
+                    if (!barrelTypesFile.createNewFile()) {
+                        throw new IOException("Could not create file, even though did not exist: " + barrelTypesFile);
+                    }
+                }
             }
             if (!barrelTypesFile.exists()) {
-                if (barrelTypesFile.createNewFile()) {
-                    throw new IOException("Could not create file, even though it existed: " + barrelTypesFile);
+                try (InputStream inputStream = BarrelTypeDefinition.class.getResourceAsStream("/barrel_types.yml")) {
+                    if (inputStream == null) {
+                        throw new FileNotFoundException("Internal file '/barrel_types.yml' not found");
+                    }
+                    try (OutputStream outputStream = new FileOutputStream(barrelTypesFile)) {
+                        inputStream.transferTo(outputStream);
+                    }
                 }
-                inputStream.mark(Short.MAX_VALUE);
-                try (OutputStream outputStream = new FileOutputStream(barrelTypesFile)) {
-                    inputStream.transferTo(outputStream);
-                }
-                inputStream.reset();
-                newlySaved = true;
             }
             if (!newlySaved) {
-                instance = ConfigManager.create(BarrelTypes.class, it -> {
+                instance = ConfigManager.create(BarrelTypeDefinitions.class, it -> {
                     it.configure(opts -> {
                         opts.bindFile(barrelTypesFile);
                         opts.configurer(new YamlSnakeYamlConfigurer());
@@ -54,13 +60,14 @@ public class BarrelTypes extends OkaeriConfig {
                     it.load(false);
                 });
             }
-            defaultsInstance = ConfigManager.create(BarrelTypes.class, it -> {
-                it.configure(opts -> {
-                    opts.bindFile("/barrel_types.yml");
-                    opts.configurer(new YamlSnakeYamlConfigurer());
+            try (InputStream inputStream = BarrelTypeDefinition.class.getResourceAsStream("/barrel_types.yml")) {
+                defaultsInstance = ConfigManager.create(BarrelTypeDefinitions.class, it -> {
+                    it.configure(opts -> {
+                        opts.configurer(new YamlSnakeYamlConfigurer());
+                    });
+                    it.load(inputStream);
                 });
-                it.load(false);
-            });
+            }
             List<BarrelType> barrelTypes = new ArrayList<>();
             instance.barrelTypes.stream()
                     .map(BarrelTypeDefinition::toBarrelType)
