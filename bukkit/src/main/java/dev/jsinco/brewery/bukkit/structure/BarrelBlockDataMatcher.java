@@ -3,6 +3,7 @@ package dev.jsinco.brewery.bukkit.structure;
 import com.destroystokyo.paper.MaterialTags;
 import com.google.common.collect.ImmutableSet;
 import dev.jsinco.brewery.api.breweries.BarrelType;
+import dev.jsinco.brewery.api.breweries.BarrelTypes;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Registry;
@@ -22,7 +23,7 @@ public class BarrelBlockDataMatcher implements BlockDataMatcher<BarrelType> {
 
     @Override
     public boolean matches(BlockData actual, BlockData expected, BarrelType matcherType) {
-        if (matcherType == BarrelType.ANY) {
+        if (matcherType == BarrelTypes.ANY) {
             throw new IllegalArgumentException("Can not match to: ANY");
         }
         Material expectedMaterial = expected.getMaterial();
@@ -38,7 +39,7 @@ public class BarrelBlockDataMatcher implements BlockDataMatcher<BarrelType> {
             }
             return stairMatches(actuallStairs, expectedStairs, matcherType);
         }
-        if (BarrelType.COPPER == matcherType) {
+        if (BarrelTypes.COPPER == matcherType) {
             return MaterialTags.CUT_COPPER_BLOCKS.isTagged(actual.getMaterial());
         }
         return materialMatches(actual, expected, matcherType);
@@ -46,7 +47,7 @@ public class BarrelBlockDataMatcher implements BlockDataMatcher<BarrelType> {
 
     @Override
     public Set<Material> findStructureMaterials(BarrelType matcherType, BreweryStructure structure) {
-        if (matcherType == BarrelType.COPPER) {
+        if (matcherType == BarrelTypes.COPPER) {
             ImmutableSet.Builder<Material> output = new ImmutableSet.Builder<>();
             output.addAll(MaterialTags.CUT_COPPER_BLOCKS.getValues());
             output.addAll(MaterialTags.CUT_COPPER_STAIRS.getValues());
@@ -74,7 +75,7 @@ public class BarrelBlockDataMatcher implements BlockDataMatcher<BarrelType> {
         if (actualStairs.getHalf() != expectedStairs.getHalf()) {
             return false;
         }
-        if (matcherType == BarrelType.COPPER) {
+        if (matcherType == BarrelTypes.COPPER) {
             return MaterialTags.CUT_COPPER_STAIRS.isTagged(actualStairs.getMaterial());
         }
         return materialMatches(actualStairs, expectedStairs, matcherType);
@@ -84,7 +85,7 @@ public class BarrelBlockDataMatcher implements BlockDataMatcher<BarrelType> {
         if (actual.isWaterlogged() != expected.isWaterlogged()) {
             return false;
         }
-        if (matcherType == BarrelType.COPPER) {
+        if (matcherType == BarrelTypes.COPPER) {
             return true;
         }
         return materialMatches(actual, expected, matcherType);
