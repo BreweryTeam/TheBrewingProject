@@ -22,7 +22,7 @@ public class StructureMatcherDefinition extends OkaeriConfig {
     public final Map<String, List<String>> blockDataFilter = Map.of();
 
     @CustomKey("block-transformation")
-    public final BlockReplacement blockTransformation = new GenericMatcherDefinition(Map.of());
+    public final BlockReplacement blockTransformation = new GenericBlockReplacement(Map.of());
 
     /**
      * @return A list of keys that are invalid

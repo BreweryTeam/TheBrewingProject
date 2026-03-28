@@ -80,7 +80,7 @@ class StructureReaderTest {
             it.withRemoveOrphans(true);
             it.saveDefaults();
             it.load(false);
-        }).toStructure(internalPath);
+        }).toStructure(internalPath, matchers);
     }
 
     static Stream<Arguments> getSchemFormatPaths() {
