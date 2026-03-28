@@ -2,6 +2,7 @@ package dev.jsinco.brewery.bukkit.brew;
 
 import dev.jsinco.brewery.api.brew.Brew;
 import dev.jsinco.brewery.api.breweries.BarrelType;
+import dev.jsinco.brewery.api.breweries.BarrelTypes;
 import dev.jsinco.brewery.api.breweries.CauldronType;
 import dev.jsinco.brewery.api.meta.MetaDataType;
 import dev.jsinco.brewery.api.moment.PassedMoment;
@@ -51,7 +52,7 @@ public class BrewAdapterTest {
                 ),
                 new AgeStepImpl(
                         new PassedMoment(20),
-                        BarrelType.ACACIA
+                        BarrelTypes.ACACIA
                 )
         )).withMeta(Key.key("test", "example"), MetaDataType.STRING, "sample text");
 
