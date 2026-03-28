@@ -6,6 +6,7 @@ import dev.jsinco.brewery.api.brew.BrewQuality;
 import dev.jsinco.brewery.api.brew.BrewScore;
 import dev.jsinco.brewery.api.brew.BrewingStep;
 import dev.jsinco.brewery.api.breweries.BarrelType;
+import dev.jsinco.brewery.api.breweries.BarrelTypes;
 import dev.jsinco.brewery.api.breweries.CauldronType;
 import dev.jsinco.brewery.api.ingredient.Ingredient;
 import dev.jsinco.brewery.api.moment.PassedMoment;
@@ -41,20 +42,20 @@ import java.util.Optional;
 public class BreweryXMigrationUtils {
 
     private static final List<BarrelType> BARREL_TYPES = List.of(
-            BarrelType.ANY,
-            BarrelType.BIRCH,
-            BarrelType.OAK,
-            BarrelType.JUNGLE,
-            BarrelType.SPRUCE,
-            BarrelType.ACACIA,
-            BarrelType.DARK_OAK,
-            BarrelType.CRIMSON,
-            BarrelType.WARPED,
-            BarrelType.MANGROVE,
-            BarrelType.CHERRY,
-            BarrelType.BAMBOO,
-            BarrelType.COPPER,
-            BarrelType.PALE_OAK
+            BarrelTypes.ANY,
+            BarrelTypes.BIRCH,
+            BarrelTypes.OAK,
+            BarrelTypes.JUNGLE,
+            BarrelTypes.SPRUCE,
+            BarrelTypes.ACACIA,
+            BarrelTypes.DARK_OAK,
+            BarrelTypes.CRIMSON,
+            BarrelTypes.WARPED,
+            BarrelTypes.MANGROVE,
+            BarrelTypes.CHERRY,
+            BarrelTypes.BAMBOO,
+            BarrelTypes.COPPER,
+            BarrelTypes.PALE_OAK
     );
     private static boolean noSeedIssueOccurred = true;
 
@@ -161,7 +162,7 @@ public class BreweryXMigrationUtils {
         if (ageTime != 0) {
             long ageInTicks = (long) (Config.config().barrels().agingYearTicks() * ageTime);
             BarrelType barrelType = woodType >= BARREL_TYPES.size() || woodType < 0 ?
-                    BarrelType.ANY : BARREL_TYPES.get(woodType);
+                    BarrelTypes.ANY : BARREL_TYPES.get(woodType);
             steps.add(new AgeStepImpl(
                     new PassedMoment(ageInTicks),
                     barrelType

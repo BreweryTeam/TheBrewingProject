@@ -1,5 +1,6 @@
 package dev.jsinco.brewery.bukkit.brews;
 
+import dev.jsinco.brewery.api.breweries.BarrelTypes;
 import dev.jsinco.brewery.brew.AgeStepImpl;
 import dev.jsinco.brewery.api.brew.Brew;
 import dev.jsinco.brewery.brew.BrewImpl;
@@ -61,13 +62,13 @@ class BukkitBarrelBrewDataTypeTest {
         BrewImpl brew1 = new BrewImpl(
                 List.of(
                         new CookStepImpl(new PassedMoment(10), Map.of(new SimpleIngredient(Material.ACACIA_BUTTON), 3), CauldronType.WATER),
-                        new AgeStepImpl(new Interval(1010, 1010 + Moment.DEFAULT_AGING_YEAR), BarrelType.ACACIA)
+                        new AgeStepImpl(new Interval(1010, 1010 + Moment.DEFAULT_AGING_YEAR), BarrelTypes.ACACIA)
                 )
         );
         BrewImpl brew2 = new BrewImpl(
                 List.of(
                         new CookStepImpl(new PassedMoment(10), Map.of(new SimpleIngredient(Material.ACACIA_BUTTON), 3), CauldronType.WATER),
-                        new AgeStepImpl(new Interval(1010, 1010 + Moment.DEFAULT_AGING_YEAR), BarrelType.ACACIA)
+                        new AgeStepImpl(new Interval(1010, 1010 + Moment.DEFAULT_AGING_YEAR), BarrelTypes.ACACIA)
                 )
         );
         BukkitBarrelBrewDataType.BarrelContext barrelContext1 = new BukkitBarrelBrewDataType.BarrelContext(1, 2, 3, 0, world.getUID());
@@ -94,7 +95,7 @@ class BukkitBarrelBrewDataTypeTest {
             preparedStatement.setBytes(7, DecoderEncoder.asBytes(world.getUID()));
             preparedStatement.setString(8, "[1,2,3,4,5,6,7,8,9]");
             preparedStatement.setString(9, "test_format");
-            preparedStatement.setString(10, BarrelType.ACACIA.key().toString());
+            preparedStatement.setString(10, BarrelTypes.ACACIA.key().toString());
             preparedStatement.setInt(11, 9);
             preparedStatement.execute();
         }

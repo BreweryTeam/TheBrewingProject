@@ -20,19 +20,26 @@ public class StructureMatchers extends OkaeriConfig {
 
     public static List<StructureMatcherDefinition> matchers(File dataFolder) {
         File barrelTypesFile = new File(dataFolder, "structures.yml");
-        try (InputStream inputStream = BarrelTypeDefinition.class.getResourceAsStream("/structures.yml")) {
-            if (inputStream == null) {
-                throw new FileNotFoundException("Internal file '/structures.yml' not found");
+        try {
+            try (InputStream inputStream = BarrelTypeDefinition.class.getResourceAsStream("/structures.yml")) {
+                if (inputStream == null) {
+                    throw new FileNotFoundException("Internal file '/structures.yml' not found");
+                }
+
             }
             if (!barrelTypesFile.exists()) {
-                if (barrelTypesFile.createNewFile()) {
-                    throw new IOException("Could not create file, even though it existed: " + barrelTypesFile);
+                try (InputStream inputStream = BarrelTypeDefinition.class.getResourceAsStream("/structures.yml")) {
+                    if (inputStream == null) {
+                        throw new FileNotFoundException("Internal file '/structures.yml' not found");
+                    }
+                    if (!barrelTypesFile.createNewFile()) {
+                        throw new IOException("Could not create file, even though it existed: " + barrelTypesFile);
+                    }
+                    try (OutputStream outputStream = new FileOutputStream(barrelTypesFile)) {
+                        inputStream.transferTo(outputStream);
+                    }
                 }
-                inputStream.mark(Short.MAX_VALUE);
-                try (OutputStream outputStream = new FileOutputStream(barrelTypesFile)) {
-                    inputStream.transferTo(outputStream);
-                }
-                inputStream.reset();
+
             }
             return ConfigManager.create(StructureMatchers.class, it -> {
                 it.configure(opts -> {

@@ -4,6 +4,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import dev.jsinco.brewery.api.brew.Brew;
 import dev.jsinco.brewery.api.breweries.BarrelType;
+import dev.jsinco.brewery.api.breweries.BarrelTypes;
 import dev.jsinco.brewery.api.breweries.CauldronType;
 import dev.jsinco.brewery.api.meta.MetaDataType;
 import dev.jsinco.brewery.api.moment.PassedMoment;
@@ -91,7 +92,7 @@ public class BrewSerializerTest {
                         ),
                         new AgeStepImpl(
                                 new PassedMoment(20),
-                                BarrelType.ACACIA
+                                BarrelTypes.ACACIA
                         )
                 )
         );
