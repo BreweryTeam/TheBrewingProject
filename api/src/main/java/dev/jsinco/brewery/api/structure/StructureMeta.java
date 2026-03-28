@@ -15,11 +15,7 @@ import java.util.Set;
  * @param <V>          The metadata type
  */
 public record StructureMeta<V>(BreweryKey key, Class<V> vClass, V defaultValue) implements BreweryKeyed {
-
-    public static final StructureMeta<Boolean> USE_BARREL_SUBSTITUTION = new StructureMeta<>(
-            BreweryKey.parse("use_barrel_substitution"),
-            Boolean.class,
-            false);
+    
     public static final StructureMeta<Integer> INVENTORY_SIZE = new StructureMeta<>(BreweryKey.parse("inventory_size"),
             Integer.class,
             9);
