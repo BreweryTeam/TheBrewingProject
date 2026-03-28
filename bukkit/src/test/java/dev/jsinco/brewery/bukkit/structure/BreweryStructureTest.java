@@ -62,7 +62,6 @@ class BreweryStructureTest {
         return new BreweryStructure(schematic,
                 new BreweryStructure.EntryPoints(List.of(new Vector3i(0, 0, 1)), true), "test_barrel",
                 new BreweryStructure.Meta(Map.of(StructureMeta.INVENTORY_SIZE, 9,
-                        StructureMeta.USE_BARREL_SUBSTITUTION, false,
                         StructureMeta.TYPE, StructureType.BARREL)
                 ), "test_barrel.schem", StructurePlacerUtils.matchers());
     }
@@ -83,7 +82,6 @@ class BreweryStructureTest {
                 Arguments.of(mutableMapOf(StructureMeta.INVENTORY_SIZE, 9)),
                 Arguments.of(mutableMapOf(
                         StructureMeta.TYPE, StructureType.BARREL,
-                        StructureMeta.USE_BARREL_SUBSTITUTION, true,
                         StructureMeta.INVENTORY_SIZE, 14)
                 )
         );
@@ -97,7 +95,6 @@ class BreweryStructureTest {
                         ),
                         mutableMapOf(
                                 StructureMeta.INVENTORY_SIZE, 9,
-                                StructureMeta.USE_BARREL_SUBSTITUTION, false,
                                 StructureMeta.PROCESS_AMOUNT, null
                         )
                 ),
@@ -106,7 +103,6 @@ class BreweryStructureTest {
                                 StructureMeta.TYPE, StructureType.DISTILLERY
                         ), mutableMapOf( // don't check for everything, so the test doesn't break on meta changes
                                 StructureMeta.INVENTORY_SIZE, 9,
-                                StructureMeta.USE_BARREL_SUBSTITUTION, null,
                                 StructureMeta.PROCESS_AMOUNT, 1
                         )
                 )
@@ -123,8 +119,8 @@ class BreweryStructureTest {
                 )),
                 Arguments.of(mutableMapOf(
                         StructureMeta.TYPE, StructureType.BARREL,
-                        StructureMeta.INVENTORY_SIZE, 9,
-                        StructureMeta.USE_BARREL_SUBSTITUTION, true)
-                ));
+                        StructureMeta.INVENTORY_SIZE, 9
+                ))
+        );
     }
 }
