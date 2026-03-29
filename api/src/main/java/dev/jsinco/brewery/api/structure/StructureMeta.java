@@ -15,7 +15,7 @@ import java.util.Set;
  * @param <V>          The metadata type
  */
 public record StructureMeta<V>(BreweryKey key, Class<V> vClass, V defaultValue) implements BreweryKeyed {
-    
+
     public static final StructureMeta<Integer> INVENTORY_SIZE = new StructureMeta<>(BreweryKey.parse("inventory_size"),
             Integer.class,
             9);
@@ -47,11 +47,6 @@ public record StructureMeta<V>(BreweryKey key, Class<V> vClass, V defaultValue) 
             BreweryKey.parse("process_amount"),
             Integer.class,
             1);
-    public static final StructureMeta<BlockMatcherReplacement.List> BLOCK_REPLACEMENTS = new StructureMeta<>(
-            BreweryKey.parse("replacements"),
-            BlockMatcherReplacement.List.class,
-            new BlockMatcherReplacement.List()
-    );
     public static final StructureMeta<String> BLOCK_MATCHER = new StructureMeta<>(
             BreweryKey.parse("block_matcher"),
             String.class,

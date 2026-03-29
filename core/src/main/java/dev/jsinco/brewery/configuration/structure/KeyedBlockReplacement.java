@@ -2,6 +2,7 @@ package dev.jsinco.brewery.configuration.structure;
 
 import dev.jsinco.brewery.api.util.BreweryKey;
 import dev.jsinco.brewery.api.util.Holder;
+import eu.okaeri.configs.serdes.SerializationData;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -39,5 +40,12 @@ public final class KeyedBlockReplacement implements BlockReplacement {
                     .forEach(output::add);
         }
         return output;
+    }
+
+    @Override
+    public void write(SerializationData data) {
+        for (Map.Entry<BreweryKey, GenericBlockReplacement> entry : matchers.entrySet()) {
+            data.set(entry.getKey().minimalized(), entry.getValue());
+        }
     }
 }
