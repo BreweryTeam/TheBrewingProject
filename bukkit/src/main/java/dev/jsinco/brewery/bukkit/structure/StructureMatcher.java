@@ -29,7 +29,7 @@ public class StructureMatcher {
     private @Nullable BreweryKey key;
     private Map<BlockType, Set<BlockType>> transformations;
     private Map<BlockType, List<String>> checkedBlockData;
-    private static final Pattern BLOCK_DATA_RE = Pattern.compile("[a-zA-Z_:](\\[.* \\])");
+    private static final Pattern BLOCK_DATA_RE = Pattern.compile("[a-zA-Z_:]+(\\[.*\\])");
 
     public StructureMatcher(String name, @Nullable BreweryKey key, Map<BlockType, Set<BlockType>> transformations, Map<BlockType, List<String>> checkedBlockData) {
         this.name = name;
