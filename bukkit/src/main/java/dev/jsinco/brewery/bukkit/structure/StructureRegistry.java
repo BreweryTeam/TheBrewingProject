@@ -4,6 +4,7 @@ import com.google.common.base.Preconditions;
 import dev.jsinco.brewery.api.structure.StructureMeta;
 import dev.jsinco.brewery.api.structure.StructureType;
 import org.bukkit.Material;
+import org.bukkit.block.BlockType;
 import org.bukkit.block.data.BlockData;
 import org.jspecify.annotations.NonNull;
 
@@ -17,7 +18,7 @@ import java.util.Set;
 public class StructureRegistry {
 
     private final Map<String, BreweryStructure> structureNames = new HashMap<>();
-    private final Map<StructureType, Map<Material, Set<BreweryStructure>>> structuresWithMaterials = new HashMap<>();
+    private final Map<StructureType, Map<BlockType, Set<BreweryStructure>>> structuresWithMaterials = new HashMap<>();
     private final Map<StructureType, Set<BreweryStructure>> structures = new HashMap<>();
 
     public Optional<BreweryStructure> getStructure(@NonNull String key) {
@@ -30,25 +31,14 @@ public class StructureRegistry {
         return structuresWithMaterials.computeIfAbsent(structureType, ignored -> new HashMap<>()).getOrDefault(material, Set.of());
     }
 
-    public <T> void addStructure(@NonNull BreweryStructure structure, BlockDataMatcher<T> blockDataMatcher, T[] matcherTypes) {
-        Preconditions.checkNotNull(structure);
-        structureNames.put(structure.getName(), structure);
-        structures.computeIfAbsent(structure.getMeta(StructureMeta.TYPE), ignored -> new HashSet<>()).add(structure);
-        for (T matcherType : matcherTypes) {
-            Set<Material> possibleMaterials = blockDataMatcher.findStructureMaterials(matcherType, structure);
-            Map<Material, Set<BreweryStructure>> materialStructureMap = structuresWithMaterials.computeIfAbsent(structure.getMeta(StructureMeta.TYPE), ignored -> new HashMap<>());
-            possibleMaterials.forEach(material -> materialStructureMap.computeIfAbsent(material, ignored -> new HashSet<>()).add(structure));
-        }
-
-    }
-
     public void addStructure(@NonNull BreweryStructure structure) {
         Preconditions.checkNotNull(structure);
         structureNames.put(structure.getName(), structure);
         structures.computeIfAbsent(structure.getMeta(StructureMeta.TYPE), ignored -> new HashSet<>()).add(structure);
-        for (BlockData blockData : structure.getPalette()) {
-            structuresWithMaterials.computeIfAbsent(structure.getMeta(StructureMeta.TYPE), ignored -> new HashMap<>())
-                    .computeIfAbsent(blockData.getMaterial(), ignored -> new HashSet<>()).add(structure);
+        for (StructureMatcher structureMatcher : structure.getStructureMatchers()) {
+            Set<BlockType> possibleMaterials = structureMatcher.dumpBlockTypes();
+            Map<BlockType, Set<BreweryStructure>> materialStructureMap = structuresWithMaterials.computeIfAbsent(structure.getMeta(StructureMeta.TYPE), ignored -> new HashMap<>());
+            possibleMaterials.forEach(material -> materialStructureMap.computeIfAbsent(material, ignored -> new HashSet<>()).add(structure));
         }
     }
 

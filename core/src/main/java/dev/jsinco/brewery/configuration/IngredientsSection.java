@@ -15,7 +15,7 @@ import eu.okaeri.configs.OkaeriConfig;
 import eu.okaeri.configs.annotation.Comment;
 import eu.okaeri.configs.annotation.CustomKey;
 import eu.okaeri.configs.annotation.Exclude;
-import eu.okaeri.configs.serdes.OkaeriSerdesPack;
+import eu.okaeri.configs.serdes.OkaeriSerdes;
 import eu.okaeri.configs.yaml.snakeyaml.YamlSnakeYamlConfigurer;
 import net.kyori.adventure.text.Component;
 import org.jspecify.annotations.NonNull;
@@ -65,7 +65,7 @@ public class IngredientsSection extends OkaeriConfig {
         return instance;
     }
 
-    public static void load(File dataFolder, OkaeriSerdesPack... packs) {
+    public static void load(File dataFolder, OkaeriSerdes... packs) {
         IngredientsSection.instance = ConfigManager.create(IngredientsSection.class, it -> {
             it.withConfigurer(new YamlSnakeYamlConfigurer(), packs);
             it.withBindFile(new File(dataFolder, "ingredients.yml"));
