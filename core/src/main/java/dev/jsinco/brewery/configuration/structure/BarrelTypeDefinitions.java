@@ -31,17 +31,10 @@ public class BarrelTypeDefinitions extends OkaeriConfig {
         boolean newlySaved = false;
         File barrelTypesFile = new File("plugins/TheBrewingProject", "barrel_types.yml");
         try {
-            try (InputStream inputStream = BarrelTypeDefinition.class.getResourceAsStream("/barrel_types.yml")) {
-                if (inputStream == null) {
-                    throw new FileNotFoundException("Internal file '/barrel_types.yml' not found");
-                }
-                if (!barrelTypesFile.exists()) {
-                    if (!barrelTypesFile.createNewFile()) {
-                        throw new IOException("Could not create file, even though did not exist: " + barrelTypesFile);
-                    }
-                }
-            }
             if (!barrelTypesFile.exists()) {
+                if (!barrelTypesFile.createNewFile()) {
+                    throw new IOException("Could not create file, even though did not exist: " + barrelTypesFile);
+                }
                 try (InputStream inputStream = BarrelTypeDefinition.class.getResourceAsStream("/barrel_types.yml")) {
                     if (inputStream == null) {
                         throw new FileNotFoundException("Internal file '/barrel_types.yml' not found");
@@ -50,15 +43,7 @@ public class BarrelTypeDefinitions extends OkaeriConfig {
                         inputStream.transferTo(outputStream);
                     }
                 }
-            }
-            if (!newlySaved) {
-                instance = ConfigManager.create(BarrelTypeDefinitions.class, it -> {
-                    it.configure(opts -> {
-                        opts.bindFile(barrelTypesFile);
-                        opts.configurer(new YamlSnakeYamlConfigurer());
-                    });
-                    it.load(false);
-                });
+                newlySaved = true;
             }
             try (InputStream inputStream = BarrelTypeDefinition.class.getResourceAsStream("/barrel_types.yml")) {
                 defaultsInstance = ConfigManager.create(BarrelTypeDefinitions.class, it -> {
@@ -68,6 +53,18 @@ public class BarrelTypeDefinitions extends OkaeriConfig {
                     it.load(inputStream);
                 });
             }
+            if (!newlySaved) {
+                instance = ConfigManager.create(BarrelTypeDefinitions.class, it -> {
+                    it.configure(opts -> {
+                        opts.bindFile(barrelTypesFile);
+                        opts.configurer(new YamlSnakeYamlConfigurer());
+                    });
+                    it.load(false);
+                });
+            } else {
+                instance = defaultsInstance;
+            }
+
             List<BarrelType> barrelTypes = new ArrayList<>();
             instance.barrelTypes.stream()
                     .map(BarrelTypeDefinition::toBarrelType)
