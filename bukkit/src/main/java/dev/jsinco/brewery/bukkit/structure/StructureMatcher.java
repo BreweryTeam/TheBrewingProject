@@ -12,6 +12,7 @@ import org.bukkit.block.BlockType;
 import org.bukkit.block.data.BlockData;
 import org.jspecify.annotations.Nullable;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -42,6 +43,14 @@ public class StructureMatcher {
 
     public BreweryKey typeKey() {
         return this.key;
+    }
+
+    public Set<BlockType> dumpBlockTypes() {
+        return transformations
+                .values()
+                .stream()
+                .flatMap(Collection::stream)
+                .collect(Collectors.toSet());
     }
 
     public boolean matches(BlockData expected, BlockData actual) {

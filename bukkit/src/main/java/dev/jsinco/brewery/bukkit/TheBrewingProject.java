@@ -49,8 +49,6 @@ import dev.jsinco.brewery.bukkit.recipe.DefaultRecipeReader;
 import dev.jsinco.brewery.bukkit.structure.BreweryStructureConfig;
 import dev.jsinco.brewery.bukkit.structure.StructureMatcher;
 import dev.jsinco.brewery.bukkit.structure.StructureRegistry;
-import dev.jsinco.brewery.bukkit.structure.serializer.BlockMatcherReplacementSerializer;
-import dev.jsinco.brewery.bukkit.structure.serializer.BlockMatcherReplacementsSerializer;
 import dev.jsinco.brewery.bukkit.structure.serializer.BreweryVectorListSerializer;
 import dev.jsinco.brewery.bukkit.structure.serializer.BreweryVectorSerializer;
 import dev.jsinco.brewery.bukkit.structure.serializer.MaterialHolderSerializer;
@@ -66,7 +64,7 @@ import dev.jsinco.brewery.configuration.Config;
 import dev.jsinco.brewery.configuration.DrunkenModifierSection;
 import dev.jsinco.brewery.configuration.EventSection;
 import dev.jsinco.brewery.configuration.IngredientsSection;
-import dev.jsinco.brewery.configuration.OkaeriSerdesPackBuilder;
+import dev.jsinco.brewery.configuration.OkaeriSerdesBuilder;
 import dev.jsinco.brewery.configuration.locale.BreweryTranslator;
 import dev.jsinco.brewery.configuration.serializers.ComponentSerializer;
 import dev.jsinco.brewery.configuration.serializers.ConditionSerializer;
@@ -101,7 +99,7 @@ import dev.jsinco.brewery.structure.PlacedStructureRegistryImpl;
 import dev.jsinco.brewery.util.ClassUtil;
 import eu.okaeri.configs.ConfigManager;
 import eu.okaeri.configs.json.gson.JsonGsonConfigurer;
-import eu.okaeri.configs.serdes.OkaeriSerdesPack;
+import eu.okaeri.configs.serdes.OkaeriSerdes;
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
 import io.papermc.paper.threadedregions.scheduler.ScheduledTask;
 import net.kyori.adventure.translation.GlobalTranslator;
@@ -185,8 +183,8 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
         this.successfulLoad = true;
     }
 
-    private OkaeriSerdesPack serializers() {
-        return new OkaeriSerdesPackBuilder()
+    private OkaeriSerdes serializers() {
+        return new OkaeriSerdesBuilder()
                 .add(new BreweryLocationSerializer())
                 .add(new EventRegistrySerializer())
                 .add(new EventStepSerializer())
@@ -301,7 +299,7 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
                 .map(string -> "structures/" + string)
                 .flatMap(name -> Stream.of(name + ".schem", name + ".json"))
                 .forEach(this::saveResourceIfNotExists);
-        OkaeriSerdesPack pack = new OkaeriSerdesPackBuilder()
+        OkaeriSerdes pack = new OkaeriSerdesBuilder()
                 .add(new BreweryVectorSerializer())
                 .add(new BreweryVectorListSerializer())
                 .add(new MaterialHolderSerializer())
@@ -310,10 +308,8 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
                 .add(new Vector3iSerializer())
                 .add(new MaterialsSerializer())
                 .add(new StructureTypeSerializer())
-                .add(new BlockMatcherReplacementSerializer())
-                .add(new BlockMatcherReplacementsSerializer())
                 .build();
-        List<StructureMatcher> matchers = StructureMatchers.matchers(this.getDataFolder())
+        List<StructureMatcher> matchers = StructureMatchers.matchers(this.getDataFolder(), pack)
                 .stream()
                 .map(StructureMatcher::getMatchers)
                 .flatMap(Collection::stream)

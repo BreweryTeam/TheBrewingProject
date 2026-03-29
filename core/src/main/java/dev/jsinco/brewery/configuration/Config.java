@@ -8,7 +8,7 @@ import eu.okaeri.configs.OkaeriConfig;
 import eu.okaeri.configs.annotation.Comment;
 import eu.okaeri.configs.annotation.CustomKey;
 import eu.okaeri.configs.annotation.Exclude;
-import eu.okaeri.configs.serdes.OkaeriSerdesPack;
+import eu.okaeri.configs.serdes.OkaeriSerdes;
 import eu.okaeri.configs.yaml.snakeyaml.YamlSnakeYamlConfigurer;
 
 import javax.crypto.KeyGenerator;
@@ -113,7 +113,7 @@ public class Config extends OkaeriConfig implements Configuration {
     @Exclude
     private static Config instance;
 
-    public static void load(File dataFolder, OkaeriSerdesPack... packs) {
+    public static void load(File dataFolder, OkaeriSerdes... packs) {
         Config.instance = ConfigManager.create(Config.class, it -> {
             it.withConfigurer(new YamlSnakeYamlConfigurer(), packs);
             it.withBindFile(new File(dataFolder, "config.yml"));
