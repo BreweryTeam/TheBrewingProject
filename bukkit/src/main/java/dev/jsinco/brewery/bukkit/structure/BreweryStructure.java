@@ -86,7 +86,7 @@ public class BreweryStructure {
             if (!world.getWorldBorder().isInside(expected.getKey()) || world.getMinHeight() > expected.getKey().getBlockY() || world.getMaxHeight() <= expected.getKey().getBlockY()) {
                 return false;
             }
-            if (!blockDataMatcher.matches(expected.getKey().getBlock().getBlockData(), expected.getValue())) {
+            if (!blockDataMatcher.matches(expected.getValue(), expected.getKey().getBlock().getBlockData())) {
                 return false;
             }
         }
