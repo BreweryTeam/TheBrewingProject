@@ -40,8 +40,7 @@ public record AgeStepImpl(Moment time, BarrelType barrelType, SequencedSet<UUID>
         if (!(other instanceof AgeStepImpl(Moment otherAge, BarrelType otherType, SequencedSet<UUID> ignored))) {
             return BREW_STEP_MISMATCH;
         }
-        double barrelTypeScore = barrelType.equals(BarrelTypes.ANY) || barrelType.equals(otherType) ? 1D : 0.9D;
-
+        double barrelTypeScore = barrelType.proximityScore(otherType);
         return Stream.of(
                 new PartialBrewScore(Math.sqrt(BrewingStepUtil.nearbyValueScore(this.time.moment(), otherAge.moment())), ScoreType.TIME),
                 new PartialBrewScore(barrelTypeScore, ScoreType.BARREL_TYPE)
@@ -58,7 +57,7 @@ public record AgeStepImpl(Moment time, BarrelType barrelType, SequencedSet<UUID>
         if (!(other instanceof AgeStepImpl(Moment otherAge, BarrelType otherType, SequencedSet<UUID> ignored))) {
             return BREW_STEP_MISMATCH;
         }
-        double barrelTypeScore = barrelType.equals(BarrelTypes.ANY) || barrelType.equals(otherType) ? 1D : 0.9D;
+        double barrelTypeScore = barrelType.proximityScore(otherType);
         double timeScore = otherAge.moment() < this.time.moment() ? 1D : BrewingStepUtil.nearbyValueScore(this.time.moment(), otherAge.moment());
         return Stream.of(
                 new PartialBrewScore(timeScore, ScoreType.TIME),
