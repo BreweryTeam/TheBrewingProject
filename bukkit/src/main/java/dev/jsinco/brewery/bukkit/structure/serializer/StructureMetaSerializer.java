@@ -55,7 +55,7 @@ public class StructureMetaSerializer implements ObjectSerializer<BreweryStructur
                 );
                 continue;
             }
-            if (breweryKey.equals(BreweryKey.parse("use_barrel_substitution"))) {
+            if (breweryKey.equals(BreweryKey.parse("use_barrel_substitution")) || breweryKey.equals(BreweryKey.parse("replacements"))) {
                 continue;
             }
             StructureMeta<?> metaItem = BreweryRegistry.STRUCTURE_META.get(breweryKey);

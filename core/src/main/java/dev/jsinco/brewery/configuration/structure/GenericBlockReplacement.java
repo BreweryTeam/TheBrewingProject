@@ -2,6 +2,7 @@ package dev.jsinco.brewery.configuration.structure;
 
 import dev.jsinco.brewery.api.util.Holder;
 import dev.jsinco.brewery.api.util.Materials;
+import eu.okaeri.configs.serdes.SerializationData;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,5 +34,12 @@ public final class GenericBlockReplacement implements BlockReplacement {
             }
         }
         return output;
+    }
+
+    @Override
+    public void write(SerializationData data) {
+        for (Map.Entry<String, Materials> entry : backing.entrySet()) {
+            data.set(entry.getKey(), entry.getValue());
+        }
     }
 }
