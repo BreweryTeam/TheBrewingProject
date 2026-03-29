@@ -3,6 +3,7 @@ package dev.jsinco.brewery.configuration.structure;
 import eu.okaeri.configs.ConfigManager;
 import eu.okaeri.configs.OkaeriConfig;
 import eu.okaeri.configs.annotation.CustomKey;
+import eu.okaeri.configs.serdes.OkaeriSerdes;
 import eu.okaeri.configs.yaml.snakeyaml.YamlSnakeYamlConfigurer;
 
 import java.io.File;
@@ -18,7 +19,7 @@ public class StructureMatchers extends OkaeriConfig {
     @CustomKey("structure-matchers")
     List<StructureMatcherDefinition> structureMatcherDefinitions = List.of();
 
-    public static List<StructureMatcherDefinition> matchers(File dataFolder) {
+    public static List<StructureMatcherDefinition> matchers(File dataFolder, OkaeriSerdes... serdes) {
         File barrelTypesFile = new File(dataFolder, "structures.yml");
         try {
             try (InputStream inputStream = BarrelTypeDefinition.class.getResourceAsStream("/structures.yml")) {
@@ -44,7 +45,7 @@ public class StructureMatchers extends OkaeriConfig {
             return ConfigManager.create(StructureMatchers.class, it -> {
                 it.configure(opts -> {
                     opts.bindFile(barrelTypesFile);
-                    opts.configurer(new YamlSnakeYamlConfigurer());
+                    opts.configurer(new YamlSnakeYamlConfigurer(), serdes);
                 });
                 it.load(false);
             }).structureMatcherDefinitions;
