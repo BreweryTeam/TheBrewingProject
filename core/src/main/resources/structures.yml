@@ -5,7 +5,7 @@ structure-matchers:
       stairs: oak_stairs
       blocks: oak_planks
       fences: oak_fence
-    block-data-filters:
+    block-data-filter:
       stairs: [ facing, half ]
       blocks: [ ]
       fences: [ ]
@@ -80,6 +80,6 @@ structure-matchers:
     replacement-material:
       pot: decorated_pot
       fences: bamboo_fence
-    block-data-filters:
+    block-data-filter:
       pot: [ ]
       fences: [ ]
