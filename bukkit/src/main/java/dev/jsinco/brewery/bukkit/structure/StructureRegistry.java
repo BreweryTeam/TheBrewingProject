@@ -3,9 +3,7 @@ package dev.jsinco.brewery.bukkit.structure;
 import com.google.common.base.Preconditions;
 import dev.jsinco.brewery.api.structure.StructureMeta;
 import dev.jsinco.brewery.api.structure.StructureType;
-import org.bukkit.Material;
 import org.bukkit.block.BlockType;
-import org.bukkit.block.data.BlockData;
 import org.jspecify.annotations.NonNull;
 
 import java.util.Collection;
@@ -26,7 +24,7 @@ public class StructureRegistry {
         return Optional.ofNullable(structureNames.get(key));
     }
 
-    public Set<BreweryStructure> getPossibleStructures(@NonNull Material material, StructureType structureType) {
+    public Set<BreweryStructure> getPossibleStructures(@NonNull BlockType material, StructureType structureType) {
         Preconditions.checkNotNull(material);
         return structuresWithMaterials.computeIfAbsent(structureType, ignored -> new HashMap<>()).getOrDefault(material, Set.of());
     }

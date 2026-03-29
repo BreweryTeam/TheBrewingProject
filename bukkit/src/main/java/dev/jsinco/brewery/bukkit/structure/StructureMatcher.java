@@ -29,6 +29,7 @@ public class StructureMatcher {
     private @Nullable BreweryKey key;
     private Map<BlockType, Set<BlockType>> transformations;
     private Map<BlockType, List<String>> checkedBlockData;
+    private static final Pattern BLOCK_DATA_RE = Pattern.compile("[a-zA-Z_:](\\[.* \\])");
 
     public StructureMatcher(String name, @Nullable BreweryKey key, Map<BlockType, Set<BlockType>> transformations, Map<BlockType, List<String>> checkedBlockData) {
         this.name = name;
@@ -54,23 +55,36 @@ public class StructureMatcher {
     }
 
     public boolean matches(BlockData expected, BlockData actual) {
+        if (expected.getMaterial().isAir()) {
+            return true;
+        }
         String expectedString = expected.getAsString();
-        List<String> allowedBlockData = checkedBlockData.get(expected.getMaterial().asBlockType());
+        BlockType expectedTypeUntransformed = expected.getMaterial().asBlockType();
+        if (!transformations.containsKey(expectedTypeUntransformed)) {
+            return actual.matches(expected);
+        }
+        List<String> allowedBlockData = checkedBlockData.get(expectedTypeUntransformed);
+        String onlyProperties;
         if (allowedBlockData != null) {
-            final String expectedStringFinal = expectedString;
-            expectedString = "[" + allowedBlockData
+            onlyProperties = "[" + allowedBlockData
                     .stream()
                     .map(allowed -> Pattern.compile(allowed + " *= *([^=,\\]]+)"))
-                    .map(pattern -> pattern.matcher(expectedStringFinal))
+                    .map(pattern -> pattern.matcher(expectedString))
                     .filter(Matcher::find)
                     .map(Matcher::group)
                     .collect(Collectors.joining(","))
                     + "]";
+        } else {
+            Matcher matcher = BLOCK_DATA_RE.matcher(expectedString);
+            if (!matcher.matches()) {
+                onlyProperties = "";
+            } else {
+                onlyProperties = matcher.group(1);
+            }
         }
-        final String expectedStringFinal = expectedString;
-        return transformations.get(expected.getMaterial().asBlockType())
+        return transformations.get(expectedTypeUntransformed)
                 .stream()
-                .anyMatch(transformedExpected -> actual.matches(transformedExpected.createBlockData(expectedStringFinal)));
+                .anyMatch(transformedExpected -> actual.matches(transformedExpected.createBlockData(onlyProperties)));
     }
 
     public static List<StructureMatcher> getMatchers(StructureMatcherDefinition structureMatcherDefinition) {

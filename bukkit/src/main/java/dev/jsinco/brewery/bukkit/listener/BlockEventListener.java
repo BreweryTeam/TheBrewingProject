@@ -125,7 +125,7 @@ public class BlockEventListener implements Listener {
     @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
     public void onBlockPlace(BlockPlaceEvent placeEvent) {
         Block placed = placeEvent.getBlockPlaced();
-        for (BreweryStructure breweryStructure : structureRegistry.getPossibleStructures(placed.getType(), StructureType.DISTILLERY)) {
+        for (BreweryStructure breweryStructure : structureRegistry.getPossibleStructures(placed.getType().asBlockType(), StructureType.DISTILLERY)) {
             Optional<Pair<PlacedBreweryStructure<BukkitDistillery>, BreweryKey>> placedBreweryStructureOptional = PlacedBreweryStructure.findValid(
                     breweryStructure,
                     placed.getLocation()
@@ -162,7 +162,7 @@ public class BlockEventListener implements Listener {
     private Optional<Pair<PlacedBreweryStructure<BukkitBarrel>, BarrelType>> getBarrel(Block block) {
         Location placedLocation = block.getLocation();
         Material material = block.getType();
-        Set<BreweryStructure> possibleStructures = structureRegistry.getPossibleStructures(material, StructureType.BARREL);
+        Set<BreweryStructure> possibleStructures = structureRegistry.getPossibleStructures(material.asBlockType(), StructureType.BARREL);
         for (BreweryStructure structure : possibleStructures) {
             Optional<Pair<PlacedBreweryStructure<BukkitBarrel>, BreweryKey>> placedBreweryStructure = PlacedBreweryStructure.findValid(
                     structure,
