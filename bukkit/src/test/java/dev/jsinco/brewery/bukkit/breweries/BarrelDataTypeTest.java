@@ -1,6 +1,5 @@
 package dev.jsinco.brewery.bukkit.breweries;
 
-import dev.jsinco.brewery.api.breweries.BarrelType;
 import dev.jsinco.brewery.api.breweries.BarrelTypes;
 import dev.jsinco.brewery.api.breweries.CauldronType;
 import dev.jsinco.brewery.api.moment.Interval;
@@ -60,7 +59,7 @@ class BarrelDataTypeTest {
         Location barrelBlock = new Location(world, -3, 1, 2);
         Optional<Pair<PlacedBreweryStructure<BukkitBarrel>, BreweryKey>> breweryStructureOptional = TheBrewingProject.getInstance()
                 .getStructureRegistry()
-                .getPossibleStructures(barrelBlock.getBlock().getType(), StructureType.BARREL)
+                .getPossibleStructures(barrelBlock.getBlock().getType().asBlockType(), StructureType.BARREL)
                 .stream()
                 .map(breweryStructure ->
                         PlacedBreweryStructure.<BukkitBarrel>findValid(breweryStructure, barrelBlock)
