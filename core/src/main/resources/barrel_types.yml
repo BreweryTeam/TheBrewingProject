@@ -1,6 +1,8 @@
 # WARNING: Content is not refreshed on reload, you need to restart your server
 # Default barrel types will be appended upon this list for backwards compatibility
 barrel-types:
+  - name: any
+    default–proximity-multiplier: 1
   - name: oak
     proximity-multipliers:
       birch: 0.6
