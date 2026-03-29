@@ -103,7 +103,7 @@ tasks {
         minecraftVersion(project.findProperty("minecraft.version")!! as String)
         if (project.findProperty("testing.integrations")!! == "true") {
             downloadPlugins {
-                modrinth("worldedit", "3ISh7ADm")
+                modrinth("worldedit", "JUWRHdru")
                 modrinth("craftengine", "0.0.67")
                 modrinth("bolt", "1f2gAAFO")
                 url("https://api.spiget.org/v2/resources/62325/download")
