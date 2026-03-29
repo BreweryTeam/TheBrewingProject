@@ -5,18 +5,24 @@ import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import dev.jsinco.brewery.api.brew.BrewingStep;
-import dev.jsinco.brewery.brew.*;
 import dev.jsinco.brewery.api.breweries.BarrelType;
 import dev.jsinco.brewery.api.breweries.CauldronType;
+import dev.jsinco.brewery.api.ingredient.Ingredient;
+import dev.jsinco.brewery.api.moment.PassedMoment;
+import dev.jsinco.brewery.api.util.BreweryRegistry;
+import dev.jsinco.brewery.api.util.Pair;
+import dev.jsinco.brewery.brew.AgeStepImpl;
+import dev.jsinco.brewery.brew.BrewImpl;
+import dev.jsinco.brewery.brew.CookStepImpl;
+import dev.jsinco.brewery.brew.DistillStepImpl;
+import dev.jsinco.brewery.brew.MixStepImpl;
 import dev.jsinco.brewery.bukkit.brew.BrewAdapter;
 import dev.jsinco.brewery.bukkit.command.argument.EnumArgument;
 import dev.jsinco.brewery.bukkit.command.argument.FlaggedArgumentBuilder;
 import dev.jsinco.brewery.bukkit.command.argument.IngredientsArgument;
+import dev.jsinco.brewery.bukkit.command.argument.RegistryArgument;
 import dev.jsinco.brewery.configuration.Config;
-import dev.jsinco.brewery.api.ingredient.Ingredient;
-import dev.jsinco.brewery.api.moment.PassedMoment;
 import dev.jsinco.brewery.util.MessageUtil;
-import dev.jsinco.brewery.api.util.Pair;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
@@ -45,7 +51,7 @@ public class CreateCommand {
                 new Pair<>("distill-runs", IntegerArgumentType.integer(1))
         ), Set.of());
         FlaggedArgumentBuilder.Flag age = new FlaggedArgumentBuilder.Flag("age", "a", List.of(
-                new Pair<>("barrel-type", new EnumArgument<>(BarrelType.class)),
+                new Pair<>("barrel-type", new RegistryArgument<>(BreweryRegistry.BARREL_TYPE)),
                 new Pair<>("aging-years", DoubleArgumentType.doubleArg(0))
         ), Set.of());
         List<ArgumentBuilder<CommandSourceStack, ?>> tree = new FlaggedArgumentBuilder(Set.of(cook, mix, distill, age), (context, flags) -> {

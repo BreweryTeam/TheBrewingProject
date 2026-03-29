@@ -1,4 +1,4 @@
-package dev.jsinco.brewery.configuration;
+package dev.jsinco.brewery.configuration.structure;
 
 import com.google.common.collect.ImmutableMap;
 import dev.jsinco.brewery.api.config.Configuration;
@@ -8,6 +8,7 @@ import dev.jsinco.brewery.api.ingredient.UncheckedIngredient;
 import dev.jsinco.brewery.api.ingredient.WildcardIngredient;
 import dev.jsinco.brewery.api.moment.Moment;
 import dev.jsinco.brewery.api.util.Holder;
+import dev.jsinco.brewery.configuration.AnimationDisplay;
 import eu.okaeri.configs.OkaeriConfig;
 import eu.okaeri.configs.annotation.Comment;
 import eu.okaeri.configs.annotation.CustomKey;

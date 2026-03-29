@@ -16,7 +16,7 @@ public class ConsumableSerializer implements ObjectSerializer<ConsumableSerializ
     }
 
     @Override
-    public boolean supports(@NonNull Class<? super Consumable> type) {
+    public boolean supports(@NonNull Class<?> type) {
         return Consumable.class == type;
     }
 

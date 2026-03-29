@@ -1,9 +1,16 @@
 package dev.jsinco.brewery.bukkit.structure;
 
-import dev.jsinco.brewery.bukkit.structure.serializer.*;
-import dev.jsinco.brewery.configuration.OkaeriSerdesPackBuilder;
+import dev.jsinco.brewery.bukkit.structure.serializer.BreweryVectorListSerializer;
+import dev.jsinco.brewery.bukkit.structure.serializer.BreweryVectorSerializer;
+import dev.jsinco.brewery.bukkit.structure.serializer.MaterialHolderSerializer;
+import dev.jsinco.brewery.bukkit.structure.serializer.MaterialTagSerializer;
+import dev.jsinco.brewery.bukkit.structure.serializer.MaterialsSerializer;
+import dev.jsinco.brewery.bukkit.structure.serializer.StructureMetaSerializer;
+import dev.jsinco.brewery.bukkit.structure.serializer.StructureTypeSerializer;
+import dev.jsinco.brewery.bukkit.structure.serializer.Vector3iSerializer;
+import dev.jsinco.brewery.configuration.OkaeriSerdesBuilder;
 import eu.okaeri.configs.ConfigManager;
-import eu.okaeri.configs.serdes.OkaeriSerdesPack;
+import eu.okaeri.configs.serdes.OkaeriSerdes;
 import eu.okaeri.configs.yaml.snakeyaml.YamlSnakeYamlConfigurer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -21,7 +28,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.nio.file.*;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystemNotFoundException;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Map;
 import java.util.stream.Stream;
 
@@ -62,7 +74,7 @@ class StructureReaderTest {
     }
 
     BreweryStructure readStructure(Path internalPath, File jsonFile) {
-        OkaeriSerdesPack pack = new OkaeriSerdesPackBuilder()
+        OkaeriSerdes pack = new OkaeriSerdesBuilder()
                 .add(new BreweryVectorSerializer())
                 .add(new BreweryVectorListSerializer())
                 .add(new MaterialHolderSerializer())
@@ -71,8 +83,6 @@ class StructureReaderTest {
                 .add(new Vector3iSerializer())
                 .add(new MaterialsSerializer())
                 .add(new StructureTypeSerializer())
-                .add(new BlockMatcherReplacementSerializer())
-                .add(new BlockMatcherReplacementsSerializer())
                 .build();
         return ConfigManager.create(BreweryStructureConfig.class, it -> {
             it.withConfigurer(new YamlSnakeYamlConfigurer(), pack);
@@ -80,7 +90,7 @@ class StructureReaderTest {
             it.withRemoveOrphans(true);
             it.saveDefaults();
             it.load(false);
-        }).toStructure(internalPath);
+        }).toStructure(internalPath, StructurePlacerUtils.matchers());
     }
 
     static Stream<Arguments> getSchemFormatPaths() {

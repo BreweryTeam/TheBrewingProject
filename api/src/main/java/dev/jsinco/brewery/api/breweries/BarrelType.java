@@ -4,29 +4,32 @@ package dev.jsinco.brewery.api.breweries;
 import dev.jsinco.brewery.api.util.BreweryKey;
 import dev.jsinco.brewery.api.util.BreweryKeyed;
 
-import java.util.Arrays;
 import java.util.Locale;
 
-public enum BarrelType implements BreweryKeyed {
+public interface BarrelType extends BreweryKeyed {
 
-    ANY,
-    OAK,
-    BIRCH,
-    SPRUCE,
-    JUNGLE,
-    ACACIA,
-    DARK_OAK,
-    CRIMSON,
-    WARPED,
-    CHERRY,
-    BAMBOO,
-    MANGROVE,
-    PALE_OAK,
-    COPPER;
+    /**
+     * Evaluate the proximity of another barrel type.
+     *
+     * @param other Another barrel type
+     * @return A score between 0 and 1
+     */
+    double proximityScore(BarrelType other);
 
-    public static final BarrelType[] PLACEABLE_TYPES = Arrays.stream(values()).filter(barrelType -> barrelType != ANY).toArray(BarrelType[]::new);
+    default String name() {
+        return key().minimalized()
+                .toUpperCase(Locale.ROOT);
+    }
 
-    public BreweryKey key() {
-        return BreweryKey.parse(name());
+    interface Builder {
+
+
+        Builder addProximity(BarrelType barrelType, double scoreMultiplier);
+
+        Builder addProximity(BreweryKey barrelTypeKey, double scoreMultiplier);
+
+        Builder defaultProximity(double scoreMultiplier);
+
+        BarrelType build();
     }
 }

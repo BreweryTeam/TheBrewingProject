@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import dev.jsinco.brewery.api.breweries.BarrelType;
+import dev.jsinco.brewery.api.breweries.BarrelTypeProvider;
 import dev.jsinco.brewery.api.breweries.CauldronType;
 import dev.jsinco.brewery.api.event.NamedDrunkEvent;
 import dev.jsinco.brewery.api.ingredient.IngredientMeta;
@@ -28,48 +29,18 @@ import java.util.List;
  *
  * @param <T> The Keyed Type
  */
-public class BreweryRegistry<T extends BreweryKeyed> {
+public interface BreweryRegistry<T extends BreweryKeyed> {
 
-    public static final BreweryRegistry<BarrelType> BARREL_TYPE = fromEnums(BarrelType.class);
-    public static final BreweryRegistry<CauldronType> CAULDRON_TYPE = fromEnums(CauldronType.class);
-    public static final BreweryRegistry<StructureMeta<?>> STRUCTURE_META = (BreweryRegistry<StructureMeta<?>>) fromFields(StructureMeta.class);
-    public static final BreweryRegistry<IngredientMeta<?>> INGREDIENT_META = (BreweryRegistry<IngredientMeta<?>>) fromFields(IngredientMeta.class);
-    public static final BreweryRegistry<StructureType> STRUCTURE_TYPE = (BreweryRegistry<StructureType>) fromFields(StructureType.class);
-    public static final BreweryRegistry<NamedDrunkEvent> DRUNK_EVENT = fromJson("/named_drunk_events.json", NamedDrunkEvent.class);
+    BreweryRegistry<BarrelType> BARREL_TYPE = new SimpleRegistry<>(BarrelTypeProvider.allBarrelsStatic());
+    BreweryRegistry<CauldronType> CAULDRON_TYPE = fromEnums(CauldronType.class);
+    BreweryRegistry<StructureMeta<?>> STRUCTURE_META = (BreweryRegistry<StructureMeta<?>>) fromFields(StructureMeta.class);
+    BreweryRegistry<IngredientMeta<?>> INGREDIENT_META = (BreweryRegistry<IngredientMeta<?>>) fromFields(IngredientMeta.class);
+    BreweryRegistry<StructureType> STRUCTURE_TYPE = (BreweryRegistry<StructureType>) fromFields(StructureType.class);
+    BreweryRegistry<NamedDrunkEvent> DRUNK_EVENT = fromJson("/named_drunk_events.json", NamedDrunkEvent.class);
 
-    private final ImmutableMap<BreweryKey, T> backing;
-
-    private BreweryRegistry(Collection<T> values) {
-        ImmutableMap.Builder<BreweryKey, T> registryBacking = ImmutableMap.builder();
-        values.forEach(value -> registryBacking.put(value.key(), value));
-        this.backing = registryBacking.build();
-    }
-
-    /**
-     * @return All keyed values for this registry
-     */
-    public Collection<T> values() {
-        return backing.values();
-    }
-
-    /**
-     * @param key A brewery key
-     * @return The brewery keyed object
-     */
-    public @Nullable T get(BreweryKey key) {
-        return backing.get(key);
-    }
-
-    /**
-     * @param key The brewery key
-     * @return True if registry contains key
-     */
-    public boolean containsKey(BreweryKey key) {
-        return backing.containsKey(key);
-    }
 
     private static <E extends Enum<E> & BreweryKeyed> BreweryRegistry<E> fromEnums(Class<E> enumClass) {
-        return new BreweryRegistry<>(Arrays.stream(enumClass.getEnumConstants()).toList());
+        return new SimpleRegistry<>(Arrays.stream(enumClass.getEnumConstants()).toList());
     }
 
     private static <T extends BreweryKeyed> BreweryRegistry<? extends T> fromFields(Class<T> tClass) {
@@ -84,7 +55,7 @@ public class BreweryRegistry<T extends BreweryKeyed> {
                     tList.add(tClass.cast(staticField));
                 }
             }
-            return new BreweryRegistry<>(tList);
+            return new SimpleRegistry<>(tList);
         } catch (IllegalAccessException e) {
             throw new RuntimeException(e);
         }
@@ -102,9 +73,52 @@ public class BreweryRegistry<T extends BreweryKeyed> {
         ) {
             Type listType = TypeToken.getParameterized(List.class, tClass).getType();
             List<T> tList = gson.fromJson(reader, listType);
-            return new BreweryRegistry<>(tList);
+            return new SimpleRegistry<>(tList);
         } catch (IOException e) {
             throw new RuntimeException("Failed to read from JSON at path: " + path, e);
+        }
+    }
+
+    Collection<T> values();
+
+    T get(BreweryKey key);
+
+    boolean containsKey(BreweryKey key);
+
+    class SimpleRegistry<T extends BreweryKeyed> implements BreweryRegistry<T> {
+        private final ImmutableMap<BreweryKey, T> backing;
+
+        private SimpleRegistry(Collection<T> values) {
+            ImmutableMap.Builder<BreweryKey, T> registryBacking = ImmutableMap.builder();
+            values.forEach(value -> registryBacking.put(value.key(), value));
+            this.backing = registryBacking.build();
+        }
+
+        /**
+         * @return All keyed values for this registry
+         */
+        @Override
+        public Collection<T> values() {
+            return backing.values();
+        }
+
+        /**
+         * @param key A brewery key
+         * @return The brewery keyed object
+         */
+        @Override
+        public @Nullable T get(BreweryKey key) {
+            return backing.get(key);
+        }
+
+
+        /**
+         * @param key The brewery key
+         * @return True if registry contains key
+         */
+        @Override
+        public boolean containsKey(BreweryKey key) {
+            return backing.containsKey(key);
         }
     }
 }

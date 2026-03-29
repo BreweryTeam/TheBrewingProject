@@ -38,7 +38,7 @@ public class RecipeArgument implements CustomArgumentType.Converted<Recipe<ItemS
                 .getRecipes()
                 .stream()
                 .map(Recipe::getRecipeName)
-                .filter(recipeName -> recipeName.startsWith(remaining))
+                .filter(recipeName -> recipeName.contains(remaining))
                 .map(ArgumentUtil::sanitizeName)
                 .forEach(builder::suggest);
         return builder.buildFuture();

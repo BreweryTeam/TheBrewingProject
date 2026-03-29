@@ -21,7 +21,7 @@ import java.util.Set;
 public class StructureMetaSerializer implements ObjectSerializer<BreweryStructure.Meta> {
 
     @Override
-    public boolean supports(@NonNull Class<? super BreweryStructure.Meta> type) {
+    public boolean supports(@NonNull Class<?> type) {
         return BreweryStructure.Meta.class == type;
     }
 
@@ -55,9 +55,17 @@ public class StructureMetaSerializer implements ObjectSerializer<BreweryStructur
                 );
                 continue;
             }
+            if (breweryKey.equals(BreweryKey.parse("use_barrel_substitution")) || breweryKey.equals(BreweryKey.parse("replacements"))) {
+                continue;
+            }
             StructureMeta<?> metaItem = BreweryRegistry.STRUCTURE_META.get(breweryKey);
             Preconditions.checkArgument(metaItem != null, "Unknown meta: " + key);
             meta.put(metaItem, data.get(key, metaItem.vClass()));
+        }
+        if (!meta.containsKey(StructureMeta.BLOCK_MATCHER)) {
+            meta.put(StructureMeta.BLOCK_MATCHER, data.getOr("use_barrel_substitution", Boolean.class, false) ?
+                    "barrel_type_matcher" : "distillery_type_matcher"
+            );
         }
         Preconditions.checkArgument(meta.containsKey(StructureMeta.TYPE), "Expected structure type to be present");
         StructureType type = (StructureType) meta.get(StructureMeta.TYPE);

@@ -51,7 +51,7 @@ dependencies {
     implementation(libs.schem.reader)
     implementation(libs.simple.yaml)
     implementation(libs.okaeri.json)
-    implementation("dev.faststats.metrics:bukkit:0.18.1") {
+    implementation("dev.faststats.metrics:bukkit:0.20.0") {
         exclude("com.google.code.gson", "gson")
     }
 
@@ -71,7 +71,9 @@ dependencies {
     compileOnly(libs.oraxen)
     compileOnly(libs.placeholderapi)
     compileOnly(libs.towny)
-    compileOnly(libs.worldguard.bukkit)
+    compileOnly(libs.worldguard.bukkit) {
+        exclude("com.google.code.gson", "gson")
+    }
     compileOnly(libs.quickshop.hikari)
     compileOnly(libs.mythic)
     compileOnly(libs.mythic.crucible)
@@ -101,7 +103,7 @@ tasks {
         minecraftVersion(project.findProperty("minecraft.version")!! as String)
         if (project.findProperty("testing.integrations")!! == "true") {
             downloadPlugins {
-                modrinth("worldedit", "3ISh7ADm")
+                modrinth("worldedit", "JUWRHdru")
                 modrinth("craftengine", "0.0.67")
                 modrinth("bolt", "1f2gAAFO")
                 url("https://api.spiget.org/v2/resources/62325/download")

@@ -12,7 +12,7 @@ import java.util.Set;
 
 public class MinutesDurationSerializer implements ObjectSerializer<Duration.Minutes> {
     @Override
-    public boolean supports(@NonNull Class<? super Duration.Minutes> type) {
+    public boolean supports(@NonNull Class<?> type) {
         return Duration.Minutes.class == type;
     }
 

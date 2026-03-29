@@ -7,6 +7,7 @@ import java.util.Collection;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+@Deprecated(forRemoval = true)
 public record BlockMatcherReplacement(Set<Materials> alternativesBacking, Holder.Material original) {
 
     public Set<Holder.Material> alternatives() {

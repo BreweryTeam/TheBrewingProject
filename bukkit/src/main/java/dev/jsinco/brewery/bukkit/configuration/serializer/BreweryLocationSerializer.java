@@ -12,7 +12,7 @@ import java.util.Arrays;
 public class BreweryLocationSerializer implements ObjectSerializer<BreweryLocation.Uncompiled> {
 
     @Override
-    public boolean supports(@NonNull Class<? super BreweryLocation.Uncompiled> type) {
+    public boolean supports(@NonNull Class<?> type) {
         return BreweryLocation.Uncompiled.class == type;
     }
 

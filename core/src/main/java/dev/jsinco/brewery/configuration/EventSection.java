@@ -29,7 +29,7 @@ import eu.okaeri.configs.OkaeriConfig;
 import eu.okaeri.configs.annotation.Comment;
 import eu.okaeri.configs.annotation.CustomKey;
 import eu.okaeri.configs.annotation.Exclude;
-import eu.okaeri.configs.serdes.OkaeriSerdesPack;
+import eu.okaeri.configs.serdes.OkaeriSerdes;
 import eu.okaeri.configs.yaml.snakeyaml.YamlSnakeYamlConfigurer;
 import net.kyori.adventure.text.Component;
 import org.yaml.snakeyaml.Yaml;
@@ -197,7 +197,7 @@ public class EventSection extends OkaeriConfig {
     @Exclude
     private static EventSection instance;
 
-    public static void validate() {
+    public static void postValidate() {
         Preconditions.checkState(instance != null, "Instance can not be null");
         Map<String, Double> variables = new DrunkStateImpl(0, -1).asVariables();
         boolean noneFailed = true;
@@ -327,7 +327,7 @@ public class EventSection extends OkaeriConfig {
         return instance;
     }
 
-    public static void load(File dataFolder, OkaeriSerdesPack... packs) {
+    public static void load(File dataFolder, OkaeriSerdes... packs) {
         EventSection.instance = ConfigManager.create(EventSection.class, it -> {
             it.withConfigurer(new YamlSnakeYamlConfigurer(), packs);
             it.withBindFile(new File(dataFolder, "events.yml"));

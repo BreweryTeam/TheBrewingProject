@@ -1,11 +1,12 @@
 package dev.jsinco.brewery.bukkit.breweries;
 
-import dev.jsinco.brewery.api.breweries.BarrelType;
+import dev.jsinco.brewery.api.breweries.BarrelTypes;
 import dev.jsinco.brewery.api.breweries.CauldronType;
 import dev.jsinco.brewery.api.moment.Interval;
 import dev.jsinco.brewery.api.moment.Moment;
 import dev.jsinco.brewery.api.moment.PassedMoment;
 import dev.jsinco.brewery.api.structure.StructureType;
+import dev.jsinco.brewery.api.util.BreweryKey;
 import dev.jsinco.brewery.api.util.Pair;
 import dev.jsinco.brewery.brew.AgeStepImpl;
 import dev.jsinco.brewery.brew.BrewImpl;
@@ -13,7 +14,6 @@ import dev.jsinco.brewery.brew.CookStepImpl;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.bukkit.breweries.barrel.BukkitBarrel;
 import dev.jsinco.brewery.bukkit.breweries.barrel.BukkitBarrelDataType;
-import dev.jsinco.brewery.bukkit.structure.BarrelBlockDataMatcher;
 import dev.jsinco.brewery.bukkit.structure.PlacedBreweryStructure;
 import dev.jsinco.brewery.bukkit.structure.StructurePlacerUtils;
 import dev.jsinco.brewery.bukkit.testutil.TBPServerMock;
@@ -47,6 +47,7 @@ class BarrelDataTypeTest {
         TheBrewingProject theBrewingProject = MockBukkit.load(TheBrewingProject.class);
         this.database = theBrewingProject.getDatabase();
     }
+
     @AfterEach
     public void tearDown() {
         MockBukkit.unmock();
@@ -56,29 +57,29 @@ class BarrelDataTypeTest {
     void checkPersistence() throws PersistenceException {
         StructurePlacerUtils.constructSmallOakBarrel(world);
         Location barrelBlock = new Location(world, -3, 1, 2);
-        Optional<Pair<PlacedBreweryStructure<BukkitBarrel>, BarrelType>> breweryStructureOptional = TheBrewingProject.getInstance()
+        Optional<Pair<PlacedBreweryStructure<BukkitBarrel>, BreweryKey>> breweryStructureOptional = TheBrewingProject.getInstance()
                 .getStructureRegistry()
-                .getPossibleStructures(barrelBlock.getBlock().getType(), StructureType.BARREL)
+                .getPossibleStructures(barrelBlock.getBlock().getType().asBlockType(), StructureType.BARREL)
                 .stream()
                 .map(breweryStructure ->
-                        PlacedBreweryStructure.<BarrelType, BukkitBarrel>findValid(breweryStructure, barrelBlock, BarrelBlockDataMatcher.INSTANCE, BarrelType.PLACEABLE_TYPES)
+                        PlacedBreweryStructure.<BukkitBarrel>findValid(breweryStructure, barrelBlock)
                 )
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .findFirst();
-        BukkitBarrel barrel = new BukkitBarrel(new Location(world, 1, 2, 3), breweryStructureOptional.get().first(), 9, BarrelType.OAK);
+        BukkitBarrel barrel = new BukkitBarrel(new Location(world, 1, 2, 3), breweryStructureOptional.get().first(), 9, BarrelTypes.OAK);
         BrewInventoryImpl inventory = barrel.getInventory();
         inventory.set(new BrewImpl(
                 List.of(
                         new CookStepImpl(new PassedMoment(10), Map.of(), CauldronType.WATER),
-                        new AgeStepImpl(new Interval(10, 10 + Moment.DEFAULT_AGING_YEAR), BarrelType.OAK)
+                        new AgeStepImpl(new Interval(10, 10 + Moment.DEFAULT_AGING_YEAR), BarrelTypes.OAK)
                 )
         ), 4);
         inventory.set(
                 new BrewImpl(
                         List.of(
                                 new CookStepImpl(new PassedMoment(10), Map.of(), CauldronType.WATER),
-                                new AgeStepImpl(new Interval(10, 10 + Moment.DEFAULT_AGING_YEAR), BarrelType.OAK)
+                                new AgeStepImpl(new Interval(10, 10 + Moment.DEFAULT_AGING_YEAR), BarrelTypes.OAK)
                         )
                 ), 5
         );

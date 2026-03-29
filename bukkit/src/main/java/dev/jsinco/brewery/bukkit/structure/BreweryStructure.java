@@ -27,6 +27,7 @@ public class BreweryStructure {
     private final String name;
     private final Meta meta;
     private final String schemFileName;
+    private final List<StructureMatcher> matchers;
 
     /**
      * Construct a schem structure where all blocks can finalize the structure
@@ -35,8 +36,8 @@ public class BreweryStructure {
      * @param name
      * @param structureMeta
      */
-    public BreweryStructure(@NonNull Schematic schem, @NonNull String name, Meta structureMeta, String schemFileName) {
-        this(schem, new EntryPoints(computeEntryPoints(schem), false), name, structureMeta, schemFileName);
+    public BreweryStructure(@NonNull Schematic schem, @NonNull String name, Meta structureMeta, String schemFileName, List<StructureMatcher> matchers) {
+        this(schem, new EntryPoints(computeEntryPoints(schem), false), name, structureMeta, schemFileName, matchers);
     }
 
     /**
@@ -46,12 +47,13 @@ public class BreweryStructure {
      * @param name
      * @param structureMeta
      */
-    public BreweryStructure(@NonNull Schematic schem, @NonNull EntryPoints origins, @NonNull String name, Meta structureMeta, String schemFileName) {
+    public BreweryStructure(@NonNull Schematic schem, @NonNull EntryPoints origins, @NonNull String name, Meta structureMeta, String schemFileName, List<StructureMatcher> matchers) {
         this.schem = Objects.requireNonNull(schem);
         this.entryPoints = origins;
         this.name = Objects.requireNonNull(name);
         this.meta = Objects.requireNonNull(structureMeta);
         this.schemFileName = schemFileName;
+        this.matchers = matchers;
     }
 
     private static List<Vector3i> computeEntryPoints(Schematic schem) {
@@ -65,26 +67,26 @@ public class BreweryStructure {
         return List.copyOf(vector3iList);
     }
 
-    public <T> Optional<Location> findValidOrigin(Matrix3d transformation, Location entryPoint, BlockDataMatcher<T> blockDataMatcher, T matcherType) {
+    public Optional<Location> findValidOrigin(Matrix3d transformation, Location entryPoint, StructureMatcher blockDataMatcher) {
         Preconditions.checkNotNull(entryPoint.getWorld(), "World for entry point can not be null!");
         for (Vector3i structureEntryPoint : entryPoints.entryPoints()) {
             Vector3d transformedEntryPoint = transformation.transform(new Vector3d(structureEntryPoint));
             Location worldOrigin = entryPoint.clone().subtract((int) transformedEntryPoint.x(), (int) transformedEntryPoint.y(), (int) transformedEntryPoint.z());
-            if (matches(transformation, worldOrigin, blockDataMatcher, matcherType)) {
+            if (matches(transformation, worldOrigin, blockDataMatcher)) {
                 return Optional.of(worldOrigin);
             }
         }
         return Optional.empty();
     }
 
-    private <T> boolean matches(Matrix3d transformation, Location structureWorldOrigin, BlockDataMatcher<T> blockDataMatcher, T matcherType) {
+    private boolean matches(Matrix3d transformation, Location structureWorldOrigin, StructureMatcher blockDataMatcher) {
         Map<Location, BlockData> expectedBlocks = getExpectedBlocks(transformation, structureWorldOrigin);
         for (Map.Entry<Location, BlockData> expected : expectedBlocks.entrySet()) {
             World world = expected.getKey().getWorld();
             if (!world.getWorldBorder().isInside(expected.getKey()) || world.getMinHeight() > expected.getKey().getBlockY() || world.getMaxHeight() <= expected.getKey().getBlockY()) {
                 return false;
             }
-            if (!blockDataMatcher.matches(expected.getKey().getBlock().getBlockData(), expected.getValue(), matcherType)) {
+            if (!blockDataMatcher.matches(expected.getValue(), expected.getKey().getBlock().getBlockData())) {
                 return false;
             }
         }
@@ -134,6 +136,10 @@ public class BreweryStructure {
 
     public String getSchemFileName() {
         return this.schemFileName;
+    }
+
+    public List<StructureMatcher> getStructureMatchers() {
+        return this.matchers;
     }
 
     public record EntryPoints(List<Vector3i> entryPoints, boolean customDefinition) {

@@ -2,6 +2,7 @@ package dev.jsinco.brewery.bukkit.brews;
 
 import dev.jsinco.brewery.api.brew.Brew;
 import dev.jsinco.brewery.api.brew.BrewQuality;
+import dev.jsinco.brewery.api.breweries.BarrelTypes;
 import dev.jsinco.brewery.brew.*;
 import dev.jsinco.brewery.api.breweries.BarrelType;
 import dev.jsinco.brewery.api.breweries.CauldronType;
@@ -63,7 +64,7 @@ class BrewTest {
                         new DistillStepImpl(129),
                         new AgeStepImpl(
                                 new Interval(0, Interval.DEFAULT_AGING_YEAR * 13),
-                                BarrelType.ACACIA
+                                BarrelTypes.ACACIA
                         )
                 )
         );
@@ -89,7 +90,7 @@ class BrewTest {
                         new DistillStepImpl(129),
                         new AgeStepImpl(
                                 new Interval(0, Interval.DEFAULT_AGING_YEAR * 13),
-                                BarrelType.BAMBOO
+                                BarrelTypes.BAMBOO
                         )
                 )
         );
@@ -115,7 +116,7 @@ class BrewTest {
                         new DistillStepImpl(129),
                         new AgeStepImpl(
                                 new Interval(0, Interval.DEFAULT_AGING_YEAR * 13),
-                                BarrelType.ACACIA
+                                BarrelTypes.ACACIA
                         )
                 )
         );
@@ -141,7 +142,7 @@ class BrewTest {
                         new DistillStepImpl(128),
                         new AgeStepImpl(
                                 new Interval(0, Interval.DEFAULT_AGING_YEAR * 13),
-                                BarrelType.ACACIA
+                                BarrelTypes.ACACIA
                         )
                 )
         );
@@ -167,7 +168,7 @@ class BrewTest {
                         new DistillStepImpl(129),
                         new AgeStepImpl(
                                 new Interval(0, Interval.DEFAULT_AGING_YEAR * 13),
-                                BarrelType.ACACIA
+                                BarrelTypes.ACACIA
                         )
                 )
         );
@@ -193,7 +194,7 @@ class BrewTest {
                         new DistillStepImpl(129),
                         new AgeStepImpl(
                                 new Interval(0, Interval.DEFAULT_AGING_YEAR * 10),
-                                BarrelType.ACACIA
+                                BarrelTypes.ACACIA
                         )
                 )
         );
@@ -218,7 +219,7 @@ class BrewTest {
                                 ),
                                 new AgeStepImpl(
                                         new PassedMoment(2 * Moment.DEFAULT_AGING_YEAR),
-                                        BarrelType.BAMBOO
+                                        BarrelTypes.BAMBOO
                                 )
                         )
                 )
@@ -232,7 +233,7 @@ class BrewTest {
                         ),
                         new AgeStepImpl(
                                 new PassedMoment(2 * Moment.DEFAULT_AGING_YEAR),
-                                BarrelType.BAMBOO
+                                BarrelTypes.BAMBOO
                         )
                 )
         );
@@ -254,7 +255,7 @@ class BrewTest {
                                 ),
                                 new AgeStepImpl(
                                         new PassedMoment(2 * Moment.DEFAULT_AGING_YEAR),
-                                        BarrelType.BAMBOO
+                                        BarrelTypes.BAMBOO
                                 )
                         )
                 )
@@ -270,7 +271,7 @@ class BrewTest {
                             ),
                             new AgeStepImpl(
                                     new PassedMoment(2 * Moment.DEFAULT_AGING_YEAR),
-                                    BarrelType.BAMBOO
+                                    BarrelTypes.BAMBOO
                             )
                     )
             );
@@ -297,7 +298,7 @@ class BrewTest {
                                 ),
                                 new AgeStepImpl(
                                         new PassedMoment(2 * Moment.DEFAULT_AGING_YEAR),
-                                        BarrelType.BAMBOO
+                                        BarrelTypes.BAMBOO
                                 )
                         )
                 )
@@ -313,7 +314,7 @@ class BrewTest {
                             ),
                             new AgeStepImpl(
                                     new PassedMoment(2 * Moment.DEFAULT_AGING_YEAR),
-                                    BarrelType.BAMBOO
+                                    BarrelTypes.BAMBOO
                             )
                     )
             );
@@ -342,7 +343,7 @@ class BrewTest {
                                 new DistillStepImpl(129),
                                 new AgeStepImpl(
                                         new PassedMoment(13 * Moment.DEFAULT_AGING_YEAR),
-                                        BarrelType.ACACIA
+                                        BarrelTypes.ACACIA
                                 )
                         )
                 )
@@ -363,7 +364,7 @@ class BrewTest {
                                 new DistillStepImpl(129),
                                 new AgeStepImpl(
                                         new PassedMoment(13 * Moment.DEFAULT_AGING_YEAR),
-                                        BarrelType.ACACIA
+                                        BarrelTypes.ACACIA
                                 )
                         )
                 )
@@ -384,7 +385,7 @@ class BrewTest {
                                 new DistillStepImpl(129),
                                 new AgeStepImpl(
                                         new PassedMoment(13 * Moment.DEFAULT_AGING_YEAR),
-                                        BarrelType.BAMBOO
+                                        BarrelTypes.BAMBOO
                                 )
                         )
                 )
@@ -405,7 +406,7 @@ class BrewTest {
                                 new DistillStepImpl(129),
                                 new AgeStepImpl(
                                         new PassedMoment(13 * Moment.DEFAULT_AGING_YEAR),
-                                        BarrelType.ACACIA
+                                        BarrelTypes.ACACIA
                                 )
                         )
                 )
@@ -426,7 +427,7 @@ class BrewTest {
                                 new DistillStepImpl(128),
                                 new AgeStepImpl(
                                         new PassedMoment(13 * Moment.DEFAULT_AGING_YEAR),
-                                        BarrelType.ACACIA
+                                        BarrelTypes.ACACIA
                                 )
                         )
                 )
@@ -447,7 +448,7 @@ class BrewTest {
                                 new DistillStepImpl(129),
                                 new AgeStepImpl(
                                         new PassedMoment(13 * Moment.DEFAULT_AGING_YEAR),
-                                        BarrelType.ACACIA
+                                        BarrelTypes.ACACIA
                                 )
                         )
                 )
@@ -468,7 +469,7 @@ class BrewTest {
                                 new DistillStepImpl(129),
                                 new AgeStepImpl(
                                         new PassedMoment(10 * Moment.DEFAULT_AGING_YEAR),
-                                        BarrelType.ACACIA
+                                        BarrelTypes.ACACIA
                                 )
                         )
                 )

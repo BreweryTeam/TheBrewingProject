@@ -1,4 +1,4 @@
-package dev.jsinco.brewery.configuration;
+package dev.jsinco.brewery.configuration.structure;
 
 import dev.jsinco.brewery.api.config.Configuration;
 import dev.jsinco.brewery.api.moment.Moment;
@@ -34,4 +34,5 @@ public class BarrelSection extends OkaeriConfig implements Configuration.Barrels
     public List<String> signKeywords() {
         return this.signKeywords;
     }
+
 }

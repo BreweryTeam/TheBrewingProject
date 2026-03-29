@@ -2,7 +2,9 @@ package dev.jsinco.brewery.bukkit.structure.serializer;
 
 import dev.jsinco.brewery.api.util.BreweryKey;
 import dev.jsinco.brewery.api.util.Holder;
+import dev.jsinco.brewery.api.util.Logger;
 import dev.jsinco.brewery.api.util.Materials;
+import eu.okaeri.configs.exception.OkaeriConfigException;
 import eu.okaeri.configs.schema.GenericsDeclaration;
 import eu.okaeri.configs.serdes.DeserializationData;
 import eu.okaeri.configs.serdes.ObjectSerializer;
@@ -10,9 +12,12 @@ import eu.okaeri.configs.serdes.SerializationData;
 import net.kyori.adventure.key.Key;
 import org.jspecify.annotations.NonNull;
 
+import java.util.Collection;
+import java.util.stream.Collectors;
+
 public class MaterialsSerializer implements ObjectSerializer<Materials> {
     @Override
-    public boolean supports(@NonNull Class<? super Materials> type) {
+    public boolean supports(@NonNull Class<?> type) {
         return Materials.class.isAssignableFrom(type);
     }
 
@@ -28,8 +33,14 @@ public class MaterialsSerializer implements ObjectSerializer<Materials> {
 
     @Override
     public Materials deserialize(@NonNull DeserializationData data, @NonNull GenericsDeclaration generics) {
-        if (!data.isValue()) {
-            return new Materials.SetBacked(data.getValueAsSet(Holder.Material.class));
+        try {
+            return new Materials.SetBacked(data.getValueAsList(Materials.class)
+                    .stream()
+                    .map(Materials::values)
+                    .flatMap(Collection::stream)
+                    .collect(Collectors.toSet())
+            );
+        } catch (IllegalArgumentException | OkaeriConfigException ignored) {
         }
         String value = data.getValue(String.class);
         if (value.startsWith("#")) {

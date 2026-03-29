@@ -16,10 +16,6 @@ import java.util.Set;
  */
 public record StructureMeta<V>(BreweryKey key, Class<V> vClass, V defaultValue) implements BreweryKeyed {
 
-    public static final StructureMeta<Boolean> USE_BARREL_SUBSTITUTION = new StructureMeta<>(
-            BreweryKey.parse("use_barrel_substitution"),
-            Boolean.class,
-            false);
     public static final StructureMeta<Integer> INVENTORY_SIZE = new StructureMeta<>(BreweryKey.parse("inventory_size"),
             Integer.class,
             9);
@@ -51,10 +47,10 @@ public record StructureMeta<V>(BreweryKey key, Class<V> vClass, V defaultValue) 
             BreweryKey.parse("process_amount"),
             Integer.class,
             1);
-    public static final StructureMeta<BlockMatcherReplacement.List> BLOCK_REPLACEMENTS = new StructureMeta<>(
-            BreweryKey.parse("replacements"),
-            BlockMatcherReplacement.List.class,
-            new BlockMatcherReplacement.List()
+    public static final StructureMeta<String> BLOCK_MATCHER = new StructureMeta<>(
+            BreweryKey.parse("block_matcher"),
+            String.class,
+            null
     );
 
     // Keep this at the bottom, going to cause issues because of class initialization order otherwise

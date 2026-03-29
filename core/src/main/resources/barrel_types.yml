@@ -1,0 +1,86 @@
+# WARNING: Content is not refreshed on reload, you need to restart your server
+# Default barrel types will be appended upon this list for backwards compatibility
+barrel-types:
+  - name: any
+    default–proximity-multiplier: 1
+  - name: oak
+    proximity-multipliers:
+      birch: 0.6
+      spruce: 0.6
+      dark_oak: 0.8
+      pale_oak: 0.9
+      mangrove: 0.5
+      acacia: 0.4
+    default–proximity-multiplier: 0.5
+
+  - name: birch
+    proximity-multipliers:
+      oak: 0.6
+      jungle: 0.5
+      bamboo: 0.4
+    default–proximity-multiplier: 0.5
+
+  - name: spruce
+    proximity-multipliers:
+      oak: 0.6
+      dark_oak: 0.7
+      mangrove: 0.6
+    default–proximity-multiplier: 0.5
+
+  - name: jungle
+    proximity-multipliers:
+      birch: 0.5
+      bamboo: 0.7
+      mangrove: 0.6
+    default–proximity-multiplier: 0.5
+
+  - name: acacia
+    proximity-multipliers:
+      oak: 0.4
+      dark_oak: 0.5
+    default–proximity-multiplier: 0.5
+
+  - name: dark_oak
+    proximity-multipliers:
+      oak: 0.8
+      spruce: 0.7
+      acacia: 0.5
+    default–proximity-multiplier: 0.5
+
+  - name: crimson
+    proximity-multipliers:
+      warped: 0.7
+    default–proximity-multiplier: 0.2
+
+  - name: warped
+    proximity-multipliers:
+      crimson: 0.7
+    default–proximity-multiplier: 0.2
+
+  - name: cherry
+    proximity-multipliers:
+      oak: 0.5
+      pale_oak: 0.6
+    default–proximity-multiplier: 0.5
+
+  - name: bamboo
+    proximity-multipliers:
+      jungle: 0.7
+      birch: 0.4
+    default–proximity-multiplier: 0.5
+
+  - name: mangrove
+    proximity-multipliers:
+      spruce: 0.6
+      jungle: 0.6
+    default–proximity-multiplier: 0.5
+
+  - name: pale_oak
+    proximity-multipliers:
+      oak: 0.9
+      cherry: 0.6
+    default–proximity-multiplier: 0.5
+
+  - name: copper
+    proximity-multipliers: { }
+    default–proximity-multiplier: 0.1

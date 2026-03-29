@@ -1,6 +1,5 @@
 package dev.jsinco.brewery.bukkit.structure;
 
-import dev.jsinco.brewery.api.breweries.BarrelType;
 import dev.jsinco.brewery.api.structure.StructureMeta;
 import dev.jsinco.brewery.api.structure.StructureType;
 import dev.thorinwasher.schem.Schematic;
@@ -27,7 +26,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(MockBukkitExtension.class)
 class BreweryStructureTest {
@@ -45,7 +45,7 @@ class BreweryStructureTest {
     void findValidOrigin() throws URISyntaxException, IOException {
         BreweryStructure oakStructure = getOakBarrel();
         StructurePlacerUtils.constructSmallOakBarrel(worldMock);
-        assertTrue(PlacedBreweryStructure.findValid(oakStructure, new Location(worldMock, -3, 1, 1), BarrelBlockDataMatcher.INSTANCE, BarrelType.PLACEABLE_TYPES).isPresent());
+        assertTrue(PlacedBreweryStructure.findValid(oakStructure, new Location(worldMock, -3, 1, 1)).isPresent());
     }
 
     @ParameterizedTest
@@ -53,7 +53,7 @@ class BreweryStructureTest {
     void fullMeta(Map<StructureMeta<?>, Object> structureMeta) throws URISyntaxException, IOException {
         URL url = PlacedBreweryStructure.class.getResource("/structures/test_barrel.schem");
         Schematic schematic = new SchematicReader().read(Paths.get(url.toURI()));
-        assertDoesNotThrow(() -> new BreweryStructure(schematic, "hello", new BreweryStructure.Meta(structureMeta), "hello.schem"));
+        assertDoesNotThrow(() -> new BreweryStructure(schematic, "hello", new BreweryStructure.Meta(structureMeta), "hello.schem", StructurePlacerUtils.matchers()));
     }
 
     private BreweryStructure getOakBarrel() throws URISyntaxException {
@@ -62,9 +62,8 @@ class BreweryStructureTest {
         return new BreweryStructure(schematic,
                 new BreweryStructure.EntryPoints(List.of(new Vector3i(0, 0, 1)), true), "test_barrel",
                 new BreweryStructure.Meta(Map.of(StructureMeta.INVENTORY_SIZE, 9,
-                        StructureMeta.USE_BARREL_SUBSTITUTION, false,
                         StructureMeta.TYPE, StructureType.BARREL)
-                ), "test_barrel.schem");
+                ), "test_barrel.schem", StructurePlacerUtils.matchers());
     }
 
     /**
@@ -83,7 +82,6 @@ class BreweryStructureTest {
                 Arguments.of(mutableMapOf(StructureMeta.INVENTORY_SIZE, 9)),
                 Arguments.of(mutableMapOf(
                         StructureMeta.TYPE, StructureType.BARREL,
-                        StructureMeta.USE_BARREL_SUBSTITUTION, true,
                         StructureMeta.INVENTORY_SIZE, 14)
                 )
         );
@@ -97,7 +95,6 @@ class BreweryStructureTest {
                         ),
                         mutableMapOf(
                                 StructureMeta.INVENTORY_SIZE, 9,
-                                StructureMeta.USE_BARREL_SUBSTITUTION, false,
                                 StructureMeta.PROCESS_AMOUNT, null
                         )
                 ),
@@ -106,7 +103,6 @@ class BreweryStructureTest {
                                 StructureMeta.TYPE, StructureType.DISTILLERY
                         ), mutableMapOf( // don't check for everything, so the test doesn't break on meta changes
                                 StructureMeta.INVENTORY_SIZE, 9,
-                                StructureMeta.USE_BARREL_SUBSTITUTION, null,
                                 StructureMeta.PROCESS_AMOUNT, 1
                         )
                 )
@@ -123,8 +119,8 @@ class BreweryStructureTest {
                 )),
                 Arguments.of(mutableMapOf(
                         StructureMeta.TYPE, StructureType.BARREL,
-                        StructureMeta.INVENTORY_SIZE, 9,
-                        StructureMeta.USE_BARREL_SUBSTITUTION, true)
-                ));
+                        StructureMeta.INVENTORY_SIZE, 9
+                ))
+        );
     }
 }

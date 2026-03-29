@@ -10,7 +10,7 @@ import org.jspecify.annotations.NonNull;
 public class IntervalSerializer implements ObjectSerializer<Interval> {
 
     @Override
-    public boolean supports(@NonNull Class<? super Interval> type) {
+    public boolean supports(@NonNull Class<?> type) {
         return Interval.class == type;
     }
 

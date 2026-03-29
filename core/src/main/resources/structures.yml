@@ -1,0 +1,83 @@
+structure-matchers:
+  - name: barrel_type_matcher
+    replacement-material:
+      stairs: oak_stairs
+      blocks: oak_planks
+      fences: oak_fence
+    block-data-filter:
+      stairs: [ facing, half ]
+      blocks: [ ]
+      fences: [ ]
+    block-transformation:
+      oak: { }
+      birch:
+        stairs: [ birch_stairs ]
+        blocks: [ birch_planks ]
+        fences: [ birch_fence ]
+      spruce:
+        stairs: [ spruce_stairs ]
+        blocks: [ spruce_planks ]
+        fences: [ spruce_fence ]
+      jungle:
+        stairs: [ jungle_stairs ]
+        blocks: [ jungle_planks ]
+        fences: [ jungle_fence ]
+      acacia:
+        stairs: [ acacia_stairs ]
+        blocks: [ acacia_planks ]
+        fences: [ acacia_fence ]
+      dark_oak:
+        stairs: [ dark_oak_stairs ]
+        blocks: [ dark_oak_planks ]
+        fences: [ dark_oak_fence ]
+      crimson:
+        stairs: [ crimson_stairs ]
+        blocks: [ crimson_planks ]
+        fences: [ crimson_fence ]
+      warped:
+        stairs: [ warped_stairs ]
+        blocks: [ warped_planks ]
+        fences: [ warped_fence ]
+      cherry:
+        stairs: [ cherry_stairs ]
+        blocks: [ cherry_planks ]
+        fences: [ cherry_fence ]
+      bamboo:
+        stairs: [ bamboo_stairs ]
+        blocks: [ bamboo_planks ]
+        fences: [ bamboo_fence ]
+      mangrove:
+        stairs: [ mangrove_stairs ]
+        blocks: [ mangrove_planks ]
+        fences: [ mangrove_fence ]
+      pale_oak:
+        stairs: [ pale_oak_stairs ]
+        blocks: [ pale_oak_planks ]
+        fences: [ pale_oak_fence ]
+      copper:
+        stairs:
+          - cut_copper_stairs
+          - exposed_cut_copper_stairs
+          - weathered_cut_copper_stairs
+          - oxidized_cut_copper_stairs
+          - waxed_cut_copper_stairs
+          - waxed_exposed_cut_copper_stairs
+          - waxed_weathered_cut_copper_stairs
+          - waxed_oxidized_cut_copper_stairs
+        blocks:
+          - cut_copper
+          - exposed_cut_copper
+          - weathered_cut_copper
+          - oxidized_cut_copper
+          - waxed_cut_copper
+          - waxed_exposed_cut_copper
+          - waxed_weathered_cut_copper
+          - waxed_oxidized_cut_copper
+        fences: [ "#wooden_fences" ]
+  - name: distillery_type_matcher
+    replacement-material:
+      pot: decorated_pot
+      fences: bamboo_fence
+    block-data-filter:
+      pot: [ ]
+      fences: [ ]
