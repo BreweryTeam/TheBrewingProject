@@ -66,6 +66,7 @@ import dev.jsinco.brewery.configuration.EventSection;
 import dev.jsinco.brewery.configuration.IngredientsSection;
 import dev.jsinco.brewery.configuration.OkaeriSerdesBuilder;
 import dev.jsinco.brewery.configuration.locale.BreweryTranslator;
+import dev.jsinco.brewery.configuration.serializers.BlockReplacementSerializer;
 import dev.jsinco.brewery.configuration.serializers.ComponentSerializer;
 import dev.jsinco.brewery.configuration.serializers.ConditionSerializer;
 import dev.jsinco.brewery.configuration.serializers.ConsumableSerializer;
@@ -308,6 +309,7 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
                 .add(new Vector3iSerializer())
                 .add(new MaterialsSerializer())
                 .add(new StructureTypeSerializer())
+                .add(new BlockReplacementSerializer())
                 .build();
         List<StructureMatcher> matchers = StructureMatchers.matchers(this.getDataFolder(), pack)
                 .stream()
