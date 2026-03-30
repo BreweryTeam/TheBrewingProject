@@ -115,6 +115,7 @@ public class DrunkEventExecutor {
                     .computeIfAbsent(playerUuid, ignored -> new HashMap<>())
                     .compute(eventId, (ignored, integer) -> integer == null ? 1 : integer + 1);
         }
+        boolean stopping = false;
         for (int i = 0; i < events.size(); i++) {
             final EventStep event = events.get(i);
             event.properties().stream()
@@ -124,6 +125,9 @@ public class DrunkEventExecutor {
                             .computeIfAbsent(playerUuid, ignored -> new HashMap<>())
                             .compute(customEventCompleted.eventKey(), (ignored, integer) -> integer == null || integer == 0 ? 0 : integer - 1)
                     );
+            if (stopping) {
+                continue;
+            }
             List<EventPropertyExecutable> properties = event.properties().stream()
                     .filter(eventStepProperty -> !(eventStepProperty instanceof CustomEventCompleted))
                     .map(registry::toExecutable)
@@ -132,7 +136,8 @@ public class DrunkEventExecutor {
             for (EventPropertyExecutable eventPropertyExecutable : properties) {
                 EventPropertyExecutable.ExecutionResult result = eventPropertyExecutable.execute(playerUuid, events, i);
                 if (result != EventPropertyExecutable.ExecutionResult.CONTINUE) {
-                    return;
+                    stopping = result == EventPropertyExecutable.ExecutionResult.STOP_EXECUTION;
+                    break;
                 }
             }
         }
