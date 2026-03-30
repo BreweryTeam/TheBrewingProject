@@ -9,6 +9,7 @@ import dev.jsinco.brewery.api.event.CustomEventRegistry;
 import dev.jsinco.brewery.api.event.DrunkEvent;
 import dev.jsinco.brewery.api.event.EventData;
 import dev.jsinco.brewery.api.event.NamedDrunkEvent;
+import dev.jsinco.brewery.api.moment.Moment;
 import dev.jsinco.brewery.api.util.BreweryRegistry;
 import dev.jsinco.brewery.api.util.Logger;
 import dev.jsinco.brewery.api.util.Pair;
@@ -101,8 +102,8 @@ public class DrunksManagerImpl<C> implements DrunksManager {
         boolean alreadyDrunk = drunks.containsKey(playerUuid);
         DrunkState initialState = (alreadyDrunk ? drunks.get(playerUuid).recalculate(timestamp) : new DrunkStateImpl(
                 timestamp, -1, DrunkenModifierSection.modifiers()
-                               .drunkenModifiers().stream()
-                               .collect(Collectors.toUnmodifiableMap(temp -> temp, DrunkenModifier::minValue))
+                .drunkenModifiers().stream()
+                .collect(Collectors.toUnmodifiableMap(temp -> temp, DrunkenModifier::minValue))
         ));
         DrunkState newState = initialState;
         // Behave exactly the same when a modifier is changing
@@ -167,11 +168,25 @@ public class DrunksManagerImpl<C> implements DrunksManager {
 
     @Override
     public @Nullable DrunkState getDrunkState(UUID playerUuid) {
-        boolean alreadyDrunk = drunks.containsKey(playerUuid);
-        return Optional.ofNullable(alreadyDrunk ? drunks.get(playerUuid).recalculate(timeSupplier.getAsLong()) : null)
-                .filter(drunkState -> !drunkState.additionalModifierData().isEmpty())
-                .orElse(null);
-
+        if (!drunks.containsKey(playerUuid)) {
+            return null;
+        }
+        DrunkState drunkState = drunks.get(playerUuid);
+        long previousTimestamp = drunkState.timestamp();
+        DrunkState recalculated = drunkState.recalculate(timeSupplier.getAsLong());
+        if (recalculated.additionalModifierData().isEmpty()) {
+            clear(playerUuid);
+            return null;
+        }
+        if (previousTimestamp + 20 * Moment.SECOND < recalculated.timestamp()) {
+            drunks.put(playerUuid, recalculated);
+            try {
+                persistenceHandler.updateValue(drunkStateDataType, new Pair<>(recalculated, playerUuid));
+            } catch (PersistenceException e) {
+                Logger.logErr(e);
+            }
+        }
+        return recalculated;
     }
 
     @Override

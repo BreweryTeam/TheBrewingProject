@@ -33,17 +33,21 @@ public record DrunkStateImpl(long timestamp,
         Map<String, Double> variables = compileVariables(modifiers, null, 0D);
         int diff = (int) (timestamp - this.timestamp);
         ImmutableMap.Builder<DrunkenModifier, Double> newDrunkenModifiers = new ImmutableMap.Builder<>();
+        boolean changed = false;
         for (Map.Entry<DrunkenModifier, Double> entry : modifiers.entrySet()) {
             double decrementTime = entry.getKey().decrementTime().evaluate(variables);
             double value;
             if (decrementTime == 0D) {
                 value = 0D;
-            } else if (decrementTime == -1D) {
-                value = entry.getValue();
             } else {
                 value = entry.getValue() - diff / decrementTime;
             }
+            value = entry.getKey().sanitize(value);
             newDrunkenModifiers.put(entry.getKey(), value);
+            changed |= value != entry.getValue();
+        }
+        if (!changed) {
+            return new DrunkStateImpl(this.timestamp, this.kickedTimestamp, modifiers);
         }
         return new DrunkStateImpl(timestamp, this.kickedTimestamp, newDrunkenModifiers.build());
     }
