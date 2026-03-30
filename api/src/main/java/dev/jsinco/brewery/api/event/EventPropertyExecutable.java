@@ -17,7 +17,8 @@ public interface EventPropertyExecutable {
      * @param index         Current index of the run events
      * @return Information whether further execution should occur
      */
-    @NonNull ExecutionResult execute(UUID contextPlayer, List<? extends EventStep> events, int index);
+    @NonNull
+    ExecutionResult execute(UUID contextPlayer, List<? extends EventStep> events, int index);
 
     /**
      * Priority of the step, just used to make the execution order deterministic
@@ -28,7 +29,8 @@ public interface EventPropertyExecutable {
 
     enum ExecutionResult {
         CONTINUE,
-        STOP_EXECUTION
+        STOP_EXECUTION,
+        WAIT_UNTIL_CONDITION
     }
 
 }

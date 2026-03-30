@@ -1,5 +1,6 @@
 package dev.jsinco.brewery.api.event;
 
+import dev.jsinco.brewery.api.util.BreweryKey;
 import dev.jsinco.brewery.api.util.Holder;
 import org.jspecify.annotations.NonNull;
 
@@ -10,12 +11,14 @@ public interface IntegrationEvent extends EventStepProperty, DrunkEvent {
 
     /**
      * Simple way to run the event
+     *
      * @param player The player target for event
      */
     void run(Holder.Player player);
 
     /**
      * Complex way to run the event
+     *
      * @return An event executable
      */
     default @NonNull EventPropertyExecutable toExecutable() {
