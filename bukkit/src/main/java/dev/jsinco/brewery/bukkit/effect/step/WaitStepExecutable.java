@@ -26,7 +26,7 @@ public class WaitStepExecutable implements EventPropertyExecutable {
         final List<? extends EventStep> eventsLeft = events.subList(index + 1, events.size());
         Bukkit.getGlobalRegionScheduler().runDelayed(TheBrewingProject.getInstance(), ignored ->
                 TheBrewingProject.getInstance().getDrunkEventExecutor().doDrunkEvents(contextPlayer, eventsLeft, null, false), durationTicks);
-        return ExecutionResult.STOP_EXECUTION;
+        return ExecutionResult.WAIT_UNTIL_CONDITION;
     }
 
     @Override

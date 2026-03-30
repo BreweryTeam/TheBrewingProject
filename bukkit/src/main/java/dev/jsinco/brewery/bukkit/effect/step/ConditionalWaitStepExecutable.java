@@ -34,7 +34,7 @@ public class ConditionalWaitStepExecutable implements EventPropertyExecutable {
                         events.subList(index + 1, events.size()).stream()
                 );
         TheBrewingProject.getInstance().getDrunkEventExecutor().addConditionalWaitExecution(contextPlayer, eventStepStream.toList(), condition);
-        return ExecutionResult.STOP_EXECUTION;
+        return ExecutionResult.WAIT_UNTIL_CONDITION;
     }
 
     @Override
