@@ -1,16 +1,56 @@
 package dev.jsinco.brewery.bukkit.effect.event;
 
-import dev.jsinco.brewery.api.event.*;
-import dev.jsinco.brewery.api.event.step.*;
+import dev.jsinco.brewery.api.event.CustomEvent;
+import dev.jsinco.brewery.api.event.CustomEventRegistry;
+import dev.jsinco.brewery.api.event.DrunkEvent;
+import dev.jsinco.brewery.api.event.EventPropertyExecutable;
+import dev.jsinco.brewery.api.event.EventStep;
+import dev.jsinco.brewery.api.event.EventStepProperty;
+import dev.jsinco.brewery.api.event.EventStepRegistry;
+import dev.jsinco.brewery.api.event.NamedDrunkEvent;
+import dev.jsinco.brewery.api.event.step.ApplyPotionEffect;
+import dev.jsinco.brewery.api.event.step.Condition;
+import dev.jsinco.brewery.api.event.step.ConditionalStep;
+import dev.jsinco.brewery.api.event.step.ConditionalWaitStep;
+import dev.jsinco.brewery.api.event.step.ConsumeStep;
+import dev.jsinco.brewery.api.event.step.CustomEventCompleted;
+import dev.jsinco.brewery.api.event.step.CustomEventStep;
+import dev.jsinco.brewery.api.event.step.SendCommand;
+import dev.jsinco.brewery.api.event.step.Teleport;
+import dev.jsinco.brewery.api.event.step.WaitStep;
+import dev.jsinco.brewery.api.util.BreweryKey;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.bukkit.api.event.DrunkEventInitiateEvent;
-import dev.jsinco.brewery.bukkit.effect.named.*;
-import dev.jsinco.brewery.bukkit.effect.step.*;
+import dev.jsinco.brewery.bukkit.effect.named.ChickenNamedExecutable;
+import dev.jsinco.brewery.bukkit.effect.named.DrunkMessageNamedExecutable;
+import dev.jsinco.brewery.bukkit.effect.named.DrunkenWalkNamedExecutable;
+import dev.jsinco.brewery.bukkit.effect.named.FeverNamedExecutable;
+import dev.jsinco.brewery.bukkit.effect.named.HallucinationNamedExecutable;
+import dev.jsinco.brewery.bukkit.effect.named.KaboomNamedExecutable;
+import dev.jsinco.brewery.bukkit.effect.named.NauseaNamedExecutable;
+import dev.jsinco.brewery.bukkit.effect.named.PassOutNamedExecutable;
+import dev.jsinco.brewery.bukkit.effect.named.PukeNamedExecutable;
+import dev.jsinco.brewery.bukkit.effect.named.StumbleNamedExecutable;
+import dev.jsinco.brewery.bukkit.effect.named.TeleportNamedExecutable;
+import dev.jsinco.brewery.bukkit.effect.step.ApplyPotionEffectExecutable;
+import dev.jsinco.brewery.bukkit.effect.step.ConditionalStepExecutable;
+import dev.jsinco.brewery.bukkit.effect.step.ConditionalWaitStepExecutable;
+import dev.jsinco.brewery.bukkit.effect.step.ConsumeStepExecutable;
+import dev.jsinco.brewery.bukkit.effect.step.CustomEventExecutable;
+import dev.jsinco.brewery.bukkit.effect.step.SendCommandExecutable;
+import dev.jsinco.brewery.bukkit.effect.step.TeleportExecutable;
+import dev.jsinco.brewery.bukkit.effect.step.WaitStepExecutable;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
+import org.jspecify.annotations.Nullable;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 public class DrunkEventExecutor {
 
@@ -18,6 +58,7 @@ public class DrunkEventExecutor {
     private final Map<UUID, List<List<EventStep>>> onDeathExecutions = new HashMap<>();
     private final Map<UUID, List<List<EventStep>>> onDamageExecutions = new HashMap<>();
     private final Map<UUID, Map<String, List<List<EventStep>>>> onJoinedWorldExecutions = new HashMap<>();
+    private final Map<UUID, Map<BreweryKey, Integer>> runningCustomEvents = new HashMap<>();
 
     public DrunkEventExecutor() {
         EventStepRegistry registry = TheBrewingProject.getInstance().getEventStepRegistry();
@@ -40,9 +81,12 @@ public class DrunkEventExecutor {
         registry.register(Teleport.class, stepProperty -> new TeleportExecutable(stepProperty.location()));
         registry.register(WaitStep.class, stepProperty -> new WaitStepExecutable(stepProperty.durationTicks()));
         CustomEventRegistry eventRegistry = TheBrewingProject.getInstance().getCustomDrunkEventRegistry();
-        registry.register(CustomEventStep.class, stepProperty -> new CustomEventExecutable(
-                eventRegistry.getCustomEvent(stepProperty.customEventKey()).getSteps()
-        ));
+        registry.register(CustomEventStep.class, stepProperty -> {
+                    List<EventStep> steps = new ArrayList<>(eventRegistry.getCustomEvent(stepProperty.customEventKey()).getSteps());
+                    steps.add(new EventStep.Builder().addProperty(new CustomEventCompleted(stepProperty.customEventKey())).build());
+                    return new CustomEventExecutable(steps, stepProperty.customEventKey());
+                }
+        );
     }
 
     public void doDrunkEvent(UUID playerUuid, DrunkEvent event) {
@@ -51,25 +95,43 @@ public class DrunkEventExecutor {
             return;
         }
         if (event instanceof CustomEvent.Keyed customEvent) {
-            doDrunkEvents(playerUuid, customEvent.getSteps());
+            if (runningCustomEvents.getOrDefault(playerUuid, Map.of()).getOrDefault(customEvent.key(), 0) > 0) {
+                return;
+            }
+            List<EventStep> eventSteps = new ArrayList<>(customEvent.getSteps());
+            eventSteps.add(new EventStep.Builder().addProperty(new CustomEventCompleted(customEvent.key())).build());
+            doDrunkEvents(playerUuid, eventSteps, customEvent.key(), true);
         } else if (event instanceof EventStepProperty eventStepProperty) {
             doDrunkEvents(playerUuid, List.of(
                     new EventStep.Builder().addProperty(eventStepProperty).build()
-            ));
+            ), null, false);
         }
     }
 
-    public void doDrunkEvents(UUID playerUuid, List<? extends EventStep> events) {
+    public void doDrunkEvents(UUID playerUuid, List<? extends EventStep> events, @Nullable BreweryKey eventId, boolean incrementEventCounter) {
         EventStepRegistry registry = TheBrewingProject.getInstance().getEventStepRegistry();
-
+        if (incrementEventCounter && eventId != null) {
+            runningCustomEvents
+                    .computeIfAbsent(playerUuid, ignored -> new HashMap<>())
+                    .compute(eventId, (ignored, integer) -> integer == null ? 1 : integer + 1);
+        }
         for (int i = 0; i < events.size(); i++) {
             final EventStep event = events.get(i);
+            event.properties().stream()
+                    .filter(CustomEventCompleted.class::isInstance)
+                    .map(CustomEventCompleted.class::cast)
+                    .forEach(customEventCompleted -> runningCustomEvents
+                            .computeIfAbsent(playerUuid, ignored -> new HashMap<>())
+                            .compute(customEventCompleted.eventKey(), (ignored, integer) -> integer == null || integer == 0 ? 0 : integer - 1)
+                    );
             List<EventPropertyExecutable> properties = event.properties().stream()
+                    .filter(eventStepProperty -> !(eventStepProperty instanceof CustomEventCompleted))
                     .map(registry::toExecutable)
                     .sorted(Comparator.comparing(EventPropertyExecutable::priority, Integer::compareTo))
                     .toList();
             for (EventPropertyExecutable eventPropertyExecutable : properties) {
-                if (eventPropertyExecutable.execute(playerUuid, events, i) == EventPropertyExecutable.ExecutionResult.STOP_EXECUTION) {
+                EventPropertyExecutable.ExecutionResult result = eventPropertyExecutable.execute(playerUuid, events, i);
+                if (result != EventPropertyExecutable.ExecutionResult.CONTINUE) {
                     return;
                 }
             }
@@ -82,14 +144,14 @@ public class DrunkEventExecutor {
                     onDeathExecutions.computeIfAbsent(playerUuid, ignored -> new ArrayList<>()).add(events);
             case Condition.JoinedServer joinedServer -> {
                 if (Bukkit.getPlayer(playerUuid) != null) {
-                    doDrunkEvents(playerUuid, events);
+                    doDrunkEvents(playerUuid, events, null, false);
                     return;
                 }
                 onJoinServerExecutions.computeIfAbsent(playerUuid, ignored -> new ArrayList<>()).add(events);
             }
             case Condition.JoinedWorld joinedWorld -> {
                 if (Bukkit.getPlayer(playerUuid) instanceof Player player && player.getWorld().getName().equals(joinedWorld.worldName())) {
-                    doDrunkEvents(playerUuid, events);
+                    doDrunkEvents(playerUuid, events, null, false);
                     return;
                 }
                 onJoinedWorldExecutions.computeIfAbsent(playerUuid, ignored -> new HashMap<>())
@@ -132,6 +194,6 @@ public class DrunkEventExecutor {
         if (eventStepListQueue == null) {
             return;
         }
-        eventStepListQueue.forEach(eventSteps -> doDrunkEvents(playerUuid, eventSteps));
+        eventStepListQueue.forEach(eventSteps -> doDrunkEvents(playerUuid, eventSteps, null, false));
     }
 }
