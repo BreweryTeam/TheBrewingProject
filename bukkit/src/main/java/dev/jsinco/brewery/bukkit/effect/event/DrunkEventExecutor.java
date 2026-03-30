@@ -135,9 +135,11 @@ public class DrunkEventExecutor {
                     .toList();
             for (EventPropertyExecutable eventPropertyExecutable : properties) {
                 EventPropertyExecutable.ExecutionResult result = eventPropertyExecutable.execute(playerUuid, events, i);
-                if (result != EventPropertyExecutable.ExecutionResult.CONTINUE) {
-                    stopping = result == EventPropertyExecutable.ExecutionResult.STOP_EXECUTION;
+                if (result == EventPropertyExecutable.ExecutionResult.STOP_EXECUTION) {
+                    stopping = true;
                     break;
+                } else if (result == EventPropertyExecutable.ExecutionResult.WAIT_UNTIL_CONDITION) {
+                    return;
                 }
             }
         }
