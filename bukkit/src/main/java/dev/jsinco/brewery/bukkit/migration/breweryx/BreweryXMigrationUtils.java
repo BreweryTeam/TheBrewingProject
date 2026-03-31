@@ -98,7 +98,7 @@ public class BreweryXMigrationUtils {
             noSeedIssueOccurred = false;
         } catch (IOException e) {
             Logger.logErr("Failed to convert a BreweryX Brew:");
-            Logger.logErr(e);
+            Logger.logAndTrackErr(e);
         }
         return null;
     }
