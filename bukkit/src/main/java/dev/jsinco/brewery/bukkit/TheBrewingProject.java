@@ -380,7 +380,7 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
         loadTimeFormats();
         BukkitMetrics.factory()
                 .token("2ee682246967303e517be0d593fe7a01")
-                .errorTracker(ErrorTracker.contextAware())
+                .errorTracker(Logger.getTracker())
                 .create(this);
     }
 
@@ -394,13 +394,13 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
             breweryRegistry.<BukkitBarrel>getOpened(StructureType.BARREL).forEach(barrel -> barrel.close(true));
             breweryRegistry.<BukkitDistillery>getOpened(StructureType.DISTILLERY).forEach(distillery -> distillery.close(true));
         } catch (Throwable e) {
-            Logger.logErr(e);
+            Logger.logAndTrackErr(e);
         }
         try {
             database.setSingleton(BreweryTimeDataType.INSTANCE, time).join();
             database.flush().join();
         } catch (PersistenceException e) {
-            Logger.logErr(e);
+            Logger.logAndTrackErr(e);
         }
     }
 
@@ -442,7 +442,7 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
                 database.setSingleton(BreweryTimeDataType.INSTANCE, time);
             }
         } catch (PersistenceException e) {
-            Logger.logErr(e);
+            Logger.logAndTrackErr(e);
         }
     }
 

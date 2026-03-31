@@ -1,11 +1,13 @@
 package dev.jsinco.brewery.api.util;
 
+import dev.faststats.core.ErrorTracker;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.logging.Level;
 
 @ApiStatus.Internal
 public final class Logger {
+    private static final ErrorTracker ERROR_TRACKER = ErrorTracker.contextAware();
 
     public static void log(String message) {
         StackTraceElement caller = Thread.currentThread().getStackTrace()[2];
@@ -26,6 +28,20 @@ public final class Logger {
         String className = caller.getClassName().substring(caller.getClassName().lastIndexOf('.') + 1);
         String prefix = "[TBP Error - " + className + ":" + caller.getLineNumber() + "] ";
         logger().log(Level.SEVERE, prefix + throwable.getMessage(), throwable);
+    }
+
+    public static void logAndTrackErr(String message) {
+        logErr(message);
+        ERROR_TRACKER.trackError(message);
+    }
+
+    public static void logAndTrackErr(Throwable throwable) {
+        logErr(throwable);
+        ERROR_TRACKER.trackError(throwable);
+    }
+
+    public static ErrorTracker getTracker() {
+        return ERROR_TRACKER;
     }
 
     public static void logDev(String message) {

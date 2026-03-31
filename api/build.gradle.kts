@@ -1,3 +1,4 @@
+
 plugins {
     `tbp-module`
     id("java-test-fixtures")
@@ -5,6 +6,7 @@ plugins {
 
 repositories {
     mavenCentral()
+    maven("https://repo.faststats.dev/releases")
 }
 
 dependencies {
@@ -14,7 +16,7 @@ dependencies {
     compileOnly(libs.adventure.api)
     compileOnly(libs.adventure.text.minimessage)
     compileOnly(libs.exp4j)
-
+    compileOnly(libs.faststats.core)
     // test
     testImplementation(libs.junit.jupiter)
     testRuntimeOnly(libs.junit.platform.launcher)

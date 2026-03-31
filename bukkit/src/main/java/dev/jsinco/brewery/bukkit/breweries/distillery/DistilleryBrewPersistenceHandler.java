@@ -51,7 +51,7 @@ public class DistilleryBrewPersistenceHandler implements BrewPersistenceHandler 
             }
             TheBrewingProject.getInstance().getDatabase().updateValue(BukkitDistilleryBrewDataType.INSTANCE, data);
         } catch (PersistenceException e) {
-            Logger.logErr(e);
+            Logger.logAndTrackErr(e);
         }
 
     }

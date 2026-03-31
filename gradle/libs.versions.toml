@@ -11,6 +11,7 @@ protocolLib = "5.3.0"
 schem-reader = "1.0.0"
 simple-yaml = "1.8.4"
 exp4j = "0.4.8"
+faststats = "0.20.0"
 
 # integrations
 bolt = "1.1.66"
@@ -51,12 +52,14 @@ gson = { group = "com.google.code.gson", name = "gson", version.ref = "gson" }
 guava = { group = "com.google.guava", name = "guava", version.ref = "guava" }
 hikaricp = { group = "com.zaxxer", name = "HikariCP", version.ref = "hikaricp" }
 okaeri-yaml = { group = "eu.okaeri", name = "okaeri-configs-yaml-snakeyaml", version.ref = "okaeri" }
-okaeri-json = { group = "eu.okaeri", name = "okaeri-configs-json-gson", version.ref = "okaeri"}
+okaeri-json = { group = "eu.okaeri", name = "okaeri-configs-json-gson", version.ref = "okaeri" }
 joml = { group = "org.joml", name = "joml", version.ref = "joml" }
 protocolLib = { group = "com.comphenix.protocol", name = "ProtocolLib", version.ref = "protocolLib" }
 schem-reader = { group = "dev.thorinwasher.schem", name = "schem-reader", version.ref = "schem-reader" }
 simple-yaml = { group = "com.github.Carleslc.Simple-YAML", name = "Simple-Yaml", version.ref = "simple-yaml" }
 exp4j = { group = "net.objecthunter", name = "exp4j", version.ref = "exp4j" }
+faststats-bukkit = { group = "dev.faststats.metrics", name = "bukkit", version.ref = "faststats" }
+faststats-core = { group = "dev.faststats.metrics", name = "core", version.ref = "faststats" }
 
 # integrations
 
@@ -79,8 +82,8 @@ worldguard-bukkit = { group = "com.sk89q.worldguard", name = "worldguard-bukkit"
 quickshop-hikari = { group = "com.ghostchu", name = "quickshop-api", version.ref = "quickshop" }
 mythic = { group = "io.lumine", name = "Mythic-Dist", version.ref = "mythic" }
 mythic-crucible = { group = "io.lumine", name = "MythicCrucible-Dist", version.ref = "mythic-crucible" }
-griefdefender = {group = "com.griefdefender", name = "api", version.ref = "griefdefender"}
-gsit = { group = "com.github.gecolay.GSit",  name = "core", version.ref = "gsit"}
+griefdefender = { group = "com.griefdefender", name = "api", version.ref = "griefdefender" }
+gsit = { group = "com.github.gecolay.GSit", name = "core", version.ref = "gsit" }
 # other
 jetbrains-annotations = { group = "org.jetbrains", name = "annotations", version.ref = "jetbrainsAnnotations" }
 
@@ -99,6 +102,6 @@ shadow = { id = "com.gradleup.shadow", version = "8.3.7" }
 run-paper = { id = "xyz.jpenilla.run-paper", version = "2.3.1" }
 plugin-yml-bukkit = { id = "de.eldoria.plugin-yml.bukkit", version = "0.7.1" }
 hangar-publish = { id = "io.papermc.hangar-publish-plugin", version = "0.1.3" }
-modrinth-publish = { id = "com.modrinth.minotaur", version = "2.8.7"}
+modrinth-publish = { id = "com.modrinth.minotaur", version = "2.8.7" }
 
 neoforged-gradle-common = { id = "net.neoforged.gradle.common", version = "7.1.21" }

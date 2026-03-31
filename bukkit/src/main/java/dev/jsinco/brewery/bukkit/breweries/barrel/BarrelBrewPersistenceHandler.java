@@ -42,7 +42,7 @@ public class BarrelBrewPersistenceHandler implements BrewPersistenceHandler {
             }
             TheBrewingProject.getInstance().getDatabase().updateValue(BukkitBarrelBrewDataType.INSTANCE, data);
         } catch (PersistenceException e) {
-            Logger.logErr(e);
+            Logger.logAndTrackErr(e);
         }
     }
 }

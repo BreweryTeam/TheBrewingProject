@@ -70,7 +70,7 @@ public class WorldEventListener implements Listener {
                     }, globalThread);
 
         } catch (PersistenceException e) {
-            Logger.logErr(e);
+            Logger.logAndTrackErr(e);
         }
     }
 }

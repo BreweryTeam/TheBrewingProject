@@ -302,7 +302,7 @@ public class PlayerEventListener implements Listener {
                     database.updateValue(BukkitCauldronDataType.INSTANCE, cauldron);
                 }
             } catch (PersistenceException e) {
-                Logger.logErr(e);
+                Logger.logAndTrackErr(e);
             }
         }
         return addedIngredient;
