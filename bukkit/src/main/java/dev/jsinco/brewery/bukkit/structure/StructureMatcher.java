@@ -3,6 +3,7 @@ package dev.jsinco.brewery.bukkit.structure;
 import com.google.common.base.Preconditions;
 import dev.jsinco.brewery.api.util.BreweryKey;
 import dev.jsinco.brewery.api.util.Holder;
+import dev.jsinco.brewery.api.util.Logger;
 import dev.jsinco.brewery.bukkit.api.BukkitAdapter;
 import dev.jsinco.brewery.configuration.structure.GenericBlockReplacement;
 import dev.jsinco.brewery.configuration.structure.KeyedBlockReplacement;
@@ -88,6 +89,19 @@ public class StructureMatcher {
     }
 
     public static List<StructureMatcher> getMatchers(StructureMatcherDefinition structureMatcherDefinition) {
+        List<String> invalid = structureMatcherDefinition.findInvalidKeys();
+        if (structureMatcherDefinition.name == null) {
+            Logger.logErr("Missing structure matcher name");
+            return List.of();
+        }
+        if (!invalid.isEmpty()) {
+            Logger.logErr(String.format(
+                    "Invalid structure matcher %s. The following keys do not have a material-replacement: %n%s",
+                    structureMatcherDefinition.name,
+                    String.join("\n", invalid)
+            ));
+            return List.of();
+        }
         Map<String, Holder.Material> materialDefinitions = structureMatcherDefinition.replacementMaterial;
         Map<String, List<String>> blockDataFilter = structureMatcherDefinition.blockDataFilter;
         Map<BlockType, List<String>> convertedBlockDataFilter = new HashMap<>();
