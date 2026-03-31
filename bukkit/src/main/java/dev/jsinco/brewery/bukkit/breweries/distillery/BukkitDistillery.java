@@ -364,7 +364,7 @@ public class BukkitDistillery implements Distillery<BukkitDistillery, ItemStack,
         try {
             TheBrewingProject.getInstance().getDatabase().updateValue(BukkitDistilleryDataType.INSTANCE, this);
         } catch (PersistenceException e) {
-            Logger.logErr(e);
+            Logger.logAndTrackErr(e);
         }
     }
 

@@ -14,6 +14,7 @@ import dev.jsinco.brewery.api.util.CancelState;
 import dev.jsinco.brewery.api.util.Logger;
 import dev.jsinco.brewery.api.util.Pair;
 import dev.jsinco.brewery.api.vector.BreweryLocation;
+import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.bukkit.api.BukkitAdapter;
 import dev.jsinco.brewery.bukkit.api.event.structure.BarrelDestroyEvent;
 import dev.jsinco.brewery.bukkit.api.event.structure.CauldronDestroyEvent;
@@ -119,7 +120,7 @@ public class BlockEventListener implements Listener {
         try {
             database.insertValue(BukkitBarrelDataType.INSTANCE, barrel);
         } catch (PersistenceException e) {
-            Logger.logErr(e);
+            Logger.logAndTrackErr(e);
         }
     }
 
@@ -158,7 +159,7 @@ public class BlockEventListener implements Listener {
             database.insertValue(BukkitDistilleryDataType.INSTANCE, bukkitDistillery);
             breweryRegistry.registerInventory(bukkitDistillery);
         } catch (PersistenceException e) {
-            Logger.logErr(e);
+            Logger.logAndTrackErr(e);
         }
     }
 
@@ -408,7 +409,7 @@ public class BlockEventListener implements Listener {
                 default -> throw new IllegalArgumentException("Unknown structure type");
             }
         } catch (PersistenceException e) {
-            Logger.logErr(e);
+            Logger.logAndTrackErr(e);
         }
     }
 }

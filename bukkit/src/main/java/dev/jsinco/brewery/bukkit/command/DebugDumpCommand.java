@@ -237,7 +237,7 @@ public class DebugDumpCommand {
                 addSpecToZip(zos, spec, dataFolder);
             }
         } catch (IOException e) {
-            Logger.logErr("Failed to create debug dump: " + e.getMessage());
+            Logger.logAndTrackErr("Failed to create debug dump: " + e.getMessage());
             return null;
         }
         return zipFile;
@@ -273,7 +273,7 @@ public class DebugDumpCommand {
         try {
             addYaml(zos, "config.yml", config);
         } catch (IOException e) {
-            Logger.logErr("Failed to add redacted config to dump: " + e.getMessage());
+            Logger.logAndTrackErr("Failed to add redacted config to dump: " + e.getMessage());
         }
     }
 
@@ -284,7 +284,7 @@ public class DebugDumpCommand {
             fis.transferTo(zos);
             zos.closeEntry();
         } catch (IOException e) {
-            Logger.logErr("Failed to add file to dump: " + entryName + " -> " + e.getMessage());
+            Logger.logAndTrackErr("Failed to add file to dump: " + entryName + " -> " + e.getMessage());
         }
     }
 

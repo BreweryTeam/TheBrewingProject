@@ -17,7 +17,7 @@ public class ListenerUtil {
             try {
                 TheBrewingProject.getInstance().getDatabase().remove(BukkitCauldronDataType.INSTANCE, cauldron);
             } catch (PersistenceException e) {
-                Logger.logErr(e);
+                Logger.logAndTrackErr(e);
             }
         }
     }

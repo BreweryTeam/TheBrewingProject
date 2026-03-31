@@ -51,7 +51,7 @@ dependencies {
     implementation(libs.schem.reader)
     implementation(libs.simple.yaml)
     implementation(libs.okaeri.json)
-    implementation("dev.faststats.metrics:bukkit:0.18.1") {
+    implementation(libs.faststats.bukkit) {
         exclude("com.google.code.gson", "gson")
     }
 
