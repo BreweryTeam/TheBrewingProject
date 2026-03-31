@@ -90,20 +90,20 @@ public class StructureMatcher {
 
     public static List<StructureMatcher> getMatchers(StructureMatcherDefinition structureMatcherDefinition) {
         List<String> invalid = structureMatcherDefinition.findInvalidKeys();
-        if (structureMatcherDefinition.name == null) {
+        if (structureMatcherDefinition.name() == null) {
             Logger.logErr("Missing structure matcher name");
             return List.of();
         }
         if (!invalid.isEmpty()) {
             Logger.logErr(String.format(
                     "Invalid structure matcher %s. The following keys do not have a material-replacement: %n%s",
-                    structureMatcherDefinition.name,
+                    structureMatcherDefinition.name(),
                     String.join("\n", invalid)
             ));
             return List.of();
         }
-        Map<String, Holder.Material> materialDefinitions = structureMatcherDefinition.replacementMaterial;
-        Map<String, List<String>> blockDataFilter = structureMatcherDefinition.blockDataFilter;
+        Map<String, Holder.Material> materialDefinitions = structureMatcherDefinition.replacementMaterial();
+        Map<String, List<String>> blockDataFilter = structureMatcherDefinition.blockDataFilter();
         Map<BlockType, List<String>> convertedBlockDataFilter = new HashMap<>();
         for (Map.Entry<String, List<String>> entry : blockDataFilter.entrySet()) {
             Material converted = BukkitAdapter.toMaterial(materialDefinitions.get(entry.getKey()));
@@ -112,19 +112,19 @@ public class StructureMatcher {
             Preconditions.checkArgument(convertedType != null, "Material not a block: " + converted);
             convertedBlockDataFilter.put(convertedType, entry.getValue());
         }
-        if (structureMatcherDefinition.blockTransformation instanceof KeyedBlockReplacement keyed) {
+        if (structureMatcherDefinition.blockTransformation() instanceof KeyedBlockReplacement keyed) {
             return keyed.listAlternatives()
                     .stream()
                     .map(key -> compile(
-                            structureMatcherDefinition.name,
+                            structureMatcherDefinition.name(),
                             key,
                             materialDefinitions,
                             convertedBlockDataFilter,
                             (string, defaultValue) -> keyed.convert(key, string, defaultValue)
                     ))
                     .toList();
-        } else if (structureMatcherDefinition.blockTransformation instanceof GenericBlockReplacement generic) {
-            return List.of(compile(structureMatcherDefinition.name, null, materialDefinitions, convertedBlockDataFilter, generic::convert));
+        } else if (structureMatcherDefinition.blockTransformation() instanceof GenericBlockReplacement generic) {
+            return List.of(compile(structureMatcherDefinition.name(), null, materialDefinitions, convertedBlockDataFilter, generic::convert));
         } else {
             throw new IllegalStateException("Unknown block replacement type");
         }

@@ -11,13 +11,13 @@ import java.util.Map;
 public class BarrelTypeDefinition extends OkaeriConfig {
 
     @CustomKey("name")
-    public final String name = null;
+    private String name = null;
 
     @CustomKey("proximity-multipliers")
-    public final Map<String, Double> proximityMultipliers = Map.of();
+    private Map<String, Double> proximityMultipliers = Map.of();
 
     @CustomKey("default-proximity-multipliers")
-    public final double defaultProximity = 0.7D;
+    private double defaultProximity = 0.7D;
 
     public BarrelType toBarrelType() {
         BarrelType.Builder builder = BarrelTypeProvider.builderStatic(name);
