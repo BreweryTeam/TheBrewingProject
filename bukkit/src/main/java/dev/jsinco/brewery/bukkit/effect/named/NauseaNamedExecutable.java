@@ -37,5 +37,10 @@ public class NauseaNamedExecutable implements EventPropertyExecutable {
         return NamedDrunkEvent.fromKey("nausea");
     }
 
+    @Override
+    public ExecutionContext context() {
+        return ExecutionContext.PLAYER;
+    }
+
 
 }
