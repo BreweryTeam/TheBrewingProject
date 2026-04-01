@@ -40,4 +40,9 @@ public class ConsumeStepExecutable implements EventPropertyExecutable {
         return new ConsumeStep(consumeModifiers);
     }
 
+    @Override
+    public ExecutionContext context() {
+        return ExecutionContext.PLAYER;
+    }
+
 }

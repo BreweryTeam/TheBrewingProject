@@ -55,5 +55,8 @@ public class ApplyPotionEffectExecutable implements EventPropertyExecutable {
         return new ApplyPotionEffect(potionEffectName, amplifierBounds, durationBounds);
     }
 
-
+    @Override
+    public ExecutionContext context() {
+        return ExecutionContext.PLAYER;
+    }
 }
