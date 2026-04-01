@@ -9,24 +9,25 @@ import org.bukkit.inventory.ItemStack;
 import org.jspecify.annotations.Nullable;
 
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 
 public final class BreweryRegistry {
 
-    private final Map<BreweryLocation, SinglePositionStructure> activeSingleBlockStructures = new HashMap<>();
+    private final Map<BreweryLocation, SinglePositionStructure> activeSingleBlockStructures = new ConcurrentHashMap<>();
     private final Map<StructureType, Set<InventoryAccessible<ItemStack, Inventory>>> opened = new HashMap<>();
-    private final Map<Inventory, InventoryAccessible<ItemStack, Inventory>> inventories = new HashMap<>();
+    private final Map<Inventory, InventoryAccessible<ItemStack, Inventory>> inventories = new ConcurrentHashMap<>();
 
     public Optional<SinglePositionStructure> getActiveSinglePositionStructure(BreweryLocation position) {
         return Optional.ofNullable(activeSingleBlockStructures.get(position));
     }
 
-    public synchronized void addActiveSinglePositionStructure(SinglePositionStructure cauldron) {
+    public void addActiveSinglePositionStructure(SinglePositionStructure cauldron) {
         activeSingleBlockStructures.put(cauldron.position(), cauldron);
     }
 
@@ -38,14 +39,18 @@ public final class BreweryRegistry {
         return activeSingleBlockStructures.values();
     }
 
-    public synchronized <H extends InventoryAccessible<ItemStack, Inventory>> void registerOpened(H holder) {
+    public <H extends InventoryAccessible<ItemStack, Inventory>> void registerOpened(H holder) {
         StructureType structureType = getStructureType(holder);
-        opened.computeIfAbsent(structureType, ignored -> new HashSet<>()).add(holder);
+        synchronized (opened) {
+            opened.computeIfAbsent(structureType, ignored -> new HashSet<>()).add(holder);
+        }
     }
 
-    public synchronized <H extends InventoryAccessible<ItemStack, Inventory>> void unregisterOpened(H holder) {
+    public <H extends InventoryAccessible<ItemStack, Inventory>> void unregisterOpened(H holder) {
         StructureType structureType = getStructureType(holder);
-        opened.computeIfAbsent(structureType, ignored -> new HashSet<>()).remove(holder);
+        synchronized (opened) {
+            opened.computeIfAbsent(structureType, ignored -> new HashSet<>()).remove(holder);
+        }
     }
 
     private <H> StructureType getStructureType(H holder) {
@@ -69,18 +74,28 @@ public final class BreweryRegistry {
         inventoryAccessible.getInventories().forEach(inventories::remove);
     }
 
-    public synchronized void clear() {
+    public void clear() {
         activeSingleBlockStructures.forEach((ignored, structure) -> structure.destroy());
         activeSingleBlockStructures.clear();
-        opened.clear();
+        synchronized (opened) {
+            opened.clear();
+        }
         inventories.clear();
     }
 
-    public synchronized void iterate(StructureType type, Consumer<InventoryAccessible<ItemStack, Inventory>> inventoryAccessibleAction) {
-        Set<InventoryAccessible<ItemStack, Inventory>> inventoryAccessible = opened.get(type);
-        if (inventoryAccessible == null) {
-            return;
+    public void iterate(StructureType type, Consumer<InventoryAccessible<ItemStack, Inventory>> inventoryAccessibleAction) {
+        synchronized (opened) {
+            Set<InventoryAccessible<ItemStack, Inventory>> inventoryAccessible = opened.get(type);
+            if (inventoryAccessible == null) {
+                return;
+            }
+            inventoryAccessible.forEach(inventoryAccessibleAction);
         }
-        inventoryAccessible.forEach(inventoryAccessibleAction);
+    }
+
+    public int countOpened(StructureType type) {
+        synchronized (opened) {
+            return opened.get(type).size();
+        }
     }
 }

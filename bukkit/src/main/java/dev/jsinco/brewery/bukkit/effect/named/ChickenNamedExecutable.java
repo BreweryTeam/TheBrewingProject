@@ -2,7 +2,6 @@ package dev.jsinco.brewery.bukkit.effect.named;
 
 import dev.jsinco.brewery.api.event.EventPropertyExecutable;
 import dev.jsinco.brewery.api.event.EventStep;
-import dev.jsinco.brewery.bukkit.effect.PlayerExecutionContext;
 import dev.jsinco.brewery.bukkit.util.BukkitMessageUtil;
 import dev.jsinco.brewery.util.MessageUtil;
 import org.bukkit.Bukkit;
@@ -42,8 +41,4 @@ public class ChickenNamedExecutable implements EventPropertyExecutable {
         return -1;
     }
 
-    @Override
-    public ExecutionContext context() {
-        return new PlayerExecutionContext();
-    }
 }
