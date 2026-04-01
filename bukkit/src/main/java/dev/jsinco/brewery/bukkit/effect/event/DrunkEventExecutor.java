@@ -51,13 +51,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class DrunkEventExecutor {
 
-    private final Map<UUID, List<List<EventStep>>> onJoinServerExecutions = new HashMap<>();
-    private final Map<UUID, List<List<EventStep>>> onDeathExecutions = new HashMap<>();
-    private final Map<UUID, List<List<EventStep>>> onDamageExecutions = new HashMap<>();
-    private final Map<UUID, Map<String, List<List<EventStep>>>> onJoinedWorldExecutions = new HashMap<>();
+    private final Map<UUID, List<List<EventStep>>> onJoinServerExecutions = new ConcurrentHashMap<>();
+    private final Map<UUID, List<List<EventStep>>> onDeathExecutions = new ConcurrentHashMap<>();
+    private final Map<UUID, List<List<EventStep>>> onDamageExecutions = new ConcurrentHashMap<>();
+    private final Map<UUID, Map<String, List<List<EventStep>>>> onJoinedWorldExecutions = new ConcurrentHashMap<>();
     private final Map<UUID, Map<BreweryKey, Integer>> runningCustomEvents = new HashMap<>();
 
     public DrunkEventExecutor() {
@@ -95,8 +96,10 @@ public class DrunkEventExecutor {
             return;
         }
         if (event instanceof CustomEvent.Keyed customEvent) {
-            if (runningCustomEvents.getOrDefault(playerUuid, Map.of()).getOrDefault(customEvent.key(), 0) > 0) {
-                return;
+            synchronized (runningCustomEvents) {
+                if (runningCustomEvents.getOrDefault(playerUuid, Map.of()).getOrDefault(customEvent.key(), 0) > 0) {
+                    return;
+                }
             }
             List<EventStep> eventSteps = new ArrayList<>(customEvent.getSteps());
             eventSteps.add(new EventStep.Builder().addProperty(new CustomEventCompleted(customEvent.key())).build());
@@ -111,9 +114,11 @@ public class DrunkEventExecutor {
     public void doDrunkEvents(UUID playerUuid, List<? extends EventStep> events, @Nullable BreweryKey eventId, boolean incrementEventCounter) {
         EventStepRegistry registry = TheBrewingProject.getInstance().getEventStepRegistry();
         if (incrementEventCounter && eventId != null) {
-            runningCustomEvents
-                    .computeIfAbsent(playerUuid, ignored -> new HashMap<>())
-                    .compute(eventId, (ignored, integer) -> integer == null ? 1 : integer + 1);
+            synchronized (runningCustomEvents) {
+                runningCustomEvents
+                        .computeIfAbsent(playerUuid, ignored -> new HashMap<>())
+                        .compute(eventId, (ignored, integer) -> integer == null ? 1 : integer + 1);
+            }
         }
         boolean stopping = false;
         for (int i = 0; i < events.size(); i++) {
@@ -121,10 +126,13 @@ public class DrunkEventExecutor {
             event.properties().stream()
                     .filter(CustomEventCompleted.class::isInstance)
                     .map(CustomEventCompleted.class::cast)
-                    .forEach(customEventCompleted -> runningCustomEvents
-                            .computeIfAbsent(playerUuid, ignored -> new HashMap<>())
-                            .compute(customEventCompleted.eventKey(), (ignored, integer) -> integer == null || integer == 0 ? 0 : integer - 1)
-                    );
+                    .forEach(customEventCompleted -> {
+                        synchronized (runningCustomEvents) {
+                            runningCustomEvents
+                                    .computeIfAbsent(playerUuid, ignored -> new HashMap<>())
+                                    .compute(customEventCompleted.eventKey(), (ignored, integer) -> integer == null || integer == 0 ? 0 : integer - 1);
+                        }
+                    });
             if (stopping) {
                 continue;
             }
@@ -147,14 +155,16 @@ public class DrunkEventExecutor {
 
     public void addConditionalWaitExecution(UUID playerUuid, List<EventStep> events, Condition condition) {
         switch (condition) {
-            case Condition.Died died ->
-                    onDeathExecutions.computeIfAbsent(playerUuid, ignored -> new ArrayList<>()).add(events);
+            case Condition.Died died -> {
+                onDeathExecutions.computeIfAbsent(playerUuid, ignored -> new ArrayList<>()).add(events);
+            }
             case Condition.JoinedServer joinedServer -> {
                 if (Bukkit.getPlayer(playerUuid) != null) {
                     doDrunkEvents(playerUuid, events, null, false);
                     return;
                 }
                 onJoinServerExecutions.computeIfAbsent(playerUuid, ignored -> new ArrayList<>()).add(events);
+
             }
             case Condition.JoinedWorld joinedWorld -> {
                 if (Bukkit.getPlayer(playerUuid) instanceof Player player && player.getWorld().getName().equals(joinedWorld.worldName())) {
@@ -163,9 +173,11 @@ public class DrunkEventExecutor {
                 }
                 onJoinedWorldExecutions.computeIfAbsent(playerUuid, ignored -> new HashMap<>())
                         .computeIfAbsent(joinedWorld.worldName(), ignored -> new ArrayList<>()).add(events);
+
             }
-            case Condition.TookDamage tookDamage ->
-                    onDamageExecutions.computeIfAbsent(playerUuid, ignored -> new ArrayList<>()).add(events);
+            case Condition.TookDamage tookDamage -> {
+                onDamageExecutions.computeIfAbsent(playerUuid, ignored -> new ArrayList<>()).add(events);
+            }
             default -> throw new IllegalStateException("Can not schedule condition: " + condition);
         }
     }
