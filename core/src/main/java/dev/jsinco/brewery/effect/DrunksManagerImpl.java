@@ -32,6 +32,7 @@ import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.function.LongSupplier;
@@ -48,10 +49,10 @@ public class DrunksManagerImpl<C> implements DrunksManager {
     private final Function<EventData, Optional<DrunkEvent>> eventSupplier;
     private Set<EventData> allowedEvents;
     private List<NamedDrunkEvent> namedDrunkEvents = initializeDrunkEventsWithOverrides();
-    private Map<UUID, DrunkState> drunks = new HashMap<>();
+    private Map<UUID, DrunkState> drunks = new ConcurrentHashMap<>();
     private LongSupplier timeSupplier;
-    private Map<Long, Map<UUID, DrunkEvent>> events = new HashMap<>();
-    private Map<UUID, Long> plannedEvents = new HashMap<>();
+    private Map<Long, Map<UUID, DrunkEvent>> events = new ConcurrentHashMap<>();
+    private Map<UUID, Long> plannedEvents = new ConcurrentHashMap<>();
 
     private static final Random RANDOM = new Random();
 
