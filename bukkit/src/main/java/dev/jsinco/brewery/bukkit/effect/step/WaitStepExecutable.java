@@ -2,6 +2,8 @@ package dev.jsinco.brewery.bukkit.effect.step;
 
 import dev.jsinco.brewery.api.event.EventPropertyExecutable;
 import dev.jsinco.brewery.api.event.EventStep;
+import dev.jsinco.brewery.api.event.EventStepProperty;
+import dev.jsinco.brewery.api.event.step.WaitStep;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import org.bukkit.Bukkit;
 import org.jspecify.annotations.NonNull;
@@ -18,20 +20,29 @@ public class WaitStepExecutable implements EventPropertyExecutable {
     }
 
     @Override
-    public @NonNull ExecutionResult execute(UUID contextPlayer, List<? extends EventStep> events, int index) {
-        if (index + 1 >= events.size()) {
+    public @NonNull ExecutionResult execute(UUID contextPlayer, List<EventStepProperty> eventStepProperties) {
+        if (eventStepProperties.isEmpty()) {
             return ExecutionResult.STOP_EXECUTION;
         }
-
-        final List<? extends EventStep> eventsLeft = events.subList(index + 1, events.size());
         Bukkit.getGlobalRegionScheduler().runDelayed(TheBrewingProject.getInstance(), ignored ->
-                TheBrewingProject.getInstance().getDrunkEventExecutor().doDrunkEvents(contextPlayer, eventsLeft, null, false), durationTicks);
+                TheBrewingProject.getInstance().getDrunkEventExecutor().doDrunkEvents(contextPlayer, eventStepProperties
+                                .stream()
+                                .map(eventStepProperty -> new EventStep.Builder().addProperty(eventStepProperty).build())
+                                .toList(),
+                        null,
+                        false
+                ), durationTicks);
         return ExecutionResult.WAIT_UNTIL_CONDITION;
     }
 
     @Override
     public int priority() {
         return Integer.MAX_VALUE;
+    }
+
+    @Override
+    public EventStepProperty toProperty() {
+        return new WaitStep(durationTicks);
     }
 
 }
