@@ -67,11 +67,11 @@ public class CauldronSection extends OkaeriConfig implements Configuration.Cauld
 
     @Comment("How to display the time [action_bar, chat, title]")
     @CustomKey("clock-display")
-    public final ModifierDisplay.DisplayWindow clockDisplay = ModifierDisplay.DisplayWindow.ACTION_BAR;
+    private ModifierDisplay.DisplayWindow clockDisplay = ModifierDisplay.DisplayWindow.ACTION_BAR;
 
     @Comment("What items can be used to display time")
     @CustomKey("clock-items")
-    public final List<IngredientInput> clockItems = List.of(UncheckedIngredient.minecraft("clock"));
+    private List<IngredientInput> clockItems = List.of(UncheckedIngredient.minecraft("clock"));
 
     @Comment("What items should be transformed into another item when added as an ingredient")
     @CustomKey("ingredient-empty-transforms")
@@ -134,5 +134,17 @@ public class CauldronSection extends OkaeriConfig implements Configuration.Cauld
 
     public Map<IngredientInput, UncheckedIngredient> ingredientEmptyTransforms() {
         return this.ingredientEmptyTransforms;
+    }
+
+    public ModifierDisplay.DisplayWindow getClockDisplay() {
+        return clockDisplay;
+    }
+
+    public List<IngredientInput> getClockItems() {
+        return clockItems;
+    }
+
+    public void setClockItems(List<IngredientInput> clockItems) {
+        this.clockItems = clockItems;
     }
 }
