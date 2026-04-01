@@ -46,6 +46,7 @@ import org.bukkit.entity.Player;
 import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -156,14 +157,14 @@ public class DrunkEventExecutor {
     public void addConditionalWaitExecution(UUID playerUuid, List<EventStep> events, Condition condition) {
         switch (condition) {
             case Condition.Died died -> {
-                onDeathExecutions.computeIfAbsent(playerUuid, ignored -> new ArrayList<>()).add(events);
+                onDeathExecutions.computeIfAbsent(playerUuid, ignored -> Collections.synchronizedList(new ArrayList<>())).add(events);
             }
             case Condition.JoinedServer joinedServer -> {
                 if (Bukkit.getPlayer(playerUuid) != null) {
                     doDrunkEvents(playerUuid, events, null, false);
                     return;
                 }
-                onJoinServerExecutions.computeIfAbsent(playerUuid, ignored -> new ArrayList<>()).add(events);
+                onJoinServerExecutions.computeIfAbsent(playerUuid, ignored -> Collections.synchronizedList(new ArrayList<>())).add(events);
 
             }
             case Condition.JoinedWorld joinedWorld -> {
@@ -171,12 +172,12 @@ public class DrunkEventExecutor {
                     doDrunkEvents(playerUuid, events, null, false);
                     return;
                 }
-                onJoinedWorldExecutions.computeIfAbsent(playerUuid, ignored -> new HashMap<>())
-                        .computeIfAbsent(joinedWorld.worldName(), ignored -> new ArrayList<>()).add(events);
+                onJoinedWorldExecutions.computeIfAbsent(playerUuid, ignored -> new ConcurrentHashMap<>())
+                        .computeIfAbsent(joinedWorld.worldName(), ignored -> Collections.synchronizedList(new ArrayList<>())).add(events);
 
             }
             case Condition.TookDamage tookDamage -> {
-                onDamageExecutions.computeIfAbsent(playerUuid, ignored -> new ArrayList<>()).add(events);
+                onDamageExecutions.computeIfAbsent(playerUuid, ignored -> Collections.synchronizedList(new ArrayList<>())).add(events);
             }
             default -> throw new IllegalStateException("Can not schedule condition: " + condition);
         }
@@ -184,6 +185,9 @@ public class DrunkEventExecutor {
 
     public void clear(UUID playerUuid) {
         onJoinServerExecutions.remove(playerUuid);
+        onDeathExecutions.remove(playerUuid);
+        onDamageExecutions.remove(playerUuid);
+        onJoinedWorldExecutions.remove(playerUuid);
     }
 
     public void clear() {
@@ -198,7 +202,7 @@ public class DrunkEventExecutor {
     }
 
     public void onPlayerJoinWorld(UUID playerUuid, World world) {
-        executeQueue(playerUuid, onJoinedWorldExecutions.computeIfAbsent(playerUuid, ignored -> new HashMap<>()).remove(world.getName()));
+        executeQueue(playerUuid, onJoinedWorldExecutions.computeIfAbsent(playerUuid, ignored -> new ConcurrentHashMap<>()).remove(world.getName()));
     }
 
     public void onDamage(UUID playerUuid) {
