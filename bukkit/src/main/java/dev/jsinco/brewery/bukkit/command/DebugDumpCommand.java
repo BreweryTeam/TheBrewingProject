@@ -31,13 +31,24 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.potion.PotionEffect;
 
-import java.io.*;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.TreeMap;
 import java.util.concurrent.CompletableFuture;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -362,8 +373,8 @@ public class DebugDumpCommand {
         tbp.set("tbp.activeCauldrons", plugin.getBreweryRegistry().getActiveSinglePositionStructure().size());
         tbp.set("tbp.placedBarrels", plugin.getPlacedStructureRegistry().getStructures(StructureType.BARREL).size());
         tbp.set("tbp.placedDistilleries", plugin.getPlacedStructureRegistry().getStructures(StructureType.DISTILLERY).size());
-        tbp.set("tbp.openedBarrels", plugin.getBreweryRegistry().getOpened(StructureType.BARREL).size());
-        tbp.set("tbp.openedDistilleries", plugin.getBreweryRegistry().getOpened(StructureType.DISTILLERY).size());
+        tbp.set("tbp.openedBarrels", plugin.getBreweryRegistry().countOpened(StructureType.BARREL));
+        tbp.set("tbp.openedDistilleries", plugin.getBreweryRegistry().countOpened(StructureType.DISTILLERY));
         tbp.set("tbp.drunkPlayers", Bukkit.getOnlinePlayers().stream()
                 .filter(p -> plugin.getDrunksManager().getDrunkState(p.getUniqueId()) != null)
                 .count());
