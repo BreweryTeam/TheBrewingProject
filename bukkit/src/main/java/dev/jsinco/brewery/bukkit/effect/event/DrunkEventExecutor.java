@@ -145,7 +145,7 @@ public class DrunkEventExecutor {
             Function<Void, Void> applyAction = ignored -> {
                 EventPropertyExecutable.ExecutionResult result = executable.execute(playerUuid, steps.stream().map(EventPropertyExecutable::toProperty).toList());
                 if (result != EventPropertyExecutable.ExecutionResult.CONTINUE) {
-                    throw new EventCancelledException(finalIndex);
+                    throw new EventCancelledException(result == EventPropertyExecutable.ExecutionResult.STOP_EXECUTION ? steps.size() - 1 : finalIndex);
                 }
                 return null;
             };
