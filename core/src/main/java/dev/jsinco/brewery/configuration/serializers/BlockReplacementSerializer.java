@@ -5,6 +5,7 @@ import dev.jsinco.brewery.api.util.Materials;
 import dev.jsinco.brewery.configuration.structure.BlockReplacement;
 import dev.jsinco.brewery.configuration.structure.GenericBlockReplacement;
 import dev.jsinco.brewery.configuration.structure.KeyedBlockReplacement;
+import eu.okaeri.configs.exception.OkaeriConfigException;
 import eu.okaeri.configs.schema.GenericsDeclaration;
 import eu.okaeri.configs.serdes.DeserializationData;
 import eu.okaeri.configs.serdes.ObjectSerializer;
@@ -36,7 +37,7 @@ public class BlockReplacementSerializer implements ObjectSerializer<BlockReplace
                 readData.put(BreweryKey.parse(key), new GenericBlockReplacement(declaration));
             }
             return new KeyedBlockReplacement(readData);
-        } catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException | OkaeriConfigException e) {
             Map<String, Materials> readData = new HashMap<>();
             keys.forEach(key ->
                     readData.put(key, data.get(key, Materials.class))
