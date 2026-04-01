@@ -137,7 +137,7 @@ public class DrunkEventExecutor {
                 ).toList();
         LinkedList<EventPropertyExecutable> queue = new LinkedList<>(steps);
         CompletableFuture<Void> execution = CompletableFuture.completedFuture(null);
-        EventPropertyExecutable.ExecutionContext previousContext = EventPropertyExecutable.ExecutionContext.PLAYER;
+        EventPropertyExecutable.ExecutionContext previousContext = EventPropertyExecutable.ExecutionContext.ANY;
         int index = 0;
         while (!queue.isEmpty()) {
             final int finalIndex = index++;
@@ -153,6 +153,7 @@ public class DrunkEventExecutor {
                 execution = execution.thenApply(applyAction);
             }
             if (executable.context() == EventPropertyExecutable.ExecutionContext.PLAYER) {
+                previousContext = EventPropertyExecutable.ExecutionContext.PLAYER;
                 execution = execution.thenApplyAsync(ignored -> {
                     if (Bukkit.getPlayer(playerUuid) != null) {
                         applyAction.apply(null);
