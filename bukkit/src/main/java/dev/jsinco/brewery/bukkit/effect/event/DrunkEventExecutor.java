@@ -19,8 +19,10 @@ import dev.jsinco.brewery.api.event.step.SendCommand;
 import dev.jsinco.brewery.api.event.step.Teleport;
 import dev.jsinco.brewery.api.event.step.WaitStep;
 import dev.jsinco.brewery.api.util.BreweryKey;
+import dev.jsinco.brewery.api.util.Logger;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.bukkit.api.event.DrunkEventInitiateEvent;
+import dev.jsinco.brewery.bukkit.effect.EventCancelledException;
 import dev.jsinco.brewery.bukkit.effect.named.ChickenNamedExecutable;
 import dev.jsinco.brewery.bukkit.effect.named.DrunkMessageNamedExecutable;
 import dev.jsinco.brewery.bukkit.effect.named.DrunkenWalkNamedExecutable;
@@ -36,6 +38,7 @@ import dev.jsinco.brewery.bukkit.effect.step.ApplyPotionEffectExecutable;
 import dev.jsinco.brewery.bukkit.effect.step.ConditionalStepExecutable;
 import dev.jsinco.brewery.bukkit.effect.step.ConditionalWaitStepExecutable;
 import dev.jsinco.brewery.bukkit.effect.step.ConsumeStepExecutable;
+import dev.jsinco.brewery.bukkit.effect.step.CustomEventCompletedExecutable;
 import dev.jsinco.brewery.bukkit.effect.step.CustomEventExecutable;
 import dev.jsinco.brewery.bukkit.effect.step.SendCommandExecutable;
 import dev.jsinco.brewery.bukkit.effect.step.TeleportExecutable;
@@ -49,10 +52,13 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
 
 public class DrunkEventExecutor {
 
@@ -121,37 +127,69 @@ public class DrunkEventExecutor {
                         .compute(eventId, (ignored, integer) -> integer == null ? 1 : integer + 1);
             }
         }
-        boolean stopping = false;
-        for (int i = 0; i < events.size(); i++) {
-            final EventStep event = events.get(i);
-            event.properties().stream()
-                    .filter(CustomEventCompleted.class::isInstance)
-                    .map(CustomEventCompleted.class::cast)
-                    .forEach(customEventCompleted -> {
-                        synchronized (runningCustomEvents) {
-                            runningCustomEvents
-                                    .computeIfAbsent(playerUuid, ignored -> new HashMap<>())
-                                    .compute(customEventCompleted.eventKey(), (ignored, integer) -> integer == null || integer == 0 ? 0 : integer - 1);
-                        }
-                    });
-            if (stopping) {
-                continue;
-            }
-            List<EventPropertyExecutable> properties = event.properties().stream()
-                    .filter(eventStepProperty -> !(eventStepProperty instanceof CustomEventCompleted))
-                    .map(registry::toExecutable)
-                    .sorted(Comparator.comparing(EventPropertyExecutable::priority, Integer::compareTo))
-                    .toList();
-            for (EventPropertyExecutable eventPropertyExecutable : properties) {
-                EventPropertyExecutable.ExecutionResult result = eventPropertyExecutable.execute(playerUuid, events, i);
-                if (result == EventPropertyExecutable.ExecutionResult.STOP_EXECUTION) {
-                    stopping = true;
-                    break;
-                } else if (result == EventPropertyExecutable.ExecutionResult.WAIT_UNTIL_CONDITION) {
-                    return;
+        List<EventPropertyExecutable> steps = events
+                .stream()
+                .map(EventStep::properties)
+                .flatMap(eventStepProperties -> eventStepProperties
+                        .stream()
+                        .map(registry::toExecutable)
+                        .sorted(Comparator.comparing(EventPropertyExecutable::priority, Integer::compareTo))
+                ).toList();
+        LinkedList<EventPropertyExecutable> queue = new LinkedList<>(steps);
+        CompletableFuture<Void> execution = CompletableFuture.completedFuture(null);
+        EventPropertyExecutable.ExecutionContext previousContext = EventPropertyExecutable.ExecutionContext.PLAYER;
+        int index = 0;
+        while (!queue.isEmpty()) {
+            final int finalIndex = index++;
+            EventPropertyExecutable executable = queue.poll();
+            Function<Void, Void> applyAction = ignored -> {
+                EventPropertyExecutable.ExecutionResult result = executable.execute(playerUuid, steps.stream().map(EventPropertyExecutable::toProperty).toList());
+                if (result != EventPropertyExecutable.ExecutionResult.CONTINUE) {
+                    throw new EventCancelledException(finalIndex);
                 }
+                return null;
+            };
+            if (executable.context() == EventPropertyExecutable.ExecutionContext.ANY || executable.context() == previousContext) {
+                execution = execution.thenApply(applyAction);
+            }
+            if (executable.context() == EventPropertyExecutable.ExecutionContext.PLAYER) {
+                execution = execution.thenApplyAsync(ignored -> {
+                    if (Bukkit.getPlayer(playerUuid) != null) {
+                        applyAction.apply(null);
+                    }
+                    return null;
+                }, runnable -> {
+                    Player player = Bukkit.getPlayer(playerUuid);
+                    if (player == null) {
+                        runnable.run();
+                        return;
+                    }
+                    player.getScheduler().run(TheBrewingProject.getInstance(), ignored -> runnable.run(), runnable);
+                });
             }
         }
+        execution.handle((ignored, exception) -> {
+            if (exception instanceof EventCancelledException e) {
+                steps.subList(0, e.index() + 1)
+                        .stream()
+                        .filter(CustomEventCompletedExecutable.class::isInstance)
+                        .map(CustomEventCompletedExecutable.class::cast)
+                        .map(CustomEventCompletedExecutable::toProperty)
+                        .forEach(customEventCompleted -> {
+                            synchronized (runningCustomEvents) {
+                                runningCustomEvents
+                                        .computeIfAbsent(playerUuid, ignored2 -> new HashMap<>())
+                                        .compute(customEventCompleted.eventKey(), (ignored2, integer) -> integer == null || integer == 0 ? 0 : integer - 1);
+                            }
+                        });
+                return null;
+            }
+            if (exception == null) {
+                return null;
+            }
+            Logger.logAndTrackErr(exception);
+            return null;
+        });
     }
 
     public void addConditionalWaitExecution(UUID playerUuid, List<EventStep> events, Condition condition) {

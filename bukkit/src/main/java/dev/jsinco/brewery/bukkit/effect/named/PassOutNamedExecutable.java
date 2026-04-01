@@ -2,6 +2,8 @@ package dev.jsinco.brewery.bukkit.effect.named;
 
 import dev.jsinco.brewery.api.event.EventPropertyExecutable;
 import dev.jsinco.brewery.api.event.EventStep;
+import dev.jsinco.brewery.api.event.EventStepProperty;
+import dev.jsinco.brewery.api.event.NamedDrunkEvent;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.bukkit.util.BukkitMessageUtil;
 import dev.jsinco.brewery.configuration.Config;
@@ -20,7 +22,7 @@ import java.util.UUID;
 public class PassOutNamedExecutable implements EventPropertyExecutable {
 
     @Override
-    public @NonNull ExecutionResult execute(UUID contextPlayer, List<? extends EventStep> events, int index) {
+    public @NonNull ExecutionResult execute(UUID contextPlayer, List<EventStepProperty> eventStepProperties) {
         Player player = Bukkit.getPlayer(contextPlayer);
         if (player == null || player.hasPermission("brewery.override.kick")) {
             return ExecutionResult.CONTINUE;
@@ -39,6 +41,12 @@ public class PassOutNamedExecutable implements EventPropertyExecutable {
         drunksManager.registerPassedOut(player.getUniqueId());
         return ExecutionResult.CONTINUE;
     }
+
+    @Override
+    public EventStepProperty toProperty() {
+        return NamedDrunkEvent.fromKey("pass_out");
+    }
+
 
     @Override
     public int priority() {

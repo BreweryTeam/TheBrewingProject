@@ -2,6 +2,8 @@ package dev.jsinco.brewery.bukkit.effect.named;
 
 import dev.jsinco.brewery.api.event.EventPropertyExecutable;
 import dev.jsinco.brewery.api.event.EventStep;
+import dev.jsinco.brewery.api.event.EventStepProperty;
+import dev.jsinco.brewery.api.event.NamedDrunkEvent;
 import dev.jsinco.brewery.configuration.EventSection;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -13,7 +15,7 @@ import java.util.UUID;
 public class DrunkMessageNamedExecutable implements EventPropertyExecutable {
 
     @Override
-    public @NonNull ExecutionResult execute(UUID contextPlayer, List<? extends EventStep> events, int index) {
+    public @NonNull ExecutionResult execute(UUID contextPlayer,  List<EventStepProperty> eventStepProperties) {
         Player player = Bukkit.getPlayer(contextPlayer);
         if (player == null) {
             return ExecutionResult.CONTINUE;
@@ -34,6 +36,11 @@ public class DrunkMessageNamedExecutable implements EventPropertyExecutable {
         Player randomPlayer = onlinePlayers.get(RANDOM.nextInt(onlinePlayers.size()));
         player.chat(drunkMessages.get(RANDOM.nextInt(drunkMessages.size())).replace("<random_player_name>", randomPlayer.getName()));
         return ExecutionResult.CONTINUE;
+    }
+
+    @Override
+    public EventStepProperty toProperty() {
+        return NamedDrunkEvent.fromKey("drunk_message");
     }
 
     @Override
