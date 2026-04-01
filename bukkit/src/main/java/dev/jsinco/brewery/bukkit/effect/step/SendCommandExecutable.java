@@ -56,4 +56,9 @@ public class SendCommandExecutable implements EventPropertyExecutable {
         return new SendCommand(command, senderType);
     }
 
+    @Override
+    public ExecutionContext context() {
+        return ExecutionContext.PLAYER;
+    }
+
 }

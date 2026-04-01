@@ -54,6 +54,11 @@ public class KaboomNamedExecutable implements EventPropertyExecutable {
     }
 
     @Override
+    public ExecutionContext context() {
+        return ExecutionContext.PLAYER;
+    }
+
+    @Override
     public int priority() {
         return -1;
     }

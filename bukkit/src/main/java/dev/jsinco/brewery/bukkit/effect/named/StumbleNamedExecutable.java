@@ -1,7 +1,6 @@
 package dev.jsinco.brewery.bukkit.effect.named;
 
 import dev.jsinco.brewery.api.event.EventPropertyExecutable;
-import dev.jsinco.brewery.api.event.EventStep;
 import dev.jsinco.brewery.api.event.EventStepProperty;
 import dev.jsinco.brewery.api.event.NamedDrunkEvent;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
@@ -37,7 +36,6 @@ public class StumbleNamedExecutable implements EventPropertyExecutable {
     public EventStepProperty toProperty() {
         return NamedDrunkEvent.fromKey("stumble");
     }
-
 
     static class StumbleHandler {
         private final Vector pushDirection2;

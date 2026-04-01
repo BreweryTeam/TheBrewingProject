@@ -43,4 +43,9 @@ public class TeleportExecutable implements EventPropertyExecutable {
         return new Teleport(location);
     }
 
+    @Override
+    public ExecutionContext context() {
+        return ExecutionContext.PLAYER;
+    }
+
 }
