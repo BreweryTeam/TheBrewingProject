@@ -223,7 +223,7 @@ public class PlayerEventListener implements Listener {
         }
         Ingredient ingredient = BukkitIngredientManager.INSTANCE.getIngredient(itemStack);
         UncheckedIngredient wrapped = new UncheckedIngredientImpl(ingredient);
-        boolean isClockItem = Config.config().cauldrons().clockItems.stream().anyMatch(ingredientInput -> ingredientInput.matches(wrapped));
+        boolean isClockItem = Config.config().cauldrons().getClockItems().stream().anyMatch(ingredientInput -> ingredientInput.matches(wrapped));
         if (!isClockItem && isIngredient(itemStack)) {
             boolean addedIngredient = handleIngredientAddition(itemStack, block, cauldronOptional.orElse(null), event.getPlayer(), event.getHand());
             if (addedIngredient) {
@@ -242,7 +242,7 @@ public class PlayerEventListener implements Listener {
             Component message = Component.translatable("tbp.cauldron.clock-message", Argument.tagResolver(
                     Placeholder.parsed("time", TimeFormatter.format(cauldron.getTime(), TimeFormat.CLOCK_MECHANIC, TimeModifier.COOKING))
             ));
-            switch (Config.config().cauldrons().clockDisplay) {
+            switch (Config.config().cauldrons().getClockDisplay()) {
                 case CHAT -> event.getPlayer().sendMessage(message);
                 case ACTION_BAR -> event.getPlayer().sendActionBar(message);
                 case TITLE -> event.getPlayer().showTitle(Title.title(Component.empty(), message));
