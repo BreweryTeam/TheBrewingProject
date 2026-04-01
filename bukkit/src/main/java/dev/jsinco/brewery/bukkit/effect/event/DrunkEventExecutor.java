@@ -88,6 +88,7 @@ public class DrunkEventExecutor {
         registry.register(SendCommand.class, stepProperty -> new SendCommandExecutable(stepProperty.command(), stepProperty.senderType()));
         registry.register(Teleport.class, stepProperty -> new TeleportExecutable(stepProperty.location()));
         registry.register(WaitStep.class, stepProperty -> new WaitStepExecutable(stepProperty.durationTicks()));
+        registry.register(CustomEventCompleted.class, CustomEventCompletedExecutable::new);
         CustomEventRegistry eventRegistry = TheBrewingProject.getInstance().getCustomDrunkEventRegistry();
         registry.register(CustomEventStep.class, stepProperty -> {
                     List<EventStep> steps = new ArrayList<>(eventRegistry.getCustomEvent(stepProperty.customEventKey()).getSteps());
@@ -170,7 +171,7 @@ public class DrunkEventExecutor {
             }
         }
         execution.handle((ignored, exception) -> {
-            if (exception instanceof EventCancelledException e) {
+            if (exception.getCause() instanceof EventCancelledException e) {
                 steps.subList(0, e.index() + 1)
                         .stream()
                         .filter(CustomEventCompletedExecutable.class::isInstance)
