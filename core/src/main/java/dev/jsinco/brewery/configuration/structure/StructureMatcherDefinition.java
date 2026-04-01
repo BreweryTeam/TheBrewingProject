@@ -39,7 +39,7 @@ public class StructureMatcherDefinition extends OkaeriConfig {
         blockTransformation().validate(allowed)
                 .stream()
                 .map(string -> "block-transformation." + string)
-                .forEach(allowed::add);
+                .forEach(output::add);
         return output;
     }
 
