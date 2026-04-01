@@ -144,7 +144,7 @@ public class DrunkEventExecutor {
             final int finalIndex = index++;
             EventPropertyExecutable executable = queue.poll();
             Function<Void, Void> applyAction = ignored -> {
-                EventPropertyExecutable.ExecutionResult result = executable.execute(playerUuid, steps.stream().map(EventPropertyExecutable::toProperty).toList());
+                EventPropertyExecutable.ExecutionResult result = executable.execute(playerUuid, queue.stream().map(EventPropertyExecutable::toProperty).toList());
                 if (result != EventPropertyExecutable.ExecutionResult.CONTINUE) {
                     throw new EventCancelledException(result == EventPropertyExecutable.ExecutionResult.STOP_EXECUTION ? steps.size() - 1 : finalIndex);
                 }
@@ -171,7 +171,10 @@ public class DrunkEventExecutor {
             }
         }
         execution.handle((ignored, exception) -> {
-            if (exception.getCause() instanceof EventCancelledException e) {
+            if (exception == null) {
+                return null;
+            }
+            if (exception.getCause() != null && exception.getCause() instanceof EventCancelledException e) {
                 steps.subList(0, e.index() + 1)
                         .stream()
                         .filter(CustomEventCompletedExecutable.class::isInstance)
@@ -184,9 +187,6 @@ public class DrunkEventExecutor {
                                         .compute(customEventCompleted.eventKey(), (ignored2, integer) -> integer == null || integer == 0 ? 0 : integer - 1);
                             }
                         });
-                return null;
-            }
-            if (exception == null) {
                 return null;
             }
             Logger.logAndTrackErr(exception);

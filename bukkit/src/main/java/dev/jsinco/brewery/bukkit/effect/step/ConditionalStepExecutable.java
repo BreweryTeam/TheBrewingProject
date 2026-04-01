@@ -38,6 +38,11 @@ public class ConditionalStepExecutable implements EventPropertyExecutable {
         return new ConditionalStep(condition);
     }
 
+    @Override
+    public ExecutionContext context() {
+        return ExecutionContext.PLAYER;
+    }
+
     private boolean shouldCancel(UUID contextPlayer, Condition condition) {
         Player player = Bukkit.getPlayer(contextPlayer);
         if (player == null) {

@@ -43,6 +43,11 @@ public class PassOutNamedExecutable implements EventPropertyExecutable {
     }
 
     @Override
+    public ExecutionContext context() {
+        return ExecutionContext.PLAYER;
+    }
+
+    @Override
     public EventStepProperty toProperty() {
         return NamedDrunkEvent.fromKey("pass_out");
     }

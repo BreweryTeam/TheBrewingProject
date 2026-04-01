@@ -59,5 +59,9 @@ public class TeleportNamedExecutable implements EventPropertyExecutable {
         return NamedDrunkEvent.fromKey("teleport");
     }
 
+    @Override
+    public ExecutionContext context() {
+        return ExecutionContext.PLAYER;
+    }
 
 }
