@@ -6,7 +6,6 @@ import org.bukkit.entity.ItemDisplay;
 import org.bukkit.util.Transformation;
 import org.bukkit.util.Vector;
 import org.joml.AxisAngle4f;
-import org.joml.Vector3f;
 
 import java.util.Random;
 import java.util.function.Consumer;
@@ -75,7 +74,7 @@ public class IngredientAddAnimation implements Consumer<ScheduledTask> {
 
     @Override
     public void accept(ScheduledTask scheduledTask) {
-        if(entity.isDead()) {
+        if (entity.isDead()) {
             scheduledTask.cancel();
         }
         if (time >= T_END) {
@@ -92,7 +91,7 @@ public class IngredientAddAnimation implements Consumer<ScheduledTask> {
         Vector travelingPoint = travelingDirection.clone()
                 .multiply(timeSeconds * v0x)
                 .setY((V0Y - G * timeSeconds / 2) * timeSeconds);
-        entity.teleport(from.clone().add(travelingPoint));
+        entity.teleportAsync(from.clone().add(travelingPoint));
     }
 
     public void close() {
