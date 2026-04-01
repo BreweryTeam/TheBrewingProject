@@ -1,7 +1,8 @@
 package dev.jsinco.brewery.bukkit.effect.step;
 
 import dev.jsinco.brewery.api.event.EventPropertyExecutable;
-import dev.jsinco.brewery.api.event.EventStep;
+import dev.jsinco.brewery.api.event.EventStepProperty;
+import dev.jsinco.brewery.api.event.step.Teleport;
 import dev.jsinco.brewery.api.vector.BreweryLocation;
 import dev.jsinco.brewery.bukkit.api.BukkitAdapter;
 import dev.jsinco.brewery.bukkit.util.LocationUtil;
@@ -21,7 +22,7 @@ public class TeleportExecutable implements EventPropertyExecutable {
     }
 
     @Override
-    public @NonNull ExecutionResult execute(UUID contextPlayer, List<? extends EventStep> events, int index) {
+    public @NonNull ExecutionResult execute(UUID contextPlayer, List<EventStepProperty> eventStepPropertiesx) {
         Player player = Bukkit.getPlayer(contextPlayer);
         if (player == null) {
             return ExecutionResult.CONTINUE;
@@ -35,6 +36,11 @@ public class TeleportExecutable implements EventPropertyExecutable {
     @Override
     public int priority() {
         return 0;
+    }
+
+    @Override
+    public EventStepProperty toProperty() {
+        return new Teleport(location);
     }
 
 }
