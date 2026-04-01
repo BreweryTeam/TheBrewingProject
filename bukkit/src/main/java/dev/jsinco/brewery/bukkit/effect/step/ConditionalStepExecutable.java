@@ -3,7 +3,9 @@ package dev.jsinco.brewery.bukkit.effect.step;
 import dev.jsinco.brewery.api.effect.DrunkState;
 import dev.jsinco.brewery.api.event.EventPropertyExecutable;
 import dev.jsinco.brewery.api.event.EventStep;
+import dev.jsinco.brewery.api.event.EventStepProperty;
 import dev.jsinco.brewery.api.event.step.Condition;
+import dev.jsinco.brewery.api.event.step.ConditionalStep;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -22,13 +24,18 @@ public class ConditionalStepExecutable implements EventPropertyExecutable {
 
 
     @Override
-    public @NonNull ExecutionResult execute(UUID contextPlayer, List<? extends EventStep> events, int index) {
+    public @NonNull ExecutionResult execute(UUID contextPlayer, List<EventStepProperty> eventStepProperties) {
         return shouldCancel(contextPlayer, condition) ? ExecutionResult.STOP_EXECUTION : ExecutionResult.CONTINUE;
     }
 
     @Override
     public int priority() {
         return Integer.MIN_VALUE;
+    }
+
+    @Override
+    public EventStepProperty toProperty() {
+        return new ConditionalStep(condition);
     }
 
     private boolean shouldCancel(UUID contextPlayer, Condition condition) {

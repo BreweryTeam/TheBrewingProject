@@ -1,7 +1,8 @@
 package dev.jsinco.brewery.bukkit.effect.named;
 
 import dev.jsinco.brewery.api.event.EventPropertyExecutable;
-import dev.jsinco.brewery.api.event.EventStep;
+import dev.jsinco.brewery.api.event.EventStepProperty;
+import dev.jsinco.brewery.api.event.NamedDrunkEvent;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.configuration.EventSection;
 import org.bukkit.Bukkit;
@@ -15,7 +16,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class FeverNamedExecutable implements EventPropertyExecutable {
 
     @Override
-    public @NonNull ExecutionResult execute(UUID contextPlayer, List<? extends EventStep> events, int index) {
+    public @NonNull ExecutionResult execute(UUID contextPlayer, List<EventStepProperty> eventStepProperties) {
         Player player = Bukkit.getPlayer(contextPlayer);
         if (player == null) {
             return ExecutionResult.CONTINUE;
@@ -36,6 +37,12 @@ public class FeverNamedExecutable implements EventPropertyExecutable {
         }, null, 1, 1);
         return ExecutionResult.CONTINUE;
     }
+
+    @Override
+    public EventStepProperty toProperty() {
+        return NamedDrunkEvent.fromKey("fever");
+    }
+
 
     @Override
     public int priority() {
