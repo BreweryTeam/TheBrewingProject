@@ -165,7 +165,9 @@ tasks {
     }
 }
 
-runPaper.folia.registerTask()
+runPaper.folia.registerTask {
+    runDirectory.set(File("run-folia"))
+}
 
 bukkit {
     main = "dev.jsinco.brewery.bukkit.TheBrewingProject"
