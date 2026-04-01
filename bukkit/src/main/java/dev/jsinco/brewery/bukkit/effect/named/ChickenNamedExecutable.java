@@ -1,7 +1,8 @@
 package dev.jsinco.brewery.bukkit.effect.named;
 
 import dev.jsinco.brewery.api.event.EventPropertyExecutable;
-import dev.jsinco.brewery.api.event.EventStep;
+import dev.jsinco.brewery.api.event.EventStepProperty;
+import dev.jsinco.brewery.api.event.NamedDrunkEvent;
 import dev.jsinco.brewery.bukkit.util.BukkitMessageUtil;
 import dev.jsinco.brewery.util.MessageUtil;
 import org.bukkit.Bukkit;
@@ -19,7 +20,7 @@ public class ChickenNamedExecutable implements EventPropertyExecutable {
     public static final NamespacedKey NO_DROPS = new NamespacedKey("brewery", "no_drops");
 
     @Override
-    public @NonNull ExecutionResult execute(UUID contextPlayer, List<? extends EventStep> events, int index) {
+    public @NonNull ExecutionResult execute(UUID contextPlayer, List<EventStepProperty> eventStepProperties) {
         Player player = Bukkit.getPlayer(contextPlayer);
         if (player == null) {
             return ExecutionResult.CONTINUE;
@@ -39,6 +40,11 @@ public class ChickenNamedExecutable implements EventPropertyExecutable {
     @Override
     public int priority() {
         return -1;
+    }
+
+    @Override
+    public EventStepProperty toProperty() {
+        return NamedDrunkEvent.fromKey("chicken");
     }
 
 }

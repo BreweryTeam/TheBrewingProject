@@ -1,6 +1,5 @@
 package dev.jsinco.brewery.api.event;
 
-import dev.jsinco.brewery.api.util.BreweryKey;
 import dev.jsinco.brewery.api.util.Holder;
 import org.jspecify.annotations.NonNull;
 
@@ -24,7 +23,7 @@ public interface IntegrationEvent extends EventStepProperty, DrunkEvent {
     default @NonNull EventPropertyExecutable toExecutable() {
         return new EventPropertyExecutable() {
             @Override
-            public @NonNull ExecutionResult execute(UUID contextPlayer, List<? extends EventStep> events, int index) {
+            public @NonNull ExecutionResult execute(UUID contextPlayer, List<EventStepProperty> eventStepProperties) {
                 run(new Holder.Player(contextPlayer));
                 return ExecutionResult.CONTINUE;
             }
@@ -32,6 +31,11 @@ public interface IntegrationEvent extends EventStepProperty, DrunkEvent {
             @Override
             public int priority() {
                 return 42; // The meaning of life
+            }
+
+            @Override
+            public EventStepProperty toProperty() {
+                return IntegrationEvent.this;
             }
         };
     }
