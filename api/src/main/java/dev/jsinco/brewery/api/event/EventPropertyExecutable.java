@@ -6,7 +6,6 @@ import org.jspecify.annotations.NonNull;
 import java.util.List;
 import java.util.Random;
 import java.util.UUID;
-import java.util.concurrent.Executor;
 
 public interface EventPropertyExecutable {
 
@@ -29,7 +28,7 @@ public interface EventPropertyExecutable {
     int priority();
 
     default ExecutionContext context() {
-        return new IndependantExecutionContext();
+        return ExecutionContext.ANY;
     }
 
     enum ExecutionResult {
@@ -38,25 +37,8 @@ public interface EventPropertyExecutable {
         WAIT_UNTIL_CONDITION
     }
 
-    interface ExecutionContext {
-
-        Executor executor();
-
-        boolean inheritsThread(ExecutionContext previous);
-
-    }
-
-    record IndependantExecutionContext() implements ExecutionContext {
-
-        @Override
-        public Executor executor() {
-            return Runnable::run;
-        }
-
-        @Override
-        public boolean inheritsThread(ExecutionContext previous) {
-            return true;
-        }
+    enum ExecutionContext {
+        PLAYER, ANY
     }
 
 }
