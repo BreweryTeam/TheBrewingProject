@@ -29,7 +29,7 @@ public interface EventPropertyExecutable {
     int priority();
 
     default ExecutionContext context() {
-        return new IntependantExecutionContext();
+        return new IndependantExecutionContext();
     }
 
     enum ExecutionResult {
@@ -46,7 +46,7 @@ public interface EventPropertyExecutable {
 
     }
 
-    record IntependantExecutionContext() implements ExecutionContext {
+    record IndependantExecutionContext() implements ExecutionContext {
 
         @Override
         public Executor executor() {
