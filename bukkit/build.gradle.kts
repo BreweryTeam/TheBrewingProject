@@ -165,6 +165,8 @@ tasks {
     }
 }
 
+runPaper.folia.registerTask()
+
 bukkit {
     main = "dev.jsinco.brewery.bukkit.TheBrewingProject"
     foliaSupported = true
