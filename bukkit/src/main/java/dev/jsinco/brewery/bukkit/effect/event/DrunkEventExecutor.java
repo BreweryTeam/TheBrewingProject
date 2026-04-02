@@ -172,26 +172,31 @@ public class DrunkEventExecutor {
         }
         execution.handle((ignored, exception) -> {
             if (exception == null) {
+                unregisterEvents(playerUuid, steps, steps.size() - 1);
                 return null;
             }
             if (exception.getCause() != null && exception.getCause() instanceof EventCancelledException e) {
-                steps.subList(0, e.index() + 1)
-                        .stream()
-                        .filter(CustomEventCompletedExecutable.class::isInstance)
-                        .map(CustomEventCompletedExecutable.class::cast)
-                        .map(CustomEventCompletedExecutable::toProperty)
-                        .forEach(customEventCompleted -> {
-                            synchronized (runningCustomEvents) {
-                                runningCustomEvents
-                                        .computeIfAbsent(playerUuid, ignored2 -> new HashMap<>())
-                                        .compute(customEventCompleted.eventKey(), (ignored2, integer) -> integer == null || integer == 0 ? 0 : integer - 1);
-                            }
-                        });
+                unregisterEvents(playerUuid, steps, e.index());
                 return null;
             }
             Logger.logAndTrackErr(exception);
             return null;
         });
+    }
+
+    private void unregisterEvents(UUID playerUuid, List<EventPropertyExecutable> steps, int index) {
+        steps.subList(0, index + 1)
+                .stream()
+                .filter(CustomEventCompletedExecutable.class::isInstance)
+                .map(CustomEventCompletedExecutable.class::cast)
+                .map(CustomEventCompletedExecutable::toProperty)
+                .forEach(customEventCompleted -> {
+                    synchronized (runningCustomEvents) {
+                        runningCustomEvents
+                                .computeIfAbsent(playerUuid, ignored2 -> new HashMap<>())
+                                .compute(customEventCompleted.eventKey(), (ignored2, integer) -> integer == null || integer == 0 ? 0 : integer - 1);
+                    }
+                });
     }
 
     public void addConditionalWaitExecution(UUID playerUuid, List<EventStep> events, Condition condition) {
@@ -228,6 +233,7 @@ public class DrunkEventExecutor {
         onDeathExecutions.remove(playerUuid);
         onDamageExecutions.remove(playerUuid);
         onJoinedWorldExecutions.remove(playerUuid);
+        runningCustomEvents.remove(playerUuid);
     }
 
     public void clear() {
@@ -235,6 +241,7 @@ public class DrunkEventExecutor {
         onDeathExecutions.clear();
         onDamageExecutions.clear();
         onJoinedWorldExecutions.clear();
+        runningCustomEvents.clear();
     }
 
     public void onPlayerJoinServer(UUID playerUuid) {
