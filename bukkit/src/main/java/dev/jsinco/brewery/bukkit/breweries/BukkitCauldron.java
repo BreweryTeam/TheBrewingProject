@@ -9,7 +9,9 @@ import dev.jsinco.brewery.api.breweries.CauldronType;
 import dev.jsinco.brewery.api.ingredient.Ingredient;
 import dev.jsinco.brewery.api.moment.Interval;
 import dev.jsinco.brewery.api.moment.Moment;
+import dev.jsinco.brewery.api.recipe.DefaultRecipe;
 import dev.jsinco.brewery.api.recipe.Recipe;
+import dev.jsinco.brewery.api.recipe.RecipeResult;
 import dev.jsinco.brewery.api.util.BreweryRegistry;
 import dev.jsinco.brewery.api.util.CancelState;
 import dev.jsinco.brewery.api.vector.BreweryLocation;
@@ -22,6 +24,7 @@ import dev.jsinco.brewery.bukkit.api.BukkitAdapter;
 import dev.jsinco.brewery.bukkit.api.event.process.BrewCauldronProcessEvent;
 import dev.jsinco.brewery.bukkit.api.event.transaction.CauldronInsertEvent;
 import dev.jsinco.brewery.bukkit.api.transaction.ItemSource;
+import dev.jsinco.brewery.bukkit.brew.BrewAdapter;
 import dev.jsinco.brewery.bukkit.ingredient.BukkitIngredientManager;
 import dev.jsinco.brewery.bukkit.listener.ListenerUtil;
 import dev.jsinco.brewery.bukkit.recipe.BukkitRecipeResult;
@@ -32,6 +35,7 @@ import dev.jsinco.brewery.bukkit.util.SoundPlayer;
 import dev.jsinco.brewery.configuration.AnimationDisplay;
 import dev.jsinco.brewery.configuration.Config;
 import dev.jsinco.brewery.sound.SoundDefinition;
+import io.papermc.paper.datacomponent.DataComponentTypes;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
@@ -169,6 +173,19 @@ public class BukkitCauldron implements Cauldron {
     private Color computeResultColor(Optional<Recipe<ItemStack>> recipeOptional) {
         if (recipeOptional.isEmpty()) {
             return convert(Config.config().cauldrons().failedParticleColor());
+        }
+        Optional<Color> defaultRecipeColor = BrewAdapter.getDefaultRecipe(
+                        recipeOptional,
+                        TheBrewingProject.getInstance().getRecipeRegistry(),
+                        brew,
+                        false
+                ).map(DefaultRecipe::result)
+                .map(RecipeResult::newLorelessItem)
+                .filter(itemStack -> itemStack.hasData(DataComponentTypes.POTION_CONTENTS))
+                .map(itemStack -> itemStack.getData(DataComponentTypes.POTION_CONTENTS))
+                .flatMap(potionContents -> Optional.ofNullable(potionContents.customColor()));
+        if (defaultRecipeColor.isPresent()) {
+            return defaultRecipeColor.get();
         }
         Map<? extends Ingredient, Integer> ingredients;
         if (brew.lastStep() instanceof BrewingStep.Cook cook) {
