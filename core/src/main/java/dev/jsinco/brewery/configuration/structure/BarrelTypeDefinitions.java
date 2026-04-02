@@ -20,7 +20,7 @@ import java.util.List;
 public class BarrelTypeDefinitions extends OkaeriConfig {
 
     @CustomKey("barrel-types")
-    public final List<BarrelTypeDefinition> barrelTypes = List.of();
+    private List<BarrelTypeDefinition> barrelTypes = List.of();
 
     @Exclude
     private static BarrelTypeDefinitions instance;
