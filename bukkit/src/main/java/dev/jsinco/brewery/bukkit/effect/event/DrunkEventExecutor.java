@@ -144,7 +144,7 @@ public class DrunkEventExecutor {
             final int finalIndex = index++;
             EventPropertyExecutable executable = queue.poll();
             Function<Void, Void> applyAction = ignored -> {
-                EventPropertyExecutable.ExecutionResult result = executable.execute(playerUuid, queue.stream().map(EventPropertyExecutable::toProperty).toList());
+                EventPropertyExecutable.ExecutionResult result = executable.execute(playerUuid, steps.stream().skip(finalIndex + 1).map(EventPropertyExecutable::toProperty).toList());
                 if (result != EventPropertyExecutable.ExecutionResult.CONTINUE) {
                     throw new EventCancelledException(result == EventPropertyExecutable.ExecutionResult.STOP_EXECUTION ? steps.size() - 1 : finalIndex);
                 }
