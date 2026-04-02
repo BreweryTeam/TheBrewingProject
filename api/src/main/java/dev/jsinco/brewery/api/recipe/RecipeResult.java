@@ -31,4 +31,5 @@ public interface RecipeResult<I> {
      * @return The display name of the output item
      */
     Component displayName();
+    
 }
