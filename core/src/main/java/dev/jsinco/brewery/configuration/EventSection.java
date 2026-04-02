@@ -184,7 +184,7 @@ public class EventSection extends OkaeriConfig {
                             Map.of("hangover", new RangeD(50D, null))
                     ))
                     .addStep(new ApplyPotionEffect("slowness", Interval.parseString("1"), Interval.parseString("20")))
-                    .addStep(new WaitStep(19))
+                    .addStep(new WaitStep(18))
                     .addStep(new ConditionalStep(new Condition.ModifierAbove("hangover", 50)))
                     .addStep(new CustomEventStep(BreweryKey.parse("hangover")))
                     .build(BreweryKey.parse("hangover"))
