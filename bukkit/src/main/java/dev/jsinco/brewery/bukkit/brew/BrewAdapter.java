@@ -40,7 +40,15 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Random;
 import java.util.stream.Collectors;
 
 public class BrewAdapter {
@@ -64,16 +72,12 @@ public class BrewAdapter {
         Optional<BrewQuality> quality = score.flatMap(brewScore -> Optional.ofNullable(brewScore.brewQuality()));
         ItemStack itemStack;
         if (quality.isEmpty()) {
-            itemStack = fromDefaultRecipe(recipe, recipeRegistry, brew, state);
+            itemStack = fromDefaultRecipe(recipe, recipeRegistry, brew, state, true);
             itemStack.editPersistentDataContainer(pdc -> {
                 pdc.set(BREWERY_SCORE, PersistentDataType.DOUBLE, 0D);
             });
         } else if (!score.map(BrewScore::completed).get()) {
-            Optional<DefaultRecipe<ItemStack>> defaultRecipeOptional = recipeRegistry.getDefaultRecipes().stream()
-                    .filter(defaultRecipe -> !defaultRecipe.onlyRuinedBrews())
-                    .filter(defaultRecipe -> defaultRecipe.recipeConditions().stream()
-                            .allMatch(recipeCondition -> recipeCondition.matches(recipe.get().getSteps(), brew.getCompletedSteps())))
-                    .max(Comparator.comparing(DefaultRecipe::complexity));
+            Optional<DefaultRecipe<ItemStack>> defaultRecipeOptional = getDefaultRecipe(recipe, recipeRegistry, brew, false);
             itemStack = defaultRecipeOptional.map(DefaultRecipe::result).map(result -> result.newBrewItem(score.get(), brew, state)).orElse(
                     incompletePotion(brew)
             );
@@ -81,7 +85,7 @@ public class BrewAdapter {
             RecipeResult<ItemStack> recipeResult = recipe.get().getRecipeResult(quality.get());
             itemStack = recipeResult.newBrewItem(score.get(), brew, state);
             itemStack.editPersistentDataContainer(pdc -> {
-                    applyBrewTags(pdc, recipe.get(), score.get().score(), MiniMessage.miniMessage().serialize(recipeResult.displayName()));
+                applyBrewTags(pdc, recipe.get(), score.get().score(), MiniMessage.miniMessage().serialize(recipeResult.displayName()));
             });
         }
         if (!(state instanceof BrewImpl.State.Seal)) {
@@ -126,17 +130,9 @@ public class BrewAdapter {
         return itemStack;
     }
 
-    private static ItemStack fromDefaultRecipe(Optional<Recipe<ItemStack>> recipe, RecipeRegistryImpl<ItemStack> recipeRegistry, Brew brew, Brew.State state) {
-        List<DefaultRecipe<ItemStack>> allDefaultRecipes = new ArrayList<>(recipeRegistry.getDefaultRecipes());
-        Collections.shuffle(allDefaultRecipes);
-        List<DefaultRecipe<ItemStack>> defaultRecipes = allDefaultRecipes
-                .stream()
-                .filter(DefaultRecipe::onlyRuinedBrews)
-                .filter(defaultRecipe -> defaultRecipe.recipeConditions().stream().allMatch(recipeCondition ->
-                        recipeCondition.matches(recipe.map(Recipe::getSteps).orElse(null), brew.getCompletedSteps())))
-                .sorted(Comparator.comparing(DefaultRecipe::complexity))
-                .toList();
-        if (defaultRecipes.isEmpty()) {
+    private static ItemStack fromDefaultRecipe(Optional<Recipe<ItemStack>> recipe, RecipeRegistryImpl<ItemStack> recipeRegistry, Brew brew, Brew.State state, boolean ruinedOnly) {
+        Optional<DefaultRecipe<ItemStack>> defaultRecipe = getDefaultRecipe(recipe, recipeRegistry, brew, ruinedOnly);
+        if (defaultRecipe.isEmpty()) {
             ItemStack itemStack = new ItemStack(Material.POTION);
             itemStack.setData(DataComponentTypes.CUSTOM_NAME, Component.text("Placeholder"));
             itemStack.setData(DataComponentTypes.LORE, ItemLore.lore(
@@ -145,8 +141,18 @@ public class BrewAdapter {
             ));
             return itemStack;
         }
+        return defaultRecipe.get().result().newBrewItem(BrewScoreImpl.PLACEHOLDER, brew, state);
+    }
 
-        return defaultRecipes.getLast().result().newBrewItem(BrewScoreImpl.PLACEHOLDER, brew, state);
+    public static Optional<DefaultRecipe<ItemStack>> getDefaultRecipe(Optional<Recipe<ItemStack>> recipe, RecipeRegistryImpl<ItemStack> recipeRegistry, Brew brew, boolean ruined) {
+        List<DefaultRecipe<ItemStack>> allDefaultRecipes = new ArrayList<>(recipeRegistry.getDefaultRecipes());
+        Collections.shuffle(allDefaultRecipes);
+        return allDefaultRecipes
+                .stream()
+                .filter(defaultRecipe -> defaultRecipe.onlyRuinedBrews() == ruined)
+                .filter(defaultRecipe -> defaultRecipe.recipeConditions().stream().allMatch(recipeCondition ->
+                        recipeCondition.matches(recipe.map(Recipe::getSteps).orElse(null), brew.getCompletedSteps())))
+                .max(Comparator.comparing(DefaultRecipe::complexity));
     }
 
     public static void applyBrewData(PersistentDataContainer pdc, Brew brew) {
