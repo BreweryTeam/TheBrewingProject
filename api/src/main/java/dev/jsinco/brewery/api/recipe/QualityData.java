@@ -66,7 +66,7 @@ public class QualityData<T> {
 
     /**
      * @param brewQuality Quality data
-     * @param ignored The ignored default value
+     * @param ignored     The ignored default value
      * @return The data for specified
      */
     @Deprecated(forRemoval = true)
@@ -96,9 +96,18 @@ public class QualityData<T> {
 
     private static String[] split(String string) {
         int previous = 0;
+        boolean escaping = false;
         Stream.Builder<String> builder = Stream.builder();
         for (int i = 0; i < string.length(); i++) {
             char character = string.charAt(i);
+            if (character == '\\') {
+                escaping = true;
+                continue;
+            }
+            if (escaping) {
+                escaping = false;
+                continue;
+            }
             if (character != '/') {
                 continue;
             }
