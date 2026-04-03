@@ -318,6 +318,17 @@ publishing {
             artifact(tasks["shadowJar"])
         }
     }
+    repositories {
+        maven {
+            name = "breweryteam"
+            url = uri("https://repo.breweryteam.dev")
+            credentials(PasswordCredentials::class)
+            authentication {
+                create<BasicAuthentication>("basic")
+            }
+
+        }
+    }
 }
 
 modrinth {

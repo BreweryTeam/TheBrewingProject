@@ -33,6 +33,13 @@ jobs:
           VERSION: ${{github.event.release.tag_name}}
           RELEASE_NOTES: ${{ github.event.release.body }}
           MODRINTH_TOKEN: ${{ secrets.MODRINTH_PUBLISH_KEY }}
+      - name: Publish to maven repo
+        run: |
+          ./gradlew :bukkit:publishMavenPublicationToBreweryteamRepository \
+          -PbreweryteamUsername=${{ secrets.BREWERY_REPO_USERNAME }} \
+          -PbreweryteamPassword=${{ secrets.BREWERY_REPO_PASSWORD }}
+        env:
+          VERSION: ${{github.event.release.tag_name}}
       - name: Display in discord
         run: "./gradlew :bukkit:postDiscordMessage"
         env:
