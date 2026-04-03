@@ -58,7 +58,7 @@ dependencies {
     compileOnly("com.github.BreweryTeam:TheBrewingProject:<version–tag>")
 }
 ```
-> [!INFO]
+> [!NOTE]
 > You can find version tags [here](https://github.com/BreweryTeam/TheBrewingProject/tags)
 
 Simple use of the API, your plugin needs to be loaded after TBP.
