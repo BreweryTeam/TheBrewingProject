@@ -321,7 +321,7 @@ publishing {
     repositories {
         maven {
             name = "breweryteam"
-            url = uri("https://repo.breweryteam.dev")
+            url = uri("https://repo.breweryteam.dev/releases")
             credentials(PasswordCredentials::class)
             authentication {
                 create<BasicAuthentication>("basic")
