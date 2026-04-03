@@ -82,7 +82,7 @@ public class QualityData<T> {
     public static QualityData<String> readQualityFactoredString(@NonNull String string) {
         String[] list = split(string);
         if (list.length == 1) {
-            return new QualityData<>(Map.of(BrewQuality.BAD, string, BrewQuality.GOOD, string, BrewQuality.EXCELLENT, string));
+            return new QualityData<>(Map.of(BrewQuality.BAD, list[0], BrewQuality.GOOD, list[0], BrewQuality.EXCELLENT, list[0]));
         }
         if (list.length != 3) {
             throw new IllegalArgumentException("Expected a string with format <bad>/<good>/<excellent>");
@@ -95,34 +95,37 @@ public class QualityData<T> {
     }
 
     private static String[] split(String string) {
-        int previous = 0;
         boolean escaping = false;
         Stream.Builder<String> builder = Stream.builder();
+        StringBuilder stringBuilder = new StringBuilder();
         for (int i = 0; i < string.length(); i++) {
             char character = string.charAt(i);
-            if (character == '\\') {
+            if (character == '\\' && !escaping) {
                 escaping = true;
                 continue;
             }
             if (escaping) {
                 escaping = false;
+                stringBuilder.append(character);
                 continue;
             }
             if (character != '/') {
+                stringBuilder.append(character);
                 continue;
             }
             if (i == 0 || i == string.length() - 1) {
-                builder.add(string.substring(previous, i));
-                previous = i + 1;
+                builder.add(stringBuilder.toString());
+                stringBuilder = new StringBuilder();
                 continue;
             }
             if (string.charAt(i - 1) == '<' && TAG_PATTERN.matcher(string.substring(i + 1)).find()) {
+                stringBuilder.append(character);
                 continue;
             }
-            builder.add(string.substring(previous, i));
-            previous = i + 1;
+            builder.add(stringBuilder.toString());
+            stringBuilder = new StringBuilder();
         }
-        builder.add(string.substring(previous));
+        builder.add(stringBuilder.toString());
         return builder.build()
                 .toArray(String[]::new);
     }
