@@ -318,7 +318,8 @@ publishing {
             artifact(tasks["jar"])
             pom {
                 name = "TheBrewingProject Bukkit API"
-                description = "API for TheBrewingProject - Bukkit implementation"
+                description = "API for TheBrewingProject - Bukkit"
+                url = "https://tbp.breweryteam.dev/docs/welcome/"
                 licenses {
                     license {
                         name = "The MIT license"
