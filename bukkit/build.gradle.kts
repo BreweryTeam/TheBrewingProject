@@ -313,9 +313,25 @@ bukkit {
 
 publishing {
     publications {
-        create<MavenPublication>("maven") {
+        create<MavenPublication>("mavenJava") {
             artifactId = "thebrewingproject-bukkit"
             artifact(tasks["jar"])
+            pom {
+                name = "TheBrewingProject Bukkit API"
+                description = "API for TheBrewingProject - Bukkit implementation"
+                licenses {
+                    license {
+                        name = "The MIT license"
+                        url =
+                            "https://raw.githubusercontent.com/BreweryTeam/TheBrewingProject/refs/heads/master/LICENSE"
+                    }
+                }
+                scm {
+                    connection = "scm:git:git//github.com/BreweryProject/thebrewingproject.git"
+                    developerConnection = "scm:git:ssh://github.com:BreweryProject/thebrewingproject.git"
+                    url = "https://github.com/BreweryProject/thebrewingproject"
+                }
+            }
         }
     }
     repositories {

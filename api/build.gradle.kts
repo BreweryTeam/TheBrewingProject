@@ -1,4 +1,3 @@
-
 plugins {
     `tbp-module`
     `maven-publish`
@@ -33,9 +32,25 @@ dependencies {
 
 publishing {
     publications {
-        create<MavenPublication>("maven") {
+        create<MavenPublication>("mavenJava") {
             artifactId = "thebrewingproject-api"
             artifact(tasks["jar"])
+            pom {
+                name = "TheBrewingProject API"
+                description = "The API for TheBrewingProject - Except server native elements"
+                licenses {
+                    license {
+                        name = "The MIT license"
+                        url =
+                            "https://raw.githubusercontent.com/BreweryTeam/TheBrewingProject/refs/heads/master/LICENSE"
+                    }
+                }
+                scm {
+                    connection = "scm:git:git//github.com/BreweryProject/thebrewingproject.git"
+                    developerConnection = "scm:git:ssh://github.com:BreweryProject/thebrewingproject.git"
+                    url = "https://github.com/BreweryProject/thebrewingproject"
+                }
+            }
         }
     }
     repositories {
