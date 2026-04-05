@@ -314,8 +314,8 @@ bukkit {
 publishing {
     publications {
         create<MavenPublication>("maven") {
-            artifactId = "thebrewingproject"
-            artifact(tasks["shadowJar"])
+            artifactId = "thebrewingproject-bukkit"
+            artifact(tasks["jar"])
         }
     }
     repositories {
