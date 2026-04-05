@@ -300,11 +300,16 @@ bukkit {
     )
 }
 
+java {
+    withSourcesJar()
+    withJavadocJar()
+}
+
 publishing {
     publications {
         create<MavenPublication>("mavenJava") {
             artifactId = "thebrewingproject-bukkit"
-            artifact(tasks["jar"])
+            from(components["java"])
             pom {
                 name = "TheBrewingProject Bukkit API"
                 description = "API for TheBrewingProject - Bukkit"
