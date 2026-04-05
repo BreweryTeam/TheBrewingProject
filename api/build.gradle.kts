@@ -38,6 +38,7 @@ publishing {
             pom {
                 name = "TheBrewingProject API"
                 description = "The API for TheBrewingProject - Except server native elements"
+                url = "https://tbp.breweryteam.dev/docs/welcome/"
                 licenses {
                     license {
                         name = "The MIT license"
