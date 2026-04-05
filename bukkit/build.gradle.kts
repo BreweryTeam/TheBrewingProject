@@ -99,6 +99,7 @@ tasks {
 
     runServer {
         minecraftVersion(project.findProperty("minecraft.version")!! as String)
+        pluginJars(project.tasks.shadowJar.flatMap { it.archiveFile })
         if (project.findProperty("testing.integrations")!! == "true") {
             downloadPlugins {
                 modrinth("worldedit", "3ISh7ADm")
@@ -295,6 +296,10 @@ bukkit {
         "GriefDefender",
         "GSit"
     )
+}
+
+runPaper {
+    disablePluginJarDetection()
 }
 
 java {
