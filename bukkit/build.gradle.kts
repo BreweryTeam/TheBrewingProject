@@ -109,11 +109,6 @@ tasks {
         }
     }
 
-    jar {
-        archiveBaseName.set(rootProject.name)
-        archiveClassifier.set("incomplete")
-    }
-
     shadowJar {
         val publishing =
             project.gradle.startParameter.taskNames.any { it.contains("publish", true) && it.contains("maven", true) }
