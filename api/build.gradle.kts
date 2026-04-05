@@ -34,7 +34,7 @@ dependencies {
 publishing {
     publications {
         create<MavenPublication>("maven") {
-            artifactId = "thebrewingproject-bukkit"
+            artifactId = "thebrewingproject-api"
             artifact(tasks["jar"])
         }
     }
