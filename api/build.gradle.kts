@@ -28,13 +28,16 @@ dependencies {
     testFixturesImplementation(libs.adventure.api)
 }
 
-
+java {
+    withSourcesJar()
+    withJavadocJar()
+}
 
 publishing {
     publications {
         create<MavenPublication>("mavenJava") {
             artifactId = "thebrewingproject-api"
-            artifact(tasks["jar"])
+            from(components["java"])
             pom {
                 name = "TheBrewingProject API"
                 description = "The API for TheBrewingProject - Except server native elements"
