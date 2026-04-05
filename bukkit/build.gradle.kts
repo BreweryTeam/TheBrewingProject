@@ -110,21 +110,15 @@ tasks {
     }
 
     shadowJar {
-        val publishing =
-            project.gradle.startParameter.taskNames.any { it.contains("publish", true) && it.contains("maven", true) }
         archiveBaseName.set(rootProject.name)
         archiveClassifier.unset()
 
         dependencies {
-            if (!publishing) {
-                exclude {
-                    it.moduleGroup == "org.jetbrains.kotlin"
-                            || it.moduleGroup == "org.jetbrains.kotlinx"
-                            || it.moduleGroup == "org.joml"
-                            || it.moduleGroup == "org.slf4j"
-                }
-            } else {
-                include(project(":api"))
+            exclude {
+                it.moduleGroup == "org.jetbrains.kotlin"
+                        || it.moduleGroup == "org.jetbrains.kotlinx"
+                        || it.moduleGroup == "org.joml"
+                        || it.moduleGroup == "org.slf4j"
             }
         }
 
