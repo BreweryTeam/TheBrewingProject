@@ -27,7 +27,9 @@ dependencies {
     compileOnly(libs.adventure.api)
     compileOnly(libs.adventure.text.minimessage)
     api(libs.okaeri.yaml)
-    implementation(libs.simple.yaml)
+    implementation(libs.simple.yaml) {
+        exclude("org.yaml", "snakeyaml")
+    }
     implementation(libs.hikaricp)
     implementation(libs.exp4j)
 

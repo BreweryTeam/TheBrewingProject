@@ -49,8 +49,10 @@ dependencies {
     // libraries
     compileOnly(libs.protocolLib)
     implementation(libs.schem.reader)
-    implementation(libs.simple.yaml)
     implementation(libs.okaeri.json)
+    implementation(libs.simple.yaml) {
+        exclude("org.yaml", "snakeyaml")
+    }
     implementation(libs.faststats.bukkit) {
         exclude("com.google.code.gson", "gson")
     }
