@@ -35,7 +35,7 @@ jobs:
           MODRINTH_TOKEN: ${{ secrets.MODRINTH_PUBLISH_KEY }}
       - name: Publish to maven repo
         run: |
-          ./gradlew :bukkit:publishMavenPublicationToBreweryteamRepository \
+          ./gradlew publishAllPublicationsToBreweryteamRepository \
           -PbreweryteamUsername=${{ secrets.BREWERY_REPO_USERNAME }} \
           -PbreweryteamPassword=${{ secrets.BREWERY_REPO_PASSWORD }}
         env:

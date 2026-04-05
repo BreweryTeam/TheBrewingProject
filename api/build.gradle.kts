@@ -1,6 +1,7 @@
 
 plugins {
     `tbp-module`
+    `maven-publish`
     id("java-test-fixtures")
 }
 
@@ -26,6 +27,28 @@ dependencies {
 
     testFixturesImplementation(libs.junit.jupiter)
     testFixturesImplementation(libs.adventure.api)
+}
+
+
+
+publishing {
+    publications {
+        create<MavenPublication>("maven") {
+            artifactId = "thebrewingproject-bukkit"
+            artifact(tasks["jar"])
+        }
+    }
+    repositories {
+        maven {
+            name = "breweryteam-api"
+            url = uri("https://repo.breweryteam.dev/releases")
+            credentials(PasswordCredentials::class)
+            authentication {
+                create<BasicAuthentication>("basic")
+            }
+
+        }
+    }
 }
 
 tasks.test {
