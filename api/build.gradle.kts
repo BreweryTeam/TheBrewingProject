@@ -40,7 +40,7 @@ publishing {
     }
     repositories {
         maven {
-            name = "breweryteam-api"
+            name = "breweryteam"
             url = uri("https://repo.breweryteam.dev/releases")
             credentials(PasswordCredentials::class)
             authentication {
