@@ -9,7 +9,7 @@ import java.util.List;
 public class ComponentUtil {
 
     /**
-     * Splits a Component into a List<Component> with one Component per line
+     * Splits a Component into a list of components with one Component per line
      * (I have no idea how I did that, but it works and that's what matters)
      */
     public static List<Component> splitIntoLines(Component component) {

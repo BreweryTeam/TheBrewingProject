@@ -99,6 +99,7 @@ tasks {
 
     runServer {
         minecraftVersion(project.findProperty("minecraft.version")!! as String)
+        pluginJars(project.tasks.shadowJar.flatMap { it.archiveFile })
         if (project.findProperty("testing.integrations")!! == "true") {
             downloadPlugins {
                 modrinth("worldedit", "3ISh7ADm")
@@ -109,27 +110,13 @@ tasks {
         }
     }
 
-    jar {
-        archiveBaseName.set(rootProject.name)
-        archiveClassifier.set("incomplete")
-    }
-
     shadowJar {
-        val publishing =
-            project.gradle.startParameter.taskNames.any { it.contains("publish", true) && it.contains("maven", true) }
-        archiveBaseName.set(rootProject.name)
-        archiveClassifier.unset()
-
         dependencies {
-            if (!publishing) {
-                exclude {
-                    it.moduleGroup == "org.jetbrains.kotlin"
-                            || it.moduleGroup == "org.jetbrains.kotlinx"
-                            || it.moduleGroup == "org.joml"
-                            || it.moduleGroup == "org.slf4j"
-                }
-            } else {
-                include(project(":api"))
+            exclude {
+                it.moduleGroup == "org.jetbrains.kotlin"
+                        || it.moduleGroup == "org.jetbrains.kotlinx"
+                        || it.moduleGroup == "org.joml"
+                        || it.moduleGroup == "org.slf4j"
             }
         }
 
@@ -311,11 +298,48 @@ bukkit {
     )
 }
 
+runPaper {
+    disablePluginJarDetection()
+}
+
+java {
+    withSourcesJar()
+    withJavadocJar()
+}
+
 publishing {
     publications {
-        create<MavenPublication>("maven") {
-            artifactId = "thebrewingproject"
-            artifact(tasks["shadowJar"])
+        create<MavenPublication>("mavenJava") {
+            artifactId = "thebrewingproject-bukkit"
+            from(components["java"])
+            pom {
+                name = "TheBrewingProject Bukkit API"
+                description = "API for TheBrewingProject - Bukkit"
+                url = "https://tbp.breweryteam.dev/docs/welcome/"
+                licenses {
+                    license {
+                        name = "The MIT license"
+                        url =
+                            "https://raw.githubusercontent.com/BreweryTeam/TheBrewingProject/refs/heads/master/LICENSE"
+                    }
+                }
+                scm {
+                    connection = "scm:git:git//github.com/BreweryProject/thebrewingproject.git"
+                    developerConnection = "scm:git:ssh://github.com:BreweryProject/thebrewingproject.git"
+                    url = "https://github.com/BreweryProject/thebrewingproject"
+                }
+            }
+        }
+    }
+    repositories {
+        maven {
+            name = "breweryteam"
+            url = uri("https://repo.breweryteam.dev/releases")
+            credentials(PasswordCredentials::class)
+            authentication {
+                create<BasicAuthentication>("basic")
+            }
+
         }
     }
 }
