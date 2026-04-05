@@ -110,9 +110,6 @@ tasks {
     }
 
     shadowJar {
-        archiveBaseName.set(rootProject.name)
-        archiveClassifier.unset()
-
         dependencies {
             exclude {
                 it.moduleGroup == "org.jetbrains.kotlin"

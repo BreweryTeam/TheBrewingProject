@@ -98,7 +98,7 @@ mockbukkit = { group = "org.mockbukkit.mockbukkit", name = "mockbukkit-v1.21", v
 sqlite-jdbc = { group = "org.xerial", name = "sqlite-jdbc", version.ref = "sqlite-jdbc" }
 
 [plugins]
-shadow = { id = "com.gradleup.shadow", version = "8.3.7" }
+shadow = { id = "com.gradleup.shadow", version = "9.4.1" }
 run-paper = { id = "xyz.jpenilla.run-paper", version = "2.3.1" }
 plugin-yml-bukkit = { id = "de.eldoria.plugin-yml.bukkit", version = "0.7.1" }
 hangar-publish = { id = "io.papermc.hangar-publish-plugin", version = "0.1.3" }
