@@ -41,21 +41,6 @@ and [Modrinth](https://modrinth.com/plugin/thebrewingproject).
 | `brewery.barrel.access`     | **Allows accessing TBP custom barrels.**                 |
 | `brewery.cauldron.access`   | **Allows brewing brews in cauldrons.**                   |
 
-***
-
-### Wiki Entries
-
-- [Creating Brews](https://hangar.papermc.io/Thorinwasher/TheBrewingProject/pages/Wiki/Creating-brews)
-- [Custom Recipes](https://hangar.papermc.io/Thorinwasher/TheBrewingProject/pages/Wiki/Custom-Recipes)
-- [Configuration](https://hangar.papermc.io/Thorinwasher/TheBrewingProject/pages/Wiki/Configuration)
-- [Commands](https://hangar.papermc.io/Thorinwasher/TheBrewingProject/pages/Wiki/Commands)
-- [Permissions](https://hangar.papermc.io/Thorinwasher/TheBrewingProject/pages/Wiki/Permissions)
-
-> [!NOTE]
-> This will be expanded upon and possibly relocated
-
-***
-
 ### Developers
 
 **API**
@@ -70,9 +55,11 @@ repositories {
 }
 
 dependencies {
-    compileOnly("com.github.BreweryTeam.TheBrewingProject:bukkit:v2.0.0")
+    compileOnly("com.github.BreweryTeam:TheBrewingProject:<version–tag>")
 }
 ```
+> [!NOTE]
+> You can find version tags [here](https://github.com/BreweryTeam/TheBrewingProject/tags)
 
 Simple use of the API, your plugin needs to be loaded after TBP.
 
