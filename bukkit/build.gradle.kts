@@ -114,6 +114,8 @@ tasks {
     }
 
     shadowJar {
+        archiveBaseName = rootProject.name
+        archiveClassifier = "bukkit"
         dependencies {
             exclude {
                 it.moduleGroup == "org.jetbrains.kotlin"
