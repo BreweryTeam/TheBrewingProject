@@ -14,7 +14,10 @@ dependencies {
     compileOnly(libs.paper.api)
 }
 
-
+java {
+    withSourcesJar()
+    withJavadocJar()
+}
 
 publishing {
     publications {

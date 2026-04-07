@@ -309,11 +309,6 @@ bukkit {
     )
 }
 
-java {
-    withSourcesJar()
-    withJavadocJar()
-}
-
 modrinth {
     token.set(System.getenv("MODRINTH_TOKEN") ?: run {
         println("Could not find any Modrinth token!")
