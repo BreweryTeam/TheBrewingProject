@@ -51,7 +51,6 @@ Importing the API
 
 ```kts
 repositories {
-    maven("https://jitpack.io")
     maven("https://repo.breweryteam.dev/")
 }
 
