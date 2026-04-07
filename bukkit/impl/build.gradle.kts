@@ -42,7 +42,7 @@ repositories {
 
 dependencies {
     implementation(project(":core"))
-    api(project(":api"))
+    api(project(":bukkit:bukkit-api"))
 
     compileOnly(libs.paper.api)
 
@@ -312,43 +312,6 @@ bukkit {
 java {
     withSourcesJar()
     withJavadocJar()
-}
-
-publishing {
-    publications {
-        create<MavenPublication>("mavenJava") {
-            artifactId = "thebrewingproject-bukkit"
-            from(components["java"])
-            pom {
-                name = "TheBrewingProject Bukkit API"
-                description = "API for TheBrewingProject - Bukkit"
-                url = "https://tbp.breweryteam.dev/docs/welcome/"
-                licenses {
-                    license {
-                        name = "The MIT license"
-                        url =
-                            "https://raw.githubusercontent.com/BreweryTeam/TheBrewingProject/refs/heads/master/LICENSE"
-                    }
-                }
-                scm {
-                    connection = "scm:git:git//github.com/BreweryProject/thebrewingproject.git"
-                    developerConnection = "scm:git:ssh://github.com:BreweryProject/thebrewingproject.git"
-                    url = "https://github.com/BreweryProject/thebrewingproject"
-                }
-            }
-        }
-    }
-    repositories {
-        maven {
-            name = "breweryteam"
-            url = uri("https://repo.breweryteam.dev/releases")
-            credentials(PasswordCredentials::class)
-            authentication {
-                create<BasicAuthentication>("basic")
-            }
-
-        }
-    }
 }
 
 modrinth {

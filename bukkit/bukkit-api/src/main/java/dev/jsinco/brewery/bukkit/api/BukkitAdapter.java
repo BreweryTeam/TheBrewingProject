@@ -3,7 +3,6 @@ package dev.jsinco.brewery.bukkit.api;
 import dev.jsinco.brewery.api.util.BreweryKey;
 import dev.jsinco.brewery.api.util.Holder;
 import dev.jsinco.brewery.api.vector.BreweryLocation;
-import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -12,6 +11,7 @@ import org.bukkit.Registry;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.Plugin;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
@@ -34,13 +34,13 @@ public class BukkitAdapter {
         return new BreweryLocation(block.getX(), block.getY(), block.getZ(), block.getWorld().getUID());
     }
 
-    public static CompletableFuture<Void> scheduleIfLoaded(BreweryLocation location, Consumer<Location> locationConsumer) {
+    public static CompletableFuture<Void> scheduleIfLoaded(BreweryLocation location, Plugin owner, Consumer<Location> locationConsumer) {
         Optional<Location> locationOptional = toLocation(location);
         if (!locationOptional.map(Location::isChunkLoaded).orElse(false)) {
             return CompletableFuture.completedFuture(null);
         }
         CompletableFuture<Void> output = new CompletableFuture<>();
-        Bukkit.getRegionScheduler().run(TheBrewingProject.getInstance(), locationOptional.get(), ignored -> {
+        Bukkit.getRegionScheduler().run(owner, locationOptional.get(), ignored -> {
             locationConsumer.accept(locationOptional.get());
             output.complete(null);
         });

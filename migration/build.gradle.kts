@@ -17,8 +17,7 @@ repositories {
 dependencies {
     compileOnly("io.papermc.paper:paper-api:1.21.8-R0.1-SNAPSHOT")
 
-    compileOnly(project(":bukkit"))
-    compileOnly(project(":api"))
+    compileOnly(project(":bukkit:impl"))
     compileOnly(project(":core"))
     compileOnly("com.dre.brewery:BreweryX:3.6.0")
     compileOnly(libs.adventure.text.minimessage)
