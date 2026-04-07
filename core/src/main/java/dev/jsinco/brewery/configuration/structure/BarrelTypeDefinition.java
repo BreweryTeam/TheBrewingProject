@@ -19,7 +19,7 @@ public class BarrelTypeDefinition extends OkaeriConfig {
     @CustomKey("proximity-multipliers")
     private Map<String, Double> proximityMultipliers = Map.of();
 
-    @CustomKey("default-proximity-multiplier")
+    @CustomKey("default–proximity-multiplier")
     private double defaultProximity = 0.7D;
 
     public Optional<BarrelType> toBarrelType() {
