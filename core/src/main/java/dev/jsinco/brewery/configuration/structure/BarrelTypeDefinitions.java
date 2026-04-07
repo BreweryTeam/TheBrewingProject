@@ -16,6 +16,7 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 public class BarrelTypeDefinitions extends OkaeriConfig {
 
@@ -68,11 +69,19 @@ public class BarrelTypeDefinitions extends OkaeriConfig {
             List<BarrelType> barrelTypes = new ArrayList<>();
             instance.barrelTypes.stream()
                     .map(BarrelTypeDefinition::toBarrelType)
+                    .flatMap(Optional::stream)
                     .forEach(barrelTypes::add);
             defaultsInstance.barrelTypes.stream()
                     .map(BarrelTypeDefinition::toBarrelType)
+                    .flatMap(Optional::stream)
                     .filter(barrelType -> barrelTypes.stream().noneMatch(barrelType1 -> barrelType1.key().equals(barrelType.key())))
                     .forEach(barrelTypes::add);
+            instance.barrelTypes.forEach(barrelTypeDefinition ->
+                    barrelTypeDefinition.postValidate(barrelTypes)
+            );
+            defaultsInstance.barrelTypes.forEach(barrelTypeDefinition ->
+                    barrelTypeDefinition.postValidate(barrelTypes)
+            );
             return Collections.unmodifiableList(barrelTypes);
         } catch (IOException e) {
             throw new RuntimeException(e);
