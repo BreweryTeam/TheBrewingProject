@@ -1,7 +1,7 @@
 package dev.jsinco.brewery.bukkit.api.transaction;
 
 import dev.jsinco.brewery.api.brew.Brew;
-import dev.jsinco.brewery.bukkit.brew.BrewAdapter;
+import dev.jsinco.brewery.bukkit.api.brew.BrewAdapterHolder;
 import org.bukkit.inventory.ItemStack;
 
 public sealed interface ItemSource {
@@ -24,7 +24,7 @@ public sealed interface ItemSource {
 
         @Override
         public ItemStack get() {
-            return BrewAdapter.toItem(brew, state);
+            return BrewAdapterHolder.instance().toItem(brew, state);
         }
     }
 }

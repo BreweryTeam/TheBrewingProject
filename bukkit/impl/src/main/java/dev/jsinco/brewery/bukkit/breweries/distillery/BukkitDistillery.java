@@ -277,7 +277,7 @@ public class BukkitDistillery implements Distillery<BukkitDistillery, ItemStack,
                 || distillate.isFull()) {
             return;
         }
-        BukkitAdapter.scheduleIfLoaded(unique, location -> {
+        BukkitAdapter.scheduleIfLoaded(unique, TheBrewingProject.getInstance(), location -> {
             checkDirty();
             if (timeProcessed % processTime == 0 && timeProcessed != 0) {
                 SoundPlayer.playSoundEffect(
