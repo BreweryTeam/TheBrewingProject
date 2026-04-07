@@ -49,7 +49,9 @@ dependencies {
     // libraries
     compileOnly(libs.protocolLib)
     implementation(libs.schem.reader)
-    implementation(libs.okaeri.json)
+    implementation(libs.okaeri.json) {
+        exclude("com.google.code.gson", "gson")
+    }
     implementation(libs.simple.yaml) {
         exclude("org.yaml", "snakeyaml")
     }
