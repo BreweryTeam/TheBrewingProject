@@ -117,7 +117,8 @@ tasks {
 
     shadowJar {
         archiveBaseName = rootProject.name
-        archiveClassifier = "bukkit"
+        archiveClassifier.unset()
+        addMultiReleaseAttribute = false
         dependencies {
             exclude {
                 it.moduleGroup == "org.jetbrains.kotlin"
