@@ -99,7 +99,7 @@ public class BukkitCauldron implements Cauldron {
 
     @Override
     public void tick() {
-        BukkitAdapter.scheduleIfLoaded(location, bukkitLocation -> {
+        BukkitAdapter.scheduleIfLoaded(location, TheBrewingProject.getInstance(), bukkitLocation -> {
             if (!Tag.CAULDRONS.isTagged(bukkitLocation.getBlock().getType()) || getBlock().getType() == Material.CAULDRON) {
                 ListenerUtil.removeActiveSinglePositionStructure(this);
                 return;
