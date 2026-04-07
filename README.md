@@ -52,14 +52,15 @@ Importing the API
 ```kts
 repositories {
     maven("https://jitpack.io")
+    maven("https://repo.breweryteam.dev/")
 }
 
 dependencies {
-    compileOnly("com.github.BreweryTeam:TheBrewingProject:<version–tag>")
+    compileOnly("dev.jsinco.brewery:thebrewingproject-bukkit:<version>")
 }
 ```
 > [!NOTE]
-> You can find version tags [here](https://github.com/BreweryTeam/TheBrewingProject/tags)
+> You can find versions [here](https://repo.breweryteam.dev/#/)
 
 Simple use of the API, your plugin needs to be loaded after TBP.
 
