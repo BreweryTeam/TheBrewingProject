@@ -6,7 +6,7 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import dev.jsinco.brewery.api.brew.Brew;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
-import dev.jsinco.brewery.bukkit.brew.BrewAdapter;
+import dev.jsinco.brewery.bukkit.brew.BrewAdapterAccess;
 import dev.jsinco.brewery.bukkit.command.argument.EnumArgument;
 import dev.jsinco.brewery.bukkit.recipe.RecipeEffectsImpl;
 import dev.jsinco.brewery.bukkit.util.BukkitMessageUtil;
@@ -70,7 +70,7 @@ public class InfoCommand {
             MessageUtil.message(sender, "tbp.command.info.not-a-brew");
             return;
         }
-        Optional<Brew> brewOptional = BrewAdapter.fromItem(itemStack);
+        Optional<Brew> brewOptional = BrewAdapterAccess.fromItem(itemStack);
         if (debug) {
             brewOptional.ifPresentOrElse(
                     brew -> sender.sendMessage(debugInfo(brew)),

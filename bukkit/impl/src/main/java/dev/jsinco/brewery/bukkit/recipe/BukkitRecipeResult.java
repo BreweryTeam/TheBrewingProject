@@ -10,7 +10,7 @@ import dev.jsinco.brewery.api.util.Logger;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.bukkit.api.integration.IntegrationTypes;
 import dev.jsinco.brewery.bukkit.api.integration.ItemIntegration;
-import dev.jsinco.brewery.bukkit.brew.BrewAdapter;
+import dev.jsinco.brewery.bukkit.brew.BrewAdapterAccess;
 import dev.jsinco.brewery.bukkit.ingredient.BukkitIngredientManager;
 import dev.jsinco.brewery.bukkit.ingredient.UncheckedIngredientImpl;
 import dev.jsinco.brewery.bukkit.util.BukkitMessageUtil;
@@ -114,7 +114,7 @@ public class BukkitRecipeResult implements RecipeResult<ItemStack> {
     }
 
     private void applyData(ItemStack itemStack) {
-        BrewAdapter.hideTooltips(itemStack);
+        BrewAdapterAccess.hideTooltips(itemStack);
         itemStack.setData(DataComponentTypes.CUSTOM_NAME, MessageUtil.miniMessage(name)
                 .decoration(TextDecoration.ITALIC, false)
                 .colorIfAbsent(NamedTextColor.WHITE)

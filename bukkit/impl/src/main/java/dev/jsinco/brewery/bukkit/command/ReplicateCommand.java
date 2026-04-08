@@ -7,7 +7,7 @@ import dev.jsinco.brewery.api.brew.BrewQuality;
 import dev.jsinco.brewery.api.brew.BrewScore;
 import dev.jsinco.brewery.api.recipe.Recipe;
 import dev.jsinco.brewery.brew.BrewImpl;
-import dev.jsinco.brewery.bukkit.brew.BrewAdapter;
+import dev.jsinco.brewery.bukkit.brew.BrewAdapterAccess;
 import dev.jsinco.brewery.bukkit.command.argument.EnumArgument;
 import dev.jsinco.brewery.bukkit.command.argument.RecipeArgument;
 import dev.jsinco.brewery.bukkit.recipe.BukkitRecipeResult;
@@ -48,8 +48,8 @@ public class ReplicateCommand {
         if (score instanceof BrewScoreImpl scoreImpl) scoreImpl.setQualityOverride(quality);
         ItemStack brewItem = recipe.getRecipeResult(quality).newBrewItem(score, brew, new Brew.State.Other());
         brewItem.editPersistentDataContainer(pdc -> {
-            BrewAdapter.applyBrewTags(pdc, recipe, score.score(), ((BukkitRecipeResult) recipe.getRecipeResult(quality)).getName());
-            BrewAdapter.applyBrewData(pdc, brew);
+            BrewAdapterAccess.applyBrewTags(pdc, recipe, score.score(), ((BukkitRecipeResult) recipe.getRecipeResult(quality)).getName());
+            BrewAdapterAccess.applyBrewData(pdc, brew);
         });
         if (!target.getInventory().addItem(brewItem).isEmpty()) {
             target.getLocation().getWorld().dropItem(target.getLocation(), brewItem);

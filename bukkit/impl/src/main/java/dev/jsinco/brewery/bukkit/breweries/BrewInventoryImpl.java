@@ -2,7 +2,7 @@ package dev.jsinco.brewery.bukkit.breweries;
 
 import dev.jsinco.brewery.api.brew.Brew;
 import dev.jsinco.brewery.api.breweries.BrewInventory;
-import dev.jsinco.brewery.bukkit.brew.BrewAdapter;
+import dev.jsinco.brewery.bukkit.brew.BrewAdapterAccess;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.HumanEntity;
@@ -46,7 +46,7 @@ public class BrewInventoryImpl implements InventoryHolder, BrewInventory {
                 inventory.setItem(i, null);
                 continue;
             }
-            inventory.setItem(i, BrewAdapter.toItem(brew, new Brew.State.Brewing()));
+            inventory.setItem(i, BrewAdapterAccess.toItem(brew, new Brew.State.Brewing()));
         }
     }
 
@@ -59,7 +59,7 @@ public class BrewInventoryImpl implements InventoryHolder, BrewInventory {
             if (itemStack == null) {
                 brew = null;
             } else {
-                brew = BrewAdapter.fromItem(itemStack).orElse(null);
+                brew = BrewAdapterAccess.fromItem(itemStack).orElse(null);
             }
             if (!Objects.equals(brew, brews[i])) {
                 hasUpdated = true;

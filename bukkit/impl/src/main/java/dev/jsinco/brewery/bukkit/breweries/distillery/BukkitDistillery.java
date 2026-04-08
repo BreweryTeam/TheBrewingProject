@@ -17,7 +17,7 @@ import dev.jsinco.brewery.brew.DistillStepImpl;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.bukkit.api.BukkitAdapter;
 import dev.jsinco.brewery.bukkit.api.event.process.BrewDistillEvent;
-import dev.jsinco.brewery.bukkit.brew.BrewAdapter;
+import dev.jsinco.brewery.bukkit.brew.BrewAdapterAccess;
 import dev.jsinco.brewery.bukkit.breweries.BrewInventoryImpl;
 import dev.jsinco.brewery.bukkit.structure.BreweryStructure;
 import dev.jsinco.brewery.bukkit.structure.PlacedBreweryStructure;
@@ -157,7 +157,7 @@ public class BukkitDistillery implements Distillery<BukkitDistillery, ItemStack,
 
     @Override
     public boolean inventoryAllows(@NonNull ItemStack item) {
-        return BrewAdapter.fromItem(item).isPresent();
+        return BrewAdapterAccess.fromItem(item).isPresent();
     }
 
     @Override

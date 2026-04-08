@@ -6,7 +6,7 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import dev.jsinco.brewery.api.brew.Brew;
 import dev.jsinco.brewery.brew.BrewImpl;
-import dev.jsinco.brewery.bukkit.brew.BrewAdapter;
+import dev.jsinco.brewery.bukkit.brew.BrewAdapterAccess;
 import dev.jsinco.brewery.util.MessageUtil;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
@@ -53,10 +53,10 @@ public class SealCommand {
             if (itemStack == null) {
                 continue;
             }
-            Optional<Brew> brewOptional = BrewAdapter.fromItem(itemStack);
+            Optional<Brew> brewOptional = BrewAdapterAccess.fromItem(itemStack);
             if (brewOptional.isPresent()) {
                 oneFound = true;
-                targetInventory.setItem(i, BrewAdapter.toItem(brewOptional.get(), new BrewImpl.State.Seal(volumeMessage)));
+                targetInventory.setItem(i, BrewAdapterAccess.toItem(brewOptional.get(), new BrewImpl.State.Seal(volumeMessage)));
             }
         }
         if (oneFound) {
@@ -73,8 +73,8 @@ public class SealCommand {
         String volumeMessage = parseVolume(context);
 
         PlayerInventory targetInventory = target.getInventory();
-        BrewAdapter.fromItem(targetInventory.getItemInMainHand())
-                .map(brew -> BrewAdapter.toItem(brew, new BrewImpl.State.Seal(volumeMessage)))
+        BrewAdapterAccess.fromItem(targetInventory.getItemInMainHand())
+                .map(brew -> BrewAdapterAccess.toItem(brew, new BrewImpl.State.Seal(volumeMessage)))
                 .ifPresentOrElse(itemStack -> {
                     targetInventory.setItemInMainHand(itemStack);
                     MessageUtil.message(sender, "tbp.command.seal-success", Placeholder.unparsed("player_name", target.getName()));

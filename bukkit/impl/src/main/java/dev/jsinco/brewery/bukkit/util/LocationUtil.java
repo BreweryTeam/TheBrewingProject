@@ -3,7 +3,7 @@ package dev.jsinco.brewery.bukkit.util;
 import dev.jsinco.brewery.api.brew.Brew;
 import dev.jsinco.brewery.api.vector.BreweryLocation;
 import dev.jsinco.brewery.bukkit.api.BukkitAdapter;
-import dev.jsinco.brewery.bukkit.brew.BrewAdapter;
+import dev.jsinco.brewery.bukkit.brew.BrewAdapterAccess;
 import dev.jsinco.brewery.configuration.EventSection;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -133,7 +133,7 @@ public class LocationUtil {
     public static void dropBrews(Location location, List<Brew> drops) {
         Location offset = location.clone().add(0.5, 0, 0.5);
         drops.stream()
-                .map(brew -> BrewAdapter.toItem(brew, new Brew.State.Other()))
+                .map(brew -> BrewAdapterAccess.toItem(brew, new Brew.State.Other()))
                 .forEach(itemStack -> offset.getWorld().dropItem(offset, itemStack));
     }
 

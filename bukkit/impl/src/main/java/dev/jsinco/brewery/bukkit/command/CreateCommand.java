@@ -16,7 +16,7 @@ import dev.jsinco.brewery.brew.BrewImpl;
 import dev.jsinco.brewery.brew.CookStepImpl;
 import dev.jsinco.brewery.brew.DistillStepImpl;
 import dev.jsinco.brewery.brew.MixStepImpl;
-import dev.jsinco.brewery.bukkit.brew.BrewAdapter;
+import dev.jsinco.brewery.bukkit.brew.BrewAdapterAccess;
 import dev.jsinco.brewery.bukkit.command.argument.EnumArgument;
 import dev.jsinco.brewery.bukkit.command.argument.FlaggedArgumentBuilder;
 import dev.jsinco.brewery.bukkit.command.argument.IngredientsArgument;
@@ -68,7 +68,7 @@ public class CreateCommand {
                 }
             }
             Player target = BreweryCommand.getPlayer(context);
-            ItemStack brewItem = BrewAdapter.toItem(new BrewImpl(steps), new BrewImpl.State.Other());
+            ItemStack brewItem = BrewAdapterAccess.toItem(new BrewImpl(steps), new BrewImpl.State.Other());
             PlayerInventory inventory = target.getInventory();
             if (!inventory.addItem(brewItem).isEmpty()) {
                 target.getWorld().dropItem(target.getLocation(), brewItem);

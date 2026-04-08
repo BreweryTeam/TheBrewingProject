@@ -3,7 +3,7 @@ package dev.jsinco.brewery.bukkit.event;
 import dev.jsinco.brewery.api.brew.Brew;
 import dev.jsinco.brewery.brew.BrewImpl;
 import dev.jsinco.brewery.api.breweries.InventoryAccessible;
-import dev.jsinco.brewery.bukkit.brew.BrewAdapter;
+import dev.jsinco.brewery.bukkit.brew.BrewAdapterAccess;
 import dev.jsinco.brewery.bukkit.breweries.BreweryRegistry;
 import dev.jsinco.brewery.bukkit.effect.named.PukeNamedExecutable;
 import dev.jsinco.brewery.configuration.Config;
@@ -65,8 +65,8 @@ public class InventoryEventListener implements Listener {
         ItemStack hoveredItem = event.getCurrentItem();
         Stream<ItemStack> relatedItems;
         if (upperInventoryIsClicked && hoveredItem != null) {
-            BrewAdapter.fromItem(hoveredItem)
-                    .map(brew -> BrewAdapter.toItem(brew, new BrewImpl.State.Other()))
+            BrewAdapterAccess.fromItem(hoveredItem)
+                    .map(brew -> BrewAdapterAccess.toItem(brew, new BrewImpl.State.Other()))
                     .ifPresent(event::setCurrentItem);
         }
         if (action == InventoryAction.MOVE_TO_OTHER_INVENTORY) {
@@ -119,8 +119,8 @@ public class InventoryEventListener implements Listener {
         }
         both.filter(inventoryAccessible -> !inventoryAccessible.inventoryAllows(event.getItem()))
                 .ifPresent(ignored -> event.setCancelled(true));
-        source.flatMap(ignored -> BrewAdapter.fromItem(event.getItem())
-                        .map(brew -> BrewAdapter.toItem(brew, new Brew.State.Other())))
+        source.flatMap(ignored -> BrewAdapterAccess.fromItem(event.getItem())
+                        .map(brew -> BrewAdapterAccess.toItem(brew, new Brew.State.Other())))
                 .ifPresent(event::setItem);
 
     }

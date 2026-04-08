@@ -18,7 +18,7 @@ import dev.jsinco.brewery.brew.AgeStepImpl;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.bukkit.api.BukkitAdapter;
 import dev.jsinco.brewery.bukkit.api.event.process.BrewAgeEvent;
-import dev.jsinco.brewery.bukkit.brew.BrewAdapter;
+import dev.jsinco.brewery.bukkit.brew.BrewAdapterAccess;
 import dev.jsinco.brewery.bukkit.breweries.BrewInventoryImpl;
 import dev.jsinco.brewery.bukkit.structure.PlacedBreweryStructure;
 import dev.jsinco.brewery.bukkit.util.LocationUtil;
@@ -98,7 +98,7 @@ public class BukkitBarrel implements Barrel<BukkitBarrel, ItemStack, Inventory>,
 
     @Override
     public boolean inventoryAllows(@NonNull ItemStack item) {
-        return BrewAdapter.fromItem(item).isPresent();
+        return BrewAdapterAccess.fromItem(item).isPresent();
     }
 
     @Override

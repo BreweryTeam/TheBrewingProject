@@ -6,7 +6,7 @@ import dev.jsinco.brewery.api.ingredient.Ingredient;
 import dev.jsinco.brewery.api.recipe.RecipeResult;
 import dev.jsinco.brewery.api.util.BreweryKey;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
-import dev.jsinco.brewery.bukkit.brew.BrewAdapter;
+import dev.jsinco.brewery.bukkit.brew.BrewAdapterAccess;
 import dev.jsinco.brewery.configuration.IngredientsSection;
 import io.papermc.paper.persistence.PersistentDataContainerView;
 import net.kyori.adventure.text.Component;
@@ -29,7 +29,7 @@ public record BreweryIngredient(BreweryKey key) implements BaseIngredient {
 
     public static Optional<Ingredient> from(ItemStack itemStack) {
         PersistentDataContainerView dataContainer = itemStack.getPersistentDataContainer();
-        String key = dataContainer.get(BrewAdapter.BREWERY_TAG, PersistentDataType.STRING);
+        String key = dataContainer.get(BrewAdapterAccess.BREWERY_TAG, PersistentDataType.STRING);
         if (key == null) {
             return Optional.empty();
         }

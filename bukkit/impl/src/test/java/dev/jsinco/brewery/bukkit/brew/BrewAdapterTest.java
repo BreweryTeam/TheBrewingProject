@@ -1,7 +1,6 @@
 package dev.jsinco.brewery.bukkit.brew;
 
 import dev.jsinco.brewery.api.brew.Brew;
-import dev.jsinco.brewery.api.breweries.BarrelType;
 import dev.jsinco.brewery.api.breweries.BarrelTypes;
 import dev.jsinco.brewery.api.breweries.CauldronType;
 import dev.jsinco.brewery.api.meta.MetaDataType;
@@ -57,8 +56,8 @@ public class BrewAdapterTest {
         )).withMeta(Key.key("test", "example"), MetaDataType.STRING, "sample text");
 
         ItemStack item = new ItemStackMockPDC(Material.POTION);
-        item.editPersistentDataContainer(pdc -> BrewAdapter.applyBrewData(pdc, originalBrew));
-        Brew recreatedBrew = BrewAdapter.fromItem(item).get();
+        item.editPersistentDataContainer(pdc -> BrewAdapterAccess.applyBrewData(pdc, originalBrew));
+        Brew recreatedBrew = BrewAdapterAccess.fromItem(item).get();
 
         assertEquals(originalBrew, recreatedBrew);
     }
