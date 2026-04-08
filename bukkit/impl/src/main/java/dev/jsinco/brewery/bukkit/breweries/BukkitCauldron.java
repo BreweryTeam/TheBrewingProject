@@ -24,7 +24,7 @@ import dev.jsinco.brewery.bukkit.api.BukkitAdapter;
 import dev.jsinco.brewery.bukkit.api.event.process.BrewCauldronProcessEvent;
 import dev.jsinco.brewery.bukkit.api.event.transaction.CauldronInsertEvent;
 import dev.jsinco.brewery.bukkit.api.transaction.ItemSource;
-import dev.jsinco.brewery.bukkit.brew.BrewAdapter;
+import dev.jsinco.brewery.bukkit.brew.BrewAdapterAccess;
 import dev.jsinco.brewery.bukkit.ingredient.BukkitIngredientManager;
 import dev.jsinco.brewery.bukkit.listener.ListenerUtil;
 import dev.jsinco.brewery.bukkit.recipe.BukkitRecipeResult;
@@ -174,7 +174,7 @@ public class BukkitCauldron implements Cauldron {
         if (recipeOptional.isEmpty()) {
             return convert(Config.config().cauldrons().failedParticleColor());
         }
-        Optional<Color> defaultRecipeColor = BrewAdapter.getDefaultRecipe(
+        Optional<Color> defaultRecipeColor = BrewAdapterAccess.getDefaultRecipe(
                         recipeOptional,
                         TheBrewingProject.getInstance().getRecipeRegistry(),
                         brew,

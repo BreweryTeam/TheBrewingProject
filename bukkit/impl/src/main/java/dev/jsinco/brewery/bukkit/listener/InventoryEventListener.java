@@ -12,7 +12,7 @@ import dev.jsinco.brewery.bukkit.api.event.transaction.ItemTransactionEvent;
 import dev.jsinco.brewery.bukkit.api.transaction.ItemSource;
 import dev.jsinco.brewery.bukkit.api.transaction.ItemTransaction;
 import dev.jsinco.brewery.bukkit.api.transaction.ItemTransactionSession;
-import dev.jsinco.brewery.bukkit.brew.BrewAdapter;
+import dev.jsinco.brewery.bukkit.brew.BrewAdapterAccess;
 import dev.jsinco.brewery.bukkit.breweries.BreweryRegistry;
 import dev.jsinco.brewery.bukkit.breweries.barrel.BukkitBarrel;
 import dev.jsinco.brewery.bukkit.breweries.distillery.BukkitDistillery;
@@ -277,7 +277,7 @@ public class InventoryEventListener implements Listener {
                                                               ItemTransaction.InventoryPosition from, ItemTransaction.InventoryPosition to,
                                                               ItemStack item, boolean insertion, @Nullable Player player) {
         ItemTransaction transaction = new ItemTransaction(from, to, item, insertion);
-        Optional<Brew> brewOptional = BrewAdapter.fromItem(item)
+        Optional<Brew> brewOptional = BrewAdapterAccess.fromItem(item)
                 .map(inventoryAccessible::initializeBrew);
         if (player != null) {
             brewOptional = brewOptional
@@ -305,7 +305,7 @@ public class InventoryEventListener implements Listener {
             ) : new DistilleryExtractEvent(
                     distillery,
                     new ItemTransactionSession<>(transaction, brewOptional
-                            .map(brew -> BrewAdapter.toItem(brew, new Brew.State.Other()))
+                            .map(brew -> BrewAdapterAccess.toItem(brew, new Brew.State.Other()))
                             .map(ItemSource.ItemBasedSource::new)
                             .orElse(null)
                     ),
@@ -328,7 +328,7 @@ public class InventoryEventListener implements Listener {
             ) : new BarrelExtractEvent(
                     barrel,
                     new ItemTransactionSession<>(transaction, brewOptional
-                            .map(brew -> BrewAdapter.toItem(brew, new Brew.State.Other()))
+                            .map(brew -> BrewAdapterAccess.toItem(brew, new Brew.State.Other()))
                             .map(ItemSource.ItemBasedSource::new)
                             .orElse(null)),
                     cancelState,

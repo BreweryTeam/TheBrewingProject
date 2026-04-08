@@ -12,7 +12,7 @@ import dev.jsinco.brewery.api.util.Pair;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.bukkit.api.ingredient.PluginIngredient;
 import dev.jsinco.brewery.bukkit.api.integration.IntegrationTypes;
-import dev.jsinco.brewery.bukkit.brew.BrewAdapter;
+import dev.jsinco.brewery.bukkit.brew.BrewAdapterAccess;
 import dev.jsinco.brewery.bukkit.integration.IntegrationManagerImpl;
 import dev.jsinco.brewery.recipes.BrewScoreImpl;
 import io.papermc.paper.persistence.PersistentDataContainerView;
@@ -50,9 +50,9 @@ public class BukkitIngredientManager implements IngredientManager<ItemStack> {
                 .or(() -> BreweryIngredient.from(itemStack))
                 .orElse(SimpleIngredient.from(itemStack));
         PersistentDataContainerView dataContainer = itemStack.getPersistentDataContainer();
-        Double score = dataContainer.get(BrewAdapter.BREWERY_SCORE, PersistentDataType.DOUBLE);
+        Double score = dataContainer.get(BrewAdapterAccess.BREWERY_SCORE, PersistentDataType.DOUBLE);
         ImmutableMap.Builder<IngredientMeta<?>, Object> extraBuilder = new ImmutableMap.Builder<>();
-        String displayNameString = dataContainer.get(BrewAdapter.BREWERY_DISPLAY_NAME, PersistentDataType.STRING);
+        String displayNameString = dataContainer.get(BrewAdapterAccess.BREWERY_DISPLAY_NAME, PersistentDataType.STRING);
         if (displayNameString != null) {
             Component displayName = MiniMessage.miniMessage().deserialize(displayNameString);
             extraBuilder.put(IngredientMeta.DISPLAY_NAME, displayName);
@@ -79,7 +79,7 @@ public class BukkitIngredientManager implements IngredientManager<ItemStack> {
                             .map(recipe -> {
                                 RecipeResult<ItemStack> result = recipe.getRecipeResult(BrewScoreImpl.quality(score));
                                 ItemStack itemStack = result.newLorelessItem();
-                                itemStack.editPersistentDataContainer(pdc -> BrewAdapter.applyBrewTags(pdc, recipe, score, ""));
+                                itemStack.editPersistentDataContainer(pdc -> BrewAdapterAccess.applyBrewTags(pdc, recipe, score, ""));
                                 return itemStack;
                             });
             case PluginIngredient pluginIngredient ->
@@ -89,10 +89,10 @@ public class BukkitIngredientManager implements IngredientManager<ItemStack> {
         if (ingredient instanceof IngredientWithMeta ingredientWithMeta) {
             itemStackOptional.ifPresent(itemStack -> itemStack.editPersistentDataContainer(pdc -> {
                 if (ingredientWithMeta.get(IngredientMeta.SCORE) instanceof Double scoreOverride) {
-                    pdc.set(BrewAdapter.BREWERY_SCORE, PersistentDataType.DOUBLE, scoreOverride);
+                    pdc.set(BrewAdapterAccess.BREWERY_SCORE, PersistentDataType.DOUBLE, scoreOverride);
                 }
                 if (ingredientWithMeta.get(IngredientMeta.DISPLAY_NAME) instanceof Component displayName) {
-                    pdc.set(BrewAdapter.BREWERY_DISPLAY_NAME, PersistentDataType.STRING, MiniMessage.miniMessage().serialize(displayName));
+                    pdc.set(BrewAdapterAccess.BREWERY_DISPLAY_NAME, PersistentDataType.STRING, MiniMessage.miniMessage().serialize(displayName));
                 }
             }));
         }

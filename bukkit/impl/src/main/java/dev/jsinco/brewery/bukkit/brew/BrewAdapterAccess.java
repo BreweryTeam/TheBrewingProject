@@ -51,7 +51,7 @@ import java.util.Optional;
 import java.util.Random;
 import java.util.stream.Collectors;
 
-public class BrewAdapter {
+public class BrewAdapterAccess {
 
 
     private static final int DATA_VERSION = 0;

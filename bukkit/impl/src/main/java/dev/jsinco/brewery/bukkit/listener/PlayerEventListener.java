@@ -21,7 +21,7 @@ import dev.jsinco.brewery.bukkit.api.event.BrewConsumeEvent;
 import dev.jsinco.brewery.bukkit.api.event.transaction.CauldronExtractEvent;
 import dev.jsinco.brewery.bukkit.api.integration.IntegrationTypes;
 import dev.jsinco.brewery.bukkit.api.transaction.ItemSource;
-import dev.jsinco.brewery.bukkit.brew.BrewAdapter;
+import dev.jsinco.brewery.bukkit.brew.BrewAdapterAccess;
 import dev.jsinco.brewery.bukkit.breweries.BreweryRegistry;
 import dev.jsinco.brewery.bukkit.breweries.BukkitCauldron;
 import dev.jsinco.brewery.bukkit.breweries.BukkitCauldronDataType;
@@ -172,8 +172,8 @@ public class PlayerEventListener implements Listener {
 
                 isSneaking() && event.getAction() == Action.RIGHT_CLICK_BLOCK) {
             ItemStack mainHand = inventory.getItemInMainHand();
-            ItemStack sealed = BrewAdapter.fromItem(mainHand)
-                    .map(brew -> BrewAdapter.toItem(brew, new BrewImpl.State.Seal(offHand.hasData(DataComponentTypes.CUSTOM_NAME) ? MiniMessage.miniMessage().serialize(offHand.getData(DataComponentTypes.CUSTOM_NAME)) : null)))
+            ItemStack sealed = BrewAdapterAccess.fromItem(mainHand)
+                    .map(brew -> BrewAdapterAccess.toItem(brew, new BrewImpl.State.Seal(offHand.hasData(DataComponentTypes.CUSTOM_NAME) ? MiniMessage.miniMessage().serialize(offHand.getData(DataComponentTypes.CUSTOM_NAME)) : null)))
                     .orElse(mainHand);
             inventory.setItemInMainHand(sealed);
             event.setUseItemInHand(Event.Result.DENY);
@@ -182,9 +182,9 @@ public class PlayerEventListener implements Listener {
         }
         if (block.getType() == Material.HOPPER && event.getItem() != null) {
             PersistentDataContainerView view = event.getItem().getPersistentDataContainer();
-            Double score = view.get(BrewAdapter.BREWERY_SCORE, PersistentDataType.DOUBLE);
+            Double score = view.get(BrewAdapterAccess.BREWERY_SCORE, PersistentDataType.DOUBLE);
             if ((Config.config().emptyAnyDrinkUsingHopper() || (score != null && score == 0))
-                    && BrewAdapter.fromItem(event.getItem()).isPresent() && event.getItem().getType() == Material.POTION) {
+                    && BrewAdapterAccess.fromItem(event.getItem()).isPresent() && event.getItem().getType() == Material.POTION) {
                 event.getItem().setAmount(event.getItem().getAmount() - 1);
                 ItemStack emptyBottle = new ItemStack(Material.GLASS_BOTTLE);
                 if (!event.getPlayer().getInventory().addItem(emptyBottle).isEmpty()) {

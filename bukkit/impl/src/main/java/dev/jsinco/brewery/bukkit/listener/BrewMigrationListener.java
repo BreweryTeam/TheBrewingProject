@@ -1,7 +1,7 @@
 package dev.jsinco.brewery.bukkit.listener;
 
 import dev.jsinco.brewery.api.brew.Brew;
-import dev.jsinco.brewery.bukkit.brew.BrewAdapter;
+import dev.jsinco.brewery.bukkit.brew.BrewAdapterAccess;
 import dev.jsinco.brewery.configuration.Config;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -22,11 +22,11 @@ public class BrewMigrationListener implements Listener {
     private ItemStack migrateItemStack(ItemStack item) {
 
         if (item == null || item.isEmpty()) return item;
-        Optional<Brew> brewOptional = BrewAdapter.fromItem(item);
+        Optional<Brew> brewOptional = BrewAdapterAccess.fromItem(item);
         if (brewOptional.isEmpty()) return item;
 
         // This re-encrypts the brew using 256 bit AES-GCM and the latest key:
-        return BrewAdapter.toItem(brewOptional.get(), new Brew.State.Other());
+        return BrewAdapterAccess.toItem(brewOptional.get(), new Brew.State.Other());
     }
 
     @EventHandler

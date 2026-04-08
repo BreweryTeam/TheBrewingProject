@@ -4,7 +4,7 @@ import com.ghostchu.quickshop.api.event.general.ShopItemMatchEvent;
 import dev.jsinco.brewery.api.ingredient.Ingredient;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.bukkit.api.integration.ChestShopIntegration;
-import dev.jsinco.brewery.bukkit.brew.BrewAdapter;
+import dev.jsinco.brewery.bukkit.brew.BrewAdapterAccess;
 import dev.jsinco.brewery.bukkit.ingredient.BukkitIngredientManager;
 import dev.jsinco.brewery.util.ClassUtil;
 import dev.jsinco.brewery.util.IngredientUtil;
@@ -31,7 +31,7 @@ public class QuickShopHikariIntegration implements ChestShopIntegration, Listene
 
     @EventHandler(ignoreCancelled = true)
     public void onShopItemMatch(ShopItemMatchEvent event) {
-        if (BrewAdapter.isBrew(event.original())) {
+        if (BrewAdapterAccess.isBrew(event.original())) {
             event.matches(matches(event.original(), event.comparison()));
         }
     }

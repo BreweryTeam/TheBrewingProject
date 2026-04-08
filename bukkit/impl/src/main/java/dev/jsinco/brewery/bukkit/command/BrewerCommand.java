@@ -8,7 +8,7 @@ import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import dev.jsinco.brewery.api.brew.Brew;
 import dev.jsinco.brewery.api.brew.BrewingStep;
 import dev.jsinco.brewery.brew.BrewImpl;
-import dev.jsinco.brewery.bukkit.brew.BrewAdapter;
+import dev.jsinco.brewery.bukkit.brew.BrewAdapterAccess;
 import dev.jsinco.brewery.bukkit.command.argument.EnumArgument;
 import dev.jsinco.brewery.bukkit.command.argument.OfflinePlayerArgument;
 import dev.jsinco.brewery.bukkit.command.argument.OfflinePlayerSelectorArgumentResolver;
@@ -189,7 +189,7 @@ public class BrewerCommand {
                 .stream()
                 .map(OfflinePlayer::getUniqueId)
                 .toList();
-        Optional<Brew> brewOptional = BrewAdapter.fromItem(itemStack);
+        Optional<Brew> brewOptional = BrewAdapterAccess.fromItem(itemStack);
         if (stepIndex.isPresent() && brewOptional.isPresent() && brewOptional.get().stepAmount() <= stepIndex.get()) {
             throw INDEX_OUT_OF_BOUNDS.create(brewOptional.get().stepAmount());
         }
@@ -202,7 +202,7 @@ public class BrewerCommand {
                                 brew.withModifiedStep(index, brewingStep -> stepOperation.apply(brewingStep, brewerUuids))
                         ).orElseGet(() -> brewOperation.apply(brew, brewerUuids))
                 ).ifPresentOrElse(brew -> {
-                    targetSlot.itemSetter().accept(BrewAdapter.toItem(brew, new Brew.State.Other()));
+                    targetSlot.itemSetter().accept(BrewAdapterAccess.toItem(brew, new Brew.State.Other()));
                     MessageUtil.message(sender, successMessageKey, Placeholder.component("brewers",
                             brewers.stream()
                                     .map(BrewerCommand::getName)

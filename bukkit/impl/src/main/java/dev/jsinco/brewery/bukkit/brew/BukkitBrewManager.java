@@ -38,12 +38,12 @@ public class BukkitBrewManager implements BrewManager<ItemStack> {
 
     @Override
     public ItemStack toItem(Brew brew, Brew.State brewState) {
-        return BrewAdapter.toItem(brew, brewState);
+        return BrewAdapterAccess.toItem(brew, brewState);
     }
 
     @Override
     public Optional<Brew> fromItem(ItemStack item) {
-        return BrewAdapter.fromItem(item);
+        return BrewAdapterAccess.fromItem(item);
     }
 
     @Override
