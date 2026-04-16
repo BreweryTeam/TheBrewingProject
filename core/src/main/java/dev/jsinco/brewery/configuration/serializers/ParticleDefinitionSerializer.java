@@ -14,7 +14,7 @@ import org.jspecify.annotations.NonNull;
 
 public class ParticleDefinitionSerializer implements ObjectSerializer<ParticleDefinition> {
 
-    private static final RangeD FULL_RANGE = new RangeD(0D, 1D);
+    private static final RangeD FULL_RANGE = new RangeD(0D, null);
 
     @Override
     public boolean supports(@NonNull Class<?> type) {
