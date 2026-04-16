@@ -123,7 +123,9 @@ public class BukkitCauldron implements Cauldron {
             if (dirty || getBrewTime() % Config.config().cauldrons().cookingMinuteTicks() == 0) {
                 this.recipe = brew.closestRecipe(TheBrewingProject.getInstance().getRecipeRegistry())
                         .orElse(null);
-                this.quality = brew.quality(recipe).orElse(null);
+                this.quality = Optional.ofNullable(recipe)
+                        .flatMap(brew::quality)
+                        .orElse(null);
                 dirty = false;
             }
             Optional<Recipe<ItemStack>> recipeOptional = Optional.ofNullable(recipe);
@@ -267,7 +269,9 @@ public class BukkitCauldron implements Cauldron {
                 );
         this.recipe = brew.closestRecipe(TheBrewingProject.getInstance().getRecipeRegistry())
                 .orElse(null);
-        this.quality = brew.quality(recipe).orElse(null);
+        this.quality = Optional.ofNullable(recipe)
+                .flatMap(brew::quality)
+                .orElse(null);
         long delay;
         if (Config.config().cauldrons().ingredientAddedAnimation() != AnimationDisplay.NONE) {
             delay = AnimationManager.playIngredientAddAnimation(addedItem, player, getBlock().getLocation().toCenterLocation());
@@ -306,6 +310,7 @@ public class BukkitCauldron implements Cauldron {
         definitions.stream()
                 .filter(particleDefinition -> particleDefinition.range() != null && particleDefinition.range().isWithin(progress))
                 .filter(particleDefinition -> particleDefinition.quality() == null || particleDefinition.quality().equals(quality))
+                .filter(particleDefinition -> particleDefinition.probability() > RANDOM.nextDouble())
                 .map(ParticleDefinition::particleKey)
                 .map(BukkitAdapter::toNamespacedKey)
                 .filter(Objects::nonNull)
