@@ -78,6 +78,7 @@ import dev.jsinco.brewery.configuration.serializers.ModifierDisplaySerializer;
 import dev.jsinco.brewery.configuration.serializers.ModifierExpressionSerializer;
 import dev.jsinco.brewery.configuration.serializers.ModifierTooltipSerializer;
 import dev.jsinco.brewery.configuration.serializers.NamedDrunkEventSerializer;
+import dev.jsinco.brewery.configuration.serializers.ParticleDefinitionSerializer;
 import dev.jsinco.brewery.configuration.serializers.RangeDSerializer;
 import dev.jsinco.brewery.configuration.serializers.SecretKeySerializer;
 import dev.jsinco.brewery.configuration.serializers.SoundDefinitionSerializer;
@@ -206,6 +207,7 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
                 .add(new ColorSerializer())
                 .add(new UncheckedIngredientSerializer())
                 .add(new IngredientInputSerializer())
+                .add(new ParticleDefinitionSerializer())
                 .build();
     }
 
