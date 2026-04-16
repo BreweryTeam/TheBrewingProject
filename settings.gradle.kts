@@ -9,6 +9,6 @@ pluginManagement {
 include("datagenerator")
 include("api")
 include("core")
-include("bukkit:bukkit-api")
-include("bukkit:impl")
+include("bukkit-api")
+include("bukkit-impl")
 include("migration")
