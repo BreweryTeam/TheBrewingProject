@@ -66,7 +66,7 @@ public interface IngredientManager<I> {
         }
         String meta = matcher.group(1);
         String id = matcher.replaceAll("");
-        if(meta.isBlank()) {
+        if (meta.isBlank()) {
             return getIngredient(id);
         }
         ImmutableMap.Builder<IngredientMeta<?>, Object> metaBuilder = new ImmutableMap.Builder<>();
@@ -78,7 +78,7 @@ public interface IngredientManager<I> {
                 );
     }
 
-    private void addMeta(String metaElement, ImmutableMap.Builder<IngredientMeta<?>, Object> metaBuilder){
+    private void addMeta(String metaElement, ImmutableMap.Builder<IngredientMeta<?>, Object> metaBuilder) {
         String[] split = metaElement.split("=", 2);
         Preconditions.checkArgument(split.length == 2, "Invalid ingredient meta pattern, missing '=' sign: " + metaElement);
         String key = split[0].strip();
@@ -100,10 +100,10 @@ public interface IngredientManager<I> {
      */
     default String serializeIngredient(Ingredient ingredient) throws IllegalArgumentException {
         if (!(ingredient instanceof IngredientWithMeta metaIngredient)) {
-            return ingredient.getKey();
+            return ingredient.key().toString();
         }
         Map<IngredientMeta<?>, Object> meta = metaIngredient.meta();
-        return String.format("%s{%s}", metaIngredient.getKey(),
+        return String.format("%s{%s}", metaIngredient.key(),
                 meta.entrySet()
                         .stream()
                         .map(entry -> entry.getKey().key().minimalized() + "=" + entry.getKey().serializer().serialize(entry.getValue()))

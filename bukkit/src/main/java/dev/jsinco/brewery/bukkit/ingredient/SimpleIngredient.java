@@ -2,6 +2,8 @@ package dev.jsinco.brewery.bukkit.ingredient;
 
 import dev.jsinco.brewery.api.ingredient.BaseIngredient;
 import dev.jsinco.brewery.api.ingredient.Ingredient;
+import dev.jsinco.brewery.api.util.BreweryKey;
+import dev.jsinco.brewery.bukkit.api.BukkitAdapter;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -18,8 +20,8 @@ import java.util.Optional;
 public record SimpleIngredient(Material material) implements BaseIngredient {
 
     @Override
-    public @NonNull String getKey() {
-        return material.getKey().toString();
+    public @NonNull BreweryKey key() {
+        return BukkitAdapter.toBreweryKey(material.getKey());
     }
 
     @Override

@@ -361,7 +361,7 @@ public class PlayerEventListener implements Listener {
         Ingredient ingredient = BukkitIngredientManager.INSTANCE.getIngredient(event.getItem());
         for (ConsumableSerializer.Consumable consumable : DrunkenModifierSection.modifiers().consumables()) {
             String key = consumable.type().contains(":") ? consumable.type() : "minecraft:" + consumable.type();
-            if (ingredient.getKey().equalsIgnoreCase(key)) {
+            if (ingredient.key().toString().equalsIgnoreCase(key)) {
                 List<ModifierConsume> consumedModifiers = consumable.modifiers().entrySet().stream()
                         .map(entry -> new ModifierConsume(DrunkenModifierSection.modifiers().modifier(entry.getKey()), entry.getValue(), true))
                         .toList();

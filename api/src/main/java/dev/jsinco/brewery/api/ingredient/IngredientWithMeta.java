@@ -1,6 +1,7 @@
 package dev.jsinco.brewery.api.ingredient;
 
 import com.google.common.base.Preconditions;
+import dev.jsinco.brewery.api.util.BreweryKey;
 import net.kyori.adventure.text.Component;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
@@ -19,8 +20,8 @@ public record IngredientWithMeta(Ingredient ingredient,
     }
 
     @Override
-    public @NonNull String getKey() {
-        return ingredient.getKey();
+    public @NonNull BreweryKey key() {
+        return ingredient.key();
     }
 
     @Override
@@ -45,6 +46,7 @@ public record IngredientWithMeta(Ingredient ingredient,
 
     /**
      * Wrap this ingredient with an ingredient with meta instance
+     *
      * @param ingredient Ingredient to wrap
      * @return Ingredient with meta wrapping the ingredient
      */
@@ -54,8 +56,8 @@ public record IngredientWithMeta(Ingredient ingredient,
 
     /**
      * @param metaKey ingredientMetaKey
+     * @param <T>     Ingredient meta value
      * @return Ingredient meta value, or null if not present
-     * @param <T> Ingredient meta value
      */
     public <T> @Nullable T get(IngredientMeta<T> metaKey) {
         return (T) meta.get(metaKey);

@@ -1,5 +1,6 @@
 package dev.jsinco.brewery.api.ingredient;
 
+import dev.jsinco.brewery.api.util.BreweryKey;
 import net.kyori.adventure.text.Component;
 import org.jspecify.annotations.NonNull;
 
@@ -15,8 +16,8 @@ import java.util.Set;
 public record ScoredIngredient(Ingredient baseIngredient, double score) implements Ingredient {
 
     @Override
-    public @NonNull String getKey() {
-        return baseIngredient.getKey();
+    public @NonNull BreweryKey key() {
+        return baseIngredient.key();
     }
 
     @Override

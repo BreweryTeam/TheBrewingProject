@@ -1,16 +1,18 @@
 package dev.jsinco.brewery.bukkit.util;
 
 import dev.jsinco.brewery.api.ingredient.Ingredient;
-import dev.jsinco.brewery.api.ingredient.WildcardIngredient;
-import dev.jsinco.brewery.api.util.BreweryKey;
-import dev.jsinco.brewery.api.util.Pair;
-import dev.jsinco.brewery.bukkit.ingredient.UncheckedIngredientImpl;
-import dev.jsinco.brewery.bukkit.ingredient.BukkitIngredientManager;
-import dev.jsinco.brewery.configuration.Config;
 import dev.jsinco.brewery.api.ingredient.UncheckedIngredient;
+import dev.jsinco.brewery.api.util.Pair;
+import dev.jsinco.brewery.bukkit.ingredient.BukkitIngredientManager;
+import dev.jsinco.brewery.bukkit.ingredient.UncheckedIngredientImpl;
+import dev.jsinco.brewery.configuration.Config;
 import dev.jsinco.brewery.util.ItemColorUtil;
 import net.kyori.adventure.key.Key;
-import org.bukkit.*;
+import org.bukkit.Bukkit;
+import org.bukkit.Keyed;
+import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
+import org.bukkit.Tag;
 import org.bukkit.inventory.ItemStack;
 import org.jspecify.annotations.Nullable;
 
@@ -33,7 +35,7 @@ public class BukkitIngredientUtil {
                 topIngredient = ingredient.getKey();
                 topIngredientAmount = ingredient.getValue();
             }
-            String key = ingredient.getKey().getKey();
+            String key = ingredient.getKey().key().toString();
             Color color = ItemColorUtil.getItemColor(key);
             if (color == null) {
                 continue;

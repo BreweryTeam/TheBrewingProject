@@ -151,7 +151,7 @@ public class IngredientsSection extends OkaeriConfig {
                             return Optional.empty();
                         }
                         return Optional.of(new IngredientGroup(
-                                "#brewery:" + key,
+                                new BreweryKey("#brewery", key),
                                 displayName,
                                 ingredients.stream()
                                         .flatMap(Optional::stream)
