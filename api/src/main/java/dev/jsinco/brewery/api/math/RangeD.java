@@ -5,7 +5,7 @@ import org.jspecify.annotations.NonNull;
 
 public record RangeD(Double min, Double max) {
 
-    private static final char INFINITY = '∞';
+    private static final String INFINITY = "INF";
 
     public RangeD {
         Preconditions.checkArgument(min != null || max != null, "Expected at least one bound");
@@ -51,7 +51,7 @@ public record RangeD(Double min, Double max) {
             min = Double.parseDouble(split[0]);
         }
         Double max;
-        if (split[1].equalsIgnoreCase(String.valueOf(INFINITY))) {
+        if (split[1].equalsIgnoreCase(INFINITY)) {
             max = null;
         } else {
             max = Double.parseDouble(split[1]);

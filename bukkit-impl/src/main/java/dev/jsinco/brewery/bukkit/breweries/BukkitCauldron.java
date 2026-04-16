@@ -321,7 +321,7 @@ public class BukkitCauldron implements Cauldron {
                     if (dataType == Void.class) {
                         world.spawnParticle(particle, locationSupplier.get(), 1);
                     } else if (dataType == Color.class) {
-                        world.spawnParticle(particle, locationSupplier.get(), 1, particleColor);
+                        world.spawnParticle(particle, locationSupplier.get(), 0, particleColor);
                     } else if (dataType == Particle.DustOptions.class) {
                         world.spawnParticle(particle, locationSupplier.get(), 1, new Particle.DustOptions(particleColor, 1.6F));
                     } else if (dataType == BlockData.class) {
