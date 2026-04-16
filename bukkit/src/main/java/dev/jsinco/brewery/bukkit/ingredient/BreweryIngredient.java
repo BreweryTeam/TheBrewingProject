@@ -17,19 +17,14 @@ import org.jspecify.annotations.NonNull;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
-public record BreweryIngredient(BreweryKey ingredientKey) implements BaseIngredient {
-
-    @Override
-    public @NonNull String getKey() {
-        return ingredientKey.toString();
-    }
+public record BreweryIngredient(BreweryKey key) implements BaseIngredient {
 
     @Override
     public @NonNull Component displayName() {
-        return TheBrewingProject.getInstance().getRecipeRegistry().getRecipe(ingredientKey.minimalized())
+        return TheBrewingProject.getInstance().getRecipeRegistry().getRecipe(key.minimalized())
                 .map(recipe -> recipe.getRecipeResult(BrewQuality.EXCELLENT))
                 .map(RecipeResult::displayName)
-                .orElseGet(() -> Component.text(ingredientKey.minimalized()));
+                .orElseGet(() -> Component.text(key.minimalized()));
     }
 
     public static Optional<Ingredient> from(ItemStack itemStack) {

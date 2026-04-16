@@ -1,19 +1,15 @@
 package dev.jsinco.brewery.api.ingredient;
 
+import dev.jsinco.brewery.api.util.BreweryKey;
 import net.kyori.adventure.text.Component;
-import org.jspecify.annotations.NonNull;
 
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-public record IngredientGroup(String key, Component displayName,
+public record IngredientGroup(BreweryKey key, Component displayName,
                               List<Ingredient> alternatives) implements Ingredient {
-    @Override
-    public @NonNull String getKey() {
-        return key;
-    }
 
     @Override
     public Optional<? extends Ingredient> findMatch(Set<BaseIngredient> baseIngredientSet) {

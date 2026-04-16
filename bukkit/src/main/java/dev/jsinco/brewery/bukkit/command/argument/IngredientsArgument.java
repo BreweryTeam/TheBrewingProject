@@ -13,6 +13,7 @@ import dev.jsinco.brewery.bukkit.ingredient.BukkitIngredientManager;
 import dev.jsinco.brewery.bukkit.util.BukkitMessageUtil;
 import io.papermc.paper.command.brigadier.MessageComponentSerializer;
 import io.papermc.paper.command.brigadier.argument.CustomArgumentType;
+import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import org.jspecify.annotations.NonNull;
 
@@ -116,8 +117,8 @@ public class IngredientsArgument implements CustomArgumentType.Converted<Map<Ing
             splitIngredients.removeLast();
         }
         TheBrewingProject.getInstance().getRecipeRegistry().registeredIngredients().stream()
-                .map(Ingredient::getKey)
-                .map(ingredientKey -> ingredientKey.replaceAll("^minecraft:", ""))
+                .map(Ingredient::key)
+                .map(ingredientKey -> ingredientKey.minimalized(Key.MINECRAFT_NAMESPACE))
                 .filter(ingredientKey -> ingredientKey.startsWith(last))
                 .map(string -> "\"" + (splitIngredients.isEmpty() ? "" : String.join(",", splitIngredients) + ",") + string)
                 .forEach(builder::suggest);

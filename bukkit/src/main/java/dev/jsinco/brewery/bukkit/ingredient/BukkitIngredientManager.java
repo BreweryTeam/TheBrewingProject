@@ -83,7 +83,7 @@ public class BukkitIngredientManager implements IngredientManager<ItemStack> {
                                 return itemStack;
                             });
             case PluginIngredient pluginIngredient ->
-                    pluginIngredient.itemIntegration().createItem(pluginIngredient.getKey());
+                    pluginIngredient.itemIntegration().createItem(pluginIngredient.key().key());
             default -> Optional.empty();
         };
         if (ingredient instanceof IngredientWithMeta ingredientWithMeta) {

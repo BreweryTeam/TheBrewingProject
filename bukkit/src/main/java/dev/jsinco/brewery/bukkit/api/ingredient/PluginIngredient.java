@@ -19,8 +19,8 @@ public class PluginIngredient implements BaseIngredient {
     }
 
     @Override
-    public @NonNull String getKey() {
-        return key.toString();
+    public @NonNull BreweryKey key() {
+        return key;
     }
 
     @Override
