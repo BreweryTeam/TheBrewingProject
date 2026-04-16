@@ -34,6 +34,7 @@ import dev.jsinco.brewery.bukkit.util.ColorUtil;
 import dev.jsinco.brewery.bukkit.util.SoundPlayer;
 import dev.jsinco.brewery.configuration.AnimationDisplay;
 import dev.jsinco.brewery.configuration.Config;
+import dev.jsinco.brewery.configuration.ParticleDefinition;
 import dev.jsinco.brewery.sound.SoundDefinition;
 import io.papermc.paper.datacomponent.DataComponentTypes;
 import net.kyori.adventure.sound.Sound;
@@ -44,7 +45,9 @@ import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Particle;
+import org.bukkit.Registry;
 import org.bukkit.Tag;
+import org.bukkit.Vibration;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -63,8 +66,10 @@ import org.jspecify.annotations.Nullable;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Random;
+import java.util.function.Supplier;
 
 public class BukkitCauldron implements Cauldron {
 
@@ -76,6 +81,7 @@ public class BukkitCauldron implements Cauldron {
     private boolean brewExtracted = false;
     private Color particleColor = Color.fromRGB(0x3F76E4);
     private @Nullable Recipe<ItemStack> recipe;
+    private @Nullable BrewQuality quality;
     private boolean dirty = true;
     private TextDisplay waterColorer = null;
 
@@ -117,6 +123,7 @@ public class BukkitCauldron implements Cauldron {
             if (dirty || getBrewTime() % Config.config().cauldrons().cookingMinuteTicks() == 0) {
                 this.recipe = brew.closestRecipe(TheBrewingProject.getInstance().getRecipeRegistry())
                         .orElse(null);
+                this.quality = brew.quality(recipe).orElse(null);
                 dirty = false;
             }
             Optional<Recipe<ItemStack>> recipeOptional = Optional.ofNullable(recipe);
@@ -260,6 +267,7 @@ public class BukkitCauldron implements Cauldron {
                 );
         this.recipe = brew.closestRecipe(TheBrewingProject.getInstance().getRecipeRegistry())
                 .orElse(null);
+        this.quality = brew.quality(recipe).orElse(null);
         long delay;
         if (Config.config().cauldrons().ingredientAddedAnimation() != AnimationDisplay.NONE) {
             delay = AnimationManager.playIngredientAddAnimation(addedItem, player, getBlock().getLocation().toCenterLocation());
@@ -281,28 +289,52 @@ public class BukkitCauldron implements Cauldron {
 
     public void playBrewingEffects() {
         Block block = getBlock();
-        Location particleLoc = // Complex particle location based off BreweryX
+        World world = block.getWorld();
+        Supplier<Location> locationSupplier = () ->
                 block.getLocation().add(0.5 + (RANDOM.nextDouble() * 0.8 - 0.4), 0.9, 0.5 + (RANDOM.nextDouble() * 0.8 - 0.4));
-
-        block.getWorld().spawnParticle(Particle.ENTITY_EFFECT, particleLoc, 0, particleColor);
-
-        if (!Config.config().cauldrons().minimalParticles() || !hot) {
-            return;
+        double progress;
+        if (brew.lastStep() instanceof BrewingStep.TimedStep timedStep) {
+            if (recipe != null && recipe.getSteps().get(brew.stepAmount() - 1) instanceof BrewingStep.TimedStep expectedTimed) {
+                progress = (double) timedStep.time().moment() / expectedTimed.time().moment();
+            } else {
+                progress = Math.min((double) timedStep.time().moment() / Moment.MINUTE * 3, 1);
+            }
+        } else {
+            progress = 1D; // Shouldn't happen
         }
-
-        if (RANDOM.nextFloat() > 0.85) {
-            // Dark pixely smoke cloud at 0.4 random in x and z
-            // 0 count enables direction, send to y = 1 with speed 0.09
-            block.getWorld().spawnParticle(Particle.LARGE_SMOKE, particleLoc, 0, 0, 1, 0, 0.09);
-        }
-        if (RANDOM.nextFloat() > 0.2) {
-            // A Water Splash with 0.2 offset in x and z
-            block.getWorld().spawnParticle(Particle.SPLASH, particleLoc, 1, 0.2, 0, 0.2);
-        }
-        if (RANDOM.nextFloat() > 0.4) {
-            // Two hovering pixely dust clouds, a bit of offset and with DustOptions to give some color and size
-            block.getWorld().spawnParticle(Particle.DUST_PLUME, particleLoc, 2, 0.15, 0.2, 0.15, new Particle.DustOptions(particleColor, 1.5f));
-        }
+        List<ParticleDefinition> definitions = hot ? Config.config().cauldrons().cookParticleDefinitions() : Config.config().cauldrons().mixParticleDefinitions();
+        definitions.stream()
+                .filter(particleDefinition -> particleDefinition.range() != null && particleDefinition.range().isWithin(progress))
+                .filter(particleDefinition -> particleDefinition.quality() == null || particleDefinition.quality().equals(quality))
+                .map(ParticleDefinition::particleKey)
+                .map(BukkitAdapter::toNamespacedKey)
+                .filter(Objects::nonNull)
+                .map(Registry.PARTICLE_TYPE::get)
+                .filter(Objects::nonNull)
+                .forEach(particle -> {
+                    Class<?> dataType = particle.getDataType();
+                    if (dataType == Void.class) {
+                        world.spawnParticle(particle, locationSupplier.get(), 1);
+                    } else if (dataType == Color.class) {
+                        world.spawnParticle(particle, locationSupplier.get(), 1, particleColor);
+                    } else if (dataType == Particle.DustOptions.class) {
+                        world.spawnParticle(particle, locationSupplier.get(), 1, new Particle.DustOptions(particleColor, 1.6F));
+                    } else if (dataType == BlockData.class) {
+                        world.spawnParticle(particle, locationSupplier.get(), 1, getBlock().getBlockData());
+                    } else if (dataType == Float.class) {
+                        world.spawnParticle(particle, locationSupplier.get(), 1, 1F);
+                    } else if (dataType == Particle.Spell.class) {
+                        world.spawnParticle(particle, locationSupplier.get(), 1, new Particle.Spell(particleColor, 1F));
+                    } else if (dataType == ItemStack.class) {
+                        // TODO: Take items from input ingredients (would require conversion)
+                    } else if (dataType == Integer.class) {
+                        world.spawnParticle(particle, locationSupplier.get(), 1, 1);
+                    } else if (dataType == Particle.Trail.class) {
+                        world.spawnParticle(particle, locationSupplier.get(), 1, new Particle.Trail(locationSupplier.get(), particleColor, 10));
+                    } else if (dataType == Vibration.class) {
+                        world.spawnParticle(particle, locationSupplier.get(), 1, new Vibration(new Vibration.Destination.BlockDestination(getBlock()), 10));
+                    }
+                });
     }
 
     public void playIngredientAddedEffects(ItemStack item, long delay) {

@@ -1,14 +1,18 @@
 package dev.jsinco.brewery.configuration.structure;
 
 import com.google.common.collect.ImmutableMap;
+import dev.jsinco.brewery.api.brew.BrewQuality;
 import dev.jsinco.brewery.api.config.Configuration;
 import dev.jsinco.brewery.api.effect.modifier.ModifierDisplay;
 import dev.jsinco.brewery.api.ingredient.IngredientInput;
 import dev.jsinco.brewery.api.ingredient.UncheckedIngredient;
 import dev.jsinco.brewery.api.ingredient.WildcardIngredient;
+import dev.jsinco.brewery.api.math.RangeD;
 import dev.jsinco.brewery.api.moment.Moment;
+import dev.jsinco.brewery.api.util.BreweryKey;
 import dev.jsinco.brewery.api.util.Holder;
 import dev.jsinco.brewery.configuration.AnimationDisplay;
+import dev.jsinco.brewery.configuration.ParticleDefinition;
 import eu.okaeri.configs.OkaeriConfig;
 import eu.okaeri.configs.annotation.Comment;
 import eu.okaeri.configs.annotation.CustomKey;
@@ -20,10 +24,6 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 public class CauldronSection extends OkaeriConfig implements Configuration.Cauldrons {
-    @Comment({"Reduce the number of particles that spawn while cauldrons brew.",
-            "This won't affect performance, but it will make the particles less obtrusive."})
-    @CustomKey("minimal-particles")
-    private boolean minimalParticles = false;
 
     @Comment({"What blocks cauldrons must have below them to be able to brew.",
             "If this list is empty, cauldrons will brew regardless of the block below them.",
@@ -73,6 +73,25 @@ public class CauldronSection extends OkaeriConfig implements Configuration.Cauld
     @CustomKey("clock-items")
     private List<IngredientInput> clockItems = List.of(UncheckedIngredient.minecraft("clock"));
 
+    @Comment({"What particles should be displayed when brewing in a cauldron",
+            "Allowed particle effects can be found here https://jd.papermc.io/paper/26.1.2/org/bukkit/Particle.html",
+            "Note that those with a description will not be possible to add, with an exception to ENTITY_EFFECT and DUST_PLUME"})
+    @CustomKey("cook-particle-definitions")
+    private List<ParticleDefinition> cookParticleDefinitions = List.of(
+            new ParticleDefinition(BreweryKey.minecraft("crit"), 0.01, new RangeD(0.8, 1D), BrewQuality.EXCELLENT),
+            new ParticleDefinition(BreweryKey.minecraft("entity_effect"), 0.1, new RangeD(0.1, 1D), null),
+            new ParticleDefinition(BreweryKey.minecraft("dust_plume"), 0.2, new RangeD(0.05, 0.1), null)
+    );
+
+    @Comment({"What particles should be displayed when brewing in a cauldron",
+            "Allowed particle effects can be found here https://jd.papermc.io/paper/26.1.2/org/bukkit/Particle.html",
+            "Note that those with a description will not be possible to add, with an exception to ENTITY_EFFECT and DUST_PLUME"})
+    @CustomKey("mix-particle-definitions")
+    private List<ParticleDefinition> mixParticleDefinitions = List.of(
+            new ParticleDefinition(BreweryKey.minecraft("crit"), 0.01, new RangeD(0.8, 1D), BrewQuality.EXCELLENT),
+            new ParticleDefinition(BreweryKey.minecraft("entity_effect"), 0.5, new RangeD(0D, 1D), null)
+    );
+
     @Comment("What items should be transformed into another item when added as an ingredient")
     @CustomKey("ingredient-empty-transforms")
     private Map<IngredientInput, UncheckedIngredient> ingredientEmptyTransforms = new ImmutableMap.Builder<IngredientInput, UncheckedIngredient>()
@@ -91,10 +110,6 @@ public class CauldronSection extends OkaeriConfig implements Configuration.Cauld
             .put(UncheckedIngredient.minecraft("rabbit_stew"), UncheckedIngredient.minecraft("bowl"))
             .put(UncheckedIngredient.minecraft("suspicious_stew"), UncheckedIngredient.minecraft("bowl"))
             .build();
-
-    public boolean minimalParticles() {
-        return this.minimalParticles;
-    }
 
     public List<Holder.Material> heatSources() {
         return this.heatSources;
@@ -142,5 +157,13 @@ public class CauldronSection extends OkaeriConfig implements Configuration.Cauld
 
     public List<IngredientInput> clockItems() {
         return clockItems;
+    }
+
+    public List<ParticleDefinition> cookParticleDefinitions() {
+        return cookParticleDefinitions;
+    }
+
+    public List<ParticleDefinition> mixParticleDefinitions() {
+        return mixParticleDefinitions;
     }
 }
