@@ -87,7 +87,7 @@ public class CauldronSection extends OkaeriConfig implements Configuration.Cauld
     @CustomKey("mix-particle-definitions")
     private List<ParticleDefinition> mixParticleDefinitions = List.of(
             new ParticleDefinition(BreweryKey.minecraft("crit"), 0.01, new RangeD(0.8, 1D), BrewQuality.EXCELLENT),
-            new ParticleDefinition(BreweryKey.minecraft("entity_effect"), 0.05, new RangeD(0D, 1D), null)
+            new ParticleDefinition(BreweryKey.minecraft("entity_effect"), 0.05, null, null)
     );
 
     @Comment("What items should be transformed into another item when added as an ingredient")
