@@ -74,8 +74,7 @@ public class CauldronSection extends OkaeriConfig implements Configuration.Cauld
     private List<IngredientInput> clockItems = List.of(UncheckedIngredient.minecraft("clock"));
 
     @Comment({"What particles should be displayed when brewing in a cauldron",
-            "Allowed particle effects can be found here https://jd.papermc.io/paper/26.1.2/org/bukkit/Particle.html",
-            "Note that those with a description will not be possible to add, with an exception to ENTITY_EFFECT and DUST_PLUME"})
+            "Allowed particle effects can be found here https://jd.papermc.io/paper/26.1.2/org/bukkit/Particle.html"})
     @CustomKey("cook-particle-definitions")
     private List<ParticleDefinition> cookParticleDefinitions = List.of(
             new ParticleDefinition(BreweryKey.minecraft("crit"), 0.01, new RangeD(0.8, 1D), BrewQuality.EXCELLENT),
@@ -84,12 +83,11 @@ public class CauldronSection extends OkaeriConfig implements Configuration.Cauld
     );
 
     @Comment({"What particles should be displayed when brewing in a cauldron",
-            "Allowed particle effects can be found here https://jd.papermc.io/paper/26.1.2/org/bukkit/Particle.html",
-            "Note that those with a description will not be possible to add, with an exception to ENTITY_EFFECT and DUST_PLUME"})
+            "Allowed particle effects can be found here https://jd.papermc.io/paper/26.1.2/org/bukkit/Particle.html"})
     @CustomKey("mix-particle-definitions")
     private List<ParticleDefinition> mixParticleDefinitions = List.of(
             new ParticleDefinition(BreweryKey.minecraft("crit"), 0.01, new RangeD(0.8, 1D), BrewQuality.EXCELLENT),
-            new ParticleDefinition(BreweryKey.minecraft("entity_effect"), 0.5, new RangeD(0D, 1D), null)
+            new ParticleDefinition(BreweryKey.minecraft("entity_effect"), 0.05, new RangeD(0D, 1D), null)
     );
 
     @Comment("What items should be transformed into another item when added as an ingredient")
