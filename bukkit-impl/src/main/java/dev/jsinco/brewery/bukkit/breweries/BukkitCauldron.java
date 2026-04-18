@@ -308,7 +308,7 @@ public class BukkitCauldron implements Cauldron {
         }
         List<ParticleDefinition> definitions = hot ? Config.config().cauldrons().cookParticleDefinitions() : Config.config().cauldrons().mixParticleDefinitions();
         definitions.stream()
-                .filter(particleDefinition -> particleDefinition.range() != null && particleDefinition.range().isWithin(progress))
+                .filter(particleDefinition -> particleDefinition.range() == null || particleDefinition.range().isWithin(progress))
                 .filter(particleDefinition -> particleDefinition.quality() == null || particleDefinition.quality().equals(quality))
                 .filter(particleDefinition -> particleDefinition.probability() > RANDOM.nextDouble())
                 .map(ParticleDefinition::particleKey)
