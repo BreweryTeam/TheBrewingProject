@@ -2,6 +2,7 @@ package dev.jsinco.brewery.bukkit.api;
 
 import dev.jsinco.brewery.api.brew.BrewManager;
 import dev.jsinco.brewery.api.effect.modifier.ModifierManager;
+import dev.jsinco.brewery.api.ingredient.IngredientManager;
 import dev.jsinco.brewery.api.integration.IntegrationManager;
 import dev.jsinco.brewery.api.effect.DrunksManager;
 import dev.jsinco.brewery.api.recipe.RecipeRegistry;
@@ -45,4 +46,9 @@ public interface TheBrewingProjectApi {
      * @return Access to some configuration options
      */
     Configuration getConfiguration();
+
+    /**
+     * @return An ingredient-item stack bridge
+     */
+    IngredientManager<ItemStack> getIngredientManager();
 }

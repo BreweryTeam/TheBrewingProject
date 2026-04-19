@@ -10,6 +10,7 @@ import dev.jsinco.brewery.api.effect.modifier.ModifierManager;
 import dev.jsinco.brewery.api.event.CustomEventRegistry;
 import dev.jsinco.brewery.api.event.EventData;
 import dev.jsinco.brewery.api.event.EventStepRegistry;
+import dev.jsinco.brewery.api.ingredient.IngredientManager;
 import dev.jsinco.brewery.api.structure.MultiblockStructure;
 import dev.jsinco.brewery.api.structure.StructureType;
 import dev.jsinco.brewery.api.util.Logger;
@@ -457,10 +458,17 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
         return Config.config();
     }
 
+
+
     private boolean noTicking() {
         ServerTickManager serverTickManager = Bukkit.getServerTickManager();
         return serverTickManager.isFrozen() && !serverTickManager.isSprinting()
                 && !serverTickManager.isStepping();
+    }
+
+    @Override
+    public IngredientManager<ItemStack> getIngredientManager() {
+        return BukkitIngredientManager.INSTANCE;
     }
 
     public StructureRegistry getStructureRegistry() {
