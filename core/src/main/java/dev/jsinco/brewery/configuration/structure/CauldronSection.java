@@ -79,7 +79,7 @@ public class CauldronSection extends OkaeriConfig implements Configuration.Cauld
     private List<ParticleDefinition> cookParticleDefinitions = List.of(
             new ParticleDefinition(BreweryKey.minecraft("crit"), 0.01, new RangeD(0.8, null), BrewQuality.EXCELLENT),
             new ParticleDefinition(BreweryKey.minecraft("entity_effect"), 0.1, new RangeD(0.1, null), null),
-            new ParticleDefinition(BreweryKey.minecraft("dust_plume"), 0.2, new RangeD(0.05, 0.1), null)
+            new ParticleDefinition(BreweryKey.minecraft("dust"), 0.2, new RangeD(0.05, 0.1), null)
     );
 
     @Comment({"What particles should be displayed when brewing in a cauldron",
