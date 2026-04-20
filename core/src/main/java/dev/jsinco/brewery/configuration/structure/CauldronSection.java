@@ -77,8 +77,8 @@ public class CauldronSection extends OkaeriConfig implements Configuration.Cauld
             "Allowed particle effects can be found here https://jd.papermc.io/paper/26.1.2/org/bukkit/Particle.html"})
     @CustomKey("cook-particle-definitions")
     private List<ParticleDefinition> cookParticleDefinitions = List.of(
-            new ParticleDefinition(BreweryKey.minecraft("crit"), 0.01, new RangeD(0.8, 1D), BrewQuality.EXCELLENT),
-            new ParticleDefinition(BreweryKey.minecraft("entity_effect"), 0.1, new RangeD(0.1, 1D), null),
+            new ParticleDefinition(BreweryKey.minecraft("crit"), 0.01, new RangeD(0.8, null), BrewQuality.EXCELLENT),
+            new ParticleDefinition(BreweryKey.minecraft("entity_effect"), 0.1, new RangeD(0.1, null), null),
             new ParticleDefinition(BreweryKey.minecraft("dust_plume"), 0.2, new RangeD(0.05, 0.1), null)
     );
 
@@ -86,7 +86,7 @@ public class CauldronSection extends OkaeriConfig implements Configuration.Cauld
             "Allowed particle effects can be found here https://jd.papermc.io/paper/26.1.2/org/bukkit/Particle.html"})
     @CustomKey("mix-particle-definitions")
     private List<ParticleDefinition> mixParticleDefinitions = List.of(
-            new ParticleDefinition(BreweryKey.minecraft("crit"), 0.01, new RangeD(0.8, 1D), BrewQuality.EXCELLENT),
+            new ParticleDefinition(BreweryKey.minecraft("crit"), 0.01, new RangeD(0.8, null), BrewQuality.EXCELLENT),
             new ParticleDefinition(BreweryKey.minecraft("entity_effect"), 0.05, null, null)
     );
 
