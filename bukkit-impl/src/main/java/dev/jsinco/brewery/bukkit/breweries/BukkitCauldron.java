@@ -319,25 +319,25 @@ public class BukkitCauldron implements Cauldron {
                 .forEach(particle -> {
                     Class<?> dataType = particle.getDataType();
                     if (dataType == Void.class) {
-                        world.spawnParticle(particle, locationSupplier.get(), 1);
+                        world.spawnParticle(particle, locationSupplier.get(), 0);
                     } else if (dataType == Color.class) {
                         world.spawnParticle(particle, locationSupplier.get(), 0, particleColor);
                     } else if (dataType == Particle.DustOptions.class) {
-                        world.spawnParticle(particle, locationSupplier.get(), 1, new Particle.DustOptions(particleColor, 1.6F));
+                        world.spawnParticle(particle, locationSupplier.get(), 0, new Particle.DustOptions(particleColor, 1.6F));
                     } else if (dataType == BlockData.class) {
-                        world.spawnParticle(particle, locationSupplier.get(), 1, getBlock().getBlockData());
+                        world.spawnParticle(particle, locationSupplier.get(), 0, getBlock().getBlockData());
                     } else if (dataType == Float.class) {
-                        world.spawnParticle(particle, locationSupplier.get(), 1, 1F);
+                        world.spawnParticle(particle, locationSupplier.get(), 0, 1F);
                     } else if (dataType == Particle.Spell.class) {
-                        world.spawnParticle(particle, locationSupplier.get(), 1, new Particle.Spell(particleColor, 1F));
+                        world.spawnParticle(particle, locationSupplier.get(), 0, new Particle.Spell(particleColor, 1F));
                     } else if (dataType == ItemStack.class) {
                         // TODO: Take items from input ingredients (would require conversion)
                     } else if (dataType == Integer.class) {
-                        world.spawnParticle(particle, locationSupplier.get(), 1, 1);
+                        world.spawnParticle(particle, locationSupplier.get(), 0, 1);
                     } else if (dataType == Particle.Trail.class) {
-                        world.spawnParticle(particle, locationSupplier.get(), 1, new Particle.Trail(locationSupplier.get(), particleColor, 10));
+                        world.spawnParticle(particle, locationSupplier.get(), 0, new Particle.Trail(locationSupplier.get(), particleColor, 10));
                     } else if (dataType == Vibration.class) {
-                        world.spawnParticle(particle, locationSupplier.get(), 1, new Vibration(new Vibration.Destination.BlockDestination(getBlock()), 10));
+                        world.spawnParticle(particle, locationSupplier.get(), 0, new Vibration(new Vibration.Destination.BlockDestination(getBlock()), 10));
                     }
                 });
     }
