@@ -8,6 +8,7 @@ import dev.jsinco.brewery.api.event.IntegrationEvent;
 import dev.jsinco.brewery.api.meta.MetaDataType;
 import dev.jsinco.brewery.api.util.BreweryKey;
 import dev.jsinco.brewery.api.util.Holder;
+import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.bukkit.api.BukkitAdapter;
 import dev.jsinco.brewery.bukkit.api.integration.EventIntegration;
 import dev.jsinco.brewery.util.ClassUtil;
@@ -21,9 +22,9 @@ import java.util.Locale;
 import java.util.Optional;
 
 public class BodyHealthIntegration implements EventIntegration<BodyHealthIntegration.BodyHealthEvent> {
-    private static final Key VALUE = Key.key("value");
-    private static final Key PERCENT = Key.key("percent");
-    private static final Key FORCE = Key.key("force");
+    private static final Key VALUE = TheBrewingProject.key("value");
+    private static final Key PERCENT = TheBrewingProject.key("percent");
+    private static final Key FORCE = TheBrewingProject.key("force");
 
     @Override
     public Class<BodyHealthEvent> eClass() {
