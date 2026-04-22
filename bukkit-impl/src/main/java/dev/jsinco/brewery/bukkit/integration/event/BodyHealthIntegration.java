@@ -22,6 +22,8 @@ import java.util.Optional;
 
 public class BodyHealthIntegration implements EventIntegration<BodyHealthIntegration.BodyHealthEvent> {
     private static final Key VALUE = Key.key("value");
+    private static final Key PERCENT = Key.key("percent");
+    private static final Key FORCE = Key.key("force");
 
     @Override
     public Class<BodyHealthEvent> eClass() {
@@ -43,6 +45,8 @@ public class BodyHealthIntegration implements EventIntegration<BodyHealthIntegra
     public Optional<BodyHealthEvent> convertToEvent(EventData eventData) {
         Double value = eventData.data(VALUE, MetaDataType.STRING_TO_DOUBLE);
         double nonNullValue = value == null ? 10D : value;
+        Boolean forced = eventData.data(FORCE, MetaDataType.STRING_TO_BOOLEAN);
+        Boolean percent = eventData.data(PERCENT, MetaDataType.STRING_TO_BOOLEAN);
         BreweryKey namespacedKey = eventData.key();
         String key = namespacedKey.key();
         Optional<BodyPartChangeType> optionalBodyPartChangeType = Arrays.stream(BodyPartChangeType.values())
@@ -54,7 +58,13 @@ public class BodyHealthIntegration implements EventIntegration<BodyHealthIntegra
         if (optionalBodyPartChangeType.isEmpty() || optionalBodyPart.isEmpty()) {
             return Optional.empty();
         }
-        return Optional.of(new BodyHealthEvent(optionalBodyPartChangeType.get(), optionalBodyPart.get(), nonNullValue));
+        return Optional.of(new BodyHealthEvent(
+                optionalBodyPartChangeType.get(),
+                optionalBodyPart.get(),
+                nonNullValue,
+                percent == null || percent,
+                forced != null && forced
+        ));
     }
 
     @Override
@@ -83,16 +93,21 @@ public class BodyHealthIntegration implements EventIntegration<BodyHealthIntegra
         HEAL
     }
 
-    public record BodyHealthEvent(BodyPartChangeType type, BodyPart part, double value) implements IntegrationEvent {
+    public record BodyHealthEvent(BodyPartChangeType type, BodyPart part, double value, boolean percent,
+                                  boolean force) implements IntegrationEvent {
         @Override
         public void run(Holder.Player player) {
             BodyHealthAPI api = BodyHealthAPI.getInstance();
             BukkitAdapter.toPlayer(player)
                     .ifPresent(bukkitPlayer -> {
+                        double partMaxHealth = api.getMaxPartHealth(bukkitPlayer, part);
                         switch (type) {
-                            case SET_HEALTH -> api.setHealth(bukkitPlayer, part, value);
-                            case DAMAGE -> api.damagePlayerDirectly(bukkitPlayer, value, part);
-                            case HEAL -> api.healPlayer(bukkitPlayer, part, (int) Math.round(value));
+                            case SET_HEALTH ->
+                                    api.setHealth(bukkitPlayer, part, percent ? value : partMaxHealth * value / 100, force);
+                            case DAMAGE ->
+                                    api.damagePlayerDirectly(bukkitPlayer, percent ? value * partMaxHealth / 100 : value, part, force);
+                            case HEAL ->
+                                    api.healPlayer(bukkitPlayer, part, (int) Math.round(percent ? value * partMaxHealth / 100 : value), force);
                         }
                     });
         }

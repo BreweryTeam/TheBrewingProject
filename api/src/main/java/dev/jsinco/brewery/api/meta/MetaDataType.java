@@ -63,6 +63,7 @@ public interface MetaDataType<P, C> {
     MetaDataType<String, Short> STRING_TO_SHORT = convertedType(STRING, Short::parseShort, String::valueOf, Short.class);
     MetaDataType<String, Float> STRING_TO_FLOAT = convertedType(STRING, Float::parseFloat, String::valueOf, Float.class);
     MetaDataType<String, Double> STRING_TO_DOUBLE = convertedType(STRING, Double::parseDouble, String::valueOf, Double.class);
+    MetaDataType<String, Boolean> STRING_TO_BOOLEAN = convertedType(STRING, Boolean::parseBoolean, String::valueOf, Boolean.class);
 
 
     /**

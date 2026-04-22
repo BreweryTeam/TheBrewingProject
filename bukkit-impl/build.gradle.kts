@@ -111,6 +111,7 @@ tasks {
                 modrinth("worldedit", "JUWRHdru")
                 modrinth("craftengine", "0.0.67")
                 modrinth("bolt", "1f2gAAFO")
+                modrinth("bodyhealth", "4.1.0")
                 url("https://api.spiget.org/v2/resources/62325/download")
             }
         }
