@@ -103,7 +103,7 @@ public class BodyHealthIntegration implements EventIntegration<BodyHealthIntegra
                         double partMaxHealth = api.getMaxPartHealth(bukkitPlayer, part);
                         switch (type) {
                             case SET_HEALTH ->
-                                    api.setHealth(bukkitPlayer, part, percent ? value : partMaxHealth * value / 100);
+                                    api.setHealth(bukkitPlayer, part, percent ? value : value * 100 / partMaxHealth);
                             case DAMAGE ->
                                     api.damagePlayerDirectly(bukkitPlayer, percent ? value * partMaxHealth / 100 : value, part, force);
                             case HEAL ->
