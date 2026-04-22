@@ -83,6 +83,7 @@ dependencies {
     compileOnly(libs.mythic.crucible)
     compileOnly(libs.griefdefender)
     compileOnly(libs.gsit)
+    compileOnly(libs.bodyhealth)
 
     // other
     compileOnly(libs.jetbrains.annotations)
@@ -306,7 +307,8 @@ bukkit {
         "MiniPlaceholders",
         "QuickShop",
         "GriefDefender",
-        "GSit"
+        "GSit",
+        "BodyHealth"
     )
 }
 

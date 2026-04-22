@@ -6,6 +6,7 @@ import dev.jsinco.brewery.api.integration.IntegrationType;
 import dev.jsinco.brewery.api.util.Logger;
 import dev.jsinco.brewery.bukkit.api.integration.IntegrationTypes;
 import dev.jsinco.brewery.bukkit.integration.chest_shop.QuickShopHikariIntegration;
+import dev.jsinco.brewery.bukkit.integration.event.BodyHealthIntegration;
 import dev.jsinco.brewery.bukkit.integration.event.GSitIntegration;
 import dev.jsinco.brewery.bukkit.integration.item.CraftEngineIntegration;
 import dev.jsinco.brewery.bukkit.integration.item.ItemsAdderIntegration;
@@ -46,6 +47,7 @@ public class IntegrationManagerImpl implements IntegrationManager {
         register(IntegrationTypes.PLACEHOLDER, new MiniPlaceholdersIntegration());
         register(IntegrationTypes.CHEST_SHOP, new QuickShopHikariIntegration());
         register(IntegrationTypes.EVENT, new GSitIntegration());
+        register(IntegrationTypes.EVENT, new BodyHealthIntegration());
     }
 
     public void loadIntegrations() {
