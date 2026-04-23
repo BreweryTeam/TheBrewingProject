@@ -27,6 +27,7 @@ public class BodyHealthIntegration implements EventIntegration<BodyHealthIntegra
     private static final Key VALUE = TheBrewingProject.key("value");
     private static final Key PERCENT = TheBrewingProject.key("percent");
     private static final Key FORCE = TheBrewingProject.key("force");
+    private static final Key FORCE_KEEP = TheBrewingProject.key("force_keep");
 
     @Override
     public Class<BodyHealthEvent> eClass() {
@@ -53,23 +54,28 @@ public class BodyHealthIntegration implements EventIntegration<BodyHealthIntegra
         double nonNullValue = value == null ? 10D : value;
         Boolean forced = eventData.data(FORCE, MetaDataType.STRING_TO_BOOLEAN);
         Boolean percent = eventData.data(PERCENT, MetaDataType.STRING_TO_BOOLEAN);
+        Boolean forceKeep = eventData.data(FORCE_KEEP, MetaDataType.STRING_TO_BOOLEAN);
         BreweryKey namespacedKey = eventData.key();
         String key = namespacedKey.key();
         Optional<BodyPartChangeType> optionalBodyPartChangeType = Arrays.stream(BodyPartChangeType.values())
                 .filter(bodyPartChangeType -> key.startsWith(bodyPartChangeType.name().toLowerCase(Locale.ROOT)))
                 .findAny();
+        if (optionalBodyPartChangeType.isEmpty()) {
+            return Optional.empty();
+        }
         Optional<BodyPart> optionalBodyPart = Arrays.stream(BodyPart.values())
                 .filter(bodyPart -> key.endsWith(bodyPart.name().toLowerCase(Locale.ROOT)))
                 .findAny();
-        if (optionalBodyPartChangeType.isEmpty() || optionalBodyPart.isEmpty()) {
+        if (optionalBodyPart.isEmpty() && !key.endsWith("_all")) {
             return Optional.empty();
         }
         return Optional.of(new BodyHealthEvent(
                 optionalBodyPartChangeType.get(),
-                optionalBodyPart.get(),
+                optionalBodyPart.orElse(null),
                 nonNullValue,
                 percent == null || percent,
-                forced != null && forced
+                forced != null && forced,
+                forceKeep != null && forceKeep
         ));
     }
 
@@ -102,7 +108,7 @@ public class BodyHealthIntegration implements EventIntegration<BodyHealthIntegra
     }
 
     public record BodyHealthEvent(BodyPartChangeType type, @Nullable BodyPart part, double value, boolean percent,
-                                  boolean force) implements IntegrationEvent {
+                                  boolean force, boolean forceKeep) implements IntegrationEvent {
         @Override
         public void run(Holder.Player player) {
             BukkitAdapter.toPlayer(player)
@@ -119,10 +125,11 @@ public class BodyHealthIntegration implements EventIntegration<BodyHealthIntegra
             BodyHealthAPI api = BodyHealthAPI.getInstance();
             double partMaxHealth = api.getMaxPartHealth(player, part);
             switch (type) {
-                case SET_HEALTH -> api.setHealth(player, part, percent ? value : value * 100 / partMaxHealth);
+                case SET_HEALTH ->
+                        api.setHealth(player, part, percent ? value : value * 100 / partMaxHealth, forceKeep);
                 case ADD_HEALTH -> {
                     double delta = percent ? value : value * 100 / partMaxHealth;
-                    api.setHealth(player, part, api.getHealth(player, part) + delta);
+                    api.setHealth(player, part, api.getHealth(player, part) + delta, forceKeep);
                 }
                 case DAMAGE ->
                         api.damagePlayerDirectly(player, percent ? value * partMaxHealth / 100 : value, part, force);
