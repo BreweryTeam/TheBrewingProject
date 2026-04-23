@@ -45,6 +45,7 @@ public class CreateCommand {
         ), Set.of(FlaggedArgumentBuilder.FlagProperty.MANDATORY_FIRST, FlaggedArgumentBuilder.FlagProperty.ONLY_FIRST));
         FlaggedArgumentBuilder.Flag mix = new FlaggedArgumentBuilder.Flag("mix", "m", List.of(
                 new Pair<>("mix-time", DoubleArgumentType.doubleArg(0)),
+                new Pair<>("cauldron-type", new EnumArgument<>(CauldronType.class)),
                 new Pair<>("mix-ingredients", new IngredientsArgument())
         ), Set.of(FlaggedArgumentBuilder.FlagProperty.MANDATORY_FIRST, FlaggedArgumentBuilder.FlagProperty.ONLY_FIRST));
         FlaggedArgumentBuilder.Flag distill = new FlaggedArgumentBuilder.Flag("distill", "d", List.of(
@@ -94,8 +95,9 @@ public class CreateCommand {
 
     private static BrewingStep parseMix(CommandContext<CommandSourceStack> context) {
         double mixTime = context.getArgument("mix-time", double.class);
+        CauldronType cauldronType = context.getArgument("cauldron-type", CauldronType.class);
         Map<Ingredient, Integer> ingredients = context.getArgument("mix-ingredients", Map.class);
-        return new MixStepImpl(new PassedMoment((long) (mixTime * Config.config().cauldrons().cookingMinuteTicks())), ingredients);
+        return new MixStepImpl(new PassedMoment((long) (mixTime * Config.config().cauldrons().cookingMinuteTicks())), ingredients, cauldronType);
     }
 
     private static BrewingStep parseCook(CommandContext<CommandSourceStack> context) {

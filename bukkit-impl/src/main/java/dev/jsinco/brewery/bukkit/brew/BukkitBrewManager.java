@@ -59,7 +59,8 @@ public class BukkitBrewManager implements BrewManager<ItemStack> {
     public BrewingStep.Mix mixingStep(long mixingTicks, Map<? extends Ingredient, Integer> ingredients, CauldronType cauldronType) {
         return new MixStepImpl(
                 new PassedMoment(mixingTicks),
-                ingredients
+                ingredients,
+                cauldronType
         );
     }
 

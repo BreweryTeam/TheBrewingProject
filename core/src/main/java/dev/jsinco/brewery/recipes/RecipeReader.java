@@ -112,7 +112,8 @@ public class RecipeReader<I> {
             case MIX -> ingredientManager.getIngredientsWithAmount((List<String>) map.get("ingredients"))
                     .thenApplyAsync(ingredients -> new MixStepImpl(
                             parseTime(map, TimeUtil.TimeUnit.COOKING_MINUTES, "mix-time", "time"),
-                            ingredients
+                            ingredients,
+                            BreweryRegistry.CAULDRON_TYPE.get(BreweryKey.parse(map.containsKey("cauldron-type") ? map.get("cauldron-type").toString().toLowerCase(Locale.ROOT) : "water"))
                     ));
         };
     }
@@ -157,6 +158,9 @@ public class RecipeReader<I> {
             case MIX -> {
                 validTime(map, "time", "mix-time");
                 Preconditions.checkArgument(map.get("ingredients") instanceof List, "Expected string list value for 'ingredients' in mix step!");
+                Preconditions.checkArgument(!map.containsKey("cauldron-type") || map.get("cauldron-type") instanceof String, "Expected string value for 'cauldron-type' in mix step!");
+                String cauldronType = map.containsKey("cauldron-type") ? (String) map.get("cauldron-type") : "water";
+                Preconditions.checkArgument(BreweryRegistry.CAULDRON_TYPE.containsKey(BreweryKey.parse(cauldronType)), "Expected a valid cauldron type for 'cauldron-type' in mix step!");
             }
         }
     }

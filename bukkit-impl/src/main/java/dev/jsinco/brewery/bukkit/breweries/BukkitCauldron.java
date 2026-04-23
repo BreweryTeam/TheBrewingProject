@@ -255,7 +255,7 @@ public class BukkitCauldron implements Cauldron {
                         ingredients.put(ingredient, amount + 1);
                         return mix.withIngredients(ingredients);
                     },
-                    () -> new MixStepImpl(new Interval(time, time), Map.of(BukkitIngredientManager.INSTANCE.getIngredient(addedItem), 1))
+                    () -> new MixStepImpl(new Interval(time, time), Map.of(BukkitIngredientManager.INSTANCE.getIngredient(addedItem), 1), cauldronType)
             );
         }
         BrewCauldronProcessEvent mixEvent = new BrewCauldronProcessEvent(this, cauldronType, hot, brew, mixed);
@@ -412,7 +412,8 @@ public class BukkitCauldron implements Cauldron {
         } else {
             brew = brew.withLastStep(BrewingStep.Mix.class,
                     mix -> mix.withTime(mix.time().withLastStep(time)),
-                    () -> new MixStepImpl(new Interval(time, time), Map.of())
+                    () -> new MixStepImpl(new Interval(time, time), Map.of(),
+                            getType().orElseThrow(() -> new IllegalStateException("Expected cauldron block type for cauldron")))
             );
         }
     }

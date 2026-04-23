@@ -49,9 +49,10 @@ public class BrewingStepSerializer {
                     object.add("brewers", brewersToJson(brewers));
                 }
             }
-            case MixStepImpl(Moment time, Map<? extends Ingredient, Integer> ingredients, SequencedSet<UUID> brewers) -> {
+            case MixStepImpl(Moment time, Map<? extends Ingredient, Integer> ingredients, CauldronType cauldronType, SequencedSet<UUID> brewers) -> {
                 object.add("ingredients", IngredientUtil.ingredientsToJson((Map<Ingredient, Integer>) ingredients, ingredientManager));
                 object.add("mix_time", Moment.SERIALIZER.serialize(time));
+                object.addProperty("cauldron_type", cauldronType.key().toString());
                 if (!brewers.isEmpty()) {
                     object.add("brewers", brewersToJson(brewers));
                 }
@@ -97,6 +98,9 @@ public class BrewingStepSerializer {
                             .thenApplyAsync(ingredients -> new MixStepImpl(
                                     Moment.SERIALIZER.deserialize(object.get("mix_time")),
                                     ingredients,
+                                    object.has("cauldron_type")
+                                            ? BreweryRegistry.CAULDRON_TYPE.get(BreweryKey.parse(object.get("cauldron_type").getAsString()))
+                                            : BreweryRegistry.CAULDRON_TYPE.get(BreweryKey.parse("water")),
                                     jsonToBrewers(object)
                             ));
         };

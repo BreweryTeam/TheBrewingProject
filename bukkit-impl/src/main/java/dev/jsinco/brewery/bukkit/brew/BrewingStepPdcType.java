@@ -49,7 +49,7 @@ public class BrewingStepPdcType implements PersistentDataType<byte[], BrewingSte
     // AES-GCM header constants
     private static final byte[] MAGIC = new byte[] { 'B','R','W','1' };
     private static final int GCM_TAG_BITS = 128; // data authentication
-    private static final int VERSION = 2;
+    private static final int VERSION = 3;
 
     private final boolean useCipher;
 
@@ -121,6 +121,7 @@ public class BrewingStepPdcType implements PersistentDataType<byte[], BrewingSte
             case BrewingStep.Mix mix -> {
                 encodeMoment(mix.time(), dataOutputStream);
                 encodeIngredients(mix.ingredients(), dataOutputStream);
+                dataOutputStream.writeUTF(mix.cauldronType().key().toString());
             }
             default -> throw new IllegalStateException("Unexpected value: " + complex);
         }
@@ -196,6 +197,9 @@ public class BrewingStepPdcType implements PersistentDataType<byte[], BrewingSte
             case MIX -> new MixStepImpl(
                     decodeMoment(dataInputStream),
                     decodeIngredients(dataInputStream),
+                    version >= 3
+                            ? BreweryRegistry.CAULDRON_TYPE.get(BreweryKey.parse(dataInputStream.readUTF()))
+                            : BreweryRegistry.CAULDRON_TYPE.get(BreweryKey.parse("water")),
                     decodeBrewers(dataInputStream, version)
             );
         };

@@ -161,6 +161,11 @@ public interface BrewingStep {
     interface Mix extends TimedStep, IngredientsStep, AuthoredStep<Mix> {
 
         /**
+         * @return The type of the cauldron
+         */
+        CauldronType cauldronType();
+
+        /**
          * @param ingredients A map of ingredients with amount
          * @return A new instance of this step with specified ingredients
          */
