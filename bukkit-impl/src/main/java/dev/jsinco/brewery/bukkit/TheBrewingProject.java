@@ -16,12 +16,15 @@ import dev.jsinco.brewery.api.structure.StructureType;
 import dev.jsinco.brewery.api.util.Logger;
 import dev.jsinco.brewery.bukkit.api.TheBrewingProjectApi;
 import dev.jsinco.brewery.bukkit.api.event.TBPReloadEvent;
+import dev.jsinco.brewery.bukkit.api.integration.EventIntegration;
+import dev.jsinco.brewery.bukkit.api.integration.IntegrationTypes;
 import dev.jsinco.brewery.bukkit.brew.BukkitBrewManager;
 import dev.jsinco.brewery.bukkit.breweries.BreweryRegistry;
 import dev.jsinco.brewery.bukkit.command.BreweryCommand;
 import dev.jsinco.brewery.bukkit.configuration.serializer.BreweryLocationSerializer;
 import dev.jsinco.brewery.bukkit.configuration.serializer.ColorSerializer;
 import dev.jsinco.brewery.bukkit.configuration.serializer.IngredientInputSerializer;
+import dev.jsinco.brewery.bukkit.configuration.serializer.IntegrationEventSerializer;
 import dev.jsinco.brewery.bukkit.configuration.serializer.MaterialSerializer;
 import dev.jsinco.brewery.bukkit.configuration.serializer.UncheckedIngredientSerializer;
 import dev.jsinco.brewery.bukkit.effect.SqlDrunkStateDataType;
@@ -154,9 +157,6 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
         Config.load(this.getDataFolder(), serializers());
         this.translator = new BreweryTranslator(new File(this.getDataFolder(), "locale"));
         DrunkenModifierSection.load(this.getDataFolder(), serializers());
-        EventSection.load(getDataFolder(), serializers());
-        DrunkenModifierSection.postValidate();
-        EventSection.postValidate();
         translator.reload();
         GlobalTranslator.translator().addSource(translator);
         this.structureRegistry = new StructureRegistry();
@@ -165,7 +165,6 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
         this.recipeRegistry = new RecipeRegistryImpl<>();
         this.drunkTextRegistry = new DrunkTextRegistry();
         this.timeFormatRegistry = new TimeFormatRegistry();
-        this.customDrunkEventRegistry = EventSection.events().customEvents();
         this.eventStepRegistry = new EventStepRegistry();
         this.drunkEventExecutor = new DrunkEventExecutor();
     }
@@ -183,7 +182,7 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
     }
 
     private OkaeriSerdes serializers() {
-        return new OkaeriSerdesBuilder()
+        OkaeriSerdesBuilder builder = new OkaeriSerdesBuilder()
                 .add(new BreweryLocationSerializer())
                 .add(new EventRegistrySerializer())
                 .add(new EventStepSerializer())
@@ -208,8 +207,11 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
                 .add(new ColorSerializer())
                 .add(new UncheckedIngredientSerializer())
                 .add(new IngredientInputSerializer())
-                .add(new ParticleDefinitionSerializer())
-                .build();
+                .add(new ParticleDefinitionSerializer());
+        for (EventIntegration<?> eventIntegration : integrationManager.retrieve(IntegrationTypes.EVENT)) {
+            builder.add(new IntegrationEventSerializer<>(eventIntegration));
+        }
+        return builder.build();
     }
 
     public void reload() {
@@ -340,6 +342,10 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
         } catch (IOException | PersistenceException | SQLException e) {
             throw new RuntimeException(e); // Hard exit if any issues here
         }
+        EventSection.load(getDataFolder(), serializers());
+        DrunkenModifierSection.postValidate();
+        EventSection.postValidate();
+        this.customDrunkEventRegistry = EventSection.events().customEvents();
         this.drunksManager = new DrunksManagerImpl<>(customDrunkEventRegistry, EventSection.events().enabledRandomEvents().stream().map(EventData::deserialize).collect(Collectors.toSet()),
                 EventUtil::fromData, () -> this.time, database, SqlDrunkStateDataType.INSTANCE, SqlDrunkenModifierDataType.INSTANCE);
         PluginManager pluginManager = Bukkit.getPluginManager();
@@ -457,7 +463,6 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
     public Configuration getConfiguration() {
         return Config.config();
     }
-
 
 
     private boolean noTicking() {
