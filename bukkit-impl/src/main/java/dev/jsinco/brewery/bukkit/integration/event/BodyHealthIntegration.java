@@ -96,6 +96,7 @@ public class BodyHealthIntegration implements EventIntegration<BodyHealthIntegra
 
     public enum BodyPartChangeType {
         SET_HEALTH,
+        ADD_HEALTH,
         DAMAGE,
         HEAL
     }
@@ -119,6 +120,10 @@ public class BodyHealthIntegration implements EventIntegration<BodyHealthIntegra
             double partMaxHealth = api.getMaxPartHealth(player, part);
             switch (type) {
                 case SET_HEALTH -> api.setHealth(player, part, percent ? value : value * 100 / partMaxHealth);
+                case ADD_HEALTH -> {
+                    double delta = percent ? value : value * 100 / partMaxHealth;
+                    api.setHealth(player, part, api.getHealth(player, part) + delta);
+                }
                 case DAMAGE ->
                         api.damagePlayerDirectly(player, percent ? value * partMaxHealth / 100 : value, part, force);
                 case HEAL ->
