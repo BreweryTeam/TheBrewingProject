@@ -16,8 +16,6 @@ import dev.jsinco.brewery.api.structure.StructureType;
 import dev.jsinco.brewery.api.util.Logger;
 import dev.jsinco.brewery.bukkit.api.TheBrewingProjectApi;
 import dev.jsinco.brewery.bukkit.api.event.TBPReloadEvent;
-import dev.jsinco.brewery.bukkit.api.integration.EventIntegration;
-import dev.jsinco.brewery.bukkit.api.integration.IntegrationTypes;
 import dev.jsinco.brewery.bukkit.brew.BukkitBrewManager;
 import dev.jsinco.brewery.bukkit.breweries.BreweryRegistry;
 import dev.jsinco.brewery.bukkit.command.BreweryCommand;
@@ -182,7 +180,7 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
     }
 
     private OkaeriSerdes serializers() {
-        OkaeriSerdesBuilder builder = new OkaeriSerdesBuilder()
+        return new OkaeriSerdesBuilder()
                 .add(new BreweryLocationSerializer())
                 .add(new EventRegistrySerializer())
                 .add(new EventStepSerializer())
@@ -207,11 +205,9 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
                 .add(new ColorSerializer())
                 .add(new UncheckedIngredientSerializer())
                 .add(new IngredientInputSerializer())
-                .add(new ParticleDefinitionSerializer());
-        for (EventIntegration<?> eventIntegration : integrationManager.retrieve(IntegrationTypes.EVENT)) {
-            builder.add(new IntegrationEventSerializer<>(eventIntegration));
-        }
-        return builder.build();
+                .add(new ParticleDefinitionSerializer())
+                .add(new IntegrationEventSerializer(integrationManager.getIntegrationRegistry()))
+                .build();
     }
 
     public void reload() {
