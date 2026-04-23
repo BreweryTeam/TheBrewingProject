@@ -164,7 +164,6 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
         this.drunkTextRegistry = new DrunkTextRegistry();
         this.timeFormatRegistry = new TimeFormatRegistry();
         this.eventStepRegistry = new EventStepRegistry();
-        this.drunkEventExecutor = new DrunkEventExecutor();
     }
 
     @Override
@@ -344,6 +343,7 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
         this.customDrunkEventRegistry = EventSection.events().customEvents();
         this.drunksManager = new DrunksManagerImpl<>(customDrunkEventRegistry, EventSection.events().enabledRandomEvents().stream().map(EventData::deserialize).collect(Collectors.toSet()),
                 EventUtil::fromData, () -> this.time, database, SqlDrunkStateDataType.INSTANCE, SqlDrunkenModifierDataType.INSTANCE);
+        this.drunkEventExecutor = new DrunkEventExecutor();
         PluginManager pluginManager = Bukkit.getPluginManager();
         pluginManager.registerEvents(new BrewMigrationListener(), this);
         pluginManager.registerEvents(new BlockEventListener(this.structureRegistry, placedStructureRegistry, this.database, this.breweryRegistry), this);
