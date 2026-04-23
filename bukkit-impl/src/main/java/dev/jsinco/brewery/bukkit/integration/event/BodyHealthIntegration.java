@@ -14,6 +14,8 @@ import dev.jsinco.brewery.bukkit.api.integration.EventIntegration;
 import dev.jsinco.brewery.util.ClassUtil;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
+import org.bukkit.entity.Player;
+import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -38,6 +40,9 @@ public class BodyHealthIntegration implements EventIntegration<BodyHealthIntegra
             for (BodyPartChangeType bodyPartChangeType : BodyPartChangeType.values()) {
                 output.add(toKey(bodyPartChangeType, bodyPart));
             }
+        }
+        for (BodyPartChangeType changeType : BodyPartChangeType.values()) {
+            output.add(toKey(changeType, null));
         }
         return output;
     }
@@ -74,8 +79,9 @@ public class BodyHealthIntegration implements EventIntegration<BodyHealthIntegra
                 .withData(VALUE, MetaDataType.STRING_TO_DOUBLE, event.value);
     }
 
-    private static BreweryKey toKey(BodyPartChangeType bodyPartChangeType, BodyPart bodyPart) {
-        return new BreweryKey("bodyhealth", bodyPartChangeType.name().toLowerCase(Locale.ROOT) + "_" + bodyPart.name().toLowerCase(Locale.ROOT));
+    private static BreweryKey toKey(BodyPartChangeType bodyPartChangeType, @Nullable BodyPart bodyPart) {
+        String bodyPartName = bodyPart == null ? "all" : bodyPart.name().toLowerCase(Locale.ROOT);
+        return new BreweryKey("bodyhealth", bodyPartChangeType.name().toLowerCase(Locale.ROOT) + "_" + bodyPartName);
     }
 
     @Override
@@ -94,23 +100,30 @@ public class BodyHealthIntegration implements EventIntegration<BodyHealthIntegra
         HEAL
     }
 
-    public record BodyHealthEvent(BodyPartChangeType type, BodyPart part, double value, boolean percent,
+    public record BodyHealthEvent(BodyPartChangeType type, @Nullable BodyPart part, double value, boolean percent,
                                   boolean force) implements IntegrationEvent {
         @Override
         public void run(Holder.Player player) {
-            BodyHealthAPI api = BodyHealthAPI.getInstance();
             BukkitAdapter.toPlayer(player)
                     .ifPresent(bukkitPlayer -> {
-                        double partMaxHealth = api.getMaxPartHealth(bukkitPlayer, part);
-                        switch (type) {
-                            case SET_HEALTH ->
-                                    api.setHealth(bukkitPlayer, part, percent ? value : value * 100 / partMaxHealth);
-                            case DAMAGE ->
-                                    api.damagePlayerDirectly(bukkitPlayer, percent ? value * partMaxHealth / 100 : value, part, force);
-                            case HEAL ->
-                                    api.healPlayer(bukkitPlayer, part, (int) Math.round(percent ? value * partMaxHealth / 100 : value), force);
+                        if (part == null) {
+                            Arrays.stream(BodyPart.values()).forEach(bodyPart -> changeHealth(bodyPart, bukkitPlayer));
+                        } else {
+                            changeHealth(part, bukkitPlayer);
                         }
                     });
+        }
+
+        private void changeHealth(BodyPart part, Player player) {
+            BodyHealthAPI api = BodyHealthAPI.getInstance();
+            double partMaxHealth = api.getMaxPartHealth(player, part);
+            switch (type) {
+                case SET_HEALTH -> api.setHealth(player, part, percent ? value : value * 100 / partMaxHealth);
+                case DAMAGE ->
+                        api.damagePlayerDirectly(player, percent ? value * partMaxHealth / 100 : value, part, force);
+                case HEAL ->
+                        api.healPlayer(player, part, (int) Math.round(percent ? value * partMaxHealth / 100 : value), force);
+            }
         }
 
         @Override
@@ -120,7 +133,8 @@ public class BodyHealthIntegration implements EventIntegration<BodyHealthIntegra
 
         @Override
         public Component displayName() {
-            return Component.text(type.name().toLowerCase(Locale.ROOT) + " " + part.name().toLowerCase(Locale.ROOT));
+            String name = type.name().toLowerCase(Locale.ROOT) + " " + (part == null ? "all" : part.name().toLowerCase(Locale.ROOT));
+            return Component.text(name.replace("_", " "));
         }
 
         @Override
