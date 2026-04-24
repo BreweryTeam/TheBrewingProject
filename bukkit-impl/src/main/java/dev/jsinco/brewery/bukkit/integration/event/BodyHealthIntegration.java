@@ -81,8 +81,18 @@ public class BodyHealthIntegration implements EventIntegration<BodyHealthIntegra
 
     @Override
     public EventData convertToData(BodyHealthEvent event) {
-        return new EventData(toKey(event.type, event.part))
+        EventData data = new EventData(toKey(event.type, event.part))
                 .withData(VALUE, MetaDataType.STRING_TO_DOUBLE, event.value);
+        if (!event.percent()) {
+            data = data.withData(PERCENT, MetaDataType.STRING_TO_BOOLEAN, false);
+        }
+        if (event.force()) {
+            data = data.withData(FORCE, MetaDataType.STRING_TO_BOOLEAN, true);
+        }
+        if (event.forceKeep()) {
+            data = data.withData(FORCE_KEEP, MetaDataType.STRING_TO_BOOLEAN, true);
+        }
+        return data;
     }
 
     private static BreweryKey toKey(BodyPartChangeType bodyPartChangeType, @Nullable BodyPart bodyPart) {
