@@ -12,13 +12,13 @@ import dev.jsinco.brewery.util.ClassUtil;
 import net.kyori.adventure.text.Component;
 import org.skriptlang.skript.addon.SkriptAddon;
 import org.skriptlang.skript.bukkit.lang.eventvalue.EventValueRegistry;
-import org.skriptlang.skript.lang.properties.PropertyRegistry;
 
 import java.util.List;
 import java.util.Optional;
 
 public class SkriptIntegration implements EventIntegration<SkriptIntegration.SkriptIntegrationEvent> {
 
+    public static final String NAMESPACE = "skript";
 
     @Override
     public Class<SkriptIntegrationEvent> eClass() {
@@ -42,7 +42,7 @@ public class SkriptIntegration implements EventIntegration<SkriptIntegration.Skr
 
     @Override
     public String getId() {
-        return "skript";
+        return NAMESPACE;
     }
 
     @Override
@@ -53,9 +53,7 @@ public class SkriptIntegration implements EventIntegration<SkriptIntegration.Skr
     @Override
     public void onLoad() {
         SkriptAddon skriptAddon = Skript.instance().registerAddon(TheBrewingProject.class, "TheBrewingProject-Skript");
-        PropertyRegistry propertyRegistry = skriptAddon.registry(PropertyRegistry.class);
-        propertyRegistry.register()
-        TbpSyntaxRegistry tbpRegistry = skriptAddon.registry(TbpSyntaxRegistry.class, TbpSyntaxRegistry::new);
+        TbpSkriptEventStructure.register(skriptAddon.syntaxRegistry());
         EventValueRegistry eventRegistry = skriptAddon.registry(EventValueRegistry.class);
     }
 
