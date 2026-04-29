@@ -40,7 +40,7 @@ public class TbpSkriptEventStructure extends Structure {
         this.key = BreweryKey.parse((String) args[0].getSingle());
         this.displayName = (Component) args[1].getSingle();
         if (entryContainer == null) {
-            Skript.error("[TBP] Empty entry container, this event does nothing! ");
+            Skript.error("[TBP] Empty entry container, this event does nothing!");
             return false;
         }
         this.source = entryContainer.getSource();
@@ -54,12 +54,12 @@ public class TbpSkriptEventStructure extends Structure {
     }
 
     public void run() {
-        // What to do here?
+        TriggerItem.walk(code.getFirst(), null);
     }
 
     public static void register(SyntaxRegistry syntaxRegistry) {
         syntaxRegistry
-                .register(SyntaxRegistry.Key.of("tbp_custom_event_structure"), DefaultSyntaxInfos.Structure.builder(TbpSkriptEventStructure.class)
+                .register(SyntaxRegistry.STRUCTURE, DefaultSyntaxInfos.Structure.builder(TbpSkriptEventStructure.class)
                         .addPattern("[tbp_]register event with key %text% [and ][display ]name %text component%")
                         .supplier(TbpSkriptEventStructure::new)
                         .build()
