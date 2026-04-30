@@ -107,7 +107,7 @@ public class BreweryXMigrationUtils {
         } catch (IOException e) {
             if (!errors.contains(e.getMessage())) {
                 Logger.logErr("Corrupted or unknown brew data!");
-                Logger.logErr("Ignoring following error to avoid excessive console output");
+                Logger.logWarn("Ignoring following error to avoid excessive console output");
                 Logger.logErr(e);
                 errors.add(e.getMessage());
             }
