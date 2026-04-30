@@ -60,7 +60,8 @@ public class BreweryXMigrationUtils {
             BarrelTypes.PALE_OAK
     );
     private static boolean noSeedIssueOccurred = true;
-    private static Set<String> invalidIngredientIdentifiers = new HashSet<>();
+    private static final Set<String> invalidIngredientIdentifiers = new HashSet<>();
+    private static final Set<String> errors = new HashSet<>();
 
     public static @Nullable ItemStack migrate(@NonNull ItemStack item) {
         ItemMeta meta = item.getItemMeta();
@@ -101,8 +102,12 @@ public class BreweryXMigrationUtils {
             }
             noSeedIssueOccurred = false;
         } catch (IOException e) {
-            Logger.logErr("Failed to convert a BreweryX Brew:");
-            Logger.logAndTrackErr(e);
+            if (!errors.contains(e.getMessage())) {
+                Logger.logErr("Corrupted or unknown brew data!");
+                Logger.logErr("Ignoring following errors to avoid excessive console output");
+                Logger.logErr(e);
+                errors.add(e.getMessage());
+            }
         }
         return null;
     }
