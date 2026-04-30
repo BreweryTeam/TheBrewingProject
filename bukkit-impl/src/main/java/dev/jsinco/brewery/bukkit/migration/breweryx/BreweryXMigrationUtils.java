@@ -82,6 +82,9 @@ public class BreweryXMigrationUtils {
 
             unscrambler.start();
             BrewData data = loadBrewDataFromStream(in);
+            if (data == null) {
+                return null;
+            }
             BrewManager<ItemStack> brewManager = TheBrewingProject.getInstance().getBrewManager();
             Brew.State state = data.sealed ? new Brew.State.Seal(null) : new Brew.State.Other();
             if (data.brew == null || data.sealed) {
@@ -144,7 +147,7 @@ public class BreweryXMigrationUtils {
     private record BrewData(@Nullable Brew brew, @Nullable String recipe, boolean sealed, byte quality) {
     }
 
-    private static BrewData loadBrewDataFromStream(DataInputStream in) throws IOException {
+    private static @Nullable BrewData loadBrewDataFromStream(DataInputStream in) throws IOException {
         byte quality = in.readByte();
         int flags = in.readUnsignedByte();
 
@@ -189,12 +192,16 @@ public class BreweryXMigrationUtils {
         }
         Map<Ingredient, Integer> ingredients = new HashMap<>();
         for (int i = 0; i < ingredientAmount; i++) {
-            Ingredient ingredient = readIngredient(in);
+            IngredientReadResult ingredient = readIngredient(in);
             int amount = in.readShort();
-            if (ingredient == null) {
-                continue;
+            switch (ingredient) {
+                case Success success -> ingredients.put(success.payload, amount);
+                case Failure ignored -> {
+                    return null;
+                }
+                case null, default -> {
+                }
             }
-            ingredients.put(ingredient, amount);
         }
         steps.addFirst(new CookStepImpl(
                 new PassedMoment((long) cookingTime * PassedMoment.MINUTE),
@@ -204,7 +211,7 @@ public class BreweryXMigrationUtils {
         return new BrewData(new BrewImpl(steps), recipe, sealed, quality);
     }
 
-    private static @Nullable Ingredient readIngredient(DataInputStream in) throws IOException {
+    private static @Nullable IngredientReadResult readIngredient(DataInputStream in) throws IOException {
         String identifier = in.readUTF().toUpperCase(Locale.ROOT);
         return switch (identifier) {
             case "CI" -> readCustomItem(in);
@@ -215,27 +222,27 @@ public class BreweryXMigrationUtils {
                     Logger.logWarn("Unknown ingredient identifier, skipping ingredient: " + identifier);
                     invalidIngredientIdentifiers.add(identifier);
                 }
-                yield null;
+                yield new Failure();
             }
         };
     }
 
-    private static Ingredient readSimpleItem(DataInputStream in) throws IOException {
+    private static IngredientReadResult readSimpleItem(DataInputStream in) throws IOException {
         String materialName = in.readUTF();
         in.skipBytes(2); // Dur ignored (short)
         return parseSimpleIngredientWithLogMessage(materialName);
     }
 
-    private static Ingredient parseSimpleIngredientWithLogMessage(String materialString) {
+    private static IngredientReadResult parseSimpleIngredientWithLogMessage(String materialString) {
         try {
-            return new SimpleIngredient(Material.valueOf(materialString));
+            return new Success(new SimpleIngredient(Material.valueOf(materialString)));
         } catch (IllegalArgumentException e) {
             Logger.logWarn("Unknown material name for simple ingredient: " + materialString);
-            return null;
+            return new Ignored();
         }
     }
 
-    private static Ingredient readPluginItem(DataInputStream in) throws IOException {
+    private static IngredientReadResult readPluginItem(DataInputStream in) throws IOException {
         String pluginId = in.readUTF();
         String itemId = in.readUTF();
         Ingredient output = TheBrewingProject.getInstance()
@@ -249,11 +256,12 @@ public class BreweryXMigrationUtils {
                 .orElse(null);
         if (output == null) {
             Logger.logWarn("Unknown plugin id or item id for plugin ingredient: " + pluginId + ":" + itemId);
+            return new Ignored();
         }
-        return output;
+        return new Success(output);
     }
 
-    private static Ingredient readCustomItem(DataInputStream in) throws IOException {
+    private static IngredientReadResult readCustomItem(DataInputStream in) throws IOException {
         if (in.readBoolean()) { // Material based
             return parseSimpleIngredientWithLogMessage(in.readUTF());
         }
@@ -269,7 +277,22 @@ public class BreweryXMigrationUtils {
         if (in.readBoolean()) { // Custom model data (unsupported)
             in.skipBytes(4); // Int ignored
         }
-        return null;
+        return new Ignored();
     }
 
+    public interface IngredientReadResult {
+
+    }
+
+    public record Success(Ingredient payload) implements IngredientReadResult {
+
+    }
+
+    public record Ignored() implements IngredientReadResult {
+
+    }
+
+    public record Failure() implements IngredientReadResult {
+
+    }
 }
