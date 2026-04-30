@@ -34,10 +34,12 @@ import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 public class BreweryXMigrationUtils {
 
@@ -58,6 +60,7 @@ public class BreweryXMigrationUtils {
             BarrelTypes.PALE_OAK
     );
     private static boolean noSeedIssueOccurred = true;
+    private static Set<String> invalidIngredientIdentifiers = new HashSet<>();
 
     public static @Nullable ItemStack migrate(@NonNull ItemStack item) {
         ItemMeta meta = item.getItemMeta();
@@ -196,13 +199,19 @@ public class BreweryXMigrationUtils {
         return new BrewData(new BrewImpl(steps), recipe, sealed, quality);
     }
 
-    private static Ingredient readIngredient(DataInputStream in) throws IOException {
-        return switch (in.readUTF().toUpperCase(Locale.ROOT)) {
+    private static @Nullable Ingredient readIngredient(DataInputStream in) throws IOException {
+        String identifier = in.readUTF().toUpperCase(Locale.ROOT);
+        return switch (identifier) {
             case "CI" -> readCustomItem(in);
             case "PI" -> readPluginItem(in);
             case "SI" -> readSimpleItem(in);
-            // Has to fail, as the following data would be messed up
-            default -> throw new IOException("Unsupported ingredient type: " + in);
+            default -> {
+                if (!invalidIngredientIdentifiers.contains(identifier)) {
+                    Logger.logWarn("Unknown ingredient identifier, skipping ingredient: " + identifier);
+                    invalidIngredientIdentifiers.add(identifier);
+                }
+                yield null;
+            }
         };
     }
 
