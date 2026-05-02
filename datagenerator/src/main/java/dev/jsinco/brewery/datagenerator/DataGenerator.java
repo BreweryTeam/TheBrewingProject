@@ -3,7 +3,7 @@ package dev.jsinco.brewery.datagenerator;
 import com.google.gson.JsonObject;
 
 import javax.imageio.ImageIO;
-import java.awt.*;
+import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -11,7 +11,12 @@ import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.nio.file.*;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystemNotFoundException;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -24,7 +29,11 @@ public class DataGenerator {
             "short_grass", 0x7cbd6b,
             "_leaves", 0x71a74d,
             "vine", 0x48b518,
-            "sugar_cane", 0x8eb971
+            "sugar_cane", 0x8eb971,
+            "lily_pad", 0x208030,
+            "seagrass", 0x4d9e3f, "kelp", 0x4d9e3f,
+            "dry_grass", 0xa89060,
+            "dry_bush", 0x946b44, "bush", 0x71a74d
     );
 
     public static void main(String[] args) throws URISyntaxException, IOException {
