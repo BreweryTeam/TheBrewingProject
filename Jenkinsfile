@@ -3,7 +3,7 @@ pipeline {
     
     stages {
         stage('Build') {
-            agent { label 'linux-jdk21' }
+            agent { label 'linux-jdk25' }
 
             steps {
                 sh 'chmod +x gradlew'
