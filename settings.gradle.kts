@@ -1,4 +1,5 @@
 rootProject.name = "TheBrewingProject"
+
 pluginManagement {
     repositories {
         mavenCentral()
@@ -6,6 +7,11 @@ pluginManagement {
         gradlePluginPortal()
     }
 }
+
+plugins {
+    id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
+}
+
 include("datagenerator")
 include("api")
 include("core")
