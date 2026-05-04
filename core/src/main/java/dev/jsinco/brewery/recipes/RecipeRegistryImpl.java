@@ -111,6 +111,7 @@ public class RecipeRegistryImpl<I> implements RecipeRegistry<I> {
 
     @Override
     public void registerDefaultRecipe(String name, DefaultRecipe<I> recipe) {
+        Preconditions.checkArgument(recipe != null, "Default recipe can not be null");
         defaultRecipes.put(name, recipe);
         defaultRecipeList.add(recipe);
     }
