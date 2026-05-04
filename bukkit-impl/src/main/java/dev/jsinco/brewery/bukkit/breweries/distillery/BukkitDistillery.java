@@ -301,7 +301,9 @@ public class BukkitDistillery implements Distillery<BukkitDistillery, ItemStack,
         checkDirty();
         if (shouldUnpopulateInventory()) {
             close(false);
-            TheBrewingProject.getInstance().getBreweryRegistry().unregisterOpened(this);
+            Bukkit.getAsyncScheduler().runNow(TheBrewingProject.getInstance(), ignored ->
+                    TheBrewingProject.getInstance().getBreweryRegistry().unregisterOpened(this)
+            );
             // Distilling results can be computed later on
             this.recentlyAccessed = -1L;
             return;
