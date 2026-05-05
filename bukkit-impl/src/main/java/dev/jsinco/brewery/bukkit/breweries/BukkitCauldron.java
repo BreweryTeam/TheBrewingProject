@@ -515,7 +515,7 @@ public class BukkitCauldron implements Cauldron {
     }
 
     @Override
-    public CompletableFuture<Void> run(Runnable action) {
+    public CompletableFuture<Void> runLocally(Runnable action) {
         CompletableFuture<Void> completableFuture = new CompletableFuture<>();
         Bukkit.getRegionScheduler().run(TheBrewingProject.getInstance(), BukkitAdapter.toLocation(location).orElseThrow(), ignored -> {
             action.run();

@@ -299,7 +299,7 @@ public class BukkitBarrel implements Barrel<BukkitBarrel, ItemStack, Inventory>,
     }
 
     @Override
-    public CompletableFuture<Void> run(Runnable action) {
+    public CompletableFuture<Void> runLocally(Runnable action) {
         CompletableFuture<Void> completableFuture = new CompletableFuture<>();
         Bukkit.getRegionScheduler().run(TheBrewingProject.getInstance(), getUniqueLocation(), ignored -> {
             action.run();

@@ -10,5 +10,5 @@ public interface SelfSchedulingBrewery {
      * @param action The action to run
      * @return A completable future that is completed when the action completes
      */
-    CompletableFuture<Void> run(Runnable action);
+    CompletableFuture<Void> runLocally(Runnable action);
 }

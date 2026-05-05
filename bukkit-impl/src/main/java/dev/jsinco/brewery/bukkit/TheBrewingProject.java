@@ -426,10 +426,10 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
                 .map(Tickable.class::cast)
                 .forEach(Tickable::tick);
         breweryRegistry.iterate(StructureType.BARREL, barrel ->
-                barrel.run(((BukkitBarrel) barrel)::tickInventory)
+                barrel.runLocally(((BukkitBarrel) barrel)::tickInventory)
         );
         breweryRegistry.iterate(StructureType.DISTILLERY, distillery ->
-                distillery.run(((BukkitDistillery) distillery)::tickInventory)
+                distillery.runLocally(((BukkitDistillery) distillery)::tickInventory)
         );
     }
 
