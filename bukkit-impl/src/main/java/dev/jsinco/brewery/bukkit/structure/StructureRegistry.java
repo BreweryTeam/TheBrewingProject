@@ -24,7 +24,7 @@ public class StructureRegistry {
         return Optional.ofNullable(structureNames.get(key));
     }
 
-    public Set<BreweryStructure> getPossibleStructures(@NonNull BlockType material, StructureType structureType) {
+    public Set<BreweryStructure> getPossibleStructures(@NonNull BlockType material, StructureType<?> structureType) {
         Preconditions.checkNotNull(material);
         return structuresWithMaterials.computeIfAbsent(structureType, ignored -> new HashMap<>()).getOrDefault(material, Set.of());
     }

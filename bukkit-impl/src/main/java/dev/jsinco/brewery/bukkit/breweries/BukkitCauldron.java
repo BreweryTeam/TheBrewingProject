@@ -69,6 +69,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Random;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Supplier;
 
 public class BukkitCauldron implements Cauldron {
@@ -511,5 +512,15 @@ public class BukkitCauldron implements Cauldron {
 
     public void setHot(boolean hot) {
         this.hot = hot;
+    }
+
+    @Override
+    public CompletableFuture<Void> run(Runnable action) {
+        CompletableFuture<Void> completableFuture = new CompletableFuture<>();
+        Bukkit.getRegionScheduler().run(TheBrewingProject.getInstance(), BukkitAdapter.toLocation(location).orElseThrow(), ignored -> {
+            action.run();
+            completableFuture.complete(null);
+        });
+        return completableFuture;
     }
 }

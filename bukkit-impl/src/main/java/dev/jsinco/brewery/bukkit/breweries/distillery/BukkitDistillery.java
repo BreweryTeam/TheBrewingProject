@@ -48,6 +48,7 @@ import java.util.Optional;
 import java.util.Queue;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -453,5 +454,15 @@ public class BukkitDistillery implements Distillery<BukkitDistillery, ItemStack,
 
     public BrewInventoryImpl getDistillate() {
         return this.distillate;
+    }
+
+    @Override
+    public CompletableFuture<Void> run(Runnable action) {
+        CompletableFuture<Void> completableFuture = new CompletableFuture<>();
+        Bukkit.getRegionScheduler().run(TheBrewingProject.getInstance(), structure.getWorldOrigin(), ignored -> {
+            action.run();
+            completableFuture.complete(null);
+        });
+        return completableFuture;
     }
 }

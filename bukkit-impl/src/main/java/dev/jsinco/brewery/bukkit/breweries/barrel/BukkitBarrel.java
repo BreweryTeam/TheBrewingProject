@@ -43,6 +43,7 @@ import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 public class BukkitBarrel implements Barrel<BukkitBarrel, ItemStack, Inventory>, BarrelAccess {
     private final PlacedBreweryStructure<BukkitBarrel> structure;
@@ -295,5 +296,15 @@ public class BukkitBarrel implements Barrel<BukkitBarrel, ItemStack, Inventory>,
 
     public Location getUniqueLocation() {
         return this.uniqueLocation;
+    }
+
+    @Override
+    public CompletableFuture<Void> run(Runnable action) {
+        CompletableFuture<Void> completableFuture = new CompletableFuture<>();
+        Bukkit.getRegionScheduler().run(TheBrewingProject.getInstance(), getUniqueLocation(), ignored -> {
+            action.run();
+            completableFuture.complete(null);
+        });
+        return completableFuture;
     }
 }

@@ -6,7 +6,7 @@ import org.jspecify.annotations.NonNull;
 
 import java.util.Optional;
 
-public interface Cauldron extends Tickable, SinglePositionStructure {
+public interface Cauldron extends Tickable, SinglePositionStructure, SelfSchedulingBrewery {
 
     /**
      * @return The brew time in ticks

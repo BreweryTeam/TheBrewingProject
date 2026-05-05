@@ -68,7 +68,7 @@ public class StructureMetaSerializer implements ObjectSerializer<BreweryStructur
             );
         }
         Preconditions.checkArgument(meta.containsKey(StructureMeta.TYPE), "Expected structure type to be present");
-        StructureType type = (StructureType) meta.get(StructureMeta.TYPE);
+        StructureType<?> type = (StructureType<?>) meta.get(StructureMeta.TYPE);
         type.getMissingMandatory(meta.keySet()).forEach(structureMeta -> {
             meta.put(structureMeta, structureMeta.defaultValue());
         });

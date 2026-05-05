@@ -20,7 +20,7 @@ import java.util.function.Consumer;
 public final class BreweryRegistry {
 
     private final Map<BreweryLocation, SinglePositionStructure> activeSingleBlockStructures = new ConcurrentHashMap<>();
-    private final Map<StructureType, Set<InventoryAccessible<ItemStack, Inventory>>> opened = new HashMap<>();
+    private final Map<StructureType<?>, Set<InventoryAccessible<ItemStack, Inventory>>> opened = new HashMap<>();
     private final Map<Inventory, InventoryAccessible<ItemStack, Inventory>> inventories = new ConcurrentHashMap<>();
 
     public Optional<SinglePositionStructure> getActiveSinglePositionStructure(BreweryLocation position) {
@@ -40,23 +40,23 @@ public final class BreweryRegistry {
     }
 
     public <H extends InventoryAccessible<ItemStack, Inventory>> void registerOpened(H holder) {
-        StructureType structureType = getStructureType(holder);
+        StructureType<H> structureType = getStructureType(holder);
         synchronized (opened) {
             opened.computeIfAbsent(structureType, ignored -> new HashSet<>()).add(holder);
         }
     }
 
     public <H extends InventoryAccessible<ItemStack, Inventory>> void unregisterOpened(H holder) {
-        StructureType structureType = getStructureType(holder);
+        StructureType<H> structureType = getStructureType(holder);
         synchronized (opened) {
             opened.computeIfAbsent(structureType, ignored -> new HashSet<>()).remove(holder);
         }
     }
 
-    private <H> StructureType getStructureType(H holder) {
-        for (StructureType structureType : dev.jsinco.brewery.api.util.BreweryRegistry.STRUCTURE_TYPE.values()) {
+    private <H> StructureType<H> getStructureType(H holder) {
+        for (StructureType<?> structureType : dev.jsinco.brewery.api.util.BreweryRegistry.STRUCTURE_TYPE.values()) {
             if (structureType.tClass().isInstance(holder)) {
-                return structureType;
+                return (StructureType<H>) structureType;
             }
         }
         throw new IllegalArgumentException("Holder does not have a matching structure type!");
@@ -83,17 +83,19 @@ public final class BreweryRegistry {
         inventories.clear();
     }
 
-    public void iterate(StructureType type, Consumer<InventoryAccessible<ItemStack, Inventory>> inventoryAccessibleAction) {
+    public <T> void iterate(StructureType<T> type, Consumer<T> inventoryAccessibleAction) {
         synchronized (opened) {
             Set<InventoryAccessible<ItemStack, Inventory>> inventoryAccessible = opened.get(type);
             if (inventoryAccessible == null) {
                 return;
             }
-            inventoryAccessible.forEach(inventoryAccessibleAction);
+            inventoryAccessible.stream()
+                    .map(type.tClass()::cast)
+                    .forEach(inventoryAccessibleAction);
         }
     }
 
-    public int countOpened(StructureType type) {
+    public int countOpened(StructureType<?> type) {
         synchronized (opened) {
             return opened.get(type).size();
         }

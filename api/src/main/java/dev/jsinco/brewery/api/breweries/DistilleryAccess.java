@@ -6,23 +6,26 @@ import dev.jsinco.brewery.api.util.Holder;
 import dev.jsinco.brewery.api.vector.BreweryLocation;
 import org.jspecify.annotations.NonNull;
 
-public interface DistilleryAccess {
+public interface DistilleryAccess extends SelfSchedulingBrewery {
     /**
      * Open this distillery inventory for the player with the specified UUID
+     *
      * @param location The location to open from
-     * @param player The player UUID
+     * @param player   The player UUID
      * @return True if canceled
      */
     CancelState open(@NonNull BreweryLocation location, Holder.@NonNull Player player);
 
     /**
      * Closes the distillery inventory for all viewers
+     *
      * @param silent Whether to play a close sound or not
      */
     void close(boolean silent);
 
     /**
      * Destroy the distillery, dropping all contained items
+     *
      * @param breweryLocation The location to destroy from
      */
     void destroy(BreweryLocation breweryLocation);

@@ -21,5 +21,5 @@ public interface StructureHolder<H extends StructureHolder<H>> {
     /**
      * @return The type of the structure
      */
-    StructureType getStructureType();
+    StructureType<?> getStructureType();
 }

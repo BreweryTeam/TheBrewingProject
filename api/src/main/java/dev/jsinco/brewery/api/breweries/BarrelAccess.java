@@ -6,24 +6,27 @@ import dev.jsinco.brewery.api.util.Holder;
 import dev.jsinco.brewery.api.vector.BreweryLocation;
 import org.jspecify.annotations.NonNull;
 
-public interface BarrelAccess {
+public interface BarrelAccess extends SelfSchedulingBrewery {
 
     /**
      * Open this barrels inventory for the player with the specified UUID
+     *
      * @param location The location to open from
-     * @param player The player
+     * @param player   The player
      * @return The resulting state
      */
     CancelState open(@NonNull BreweryLocation location, Holder.@NonNull Player player);
 
     /**
      * Closes the barrel inventory for all viewers
+     *
      * @param silent Whether to play a barrel sound or not
      */
     void close(boolean silent);
 
     /**
      * Destroy the barrel, dropping all contained items
+     *
      * @param breweryLocation The location to destroy from
      */
     void destroy(BreweryLocation breweryLocation);

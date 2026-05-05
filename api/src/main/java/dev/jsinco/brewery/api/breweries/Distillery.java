@@ -11,7 +11,7 @@ public interface Distillery<D extends Distillery<D, IS, I>, IS, I> extends Struc
     long getStartTime();
 
     @Override
-    default StructureType getStructureType() {
+    default StructureType<DistilleryAccess> getStructureType() {
         return StructureType.DISTILLERY;
     }
 }

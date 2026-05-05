@@ -4,15 +4,16 @@ import dev.jsinco.brewery.api.structure.StructureType;
 
 /**
  * Due to using too much generics complexity, replaced with {@link BarrelAccess}
- * @param <B> Self
+ *
+ * @param <B>  Self
  * @param <IS> ItemStack
- * @param <I> Inventory
+ * @param <I>  Inventory
  */
 @Deprecated(forRemoval = true)
 public interface Barrel<B extends Barrel<B, IS, I>, IS, I> extends StructureHolder<B>, InventoryAccessible<IS, I> {
 
     @Override
-    default StructureType getStructureType() {
+    default StructureType<BarrelAccess> getStructureType() {
         return StructureType.BARREL;
     }
 }

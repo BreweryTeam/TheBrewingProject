@@ -3,7 +3,6 @@ package dev.jsinco.brewery.bukkit;
 import com.google.common.base.Preconditions;
 import dev.faststats.bukkit.BukkitMetrics;
 import dev.jsinco.brewery.api.brew.BrewManager;
-import dev.jsinco.brewery.api.breweries.InventoryAccessible;
 import dev.jsinco.brewery.api.breweries.Tickable;
 import dev.jsinco.brewery.api.config.Configuration;
 import dev.jsinco.brewery.api.effect.modifier.ModifierManager;
@@ -18,6 +17,8 @@ import dev.jsinco.brewery.bukkit.api.TheBrewingProjectApi;
 import dev.jsinco.brewery.bukkit.api.event.TBPReloadEvent;
 import dev.jsinco.brewery.bukkit.brew.BukkitBrewManager;
 import dev.jsinco.brewery.bukkit.breweries.BreweryRegistry;
+import dev.jsinco.brewery.bukkit.breweries.barrel.BukkitBarrel;
+import dev.jsinco.brewery.bukkit.breweries.distillery.BukkitDistillery;
 import dev.jsinco.brewery.bukkit.command.BreweryCommand;
 import dev.jsinco.brewery.bukkit.configuration.serializer.BreweryLocationSerializer;
 import dev.jsinco.brewery.bukkit.configuration.serializer.ColorSerializer;
@@ -424,8 +425,12 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
                 .map(MultiblockStructure::getHolder)
                 .map(Tickable.class::cast)
                 .forEach(Tickable::tick);
-        breweryRegistry.iterate(StructureType.BARREL, InventoryAccessible::tickInventory);
-        breweryRegistry.iterate(StructureType.DISTILLERY, InventoryAccessible::tickInventory);
+        breweryRegistry.iterate(StructureType.BARREL, barrel ->
+                barrel.run(((BukkitBarrel) barrel)::tickInventory)
+        );
+        breweryRegistry.iterate(StructureType.DISTILLERY, distillery ->
+                distillery.run(((BukkitDistillery) distillery)::tickInventory)
+        );
     }
 
     private void otherTicking(ScheduledTask ignored) {
