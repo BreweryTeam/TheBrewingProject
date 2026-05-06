@@ -11,10 +11,8 @@ import dev.jsinco.brewery.api.recipe.RecipeRegistry;
 import dev.jsinco.brewery.api.util.Logger;
 import org.jspecify.annotations.NonNull;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -28,8 +26,7 @@ public class RecipeRegistryImpl<I> implements RecipeRegistry<I> {
 
 
     private Map<String, Recipe<I>> recipes = Collections.synchronizedMap(new LinkedHashMap<>());
-    private Map<String, DefaultRecipe<I>> defaultRecipes = new HashMap<>();
-    private List<DefaultRecipe<I>> defaultRecipeList = new ArrayList<>();
+    private Map<String, DefaultRecipe<I>> defaultRecipes = new LinkedHashMap<>();
     private Set<BaseIngredient> allIngredients = Collections.newSetFromMap(new ConcurrentHashMap<>());
 
     public void registerRecipes(@NonNull Map<String, Recipe<I>> recipes) {
@@ -38,7 +35,6 @@ public class RecipeRegistryImpl<I> implements RecipeRegistry<I> {
                 .map(this::getRecipeIngredients)
                 .flatMap(Collection::stream)
                 .forEach(allIngredients::add);
-
     }
 
     @Override
@@ -107,7 +103,7 @@ public class RecipeRegistryImpl<I> implements RecipeRegistry<I> {
 
     @Override
     public Collection<DefaultRecipe<I>> getDefaultRecipes() {
-        return defaultRecipeList;
+        return defaultRecipes.values();
     }
 
     @Override
@@ -117,16 +113,11 @@ public class RecipeRegistryImpl<I> implements RecipeRegistry<I> {
             return;
         }
         defaultRecipes.put(name, recipe);
-        defaultRecipeList.add(recipe);
     }
 
     @Override
     public void unRegisterDefaultRecipe(String name) {
-        DefaultRecipe<I> defaultRecipe = defaultRecipes.remove(name);
-        if (defaultRecipe == null) {
-            return;
-        }
-        defaultRecipeList.remove(defaultRecipe);
+        defaultRecipes.remove(name);
     }
 
     @Override
@@ -143,7 +134,6 @@ public class RecipeRegistryImpl<I> implements RecipeRegistry<I> {
     public void clear() {
         recipes.clear();
         defaultRecipes.clear();
-        defaultRecipeList.clear();
         allIngredients.clear();
     }
 }
