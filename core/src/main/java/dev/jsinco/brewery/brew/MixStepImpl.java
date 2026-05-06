@@ -7,13 +7,14 @@ import dev.jsinco.brewery.api.breweries.CauldronType;
 import dev.jsinco.brewery.api.ingredient.Ingredient;
 import dev.jsinco.brewery.api.moment.Moment;
 import dev.jsinco.brewery.util.CollectionUtil;
+import org.jspecify.annotations.Nullable;
 
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public record MixStepImpl(Moment time, Map<? extends Ingredient, Integer> ingredients,
-                          CauldronType cauldronType, SequencedSet<UUID> brewers) implements BrewingStep.Mix {
+                          @Nullable CauldronType cauldronType, SequencedSet<UUID> brewers) implements BrewingStep.Mix {
 
     private static final Map<ScoreType, PartialBrewScore> BREW_STEP_MISMATCH = Stream.of(
             new PartialBrewScore(0, ScoreType.TIME),
@@ -37,7 +38,7 @@ public record MixStepImpl(Moment time, Map<? extends Ingredient, Integer> ingred
         ))) {
             return BREW_STEP_MISMATCH;
         }
-        double cauldronTypeScore = cauldronType.equals(otherType) ? 1D : 0D;
+        double cauldronTypeScore = (cauldronType == null || otherType == null) ? 1D : cauldronType.equals(otherType) ? 1D : 0D;
         double timeScore = Math.sqrt(BrewingStepUtil.nearbyValueScore(this.time.moment(), otherTime.moment()));
         double ingredientsScore = BrewingStepUtil.getIngredientsScore((Map<Ingredient, Integer>) this.ingredients, (Map<Ingredient, Integer>) otherIngredients);
         return Stream.of(

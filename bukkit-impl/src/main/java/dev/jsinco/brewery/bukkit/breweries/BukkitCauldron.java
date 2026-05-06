@@ -15,8 +15,10 @@ import dev.jsinco.brewery.api.recipe.RecipeResult;
 import dev.jsinco.brewery.api.util.BreweryRegistry;
 import dev.jsinco.brewery.api.util.CancelState;
 import dev.jsinco.brewery.api.vector.BreweryLocation;
+import dev.jsinco.brewery.api.moment.PassedMoment;
 import dev.jsinco.brewery.brew.BrewImpl;
 import dev.jsinco.brewery.brew.CookStepImpl;
+import dev.jsinco.brewery.brew.DistillStepImpl;
 import dev.jsinco.brewery.brew.MixStepImpl;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.bukkit.animation.AnimationManager;
@@ -63,12 +65,15 @@ import org.joml.Vector3f;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Random;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Supplier;
 
@@ -170,11 +175,15 @@ public class BukkitCauldron implements Cauldron {
     }
 
     private Color computeParticleColor(Color baseColor, Color resultColor, Recipe<ItemStack> recipe) {
+        int lastIdx = brew.getCompletedSteps().size() - 1;
+        if (lastIdx >= recipe.getSteps().size()) {
+            return baseColor;
+        }
         if (brew.lastStep() instanceof BrewingStep.Cook cook) {
-            BrewingStep.Cook expectedCook = (BrewingStep.Cook) recipe.getSteps().get(brew.getCompletedSteps().size() - 1);
+            BrewingStep.Cook expectedCook = (BrewingStep.Cook) recipe.getSteps().get(lastIdx);
             return ColorUtil.getNextColor(baseColor, resultColor, cook.time().moment(), expectedCook.time().moment());
         } else if (brew.lastStep() instanceof BrewingStep.Mix mix) {
-            BrewingStep.Mix expectedMix = (BrewingStep.Mix) recipe.getSteps().get(brew.getCompletedSteps().size() - 1);
+            BrewingStep.Mix expectedMix = (BrewingStep.Mix) recipe.getSteps().get(lastIdx);
             return ColorUtil.getNextColor(baseColor, resultColor, mix.time().moment(), expectedMix.time().moment());
         }
         return baseColor;
@@ -229,6 +238,12 @@ public class BukkitCauldron implements Cauldron {
             return false;
         }
         ItemStack addedItem = insertEvent.getItemSource().get();
+        Optional<Brew> addedBrewOpt = BrewAdapterAccess.fromItem(addedItem);
+        boolean isTBPBrew = addedBrewOpt.isPresent() || BrewAdapterAccess.isBrew(addedItem);
+        if (isTBPBrew) {
+            return handleBrewReaddition(addedItem, addedBrewOpt, player);
+        }
+
         if (!brewExtracted && addedItem.getType() == Material.POTION) {
             BukkitCauldron.incrementLevel(getBlock());
             updateLevel(getBlock().getBlockData());
@@ -283,6 +298,158 @@ public class BukkitCauldron implements Cauldron {
         return true;
     }
 
+    private boolean handleBrewReaddition(ItemStack item, Optional<Brew> addedBrewOpt, Player player) {
+        boolean isSealed = addedBrewOpt.isEmpty();
+
+        if (!cauldronHasActiveBrew()) {
+            // Empty cauldron: reinsert brew into the cauldron with 1 water level
+            if (isSealed && !Config.config().cauldrons().allowSealedBrewContinuation()) {
+                return false;
+            }
+            addedBrewOpt.ifPresent(value -> this.brew = value);
+            BukkitCauldron.incrementLevel(getBlock());
+            updateLevel(getBlock().getBlockData());
+            this.brewExtracted = false;
+            this.dirty = true;
+            this.hot = isHeatSource(getBlock().getRelative(BlockFace.DOWN));
+            recalculateBrewTime();
+            this.recipe = brew.closestRecipe(TheBrewingProject.getInstance().getRecipeRegistry()).orElse(null);
+            this.quality = Optional.ofNullable(recipe).flatMap(brew::quality).orElse(null);
+            playBrewInsertEffects(item, player);
+            return true;
+        }
+
+        // Cauldron has an active brew: merge when it holds the same recipe
+        if (!isSealed) {
+            Brew addedBrew = addedBrewOpt.get();
+            Optional<Recipe<ItemStack>> existingRecipeOpt = brew.closestRecipe(TheBrewingProject.getInstance().getRecipeRegistry());
+            Optional<Recipe<ItemStack>> addedRecipeOpt = addedBrew.closestRecipe(TheBrewingProject.getInstance().getRecipeRegistry());
+            boolean sameRecipe = existingRecipeOpt.isPresent() && addedRecipeOpt.isPresent()
+                    && existingRecipeOpt.get().getRecipeName().equals(addedRecipeOpt.get().getRecipeName());
+            if (sameRecipe) {
+                this.brew = mergeBrews(this.brew, addedBrew);
+                BukkitCauldron.incrementLevel(getBlock());
+                updateLevel(getBlock().getBlockData());
+                this.dirty = true;
+                this.recipe = brew.closestRecipe(TheBrewingProject.getInstance().getRecipeRegistry()).orElse(null);
+                this.quality = Optional.ofNullable(recipe).flatMap(brew::quality).orElse(null);
+                playBrewInsertEffects(item, player);
+                return true;
+            }
+        }
+
+        // Different recipe or sealed brew: add as an ingredient
+        if (isSealed && !Config.config().cauldrons().allowSealedBrewAsIngredient()) {
+            return false;
+        }
+        this.hot = isHeatSource(getBlock().getRelative(BlockFace.DOWN));
+        CauldronType cauldronType = getType().orElseThrow(() -> new IllegalStateException("Expected cauldron block type for cauldron"));
+        long time = TheBrewingProject.getInstance().getTime();
+        Ingredient ingredient = BukkitIngredientManager.INSTANCE.getIngredient(item);
+        Brew mixed;
+        if (hot) {
+            mixed = brew.withLastStep(BrewingStep.Cook.class,
+                    cook -> {
+                        Map<Ingredient, Integer> ingredients = new HashMap<>(cook.ingredients());
+                        ingredients.merge(ingredient, 1, Integer::sum);
+                        return cook.withIngredients(ingredients);
+                    },
+                    () -> new CookStepImpl(new Interval(time, time), Map.of(ingredient, 1), cauldronType)
+            );
+        } else {
+            mixed = brew.withLastStep(BrewingStep.Mix.class,
+                    mix -> {
+                        Map<Ingredient, Integer> ingredients = new HashMap<>(mix.ingredients());
+                        ingredients.merge(ingredient, 1, Integer::sum);
+                        return mix.withIngredients(ingredients);
+                    },
+                    () -> new MixStepImpl(new Interval(time, time), Map.of(ingredient, 1), cauldronType)
+            );
+        }
+        BrewCauldronProcessEvent mixEvent = new BrewCauldronProcessEvent(this, cauldronType, hot, brew, mixed);
+        if (!mixEvent.callEvent()) {
+            return true;
+        }
+        brew = mixEvent.getResult().witModifiedLastStep(step ->
+                step instanceof BrewingStep.AuthoredStep<?> authoredStep
+                        ? authoredStep.withBrewer(player.getUniqueId()) : step
+        );
+        this.recipe = brew.closestRecipe(TheBrewingProject.getInstance().getRecipeRegistry()).orElse(null);
+        this.quality = Optional.ofNullable(recipe).flatMap(brew::quality).orElse(null);
+        playBrewInsertEffects(item, player);
+        return true;
+    }
+
+    private void playBrewInsertEffects(ItemStack item, Player player) {
+        long delay;
+        if (Config.config().cauldrons().ingredientAddedAnimation() != AnimationDisplay.NONE) {
+            delay = AnimationManager.playIngredientAddAnimation(item, player, getBlock().getLocation().toCenterLocation());
+        } else {
+            delay = 1;
+        }
+        playIngredientAddedEffects(item, delay);
+    }
+
+    private boolean cauldronHasActiveBrew() {
+        return brew.getCompletedSteps().stream().anyMatch(step ->
+                (step instanceof BrewingStep.IngredientsStep i && !i.ingredients().isEmpty())
+                        || step instanceof BrewingStep.Distill
+                        || step instanceof BrewingStep.Age
+        );
+    }
+
+    private Brew mergeBrews(Brew existing, Brew added) {
+        long currentTime = TheBrewingProject.getInstance().getTime();
+        List<BrewingStep> existingSteps = existing.getCompletedSteps();
+        List<BrewingStep> addedSteps = added.getCompletedSteps();
+        int mergeCount = Math.min(existingSteps.size(), addedSteps.size());
+        List<BrewingStep> mergedSteps = new ArrayList<>(existingSteps.size());
+        for (int i = 0; i < mergeCount; i++) {
+            mergedSteps.add(mergeStep(existingSteps.get(i), addedSteps.get(i), currentTime));
+        }
+        for (int i = mergeCount; i < existingSteps.size(); i++) {
+            mergedSteps.add(existingSteps.get(i));
+        }
+        return existing.withStepsReplaced(mergedSteps);
+    }
+
+    private BrewingStep mergeStep(BrewingStep a, BrewingStep b, long currentTime) {
+        if (a instanceof BrewingStep.Cook cookA && b instanceof BrewingStep.Cook cookB) {
+            long avgElapsed = (cookA.time().moment() + cookB.time().moment()) / 2;
+            return cookA.withBrewTime(new PassedMoment(avgElapsed).withLastStep(currentTime))
+                        .withIngredients(averageIngredients(cookA.ingredients(), cookB.ingredients()));
+        }
+        if (a instanceof BrewingStep.Mix mixA && b instanceof BrewingStep.Mix mixB) {
+            long avgElapsed = (mixA.time().moment() + mixB.time().moment()) / 2;
+            return mixA.withTime(new PassedMoment(avgElapsed).withLastStep(currentTime))
+                       .withIngredients(averageIngredients(mixA.ingredients(), mixB.ingredients()));
+        }
+        if (a instanceof BrewingStep.Distill distillA && b instanceof BrewingStep.Distill distillB) {
+            return new DistillStepImpl((distillA.runs() + distillB.runs() + 1) / 2, distillA.brewers());
+        }
+        if (a instanceof BrewingStep.Age ageA && b instanceof BrewingStep.Age ageB) {
+            long avgElapsed = (ageA.time().moment() + ageB.time().moment()) / 2;
+            return ageA.withAge(new PassedMoment(avgElapsed));
+        }
+        return a;
+    }
+
+    @SuppressWarnings("unchecked")
+    private static Map<Ingredient, Integer> averageIngredients(Map<? extends Ingredient, Integer> a, Map<? extends Ingredient, Integer> b) {
+        Map<Ingredient, Integer> mapA = (Map<Ingredient, Integer>) a;
+        Map<Ingredient, Integer> mapB = (Map<Ingredient, Integer>) b;
+        Set<Ingredient> allKeys = new HashSet<>(mapA.keySet());
+        allKeys.addAll(mapB.keySet());
+        Map<Ingredient, Integer> result = new HashMap<>();
+        for (Ingredient key : allKeys) {
+            int countA = mapA.getOrDefault(key, 0);
+            int countB = mapB.getOrDefault(key, 0);
+            int avg = (countA + countB + 1) / 2;
+            if (avg > 0) result.put(key, avg);
+        }
+        return result;
+    }
+
     private Color computeBaseParticleColor(Block block) {
         return switch (block.getType()) {
             case WATER_CAULDRON -> convert(Config.config().cauldrons().waterBaseParticleColor());
@@ -299,7 +466,8 @@ public class BukkitCauldron implements Cauldron {
                 block.getLocation().add(0.5 + (RANDOM.nextDouble() * 0.8 - 0.4), 0.9, 0.5 + (RANDOM.nextDouble() * 0.8 - 0.4));
         double progress;
         if (brew.lastStep() instanceof BrewingStep.TimedStep timedStep) {
-            if (recipe != null && recipe.getSteps().get(brew.stepAmount() - 1) instanceof BrewingStep.TimedStep expectedTimed) {
+            if (recipe != null && brew.stepAmount() - 1 < recipe.getSteps().size()
+                    && recipe.getSteps().get(brew.stepAmount() - 1) instanceof BrewingStep.TimedStep expectedTimed) {
                 progress = (double) timedStep.time().moment() / expectedTimed.time().moment();
             } else {
                 progress = Math.min((double) timedStep.time().moment() / Moment.MINUTE * 3, 1);
