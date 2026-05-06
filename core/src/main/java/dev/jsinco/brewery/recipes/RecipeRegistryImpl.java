@@ -8,6 +8,7 @@ import dev.jsinco.brewery.api.ingredient.IngredientGroup;
 import dev.jsinco.brewery.api.recipe.DefaultRecipe;
 import dev.jsinco.brewery.api.recipe.Recipe;
 import dev.jsinco.brewery.api.recipe.RecipeRegistry;
+import dev.jsinco.brewery.api.util.Logger;
 import org.jspecify.annotations.NonNull;
 
 import java.util.ArrayList;
@@ -111,7 +112,10 @@ public class RecipeRegistryImpl<I> implements RecipeRegistry<I> {
 
     @Override
     public void registerDefaultRecipe(String name, DefaultRecipe<I> recipe) {
-        Preconditions.checkArgument(recipe != null, "Default recipe can not be null");
+        if (recipe == null) {
+            Logger.logWarn("Default recipe was null, ignoring: " + name);
+            return;
+        }
         defaultRecipes.put(name, recipe);
         defaultRecipeList.add(recipe);
     }
