@@ -17,7 +17,7 @@ import java.util.ServiceLoader;
 
 public final class FileUtil {
 
-    private static WorkingFolderProvider workingFolderProvider;
+    private static WorkFolderProvider workFolderProvider;
 
     public static void extractFile(@NonNull Class<?> clazz, @NonNull String filename, @NonNull Path outDir, boolean replace) {
         try (InputStream in = clazz.getResourceAsStream("/" + filename)) {
@@ -54,12 +54,12 @@ public final class FileUtil {
         }
     }
 
-    public static File getWorkingFolder() {
-        if (workingFolderProvider == null) {
-            workingFolderProvider = ServiceLoader.load(WorkingFolderProvider.class, WorkingFolderProvider.class.getClassLoader()).findFirst()
+    public static File getWorkFolder() {
+        if (workFolderProvider == null) {
+            workFolderProvider = ServiceLoader.load(WorkFolderProvider.class, WorkFolderProvider.class.getClassLoader()).findFirst()
                     .orElseThrow();
         }
-        return workingFolderProvider.getWorkingFolder();
+        return workFolderProvider.getWorkFolder();
     }
 
 }

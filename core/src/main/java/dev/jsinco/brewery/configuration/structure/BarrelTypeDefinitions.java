@@ -31,7 +31,7 @@ public class BarrelTypeDefinitions extends OkaeriConfig {
 
     public static List<BarrelType> allBarrelTypes() {
         boolean newlySaved = false;
-        File barrelTypesFile = new File(FileUtil.getWorkingFolder(), "barrel_types.yml");
+        File barrelTypesFile = new File(FileUtil.getWorkFolder(), "barrel_types.yml");
         try {
             if (!barrelTypesFile.exists()) {
                 if (!barrelTypesFile.createNewFile()) {
