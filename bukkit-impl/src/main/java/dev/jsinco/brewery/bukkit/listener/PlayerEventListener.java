@@ -327,6 +327,9 @@ public class PlayerEventListener implements Listener {
         if (DISALLOWED_INGREDIENT_MATERIALS.contains(type)) {
             return false;
         }
+        if (BrewAdapterAccess.fromItem(itemStack).isPresent() || BrewAdapterAccess.isBrew(itemStack)) {
+            return true; // the cauldron itself decides whether to accept TBP brews
+        }
         if (Config.config().allowUnregisteredIngredients()) {
             return true;
         }

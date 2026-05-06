@@ -90,6 +90,14 @@ public class CauldronSection extends OkaeriConfig implements Configuration.Cauld
             new ParticleDefinition(BreweryKey.minecraft("entity_effect"), 0.05, null, null)
     );
 
+    @Comment("Whether sealed brews can be put back into a cauldron to continue a recipe chain")
+    @CustomKey("allow-sealed-brew-continuation")
+    private boolean allowSealedBrewContinuation = false;
+
+    @Comment("Whether sealed brews can be added as an ingredient to a cauldron brewing a different recipe")
+    @CustomKey("allow-sealed-brew-as-ingredient")
+    private boolean allowSealedBrewAsIngredient = false;
+
     @Comment("What items should be transformed into another item when added as an ingredient")
     @CustomKey("ingredient-empty-transforms")
     private Map<IngredientInput, UncheckedIngredient> ingredientEmptyTransforms = new ImmutableMap.Builder<IngredientInput, UncheckedIngredient>()
@@ -108,6 +116,14 @@ public class CauldronSection extends OkaeriConfig implements Configuration.Cauld
             .put(UncheckedIngredient.minecraft("rabbit_stew"), UncheckedIngredient.minecraft("bowl"))
             .put(UncheckedIngredient.minecraft("suspicious_stew"), UncheckedIngredient.minecraft("bowl"))
             .build();
+
+    public boolean allowSealedBrewContinuation() {
+        return this.allowSealedBrewContinuation;
+    }
+
+    public boolean allowSealedBrewAsIngredient() {
+        return this.allowSealedBrewAsIngredient;
+    }
 
     public List<Holder.Material> heatSources() {
         return this.heatSources;

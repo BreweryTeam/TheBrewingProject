@@ -8,6 +8,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import net.kyori.adventure.text.minimessage.translation.Argument;
 import org.jetbrains.annotations.Range;
+import org.jspecify.annotations.Nullable;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -113,9 +114,9 @@ public interface BrewingStep {
     interface Cook extends TimedStep, IngredientsStep, AuthoredStep<Cook> {
 
         /**
-         * @return The type of the cauldron
+         * @return The type of the cauldron, or null for non-first recipe steps
          */
-        CauldronType cauldronType();
+        @Nullable CauldronType cauldronType();
 
         /**
          * @param brewTime A brew time (ticks)
@@ -161,9 +162,9 @@ public interface BrewingStep {
     interface Mix extends TimedStep, IngredientsStep, AuthoredStep<Mix> {
 
         /**
-         * @return The type of the cauldron
+         * @return The type of the cauldron, or null for non-first recipe steps
          */
-        CauldronType cauldronType();
+        @Nullable CauldronType cauldronType();
 
         /**
          * @param ingredients A map of ingredients with amount
