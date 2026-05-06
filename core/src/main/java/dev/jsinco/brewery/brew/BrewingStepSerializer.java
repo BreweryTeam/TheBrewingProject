@@ -37,7 +37,9 @@ public class BrewingStepSerializer {
                     SequencedSet<UUID> brewers
             ) -> {
                 object.add("brew_time", Moment.SERIALIZER.serialize(brewTime));
-                object.addProperty("cauldron_type", cauldronType.key().toString());
+                if (cauldronType != null) {
+                    object.addProperty("cauldron_type", cauldronType.key().toString());
+                }
                 object.add("ingredients", IngredientUtil.ingredientsToJson((Map<Ingredient, Integer>) ingredients, ingredientManager));
                 if (!brewers.isEmpty()) {
                     object.add("brewers", brewersToJson(brewers));
@@ -52,7 +54,9 @@ public class BrewingStepSerializer {
             case MixStepImpl(Moment time, Map<? extends Ingredient, Integer> ingredients, CauldronType cauldronType, SequencedSet<UUID> brewers) -> {
                 object.add("ingredients", IngredientUtil.ingredientsToJson((Map<Ingredient, Integer>) ingredients, ingredientManager));
                 object.add("mix_time", Moment.SERIALIZER.serialize(time));
-                object.addProperty("cauldron_type", cauldronType.key().toString());
+                if (cauldronType != null) {
+                    object.addProperty("cauldron_type", cauldronType.key().toString());
+                }
                 if (!brewers.isEmpty()) {
                     object.add("brewers", brewersToJson(brewers));
                 }
@@ -79,7 +83,9 @@ public class BrewingStepSerializer {
                             .thenApplyAsync(ingredients -> new CookStepImpl(
                                     Moment.SERIALIZER.deserialize(object.get("brew_time")),
                                     ingredients,
-                                    BreweryRegistry.CAULDRON_TYPE.get(BreweryKey.parse(object.get("cauldron_type").getAsString())),
+                                    object.has("cauldron_type")
+                                            ? BreweryRegistry.CAULDRON_TYPE.get(BreweryKey.parse(object.get("cauldron_type").getAsString()))
+                                            : null,
                                     jsonToBrewers(object)
                             ));
             case DISTILL ->
@@ -100,7 +106,7 @@ public class BrewingStepSerializer {
                                     ingredients,
                                     object.has("cauldron_type")
                                             ? BreweryRegistry.CAULDRON_TYPE.get(BreweryKey.parse(object.get("cauldron_type").getAsString()))
-                                            : BreweryRegistry.CAULDRON_TYPE.get(BreweryKey.parse("water")),
+                                            : null,
                                     jsonToBrewers(object)
                             ));
         };
