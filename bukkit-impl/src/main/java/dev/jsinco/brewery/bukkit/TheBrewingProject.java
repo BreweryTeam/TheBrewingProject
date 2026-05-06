@@ -146,6 +146,10 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
     private ModifierManager modifierManager = new ModifierManagerImpl();
     private BreweryTranslator translator;
     private boolean successfulLoad = false;
+    private final BukkitMetrics metrics = BukkitMetrics.factory()
+            .token("2ee682246967303e517be0d593fe7a01")
+            .errorTracker(Logger.getTracker())
+            .create(this);
 
     public static TheBrewingProject getInstance() {
         return TheBrewingProject.instance;
@@ -375,15 +379,13 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
         this.getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS, BreweryCommand::register);
         loadDrunkenReplacements();
         loadTimeFormats();
-        BukkitMetrics.factory()
-                .token("2ee682246967303e517be0d593fe7a01")
-                .errorTracker(Logger.getTracker())
-                .create(this);
+        this.metrics.ready();
     }
 
     @Override
     public void onDisable() {
         closeDatabase();
+        this.metrics.shutdown();
     }
 
     private void closeDatabase() {
