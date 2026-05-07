@@ -7,7 +7,9 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.Style;
 import org.jspecify.annotations.NonNull;
 
+import java.awt.Color;
 import java.util.Objects;
+import java.util.Optional;
 
 public class PluginIngredient implements BaseIngredient {
     private final ItemIntegration itemIntegration;
@@ -52,5 +54,10 @@ public class PluginIngredient implements BaseIngredient {
     @Override
     public int hashCode() {
         return Objects.hashCode(key);
+    }
+
+    @Override
+    public Optional<Color> color() {
+        return Optional.ofNullable(itemIntegration.colorOverride(key.key()));
     }
 }

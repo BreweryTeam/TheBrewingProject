@@ -4,6 +4,7 @@ import dev.jsinco.brewery.api.ingredient.BaseIngredient;
 import dev.jsinco.brewery.api.ingredient.Ingredient;
 import dev.jsinco.brewery.api.util.BreweryKey;
 import dev.jsinco.brewery.bukkit.api.BukkitAdapter;
+import dev.jsinco.brewery.util.ItemColorUtil;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -11,6 +12,7 @@ import org.bukkit.Registry;
 import org.bukkit.inventory.ItemStack;
 import org.jspecify.annotations.NonNull;
 
+import java.awt.Color;
 import java.util.Locale;
 import java.util.Optional;
 
@@ -51,5 +53,10 @@ public record SimpleIngredient(Material material) implements BaseIngredient {
         return Optional.ofNullable(NamespacedKey.fromString(materialStr.toLowerCase(Locale.ROOT)))
                 .flatMap(namespacedKey -> Optional.ofNullable(Registry.MATERIAL.get(namespacedKey)))
                 .map(SimpleIngredient::new);
+    }
+
+    @Override
+    public Optional<Color> color() {
+        return Optional.ofNullable(ItemColorUtil.getItemColor(material.key()));
     }
 }
