@@ -113,6 +113,11 @@ public class BukkitRecipeResult implements RecipeResult<ItemStack> {
         return MiniMessage.miniMessage().deserialize(name);
     }
 
+    @Override
+    public java.awt.Color brewColor() {
+        return new java.awt.Color(color.asRGB());
+    }
+
     private void applyData(ItemStack itemStack) {
         BrewAdapterAccess.hideTooltips(itemStack);
         itemStack.setData(DataComponentTypes.CUSTOM_NAME, MessageUtil.miniMessage(name)
