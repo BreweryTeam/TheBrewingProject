@@ -26,7 +26,7 @@ public class RecipeRegistryImpl<I> implements RecipeRegistry<I> {
 
 
     private Map<String, Recipe<I>> recipes = Collections.synchronizedMap(new LinkedHashMap<>());
-    private Map<String, DefaultRecipe<I>> defaultRecipes = new LinkedHashMap<>();
+    private final Map<String, DefaultRecipe<I>> defaultRecipes = Collections.synchronizedMap(new LinkedHashMap<>());
     private Set<BaseIngredient> allIngredients = Collections.newSetFromMap(new ConcurrentHashMap<>());
 
     public void registerRecipes(@NonNull Map<String, Recipe<I>> recipes) {
