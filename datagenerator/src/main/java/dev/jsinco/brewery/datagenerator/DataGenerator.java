@@ -72,7 +72,7 @@ public class DataGenerator {
                     }
                     try (InputStream inputStream = Files.newInputStream(next)) {
                         BufferedImage image = ImageIO.read(inputStream);
-                        Color color = replaceBiomeColors(ColorUtil.getAverageColor(image), name);
+                        Color color = replaceBiomeColors(ColorUtil.getDistinctColor(image), name);
                         jsonObject.addProperty(name, Integer.toHexString(color.getRGB() & 0x00ffffff));
                     }
                 }
