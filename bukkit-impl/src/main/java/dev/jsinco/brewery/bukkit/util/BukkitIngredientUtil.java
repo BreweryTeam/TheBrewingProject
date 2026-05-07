@@ -6,7 +6,6 @@ import dev.jsinco.brewery.api.util.Pair;
 import dev.jsinco.brewery.bukkit.ingredient.BukkitIngredientManager;
 import dev.jsinco.brewery.bukkit.ingredient.UncheckedIngredientImpl;
 import dev.jsinco.brewery.configuration.Config;
-import dev.jsinco.brewery.util.ItemColorUtil;
 import net.kyori.adventure.key.Key;
 import org.bukkit.Bukkit;
 import org.bukkit.Keyed;
@@ -35,8 +34,9 @@ public class BukkitIngredientUtil {
                 topIngredient = ingredient.getKey();
                 topIngredientAmount = ingredient.getValue();
             }
-            String key = ingredient.getKey().key().toString();
-            Color color = ItemColorUtil.getItemColor(key);
+            Color color = ingredient.getKey()
+                    .toBaseIngredient().color()
+                    .orElse(null);
             if (color == null) {
                 continue;
             }
