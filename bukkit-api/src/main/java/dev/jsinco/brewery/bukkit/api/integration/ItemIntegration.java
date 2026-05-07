@@ -10,6 +10,7 @@ import org.bukkit.inventory.ItemStack;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
+import java.awt.Color;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
@@ -54,6 +55,16 @@ public interface ItemIntegration extends Integration {
      * Returns the identifier of the given ItemStack, or null if unknown
      */
     @Nullable String getItemId(ItemStack itemStack);
+
+    /**
+     * Whether to override the color for specified ingredient
+     *
+     * @param id Ingredient id
+     * @return The override color, or null
+     */
+    default @Nullable Color colorOverride(String id) {
+        return null;
+    }
 
     /**
      * Completes when the integration has finished initializing

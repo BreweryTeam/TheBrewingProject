@@ -1,5 +1,6 @@
 package dev.jsinco.brewery.api.ingredient;
 
+import java.awt.Color;
 import java.util.Optional;
 import java.util.Set;
 
@@ -12,6 +13,8 @@ public interface BaseIngredient extends Ingredient {
     default BaseIngredient toBaseIngredient() {
         return this;
     }
+
+    Optional<Color> color();
 
     @Override
     default Optional<? extends Ingredient> findMatch(Set<BaseIngredient> baseIngredientSet) {
