@@ -14,6 +14,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
 import org.jspecify.annotations.NonNull;
 
+import java.awt.Color;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
@@ -48,5 +49,12 @@ public record BreweryIngredient(BreweryKey key) implements BaseIngredient {
         return Optional.<Ingredient>of(new BreweryIngredient(id))
                 .map(Optional::of)
                 .map(CompletableFuture::completedFuture);
+    }
+
+    @Override
+    public Optional<Color> color() {
+        return TheBrewingProject.getInstance().getRecipeRegistry().getRecipe(key.minimalized())
+                .map(recipe -> recipe.getRecipeResult(BrewQuality.EXCELLENT))
+                .map(RecipeResult::brewColor);
     }
 }
