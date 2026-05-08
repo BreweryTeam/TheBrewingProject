@@ -6,6 +6,7 @@ import dev.jsinco.brewery.bukkit.api.integration.ItemIntegration;
 import dev.jsinco.brewery.bukkit.util.color.ResourcePackColors;
 import dev.jsinco.brewery.util.ClassUtil;
 import io.lumine.mythic.lib.api.item.NBTItem;
+import net.Indyuce.mmoitems.ItemStats;
 import net.Indyuce.mmoitems.MMOItems;
 import net.Indyuce.mmoitems.api.Type;
 import net.Indyuce.mmoitems.api.event.MMOItemsReloadEvent;
@@ -13,6 +14,8 @@ import net.Indyuce.mmoitems.api.item.build.ItemStackBuilder;
 import net.Indyuce.mmoitems.api.item.build.MMOItemBuilder;
 import net.Indyuce.mmoitems.api.item.mmoitem.MMOItem;
 import net.Indyuce.mmoitems.api.item.template.MMOItemTemplate;
+import net.Indyuce.mmoitems.stat.data.StringData;
+import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
@@ -21,13 +24,16 @@ import org.bukkit.inventory.ItemStack;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
+import java.awt.Color;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 public class MmoItemsIntegration implements ItemIntegration, Listener {
     private final CompletableFuture<Void> initialized = new CompletableFuture<>();
+    private final ResourcePackColors resourcePackColors;
 
     public MmoItemsIntegration(ResourcePackColors resourcePackColors) {
+        this.resourcePackColors = resourcePackColors;
     }
 
     @Override
@@ -89,5 +95,16 @@ public class MmoItemsIntegration implements ItemIntegration, Listener {
     @EventHandler
     public void onMmoItemsReload(MMOItemsReloadEvent event) {
         initialized.completeAsync(() -> null);
+    }
+
+    @Override
+    public @Nullable Color color(String id) {
+        return getMmoItem(id)
+                .flatMap(item -> Optional.ofNullable(item.getData(ItemStats.MODEL)))
+                .map(StringData.class::cast)
+                .map(StringData::getString)
+                .map(Key::key)
+                .flatMap(key -> Optional.ofNullable(resourcePackColors.modelColor(key)))
+                .orElse(null);
     }
 }

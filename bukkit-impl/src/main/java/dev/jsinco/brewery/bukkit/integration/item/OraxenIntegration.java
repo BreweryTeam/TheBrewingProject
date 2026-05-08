@@ -7,6 +7,7 @@ import dev.jsinco.brewery.util.ClassUtil;
 import io.th0rgal.oraxen.api.OraxenItems;
 import io.th0rgal.oraxen.api.events.OraxenItemsLoadedEvent;
 import io.th0rgal.oraxen.items.ItemBuilder;
+import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
@@ -15,6 +16,7 @@ import org.bukkit.inventory.ItemStack;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
+import java.awt.Color;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
@@ -22,8 +24,10 @@ public class OraxenIntegration implements ItemIntegration, Listener {
 
     private static final boolean ENABLED = ClassUtil.exists("io.th0rgal.oraxen.api.OraxenItem");
     private final CompletableFuture<Void> initializedFuture = new CompletableFuture<>();
+    private final ResourcePackColors resourcePackColors;
 
     public OraxenIntegration(ResourcePackColors resourcePackColors) {
+        this.resourcePackColors = resourcePackColors;
     }
 
     @Override
@@ -74,4 +78,17 @@ public class OraxenIntegration implements ItemIntegration, Listener {
         initializedFuture.completeAsync(() -> null);
     }
 
+
+    @Override
+    public @Nullable Color color(String id) {
+        ItemBuilder builder = OraxenItems.getItemById(id);
+        if (builder == null) {
+            return null;
+        }
+        Key key = builder.getItemModel();
+        if (key == null) {
+            return null;
+        }
+        return resourcePackColors.modelColor(key);
+    }
 }
