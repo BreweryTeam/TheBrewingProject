@@ -7,14 +7,17 @@ import dev.jsinco.brewery.bukkit.util.color.ResourcePackColors;
 import dev.jsinco.brewery.util.ClassUtil;
 import dev.lone.itemsadder.api.CustomStack;
 import dev.lone.itemsadder.api.Events.ItemsAdderLoadDataEvent;
+import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
+import org.bukkit.NamespacedKey;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.inventory.ItemStack;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
+import java.awt.Color;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
@@ -22,8 +25,10 @@ public class ItemsAdderIntegration implements ItemIntegration, Listener {
 
     private static final boolean ENABLED = ClassUtil.exists("dev.lone.itemsadder.api.CustomStack");
     private final CompletableFuture<Void> initializedFuture = new CompletableFuture<>();
+    private final ResourcePackColors resourcePackColors;
 
     public ItemsAdderIntegration(ResourcePackColors resourcePackColors) {
+        this.resourcePackColors = resourcePackColors;
     }
 
     @Override
@@ -83,5 +88,22 @@ public class ItemsAdderIntegration implements ItemIntegration, Listener {
     @EventHandler
     public void onItemsAdderItemsLoad(ItemsAdderLoadDataEvent loadDataEvent) {
         initializedFuture.completeAsync(() -> null);
+    }
+
+    @Override
+    public @Nullable Color color(String id) {
+        CustomStack customStack = CustomStack.getInstance(id);
+        if (customStack == null) {
+            return null;
+        }
+        String modelPath = customStack.getModelPath();
+        if (modelPath == null) {
+            return null;
+        }
+        Key model = NamespacedKey.fromString(modelPath);
+        if (model == null) {
+            return null;
+        }
+        return resourcePackColors.modelColor(model);
     }
 }

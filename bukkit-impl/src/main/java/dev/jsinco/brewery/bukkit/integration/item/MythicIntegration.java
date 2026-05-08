@@ -85,8 +85,10 @@ public class MythicIntegration implements ItemIntegration, Listener {
 
     @Override
     public @Nullable Color color(String id) {
-        getMythicItem(id)
-                .map()
+        return getMythicItem(id)
+                .flatMap(item -> Optional.ofNullable(item.getItemModel()))
+                .flatMap(key -> Optional.ofNullable(resourcePackColors.modelColor(key)))
+                .orElse(null);
     }
-    
+
 }
