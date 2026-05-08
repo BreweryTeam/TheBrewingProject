@@ -23,13 +23,14 @@ import dev.jsinco.brewery.bukkit.integration.structure.HuskClaimsIntegration;
 import dev.jsinco.brewery.bukkit.integration.structure.LandsIntegration;
 import dev.jsinco.brewery.bukkit.integration.structure.TownyIntegration;
 import dev.jsinco.brewery.bukkit.integration.structure.WorldGuardIntegration;
+import dev.jsinco.brewery.bukkit.util.color.ResourcePackColors;
 
 import java.util.Set;
 
 public class IntegrationManagerImpl implements IntegrationManager {
     private final IntegrationRegistry integrationRegistry = new IntegrationRegistry();
 
-    public void registerIntegrations() {
+    public void registerIntegrations(ResourcePackColors resourcePackColors) {
         register(IntegrationTypes.STRUCTURE, new WorldGuardIntegration());
         register(IntegrationTypes.STRUCTURE, new BoltIntegration());
         register(IntegrationTypes.STRUCTURE, new GriefPreventionIntegration());
@@ -37,12 +38,12 @@ public class IntegrationManagerImpl implements IntegrationManager {
         register(IntegrationTypes.STRUCTURE, new LandsIntegration());
         register(IntegrationTypes.STRUCTURE, new TownyIntegration());
         register(IntegrationTypes.STRUCTURE, new GriefDefenderIntegration());
-        register(IntegrationTypes.ITEM, new CraftEngineIntegration());
-        register(IntegrationTypes.ITEM, new ItemsAdderIntegration());
-        register(IntegrationTypes.ITEM, new NexoIntegration());
-        register(IntegrationTypes.ITEM, new OraxenIntegration());
-        register(IntegrationTypes.ITEM, new MmoItemsIntegration());
-        register(IntegrationTypes.ITEM, new MythicIntegration());
+        register(IntegrationTypes.ITEM, new CraftEngineIntegration(resourcePackColors));
+        register(IntegrationTypes.ITEM, new ItemsAdderIntegration(resourcePackColors));
+        register(IntegrationTypes.ITEM, new NexoIntegration(resourcePackColors));
+        register(IntegrationTypes.ITEM, new OraxenIntegration(resourcePackColors));
+        register(IntegrationTypes.ITEM, new MmoItemsIntegration(resourcePackColors));
+        register(IntegrationTypes.ITEM, new MythicIntegration(resourcePackColors));
         register(IntegrationTypes.PLACEHOLDER, new PlaceholderApiIntegration());
         register(IntegrationTypes.PLACEHOLDER, new MiniPlaceholdersIntegration());
         register(IntegrationTypes.CHEST_SHOP, new QuickShopHikariIntegration());

@@ -4,7 +4,7 @@ import dev.jsinco.brewery.api.recipe.DefaultRecipe;
 import dev.jsinco.brewery.api.recipe.RecipeCondition;
 import dev.jsinco.brewery.api.util.Logger;
 import dev.jsinco.brewery.bukkit.ingredient.BukkitIngredientManager;
-import dev.jsinco.brewery.bukkit.util.ColorUtil;
+import dev.jsinco.brewery.bukkit.util.color.ColorUtil;
 import dev.jsinco.brewery.recipes.RecipeConditionsReader;
 import org.bukkit.inventory.ItemStack;
 import org.simpleyaml.configuration.ConfigurationSection;

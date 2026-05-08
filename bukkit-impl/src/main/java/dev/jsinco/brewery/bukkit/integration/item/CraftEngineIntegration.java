@@ -2,6 +2,7 @@ package dev.jsinco.brewery.bukkit.integration.item;
 
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.bukkit.api.integration.ItemIntegration;
+import dev.jsinco.brewery.bukkit.util.color.ResourcePackColors;
 import dev.jsinco.brewery.util.ClassUtil;
 import net.kyori.adventure.text.Component;
 import net.momirealms.craftengine.bukkit.api.event.CraftEngineReloadEvent;
@@ -15,6 +16,7 @@ import org.bukkit.inventory.ItemStack;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
+import java.awt.Color;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
@@ -22,6 +24,11 @@ public class CraftEngineIntegration implements ItemIntegration, Listener {
 
     private static final boolean ENABLED = ClassUtil.exists("net.momirealms.craftengine.bukkit.plugin.BukkitCraftEngine");
     private final CompletableFuture<Void> initializedFuture = new CompletableFuture<>();
+    private final ResourcePackColors resourcePackColors;
+
+    public CraftEngineIntegration(ResourcePackColors resourcePackColors) {
+        this.resourcePackColors = resourcePackColors;
+    }
 
     public @Nullable String getItemId(ItemStack itemStack) {
         Item<ItemStack> customItem = BukkitCraftEngine.instance().itemManager().wrap(itemStack);
@@ -69,5 +76,17 @@ public class CraftEngineIntegration implements ItemIntegration, Listener {
     @EventHandler
     public void onCraftEngineReload(CraftEngineReloadEvent ignored) {
         initializedFuture.completeAsync(() -> null);
+    }
+
+    @Override
+    public @Nullable Color color(String id) {
+        Item<ItemStack> item = BukkitCraftEngine.instance().itemManager().createWrappedItem(Key.from(id), null);
+        if (item == null) {
+            return null;
+        }
+        return item.itemModel()
+                .map(net.kyori.adventure.key.Key::key)
+                .flatMap(key -> Optional.ofNullable(resourcePackColors.modelColor(key)))
+                .orElse(null);
     }
 }
