@@ -3,6 +3,7 @@ package dev.jsinco.brewery.bukkit.integration.item;
 import dev.jsinco.brewery.api.ingredient.Ingredient;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.bukkit.api.integration.ItemIntegration;
+import dev.jsinco.brewery.bukkit.util.color.ResourcePackColors;
 import dev.jsinco.brewery.util.ClassUtil;
 import dev.lone.itemsadder.api.CustomStack;
 import dev.lone.itemsadder.api.Events.ItemsAdderLoadDataEvent;
@@ -21,6 +22,9 @@ public class ItemsAdderIntegration implements ItemIntegration, Listener {
 
     private static final boolean ENABLED = ClassUtil.exists("dev.lone.itemsadder.api.CustomStack");
     private final CompletableFuture<Void> initializedFuture = new CompletableFuture<>();
+
+    public ItemsAdderIntegration(ResourcePackColors resourcePackColors) {
+    }
 
     @Override
     public Optional<ItemStack> createItem(String id) {
