@@ -58,6 +58,6 @@ public class PluginIngredient implements BaseIngredient {
 
     @Override
     public Optional<Color> color() {
-        return Optional.ofNullable(itemIntegration.colorOverride(key.key()));
+        return Optional.ofNullable(itemIntegration.color(key.key()));
     }
 }

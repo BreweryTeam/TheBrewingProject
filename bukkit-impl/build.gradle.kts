@@ -58,6 +58,7 @@ dependencies {
     implementation(libs.faststats.bukkit) {
         exclude("com.google.code.gson", "gson")
     }
+    implementation(libs.creative)
 
     // integrations
     compileOnly(libs.bolt.bukkit)
@@ -142,7 +143,8 @@ tasks {
             "org.yaml.snakeyaml",
             "eu.okaeri",
             "net.objecthunter.exp4j",
-            "dev.faststats"
+            "dev.faststats",
+            "team.unnamed"
         ).forEach { relocate(it, "${project.group}.lib.$it") }
     }
 

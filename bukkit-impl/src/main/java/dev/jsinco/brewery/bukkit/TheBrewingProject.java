@@ -59,6 +59,7 @@ import dev.jsinco.brewery.bukkit.structure.serializer.Vector3iSerializer;
 import dev.jsinco.brewery.bukkit.util.BreweryTimeDataType;
 import dev.jsinco.brewery.bukkit.util.BukkitIngredientUtil;
 import dev.jsinco.brewery.bukkit.util.EventUtil;
+import dev.jsinco.brewery.bukkit.util.color.ResourcePackColors;
 import dev.jsinco.brewery.configuration.Config;
 import dev.jsinco.brewery.configuration.DrunkenModifierSection;
 import dev.jsinco.brewery.configuration.EventSection;
@@ -179,7 +180,9 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
         instance = this;
         saveResources();
         Migrations.migrateAllConfigFiles(this.getDataFolder());
-        integrationManager.registerIntegrations();
+        ResourcePackColors resourcePackColors = new ResourcePackColors();
+        resourcePackColors.init();
+        integrationManager.registerIntegrations(resourcePackColors);
         initialize();
         integrationManager.loadIntegrations();
         Bukkit.getServicesManager().register(TheBrewingProjectApi.class, this, this, ServicePriority.Normal);

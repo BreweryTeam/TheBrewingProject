@@ -23,6 +23,7 @@ import dev.jsinco.brewery.bukkit.integration.structure.HuskClaimsIntegration;
 import dev.jsinco.brewery.bukkit.integration.structure.LandsIntegration;
 import dev.jsinco.brewery.bukkit.integration.structure.TownyIntegration;
 import dev.jsinco.brewery.bukkit.integration.structure.WorldGuardIntegration;
+import dev.jsinco.brewery.bukkit.util.color.ResourcePackColors;
 import dev.jsinco.brewery.util.ClassUtil;
 
 import java.util.Set;
@@ -31,7 +32,7 @@ import java.util.function.Supplier;
 public class IntegrationManagerImpl implements IntegrationManager {
     private final IntegrationRegistry integrationRegistry = new IntegrationRegistry();
 
-    public void registerIntegrations() {
+    public void registerIntegrations(ResourcePackColors resourcePackColors) {
         /*
         Don't replace these with a method reference. Class loading issues otherwise
          */
@@ -42,12 +43,12 @@ public class IntegrationManagerImpl implements IntegrationManager {
         register(IntegrationTypes.STRUCTURE, "me.angeschossen.lands.api.LandsIntegration", () -> new LandsIntegration());
         register(IntegrationTypes.STRUCTURE, "com.palmergames.bukkit.towny.utils.PlayerCacheUtil", () -> new TownyIntegration());
         register(IntegrationTypes.STRUCTURE, "com.griefdefender.api.GriefDefender", () -> new GriefDefenderIntegration());
-        register(IntegrationTypes.ITEM, "net.momirealms.craftengine.bukkit.plugin.BukkitCraftEngine", () -> new CraftEngineIntegration());
-        register(IntegrationTypes.ITEM, "dev.lone.itemsadder.api.CustomStack", () -> new ItemsAdderIntegration());
-        register(IntegrationTypes.ITEM, "com.nexomc.nexo.api.NexoItems", () -> new NexoIntegration());
-        register(IntegrationTypes.ITEM, "io.th0rgal.oraxen.api.OraxenItem", () -> new OraxenIntegration());
-        register(IntegrationTypes.ITEM, "net.Indyuce.mmoitems.MMOItems", () -> new MmoItemsIntegration());
-        register(IntegrationTypes.ITEM, "io.lumine.mythic.bukkit.MythicBukkit", () -> new MythicIntegration());
+        register(IntegrationTypes.ITEM, "net.momirealms.craftengine.bukkit.plugin.BukkitCraftEngine", () -> new CraftEngineIntegration(resourcePackColors));
+        register(IntegrationTypes.ITEM, "dev.lone.itemsadder.api.CustomStack", () -> new ItemsAdderIntegration(resourcePackColors));
+        register(IntegrationTypes.ITEM, "com.nexomc.nexo.api.NexoItems", () -> new NexoIntegration(resourcePackColors));
+        register(IntegrationTypes.ITEM, "io.th0rgal.oraxen.api.OraxenItem", () -> new OraxenIntegration(resourcePackColors));
+        register(IntegrationTypes.ITEM, "net.Indyuce.mmoitems.MMOItems", () -> new MmoItemsIntegration(resourcePackColors));
+        register(IntegrationTypes.ITEM, "io.lumine.mythic.bukkit.MythicBukkit", () -> new MythicIntegration(resourcePackColors));
         register(IntegrationTypes.PLACEHOLDER, "me.clip.placeholderapi.expansion.PlaceholderExpansion", () -> new PlaceholderApiIntegration());
         register(IntegrationTypes.PLACEHOLDER, "io.github.miniplaceholders.api.utils.TagsUtils", () -> new MiniPlaceholdersIntegration());
         register(IntegrationTypes.CHEST_SHOP, "com.ghostchu.quickshop.api.event.general.ShopItemMatchEvent", () -> new QuickShopHikariIntegration());

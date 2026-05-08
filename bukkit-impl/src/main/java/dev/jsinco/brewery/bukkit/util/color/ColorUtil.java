@@ -1,7 +1,10 @@
-package dev.jsinco.brewery.bukkit.util;
+package dev.jsinco.brewery.bukkit.util.color;
 
 import org.bukkit.Color;
 
+import java.awt.image.BufferedImage;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -79,5 +82,70 @@ public class ColorUtil {
         int blue = (int) (ratio * destination.getBlue() + (1f - ratio) * current.getBlue());
 
         return Color.fromRGB(red, green, blue);
+    }
+
+    public static java.awt.Color getDistinctColor(BufferedImage image) {
+        int imageSize = 0;
+        Bucket[] buckets = new Bucket[32];
+        for (int i = 0; i < buckets.length; i++) {
+            buckets[i] = new Bucket();
+        }
+        for (int x = 0; x < image.getWidth(); x++) {
+            for (int y = 0; y < image.getHeight(); y++) {
+                java.awt.Color pixel = new java.awt.Color(image.getRGB(x, y), true);
+                if (pixel.getAlpha() < 32) {
+                    continue;
+                }
+                float[] hsb = new float[3];
+                java.awt.Color.RGBtoHSB(pixel.getRed(), pixel.getGreen(), pixel.getBlue(), hsb);
+                float h = hsb[0];
+                float s = hsb[1];
+                float b = hsb[2];
+                if (b < 0.2F) {
+                    continue;
+                }
+                imageSize++;
+                int bucketsIndex = Math.clamp((int) (h * buckets.length), 0, buckets.length);
+                buckets[bucketsIndex].add(h, s, b);
+            }
+        }
+        int minCount = imageSize >> 3;
+        return Arrays.stream(buckets)
+                .filter(bucket -> bucket.count >= minCount)
+                .max(Comparator.comparingDouble(Bucket::weightedScore))
+                .map(Bucket::average)
+                .orElse(java.awt.Color.GRAY);
+    }
+
+    static class Bucket {
+        private float hSum = 0F;
+        private float sSum = 0F;
+        private float bSum = 0F;
+        private int count = 0;
+
+
+        void add(float h, float s, float b) {
+            this.hSum += h;
+            this.sSum += s;
+            this.bSum += b;
+            count++;
+        }
+
+        java.awt.Color average() {
+            if (count == 0) {
+                return java.awt.Color.GRAY;
+            }
+            return java.awt.Color.getHSBColor(hSum / count, sSum / count, bSum / count);
+        }
+
+        double weightedScore() {
+            if (count == 0) {
+                return 0;
+            }
+            float s = sSum / count;
+            float b = bSum / count;
+            return Math.sqrt(count) * s * s * b;
+        }
+
     }
 }
