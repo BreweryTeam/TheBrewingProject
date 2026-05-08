@@ -62,7 +62,7 @@ public interface ItemIntegration extends Integration {
      * @param id Ingredient id
      * @return The override color, or null
      */
-    default @Nullable Color colorOverride(String id) {
+    default @Nullable Color color(String id) {
         return null;
     }
 

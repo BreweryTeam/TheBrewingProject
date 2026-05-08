@@ -2,6 +2,7 @@ package dev.jsinco.brewery.bukkit.integration.item;
 
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.bukkit.api.integration.ItemIntegration;
+import dev.jsinco.brewery.bukkit.util.color.ResourcePackColors;
 import dev.jsinco.brewery.util.ClassUtil;
 import io.lumine.mythic.bukkit.MythicBukkit;
 import io.lumine.mythic.bukkit.adapters.BukkitItemStack;
@@ -14,6 +15,7 @@ import org.bukkit.inventory.ItemStack;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
+import java.awt.Color;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -21,6 +23,11 @@ import java.util.concurrent.TimeUnit;
 
 public class MythicIntegration implements ItemIntegration, Listener {
     private final CompletableFuture<Void> initialized = new CompletableFuture<>();
+    private final ResourcePackColors resourcePackColors;
+
+    public MythicIntegration(ResourcePackColors resourcePackColors) {
+        this.resourcePackColors = resourcePackColors;
+    }
 
     @Override
     public Optional<ItemStack> createItem(String id) {
@@ -94,6 +101,13 @@ public class MythicIntegration implements ItemIntegration, Listener {
             initialized.complete(null);
             task.cancel();
         }
+    }
+
+
+    @Override
+    public @Nullable Color color(String id) {
+        getMythicItem(id)
+                .map()
     }
 
 }

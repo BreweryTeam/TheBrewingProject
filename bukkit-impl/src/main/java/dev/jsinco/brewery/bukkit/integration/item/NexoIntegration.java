@@ -5,7 +5,9 @@ import com.nexomc.nexo.api.events.NexoItemsLoadedEvent;
 import com.nexomc.nexo.items.ItemBuilder;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.bukkit.api.integration.ItemIntegration;
+import dev.jsinco.brewery.bukkit.util.color.ResourcePackColors;
 import dev.jsinco.brewery.util.ClassUtil;
+import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
@@ -14,13 +16,22 @@ import org.bukkit.inventory.ItemStack;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
+import java.awt.Color;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class NexoIntegration implements ItemIntegration, Listener {
 
     private static final boolean ENABLED = ClassUtil.exists("com.nexomc.nexo.api.NexoItems");
     private final CompletableFuture<Void> initializedFuture = new CompletableFuture<>();
+    private final Map<String, Color> colors = new ConcurrentHashMap<>();
+    private final ResourcePackColors resourcePackColors;
+
+    public NexoIntegration(ResourcePackColors resourcePackColors) {
+        this.resourcePackColors = resourcePackColors;
+    }
 
     @Override
     public Optional<ItemStack> createItem(String id) {
@@ -77,5 +88,18 @@ public class NexoIntegration implements ItemIntegration, Listener {
     @EventHandler
     public void onNexoItemsLoaded(NexoItemsLoadedEvent event) {
         initializedFuture.completeAsync(() -> null);
+    }
+
+    @Override
+    public @Nullable Color color(String id) {
+        ItemBuilder builder = NexoItems.itemFromId(id);
+        if (builder == null) {
+            return null;
+        }
+        Key model = builder.getItemModel();
+        if (model == null) {
+            return null;
+        }
+        return resourcePackColors.modelColor(model);
     }
 }

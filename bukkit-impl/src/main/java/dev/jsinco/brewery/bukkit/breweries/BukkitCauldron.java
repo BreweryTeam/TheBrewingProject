@@ -30,7 +30,7 @@ import dev.jsinco.brewery.bukkit.listener.ListenerUtil;
 import dev.jsinco.brewery.bukkit.recipe.BukkitRecipeResult;
 import dev.jsinco.brewery.bukkit.util.BlockUtil;
 import dev.jsinco.brewery.bukkit.util.BukkitIngredientUtil;
-import dev.jsinco.brewery.bukkit.util.ColorUtil;
+import dev.jsinco.brewery.bukkit.util.color.ColorUtil;
 import dev.jsinco.brewery.bukkit.util.SoundPlayer;
 import dev.jsinco.brewery.configuration.AnimationDisplay;
 import dev.jsinco.brewery.configuration.Config;
