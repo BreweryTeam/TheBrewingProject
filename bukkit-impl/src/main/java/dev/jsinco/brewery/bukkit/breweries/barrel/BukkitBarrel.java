@@ -137,6 +137,9 @@ public class BukkitBarrel implements Barrel<BukkitBarrel, ItemStack, Inventory>,
 
     @Override
     public void tickInventory() {
+        if (recentlyAccessed == -1L) {
+            return;
+        }
         if (shouldUnpopulateInventory()) {
             close(false);
             Bukkit.getAsyncScheduler().runNow(TheBrewingProject.getInstance(), ignored ->
