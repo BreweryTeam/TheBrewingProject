@@ -5,6 +5,7 @@ import dev.jsinco.brewery.bukkit.api.integration.ItemIntegration;
 import dev.jsinco.brewery.bukkit.util.color.ResourcePackColors;
 import dev.jsinco.brewery.util.ClassUtil;
 import net.kyori.adventure.text.Component;
+import net.momirealms.craftengine.bukkit.api.event.AsyncResourcePackGenerateEvent;
 import net.momirealms.craftengine.bukkit.api.event.CraftEngineReloadEvent;
 import net.momirealms.craftengine.bukkit.item.BukkitItem;
 import net.momirealms.craftengine.bukkit.plugin.BukkitCraftEngine;
@@ -23,7 +24,9 @@ import java.util.concurrent.CompletableFuture;
 public class CraftEngineIntegration implements ItemIntegration, Listener {
 
     private static final boolean ENABLED = ClassUtil.exists("net.momirealms.craftengine.bukkit.plugin.BukkitCraftEngine");
-    private final CompletableFuture<Void> initializedFuture = new CompletableFuture<>();
+    private final CompletableFuture<Void> itemsLoadedFuture = new CompletableFuture<>();
+    private final CompletableFuture<Void> resourcePackLoadedFuture = new CompletableFuture<>();
+    private final CompletableFuture<Void> initializedFuture = CompletableFuture.allOf(itemsLoadedFuture, resourcePackLoadedFuture);
     private final ResourcePackColors resourcePackColors;
 
     public CraftEngineIntegration(ResourcePackColors resourcePackColors) {
@@ -78,7 +81,13 @@ public class CraftEngineIntegration implements ItemIntegration, Listener {
 
     @EventHandler
     public void onCraftEngineReload(CraftEngineReloadEvent ignored) {
-        initializedFuture.completeAsync(() -> null);
+        itemsLoadedFuture.completeAsync(() -> null);
+    }
+
+    @EventHandler
+    public void onResourcePackGenerate(AsyncResourcePackGenerateEvent resourcePackGenerateEvent) {
+        resourcePackColors.setUrl(resourcePackGenerateEvent.zipFilePath().toUri().toString());
+        resourcePackLoadedFuture.completeAsync(() -> null);
     }
 
     @Override
@@ -90,6 +99,11 @@ public class CraftEngineIntegration implements ItemIntegration, Listener {
         return item.itemModel()
                 .map(net.kyori.adventure.key.Key::key)
                 .flatMap(key -> Optional.ofNullable(resourcePackColors.modelColor(key)))
+                .or(() -> item.customModelData()
+                        .flatMap(integer -> Optional.ofNullable(
+                                resourcePackColors.customModelDataColor(net.kyori.adventure.key.Key.key(item.id().toString()), integer)
+                        ))
+                )
                 .orElse(null);
     }
 }
