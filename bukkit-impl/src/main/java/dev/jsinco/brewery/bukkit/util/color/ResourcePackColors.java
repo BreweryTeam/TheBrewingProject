@@ -7,10 +7,13 @@ import org.jetbrains.annotations.NotNull;
 import org.jspecify.annotations.Nullable;
 import team.unnamed.creative.ResourcePack;
 import team.unnamed.creative.item.CompositeItemModel;
+import team.unnamed.creative.item.ConditionItemModel;
+import team.unnamed.creative.item.EmptyItemModel;
 import team.unnamed.creative.item.Item;
 import team.unnamed.creative.item.ItemModel;
 import team.unnamed.creative.item.RangeDispatchItemModel;
 import team.unnamed.creative.item.ReferenceItemModel;
+import team.unnamed.creative.item.SelectItemModel;
 import team.unnamed.creative.item.SpecialItemModel;
 import team.unnamed.creative.model.Model;
 import team.unnamed.creative.model.ModelTexture;
@@ -58,11 +61,6 @@ public class ResourcePackColors {
             Logger.logAndTrackErr(e);
             return;
         }
-        Logger.log(resourcePack.textures()
-                .stream()
-                .map(Texture::key)
-                .toList().toString()
-        );
 
         for (Item item : resourcePack.items()) {
             ItemModel itemModel = item.model();
@@ -98,6 +96,11 @@ public class ResourcePackColors {
                     readItemModel(rangeDispatchItemModel.fallback(), resourcePack);
             case ReferenceItemModel referenceItemModel ->
                     readModel(resourcePack.model(referenceItemModel.model()), resourcePack);
+            case ConditionItemModel conditionItemModel -> readItemModel(conditionItemModel.onFalse(), resourcePack);
+            case SelectItemModel selectItemModel -> readItemModel(
+                    selectItemModel.fallback(), resourcePack
+            );
+            case EmptyItemModel _ -> null;
             case null -> {
                 Logger.log("Model was null");
                 yield null;
