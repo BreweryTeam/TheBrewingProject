@@ -15,6 +15,8 @@ import dev.jsinco.brewery.api.structure.StructureType;
 import dev.jsinco.brewery.api.util.Logger;
 import dev.jsinco.brewery.bukkit.api.TheBrewingProjectApi;
 import dev.jsinco.brewery.bukkit.api.event.TBPReloadEvent;
+import dev.jsinco.brewery.bukkit.api.integration.IntegrationTypes;
+import dev.jsinco.brewery.bukkit.api.integration.ItemIntegration;
 import dev.jsinco.brewery.bukkit.brew.BukkitBrewManager;
 import dev.jsinco.brewery.bukkit.breweries.BreweryRegistry;
 import dev.jsinco.brewery.bukkit.breweries.barrel.BukkitBarrel;
@@ -142,6 +144,7 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
     private WorldEventListener worldEventListener;
     private EventStepRegistry eventStepRegistry;
     private DrunkEventExecutor drunkEventExecutor;
+    private ResourcePackColors resourcePackColors;
     private long time;
     private BrewManager<ItemStack> brewManager = new BukkitBrewManager();
     private final IntegrationManagerImpl integrationManager = new IntegrationManagerImpl();
@@ -180,9 +183,13 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
         instance = this;
         saveResources();
         Migrations.migrateAllConfigFiles(this.getDataFolder());
-        ResourcePackColors resourcePackColors = new ResourcePackColors();
-        resourcePackColors.init();
+        this.resourcePackColors = new ResourcePackColors();
         integrationManager.registerIntegrations(resourcePackColors);
+        CompletableFuture.allOf(integrationManager.retrieve(IntegrationTypes.ITEM)
+                .stream()
+                .map(ItemIntegration::initialized)
+                .toArray(CompletableFuture[]::new)
+        ).thenAccept(ignored -> Bukkit.getAsyncScheduler().runNow(this, ignored2 -> resourcePackColors.init()));
         initialize();
         integrationManager.loadIntegrations();
         Bukkit.getServicesManager().register(TheBrewingProjectApi.class, this, this, ServicePriority.Normal);
