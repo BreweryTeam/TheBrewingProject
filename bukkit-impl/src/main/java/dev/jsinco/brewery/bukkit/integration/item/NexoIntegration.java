@@ -2,6 +2,7 @@ package dev.jsinco.brewery.bukkit.integration.item;
 
 import com.nexomc.nexo.api.NexoItems;
 import com.nexomc.nexo.api.events.NexoItemsLoadedEvent;
+import com.nexomc.nexo.api.events.resourcepack.NexoPackUploadEvent;
 import com.nexomc.nexo.items.ItemBuilder;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.bukkit.api.integration.ItemIntegration;
@@ -17,16 +18,15 @@ import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
 import java.awt.Color;
-import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class NexoIntegration implements ItemIntegration, Listener {
 
     private static final boolean ENABLED = ClassUtil.exists("com.nexomc.nexo.api.NexoItems");
-    private final CompletableFuture<Void> initializedFuture = new CompletableFuture<>();
-    private final Map<String, Color> colors = new ConcurrentHashMap<>();
+    private final CompletableFuture<Void> itemsLoaded = new CompletableFuture<>();
+    private final CompletableFuture<Void> packLoaded = new CompletableFuture<>();
+    private final CompletableFuture<Void> initialized = CompletableFuture.allOf(itemsLoaded, packLoaded);
     private final ResourcePackColors resourcePackColors;
 
     public NexoIntegration(ResourcePackColors resourcePackColors) {
@@ -67,7 +67,7 @@ public class NexoIntegration implements ItemIntegration, Listener {
 
     @Override
     public @NonNull CompletableFuture<Void> initialized() {
-        return initializedFuture;
+        return initialized;
     }
 
     @Override
@@ -87,7 +87,13 @@ public class NexoIntegration implements ItemIntegration, Listener {
 
     @EventHandler
     public void onNexoItemsLoaded(NexoItemsLoadedEvent event) {
-        initializedFuture.completeAsync(() -> null);
+        itemsLoaded.completeAsync(() -> null);
+    }
+
+    @EventHandler
+    public void onResourcePackLoaded(NexoPackUploadEvent packUploadEvent) {
+        resourcePackColors.setUrl(packUploadEvent.getUrl());
+        packLoaded.completeAsync(() -> null);
     }
 
     @Override
@@ -98,7 +104,11 @@ public class NexoIntegration implements ItemIntegration, Listener {
         }
         Key model = builder.getItemModel();
         if (model == null) {
-            return null;
+            Integer customModelData = builder.getCustomModelData();
+            if (customModelData == null) {
+                return null;
+            }
+            return resourcePackColors.customModelDataColor(builder.build().getType().key(), customModelData);
         }
         return resourcePackColors.modelColor(model);
     }
