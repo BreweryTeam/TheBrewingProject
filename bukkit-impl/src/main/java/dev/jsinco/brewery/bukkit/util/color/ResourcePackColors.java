@@ -1,6 +1,7 @@
 package dev.jsinco.brewery.bukkit.util.color;
 
 import dev.jsinco.brewery.api.util.Logger;
+import io.netty.handler.codec.http.HttpHeaderNames;
 import net.kyori.adventure.key.Key;
 import org.bukkit.Bukkit;
 import org.jetbrains.annotations.NotNull;
@@ -24,9 +25,17 @@ import javax.imageio.ImageIO;
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -37,31 +46,29 @@ public class ResourcePackColors {
 
     private final Map<Key, Color> itemModelColors = new ConcurrentHashMap<>();
     private final Map<Key, Map<Float, Color>> customModelDataColors = new ConcurrentHashMap<>();
-    private String url = null;
+    private List<ResourcePackSource> sources = new ArrayList<>();
 
     public void init() {
-        String packUrl;
-        if (url == null) {
-            org.bukkit.packs.ResourcePack bukkitPack = Bukkit.getServerResourcePack();
-            if (bukkitPack == null) {
-                Logger.log("Server resource pack was null");
-                return;
-            }
-            packUrl = bukkitPack.getUrl();
-        } else {
-            packUrl = url;
-        }
-        ResourcePack resourcePack;
-        try (InputStream inputStream = URI.create(packUrl).toURL().openStream()) {
-            resourcePack = MinecraftResourcePackReader.builder()
-                    .lenient(true)
-                    .build()
-                    .readFromInputStream(inputStream);
-        } catch (IOException e) {
+        List<ResourcePack> resourcePacks;
+        try {
+            resourcePacks = readResourcePacks();
+        } catch (IOException | InterruptedException e) {
             Logger.logAndTrackErr(e);
             return;
         }
+        if (resourcePacks.isEmpty()) {
+            Logger.log("Resource packs was empty");
+            return;
+        }
+        for (ResourcePack resourcePack : resourcePacks) {
+            readResourcePackContent(resourcePack);
+        }
+    }
 
+    private void readResourcePackContent(ResourcePack resourcePack) {
+        if (resourcePack.items().isEmpty()) {
+            Logger.log("Items was empty");
+        }
         for (Item item : resourcePack.items()) {
             ItemModel itemModel = item.model();
             if (itemModel instanceof RangeDispatchItemModel rangeDispatchItemModel) {
@@ -76,6 +83,7 @@ public class ResourcePackColors {
                     colors.put(entry.threshold(), ColorUtil.getDistinctColor(modelImage));
                 }
                 customModelDataColors.put(item.key(), colors);
+                Logger.log("Added custom model data: " + item.key() + colors);
                 continue;
             }
             BufferedImage modelImage = readItemModel(item.model(), resourcePack);
@@ -84,7 +92,27 @@ public class ResourcePackColors {
                 continue;
             }
             itemModelColors.put(item.key(), ColorUtil.getDistinctColor(modelImage));
+            Logger.log("Added custom item model: " + item.key());
         }
+    }
+
+    private List<ResourcePack> readResourcePacks() throws IOException, InterruptedException {
+        if (sources.isEmpty()) {
+            org.bukkit.packs.ResourcePack bukkitPack = Bukkit.getServerResourcePack();
+            if (bukkitPack == null) {
+                Logger.log("Server resource pack was null");
+                return List.of();
+            }
+            sources.add(new HttpResourcePackSource(bukkitPack.getUrl(), false));
+        }
+        MinecraftResourcePackReader reader = MinecraftResourcePackReader.builder()
+                .lenient(true)
+                .build();
+        List<ResourcePack> output = new ArrayList<>();
+        for (ResourcePackSource source : List.copyOf(sources)) {
+            output.add(source.readPack());
+        }
+        return output;
     }
 
     private @Nullable BufferedImage readItemModel(ItemModel itemModel, ResourcePack resourcePack) {
@@ -198,12 +226,76 @@ public class ResourcePackColors {
         return null;
     }
 
-    public void setUrl(String url) {
-        this.url = url;
+    public void addSource(ResourcePackSource source) {
+        this.sources.add(source);
     }
 
     public @Nullable Color customModelDataColor(@NotNull Key key, int customModelData) {
         return customModelDataColors.getOrDefault(key, Map.of())
                 .get((float) customModelData);
+    }
+
+    public interface ResourcePackSource {
+
+        MinecraftResourcePackReader READER = MinecraftResourcePackReader.builder()
+                .lenient(true)
+                .build();
+
+        ResourcePack readPack() throws IOException, InterruptedException;
+    }
+
+    public record HttpResourcePackSource(String url, boolean sha256) implements ResourcePackSource {
+
+        public static HttpResourcePackSource withSha256(String url) {
+            return new HttpResourcePackSource(url, true);
+        }
+
+        public static HttpResourcePackSource withoutSha256(String url) {
+            return new HttpResourcePackSource(url, false);
+        }
+
+        @Override
+        public ResourcePack readPack() throws IOException, InterruptedException {
+            URI uri = URI.create(url);
+            Logger.log("Sending http get request: " + uri);
+            HttpRequest httpRequest = HttpRequest.newBuilder()
+                    .uri(uri)
+                    .timeout(Duration.ofSeconds(10))
+                    .headers(
+                            HttpHeaderNames.USER_AGENT.toString(), "Minecraft Java/1.21.11",
+                            "X-Minecraft-Version", "1.21.11"
+                    ).GET()
+                    .build();
+            try (HttpClient httpClient = HttpClient.newBuilder()
+                    .followRedirects(HttpClient.Redirect.ALWAYS)
+                    .build()) {
+                if (sha256) {
+                    MessageDigest messageDigest = MessageDigest.getInstance("SHA-256");
+                    return READER.readFromInputStream(new ByteArrayInputStream(
+                            messageDigest.digest(httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofByteArray())
+                                    .body())
+                    ));
+                } else {
+                    return READER.readFromInputStream(new ByteArrayInputStream(httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofByteArray())
+                            .body()
+                    ));
+                }
+            } catch (NoSuchAlgorithmException e) {
+                throw new IllegalStateException(e);
+            }
+        }
+    }
+
+
+    public record FileResourcePackSource(File file) implements ResourcePackSource {
+
+        @Override
+        public ResourcePack readPack() throws IOException, InterruptedException {
+            if (file.isDirectory()) {
+                return READER.readFromDirectory(file);
+            } else {
+                return READER.readFromZipFile(file);
+            }
+        }
     }
 }

@@ -92,7 +92,7 @@ public class NexoIntegration implements ItemIntegration, Listener {
 
     @EventHandler
     public void onResourcePackLoaded(NexoPackUploadEvent packUploadEvent) {
-        resourcePackColors.setUrl(packUploadEvent.getUrl());
+        resourcePackColors.addSource(new ResourcePackColors.HttpResourcePackSource(packUploadEvent.getUrl(), false));
         packLoaded.completeAsync(() -> null);
     }
 
