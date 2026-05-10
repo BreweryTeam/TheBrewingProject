@@ -106,7 +106,7 @@ tasks {
 
 
     runServer {
-        minecraftVersion(project.findProperty("minecraft.version")!! as String)
+        minecraftVersion("1.21.11")
         if (project.findProperty("testing.integrations")!! == "true") {
             downloadPlugins {
                 modrinth("worldedit", "JUWRHdru")
