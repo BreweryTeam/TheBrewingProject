@@ -5,10 +5,10 @@ import dev.jsinco.brewery.bukkit.api.integration.ItemIntegration;
 import dev.jsinco.brewery.bukkit.util.color.ResourcePackColors;
 import dev.jsinco.brewery.util.ClassUtil;
 import net.kyori.adventure.text.Component;
-import net.momirealms.craftengine.bukkit.api.event.AsyncResourcePackGenerateEvent;
 import net.momirealms.craftengine.bukkit.api.event.CraftEngineReloadEvent;
 import net.momirealms.craftengine.bukkit.plugin.BukkitCraftEngine;
 import net.momirealms.craftengine.core.item.Item;
+import net.momirealms.craftengine.core.plugin.config.Config;
 import net.momirealms.craftengine.core.util.Key;
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
@@ -18,6 +18,7 @@ import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
 import java.awt.Color;
+import java.io.File;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
@@ -25,8 +26,6 @@ public class CraftEngineIntegration implements ItemIntegration, Listener {
 
     private static final boolean ENABLED = ClassUtil.exists("net.momirealms.craftengine.bukkit.plugin.BukkitCraftEngine");
     private final CompletableFuture<Void> itemsLoadedFuture = new CompletableFuture<>();
-    private final CompletableFuture<Void> resourcePackLoadedFuture = new CompletableFuture<>();
-    private final CompletableFuture<Void> initializedFuture = CompletableFuture.allOf(itemsLoadedFuture, resourcePackLoadedFuture);
     private final ResourcePackColors resourcePackColors;
 
     public CraftEngineIntegration(ResourcePackColors resourcePackColors) {
@@ -42,7 +41,7 @@ public class CraftEngineIntegration implements ItemIntegration, Listener {
 
     @Override
     public @NonNull CompletableFuture<Void> initialized() {
-        return initializedFuture;
+        return itemsLoadedFuture;
     }
 
     @Override
@@ -77,14 +76,12 @@ public class CraftEngineIntegration implements ItemIntegration, Listener {
     }
 
     @EventHandler
-    public void onCraftEngineReload(CraftEngineReloadEvent ignored) {
-        itemsLoadedFuture.completeAsync(() -> null);
-    }
-
-    @EventHandler
-    public void onResourcePackGenerate(AsyncResourcePackGenerateEvent resourcePackGenerateEvent) {
-        resourcePackColors.setUrl(resourcePackGenerateEvent.zipFilePath().toUri().toString());
-        resourcePackLoadedFuture.completeAsync(() -> null);
+    public void onCraftEngineReload(CraftEngineReloadEvent event) {
+        File target = Config.resourcePackPath().toFile();
+        if (target.exists()) {
+            resourcePackColors.addSource(new ResourcePackColors.FileResourcePackSource(target));
+        }
+        itemsLoadedFuture.complete(null);
     }
 
     @Override
