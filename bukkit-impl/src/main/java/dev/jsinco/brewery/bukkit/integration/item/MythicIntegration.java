@@ -14,6 +14,7 @@ import org.bukkit.inventory.ItemStack;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
+import java.util.Collection;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
@@ -76,7 +77,11 @@ public class MythicIntegration implements ItemIntegration, Listener {
     public void onEnable() {
         Bukkit.getAsyncScheduler().runAtFixedRate(TheBrewingProject.getInstance(), task -> {
             ItemManager manager = MythicBukkit.inst().getItemManager();
-            if (manager != null && !manager.getItems().isEmpty()) {
+            if (manager == null) {
+                return;
+            }
+            Collection<MythicItem> items = manager.getItems();
+            if (items != null && !items.isEmpty()) {
                 initialized.complete(null);
                 task.cancel();
             }
