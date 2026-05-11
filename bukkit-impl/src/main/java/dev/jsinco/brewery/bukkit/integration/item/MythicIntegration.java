@@ -16,6 +16,7 @@ import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
 import java.awt.Color;
+import java.io.File;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -98,6 +99,10 @@ public class MythicIntegration implements ItemIntegration, Listener {
         }
         Collection<MythicItem> items = manager.getItems();
         if (items != null && !items.isEmpty()) {
+            File resourcePack = new File(MythicBukkit.inst().getDataFolder(), "Generation/resource_pack.zip");
+            if (resourcePack.exists() && resourcePack.isFile()) {
+                resourcePackColors.addSource(new ResourcePackColors.FileResourcePackSource(resourcePack));
+            }
             initialized.complete(null);
             task.cancel();
         }
