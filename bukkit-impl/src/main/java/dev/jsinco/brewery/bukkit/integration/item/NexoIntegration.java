@@ -4,6 +4,7 @@ import com.nexomc.nexo.api.NexoItems;
 import com.nexomc.nexo.api.events.NexoItemsLoadedEvent;
 import com.nexomc.nexo.api.events.resourcepack.NexoPackUploadEvent;
 import com.nexomc.nexo.items.ItemBuilder;
+import dev.jsinco.brewery.api.util.Logger;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.bukkit.api.integration.ItemIntegration;
 import dev.jsinco.brewery.bukkit.util.color.ResourcePackColors;
@@ -99,7 +100,7 @@ public class NexoIntegration implements ItemIntegration, Listener {
             URL url = URI.create(packUploadEvent.getUrl()).toURL();
             resourcePackColors.addSource(new ResourcePackColors.InputStreamResourcePackSource(url::openStream));
         } catch (MalformedURLException e) {
-            throw new RuntimeException(e);
+            Logger.logAndTrackErr(e);
         } finally {
             packLoaded.complete(null);
         }
