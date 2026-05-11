@@ -6,6 +6,7 @@ import dev.jsinco.brewery.bukkit.util.color.ResourcePackColors;
 import dev.jsinco.brewery.util.ClassUtil;
 import io.th0rgal.oraxen.api.OraxenItems;
 import io.th0rgal.oraxen.api.events.OraxenItemsLoadedEvent;
+import io.th0rgal.oraxen.api.events.OraxenPackGeneratedEvent;
 import io.th0rgal.oraxen.items.ItemBuilder;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
@@ -23,7 +24,9 @@ import java.util.concurrent.CompletableFuture;
 public class OraxenIntegration implements ItemIntegration, Listener {
 
     private static final boolean ENABLED = ClassUtil.exists("io.th0rgal.oraxen.api.OraxenItem");
-    private final CompletableFuture<Void> initializedFuture = new CompletableFuture<>();
+    private final CompletableFuture<Void> itemsLoadedFuture = new CompletableFuture<>();
+    private final CompletableFuture<Void> packGeneratedFuture = new CompletableFuture<>();
+    private final CompletableFuture<Void> initializedFuture = CompletableFuture.allOf(itemsLoadedFuture, packGeneratedFuture);
     private final ResourcePackColors resourcePackColors;
 
     public OraxenIntegration(ResourcePackColors resourcePackColors) {
@@ -75,9 +78,17 @@ public class OraxenIntegration implements ItemIntegration, Listener {
 
     @EventHandler
     public void onOraxenItemsLoaded(OraxenItemsLoadedEvent event) {
-        initializedFuture.completeAsync(() -> null);
+        itemsLoadedFuture.complete(null);
     }
 
+    @EventHandler
+    public void onPackGenerate(OraxenPackGeneratedEvent event) {
+        event.getOutput()
+                .stream()
+                .map(virtualFile -> new ResourcePackColors.InputStreamResourcePackSource(virtualFile::getInputStream))
+                .forEach(resourcePackColors::addSource);
+        packGeneratedFuture.complete(null);
+    }
 
     @Override
     public @Nullable Color color(String id) {
