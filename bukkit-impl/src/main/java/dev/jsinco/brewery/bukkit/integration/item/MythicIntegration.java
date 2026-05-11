@@ -1,20 +1,14 @@
 package dev.jsinco.brewery.bukkit.integration.item;
 
-import dev.jsinco.brewery.api.util.Logger;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.bukkit.api.integration.ItemIntegration;
 import dev.jsinco.brewery.util.ClassUtil;
+import io.lumine.mythic.api.items.ItemManager;
 import io.lumine.mythic.bukkit.MythicBukkit;
 import io.lumine.mythic.bukkit.adapters.BukkitItemStack;
-import io.lumine.mythic.bukkit.events.MythicPostReloadedEvent;
-import io.lumine.mythic.bukkit.events.MythicPreReloadEvent;
-import io.lumine.mythic.bukkit.events.MythicReloadCompleteEvent;
-import io.lumine.mythic.bukkit.events.MythicReloadEvent;
-import io.lumine.mythic.bukkit.events.MythicReloadedEvent;
 import io.lumine.mythic.core.items.MythicItem;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
-import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.inventory.ItemStack;
 import org.jspecify.annotations.NonNull;
@@ -22,6 +16,7 @@ import org.jspecify.annotations.Nullable;
 
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 
 public class MythicIntegration implements ItemIntegration, Listener {
     private final CompletableFuture<Void> initialized = new CompletableFuture<>();
@@ -79,34 +74,13 @@ public class MythicIntegration implements ItemIntegration, Listener {
 
     @Override
     public void onEnable() {
-        Bukkit.getGlobalRegionScheduler()
-                .run(TheBrewingProject.getInstance(), ignored -> initialized.completeAsync(() -> null));
-        Bukkit.getPluginManager().registerEvents(this, TheBrewingProject.getInstance());
-    }
-
-    @EventHandler
-    public void onMythicReload(MythicReloadEvent event) {
-        Logger.log("reload");
-    }
-
-    @EventHandler
-    public void onMythicReload(MythicPreReloadEvent event) {
-        Logger.log("pre reload");
-    }
-
-    @EventHandler
-    public void onMythicReload(MythicPostReloadedEvent event) {
-        Logger.log("post reload");
-    }
-
-    @EventHandler
-    public void onMythicReload(MythicReloadedEvent event) {
-        Logger.log("reloaded");
-    }
-
-    @EventHandler
-    public void onMythicReload(MythicReloadCompleteEvent event) {
-        Logger.log("reload complete");
+        Bukkit.getAsyncScheduler().runAtFixedRate(TheBrewingProject.getInstance(), task -> {
+            ItemManager manager = MythicBukkit.inst().getItemManager();
+            if (manager != null && !manager.getItems().isEmpty()) {
+                initialized.complete(null);
+                task.cancel();
+            }
+        }, 0, 1, TimeUnit.SECONDS);
     }
 
 }
