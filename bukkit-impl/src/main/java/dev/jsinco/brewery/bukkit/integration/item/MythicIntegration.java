@@ -15,6 +15,7 @@ import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
 import java.awt.Color;
+import java.io.File;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
@@ -80,7 +81,13 @@ public class MythicIntegration implements ItemIntegration, Listener {
     @Override
     public void onEnable() {
         Bukkit.getGlobalRegionScheduler()
-                .run(TheBrewingProject.getInstance(), ignored -> initialized.completeAsync(() -> null));
+                .run(TheBrewingProject.getInstance(), ignored -> {
+                    File resourcePack = new File(MythicBukkit.inst().getDataFolder(), "Generation/resource_pack.zip");
+                    if (resourcePack.exists() && resourcePack.isFile()) {
+                        resourcePackColors.addSource(new ResourcePackColors.FileResourcePackSource(resourcePack));
+                    }
+                    initialized.completeAsync(() -> null);
+                });
     }
 
     @Override
