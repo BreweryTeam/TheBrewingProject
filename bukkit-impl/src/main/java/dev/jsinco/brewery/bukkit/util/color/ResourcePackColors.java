@@ -6,6 +6,7 @@ import net.kyori.adventure.key.Key;
 import org.bukkit.Bukkit;
 import org.jetbrains.annotations.NotNull;
 import org.jspecify.annotations.Nullable;
+import software.amazon.awssdk.http.HttpStatusCode;
 import team.unnamed.creative.ResourcePack;
 import team.unnamed.creative.item.CompositeItemModel;
 import team.unnamed.creative.item.ConditionItemModel;
@@ -32,6 +33,8 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
@@ -40,6 +43,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class ResourcePackColors {
@@ -103,7 +107,7 @@ public class ResourcePackColors {
                 Logger.log("Server resource pack was null");
                 return List.of();
             }
-            sources.add(new HttpResourcePackSource(bukkitPack.getUrl(), false));
+            sources.add(new HttpResourcePackSource(bukkitPack.getUrl(), false, null));
         }
         MinecraftResourcePackReader reader = MinecraftResourcePackReader.builder()
                 .lenient(true)
@@ -244,15 +248,9 @@ public class ResourcePackColors {
         ResourcePack readPack() throws IOException, InterruptedException;
     }
 
-    public record HttpResourcePackSource(String url, boolean sha256) implements ResourcePackSource {
+    public record HttpResourcePackSource(String url, boolean sha256,
+                                         @Nullable UUID playerUuid) implements ResourcePackSource {
 
-        public static HttpResourcePackSource withSha256(String url) {
-            return new HttpResourcePackSource(url, true);
-        }
-
-        public static HttpResourcePackSource withoutSha256(String url) {
-            return new HttpResourcePackSource(url, false);
-        }
 
         @Override
         public ResourcePack readPack() throws IOException, InterruptedException {
@@ -263,26 +261,36 @@ public class ResourcePackColors {
                     .timeout(Duration.ofSeconds(10))
                     .headers(
                             HttpHeaderNames.USER_AGENT.toString(), "Minecraft Java/1.21.11",
-                            "X-Minecraft-Version", "1.21.11"
+                            "X-Minecraft-Version", "1.21.11",
+                            "X-Minecraft-UUID", (playerUuid == null ? UUID.randomUUID() : playerUuid).toString().replace("-", "")
                     ).GET()
                     .build();
             try (HttpClient httpClient = HttpClient.newBuilder()
                     .followRedirects(HttpClient.Redirect.ALWAYS)
                     .build()) {
+                HttpResponse<byte[]> response = httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofByteArray());
+                if (response.statusCode() != HttpStatusCode.OK) {
+                    throw new IOException(String.format("HTTP response %s: %s", response.statusCode(), new String(response.body(), StandardCharsets.UTF_8)));
+                }
                 if (sha256) {
                     MessageDigest messageDigest = MessageDigest.getInstance("SHA-256");
                     return READER.readFromInputStream(new ByteArrayInputStream(
-                            messageDigest.digest(httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofByteArray())
-                                    .body())
+                            messageDigest.digest(response.body())
                     ));
                 } else {
-                    return READER.readFromInputStream(new ByteArrayInputStream(httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofByteArray())
-                            .body()
-                    ));
+                    return READER.readFromInputStream(new ByteArrayInputStream(response.body()));
                 }
             } catch (NoSuchAlgorithmException e) {
                 throw new IllegalStateException(e);
             }
+        }
+    }
+
+    public record PathResourcePackSource(Path file) implements ResourcePackSource {
+
+        @Override
+        public ResourcePack readPack() throws IOException, InterruptedException {
+            return READER.readFromZipFile(file);
         }
     }
 
@@ -297,5 +305,22 @@ public class ResourcePackColors {
                 return READER.readFromZipFile(file);
             }
         }
+    }
+
+    public record InputStreamResourcePackSource(
+            InputStreamSupplier inputStreamSupplier) implements ResourcePackSource {
+
+        @Override
+        public ResourcePack readPack() throws IOException, InterruptedException {
+            try (InputStream inputStream = inputStreamSupplier.get()) {
+                return READER.readFromInputStream(inputStream);
+            }
+        }
+    }
+
+    @FunctionalInterface
+    public interface InputStreamSupplier {
+
+        InputStream get() throws IOException;
     }
 }

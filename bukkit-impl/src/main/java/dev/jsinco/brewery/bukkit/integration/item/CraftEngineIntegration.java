@@ -80,8 +80,8 @@ public class CraftEngineIntegration implements ItemIntegration, Listener {
         File target = Config.resourcePackPath().toFile();
         if (target.exists()) {
             resourcePackColors.addSource(new ResourcePackColors.FileResourcePackSource(target));
+            itemsLoadedFuture.complete(null);
         }
-        itemsLoadedFuture.complete(null);
     }
 
     @Override
