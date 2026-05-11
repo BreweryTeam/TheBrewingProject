@@ -18,6 +18,9 @@ import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
 import java.awt.Color;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URL;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
@@ -92,8 +95,14 @@ public class NexoIntegration implements ItemIntegration, Listener {
 
     @EventHandler
     public void onResourcePackLoaded(NexoPackUploadEvent packUploadEvent) {
-        resourcePackColors.addSource(new ResourcePackColors.HttpResourcePackSource(packUploadEvent.getUrl(), false));
-        packLoaded.completeAsync(() -> null);
+        try {
+            URL url = URI.create(packUploadEvent.getUrl()).toURL();
+            resourcePackColors.addSource(new ResourcePackColors.InputStreamResourcePackSource(url::openStream));
+        } catch (MalformedURLException e) {
+            throw new RuntimeException(e);
+        } finally {
+            packLoaded.complete(null);
+        }
     }
 
     @Override
