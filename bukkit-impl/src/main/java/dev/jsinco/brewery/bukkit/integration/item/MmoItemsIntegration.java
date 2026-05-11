@@ -94,7 +94,7 @@ public class MmoItemsIntegration implements ItemIntegration, Listener {
 
     @EventHandler
     public void onMmoItemsReload(MMOItemsReloadEvent event) {
-        initialized.completeAsync(() -> null);
+        initialized.complete(null);
     }
 
     @Override
