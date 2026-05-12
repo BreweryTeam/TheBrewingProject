@@ -1,14 +1,13 @@
 package dev.jsinco.brewery.bukkit.integration.item;
 
 import dev.jsinco.brewery.api.ingredient.Ingredient;
-import dev.jsinco.brewery.api.util.Logger;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.bukkit.api.integration.ItemIntegration;
 import dev.jsinco.brewery.bukkit.util.color.ResourcePackColors;
+import dev.jsinco.brewery.bukkit.util.color.ResourcePackSource;
 import dev.jsinco.brewery.util.ClassUtil;
 import dev.lone.itemsadder.api.CustomStack;
 import dev.lone.itemsadder.api.Events.ItemsAdderLoadDataEvent;
-import dev.lone.itemsadder.api.ItemsAdder;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
@@ -20,9 +19,7 @@ import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
 import java.awt.Color;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URL;
+import java.io.File;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
@@ -92,15 +89,9 @@ public class ItemsAdderIntegration implements ItemIntegration, Listener {
 
     @EventHandler
     public void onItemsAdderItemsLoad(ItemsAdderLoadDataEvent loadDataEvent) {
-        String urlString = ItemsAdder.getPackUrl(false);
-        if (urlString != null) {
-            URI uri = URI.create(urlString);
-            try {
-                URL url = uri.toURL();
-                resourcePackColors.addSource(new ResourcePackColors.InputStreamResourcePackSource(url::openStream));
-            } catch (MalformedURLException e) {
-                Logger.logAndTrackErr(e);
-            }
+        File resourcePack = new File(Bukkit.getPluginsFolder(), "ItemsAdder/output/generated.zip");
+        if (resourcePack.exists() && resourcePack.isFile()) {
+            resourcePackColors.addSource(new ResourcePackSource.FileResourcePackSource(resourcePack));
         }
         initializedFuture.complete(null);
     }
