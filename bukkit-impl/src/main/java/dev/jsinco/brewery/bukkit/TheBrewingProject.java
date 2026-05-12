@@ -94,6 +94,7 @@ import dev.jsinco.brewery.effect.DrunksManagerImpl;
 import dev.jsinco.brewery.effect.ModifierManagerImpl;
 import dev.jsinco.brewery.effect.text.DrunkTextRegistry;
 import dev.jsinco.brewery.format.TimeFormatRegistry;
+import dev.jsinco.brewery.recipes.RecipeImpl;
 import dev.jsinco.brewery.recipes.RecipeReader;
 import dev.jsinco.brewery.recipes.RecipeRegistryImpl;
 import dev.jsinco.brewery.structure.PlacedStructureRegistryImpl;
@@ -120,6 +121,8 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -248,7 +251,12 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
         recipeRegistry.clear();
         RecipeReader<ItemStack> recipeReader = new RecipeReader<>(this.getDataFolder(), new BukkitRecipeResultReader(), BukkitIngredientManager.INSTANCE);
 
-        recipeReader.readRecipes().forEach(recipeFuture -> recipeFuture.thenAcceptAsync(recipe -> recipeRegistry.registerRecipe(recipe)));
+        List<CompletableFuture<RecipeImpl<ItemStack>>> recipeFutures = recipeReader.readRecipes();
+        CompletableFuture.allOf(recipeFutures.toArray(new CompletableFuture[0]))
+                .thenRunAsync(() -> recipeFutures.stream()
+                        .map(f -> f.getNow(null))
+                        .filter(Objects::nonNull)
+                        .forEach(recipeRegistry::registerRecipe));
         DefaultRecipeReader.readDefaultRecipes(this.getDataFolder()).forEach((string, defaultRecipe) -> defaultRecipe
                 .whenComplete((defaultRecipe1, throwable) -> {
                     if (throwable != null) {
@@ -372,7 +380,12 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
         IngredientsSection.validate(BukkitIngredientManager.INSTANCE, BukkitIngredientUtil::tagValuesFromString);
         RecipeReader<ItemStack> recipeReader = new RecipeReader<>(this.getDataFolder(), new BukkitRecipeResultReader(), BukkitIngredientManager.INSTANCE);
 
-        recipeReader.readRecipes().forEach(recipeFuture -> recipeFuture.thenAcceptAsync(recipe -> recipeRegistry.registerRecipe(recipe)));
+        List<CompletableFuture<RecipeImpl<ItemStack>>> recipeFutures = recipeReader.readRecipes();
+        CompletableFuture.allOf(recipeFutures.toArray(new CompletableFuture[0]))
+                .thenRunAsync(() -> recipeFutures.stream()
+                        .map(f -> f.getNow(null))
+                        .filter(Objects::nonNull)
+                        .forEach(recipeRegistry::registerRecipe));
         DefaultRecipeReader.readDefaultRecipes(this.getDataFolder()).forEach((string, defaultRecipe) -> defaultRecipe
                 .whenComplete((defaultRecipe1, throwable) -> {
                     if (throwable != null) {
