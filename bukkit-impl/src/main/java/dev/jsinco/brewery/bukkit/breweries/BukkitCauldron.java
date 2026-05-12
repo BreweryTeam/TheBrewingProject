@@ -320,7 +320,7 @@ public class BukkitCauldron implements Cauldron {
         // Cauldron has an active brew: merge when it holds the same recipe
         if (!isSealed) {
             Brew addedBrew = addedBrewOpt.get();
-            Optional<Recipe<ItemStack>> existingRecipeOpt = brew.closestRecipe(TheBrewingProject.getInstance().getRecipeRegistry());
+            Optional<Recipe<ItemStack>> existingRecipeOpt = stripShortLastStep(brew).closestRecipe(TheBrewingProject.getInstance().getRecipeRegistry());
             Optional<Recipe<ItemStack>> addedRecipeOpt = addedBrew.closestRecipe(TheBrewingProject.getInstance().getRecipeRegistry());
             boolean sameRecipe = existingRecipeOpt.isPresent() && addedRecipeOpt.isPresent()
                     && existingRecipeOpt.get().getRecipeName().equals(addedRecipeOpt.get().getRecipeName());
@@ -386,6 +386,16 @@ public class BukkitCauldron implements Cauldron {
             delay = 1;
         }
         playIngredientAddedEffects(item, delay);
+    }
+
+    private Brew stripShortLastStep(Brew brew) {
+        if (brew.stepAmount() <= 1) return brew;
+        BrewingStep last = brew.lastStep();
+        if ((last instanceof BrewingStep.Cook || last instanceof BrewingStep.Mix)
+                && ((BrewingStep.TimedStep) last).time().moment() < Moment.MINUTE) {
+            return brew.withStepsReplaced(brew.getSteps().subList(0, brew.stepAmount() - 1));
+        }
+        return brew;
     }
 
     private boolean cauldronHasActiveBrew() {
