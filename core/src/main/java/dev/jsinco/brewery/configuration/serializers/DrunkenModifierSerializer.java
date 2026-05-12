@@ -21,8 +21,8 @@ public class DrunkenModifierSerializer implements ObjectSerializer<DrunkenModifi
         data.set("name", object.name());
         data.set("min-value", object.minValue());
         data.set("max-value", object.maxValue());
-        data.set("decrement-time", object.decrementTime());
-        data.set("increment-dependency", object.dependency());
+        if (object.decrementTime() != null) data.set("decrement-time", object.decrementTime());
+        if (object.dependency() != null) data.set("increment-dependency", object.dependency());
         data.set("display-name", object.displayName());
     }
 
@@ -37,8 +37,8 @@ public class DrunkenModifierSerializer implements ObjectSerializer<DrunkenModifi
         Preconditions.checkArgument(name != null, "Missing drunken modifier name");
         return new DrunkenModifier(
                 name,
-                incrementDependency == null ? new ModifierExpression("0") : incrementDependency,
-                decrementTime == null ? new ModifierExpression("-1") : decrementTime,
+                incrementDependency,
+                decrementTime,
                 minValue == null ? 0D : minValue,
                 maxValue == null ? 0D : maxValue,
                 displayName == null ? Component.text(name) : displayName

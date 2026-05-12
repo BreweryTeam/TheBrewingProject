@@ -35,14 +35,18 @@ public record DrunkStateImpl(long timestamp,
         ImmutableMap.Builder<DrunkenModifier, Double> newDrunkenModifiers = new ImmutableMap.Builder<>();
         boolean changed = false;
         for (Map.Entry<DrunkenModifier, Double> entry : modifiers.entrySet()) {
-            double decrementTime = entry.getKey().decrementTime().evaluate(variables);
             double value;
-            if (decrementTime == 0D) {
-                value = 0D;
+            if (entry.getKey().decrementTime() == null) {
+                value = entry.getValue();
             } else {
-                value = entry.getValue() - diff / decrementTime;
+                double decrementTime = entry.getKey().decrementTime().evaluate(variables);
+                if (decrementTime == 0D) {
+                    value = 0D;
+                } else {
+                    value = entry.getValue() - diff / decrementTime;
+                }
+                value = entry.getKey().sanitize(value);
             }
-            value = entry.getKey().sanitize(value);
             newDrunkenModifiers.put(entry.getKey(), value);
             changed |= value != entry.getValue();
         }
@@ -100,6 +104,10 @@ public record DrunkStateImpl(long timestamp,
         Map<String, Double> variables = compileVariables(modifiers, modifierToAdd, valueChange);
         boolean cascadedOnSelf = false;
         for (Map.Entry<DrunkenModifier, Double> entry : modifiers.entrySet()) {
+            if (entry.getKey().dependency() == null) {
+                newModifiers.put(entry.getKey(), entry.getValue());
+                continue;
+            }
             double diff = entry.getKey().dependency().evaluate(variables);
             if (diff != 0D) {
                 newModifiers.put(entry.getKey(), entry.getValue() + diff);
