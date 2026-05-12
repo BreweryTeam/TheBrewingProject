@@ -24,12 +24,12 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
 import org.jspecify.annotations.NonNull;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -149,17 +149,20 @@ public class BukkitIngredientManager implements IngredientManager<ItemStack> {
     public CompletableFuture<Map<Ingredient, Integer>> getIngredientsWithAmount(List<String> stringList, boolean withMeta) throws
             IllegalArgumentException {
         if (stringList == null || stringList.isEmpty()) {
-            return CompletableFuture.completedFuture(new HashMap<>());
+            return CompletableFuture.completedFuture(new LinkedHashMap<>());
         }
-        Map<Ingredient, Integer> ingredientMap = new ConcurrentHashMap<>();
-        CompletableFuture<?>[] ingredientsFuture = stringList.stream()
+        List<CompletableFuture<Pair<Ingredient, Integer>>> futures = stringList.stream()
                 .map(string -> getIngredientWithAmount(string, withMeta))
-                .map(ingredientAmountPairFuture ->
-                        ingredientAmountPairFuture
-                                .thenAcceptAsync(ingredientAmountPair -> IngredientManager.insertIngredientIntoMap(ingredientMap, ingredientAmountPair))
-                ).toArray(CompletableFuture<?>[]::new);
-        return CompletableFuture.allOf(ingredientsFuture)
-                .thenApplyAsync(ignored -> ingredientMap);
+                .toList();
+        return CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]))
+                .thenApplyAsync(ignored -> {
+                    Map<Ingredient, Integer> ingredientMap = new LinkedHashMap<>();
+                    futures.stream()
+                            .map(f -> f.getNow(null))
+                            .filter(Objects::nonNull)
+                            .forEach(pair -> IngredientManager.insertIngredientIntoMap(ingredientMap, pair));
+                    return ingredientMap;
+                });
     }
 
     public boolean isValidIngredient(@NonNull String ingredientWithAmount) {
