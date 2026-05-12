@@ -55,6 +55,7 @@ public class ResourcePackColors {
         for (ResourcePack resourcePack : resourcePacks) {
             readResourcePackContent(resourcePack);
         }
+        Logger.log("Successfully read serverside resource packs.");
     }
 
     private void readResourcePackContent(ResourcePack resourcePack) {
