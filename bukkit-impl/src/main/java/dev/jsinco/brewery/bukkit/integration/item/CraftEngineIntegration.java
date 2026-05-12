@@ -3,6 +3,7 @@ package dev.jsinco.brewery.bukkit.integration.item;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.bukkit.api.integration.ItemIntegration;
 import dev.jsinco.brewery.bukkit.util.color.ResourcePackColors;
+import dev.jsinco.brewery.bukkit.util.color.ResourcePackSource;
 import dev.jsinco.brewery.util.ClassUtil;
 import net.kyori.adventure.text.Component;
 import net.momirealms.craftengine.bukkit.api.event.CraftEngineReloadEvent;
@@ -79,7 +80,7 @@ public class CraftEngineIntegration implements ItemIntegration, Listener {
     public void onCraftEngineReload(CraftEngineReloadEvent event) {
         File target = Config.resourcePackPath().toFile();
         if (target.exists()) {
-            resourcePackColors.addSource(new ResourcePackColors.FileResourcePackSource(target));
+            resourcePackColors.addSource(new ResourcePackSource.FileResourcePackSource(target));
             itemsLoadedFuture.complete(null);
         }
     }

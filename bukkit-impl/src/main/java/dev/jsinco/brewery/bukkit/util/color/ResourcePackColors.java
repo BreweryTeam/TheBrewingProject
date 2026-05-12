@@ -1,22 +1,21 @@
 package dev.jsinco.brewery.bukkit.util.color;
 
 import dev.jsinco.brewery.api.util.Logger;
-import io.netty.handler.codec.http.HttpHeaderNames;
 import net.kyori.adventure.key.Key;
 import org.bukkit.Bukkit;
 import org.jetbrains.annotations.NotNull;
 import org.jspecify.annotations.Nullable;
-import software.amazon.awssdk.http.HttpStatusCode;
 import team.unnamed.creative.ResourcePack;
 import team.unnamed.creative.item.CompositeItemModel;
 import team.unnamed.creative.item.ConditionItemModel;
-import team.unnamed.creative.item.EmptyItemModel;
 import team.unnamed.creative.item.Item;
 import team.unnamed.creative.item.ItemModel;
 import team.unnamed.creative.item.RangeDispatchItemModel;
 import team.unnamed.creative.item.ReferenceItemModel;
 import team.unnamed.creative.item.SelectItemModel;
 import team.unnamed.creative.item.SpecialItemModel;
+import team.unnamed.creative.item.special.HeadSpecialRender;
+import team.unnamed.creative.model.ItemOverride;
 import team.unnamed.creative.model.Model;
 import team.unnamed.creative.model.ModelTexture;
 import team.unnamed.creative.serialize.minecraft.MinecraftResourcePackReader;
@@ -26,24 +25,14 @@ import javax.imageio.ImageIO;
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Path;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class ResourcePackColors {
@@ -61,7 +50,6 @@ public class ResourcePackColors {
             return;
         }
         if (resourcePacks.isEmpty()) {
-            Logger.log("Resource packs was empty");
             return;
         }
         for (ResourcePack resourcePack : resourcePacks) {
@@ -70,33 +58,33 @@ public class ResourcePackColors {
     }
 
     private void readResourcePackContent(ResourcePack resourcePack) {
-        if (resourcePack.items().isEmpty()) {
-            Logger.log("Items was empty");
+        ResourceResolver resolver = new ResourceResolver(resourcePack);
+        readContainerContent(resourcePack.items(), resolver);
+        resourcePack.overlays()
+                .forEach(overlay -> readContainerContent(overlay.items(), resolver));
+    }
+
+    private void readContainerContent(Collection<Item> containerContent, ResourceResolver resolver) {
+        if (containerContent.isEmpty()) {
         }
-        for (Item item : resourcePack.items()) {
+        for (Item item : containerContent) {
             ItemModel itemModel = item.model();
             if (itemModel instanceof RangeDispatchItemModel rangeDispatchItemModel) {
-                Map<Float, Color> colors = new HashMap<>();
                 for (RangeDispatchItemModel.Entry entry : rangeDispatchItemModel.entries()) {
-                    BufferedImage modelImage = readItemModel(entry.model(), resourcePack);
+                    BufferedImage modelImage = readItemModel(entry.model(), resolver);
                     if (modelImage == null) {
-                        Logger.log("Model image was null for item: " + item.key());
-                        Logger.log("Custom model data: " + entry.threshold());
                         continue;
                     }
-                    colors.put(entry.threshold(), ColorUtil.getDistinctColor(modelImage));
+                    customModelDataColors.computeIfAbsent(item.key(), ignored -> new HashMap<>())
+                            .put(entry.threshold(), ColorUtil.getDistinctColor(modelImage));
                 }
-                customModelDataColors.put(item.key(), colors);
-                Logger.log("Added custom model data: " + item.key() + colors);
                 continue;
             }
-            BufferedImage modelImage = readItemModel(item.model(), resourcePack);
+            BufferedImage modelImage = readItemModel(item.model(), resolver);
             if (modelImage == null) {
-                Logger.log("Model image was null for item: " + item.key());
                 continue;
             }
             itemModelColors.put(item.key(), ColorUtil.getDistinctColor(modelImage));
-            Logger.log("Added custom item model: " + item.key());
         }
     }
 
@@ -104,10 +92,9 @@ public class ResourcePackColors {
         if (sources.isEmpty()) {
             org.bukkit.packs.ResourcePack bukkitPack = Bukkit.getServerResourcePack();
             if (bukkitPack == null) {
-                Logger.log("Server resource pack was null");
                 return List.of();
             }
-            sources.add(new HttpResourcePackSource(bukkitPack.getUrl(), false, null));
+            sources.add(new ResourcePackSource.HttpResourcePackSource(bukkitPack.getUrl(), false, null));
         }
         MinecraftResourcePackReader reader = MinecraftResourcePackReader.builder()
                 .lenient(true)
@@ -119,58 +106,82 @@ public class ResourcePackColors {
         return output;
     }
 
-    private @Nullable BufferedImage readItemModel(ItemModel itemModel, ResourcePack resourcePack) {
+    private @Nullable BufferedImage readItemModel(ItemModel itemModel, ResourceResolver resolver) {
         return switch (itemModel) {
-            case CompositeItemModel compositeItemModel -> readCompositeModel(compositeItemModel, resourcePack);
-            case SpecialItemModel specialItemModel ->
-                    readModel(resourcePack.model(specialItemModel.base()), resourcePack);
+            case CompositeItemModel compositeItemModel -> readCompositeModel(compositeItemModel, resolver);
+            case SpecialItemModel specialItemModel -> readSpecialRender(specialItemModel, resolver);
             case RangeDispatchItemModel rangeDispatchItemModel ->
-                    readItemModel(rangeDispatchItemModel.fallback(), resourcePack);
+                    readItemModel(rangeDispatchItemModel.fallback(), resolver);
             case ReferenceItemModel referenceItemModel ->
-                    readModel(resourcePack.model(referenceItemModel.model()), resourcePack);
-            case ConditionItemModel conditionItemModel -> readItemModel(conditionItemModel.onFalse(), resourcePack);
+                    readModel(resolver.resolveModel(referenceItemModel.model()), resolver);
+            case ConditionItemModel conditionItemModel -> readItemModel(conditionItemModel.onFalse(), resolver);
             case SelectItemModel selectItemModel -> readItemModel(
-                    selectItemModel.fallback(), resourcePack
+                    selectItemModel.fallback(), resolver
             );
-            case EmptyItemModel _ -> null;
-            case null -> {
-                Logger.log("Model was null");
-                yield null;
-            }
-            default -> {
-                Logger.log("Unknown item model type: " + itemModel.getClass().getName());
-                yield null;
-            }
+            case null, default -> null;
         };
     }
 
-    private BufferedImage readModel(Model model, ResourcePack resourcePack) {
+    private @Nullable BufferedImage readSpecialRender(SpecialItemModel specialItemModel, ResourceResolver resolver) {
+        Texture texture = switch (specialItemModel.render()) {
+            case HeadSpecialRender headSpecialRender -> {
+                Key textureKey = headSpecialRender.texture();
+                if (textureKey == null) {
+                    yield null;
+                }
+                yield resolver.resolveTexture(textureKey);
+            }
+            default -> null;
+        };
+        if (texture == null) {
+            return readModel(resolver.resolveModel(specialItemModel.base()), resolver);
+        }
+        return readTexture(texture);
+    }
+
+    private BufferedImage readModel(Model model, ResourceResolver resolver) {
         if (model == null) {
-            Logger.log("Model was null");
             return null;
         }
+        List<ItemOverride> overrides = model.overrides();
+        if (!overrides.isEmpty()) {
+            for (int i = 0; i < overrides.size(); i++) {
+                ItemOverride override = overrides.get(i);
+                if (override.model().equals(model.key())) {
+                    continue;
+                }
+                BufferedImage image = readModel(resolver.resolveModel(override.model()), resolver);
+                if (image == null) {
+                    Model overrideModel = resolver.resolveModel(override.model());
+                    if (overrideModel != null) {
+                    }
+                    continue;
+                }
+                customModelDataColors.computeIfAbsent(model.key(), ignored -> new HashMap<>())
+                        .put((float) i, ColorUtil.getDistinctColor(image));
+            }
+        }
         List<BufferedImage> layers = model.textures().layers().stream()
-                .map(modelTexture -> readImage(resourcePack, modelTexture))
+                .map(modelTexture -> readModelTexture(resolver, modelTexture))
                 .toList();
         if (layers.isEmpty()) {
             return mergeImages(model.textures().variables().entrySet().stream()
                     .filter(entry -> entry.getKey().matches("\\d+"))
                     .sorted(Comparator.comparingInt(entry -> Integer.parseInt(entry.getKey())))
                     .map(Map.Entry::getValue)
-                    .map(modelTexture -> readImage(resourcePack, modelTexture))
+                    .map(modelTexture -> readModelTexture(resolver, modelTexture))
                     .toList()
             );
         }
         return mergeImages(layers);
     }
 
-    private @Nullable BufferedImage readCompositeModel(CompositeItemModel compositeItemModel, ResourcePack resourcePack) {
+    private @Nullable BufferedImage readCompositeModel(CompositeItemModel compositeItemModel, ResourceResolver resolver) {
         List<BufferedImage> layers = compositeItemModel.models()
                 .stream()
-                .map(modelTexture -> readItemModel(modelTexture, resourcePack))
+                .map(modelTexture -> readItemModel(modelTexture, resolver))
                 .toList();
         if (layers.isEmpty()) {
-            Logger.log("Image layers was empty");
         }
         return mergeImages(layers);
     }
@@ -208,18 +219,16 @@ public class ResourcePackColors {
         }
     }
 
-    private static @Nullable BufferedImage readImage(ResourcePack resourcePack, ModelTexture model) {
+    private static @Nullable BufferedImage readModelTexture(ResourceResolver resolver, ModelTexture model) {
         Key key = model.key();
         if (key == null) {
-            Logger.log("Model key was null");
             return null;
         }
-        if (!key.value().contains(".")) {
-            key = Key.key(key.namespace(), key.value() + ".png");
-        }
-        Texture texture = resourcePack.texture(key);
+        return readTexture(resolver.resolveTexture(key));
+    }
+
+    private static @Nullable BufferedImage readTexture(@Nullable Texture texture) {
         if (texture == null) {
-            Logger.log("Texture was null: " + key);
             return null;
         }
         try (InputStream inputStream = new ByteArrayInputStream(texture.data().toByteArray())) {
@@ -239,88 +248,5 @@ public class ResourcePackColors {
                 .get((float) customModelData);
     }
 
-    public interface ResourcePackSource {
 
-        MinecraftResourcePackReader READER = MinecraftResourcePackReader.builder()
-                .lenient(true)
-                .build();
-
-        ResourcePack readPack() throws IOException, InterruptedException;
-    }
-
-    public record HttpResourcePackSource(String url, boolean sha256,
-                                         @Nullable UUID playerUuid) implements ResourcePackSource {
-
-
-        @Override
-        public ResourcePack readPack() throws IOException, InterruptedException {
-            URI uri = URI.create(url);
-            Logger.log("Sending http get request: " + uri);
-            HttpRequest httpRequest = HttpRequest.newBuilder()
-                    .uri(uri)
-                    .timeout(Duration.ofSeconds(10))
-                    .headers(
-                            HttpHeaderNames.USER_AGENT.toString(), "Minecraft Java/1.21.11",
-                            "X-Minecraft-Version", "1.21.11",
-                            "X-Minecraft-UUID", (playerUuid == null ? UUID.randomUUID() : playerUuid).toString().replace("-", "")
-                    ).GET()
-                    .build();
-            try (HttpClient httpClient = HttpClient.newBuilder()
-                    .followRedirects(HttpClient.Redirect.ALWAYS)
-                    .build()) {
-                HttpResponse<byte[]> response = httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofByteArray());
-                if (response.statusCode() != HttpStatusCode.OK) {
-                    throw new IOException(String.format("HTTP response %s: %s", response.statusCode(), new String(response.body(), StandardCharsets.UTF_8)));
-                }
-                if (sha256) {
-                    MessageDigest messageDigest = MessageDigest.getInstance("SHA-256");
-                    return READER.readFromInputStream(new ByteArrayInputStream(
-                            messageDigest.digest(response.body())
-                    ));
-                } else {
-                    return READER.readFromInputStream(new ByteArrayInputStream(response.body()));
-                }
-            } catch (NoSuchAlgorithmException e) {
-                throw new IllegalStateException(e);
-            }
-        }
-    }
-
-    public record PathResourcePackSource(Path file) implements ResourcePackSource {
-
-        @Override
-        public ResourcePack readPack() throws IOException, InterruptedException {
-            return READER.readFromZipFile(file);
-        }
-    }
-
-
-    public record FileResourcePackSource(File file) implements ResourcePackSource {
-
-        @Override
-        public ResourcePack readPack() throws IOException, InterruptedException {
-            if (file.isDirectory()) {
-                return READER.readFromDirectory(file);
-            } else {
-                return READER.readFromZipFile(file);
-            }
-        }
-    }
-
-    public record InputStreamResourcePackSource(
-            InputStreamSupplier inputStreamSupplier) implements ResourcePackSource {
-
-        @Override
-        public ResourcePack readPack() throws IOException, InterruptedException {
-            try (InputStream inputStream = inputStreamSupplier.get()) {
-                return READER.readFromInputStream(inputStream);
-            }
-        }
-    }
-
-    @FunctionalInterface
-    public interface InputStreamSupplier {
-
-        InputStream get() throws IOException;
-    }
 }
