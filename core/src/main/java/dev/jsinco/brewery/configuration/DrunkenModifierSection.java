@@ -111,8 +111,8 @@ public class DrunkenModifierSection extends OkaeriConfig {
         boolean noneFailed = true;
         for (DrunkenModifier drunkenModifier : instance.drunkenModifiers()) {
             try {
-                drunkenModifier.decrementTime().evaluate(variables);
-                drunkenModifier.dependency().evaluate(variables);
+                if (drunkenModifier.decrementTime() != null) drunkenModifier.decrementTime().evaluate(variables);
+                if (drunkenModifier.dependency() != null) drunkenModifier.dependency().evaluate(variables);
             } catch (Exception e) {
                 Logger.logErr("Failed to validate modifier: " + drunkenModifier.name());
                 Logger.logErr(e);

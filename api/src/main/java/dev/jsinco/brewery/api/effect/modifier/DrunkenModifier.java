@@ -1,8 +1,10 @@
 package dev.jsinco.brewery.api.effect.modifier;
 
 import net.kyori.adventure.text.Component;
+import org.jspecify.annotations.Nullable;
 
-public record DrunkenModifier(String name, ModifierExpression dependency, ModifierExpression decrementTime,
+public record DrunkenModifier(String name, @Nullable ModifierExpression dependency,
+                              @Nullable ModifierExpression decrementTime,
                               double minValue, double maxValue, Component displayName) {
 
 
