@@ -8,6 +8,7 @@ import dev.jsinco.brewery.api.util.Logger;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.bukkit.api.integration.ItemIntegration;
 import dev.jsinco.brewery.bukkit.util.color.ResourcePackColors;
+import dev.jsinco.brewery.bukkit.util.color.ResourcePackSource;
 import dev.jsinco.brewery.util.ClassUtil;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
@@ -98,7 +99,7 @@ public class NexoIntegration implements ItemIntegration, Listener {
     public void onResourcePackLoaded(NexoPackUploadEvent packUploadEvent) {
         try {
             URL url = URI.create(packUploadEvent.getUrl()).toURL();
-            resourcePackColors.addSource(new ResourcePackColors.InputStreamResourcePackSource(url::openStream));
+            resourcePackColors.addSource(new ResourcePackSource.InputStreamResourcePackSource(url::openStream));
         } catch (MalformedURLException e) {
             Logger.logAndTrackErr(e);
         } finally {

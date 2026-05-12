@@ -3,6 +3,7 @@ package dev.jsinco.brewery.bukkit.integration.item;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.bukkit.api.integration.ItemIntegration;
 import dev.jsinco.brewery.bukkit.util.color.ResourcePackColors;
+import dev.jsinco.brewery.bukkit.util.color.ResourcePackSource;
 import dev.jsinco.brewery.util.ClassUtil;
 import io.lumine.mythic.bukkit.MythicBukkit;
 import io.lumine.mythic.bukkit.adapters.BukkitItemStack;
@@ -101,7 +102,7 @@ public class MythicIntegration implements ItemIntegration, Listener {
         if (items != null && !items.isEmpty()) {
             File resourcePack = new File(MythicBukkit.inst().getDataFolder(), "Generation/resource_pack.zip");
             if (resourcePack.exists() && resourcePack.isFile()) {
-                resourcePackColors.addSource(new ResourcePackColors.FileResourcePackSource(resourcePack));
+                resourcePackColors.addSource(new ResourcePackSource.FileResourcePackSource(resourcePack));
             }
             initialized.complete(null);
             task.cancel();
