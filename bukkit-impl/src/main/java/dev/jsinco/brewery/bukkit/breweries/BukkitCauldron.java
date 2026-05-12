@@ -303,9 +303,7 @@ public class BukkitCauldron implements Cauldron {
 
         if (!cauldronHasActiveBrew()) {
             // Empty cauldron: reinsert brew into the cauldron with 1 water level
-            if (isSealed && !Config.config().cauldrons().allowSealedBrewContinuation()) {
-                return false;
-            }
+            if (isSealed) return false;
             addedBrewOpt.ifPresent(value -> this.brew = value);
             BukkitCauldron.incrementLevel(getBlock());
             updateLevel(getBlock().getBlockData());
