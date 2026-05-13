@@ -10,6 +10,7 @@ import dev.jsinco.brewery.api.meta.MetaData;
 import dev.jsinco.brewery.api.meta.MetaDataType;
 import dev.jsinco.brewery.api.recipe.Recipe;
 import dev.jsinco.brewery.api.recipe.RecipeRegistry;
+import dev.jsinco.brewery.api.util.Pair;
 import dev.jsinco.brewery.recipes.BrewScoreImpl;
 import net.kyori.adventure.key.Key;
 import org.jspecify.annotations.NonNull;
@@ -18,6 +19,7 @@ import org.jspecify.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -187,16 +189,17 @@ public class BrewImpl implements Brew {
 
     @Override
     public <I> Optional<Recipe<I>> closestRecipe(RecipeRegistry<I> registry) {
-        double bestScore = 0;
-        Recipe<I> bestMatch = null;
-        for (Recipe<I> recipe : registry.getRecipes()) {
-            double score = score(recipe).rawScore();
-            if (score > bestScore) {
-                bestScore = score;
-                bestMatch = recipe;
-            }
-        }
-        return Optional.ofNullable(bestMatch);
+        List<Pair<BrewScore, Recipe<I>>> scores = registry.possibleRecipes(steps)
+                .stream()
+                .map(recipe ->
+                        new Pair<>(score(recipe), recipe)
+                ).toList();
+        return scores.stream()
+                .filter(pair -> pair.first().completed())
+                .max(Comparator.comparingDouble(pair -> pair.first().rawScore()))
+                .or(() -> scores.stream()
+                        .max(Comparator.comparingDouble(pair -> pair.first().rawScore()))
+                ).map(Pair::second);
     }
 
     @Override

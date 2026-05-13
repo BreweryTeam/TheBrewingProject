@@ -1,9 +1,20 @@
 package dev.jsinco.brewery.util;
 
 import dev.jsinco.brewery.api.brew.BrewingStep;
-import dev.jsinco.brewery.api.ingredient.*;
+import dev.jsinco.brewery.api.ingredient.BaseIngredient;
+import dev.jsinco.brewery.api.ingredient.Ingredient;
+import dev.jsinco.brewery.api.ingredient.IngredientGroup;
+import dev.jsinco.brewery.api.ingredient.IngredientMeta;
+import dev.jsinco.brewery.api.ingredient.IngredientWithMeta;
+import dev.jsinco.brewery.api.recipe.Recipe;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Stream;
 
 public class IngredientUtil {
 
@@ -47,5 +58,27 @@ public class IngredientUtil {
             return Optional.ofNullable(ingredientWithMeta.get(IngredientMeta.SCORE));
         }
         return Optional.empty();
+    }
+
+    public static List<BaseIngredient> getRecipeIngredients(Recipe<?> recipe) {
+        return getRecipeIngredients(recipe.getSteps());
+    }
+
+    public static List<BaseIngredient> getRecipeIngredients(List<BrewingStep> steps) {
+        return steps
+                .stream()
+                .filter(BrewingStep.IngredientsStep.class::isInstance)
+                .map(BrewingStep.IngredientsStep.class::cast)
+                .map(BrewingStep.IngredientsStep::ingredients)
+                .map(Map::keySet)
+                .flatMap(Collection::stream)
+                .flatMap(ingredient -> {
+                    if (ingredient instanceof IngredientGroup ingredientGroup) {
+                        return ingredientGroup.alternatives().stream()
+                                .map(Ingredient::toBaseIngredient);
+                    }
+                    return Stream.of(ingredient.toBaseIngredient());
+                })
+                .toList();
     }
 }
