@@ -4,11 +4,11 @@ import com.google.common.base.Preconditions;
 import dev.jsinco.brewery.api.brew.BrewingStep;
 import dev.jsinco.brewery.api.ingredient.BaseIngredient;
 import dev.jsinco.brewery.api.ingredient.Ingredient;
-import dev.jsinco.brewery.api.ingredient.IngredientGroup;
 import dev.jsinco.brewery.api.recipe.DefaultRecipe;
 import dev.jsinco.brewery.api.recipe.Recipe;
 import dev.jsinco.brewery.api.recipe.RecipeRegistry;
 import dev.jsinco.brewery.api.util.Logger;
+import dev.jsinco.brewery.util.BrewUtil;
 import org.jspecify.annotations.NonNull;
 
 import java.util.Collection;
@@ -19,22 +19,18 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class RecipeRegistryImpl<I> implements RecipeRegistry<I> {
 
 
-    private Map<String, Recipe<I>> recipes = Collections.synchronizedMap(new LinkedHashMap<>());
+    private final Map<String, Recipe<I>> recipes = Collections.synchronizedMap(new LinkedHashMap<>());
     private final Map<String, DefaultRecipe<I>> defaultRecipes = Collections.synchronizedMap(new LinkedHashMap<>());
-    private Set<BaseIngredient> allIngredients = Collections.newSetFromMap(new ConcurrentHashMap<>());
+    private final Map<BaseIngredient, Set<Recipe<I>>> baseIngredientToRecipes = new ConcurrentHashMap<>();
+
 
     public void registerRecipes(@NonNull Map<String, Recipe<I>> recipes) {
-        this.recipes = Collections.synchronizedMap(new LinkedHashMap<>(recipes));
-        recipes.values().stream()
-                .map(this::getRecipeIngredients)
-                .flatMap(Collection::stream)
-                .forEach(allIngredients::add);
+        this.clear();
+        recipes.forEach((_, recipe) -> registerRecipe(recipe));
     }
 
     @Override
@@ -63,42 +59,50 @@ public class RecipeRegistryImpl<I> implements RecipeRegistry<I> {
     }
 
     @Override
+    public Collection<Recipe<I>> possibleRecipes(List<BrewingStep> steps) {
+        Set<Recipe<I>> recipes = null;
+        for (BaseIngredient baseIngredient : BrewUtil.getRecipeIngredients(steps)) {
+            if (recipes == null) {
+                recipes = baseIngredientToRecipes.getOrDefault(baseIngredient, Set.of());
+            }
+            if (recipes.isEmpty()) {
+                return recipes;
+            }
+            recipes.removeIf(recipe -> !BrewUtil.getRecipeIngredients(recipe)
+                    .contains(baseIngredient)
+            );
+        }
+        return recipes;
+    }
+
+    @Override
     public void registerRecipe(Recipe<I> recipe) {
         recipes.put(recipe.getRecipeName(), recipe);
-        allIngredients.addAll(this.getRecipeIngredients(recipe));
+        for (BaseIngredient recipeIngredient : BrewUtil.getRecipeIngredients(recipe)) {
+            baseIngredientToRecipes.computeIfAbsent(recipeIngredient, ignored -> Collections.newSetFromMap(new ConcurrentHashMap<>()))
+                    .add(recipe);
+        }
     }
 
     @Override
     public void unRegisterRecipe(Recipe<I> recipe) {
         recipes.remove(recipe.getRecipeName());
-        allIngredients = recipes.values().stream()
-                .map(this::getRecipeIngredients)
-                .flatMap(Collection::stream)
-                .collect(Collectors.toSet());
+        for (BaseIngredient baseIngredient : BrewUtil.getRecipeIngredients(recipe)) {
+            Set<Recipe<I>> ingredientRecipes = baseIngredientToRecipes.get(baseIngredient);
+            if (ingredientRecipes == null) {
+                continue;
+            }
+            ingredientRecipes.removeIf(recipe0 -> recipe0.getRecipeName().equals(recipe.getRecipeName()));
+            if (ingredientRecipes.isEmpty()) {
+                baseIngredientToRecipes.remove(baseIngredient);
+            }
+        }
     }
 
     @Override
     public Optional<DefaultRecipe<I>> getDefaultRecipe(@NonNull String recipeName) {
         Preconditions.checkNotNull(recipeName);
         return Optional.ofNullable(defaultRecipes.get(recipeName));
-    }
-
-    private List<BaseIngredient> getRecipeIngredients(Recipe<?> recipe) {
-        return recipe.getSteps()
-                .stream()
-                .filter(BrewingStep.IngredientsStep.class::isInstance)
-                .map(BrewingStep.IngredientsStep.class::cast)
-                .map(BrewingStep.IngredientsStep::ingredients)
-                .map(Map::keySet)
-                .flatMap(Collection::stream)
-                .flatMap(ingredient -> {
-                    if (ingredient instanceof IngredientGroup ingredientGroup) {
-                        return ingredientGroup.alternatives().stream()
-                                .map(Ingredient::toBaseIngredient);
-                    }
-                    return Stream.of(ingredient.toBaseIngredient());
-                })
-                .toList();
     }
 
     @Override
@@ -122,18 +126,18 @@ public class RecipeRegistryImpl<I> implements RecipeRegistry<I> {
 
     @Override
     public boolean isRegisteredIngredient(Ingredient ingredient) {
-        return ingredient.findMatch(allIngredients)
+        return ingredient.findMatch(baseIngredientToRecipes.keySet())
                 .isPresent();
     }
 
     @Override
     public Set<BaseIngredient> registeredIngredients() {
-        return allIngredients;
+        return baseIngredientToRecipes.keySet();
     }
 
     public void clear() {
         recipes.clear();
         defaultRecipes.clear();
-        allIngredients.clear();
+        baseIngredientToRecipes.clear();
     }
 }
