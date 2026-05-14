@@ -24,10 +24,11 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
 import org.jspecify.annotations.NonNull;
 
+import dev.jsinco.brewery.util.FutureUtil;
+
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.regex.Matcher;
@@ -154,13 +155,10 @@ public class BukkitIngredientManager implements IngredientManager<ItemStack> {
         List<CompletableFuture<Pair<Ingredient, Integer>>> futures = stringList.stream()
                 .map(string -> getIngredientWithAmount(string, withMeta))
                 .toList();
-        return CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]))
-                .thenApplyAsync(ignored -> {
+        return FutureUtil.mergeFutures(futures)
+                .thenApplyAsync(pairs -> {
                     Map<Ingredient, Integer> ingredientMap = new LinkedHashMap<>();
-                    futures.stream()
-                            .map(f -> f.getNow(null))
-                            .filter(Objects::nonNull)
-                            .forEach(pair -> IngredientManager.insertIngredientIntoMap(ingredientMap, pair));
+                    pairs.forEach(pair -> IngredientManager.insertIngredientIntoMap(ingredientMap, pair));
                     return ingredientMap;
                 });
     }
