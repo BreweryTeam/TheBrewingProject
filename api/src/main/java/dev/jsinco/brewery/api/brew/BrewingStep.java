@@ -10,7 +10,12 @@ import net.kyori.adventure.text.minimessage.translation.Argument;
 import org.jetbrains.annotations.Range;
 import org.jspecify.annotations.Nullable;
 
-import java.util.*;
+import java.util.LinkedHashSet;
+import java.util.Locale;
+import java.util.Map;
+import java.util.SequencedCollection;
+import java.util.SequencedSet;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -42,6 +47,7 @@ public interface BrewingStep {
 
     /**
      * All players who contributed to this brewing step, in their order of contribution.
+     *
      * @return All brewers, may be empty
      */
     SequencedSet<UUID> brewers();
@@ -79,6 +85,12 @@ public interface BrewingStep {
          * @return The ingredients for this step
          */
         Map<? extends Ingredient, Integer> ingredients();
+
+        /**
+         * @param ingredients The new ingredient content
+         * @return A new ingredient step with the changed ingredients
+         */
+        IngredientsStep withIngredients(Map<? extends Ingredient, Integer> ingredients);
     }
 
     interface AuthoredStep<SELF extends AuthoredStep<SELF>> extends BrewingStep {
@@ -88,7 +100,7 @@ public interface BrewingStep {
          * @return A new instance of this step with the specified brewer
          */
         default SELF withBrewer(UUID brewer) {
-            if(brewers().contains(brewer)) {
+            if (brewers().contains(brewer)) {
                 return (SELF) this;
             }
             return withBrewersReplaced(Stream.concat(
