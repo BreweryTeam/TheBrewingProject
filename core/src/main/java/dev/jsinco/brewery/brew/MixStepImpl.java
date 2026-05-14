@@ -76,6 +76,11 @@ public record MixStepImpl(Moment time, Map<? extends Ingredient, Integer> ingred
     public boolean isCompleted() {
         return true;
     }
+    
+    @Override
+    public int mergeCount() {
+        return this.mergeCount > 0 ? this.mergeCount : 1;
+    }
 
     @Override
     public Optional<BrewingStep> merge(BrewingStep otherObject) {
