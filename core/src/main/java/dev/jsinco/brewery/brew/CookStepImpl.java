@@ -6,15 +6,25 @@ import dev.jsinco.brewery.api.brew.ScoreType;
 import dev.jsinco.brewery.api.breweries.CauldronType;
 import dev.jsinco.brewery.api.ingredient.Ingredient;
 import dev.jsinco.brewery.api.moment.Moment;
+import dev.jsinco.brewery.api.moment.PassedMoment;
+import dev.jsinco.brewery.util.BrewUtil;
 import dev.jsinco.brewery.util.CollectionUtil;
 import org.jspecify.annotations.Nullable;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.SequencedCollection;
+import java.util.SequencedSet;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public record CookStepImpl(Moment time, Map<? extends Ingredient, Integer> ingredients,
-                           @Nullable CauldronType cauldronType, SequencedSet<UUID> brewers) implements BrewingStep.Cook {
+                           @Nullable CauldronType cauldronType, SequencedSet<UUID> brewers,
+                           int mergeCount) implements BrewingStep.Cook {
 
     private static final Map<ScoreType, PartialBrewScore> BREW_STEP_MISMATCH = Stream.of(
             new PartialBrewScore(0, ScoreType.TIME),
@@ -23,24 +33,24 @@ public record CookStepImpl(Moment time, Map<? extends Ingredient, Integer> ingre
 
     public CookStepImpl(Moment time, Map<? extends Ingredient, Integer> ingredients,
                         CauldronType cauldronType) {
-        this(time, ingredients, cauldronType, Collections.emptySortedSet());
+        this(time, ingredients, cauldronType, Collections.emptySortedSet(), 1);
     }
 
     @Override
     public CookStepImpl withBrewTime(Moment brewTime) {
-        return new CookStepImpl(brewTime, this.ingredients, this.cauldronType, this.brewers);
+        return new CookStepImpl(brewTime, this.ingredients, this.cauldronType, this.brewers, mergeCount);
     }
 
     @Override
     public CookStepImpl withIngredients(Map<? extends Ingredient, Integer> ingredients) {
-        return new CookStepImpl(this.time, ingredients, this.cauldronType, this.brewers);
+        return new CookStepImpl(this.time, ingredients, this.cauldronType, this.brewers, mergeCount);
     }
 
     @Override
     public Map<ScoreType, PartialBrewScore> proximityScores(BrewingStep other) {
         if (!(other instanceof CookStepImpl(
                 Moment otherTime, Map<? extends Ingredient, Integer> otherIngredients,
-                CauldronType otherType, SequencedSet<UUID> ignored
+                CauldronType otherType, SequencedSet<UUID> ignored, int ignored2
         ))) {
             return BREW_STEP_MISMATCH;
         }
@@ -74,21 +84,51 @@ public record CookStepImpl(Moment time, Map<? extends Ingredient, Integer> ingre
     }
 
     @Override
+    public int mergeCount() {
+        return 0;
+    }
+
+    @Override
+    public Optional<BrewingStep> merge(BrewingStep otherObject) {
+        if (!(otherObject instanceof BrewingStep.Cook other)) {
+            return Optional.empty();
+        }
+        if (other.cauldronType() != this.cauldronType()) {
+            return Optional.empty();
+        }
+        long newElapsedTime = (other.time().moment() * other.mergeCount() + this.time().moment() * this.mergeCount) / (other.mergeCount() + this.mergeCount);
+        Map<Ingredient, Integer> newIngredients = BrewUtil.averageIngredients(
+                this.ingredients,
+                other.ingredients()
+        );
+        SequencedSet<UUID> newBrewers = new LinkedHashSet<>(this.brewers);
+        newBrewers.addAll(other.brewers());
+        return Optional.of(new CookStepImpl(
+                new PassedMoment(newElapsedTime),
+                newIngredients,
+                cauldronType,
+                newBrewers,
+                this.mergeCount + other.mergeCount()
+        ));
+    }
+
+    @Override
     public Cook withBrewersReplaced(SequencedCollection<UUID> brewers) {
-        return new CookStepImpl(this.time, this.ingredients, this.cauldronType, new LinkedHashSet<>(brewers));
+        return new CookStepImpl(this.time, this.ingredients, this.cauldronType, new LinkedHashSet<>(brewers), mergeCount);
     }
 
     @Override
     public boolean equals(Object o) {
         if (!(o instanceof CookStepImpl(
                 Moment otherTime, Map<? extends Ingredient, Integer> otherIngredients,
-                CauldronType otherType, SequencedSet<UUID> otherBrewers
+                CauldronType otherType, SequencedSet<UUID> otherBrewers, int otherMergeCount
         ))) {
             return false;
         }
         return Objects.equals(time, otherTime)
                 && Objects.equals(ingredients, otherIngredients)
                 && cauldronType == otherType
-                && CollectionUtil.isEqualWithOrdering(brewers, otherBrewers);
+                && CollectionUtil.isEqualWithOrdering(brewers, otherBrewers)
+                && mergeCount == otherMergeCount;
     }
 }

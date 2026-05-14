@@ -13,6 +13,7 @@ import org.jspecify.annotations.Nullable;
 import java.util.LinkedHashSet;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.SequencedCollection;
 import java.util.SequencedSet;
 import java.util.UUID;
@@ -59,6 +60,18 @@ public interface BrewingStep {
      * @return True if the step is completed
      */
     boolean isCompleted();
+
+    /**
+     *
+     * @return The amount of times this step has been merged with another step of same type
+     */
+    int mergeCount();
+
+    /**
+     * @param other The other step to merge with
+     * @return An optional value with a new merged step
+     */
+    Optional<BrewingStep> merge(BrewingStep other);
 
     /**
      * @param state    The state of the brew

@@ -15,10 +15,8 @@ import dev.jsinco.brewery.api.recipe.RecipeResult;
 import dev.jsinco.brewery.api.util.BreweryRegistry;
 import dev.jsinco.brewery.api.util.CancelState;
 import dev.jsinco.brewery.api.vector.BreweryLocation;
-import dev.jsinco.brewery.api.moment.PassedMoment;
 import dev.jsinco.brewery.brew.BrewImpl;
 import dev.jsinco.brewery.brew.CookStepImpl;
-import dev.jsinco.brewery.brew.DistillStepImpl;
 import dev.jsinco.brewery.brew.MixStepImpl;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.bukkit.animation.AnimationManager;
@@ -38,6 +36,7 @@ import dev.jsinco.brewery.configuration.AnimationDisplay;
 import dev.jsinco.brewery.configuration.Config;
 import dev.jsinco.brewery.configuration.ParticleDefinition;
 import dev.jsinco.brewery.sound.SoundDefinition;
+import dev.jsinco.brewery.util.BrewUtil;
 import io.papermc.paper.datacomponent.DataComponentTypes;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
@@ -65,15 +64,12 @@ import org.joml.Vector3f;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Random;
-import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Supplier;
 
@@ -325,7 +321,11 @@ public class BukkitCauldron implements Cauldron {
             boolean sameRecipe = existingRecipeOpt.isPresent() && addedRecipeOpt.isPresent()
                     && existingRecipeOpt.get().getRecipeName().equals(addedRecipeOpt.get().getRecipeName());
             if (sameRecipe) {
-                this.brew = mergeBrews(this.brew, addedBrew);
+                Optional<Brew> merged = BrewUtil.mergeBrews(this.brew, addedBrew);
+                if (merged.isEmpty()) {
+                    return false;
+                }
+                this.brew = merged.get();
                 BukkitCauldron.incrementLevel(getBlock());
                 updateLevel(getBlock().getBlockData());
                 this.dirty = true;
@@ -404,58 +404,6 @@ public class BukkitCauldron implements Cauldron {
                         || step instanceof BrewingStep.Distill
                         || step instanceof BrewingStep.Age
         );
-    }
-
-    private Brew mergeBrews(Brew existing, Brew added) {
-        long currentTime = TheBrewingProject.getInstance().getTime();
-        List<BrewingStep> existingSteps = existing.getCompletedSteps();
-        List<BrewingStep> addedSteps = added.getCompletedSteps();
-        int mergeCount = Math.min(existingSteps.size(), addedSteps.size());
-        List<BrewingStep> mergedSteps = new ArrayList<>(existingSteps.size());
-        for (int i = 0; i < mergeCount; i++) {
-            mergedSteps.add(mergeStep(existingSteps.get(i), addedSteps.get(i), currentTime));
-        }
-        for (int i = mergeCount; i < existingSteps.size(); i++) {
-            mergedSteps.add(existingSteps.get(i));
-        }
-        return existing.withStepsReplaced(mergedSteps);
-    }
-
-    private BrewingStep mergeStep(BrewingStep a, BrewingStep b, long currentTime) {
-        if (a instanceof BrewingStep.Cook cookA && b instanceof BrewingStep.Cook cookB) {
-            long avgElapsed = (cookA.time().moment() + cookB.time().moment()) / 2;
-            return cookA.withBrewTime(new PassedMoment(avgElapsed).withLastStep(currentTime))
-                        .withIngredients(averageIngredients(cookA.ingredients(), cookB.ingredients()));
-        }
-        if (a instanceof BrewingStep.Mix mixA && b instanceof BrewingStep.Mix mixB) {
-            long avgElapsed = (mixA.time().moment() + mixB.time().moment()) / 2;
-            return mixA.withTime(new PassedMoment(avgElapsed).withLastStep(currentTime))
-                       .withIngredients(averageIngredients(mixA.ingredients(), mixB.ingredients()));
-        }
-        if (a instanceof BrewingStep.Distill distillA && b instanceof BrewingStep.Distill distillB) {
-            return new DistillStepImpl((distillA.runs() + distillB.runs() + 1) / 2, distillA.brewers());
-        }
-        if (a instanceof BrewingStep.Age ageA && b instanceof BrewingStep.Age ageB) {
-            long avgElapsed = (ageA.time().moment() + ageB.time().moment()) / 2;
-            return ageA.withAge(new PassedMoment(avgElapsed));
-        }
-        return a;
-    }
-
-    @SuppressWarnings("unchecked")
-    private static Map<Ingredient, Integer> averageIngredients(Map<? extends Ingredient, Integer> a, Map<? extends Ingredient, Integer> b) {
-        Map<Ingredient, Integer> mapA = (Map<Ingredient, Integer>) a;
-        Map<Ingredient, Integer> mapB = (Map<Ingredient, Integer>) b;
-        Set<Ingredient> allKeys = new HashSet<>(mapA.keySet());
-        allKeys.addAll(mapB.keySet());
-        Map<Ingredient, Integer> result = new HashMap<>();
-        for (Ingredient key : allKeys) {
-            int countA = mapA.getOrDefault(key, 0);
-            int countB = mapB.getOrDefault(key, 0);
-            int avg = (countA + countB + 1) / 2;
-            if (avg > 0) result.put(key, avg);
-        }
-        return result;
     }
 
     private Color computeBaseParticleColor(Block block) {

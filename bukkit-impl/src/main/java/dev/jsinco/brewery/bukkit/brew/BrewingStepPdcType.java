@@ -47,9 +47,9 @@ import java.util.UUID;
 public class BrewingStepPdcType implements PersistentDataType<byte[], BrewingStep> {
 
     // AES-GCM header constants
-    private static final byte[] MAGIC = new byte[] { 'B','R','W','1' };
+    private static final byte[] MAGIC = new byte[]{'B', 'R', 'W', '1'};
     private static final int GCM_TAG_BITS = 128; // data authentication
-    private static final int VERSION = 3;
+    private static final int VERSION = 4;
 
     private final boolean useCipher;
 
@@ -126,6 +126,7 @@ public class BrewingStepPdcType implements PersistentDataType<byte[], BrewingSte
             default -> throw new IllegalStateException("Unexpected value: " + complex);
         }
         encodeBrewers(complex.brewers(), dataOutputStream);
+        dataOutputStream.writeInt(complex.mergeCount());
     }
 
     @Override
@@ -172,6 +173,7 @@ public class BrewingStepPdcType implements PersistentDataType<byte[], BrewingSte
             throw new RuntimeException(e);
         }
     }
+
     private static ByteArrayInputStream inDup(byte[] all, int offset) {
         return new ByteArrayInputStream(all, offset, all.length - offset);
     }
@@ -183,16 +185,19 @@ public class BrewingStepPdcType implements PersistentDataType<byte[], BrewingSte
                     decodeMoment(dataInputStream),
                     decodeIngredients(dataInputStream),
                     BreweryRegistry.CAULDRON_TYPE.get(BreweryKey.parse(dataInputStream.readUTF())),
-                    decodeBrewers(dataInputStream, version)
+                    decodeBrewers(dataInputStream, version),
+                    version > 3 ? dataInputStream.readInt() : 1
             );
             case DISTILL -> new DistillStepImpl(
                     dataInputStream.readInt(),
-                    decodeBrewers(dataInputStream, version)
+                    decodeBrewers(dataInputStream, version),
+                    version > 3 ? dataInputStream.readInt() : 1
             );
             case AGE -> new AgeStepImpl(
                     decodeMoment(dataInputStream),
                     BreweryRegistry.BARREL_TYPE.get(BreweryKey.parse(dataInputStream.readUTF())),
-                    decodeBrewers(dataInputStream, version)
+                    decodeBrewers(dataInputStream, version),
+                    version > 3 ? dataInputStream.readInt() : 1
             );
             case MIX -> new MixStepImpl(
                     decodeMoment(dataInputStream),
@@ -200,7 +205,8 @@ public class BrewingStepPdcType implements PersistentDataType<byte[], BrewingSte
                     version >= 3
                             ? BreweryRegistry.CAULDRON_TYPE.get(BreweryKey.parse(dataInputStream.readUTF()))
                             : BreweryRegistry.CAULDRON_TYPE.get(BreweryKey.parse("water")),
-                    decodeBrewers(dataInputStream, version)
+                    decodeBrewers(dataInputStream, version),
+                    version > 3 ? dataInputStream.readInt() : 1
             );
         };
     }
@@ -208,16 +214,15 @@ public class BrewingStepPdcType implements PersistentDataType<byte[], BrewingSte
     private BrewingStep readLegacyDES(byte[] primitive) {
         Exception lastException;
         try {
-            return attemptDecryptDES(primitive, Config.config().encryptionKey()); }
-        catch (Exception e) {
+            return attemptDecryptDES(primitive, Config.config().encryptionKey());
+        } catch (Exception e) {
             lastException = e;
         }
 
         for (SecretKey key : Config.config().previousEncryptionKeys()) {
             try {
                 return attemptDecryptDES(primitive, key);
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 lastException = e;
             }
         }
@@ -312,5 +317,4 @@ public class BrewingStepPdcType implements PersistentDataType<byte[], BrewingSte
             throw new RuntimeException(e);
         }
     }
-
 }

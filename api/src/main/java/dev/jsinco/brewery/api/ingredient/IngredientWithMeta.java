@@ -56,10 +56,20 @@ public record IngredientWithMeta(Ingredient ingredient,
 
     /**
      * @param metaKey ingredientMetaKey
-     * @param <T>     Ingredient meta value
+     * @param <T>     Ingredient meta value type
      * @return Ingredient meta value, or null if not present
      */
     public <T> @Nullable T get(IngredientMeta<T> metaKey) {
         return (T) meta.get(metaKey);
+    }
+
+    /**
+     * @param metaKey      ingredient meta key
+     * @param defaultValue the default value
+     * @param <T>          Ingredient meta value type
+     * @return The ingredient meta value, or the default value if not present
+     */
+    public <T> @Nullable T getOrDefault(IngredientMeta<T> metaKey, T defaultValue) {
+        return (T) meta.getOrDefault(metaKey, defaultValue);
     }
 }

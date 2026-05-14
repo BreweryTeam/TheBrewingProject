@@ -17,9 +17,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Stream;
 
 public class BrewUtil {
@@ -155,5 +157,39 @@ public class BrewUtil {
         }
         output.add(built);
         return output;
+    }
+
+    public static Map<Ingredient, Integer> averageIngredients(Map<? extends Ingredient, Integer> a, Map<? extends Ingredient, Integer> b) {
+        Map<Ingredient, Integer> mapA = (Map<Ingredient, Integer>) a;
+        Map<Ingredient, Integer> mapB = (Map<Ingredient, Integer>) b;
+        Set<Ingredient> allKeys = new HashSet<>(mapA.keySet());
+        allKeys.addAll(mapB.keySet());
+        Map<Ingredient, Integer> result = new HashMap<>();
+        for (Ingredient key : allKeys) {
+            int countA = mapA.getOrDefault(key, 0);
+            int countB = mapB.getOrDefault(key, 0);
+            int avg = (countA + countB + 1) / 2;
+            if (avg > 0) result.put(key, avg);
+        }
+        return result;
+    }
+
+
+    public static Optional<Brew> mergeBrews(Brew existing, Brew added) {
+        List<BrewingStep> existingSteps = existing.getCompletedSteps();
+        List<BrewingStep> addedSteps = added.getCompletedSteps();
+        int mergeCount = Math.min(existingSteps.size(), addedSteps.size());
+        List<BrewingStep> mergedSteps = new ArrayList<>(existingSteps.size());
+        for (int i = 0; i < mergeCount; i++) {
+            Optional<BrewingStep> optionalBrewingStep = existingSteps.get(i).merge(addedSteps.get(i));
+            if (optionalBrewingStep.isEmpty()) {
+                return Optional.empty();
+            }
+            optionalBrewingStep.ifPresent(mergedSteps::add);
+        }
+        for (int i = mergeCount; i < existingSteps.size(); i++) {
+            mergedSteps.add(existingSteps.get(i));
+        }
+        return Optional.of(existing.withStepsReplaced(mergedSteps));
     }
 }
