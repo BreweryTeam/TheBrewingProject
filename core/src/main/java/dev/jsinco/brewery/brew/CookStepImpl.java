@@ -85,7 +85,7 @@ public record CookStepImpl(Moment time, Map<? extends Ingredient, Integer> ingre
 
     @Override
     public int mergeCount() {
-        return 0;
+        return this.mergeCount > 0 ? this.mergeCount : 1;
     }
 
     @Override
