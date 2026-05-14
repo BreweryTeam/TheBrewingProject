@@ -66,6 +66,11 @@ public record DistillStepImpl(int runs, SequencedSet<UUID> brewers, int mergeCou
     }
 
     @Override
+    public int mergeCount() {
+        return this.mergeCount > 0 ? this.mergeCount : 1;
+    }
+
+    @Override
     public Optional<BrewingStep> merge(BrewingStep otherObject) {
         if (!(otherObject instanceof BrewingStep.Distill other)) {
             return Optional.empty();

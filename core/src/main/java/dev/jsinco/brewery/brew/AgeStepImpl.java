@@ -82,6 +82,11 @@ public record AgeStepImpl(Moment time, BarrelType barrelType, SequencedSet<UUID>
     }
 
     @Override
+    public int mergeCount() {
+        return this.mergeCount > 0 ? this.mergeCount : 1;
+    }
+    
+    @Override
     public Optional<BrewingStep> merge(BrewingStep otherObject) {
         if (!(otherObject instanceof BrewingStep.Age other)) {
             return Optional.empty();
