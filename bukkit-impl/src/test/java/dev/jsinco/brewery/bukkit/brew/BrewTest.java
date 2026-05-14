@@ -3,27 +3,30 @@ package dev.jsinco.brewery.bukkit.brew;
 import dev.jsinco.brewery.api.brew.Brew;
 import dev.jsinco.brewery.api.brew.BrewingStep;
 import dev.jsinco.brewery.api.breweries.BarrelTypes;
+import dev.jsinco.brewery.api.breweries.CauldronType;
+import dev.jsinco.brewery.api.moment.PassedMoment;
 import dev.jsinco.brewery.brew.AgeStepImpl;
 import dev.jsinco.brewery.brew.BrewImpl;
 import dev.jsinco.brewery.brew.CookStepImpl;
 import dev.jsinco.brewery.brew.DistillStepImpl;
-import dev.jsinco.brewery.api.breweries.BarrelType;
-import dev.jsinco.brewery.api.breweries.CauldronType;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.bukkit.ingredient.SimpleIngredient;
-import dev.jsinco.brewery.api.moment.PassedMoment;
 import dev.jsinco.brewery.bukkit.testutil.TBPServerMock;
 import dev.jsinco.brewery.util.CollectionUtil;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockbukkit.mockbukkit.MockBukkit;
-import org.mockbukkit.mockbukkit.MockBukkitExtension;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.SequencedSet;
+import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class BrewTest {
 
@@ -34,7 +37,7 @@ public class BrewTest {
     }
 
     @AfterEach
-    void tearDown(){
+    void tearDown() {
         MockBukkit.unmock();
     }
 
@@ -52,16 +55,19 @@ public class BrewTest {
                                 new PassedMoment(20),
                                 Map.of(SimpleIngredient.from("wheat").get(), 1),
                                 CauldronType.LAVA,
-                                CollectionUtil.sequencedSetOf(UUID.fromString("f6489b79-7a9f-49e2-980e-265a05dbc3af"))
+                                CollectionUtil.sequencedSetOf(UUID.fromString("f6489b79-7a9f-49e2-980e-265a05dbc3af")),
+                                1
                         ),
                         new DistillStepImpl(
                                 3,
-                                CollectionUtil.sequencedSetOf(UUID.fromString("144ce39d-301b-40a9-9788-0ca8cb23daf4"))
+                                CollectionUtil.sequencedSetOf(UUID.fromString("144ce39d-301b-40a9-9788-0ca8cb23daf4")),
+                                1
                         ),
                         new AgeStepImpl(
                                 new PassedMoment(2000000),
                                 BarrelTypes.ACACIA,
-                                CollectionUtil.sequencedSetOf(UUID.fromString("d2b440c3-edde-4443-899e-6825c31d0919"))
+                                CollectionUtil.sequencedSetOf(UUID.fromString("d2b440c3-edde-4443-899e-6825c31d0919")),
+                                1
                         )
                 )
         );
@@ -85,16 +91,19 @@ public class BrewTest {
                                 CollectionUtil.sequencedSetOf(
                                         UUID.fromString("f6489b79-7a9f-49e2-980e-265a05dbc3af"),
                                         UUID.fromString("d2b440c3-edde-4443-899e-6825c31d0919")
-                                )
+                                ),
+                                1
                         ),
                         new DistillStepImpl(
                                 3,
-                                CollectionUtil.sequencedSetOf(UUID.fromString("144ce39d-301b-40a9-9788-0ca8cb23daf4"))
+                                CollectionUtil.sequencedSetOf(UUID.fromString("144ce39d-301b-40a9-9788-0ca8cb23daf4")),
+                                1
                         ),
                         new AgeStepImpl(
                                 new PassedMoment(20),
                                 BarrelTypes.ACACIA,
-                                CollectionUtil.sequencedSetOf(UUID.fromString("d2b440c3-edde-4443-899e-6825c31d0919"))
+                                CollectionUtil.sequencedSetOf(UUID.fromString("d2b440c3-edde-4443-899e-6825c31d0919")),
+                                1
                         )
                 )
         );
@@ -205,7 +214,8 @@ public class BrewTest {
                                 new PassedMoment(20),
                                 Map.of(SimpleIngredient.from("wheat").get(), 1),
                                 CauldronType.LAVA,
-                                CollectionUtil.sequencedSetOf(UUID.fromString("f6489b79-7a9f-49e2-980e-265a05dbc3af"))
+                                CollectionUtil.sequencedSetOf(UUID.fromString("f6489b79-7a9f-49e2-980e-265a05dbc3af")),
+                                1
                         ),
                         new DistillStepImpl(
                                 3
@@ -222,7 +232,8 @@ public class BrewTest {
                                 new PassedMoment(20),
                                 Map.of(SimpleIngredient.from("wheat").get(), 1),
                                 CauldronType.LAVA,
-                                CollectionUtil.sequencedSetOf(UUID.fromString("f6489b79-7a9f-49e2-980e-265a05dbc3af"))
+                                CollectionUtil.sequencedSetOf(UUID.fromString("f6489b79-7a9f-49e2-980e-265a05dbc3af")),
+                                1
                         ),
                         new DistillStepImpl(
                                 3
@@ -321,7 +332,8 @@ public class BrewTest {
                         ),
                         new DistillStepImpl(
                                 3,
-                                CollectionUtil.sequencedSetOf(UUID.fromString("f6489b79-7a9f-49e2-980e-265a05dbc3af"))
+                                CollectionUtil.sequencedSetOf(UUID.fromString("f6489b79-7a9f-49e2-980e-265a05dbc3af")),
+                                1
                         ),
                         new AgeStepImpl(
                                 new PassedMoment(20),
@@ -359,7 +371,8 @@ public class BrewTest {
                                 CollectionUtil.sequencedSetOf(
                                         UUID.fromString("f6489b79-7a9f-49e2-980e-265a05dbc3af"),
                                         UUID.fromString("144ce39d-301b-40a9-9788-0ca8cb23daf4")
-                                )
+                                ),
+                                1
                         )
                 )
         );
@@ -373,7 +386,8 @@ public class BrewTest {
                                         // reversed order
                                         UUID.fromString("144ce39d-301b-40a9-9788-0ca8cb23daf4"),
                                         UUID.fromString("f6489b79-7a9f-49e2-980e-265a05dbc3af")
-                                )
+                                ),
+                                1
                         )
                 )
         );
