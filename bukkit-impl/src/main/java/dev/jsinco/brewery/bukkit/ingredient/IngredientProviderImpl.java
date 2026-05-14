@@ -1,12 +1,13 @@
 package dev.jsinco.brewery.bukkit.ingredient;
 
+import dev.jsinco.brewery.api.ingredient.BaseIngredient;
 import dev.jsinco.brewery.api.ingredient.Ingredient;
+import dev.jsinco.brewery.api.ingredient.IngredientProvider;
 import dev.jsinco.brewery.api.ingredient.UncheckedIngredient;
-import dev.jsinco.brewery.api.ingredient.IngredientInputProvider;
 import dev.jsinco.brewery.api.ingredient.WildcardIngredient;
 import dev.jsinco.brewery.api.util.BreweryKey;
 
-public class IngredientInputProviderImpl implements IngredientInputProvider {
+public class IngredientProviderImpl implements IngredientProvider {
     @Override
     public UncheckedIngredient unchecked(BreweryKey key) {
         return new UncheckedIngredientImpl(key);
@@ -20,5 +21,10 @@ public class IngredientInputProviderImpl implements IngredientInputProvider {
     @Override
     public WildcardIngredient wildcard(String value) {
         return new WildcardIngredientImpl(value);
+    }
+
+    @Override
+    public BaseIngredient breweryIngredient(BreweryKey key) {
+        return new BreweryIngredient(key);
     }
 }

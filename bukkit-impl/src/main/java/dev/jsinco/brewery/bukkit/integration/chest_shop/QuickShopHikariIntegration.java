@@ -7,7 +7,7 @@ import dev.jsinco.brewery.bukkit.api.integration.ChestShopIntegration;
 import dev.jsinco.brewery.bukkit.brew.BrewAdapterAccess;
 import dev.jsinco.brewery.bukkit.ingredient.BukkitIngredientManager;
 import dev.jsinco.brewery.util.ClassUtil;
-import dev.jsinco.brewery.util.IngredientUtil;
+import dev.jsinco.brewery.util.BrewUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -38,10 +38,10 @@ public class QuickShopHikariIntegration implements ChestShopIntegration, Listene
 
     private boolean matches(ItemStack originalItem, ItemStack comparisonItem) {
         Ingredient original = BukkitIngredientManager.INSTANCE.getIngredient(originalItem);
-        double originalScore = IngredientUtil.score(original)
+        double originalScore = BrewUtil.score(original)
                 .orElse(1D);
         Ingredient comparison = BukkitIngredientManager.INSTANCE.getIngredient(comparisonItem);
-        double comparisonScore = IngredientUtil.score(comparison)
+        double comparisonScore = BrewUtil.score(comparison)
                 .orElse(1D);
         return original.toBaseIngredient().equals(original.toBaseIngredient()) && comparisonScore > originalScore;
     }
