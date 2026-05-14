@@ -1,13 +1,21 @@
 package dev.jsinco.brewery.recipes;
 
 import com.google.common.base.Preconditions;
+import dev.jsinco.brewery.api.brew.BrewQuality;
 import dev.jsinco.brewery.api.brew.BrewingStep;
+import dev.jsinco.brewery.api.ingredient.BaseIngredient;
+import dev.jsinco.brewery.api.ingredient.Ingredient;
+import dev.jsinco.brewery.api.ingredient.IngredientMeta;
+import dev.jsinco.brewery.api.ingredient.IngredientProviderHolder;
+import dev.jsinco.brewery.api.ingredient.IngredientWithMeta;
 import dev.jsinco.brewery.api.recipe.QualityData;
 import dev.jsinco.brewery.api.recipe.Recipe;
 import dev.jsinco.brewery.api.recipe.RecipeResult;
+import dev.jsinco.brewery.api.util.BreweryKey;
 import org.jspecify.annotations.NonNull;
 
 import java.util.List;
+import java.util.Map;
 
 public class RecipeImpl<I> implements Recipe<I> {
 
@@ -32,6 +40,20 @@ public class RecipeImpl<I> implements Recipe<I> {
 
     public @NonNull QualityData<RecipeResult<I>> getRecipeResults() {
         return this.recipeResults;
+    }
+
+    @Override
+    public Ingredient toIngredient(double score) {
+        BaseIngredient base = IngredientProviderHolder.instance()
+                .breweryIngredient(BreweryKey.parse(recipeName));
+        BrewQuality quality = BrewScoreImpl.quality(score);
+        Preconditions.checkArgument(quality != null, "0 valued scores are not allowed");
+        return new IngredientWithMeta(base,
+                Map.of(
+                        IngredientMeta.SCORE, score,
+                        IngredientMeta.DISPLAY_NAME, getRecipeResult(quality).displayName()
+                )
+        );
     }
 
     public String getRecipeName() {

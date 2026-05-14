@@ -17,7 +17,7 @@ public interface UncheckedIngredient extends IngredientInput {
      * @param string key string representation
      */
     static UncheckedIngredient minecraft(String string) {
-        return IngredientInputProviderHolder.instance()
+        return IngredientProviderHolder.instance()
                 .unchecked(BreweryKey.parse(string, Key.MINECRAFT_NAMESPACE));
     }
 
