@@ -12,6 +12,7 @@ import dev.jsinco.brewery.api.recipe.Recipe;
 import dev.jsinco.brewery.api.recipe.RecipeRegistry;
 import dev.jsinco.brewery.api.util.Pair;
 import dev.jsinco.brewery.recipes.BrewScoreImpl;
+import dev.jsinco.brewery.util.BrewUtil;
 import net.kyori.adventure.key.Key;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
@@ -189,11 +190,14 @@ public class BrewImpl implements Brew {
 
     @Override
     public <I> Optional<Recipe<I>> closestRecipe(RecipeRegistry<I> registry) {
-        List<Pair<BrewScore, Recipe<I>>> scores = registry.possibleRecipes(steps)
-                .stream()
-                .map(recipe ->
-                        new Pair<>(score(recipe), recipe)
-                ).toList();
+        List<Pair<BrewScore, Recipe<I>>> scores = new ArrayList<>();
+        for (List<BrewingStep> stepVariation : BrewUtil.variations(steps, registry)) {
+            registry.possibleRecipes(stepVariation)
+                    .stream()
+                    .map(recipe ->
+                            new Pair<>(score(recipe), recipe)
+                    ).forEach(scores::add);
+        }
         return scores.stream()
                 .filter(pair -> pair.first().completed())
                 .max(Comparator.comparingDouble(pair -> pair.first().rawScore()))

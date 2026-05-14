@@ -13,6 +13,7 @@ import org.jspecify.annotations.NonNull;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -60,19 +61,25 @@ public class RecipeRegistryImpl<I> implements RecipeRegistry<I> {
 
     @Override
     public Collection<Recipe<I>> possibleRecipes(List<BrewingStep> steps) {
-        Set<Recipe<I>> recipes = null;
-        for (BaseIngredient baseIngredient : BrewUtil.getRecipeIngredients(steps)) {
-            if (recipes == null) {
-                recipes = baseIngredientToRecipes.getOrDefault(baseIngredient, Set.of());
+        Set<Recipe<I>> output = new HashSet<>();
+        for (List<BrewingStep> stepVariation : BrewUtil.variations(steps, this)) {
+            Set<Recipe<I>> recipes = null;
+            for (BaseIngredient baseIngredient : BrewUtil.getRecipeIngredients(stepVariation)) {
+                if (recipes == null) {
+                    recipes = baseIngredientToRecipes.getOrDefault(baseIngredient, Set.of());
+                }
+                if (recipes.isEmpty()) {
+                    return recipes;
+                }
+                recipes.removeIf(recipe -> !BrewUtil.getRecipeIngredients(recipe)
+                        .contains(baseIngredient)
+                );
             }
-            if (recipes.isEmpty()) {
-                return recipes;
+            if (recipes != null) {
+                output.addAll(recipes);
             }
-            recipes.removeIf(recipe -> !BrewUtil.getRecipeIngredients(recipe)
-                    .contains(baseIngredient)
-            );
         }
-        return recipes;
+        return output;
     }
 
     @Override
