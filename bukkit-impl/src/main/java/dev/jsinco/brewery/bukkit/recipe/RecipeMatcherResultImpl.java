@@ -226,7 +226,6 @@ public class RecipeMatcherResultImpl implements RecipeMatcherResult<ItemStack> {
     private void applyLore(ItemStack itemStack, RecipeResult<ItemStack> recipeResult, Brew.State state) {
         Stream.Builder<Component> fullLoreBuilder = Stream.builder();
         TagResolver resolver = TagResolver.resolver(MessageUtil.recipeEffectsResolver(recipeResult.recipeEffects()), MessageUtil.brewScoreResolver(score));
-        List<BrewingStep> completedSteps = brew.getCompletedSteps();
         for (BrewTooltipType tooltipType : Config.config().brewTooltipOrder()) {
             if (!recipeResult.appendBrewInfoLore() && BrewTooltipType.RECIPE_LORE != tooltipType) {
                 continue;
@@ -257,13 +256,13 @@ public class RecipeMatcherResultImpl implements RecipeMatcherResult<ItemStack> {
                 case STEPS -> {
                     switch (state) {
                         case Brew.State.Brewing ignored -> {
-                            MessageUtil.compileBrewInfo(completedSteps, score, false).forEach(fullLoreBuilder::add);
+                            MessageUtil.compileBrewInfo(matchingSteps, score, false).forEach(fullLoreBuilder::add);
                         }
                         case Brew.State.Other ignored -> {
-                            addLastStepLore(brew, fullLoreBuilder, score, state);
+                            addLastStepLore(fullLoreBuilder, score, state);
                         }
                         case Brew.State.Seal ignored -> {
-                            addLastStepLore(brew, fullLoreBuilder, score, state);
+                            addLastStepLore(fullLoreBuilder, score, state);
                         }
                     }
                 }
@@ -279,9 +278,9 @@ public class RecipeMatcherResultImpl implements RecipeMatcherResult<ItemStack> {
         ));
     }
 
-    private void addLastStepLore(Brew brew, Stream.Builder<Component> streamBuilder, BrewScore score, Brew.State state) {
-        int lastIndex = brew.getCompletedSteps().size() - 1;
-        BrewingStep lastCompleted = brew.lastCompletedStep();
+    private void addLastStepLore(Stream.Builder<Component> streamBuilder, BrewScore score, Brew.State state) {
+        int lastIndex = matchingSteps.size() - 1;
+        BrewingStep lastCompleted = matchingSteps.getLast();
         streamBuilder.add(lastCompleted.infoDisplay(state, MessageUtil.getBrewStepTagResolver(lastCompleted, score.getPartialScores(lastIndex), score.brewDifficulty())));
     }
 
