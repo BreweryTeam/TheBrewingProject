@@ -7,6 +7,7 @@ import dev.jsinco.brewery.api.brew.BrewingStep;
 import dev.jsinco.brewery.api.brew.PartialBrewScore;
 import dev.jsinco.brewery.api.brew.ScoreType;
 import dev.jsinco.brewery.api.effect.modifier.DrunkenModifier;
+import dev.jsinco.brewery.api.recipe.RecipeEffects;
 import dev.jsinco.brewery.api.recipe.RecipeRegistry;
 import dev.jsinco.brewery.api.util.Pair;
 import dev.jsinco.brewery.configuration.Config;
@@ -131,6 +132,14 @@ public class MessageUtil {
             );
         }
         return streamBuilder.build();
+    }
+
+    public static TagResolver brewScoreResolver(BrewScore score) {
+        return MessageUtil.getScoreTagResolver(score);
+    }
+
+    public static TagResolver recipeEffectsResolver(RecipeEffects recipeEffects) {
+        return MessageUtil.numberedModifierTagResolver(recipeEffects.getModifiers(), null);
     }
 
     public static @NonNull Stream<Component> compileBrewInfo(Brew brew, boolean detailed, RecipeRegistry<?> registry) {

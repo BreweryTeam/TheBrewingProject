@@ -6,6 +6,7 @@ import dev.jsinco.brewery.api.brew.BrewingStep;
 import dev.jsinco.brewery.api.ingredient.BaseIngredient;
 import dev.jsinco.brewery.api.ingredient.Ingredient;
 import dev.jsinco.brewery.api.ingredient.IngredientGroup;
+import dev.jsinco.brewery.api.ingredient.IngredientManager;
 import dev.jsinco.brewery.api.ingredient.IngredientMeta;
 import dev.jsinco.brewery.api.ingredient.IngredientWithMeta;
 import dev.jsinco.brewery.api.recipe.Recipe;
@@ -139,7 +140,7 @@ public class BrewUtil {
         for (int i = 0; i < remaining.size(); i++) {
             Brew brew = new BrewImpl(built);
             final int iFinal = i;
-            registry.possibleRecipes(built, false)
+            registry.possibleRecipes(built)
                     .stream()
                     .flatMap(recipe -> {
                         BrewScore score = brew.score(recipe);
@@ -187,5 +188,15 @@ public class BrewUtil {
             mergedSteps.add(existingSteps.get(i));
         }
         return Optional.of(existing.withStepsReplaced(mergedSteps));
+    }
+
+    public static Map<Ingredient, Integer> countIngredientTotal(List<BrewingStep> steps) {
+        Map<Ingredient, Integer> output = new HashMap<>();
+        for (BrewingStep step : steps) {
+            if (step instanceof BrewingStep.IngredientsStep ingredientsStep) {
+                IngredientManager.merge(output, (Map<Ingredient, Integer>) ingredientsStep.ingredients());
+            }
+        }
+        return output;
     }
 }
