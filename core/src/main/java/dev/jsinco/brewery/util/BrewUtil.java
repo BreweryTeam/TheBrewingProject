@@ -94,7 +94,7 @@ public class BrewUtil {
         List<List<BrewingStep>> sections = new ArrayList<>();
         List<BrewingStep> latest = new ArrayList<>();
         for (BrewingStep step : steps) {
-            if (!latest.isEmpty() || step instanceof BrewingStep.IngredientsStep) {
+            if (!latest.isEmpty() && step instanceof BrewingStep.IngredientsStep) {
                 sections.add(latest);
                 latest = new ArrayList<>();
             }
@@ -136,16 +136,10 @@ public class BrewUtil {
 
         List<List<BrewingStep>> remaining = sections.subList(1, sections.size());
         List<List<BrewingStep>> output = new ArrayList<>();
-        for (
-                int i = 0; i < remaining.size(); i++) {
-            List<BrewingStep> addition = remaining.get(i);
-            built.addAll(addition);
-            if (i + 1 >= remaining.size()) {
-                continue;
-            }
+        for (int i = 0; i < remaining.size(); i++) {
             Brew brew = new BrewImpl(built);
             final int iFinal = i;
-            registry.possibleRecipes(built)
+            registry.possibleRecipes(built, false)
                     .stream()
                     .flatMap(recipe -> {
                         BrewScore score = brew.score(recipe);
@@ -154,6 +148,8 @@ public class BrewUtil {
                     })
                     .map(ingredient -> variations0(remaining.subList(iFinal, remaining.size()), registry, ingredient))
                     .forEach(output::addAll);
+            List<BrewingStep> addition = remaining.get(i);
+            built.addAll(addition);
         }
         output.add(built);
         return output;

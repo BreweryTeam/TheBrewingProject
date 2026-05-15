@@ -19,6 +19,12 @@ import java.util.function.Supplier;
 public interface Brew extends MetaContainer<Brew> {
 
     /**
+     *
+     * @return All possible alternate variations of this brew
+     */
+    List<List<BrewingStep>> variations();
+
+    /**
      * @param registry A registry with all available recipes
      * @param <I>      Item stack type
      * @return The closest recipe, if any are not fatally different
@@ -68,7 +74,7 @@ public interface Brew extends MetaContainer<Brew> {
     Brew withStepsReplaced(Collection<BrewingStep> steps);
 
     /**
-     * @param index Index of the step in {@link #getSteps()}
+     * @param index    Index of the step in {@link #getSteps()}
      * @param modifier Function that modifies the step
      * @return A new brew instance with the modified step
      * @throws IndexOutOfBoundsException If the index is out of bounds
@@ -82,9 +88,9 @@ public interface Brew extends MetaContainer<Brew> {
     Brew witModifiedLastStep(Function<BrewingStep, BrewingStep> modifier);
 
     /**
-     * @param bClass       The type of the brewing step
-     * @param modifier     The modifier of the brewing step
-     * @param <B>          The type of the brewing step
+     * @param bClass   The type of the brewing step
+     * @param modifier The modifier of the brewing step
+     * @param <B>      The type of the brewing step
      * @return A new brewing step with the applied modifier if already existed with type, or a new step from the step supplier
      */
     <B extends BrewingStep> Brew withModifiedLastStep(Class<B> bClass, Function<B, B> modifier);

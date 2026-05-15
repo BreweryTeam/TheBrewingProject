@@ -8,6 +8,7 @@ import dev.jsinco.brewery.api.brew.PartialBrewScore;
 import dev.jsinco.brewery.api.brew.ScoreType;
 import dev.jsinco.brewery.api.effect.modifier.DrunkenModifier;
 import dev.jsinco.brewery.api.recipe.RecipeRegistry;
+import dev.jsinco.brewery.api.util.Pair;
 import dev.jsinco.brewery.configuration.Config;
 import dev.jsinco.brewery.configuration.DrunkenModifierSection;
 import dev.jsinco.brewery.format.TimeFormat;
@@ -32,6 +33,7 @@ import net.kyori.adventure.translation.GlobalTranslator;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -117,11 +119,10 @@ public class MessageUtil {
         return new StyleBuilderApplicable[]{NamedTextColor.GRAY, TextDecoration.STRIKETHROUGH};
     }
 
-    public static @NonNull Stream<Component> compileBrewInfo(Brew brew, BrewScore score, boolean detailed) {
-        List<BrewingStep> brewingSteps = brew.getCompletedSteps();
+    public static @NonNull Stream<Component> compileBrewInfo(List<BrewingStep> steps, BrewScore score, boolean detailed) {
         Stream.Builder<Component> streamBuilder = Stream.builder();
-        for (int i = 0; i < brewingSteps.size(); i++) {
-            BrewingStep brewingStep = brewingSteps.get(i);
+        for (int i = 0; i < steps.size(); i++) {
+            BrewingStep brewingStep = steps.get(i);
             String translationKey = (detailed ? "tbp.brew.detailed-tooltip." : "tbp.brew.tooltip-brewing.") + brewingStep.stepType().name().toLowerCase(Locale.ROOT);
             streamBuilder.add(
                     Component.translatable(translationKey,
@@ -133,10 +134,24 @@ public class MessageUtil {
     }
 
     public static @NonNull Stream<Component> compileBrewInfo(Brew brew, boolean detailed, RecipeRegistry<?> registry) {
-        BrewScore score = brew.closestRecipe(registry)
-                .map(brew::score)
-                .orElse(BrewScoreImpl.failed(brew));
-        return compileBrewInfo(brew, score, detailed);
+        List<BrewingStep> completedSteps = brew.getCompletedSteps();
+        List<Pair<List<BrewingStep>, BrewScore>> scores = BrewUtil.variations(completedSteps, registry)
+                .stream()
+                .map(variation -> new Pair<>(
+                        variation,
+                        registry.closestRecipe(variation)
+                                .map(recipe -> recipe.score(variation))
+                                .orElseGet(() -> BrewScoreImpl.failed(variation))
+                ))
+                .toList();
+        Pair<List<BrewingStep>, BrewScore> scorePair = scores
+                .stream()
+                .filter(pair -> pair.second().completed())
+                .max(Comparator.comparingDouble(pair -> pair.second().rawScore()))
+                .or(() -> scores.stream()
+                        .max(Comparator.comparingDouble(pair -> pair.second().rawScore()))
+                ).orElseGet(() -> new Pair<>(completedSteps, BrewScoreImpl.failed(completedSteps)));
+        return compileBrewInfo(scorePair.first(), scorePair.second(), detailed);
     }
 
     public static @NonNull TagResolver getValueDisplayTagResolver(double displayValue) {

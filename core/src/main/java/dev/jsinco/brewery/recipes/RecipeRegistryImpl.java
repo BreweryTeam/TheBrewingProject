@@ -1,6 +1,7 @@
 package dev.jsinco.brewery.recipes;
 
 import com.google.common.base.Preconditions;
+import dev.jsinco.brewery.api.brew.BrewScore;
 import dev.jsinco.brewery.api.brew.BrewingStep;
 import dev.jsinco.brewery.api.ingredient.BaseIngredient;
 import dev.jsinco.brewery.api.ingredient.Ingredient;
@@ -8,11 +9,14 @@ import dev.jsinco.brewery.api.recipe.DefaultRecipe;
 import dev.jsinco.brewery.api.recipe.Recipe;
 import dev.jsinco.brewery.api.recipe.RecipeRegistry;
 import dev.jsinco.brewery.api.util.Logger;
+import dev.jsinco.brewery.api.util.Pair;
 import dev.jsinco.brewery.util.BrewUtil;
 import org.jspecify.annotations.NonNull;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -26,7 +30,7 @@ public class RecipeRegistryImpl<I> implements RecipeRegistry<I> {
 
     private final Map<String, Recipe<I>> recipes = Collections.synchronizedMap(new LinkedHashMap<>());
     private final Map<String, DefaultRecipe<I>> defaultRecipes = Collections.synchronizedMap(new LinkedHashMap<>());
-    private final Map<BaseIngredient, Set<Recipe<I>>> baseIngredientToRecipes = new ConcurrentHashMap<>();
+    private final Map<BaseIngredient, Set<Recipe<I>>> baseIngredientToRecipes = Collections.synchronizedMap(new HashMap<>());
 
 
     public void registerRecipes(@NonNull Map<String, Recipe<I>> recipes) {
@@ -61,25 +65,45 @@ public class RecipeRegistryImpl<I> implements RecipeRegistry<I> {
 
     @Override
     public Collection<Recipe<I>> possibleRecipes(List<BrewingStep> steps) {
+        Set<Recipe<I>> recipes = null;
+        for (BaseIngredient baseIngredient : BrewUtil.getRecipeIngredients(steps)) {
+            if (recipes == null) {
+                recipes = new HashSet<>(baseIngredientToRecipes.getOrDefault(baseIngredient, Set.of()));
+            }
+            if (recipes.isEmpty()) {
+                return recipes;
+            }
+            recipes.removeIf(recipe -> !BrewUtil.getRecipeIngredients(recipe)
+                    .contains(baseIngredient)
+            );
+        }
+        return recipes == null ? Set.of() : recipes;
+    }
+
+    @Override
+    public Collection<Recipe<I>> possibleRecipes(List<BrewingStep> steps, boolean calculateVariations) {
+        if (!calculateVariations) {
+            return possibleRecipes(steps);
+        }
         Set<Recipe<I>> output = new HashSet<>();
         for (List<BrewingStep> stepVariation : BrewUtil.variations(steps, this)) {
-            Set<Recipe<I>> recipes = null;
-            for (BaseIngredient baseIngredient : BrewUtil.getRecipeIngredients(stepVariation)) {
-                if (recipes == null) {
-                    recipes = baseIngredientToRecipes.getOrDefault(baseIngredient, Set.of());
-                }
-                if (recipes.isEmpty()) {
-                    return recipes;
-                }
-                recipes.removeIf(recipe -> !BrewUtil.getRecipeIngredients(recipe)
-                        .contains(baseIngredient)
-                );
-            }
-            if (recipes != null) {
-                output.addAll(recipes);
-            }
+            output.addAll(possibleRecipes(stepVariation));
         }
         return output;
+    }
+
+    @Override
+    public Optional<Recipe<I>> closestRecipe(List<BrewingStep> steps) {
+        List<Pair<Recipe<I>, BrewScore>> possibleRecipes = possibleRecipes(steps)
+                .stream()
+                .map(recipe -> new Pair<>(recipe, recipe.score(steps)))
+                .toList();
+        return possibleRecipes.stream()
+                .filter(pair -> pair.second().completed())
+                .max(Comparator.comparingDouble(pair -> pair.second().rawScore()))
+                .or(() -> possibleRecipes.stream()
+                        .max(Comparator.comparingDouble(pair -> pair.second().rawScore()))
+                ).map(Pair::first);
     }
 
     @Override

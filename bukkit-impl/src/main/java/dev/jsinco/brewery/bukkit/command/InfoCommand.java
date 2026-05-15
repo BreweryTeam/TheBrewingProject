@@ -82,7 +82,7 @@ public class InfoCommand {
                 "tbp.command.info.message",
                 MessageUtil.getScoreTagResolver(brew.closestRecipe(TheBrewingProject.getInstance().getRecipeRegistry())
                         .map(brew::score)
-                        .orElse(BrewScoreImpl.failed(brew))),
+                        .orElse(BrewScoreImpl.failed(brew.getSteps()))),
                 Placeholder.component("brewing_step_info", MessageUtil.compileBrewInfo(brew, true, TheBrewingProject.getInstance().getRecipeRegistry())
                         .collect(Component.toComponent(Component.text("\n")))
                 ))
