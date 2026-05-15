@@ -186,7 +186,7 @@ public class BukkitCauldron implements Cauldron {
         }
         RecipeResult<ItemStack> recipeResult = matcherResult.recipeResult().orElse(null);
         if (recipeResult != null) {
-            return Color.fromRGB(recipeResult.brewColor().getRGB());
+            return Color.fromRGB(recipeResult.brewColor().getRGB() & 0xFFFFFF);
         }
         Optional<Color> defaultRecipeColor = BrewAdapterAccess.getDefaultRecipe(
                         recipeOptional.orElse(null),
@@ -196,6 +196,7 @@ public class BukkitCauldron implements Cauldron {
                 ).map(DefaultRecipe::result)
                 .map(RecipeResult::brewColor)
                 .map(java.awt.Color::getRGB)
+                .map(integer -> integer & 0xFFFFFF)
                 .map(Color::fromRGB);
         if (defaultRecipeColor.isPresent()) {
             return defaultRecipeColor.get();
