@@ -11,6 +11,7 @@ import dev.jsinco.brewery.api.moment.Interval;
 import dev.jsinco.brewery.api.moment.Moment;
 import dev.jsinco.brewery.api.recipe.DefaultRecipe;
 import dev.jsinco.brewery.api.recipe.Recipe;
+import dev.jsinco.brewery.api.recipe.RecipeRegistry;
 import dev.jsinco.brewery.api.recipe.RecipeResult;
 import dev.jsinco.brewery.api.util.BreweryRegistry;
 import dev.jsinco.brewery.api.util.CancelState;
@@ -279,11 +280,13 @@ public class BukkitCauldron implements Cauldron {
                         step instanceof BrewingStep.AuthoredStep<?> authoredStep
                                 ? authoredStep.withBrewer(player.getUniqueId()) : step
                 );
-        this.recipe = brew.closestRecipe(TheBrewingProject.getInstance().getRecipeRegistry())
+        RecipeRegistry<ItemStack> registry = TheBrewingProject.getInstance().getRecipeRegistry();
+        this.recipe = brew.closestRecipe(registry)
                 .orElse(null);
         this.quality = Optional.ofNullable(recipe)
                 .flatMap(brew::quality)
                 .orElse(null);
+
         long delay;
         if (Config.config().cauldrons().ingredientAddedAnimation() != AnimationDisplay.NONE) {
             delay = AnimationManager.playIngredientAddAnimation(addedItem, player, getBlock().getLocation().toCenterLocation());
@@ -316,15 +319,9 @@ public class BukkitCauldron implements Cauldron {
         // Cauldron has an active brew: merge when it holds the same recipe
         if (!isSealed) {
             Brew addedBrew = addedBrewOpt.get();
-            Optional<Recipe<ItemStack>> existingRecipeOpt = stripShortLastStep(brew).closestRecipe(TheBrewingProject.getInstance().getRecipeRegistry());
-            Optional<Recipe<ItemStack>> addedRecipeOpt = addedBrew.closestRecipe(TheBrewingProject.getInstance().getRecipeRegistry());
-            boolean sameRecipe = existingRecipeOpt.isPresent() && addedRecipeOpt.isPresent()
-                    && existingRecipeOpt.get().getRecipeName().equals(addedRecipeOpt.get().getRecipeName());
-            if (sameRecipe) {
-                Optional<Brew> merged = BrewUtil.mergeBrews(this.brew, addedBrew);
-                if (merged.isEmpty()) {
-                    return false;
-                }
+
+            Optional<Brew> merged = BrewUtil.mergeBrews(this.brew, addedBrew);
+            if (merged.isPresent()) {
                 this.brew = merged.get();
                 BukkitCauldron.incrementLevel(getBlock());
                 updateLevel(getBlock().getBlockData());
@@ -335,6 +332,7 @@ public class BukkitCauldron implements Cauldron {
                 return true;
             }
         }
+
 
         // Different recipe or sealed brew: add as an ingredient
         if (isSealed && !Config.config().cauldrons().allowSealedBrewAsIngredient()) {

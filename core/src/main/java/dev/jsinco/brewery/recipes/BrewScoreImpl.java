@@ -1,6 +1,5 @@
 package dev.jsinco.brewery.recipes;
 
-import dev.jsinco.brewery.api.brew.Brew;
 import dev.jsinco.brewery.api.brew.BrewQuality;
 import dev.jsinco.brewery.api.brew.BrewScore;
 import dev.jsinco.brewery.api.brew.BrewingStep;
@@ -30,8 +29,8 @@ public class BrewScoreImpl implements BrewScore {
         brewDifficulty = 1;
     }
 
-    public static BrewScoreImpl failed(Brew brew) {
-        List<Map<ScoreType, PartialBrewScore>> scores = brew.getCompletedSteps()
+    public static BrewScoreImpl failed(List<BrewingStep> completedSteps) {
+        List<Map<ScoreType, PartialBrewScore>> scores = completedSteps
                 .stream().map(BrewingStep::failedScores)
                 .toList();
         return new BrewScoreImpl(scores, true, 1);

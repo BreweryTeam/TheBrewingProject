@@ -1,6 +1,7 @@
 package dev.jsinco.brewery.api.recipe;
 
 import dev.jsinco.brewery.api.brew.BrewQuality;
+import dev.jsinco.brewery.api.brew.BrewScore;
 import dev.jsinco.brewery.api.brew.BrewingStep;
 import dev.jsinco.brewery.api.ingredient.Ingredient;
 import org.jetbrains.annotations.Range;
@@ -42,4 +43,11 @@ public interface Recipe<I> {
      * @return An ingredient representing this recipe output item
      */
     Ingredient toIngredient(@Range(from = 0, to = 1) double score);
+
+    /**
+     *
+     * @param steps The brewing procedure
+     * @return The brew score
+     */
+    BrewScore score(List<BrewingStep> steps);
 }
