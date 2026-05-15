@@ -4,6 +4,7 @@ import dev.jsinco.brewery.api.effect.modifier.DrunkenModifier;
 import dev.jsinco.brewery.api.util.BreweryKey;
 import dev.jsinco.brewery.api.util.Holder;
 import net.kyori.adventure.text.Component;
+import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
 import java.util.List;
@@ -57,4 +58,9 @@ public interface RecipeEffects {
      * @return A formatted message component
      */
     @Nullable Component formatMessage(String message, Holder.Player player);
+
+    /**
+     * @return The modifiers changes linked to this effects
+     */
+    @NonNull Map<DrunkenModifier, Double> getModifiers();
 }

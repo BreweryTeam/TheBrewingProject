@@ -8,6 +8,7 @@ import dev.jsinco.brewery.api.brew.ScoreType;
 import dev.jsinco.brewery.util.MessageUtil;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.translation.Argument;
+import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
 import java.util.Collection;
@@ -134,5 +135,13 @@ public class BrewScoreImpl implements BrewScore {
 
     public void setQualityOverride(BrewQuality qualityOverride) {
         this.qualityOverride = qualityOverride;
+    }
+
+    @Override
+    public int compareTo(@NonNull BrewScore other) {
+        if (other.completed()) {
+            return !this.completed ? -1 : Double.compare(this.rawScore(), other.rawScore());
+        }
+        return this.completed ? 1 : Double.compare(this.rawScore(), other.rawScore());
     }
 }

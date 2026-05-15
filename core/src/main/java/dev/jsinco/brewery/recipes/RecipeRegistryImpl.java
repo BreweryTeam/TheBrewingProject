@@ -81,18 +81,6 @@ public class RecipeRegistryImpl<I> implements RecipeRegistry<I> {
     }
 
     @Override
-    public Collection<Recipe<I>> possibleRecipes(List<BrewingStep> steps, boolean calculateVariations) {
-        if (!calculateVariations) {
-            return possibleRecipes(steps);
-        }
-        Set<Recipe<I>> output = new HashSet<>();
-        for (List<BrewingStep> stepVariation : BrewUtil.variations(steps, this)) {
-            output.addAll(possibleRecipes(stepVariation));
-        }
-        return output;
-    }
-
-    @Override
     public Optional<Recipe<I>> closestRecipe(List<BrewingStep> steps) {
         List<Pair<Recipe<I>, BrewScore>> possibleRecipes = possibleRecipes(steps)
                 .stream()
