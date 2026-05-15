@@ -190,7 +190,7 @@ public class BrewImpl implements Brew {
     @Override
     public List<List<BrewingStep>> variations() {
         if (this.variations == null) {
-            this.variations = BrewUtil.variations(steps, RegistryProviderHolder.instance().recipeRegistry());
+            this.variations = BrewUtil.variations(getCompletedSteps(), RegistryProviderHolder.instance().recipeRegistry());
         }
         return variations;
     }
