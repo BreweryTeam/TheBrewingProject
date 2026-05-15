@@ -1,51 +1,34 @@
 package dev.jsinco.brewery.bukkit.brew;
 
 import dev.jsinco.brewery.api.brew.Brew;
-import dev.jsinco.brewery.api.brew.BrewQuality;
-import dev.jsinco.brewery.api.brew.BrewScore;
 import dev.jsinco.brewery.api.brew.BrewingStep;
-import dev.jsinco.brewery.api.ingredient.Ingredient;
-import dev.jsinco.brewery.api.ingredient.IngredientManager;
 import dev.jsinco.brewery.api.meta.MetaData;
 import dev.jsinco.brewery.api.recipe.DefaultRecipe;
 import dev.jsinco.brewery.api.recipe.Recipe;
-import dev.jsinco.brewery.api.recipe.RecipeResult;
 import dev.jsinco.brewery.api.util.BreweryKey;
-import dev.jsinco.brewery.api.util.Pair;
 import dev.jsinco.brewery.brew.BrewImpl;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.bukkit.meta.MetaDataPdcType;
-import dev.jsinco.brewery.bukkit.util.BukkitIngredientUtil;
+import dev.jsinco.brewery.bukkit.recipe.RecipeMatcherImpl;
 import dev.jsinco.brewery.bukkit.util.ListPersistentDataType;
 import dev.jsinco.brewery.configuration.Config;
-import dev.jsinco.brewery.recipes.BrewScoreImpl;
 import dev.jsinco.brewery.recipes.RecipeRegistryImpl;
 import dev.jsinco.brewery.util.ClassUtil;
 import io.papermc.paper.datacomponent.DataComponentTypes;
-import io.papermc.paper.datacomponent.item.ItemLore;
-import io.papermc.paper.datacomponent.item.PotionContents;
 import io.papermc.paper.datacomponent.item.TooltipDisplay;
 import io.papermc.paper.persistence.PersistentDataContainerView;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.TextDecoration;
-import net.kyori.adventure.text.minimessage.MiniMessage;
-import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
-import net.kyori.adventure.text.minimessage.translation.Argument;
-import net.kyori.adventure.translation.GlobalTranslator;
-import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Registry;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
+import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Random;
@@ -66,94 +49,12 @@ public class BrewAdapterAccess {
     public static final NamespacedKey BREWERY_DISPLAY_NAME = TheBrewingProject.key("display_name");
 
     public static ItemStack toItem(Brew brew, Brew.State state) {
-        RecipeRegistryImpl<ItemStack> recipeRegistry = TheBrewingProject.getInstance().getRecipeRegistry();
-        Optional<Recipe<ItemStack>> recipe = brew.closestRecipe(recipeRegistry);
-        Optional<BrewScore> score = recipe.map(brew::score);
-        Optional<BrewQuality> quality = score.flatMap(brewScore -> Optional.ofNullable(brewScore.brewQuality()));
-        ItemStack itemStack;
-        if (quality.isEmpty()) {
-            itemStack = fromDefaultRecipe(recipe, recipeRegistry, brew, state, true);
-            itemStack.editPersistentDataContainer(pdc -> {
-                pdc.set(BREWERY_SCORE, PersistentDataType.DOUBLE, 0D);
-            });
-        } else if (!score.map(BrewScore::completed).get()) {
-            Optional<DefaultRecipe<ItemStack>> defaultRecipeOptional = getDefaultRecipe(recipe, recipeRegistry, brew, false);
-            itemStack = defaultRecipeOptional.map(DefaultRecipe::result).map(result -> result.newBrewItem(score.get(), brew, state)).orElse(
-                    incompletePotion(brew)
-            );
-        } else {
-            RecipeResult<ItemStack> recipeResult = recipe.get().getRecipeResult(quality.get());
-            itemStack = recipeResult.newBrewItem(score.get(), brew, state);
-            itemStack.editPersistentDataContainer(pdc -> {
-                applyBrewTags(pdc, recipe.get(), score.get().score(), MiniMessage.miniMessage().serialize(recipeResult.displayName()));
-            });
-        }
-        if (!(state instanceof BrewImpl.State.Seal)) {
-            itemStack.editPersistentDataContainer(pdc ->
-                    applyBrewData(pdc, brew)
-            );
-        }
-        return itemStack;
+        return RecipeMatcherImpl.builder()
+                .build()
+                .match(brew)
+                .toItem(state);
     }
 
-    private static ItemStack incompletePotion(Brew brew) {
-        ItemStack itemStack = new ItemStack(Material.POTION);
-        hideTooltips(itemStack);
-        Map<Ingredient, Integer> ingredients = new HashMap<>();
-        for (BrewingStep brewingStep : brew.getCompletedSteps()) {
-            if (brewingStep instanceof BrewingStep.Cook cook) {
-                IngredientManager.merge(ingredients, (Map<Ingredient, Integer>) cook.ingredients());
-            }
-            if (brewingStep instanceof BrewingStep.Mix mix) {
-                IngredientManager.merge(ingredients, (Map<Ingredient, Integer>) mix.ingredients());
-            }
-        }
-        Pair<org.bukkit.Color, Ingredient> itemsInfo = BukkitIngredientUtil.ingredientData(ingredients);
-        Ingredient topIngredient = itemsInfo.second();
-        final Map<BrewingStep.StepType, String> displayNameByStep = Map.of(
-                BrewingStep.StepType.COOK, "unfinished-fermented",
-                BrewingStep.StepType.DISTILL, "unfinished-distilled",
-                BrewingStep.StepType.AGE, "unfinished-aged",
-                BrewingStep.StepType.MIX, "unfinished-mixed"
-        );
-
-        BrewingStep.StepType lastStep = brew.getCompletedSteps().getLast().stepType();
-        String translationKey = "tbp.brew.display-name." + displayNameByStep.get(lastStep);
-        Component displayName = topIngredient == null
-                ? Component.translatable(translationKey + "-unknown")
-                : Component.translatable(translationKey, Argument.tagResolver(Placeholder.component("ingredient", topIngredient.displayName())));
-
-        itemStack.setData(DataComponentTypes.CUSTOM_NAME, GlobalTranslator
-                .render(displayName, Config.config().language()).decoration(TextDecoration.ITALIC, false));
-        itemStack.setData(DataComponentTypes.POTION_CONTENTS, PotionContents.potionContents()
-                .customColor(itemsInfo.first()).build());
-        return itemStack;
-    }
-
-    private static ItemStack fromDefaultRecipe(Optional<Recipe<ItemStack>> recipe, RecipeRegistryImpl<ItemStack> recipeRegistry, Brew brew, Brew.State state, boolean ruinedOnly) {
-        Optional<DefaultRecipe<ItemStack>> defaultRecipe = getDefaultRecipe(recipe, recipeRegistry, brew, ruinedOnly);
-        if (defaultRecipe.isEmpty()) {
-            ItemStack itemStack = new ItemStack(Material.POTION);
-            itemStack.setData(DataComponentTypes.CUSTOM_NAME, Component.text("Placeholder"));
-            itemStack.setData(DataComponentTypes.LORE, ItemLore.lore(
-                    List.of(Component.text("you don't have any default/incomplete recipes!"),
-                            Component.text("Contact admin, or if you're admin look into incomplete-recipes.yml"))
-            ));
-            return itemStack;
-        }
-        return defaultRecipe.get().result().newBrewItem(BrewScoreImpl.PLACEHOLDER, brew, state);
-    }
-
-    public static Optional<DefaultRecipe<ItemStack>> getDefaultRecipe(Optional<Recipe<ItemStack>> recipe, RecipeRegistryImpl<ItemStack> recipeRegistry, Brew brew, boolean ruined) {
-        List<DefaultRecipe<ItemStack>> allDefaultRecipes = new ArrayList<>(recipeRegistry.getDefaultRecipes());
-        Collections.shuffle(allDefaultRecipes);
-        return allDefaultRecipes
-                .stream()
-                .filter(defaultRecipe -> defaultRecipe.onlyRuinedBrews() == ruined)
-                .filter(defaultRecipe -> defaultRecipe.recipeConditions().stream().allMatch(recipeCondition ->
-                        recipeCondition.matches(recipe.map(Recipe::getSteps).orElse(null), brew.getCompletedSteps())))
-                .max(Comparator.comparing(DefaultRecipe::complexity));
-    }
 
     public static void applyBrewData(PersistentDataContainer pdc, Brew brew) {
         pdc.set(BREWERY_DATA_VERSION, PersistentDataType.INTEGER, DATA_VERSION);
@@ -184,6 +85,19 @@ public class BrewAdapterAccess {
             meta = new MetaData();
         }
         return Optional.of(new BrewImpl(steps, meta));
+    }
+
+    public static Optional<DefaultRecipe<ItemStack>> getDefaultRecipe(@Nullable Recipe<ItemStack> recipe, RecipeRegistryImpl<ItemStack> recipeRegistry, Brew brew, boolean ruined) {
+        List<DefaultRecipe<ItemStack>> allDefaultRecipes = new ArrayList<>(recipeRegistry.getDefaultRecipes());
+        Collections.shuffle(allDefaultRecipes);
+        return allDefaultRecipes
+                .stream()
+                .filter(defaultRecipe -> defaultRecipe.onlyRuinedBrews() == ruined)
+                .filter(defaultRecipe -> defaultRecipe.recipeConditions().stream().allMatch(recipeCondition ->
+                        recipeCondition.matches(Optional.ofNullable(recipe)
+                                .map(Recipe::getSteps).orElse(null), brew.getCompletedSteps()))
+                )
+                .max(Comparator.comparing(DefaultRecipe::complexity));
     }
 
     public static void hideTooltips(ItemStack itemStack) {

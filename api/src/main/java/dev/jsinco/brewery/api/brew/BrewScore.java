@@ -5,7 +5,7 @@ import org.jspecify.annotations.Nullable;
 
 import java.util.Map;
 
-public interface BrewScore {
+public interface BrewScore extends Comparable<BrewScore> {
 
     /**
      * @return The quality of the brew, else null if it's a failed score

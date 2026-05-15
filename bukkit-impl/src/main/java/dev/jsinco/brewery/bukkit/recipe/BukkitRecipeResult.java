@@ -3,6 +3,7 @@ package dev.jsinco.brewery.bukkit.recipe;
 import dev.jsinco.brewery.api.brew.Brew;
 import dev.jsinco.brewery.api.brew.BrewScore;
 import dev.jsinco.brewery.api.brew.BrewingStep;
+import dev.jsinco.brewery.api.ingredient.UncheckedIngredient;
 import dev.jsinco.brewery.api.recipe.RecipeEffects;
 import dev.jsinco.brewery.api.recipe.RecipeResult;
 import dev.jsinco.brewery.api.util.BreweryKey;
@@ -18,13 +19,13 @@ import dev.jsinco.brewery.configuration.BrewTooltipType;
 import dev.jsinco.brewery.configuration.Config;
 import dev.jsinco.brewery.configuration.DrunkenModifierSection;
 import dev.jsinco.brewery.effect.DrunkStateImpl;
-import dev.jsinco.brewery.recipes.BrewScoreImpl;
 import dev.jsinco.brewery.util.MessageUtil;
 import io.papermc.paper.datacomponent.DataComponentTypes;
 import io.papermc.paper.datacomponent.item.CustomModelData;
 import io.papermc.paper.datacomponent.item.ItemEnchantments;
 import io.papermc.paper.datacomponent.item.ItemLore;
 import io.papermc.paper.datacomponent.item.PotionContents;
+import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
@@ -58,7 +59,7 @@ public class BukkitRecipeResult implements RecipeResult<ItemStack> {
     private final boolean glint;
     private final int customModelData;
     private final @Nullable NamespacedKey itemModel;
-    private final UncheckedIngredientImpl customId;
+    private final @Nullable UncheckedIngredientImpl customId;
 
     private final String name;
     private final List<String> lore;
@@ -80,27 +81,16 @@ public class BukkitRecipeResult implements RecipeResult<ItemStack> {
     }
 
     @Override
-    public ItemStack newBrewItem(@NonNull BrewScore ignored, @NonNull Brew brew, Brew.@NonNull State state) {
-        List<BrewingStep> completedSteps = brew.getCompletedSteps();
-        return newBrewItem(brew.closestRecipe(TheBrewingProject.getInstance().getRecipeRegistry())
-                        .map(recipe -> recipe.score(completedSteps))
-                        .orElseGet(() -> BrewScoreImpl.failed(completedSteps)),
-                completedSteps,
-                state
-        );
-    }
-
-    @Override
-    public ItemStack newBrewItem(@NonNull BrewScore score, @NonNull List<BrewingStep> steps, Brew.@NonNull State state) {
+    public ItemStack newBrewItem(@NonNull BrewScore score, @NonNull Brew brew, Brew.@NonNull State state) {
         ItemStack itemStack = newLorelessItem();
-        applyLore(itemStack, score, steps, state);
+        applyLore(itemStack, score, brew, state);
         return itemStack;
     }
 
     @Override
     public ItemStack newLorelessItem() {
-        if (customId != null) {
-            ItemStack itemStack = customId.retrieve()
+        if (itemOutputOverride() != null) {
+            ItemStack itemStack = itemOutputOverride().retrieve()
                     .flatMap(BukkitIngredientManager.INSTANCE::toItem)
                     .orElse(null);
 
@@ -108,7 +98,7 @@ public class BukkitRecipeResult implements RecipeResult<ItemStack> {
                 applyData(itemStack);
                 return itemStack;
             }
-            Logger.logErr("Invalid or uninitialized customId for recipe: " + name);
+            Logger.logErr("Invalid or uninitialized customId for recipe: " + name());
         }
         ItemStack itemStack = new ItemStack(Material.POTION);
         applyData(itemStack);
@@ -117,44 +107,57 @@ public class BukkitRecipeResult implements RecipeResult<ItemStack> {
 
     @Override
     public RecipeEffects effects() {
-        return recipeEffects;
+        return recipeEffects();
     }
 
     @Override
     public Component displayName() {
-        return MiniMessage.miniMessage().deserialize(name);
+        return MiniMessage.miniMessage().deserialize(name());
+    }
+
+    @Override
+    public java.awt.Color color() {
+        return new java.awt.Color(color.asRGB());
+    }
+
+    @Override
+    public List<Component> staticLore() {
+        return lore.stream()
+                .map(MiniMessage.miniMessage()::deserialize)
+                .toList();
     }
 
     private void applyData(ItemStack itemStack) {
         BrewAdapterAccess.hideTooltips(itemStack);
-        itemStack.setData(DataComponentTypes.CUSTOM_NAME, MessageUtil.miniMessage(name)
+        itemStack.setData(DataComponentTypes.CUSTOM_NAME, MessageUtil.miniMessage(name())
                 .decoration(TextDecoration.ITALIC, false)
                 .colorIfAbsent(NamedTextColor.WHITE)
         );
-        if (glint) {
+        if (glint()) {
             itemStack.setData(DataComponentTypes.ENCHANTMENTS, ItemEnchantments.itemEnchantments().add(Enchantment.MENDING, 1));
         }
-        if (customModelData > 0) {
-            itemStack.setData(DataComponentTypes.CUSTOM_MODEL_DATA, CustomModelData.customModelData().addFloat(customModelData).build());
+        if (customModelData() > 0) {
+            itemStack.setData(DataComponentTypes.CUSTOM_MODEL_DATA, CustomModelData.customModelData().addFloat(customModelData()).build());
         }
-        if (itemModel != null) {
-            itemStack.setData(DataComponentTypes.ITEM_MODEL, itemModel);
+        if (itemModel() != null) {
+            itemStack.setData(DataComponentTypes.ITEM_MODEL, itemModel());
         }
-        recipeEffects.applyTo(itemStack);
+        recipeEffects().applyTo(itemStack);
         itemStack.setData(DataComponentTypes.POTION_CONTENTS, PotionContents.potionContents()
                 .customColor(color)
         );
     }
 
-    private void applyLore(ItemStack itemStack, BrewScore score, List<BrewingStep> Steps, Brew.State state) {
+    private void applyLore(ItemStack itemStack, BrewScore score, Brew brew, Brew.State state) {
         Stream.Builder<Component> fullLoreBuilder = Stream.builder();
-        TagResolver resolver = getResolver(score);
+        TagResolver resolver = TagResolver.resolver(MessageUtil.recipeEffectsResolver(recipeEffects()), MessageUtil.brewScoreResolver(score));
+        List<BrewingStep> completedSteps = brew.getCompletedSteps();
         for (BrewTooltipType tooltipType : Config.config().brewTooltipOrder()) {
-            if (!appendBrewInfoLore && BrewTooltipType.RECIPE_LORE != tooltipType) {
+            if (!appendBrewInfoLore() && BrewTooltipType.RECIPE_LORE != tooltipType) {
                 continue;
             }
             switch (tooltipType) {
-                case RECIPE_LORE -> lore.stream()
+                case RECIPE_LORE -> lore().stream()
                         .map(line -> MessageUtil.miniMessage(line, MessageUtil.getScoreTagResolver(score)))
                         .forEach(fullLoreBuilder);
                 case SCORE -> {
@@ -175,17 +178,17 @@ public class BukkitRecipeResult implements RecipeResult<ItemStack> {
                         ));
                     }
                 }
-                case BREWERS -> applyBrewersTooltip(Steps, fullLoreBuilder);
+                case BREWERS -> applyBrewersTooltip(brew, fullLoreBuilder);
                 case STEPS -> {
                     switch (state) {
                         case Brew.State.Brewing ignored -> {
-                            MessageUtil.compileBrewInfo(Steps, score, false).forEach(fullLoreBuilder::add);
+                            MessageUtil.compileBrewInfo(completedSteps, score, false).forEach(fullLoreBuilder::add);
                         }
                         case Brew.State.Other ignored -> {
-                            addLastStepLore(Steps, fullLoreBuilder, score, state);
+                            addLastStepLore(brew, fullLoreBuilder, score, state);
                         }
                         case Brew.State.Seal ignored -> {
-                            addLastStepLore(Steps, fullLoreBuilder, score, state);
+                            addLastStepLore(brew, fullLoreBuilder, score, state);
                         }
                     }
                 }
@@ -231,36 +234,59 @@ public class BukkitRecipeResult implements RecipeResult<ItemStack> {
     private void applyDrunkenTooltips(Brew.State state, Stream.Builder<Component> streamBuilder, TagResolver resolver) {
         DrunkenModifierSection.modifiers().drunkenTooltips()
                 .stream()
-                .filter(modifierTooltip -> modifierTooltip.filter().evaluate(DrunkStateImpl.compileVariables(recipeEffects.getModifiers(), null, 0D)) > 0)
+                .filter(modifierTooltip -> modifierTooltip.filter().evaluate(DrunkStateImpl.compileVariables(recipeEffects().getModifiers(), null, 0D)) > 0)
                 .map(modifierTooltip -> modifierTooltip.getTooltip(state))
                 .filter(Objects::nonNull)
                 .map(miniMessage -> MessageUtil.miniMessage(miniMessage, resolver))
                 .forEach(streamBuilder::add);
     }
 
-    private @NonNull TagResolver getResolver(BrewScore score) {
-        TagResolver.Builder output = TagResolver.builder();
-        output.resolvers(
-                MessageUtil.numberedModifierTagResolver(recipeEffects.getModifiers(), null),
-                MessageUtil.getScoreTagResolver(score)
-        );
-        return output.build();
-    }
-
     public String getName() {
-        return this.name;
-    }
-
-    public List<String> getLore() {
-        return this.lore;
-    }
-
-    public RecipeEffectsImpl getRecipeEffects() {
-        return this.recipeEffects;
+        return this.name();
     }
 
     public Color getColor() {
         return this.color;
+    }
+
+    @Override
+    public boolean glint() {
+        return glint;
+    }
+
+    @Override
+    public int customModelData() {
+        return customModelData;
+    }
+
+    @Override
+    public @Nullable Key itemModel() {
+        return itemModel;
+    }
+
+    @Override
+    public @Nullable UncheckedIngredient itemOutputOverride() {
+        return customId;
+    }
+
+    @Override
+    public String name() {
+        return name;
+    }
+
+    @Override
+    public List<String> lore() {
+        return lore;
+    }
+
+    @Override
+    public RecipeEffectsImpl recipeEffects() {
+        return recipeEffects;
+    }
+
+    @Override
+    public boolean appendBrewInfoLore() {
+        return appendBrewInfoLore;
     }
 
     public static class Builder implements dev.jsinco.brewery.api.util.Builder<RecipeResult<ItemStack>> {
