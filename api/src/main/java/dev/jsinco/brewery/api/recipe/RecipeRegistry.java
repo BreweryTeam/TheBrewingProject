@@ -1,5 +1,6 @@
 package dev.jsinco.brewery.api.recipe;
 
+import dev.jsinco.brewery.api.brew.Brew;
 import dev.jsinco.brewery.api.brew.BrewingStep;
 import dev.jsinco.brewery.api.ingredient.BaseIngredient;
 import dev.jsinco.brewery.api.ingredient.Ingredient;
@@ -29,10 +30,18 @@ public interface RecipeRegistry<I> {
     Collection<Recipe<I>> getRecipes();
 
     /**
-     * @param ingredients The ingredients added to the recipe
+     * @param steps The recipe procedure
      * @return A collection of possible recipes
      */
     Collection<Recipe<I>> possibleRecipes(List<BrewingStep> steps);
+
+    /**
+     * The closest recipe for these steps
+     *
+     * @param steps The recipe procedure
+     * @return An optionally present recipe, if found
+     */
+    Optional<Recipe<I>> closestRecipe(List<BrewingStep> steps);
 
     /**
      * @param recipe The recipe to register
