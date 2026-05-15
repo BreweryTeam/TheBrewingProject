@@ -2,7 +2,10 @@ package dev.jsinco.brewery.recipes;
 
 import com.google.common.base.Preconditions;
 import dev.jsinco.brewery.api.brew.BrewQuality;
+import dev.jsinco.brewery.api.brew.BrewScore;
 import dev.jsinco.brewery.api.brew.BrewingStep;
+import dev.jsinco.brewery.api.brew.PartialBrewScore;
+import dev.jsinco.brewery.api.brew.ScoreType;
 import dev.jsinco.brewery.api.ingredient.BaseIngredient;
 import dev.jsinco.brewery.api.ingredient.Ingredient;
 import dev.jsinco.brewery.api.ingredient.IngredientMeta;
@@ -14,6 +17,7 @@ import dev.jsinco.brewery.api.recipe.RecipeResult;
 import dev.jsinco.brewery.api.util.BreweryKey;
 import org.jspecify.annotations.NonNull;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -54,6 +58,29 @@ public class RecipeImpl<I> implements Recipe<I> {
                         IngredientMeta.DISPLAY_NAME, getRecipeResult(quality).displayName()
                 )
         );
+    }
+
+    @Override
+    public BrewScore score(List<BrewingStep> brewingSteps) {
+        if (brewingSteps.size() > steps.size()) {
+            return BrewScoreImpl.failed(brewingSteps);
+        }
+        List<Map<ScoreType, PartialBrewScore>> scores = new ArrayList<>();
+        for (int i = 0; i < brewingSteps.size(); i++) {
+            BrewingStep recipeStep = steps.get(i);
+            scores.add(recipeStep.proximityScores(brewingSteps.get(i)));
+        }
+        boolean completed = steps.size() == brewingSteps.size();
+        BrewScoreImpl brewScore = new BrewScoreImpl(scores, completed, getBrewDifficulty());
+        if (brewScore.brewQuality() == null) {
+            scores.removeLast();
+            scores.add(steps.get(brewingSteps.size() - 1).maximumScores(brewingSteps.getLast()));
+            BrewScoreImpl uncompleted = new BrewScoreImpl(scores, false, getBrewDifficulty());
+            if (uncompleted.brewQuality() != null) {
+                return uncompleted;
+            }
+        }
+        return brewScore;
     }
 
     public String getRecipeName() {

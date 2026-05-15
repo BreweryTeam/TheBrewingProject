@@ -18,6 +18,7 @@ import dev.jsinco.brewery.configuration.BrewTooltipType;
 import dev.jsinco.brewery.configuration.Config;
 import dev.jsinco.brewery.configuration.DrunkenModifierSection;
 import dev.jsinco.brewery.effect.DrunkStateImpl;
+import dev.jsinco.brewery.recipes.BrewScoreImpl;
 import dev.jsinco.brewery.util.MessageUtil;
 import io.papermc.paper.datacomponent.DataComponentTypes;
 import io.papermc.paper.datacomponent.item.CustomModelData;
@@ -79,9 +80,20 @@ public class BukkitRecipeResult implements RecipeResult<ItemStack> {
     }
 
     @Override
-    public ItemStack newBrewItem(@NonNull BrewScore score, @NonNull Brew brew, Brew.@NonNull State state) {
+    public ItemStack newBrewItem(@NonNull BrewScore ignored, @NonNull Brew brew, Brew.@NonNull State state) {
+        List<BrewingStep> completedSteps = brew.getCompletedSteps();
+        return newBrewItem(brew.closestRecipe(TheBrewingProject.getInstance().getRecipeRegistry())
+                        .map(recipe -> recipe.score(completedSteps))
+                        .orElseGet(() -> BrewScoreImpl.failed(completedSteps)),
+                completedSteps,
+                state
+        );
+    }
+
+    @Override
+    public ItemStack newBrewItem(@NonNull BrewScore score, @NonNull List<BrewingStep> steps, Brew.@NonNull State state) {
         ItemStack itemStack = newLorelessItem();
-        applyLore(itemStack, score, brew, state);
+        applyLore(itemStack, score, steps, state);
         return itemStack;
     }
 
@@ -134,7 +146,7 @@ public class BukkitRecipeResult implements RecipeResult<ItemStack> {
         );
     }
 
-    private void applyLore(ItemStack itemStack, BrewScore score, Brew brew, Brew.State state) {
+    private void applyLore(ItemStack itemStack, BrewScore score, List<BrewingStep> Steps, Brew.State state) {
         Stream.Builder<Component> fullLoreBuilder = Stream.builder();
         TagResolver resolver = getResolver(score);
         for (BrewTooltipType tooltipType : Config.config().brewTooltipOrder()) {
@@ -163,17 +175,17 @@ public class BukkitRecipeResult implements RecipeResult<ItemStack> {
                         ));
                     }
                 }
-                case BREWERS -> applyBrewersTooltip(brew, fullLoreBuilder);
+                case BREWERS -> applyBrewersTooltip(Steps, fullLoreBuilder);
                 case STEPS -> {
                     switch (state) {
                         case Brew.State.Brewing ignored -> {
-                            MessageUtil.compileBrewInfo(brew, score, false).forEach(fullLoreBuilder::add);
+                            MessageUtil.compileBrewInfo(Steps, score, false).forEach(fullLoreBuilder::add);
                         }
                         case Brew.State.Other ignored -> {
-                            addLastStepLore(brew, fullLoreBuilder, score, state);
+                            addLastStepLore(Steps, fullLoreBuilder, score, state);
                         }
                         case Brew.State.Seal ignored -> {
-                            addLastStepLore(brew, fullLoreBuilder, score, state);
+                            addLastStepLore(Steps, fullLoreBuilder, score, state);
                         }
                     }
                 }
