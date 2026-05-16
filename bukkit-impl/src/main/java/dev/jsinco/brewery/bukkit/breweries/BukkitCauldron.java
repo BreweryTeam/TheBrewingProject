@@ -237,7 +237,7 @@ public class BukkitCauldron implements Cauldron {
                         step instanceof BrewingStep.AuthoredStep<?> authoredStep
                                 ? authoredStep.withBrewer(player.getUniqueId()) : step
                 );
-        if (!changeBrew(newBrew)) {
+        if (!changeBrew(newBrew, CauldronType.WATER)) {
             return false;
         }
 
@@ -280,7 +280,7 @@ public class BukkitCauldron implements Cauldron {
     }
 
     private boolean handleBrewReaddition(ItemStack item, Brew addedBrew, Player player) {
-        if (!cauldronHasActiveBrew() && changeBrew(addedBrew)) {
+        if (!cauldronHasActiveBrew() && changeBrew(addedBrew, CauldronType.WATER)) {
             // Empty cauldron: reinsert brew into the cauldron with 1 water level
             BukkitCauldron.incrementLevel(getBlock());
             updateLevel(getBlock().getBlockData());
@@ -292,7 +292,7 @@ public class BukkitCauldron implements Cauldron {
         }
 
         Optional<Brew> merged = BrewUtil.mergeBrews(this.brew, addedBrew);
-        if (merged.isPresent() && changeBrew(merged.get())) {
+        if (merged.isPresent() && changeBrew(merged.get(), CauldronType.WATER)) {
             BukkitCauldron.incrementLevel(getBlock());
             updateLevel(getBlock().getBlockData());
             playBrewInsertEffects(item, player);
@@ -305,7 +305,7 @@ public class BukkitCauldron implements Cauldron {
                         step instanceof BrewingStep.AuthoredStep<?> authoredStep
                                 ? authoredStep.withBrewer(player.getUniqueId()) : step
                 );
-        if (!changeBrew(newBrew)) {
+        if (!changeBrew(newBrew, CauldronType.WATER)) {
             return false;
         }
         playBrewInsertEffects(item, player);
