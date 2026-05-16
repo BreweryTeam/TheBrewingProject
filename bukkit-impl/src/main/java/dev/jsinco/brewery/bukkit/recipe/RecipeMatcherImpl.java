@@ -31,7 +31,9 @@ public record RecipeMatcherImpl(@Nullable Set<Recipe<ItemStack>> whitelist,
                                         brew,
                                         recipe.score(variation)
                                 ))
-                ).max(Comparator.comparing(RecipeMatcherResult::score))
+                )
+                .filter(pair -> pair.score().score() > 0)
+                .max(Comparator.comparing(RecipeMatcherResult::score))
                 .orElseGet(() -> new RecipeMatcherResultImpl(
                         null,
                         brew.getCompletedSteps(),
