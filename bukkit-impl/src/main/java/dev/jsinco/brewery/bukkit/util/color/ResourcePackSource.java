@@ -37,7 +37,6 @@ public interface ResourcePackSource {
         @Override
         public ResourcePack readPack() throws IOException, InterruptedException {
             URI uri = URI.create(url);
-            Logger.log("Sending http get request: " + uri);
             HttpRequest httpRequest = HttpRequest.newBuilder()
                     .uri(uri)
                     .timeout(Duration.ofSeconds(10))
