@@ -15,7 +15,7 @@ faststats = "0.20.0"
 
 # integrations
 bolt = "1.1.66"
-craft-engine = "0.0.61"
+craft-engine = "26.5"
 griefprevention = "17.0.0"
 huskclaims = "1.5.9"
 itemsadder = "4.0.10"
