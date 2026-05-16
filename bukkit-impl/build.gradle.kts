@@ -109,7 +109,7 @@ tasks {
         if (project.findProperty("testing.integrations")!! == "true") {
             downloadPlugins {
                 modrinth("worldedit", "JUWRHdru")
-                modrinth("craftengine", "0.0.67")
+                modrinth("craftengine", "26.5")
                 modrinth("bolt", "1f2gAAFO")
                 modrinth("bodyhealth", "4.1.0")
                 url("https://api.spiget.org/v2/resources/62325/download")

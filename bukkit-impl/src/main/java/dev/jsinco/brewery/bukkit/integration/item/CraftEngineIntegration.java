@@ -5,8 +5,8 @@ import dev.jsinco.brewery.bukkit.api.integration.ItemIntegration;
 import dev.jsinco.brewery.util.ClassUtil;
 import net.kyori.adventure.text.Component;
 import net.momirealms.craftengine.bukkit.api.event.CraftEngineReloadEvent;
+import net.momirealms.craftengine.bukkit.item.BukkitItem;
 import net.momirealms.craftengine.bukkit.plugin.BukkitCraftEngine;
-import net.momirealms.craftengine.core.item.Item;
 import net.momirealms.craftengine.core.util.Key;
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
@@ -24,7 +24,7 @@ public class CraftEngineIntegration implements ItemIntegration, Listener {
     private final CompletableFuture<Void> initializedFuture = new CompletableFuture<>();
 
     public @Nullable String getItemId(ItemStack itemStack) {
-        Item<ItemStack> customItem = BukkitCraftEngine.instance().itemManager().wrap(itemStack);
+        BukkitItem customItem = BukkitCraftEngine.instance().itemManager().wrap(itemStack);
         return customItem.customId()
                 .map(Key::toString)
                 .orElse(null);
@@ -38,7 +38,7 @@ public class CraftEngineIntegration implements ItemIntegration, Listener {
     @Override
     public Optional<ItemStack> createItem(String id) {
         return Optional.ofNullable(BukkitCraftEngine.instance().itemManager().createWrappedItem(Key.from(id), null))
-                .map(Item::getItem);
+                .map(BukkitItem::getBukkitItem);
     }
 
     @Override
@@ -48,7 +48,10 @@ public class CraftEngineIntegration implements ItemIntegration, Listener {
     }
 
     public @Nullable Component displayName(String id) {
-        return BukkitCraftEngine.instance().itemManager().buildItemStack(Key.from(id), null).effectiveName();
+        return createItem(id)
+                .map(ItemStack::effectiveName)
+                .orElse(null);
+
     }
 
     @Override
