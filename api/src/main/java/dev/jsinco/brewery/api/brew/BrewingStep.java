@@ -136,24 +136,27 @@ public interface BrewingStep {
         SELF withBrewersReplaced(SequencedCollection<UUID> brewers);
     }
 
-    interface Cook extends TimedStep, IngredientsStep, AuthoredStep<Cook> {
-
+    interface CauldronStep<SELF extends CauldronStep<SELF>> extends TimedStep, IngredientsStep, AuthoredStep<SELF> {
         /**
          * @return The type of the cauldron, or null for non-first recipe steps
          */
         @Nullable CauldronType cauldronType();
 
         /**
-         * @param brewTime A brew time (ticks)
-         * @return A new instance of this step with specified brew time
+         * @param ingredients A map of ingredients with amount
+         * @return A new instance of this step with specified ingredients
          */
-        Cook withBrewTime(Moment brewTime);
+        CauldronStep<SELF> withIngredients(Map<? extends Ingredient, Integer> ingredients);
 
         /**
-         * @param ingredients A map of ingredients with amount
-         * @return A new instance of this step with the specified ingredients
+         * @param time A time (ticks)
+         * @return A new instance of this step with specified time
          */
-        Cook withIngredients(Map<? extends Ingredient, Integer> ingredients);
+        CauldronStep<SELF> withTime(Moment time);
+
+        default CauldronStep<SELF> withBrewTime(Moment time) {
+            return withTime(time);
+        }
     }
 
     interface Distill extends AuthoredStep<Distill> {
@@ -184,25 +187,37 @@ public interface BrewingStep {
         Age withAge(Moment age);
     }
 
-    interface Mix extends TimedStep, IngredientsStep, AuthoredStep<Mix> {
+    interface Mix extends CauldronStep<Mix> {
 
-        /**
-         * @return The type of the cauldron, or null for non-first recipe steps
-         */
+        @Override
         @Nullable CauldronType cauldronType();
 
-        /**
-         * @param ingredients A map of ingredients with amount
-         * @return A new instance of this step with specified ingredients
-         */
+
+        @Override
         Mix withIngredients(Map<? extends Ingredient, Integer> ingredients);
 
-        /**
-         * @param time A time (ticks)
-         * @return A new instance of this step with specified time
-         */
+
+        @Override
         Mix withTime(Moment time);
     }
+
+    interface Cook extends CauldronStep<Cook> {
+        @Override
+        @Nullable CauldronType cauldronType();
+
+
+        @Override
+        Cook withIngredients(Map<? extends Ingredient, Integer> ingredients);
+
+
+        @Override
+        Cook withTime(Moment time);
+
+        default Cook withBrewTime(Moment time) {
+            return withTime(time);
+        }
+    }
+
 
     enum StepType {
         COOK,

@@ -1,5 +1,5 @@
 UPDATE cauldrons
-SET brew = ?
+SET brew = ?, cauldron_type = ?
 WHERE cauldron_x = ?
   AND cauldron_y = ?
   AND cauldron_z = ?

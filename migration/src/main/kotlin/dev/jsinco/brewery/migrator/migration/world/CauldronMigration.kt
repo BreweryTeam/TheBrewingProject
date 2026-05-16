@@ -34,7 +34,8 @@ object CauldronMigration {
                     CauldronType.WATER
                 )
             ),
-            BukkitAdapter.toBreweryLocation(bCauldron.block)
+            BukkitAdapter.toBreweryLocation(bCauldron.block),
+            CauldronType.WATER
         )
     }
 }

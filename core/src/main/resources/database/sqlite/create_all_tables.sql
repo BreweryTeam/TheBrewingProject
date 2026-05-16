@@ -34,6 +34,7 @@ CREATE TABLE IF NOT EXISTS cauldrons
     cauldron_z INTEGER,
     world_uuid BINARY(16),
     brew       JSON,
+    cauldron_type TEXT,
     PRIMARY KEY (cauldron_x, cauldron_y, cauldron_z, world_uuid)
 );
 
