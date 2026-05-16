@@ -37,7 +37,7 @@ public record CookStepImpl(Moment time, Map<? extends Ingredient, Integer> ingre
     }
 
     @Override
-    public CookStepImpl withBrewTime(Moment brewTime) {
+    public CookStepImpl withTime(Moment brewTime) {
         return new CookStepImpl(brewTime, this.ingredients, this.cauldronType, this.brewers, mergeCount);
     }
 
@@ -54,7 +54,7 @@ public record CookStepImpl(Moment time, Map<? extends Ingredient, Integer> ingre
         ))) {
             return BREW_STEP_MISMATCH;
         }
-        double cauldronTypeScore = (cauldronType == null || otherType == null) ? 1D : cauldronType.equals(otherType) ? 1D : 0D;
+        double cauldronTypeScore = (cauldronType == null || otherType == null) ? 1D : cauldronType.appliesTo(otherType) ? 1D : 0D;
         double timeScore = Math.sqrt(BrewingStepUtil.nearbyValueScore(this.time.moment(), otherTime.moment()));
         double ingredientsScore = BrewingStepUtil.getIngredientsScore((Map<Ingredient, Integer>) this.ingredients, (Map<Ingredient, Integer>) otherIngredients);
         return Stream.of(
