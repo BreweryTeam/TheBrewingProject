@@ -28,7 +28,7 @@ import java.util.concurrent.ScheduledExecutorService;
 
 public class Database implements PersistenceHandler<Connection> {
 
-    private static final int BREWERY_DATABASE_VERSION = 2;
+    private static final int BREWERY_DATABASE_VERSION = 3;
     private final DatabaseDriver driver;
     private HikariDataSource hikariDataSource;
     private final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
@@ -95,6 +95,11 @@ public class Database implements PersistenceHandler<Connection> {
             }
             case 1 -> {
                 for (String statement : FileUtil.readInternalResource("/database/migration/foreign_keys_on_migration.sql").split(";")) {
+                    connection.prepareStatement(statement + ";").execute();
+                }
+            }
+            case 2 -> {
+                for (String statement : FileUtil.readInternalResource("/database/migration/add_cauldron_type_migration.sql").split(";")) {
                     connection.prepareStatement(statement + ";").execute();
                 }
             }

@@ -2,6 +2,9 @@ package dev.jsinco.brewery.bukkit.breweries;
 
 import com.google.gson.JsonParser;
 import dev.jsinco.brewery.api.brew.Brew;
+import dev.jsinco.brewery.api.brew.BrewingStep;
+import dev.jsinco.brewery.api.breweries.CauldronType;
+import dev.jsinco.brewery.api.util.BreweryKey;
 import dev.jsinco.brewery.api.vector.BreweryLocation;
 import dev.jsinco.brewery.brew.BrewImpl;
 import dev.jsinco.brewery.bukkit.ingredient.BukkitIngredientManager;
@@ -16,6 +19,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -34,6 +38,7 @@ public class BukkitCauldronDataType implements SqlStoredData.Findable<BukkitCaul
             preparedStatement.setInt(3, location.z());
             preparedStatement.setBytes(4, DecoderEncoder.asBytes(location.worldUuid()));
             preparedStatement.setString(5, BrewImpl.SERIALIZER.serialize(value.getBrew(), BukkitIngredientManager.INSTANCE).toString());
+            preparedStatement.setString(6, value.getCauldronType().key().minimalized());
             preparedStatement.execute();
         } catch (SQLException e) {
             throw new PersistenceException(e);
@@ -45,10 +50,11 @@ public class BukkitCauldronDataType implements SqlStoredData.Findable<BukkitCaul
         try (PreparedStatement preparedStatement = connection.prepareStatement(statements.get(SqlStatements.Type.UPDATE))) {
             BreweryLocation location = newValue.position();
             preparedStatement.setString(1, BrewImpl.SERIALIZER.serialize(newValue.getBrew(), BukkitIngredientManager.INSTANCE).toString());
-            preparedStatement.setInt(2, location.x());
-            preparedStatement.setInt(3, location.y());
-            preparedStatement.setInt(4, location.z());
-            preparedStatement.setBytes(5, DecoderEncoder.asBytes(location.worldUuid()));
+            preparedStatement.setString(2, newValue.getCauldronType().key().minimalized());
+            preparedStatement.setInt(3, location.x());
+            preparedStatement.setInt(4, location.y());
+            preparedStatement.setInt(5, location.z());
+            preparedStatement.setBytes(6, DecoderEncoder.asBytes(location.worldUuid()));
             preparedStatement.execute();
         } catch (SQLException e) {
             throw new PersistenceException(e);
@@ -80,7 +86,22 @@ public class BukkitCauldronDataType implements SqlStoredData.Findable<BukkitCaul
                 int y = resultSet.getInt("cauldron_y");
                 int z = resultSet.getInt("cauldron_z");
                 CompletableFuture<Brew> brewFuture = BrewImpl.SERIALIZER.deserialize(JsonParser.parseString(resultSet.getString("brew")), BukkitIngredientManager.INSTANCE);
-                cauldrons.add(brewFuture.thenApplyAsync(brew -> new BukkitCauldron(brew, new BreweryLocation(x, y, z, worldUuid))));
+                String typeName = resultSet.getString("cauldron_type");
+                CauldronType cauldronType;
+                if (typeName != null) {
+                    BreweryKey typeKey = BreweryKey.parse(typeName);
+                    cauldronType = Arrays.stream(CauldronType.values()).filter(cauldronType1 -> cauldronType1.key().equals(typeKey))
+                            .findAny()
+                            .orElse(null);
+                } else {
+                    cauldronType = null;
+                }
+                cauldrons.add(brewFuture.thenApplyAsync(brew -> {
+                    CauldronType cauldronType1 = cauldronType != null ? cauldronType :
+                            (brew.lastStep() instanceof BrewingStep.CauldronStep<?> cauldronStep) ?
+                                    cauldronStep.cauldronType() : CauldronType.WATER;
+                    return new BukkitCauldron(brew, new BreweryLocation(x, y, z, worldUuid), cauldronType1);
+                }));
             }
             return FutureUtil.mergeFutures(cauldrons).join();
         } catch (SQLException e) {

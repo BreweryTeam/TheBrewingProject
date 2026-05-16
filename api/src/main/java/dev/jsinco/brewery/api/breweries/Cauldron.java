@@ -28,7 +28,13 @@ public interface Cauldron extends Tickable, SinglePositionStructure, SelfSchedul
      *
      * @return The type of the cauldron
      */
+    @Deprecated
     Optional<CauldronType> getType();
+
+    /**
+     * @return The type of the cauldron
+     */
+    CauldronType getCauldronType();
 
     /**
      * Requires chunk loading, checks the cauldron block for information
