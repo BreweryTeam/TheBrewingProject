@@ -291,7 +291,7 @@ public class PlayerEventListener implements Listener {
         if (createNewCauldron) {
             cauldron = new BukkitCauldron(BukkitAdapter.toBreweryLocation(block), BukkitCauldron.isHeatSource(block.getRelative(BlockFace.DOWN)));
         }
-        boolean addedIngredient = cauldron.addIngredient(itemStack, player);
+        boolean addedIngredient = cauldron.withIngredient(itemStack, player);
         if (addedIngredient) {
             updateHeldItem(decreaseItem(itemStack, player), player, hand);
             try {
