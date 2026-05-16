@@ -8,12 +8,17 @@ import dev.jsinco.brewery.api.breweries.BarrelType;
 import dev.jsinco.brewery.api.breweries.CauldronType;
 import dev.jsinco.brewery.api.ingredient.Ingredient;
 import dev.jsinco.brewery.api.ingredient.IngredientManager;
-import dev.jsinco.brewery.ingredient.IngredientUtil;
 import dev.jsinco.brewery.api.moment.Moment;
 import dev.jsinco.brewery.api.util.BreweryKey;
 import dev.jsinco.brewery.api.util.BreweryRegistry;
+import dev.jsinco.brewery.ingredient.IngredientUtil;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.Locale;
+import java.util.Map;
+import java.util.SequencedSet;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 public class BrewingStepSerializer {
@@ -24,37 +29,57 @@ public class BrewingStepSerializer {
         JsonObject object = new JsonObject();
         object.addProperty("type", step.stepType().name().toLowerCase(Locale.ROOT));
         switch (step) {
-            case AgeStepImpl(Moment age, BarrelType type, SequencedSet<UUID> brewers) -> {
+            case AgeStepImpl(Moment age, BarrelType type, SequencedSet<UUID> brewers, int mergeCount) -> {
                 object.add("age", Moment.SERIALIZER.serialize(age));
                 object.addProperty("barrel_type", type.key().toString());
                 if (!brewers.isEmpty()) {
                     object.add("brewers", brewersToJson(brewers));
                 }
+                if (mergeCount != 1) {
+                    object.addProperty("merge_count", mergeCount);
+                }
             }
             case CookStepImpl(
                     Moment brewTime, Map<? extends Ingredient, Integer> ingredients,
                     CauldronType cauldronType,
-                    SequencedSet<UUID> brewers
+                    SequencedSet<UUID> brewers,
+                    int mergeCount
             ) -> {
                 object.add("brew_time", Moment.SERIALIZER.serialize(brewTime));
-                object.addProperty("cauldron_type", cauldronType.key().toString());
+                if (cauldronType != null) {
+                    object.addProperty("cauldron_type", cauldronType.key().toString());
+                }
                 object.add("ingredients", IngredientUtil.ingredientsToJson((Map<Ingredient, Integer>) ingredients, ingredientManager));
                 if (!brewers.isEmpty()) {
                     object.add("brewers", brewersToJson(brewers));
                 }
+                if (mergeCount != 1) {
+                    object.addProperty("merge_count", mergeCount);
+                }
             }
-            case DistillStepImpl(int runs, SequencedSet<UUID> brewers) -> {
+            case DistillStepImpl(int runs, SequencedSet<UUID> brewers, int mergeCount) -> {
                 object.addProperty("runs", runs);
                 if (!brewers.isEmpty()) {
                     object.add("brewers", brewersToJson(brewers));
                 }
+                if (mergeCount != 1) {
+                    object.addProperty("merge_count", mergeCount);
+                }
             }
-            case MixStepImpl(Moment time, Map<? extends Ingredient, Integer> ingredients, CauldronType cauldronType, SequencedSet<UUID> brewers) -> {
+            case MixStepImpl(
+                    Moment time, Map<? extends Ingredient, Integer> ingredients, CauldronType cauldronType,
+                    SequencedSet<UUID> brewers, int mergeCount
+            ) -> {
                 object.add("ingredients", IngredientUtil.ingredientsToJson((Map<Ingredient, Integer>) ingredients, ingredientManager));
                 object.add("mix_time", Moment.SERIALIZER.serialize(time));
-                object.addProperty("cauldron_type", cauldronType.key().toString());
+                if (cauldronType != null) {
+                    object.addProperty("cauldron_type", cauldronType.key().toString());
+                }
                 if (!brewers.isEmpty()) {
                     object.add("brewers", brewersToJson(brewers));
+                }
+                if (mergeCount != 1) {
+                    object.addProperty("merge_count", mergeCount);
                 }
             }
             default -> throw new IllegalStateException("Unexpected value: " + step);
@@ -79,20 +104,23 @@ public class BrewingStepSerializer {
                             .thenApplyAsync(ingredients -> new CookStepImpl(
                                     Moment.SERIALIZER.deserialize(object.get("brew_time")),
                                     ingredients,
-                                    BreweryRegistry.CAULDRON_TYPE.get(BreweryKey.parse(object.get("cauldron_type").getAsString())),
-                                    jsonToBrewers(object)
+                                    object.has("cauldron_type")
+                                            ? BreweryRegistry.CAULDRON_TYPE.get(BreweryKey.parse(object.get("cauldron_type").getAsString()))
+                                            : null,
+                                    jsonToBrewers(object),
+                                    object.has("merge_count") ? object.get("merge_count").getAsInt() : 1
                             ));
-            case DISTILL ->
-                    CompletableFuture.completedFuture(new DistillStepImpl(
-                            object.get("runs").getAsInt(),
-                            jsonToBrewers(object)
-                    ));
-            case AGE ->
-                    CompletableFuture.completedFuture(new AgeStepImpl(
-                            Moment.SERIALIZER.deserialize(object.get("age")),
-                            BreweryRegistry.BARREL_TYPE.get(BreweryKey.parse(object.get("barrel_type").getAsString())),
-                            jsonToBrewers(object)
-                    ));
+            case DISTILL -> CompletableFuture.completedFuture(new DistillStepImpl(
+                    object.get("runs").getAsInt(),
+                    jsonToBrewers(object),
+                    object.has("merge_count") ? object.get("merge_count").getAsInt() : 1
+            ));
+            case AGE -> CompletableFuture.completedFuture(new AgeStepImpl(
+                    Moment.SERIALIZER.deserialize(object.get("age")),
+                    BreweryRegistry.BARREL_TYPE.get(BreweryKey.parse(object.get("barrel_type").getAsString())),
+                    jsonToBrewers(object),
+                    object.has("merge_count") ? object.get("merge_count").getAsInt() : 1
+            ));
             case MIX ->
                     IngredientUtil.ingredientsFromJson(object.get("ingredients").getAsJsonObject(), ingredientManager)
                             .thenApplyAsync(ingredients -> new MixStepImpl(
@@ -100,8 +128,9 @@ public class BrewingStepSerializer {
                                     ingredients,
                                     object.has("cauldron_type")
                                             ? BreweryRegistry.CAULDRON_TYPE.get(BreweryKey.parse(object.get("cauldron_type").getAsString()))
-                                            : BreweryRegistry.CAULDRON_TYPE.get(BreweryKey.parse("water")),
-                                    jsonToBrewers(object)
+                                            : null,
+                                    jsonToBrewers(object),
+                                    object.has("merge_count") ? object.get("merge_count").getAsInt() : 1
                             ));
         };
     }

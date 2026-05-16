@@ -291,7 +291,7 @@ public class PlayerEventListener implements Listener {
         if (createNewCauldron) {
             cauldron = new BukkitCauldron(BukkitAdapter.toBreweryLocation(block), BukkitCauldron.isHeatSource(block.getRelative(BlockFace.DOWN)));
         }
-        boolean addedIngredient = cauldron.addIngredient(itemStack, player);
+        boolean addedIngredient = cauldron.withIngredient(itemStack, player);
         if (addedIngredient) {
             updateHeldItem(decreaseItem(itemStack, player), player, hand);
             try {
@@ -326,6 +326,9 @@ public class PlayerEventListener implements Listener {
         Material type = itemStack.getType();
         if (DISALLOWED_INGREDIENT_MATERIALS.contains(type)) {
             return false;
+        }
+        if (BrewAdapterAccess.fromItem(itemStack).isPresent() || BrewAdapterAccess.isBrew(itemStack)) {
+            return true; // the cauldron itself decides whether to accept TBP brews
         }
         if (Config.config().allowUnregisteredIngredients()) {
             return true;

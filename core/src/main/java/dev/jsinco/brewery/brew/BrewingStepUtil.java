@@ -2,7 +2,7 @@ package dev.jsinco.brewery.brew;
 
 import dev.jsinco.brewery.api.ingredient.*;
 import dev.jsinco.brewery.api.util.Pair;
-import dev.jsinco.brewery.util.IngredientUtil;
+import dev.jsinco.brewery.util.BrewUtil;
 import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -21,9 +21,9 @@ public class BrewingStepUtil {
         Pair<Double, Integer> actualIngredientsScore = actual.entrySet()
                 .stream()
                 .flatMap(entry ->
-                        IngredientUtil.score(entry.getKey()).map(score -> new Pair<>(score * entry.getValue(), entry.getValue())).stream()
+                        BrewUtil.score(entry.getKey()).map(score -> new Pair<>(score * entry.getValue(), entry.getValue())).stream()
                 ).reduce(new Pair<>(0D, 0), (pair1, pair2) -> new Pair<>(pair1.first() + pair2.first(), pair1.second() + pair2.second()));
-        Map<BaseIngredient, Integer> modifiedActual = IngredientUtil.sanitizeIngredients(actual);
+        Map<BaseIngredient, Integer> modifiedActual = BrewUtil.sanitizeIngredients(actual);
         double ingredientScoreCumulativeSum = actualIngredientsScore.first();
         int scoredIngredientAmount = actualIngredientsScore.second();
         double output = 1D;
@@ -56,7 +56,7 @@ public class BrewingStepUtil {
             Ingredient ingredientMatch = ingredientMatchOptional.get();
             int amount = actual.remove(ingredientMatch.toBaseIngredient());
             return new Pair<>(amount,
-                    IngredientUtil.score(ingredientMatch)
+                    BrewUtil.score(ingredientMatch)
                             .orElse(null)
             );
         }

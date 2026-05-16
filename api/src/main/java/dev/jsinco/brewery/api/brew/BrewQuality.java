@@ -1,6 +1,8 @@
 package dev.jsinco.brewery.api.brew;
 
 
+import org.jspecify.annotations.Nullable;
+
 public enum BrewQuality {
     BAD(0xFF0000),
     GOOD(0xFFA500),
@@ -10,6 +12,15 @@ public enum BrewQuality {
 
     BrewQuality(int color) {
         this.color = color;
+    }
+
+    public static double maxScore(@Nullable BrewQuality overrideQuality) {
+        return switch (overrideQuality) {
+            case BAD -> 0.6D - Math.ulp(0.6D);
+            case GOOD -> 0.8D - Math.ulp(0.8D);
+            case EXCELLENT -> 1D;
+            case null -> 0.0;
+        };
     }
 
     /**

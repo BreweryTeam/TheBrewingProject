@@ -4,13 +4,13 @@ import dev.jsinco.brewery.api.brew.Brew;
 import dev.jsinco.brewery.api.brew.BrewQuality;
 import dev.jsinco.brewery.api.brew.BrewScore;
 import dev.jsinco.brewery.api.brew.BrewingStep;
-import dev.jsinco.brewery.api.brew.PartialBrewScore;
-import dev.jsinco.brewery.api.brew.ScoreType;
 import dev.jsinco.brewery.api.meta.MetaData;
 import dev.jsinco.brewery.api.meta.MetaDataType;
 import dev.jsinco.brewery.api.recipe.Recipe;
 import dev.jsinco.brewery.api.recipe.RecipeRegistry;
-import dev.jsinco.brewery.recipes.BrewScoreImpl;
+import dev.jsinco.brewery.api.util.Pair;
+import dev.jsinco.brewery.util.BrewUtil;
+import dev.jsinco.brewery.util.RegistryProviderHolder;
 import net.kyori.adventure.key.Key;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
@@ -18,6 +18,7 @@ import org.jspecify.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -34,6 +35,7 @@ import java.util.stream.Stream;
 public class BrewImpl implements Brew {
 
     private final List<BrewingStep> steps;
+    private @Nullable List<List<BrewingStep>> variations = null;
     private final MetaData meta;
     public static final BrewSerializer SERIALIZER = new BrewSerializer();
 
@@ -186,42 +188,37 @@ public class BrewImpl implements Brew {
     }
 
     @Override
-    public <I> Optional<Recipe<I>> closestRecipe(RecipeRegistry<I> registry) {
-        double bestScore = 0;
-        Recipe<I> bestMatch = null;
-        for (Recipe<I> recipe : registry.getRecipes()) {
-            double score = score(recipe).rawScore();
-            if (score > bestScore) {
-                bestScore = score;
-                bestMatch = recipe;
-            }
+    public List<List<BrewingStep>> variations() {
+        if (this.variations == null) {
+            this.variations = BrewUtil.variations(getCompletedSteps(), RegistryProviderHolder.instance().recipeRegistry());
         }
-        return Optional.ofNullable(bestMatch);
+        return variations;
+    }
+
+    @Override
+    public <I> Optional<Recipe<I>> closestRecipe(RecipeRegistry<I> registry) {
+        List<Pair<BrewScore, Recipe<I>>> scores = variations()
+                .stream()
+                .flatMap(steps -> registry.closestRecipe(steps)
+                        .map(recipe -> new Pair<>(recipe.score(steps), recipe))
+                        .stream()
+                )
+                .toList();
+        return scores.stream()
+                .filter(pair -> pair.first().completed())
+                .max(Comparator.comparingDouble(pair -> pair.first().rawScore()))
+                .or(() -> scores.stream()
+                        .max(Comparator.comparingDouble(pair -> pair.first().rawScore()))
+                ).map(Pair::second);
     }
 
     @Override
     public @NonNull BrewScore score(Recipe<?> recipe) {
-        List<BrewingStep> recipeSteps = recipe.getSteps();
-        List<Map<ScoreType, PartialBrewScore>> scores = new ArrayList<>();
-        List<BrewingStep> completedSteps = getCompletedSteps();
-        if (completedSteps.size() > recipeSteps.size()) {
-            return BrewScoreImpl.failed(this);
-        }
-        for (int i = 0; i < completedSteps.size(); i++) {
-            BrewingStep recipeStep = recipeSteps.get(i);
-            scores.add(recipeStep.proximityScores(completedSteps.get(i)));
-        }
-        boolean completed = completedSteps.size() == recipeSteps.size();
-        BrewScoreImpl brewScore = new BrewScoreImpl(scores, completed, recipe.getBrewDifficulty());
-        if (brewScore.brewQuality() == null) {
-            scores.removeLast();
-            scores.add(recipeSteps.get(completedSteps.size() - 1).maximumScores(completedSteps.getLast()));
-            BrewScoreImpl uncompleted = new BrewScoreImpl(scores, false, recipe.getBrewDifficulty());
-            if (uncompleted.brewQuality() != null) {
-                return uncompleted;
-            }
-        }
-        return brewScore;
+        return BrewUtil.variations(steps, RegistryProviderHolder.instance().recipeRegistry())
+                .stream()
+                .map(recipe::score)
+                .max(Comparator.comparingDouble(BrewScore::score))
+                .orElseGet(() -> recipe.score(steps));
     }
 
     @Override

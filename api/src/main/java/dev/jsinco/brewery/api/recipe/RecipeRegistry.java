@@ -1,10 +1,13 @@
 package dev.jsinco.brewery.api.recipe;
 
+import dev.jsinco.brewery.api.brew.Brew;
+import dev.jsinco.brewery.api.brew.BrewingStep;
 import dev.jsinco.brewery.api.ingredient.BaseIngredient;
 import dev.jsinco.brewery.api.ingredient.Ingredient;
 import org.jspecify.annotations.NonNull;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -25,6 +28,20 @@ public interface RecipeRegistry<I> {
      * @return All recipes registered at the moment
      */
     Collection<Recipe<I>> getRecipes();
+
+    /**
+     * @param steps The recipe procedure
+     * @return A collection of possible recipes
+     */
+    Collection<Recipe<I>> possibleRecipes(List<BrewingStep> steps);
+
+    /**
+     * The closest recipe for these steps
+     *
+     * @param steps The recipe procedure
+     * @return An optionally present recipe, if found
+     */
+    Optional<Recipe<I>> closestRecipe(List<BrewingStep> steps);
 
     /**
      * @param recipe The recipe to register

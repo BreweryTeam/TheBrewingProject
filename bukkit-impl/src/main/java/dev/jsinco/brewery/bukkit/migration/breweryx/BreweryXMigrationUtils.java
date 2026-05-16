@@ -21,7 +21,7 @@ import dev.jsinco.brewery.bukkit.api.integration.IntegrationTypes;
 import dev.jsinco.brewery.bukkit.ingredient.SimpleIngredient;
 import dev.jsinco.brewery.configuration.Config;
 import dev.jsinco.brewery.recipes.BrewScoreImpl;
-import dev.jsinco.brewery.util.IngredientUtil;
+import dev.jsinco.brewery.util.BrewUtil;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
@@ -128,10 +128,10 @@ public class BreweryXMigrationUtils {
         Recipe<ItemStack> recipe = recipeOptional.get();
         List<BrewingStep> steps = new ArrayList<>(recipe.getSteps());
         if (steps.getFirst() instanceof BrewingStep.Cook cookStep) {
-            steps.set(0, cookStep.withIngredients(IngredientUtil.sanitizeIngredients(cookStep.ingredients())));
+            steps.set(0, cookStep.withIngredients(BrewUtil.sanitizeIngredients(cookStep.ingredients())));
         }
         if (steps.getFirst() instanceof BrewingStep.Mix mixStep) {
-            steps.set(0, mixStep.withIngredients(IngredientUtil.sanitizeIngredients(mixStep.ingredients())));
+            steps.set(0, mixStep.withIngredients(BrewUtil.sanitizeIngredients(mixStep.ingredients())));
         }
         Brew brew = brewManager.createBrew(steps);
         BrewScore score = brew.score(recipe);

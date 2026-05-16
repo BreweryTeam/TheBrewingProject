@@ -1,6 +1,5 @@
 package dev.jsinco.brewery.recipes;
 
-import dev.jsinco.brewery.api.brew.Brew;
 import dev.jsinco.brewery.api.brew.BrewQuality;
 import dev.jsinco.brewery.api.brew.BrewScore;
 import dev.jsinco.brewery.api.brew.BrewingStep;
@@ -9,6 +8,7 @@ import dev.jsinco.brewery.api.brew.ScoreType;
 import dev.jsinco.brewery.util.MessageUtil;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.translation.Argument;
+import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
 import java.util.Collection;
@@ -30,8 +30,8 @@ public class BrewScoreImpl implements BrewScore {
         brewDifficulty = 1;
     }
 
-    public static BrewScoreImpl failed(Brew brew) {
-        List<Map<ScoreType, PartialBrewScore>> scores = brew.getCompletedSteps()
+    public static BrewScoreImpl failed(List<BrewingStep> completedSteps) {
+        List<Map<ScoreType, PartialBrewScore>> scores = completedSteps
                 .stream().map(BrewingStep::failedScores)
                 .toList();
         return new BrewScoreImpl(scores, true, 1);
@@ -135,5 +135,13 @@ public class BrewScoreImpl implements BrewScore {
 
     public void setQualityOverride(BrewQuality qualityOverride) {
         this.qualityOverride = qualityOverride;
+    }
+
+    @Override
+    public int compareTo(@NonNull BrewScore other) {
+        if (other.completed()) {
+            return !this.completed ? -1 : Double.compare(this.rawScore(), other.rawScore());
+        }
+        return this.completed ? 1 : Double.compare(this.rawScore(), other.rawScore());
     }
 }

@@ -8,8 +8,15 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import net.kyori.adventure.text.minimessage.translation.Argument;
 import org.jetbrains.annotations.Range;
+import org.jspecify.annotations.Nullable;
 
-import java.util.*;
+import java.util.LinkedHashSet;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Optional;
+import java.util.SequencedCollection;
+import java.util.SequencedSet;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -41,6 +48,7 @@ public interface BrewingStep {
 
     /**
      * All players who contributed to this brewing step, in their order of contribution.
+     *
      * @return All brewers, may be empty
      */
     SequencedSet<UUID> brewers();
@@ -52,6 +60,18 @@ public interface BrewingStep {
      * @return True if the step is completed
      */
     boolean isCompleted();
+
+    /**
+     *
+     * @return The amount of times this step has been merged with another step of same type
+     */
+    int mergeCount();
+
+    /**
+     * @param other The other step to merge with
+     * @return An optional value with a new merged step
+     */
+    Optional<BrewingStep> merge(BrewingStep other);
 
     /**
      * @param state    The state of the brew
@@ -78,6 +98,12 @@ public interface BrewingStep {
          * @return The ingredients for this step
          */
         Map<? extends Ingredient, Integer> ingredients();
+
+        /**
+         * @param ingredients The new ingredient content
+         * @return A new ingredient step with the changed ingredients
+         */
+        IngredientsStep withIngredients(Map<? extends Ingredient, Integer> ingredients);
     }
 
     interface AuthoredStep<SELF extends AuthoredStep<SELF>> extends BrewingStep {
@@ -87,7 +113,7 @@ public interface BrewingStep {
          * @return A new instance of this step with the specified brewer
          */
         default SELF withBrewer(UUID brewer) {
-            if(brewers().contains(brewer)) {
+            if (brewers().contains(brewer)) {
                 return (SELF) this;
             }
             return withBrewersReplaced(Stream.concat(
@@ -113,9 +139,9 @@ public interface BrewingStep {
     interface Cook extends TimedStep, IngredientsStep, AuthoredStep<Cook> {
 
         /**
-         * @return The type of the cauldron
+         * @return The type of the cauldron, or null for non-first recipe steps
          */
-        CauldronType cauldronType();
+        @Nullable CauldronType cauldronType();
 
         /**
          * @param brewTime A brew time (ticks)
@@ -161,9 +187,9 @@ public interface BrewingStep {
     interface Mix extends TimedStep, IngredientsStep, AuthoredStep<Mix> {
 
         /**
-         * @return The type of the cauldron
+         * @return The type of the cauldron, or null for non-first recipe steps
          */
-        CauldronType cauldronType();
+        @Nullable CauldronType cauldronType();
 
         /**
          * @param ingredients A map of ingredients with amount
