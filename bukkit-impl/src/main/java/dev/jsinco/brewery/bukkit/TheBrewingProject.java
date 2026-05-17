@@ -161,8 +161,6 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
     }
 
     public void initialize() {
-        EventSection.migrateEvents(getDataFolder());
-        Config.load(this.getDataFolder(), serializers());
         this.translator = new BreweryTranslator(new File(this.getDataFolder(), "locale"));
         DrunkenModifierSection.load(this.getDataFolder(), serializers());
         translator.reload();
@@ -182,6 +180,8 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
         saveResources();
         Migrations.migrateAllConfigFiles(this.getDataFolder());
         this.resourcePackColors = new ResourcePackColors();
+        EventSection.migrateEvents(getDataFolder());
+        Config.load(this.getDataFolder(), serializers());
         integrationManager.registerIntegrations(resourcePackColors);
         CompletableFuture.allOf(integrationManager.retrieve(IntegrationTypes.ITEM)
                 .stream()
