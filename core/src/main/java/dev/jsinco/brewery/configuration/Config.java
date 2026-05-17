@@ -110,6 +110,12 @@ public class Config extends OkaeriConfig implements Configuration {
     @Comment("The aliases for the 'tbp' command")
     private List<String> commandAliases = List.of("brewery", "brew");
 
+    @CustomKey("integration-blacklist")
+    @Comment({"Disable some integrations. (Only loaded on startup)",
+            "Matches against an integration type and integration name.",
+            "for example 'item.nexo' for exact match, and just 'nexo' to match with all nexo integrations"})
+    private List<String> integrationBlacklist = List.of();
+
     @Exclude
     private static Config instance;
 
@@ -223,5 +229,9 @@ public class Config extends OkaeriConfig implements Configuration {
 
     public List<String> commandAliases() {
         return this.commandAliases;
+    }
+
+    public List<String> integrationBlacklist() {
+        return this.integrationBlacklist;
     }
 }
