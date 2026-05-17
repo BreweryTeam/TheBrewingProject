@@ -1,6 +1,10 @@
 package dev.jsinco.brewery.brew;
 
-import dev.jsinco.brewery.api.ingredient.*;
+import dev.jsinco.brewery.api.ingredient.BaseIngredient;
+import dev.jsinco.brewery.api.ingredient.Ingredient;
+import dev.jsinco.brewery.api.ingredient.IngredientGroup;
+import dev.jsinco.brewery.api.ingredient.IngredientMeta;
+import dev.jsinco.brewery.api.ingredient.IngredientWithMeta;
 import dev.jsinco.brewery.api.util.Pair;
 import dev.jsinco.brewery.util.BrewUtil;
 import org.jspecify.annotations.Nullable;
@@ -14,7 +18,7 @@ public class BrewingStepUtil {
 
     public static double nearbyValueScore(long expected, long value) {
         double diff = Math.abs(expected - value);
-        return 1 - Math.max(diff / expected, 0D);
+        return 1 - Math.clamp(diff / expected, 0D, 1D);
     }
 
     public static double getIngredientsScore(Map<Ingredient, Integer> target, Map<Ingredient, Integer> actual) {
