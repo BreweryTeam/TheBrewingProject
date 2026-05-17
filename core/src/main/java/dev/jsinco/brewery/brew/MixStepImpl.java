@@ -76,7 +76,7 @@ public record MixStepImpl(Moment time, Map<? extends Ingredient, Integer> ingred
     public boolean isCompleted() {
         return true;
     }
-    
+
     @Override
     public int mergeCount() {
         return this.mergeCount > 0 ? this.mergeCount : 1;
@@ -93,7 +93,9 @@ public record MixStepImpl(Moment time, Map<? extends Ingredient, Integer> ingred
         long newElapsedTime = (other.time().moment() * other.mergeCount() + this.time().moment() * this.mergeCount) / (other.mergeCount() + this.mergeCount);
         Map<Ingredient, Integer> newIngredients = BrewUtil.averageIngredients(
                 this.ingredients,
-                other.ingredients()
+                other.ingredients(),
+                this.mergeCount,
+                other.mergeCount()
         );
         SequencedSet<UUID> newBrewers = new LinkedHashSet<>(this.brewers);
         newBrewers.addAll(other.brewers());
