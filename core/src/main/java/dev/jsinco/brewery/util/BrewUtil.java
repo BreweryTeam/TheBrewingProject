@@ -1,6 +1,5 @@
 package dev.jsinco.brewery.util;
 
-import dev.jsinco.brewery.api.brew.Brew;
 import dev.jsinco.brewery.api.brew.BrewScore;
 import dev.jsinco.brewery.api.brew.BrewingStep;
 import dev.jsinco.brewery.api.ingredient.BaseIngredient;
@@ -11,7 +10,6 @@ import dev.jsinco.brewery.api.ingredient.IngredientMeta;
 import dev.jsinco.brewery.api.ingredient.IngredientWithMeta;
 import dev.jsinco.brewery.api.recipe.Recipe;
 import dev.jsinco.brewery.api.recipe.RecipeRegistry;
-import dev.jsinco.brewery.brew.BrewImpl;
 import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -107,10 +105,10 @@ public class BrewUtil {
         if (sections.size() < 2) {
             return sections;
         }
-        return variations0(sections, registry, null);
+        return variations0(sections, registry, null, 0);
     }
 
-    private static List<List<BrewingStep>> variations0(List<List<BrewingStep>> sections, RecipeRegistry<?> registry, @Nullable Ingredient carryoverIngredient) {
+    private static List<List<BrewingStep>> variations0(List<List<BrewingStep>> sections, RecipeRegistry<?> registry, @Nullable Ingredient carryoverIngredient, int carryoverAmount) {
         if (sections.isEmpty()) {
             return List.of();
         }
@@ -122,41 +120,50 @@ public class BrewUtil {
         if (carryoverIngredient != null) {
             if (firstStep instanceof BrewingStep.IngredientsStep ingredientsStep) {
                 Map<Ingredient, Integer> ingredients = new HashMap<>(ingredientsStep.ingredients());
-                ingredients.put(carryoverIngredient, 3);
+                ingredients.put(carryoverIngredient, carryoverAmount);
                 built.set(0, ingredientsStep.withIngredients(
                         ingredients
                 ));
             } else {
                 // Avoid generating invalid variations
-                return List.of();
+                return List.of(
+                        sections.stream()
+                                .flatMap(Collection::stream)
+                                .toList()
+                );
             }
         }
         if (sections.size() == 1) {
             return List.of(built);
         }
 
+        int mergeCount = built.getFirst().mergeCount();
         List<List<BrewingStep>> remaining = sections.subList(1, sections.size());
         List<List<BrewingStep>> output = new ArrayList<>();
         for (int i = 0; i < remaining.size(); i++) {
-            Brew brew = new BrewImpl(built);
-            final int iFinal = i;
-            registry.possibleRecipes(built)
-                    .stream()
-                    .flatMap(recipe -> {
-                        BrewScore score = brew.score(recipe);
-                        double scoreValue = score.score();
-                        return (score.completed() && scoreValue > 0) ? Stream.of(recipe.toIngredient(scoreValue)) : Stream.empty();
-                    })
-                    .map(ingredient -> variations0(remaining.subList(iFinal, remaining.size()), registry, ingredient))
-                    .forEach(output::addAll);
+            for (Recipe<?> possibleRecipe : registry.possibleRecipes(built)) {
+                BrewScore score = possibleRecipe.score(built);
+                double scoreValue = score.score();
+                if (!score.completed() || scoreValue <= 0) {
+                    continue;
+                }
+                Ingredient ingredient = possibleRecipe.toIngredient(scoreValue);
+                output.addAll(
+                        variations0(remaining.subList(i, remaining.size()), registry, ingredient, mergeCount)
+                );
+            }
             List<BrewingStep> addition = remaining.get(i);
+            mergeCount = addition.getFirst().mergeCount();
             built.addAll(addition);
         }
         output.add(built);
         return output;
     }
 
-    public static Map<Ingredient, Integer> averageIngredients(Map<? extends Ingredient, Integer> a, Map<? extends Ingredient, Integer> b) {
+    public static Map<Ingredient, Integer> averageIngredients(Map<? extends Ingredient, Integer> a, Map<? extends Ingredient, Integer> b, int weightA, int weightB) {
+        if (weightA + weightB == 0) {
+            return Map.of();
+        }
         Map<Ingredient, Integer> mapA = (Map<Ingredient, Integer>) a;
         Map<Ingredient, Integer> mapB = (Map<Ingredient, Integer>) b;
         Set<Ingredient> allKeys = new HashSet<>(mapA.keySet());
@@ -165,29 +172,26 @@ public class BrewUtil {
         for (Ingredient key : allKeys) {
             int countA = mapA.getOrDefault(key, 0);
             int countB = mapB.getOrDefault(key, 0);
-            int avg = (countA + countB + 1) / 2;
+            int avg = (int) Math.round((double) (countA * weightA + countB * weightB) / (weightA + weightB));
             if (avg > 0) result.put(key, avg);
         }
         return result;
     }
 
 
-    public static Optional<Brew> mergeBrews(Brew existing, Brew added) {
-        List<BrewingStep> existingSteps = existing.getCompletedSteps();
-        List<BrewingStep> addedSteps = added.getCompletedSteps();
-        int mergeCount = Math.min(existingSteps.size(), addedSteps.size());
-        List<BrewingStep> mergedSteps = new ArrayList<>(existingSteps.size());
-        for (int i = 0; i < mergeCount; i++) {
-            Optional<BrewingStep> optionalBrewingStep = existingSteps.get(i).merge(addedSteps.get(i));
+    public static Optional<List<BrewingStep>> mergeSteps(List<BrewingStep> existing, List<BrewingStep> added) {
+        if (existing.size() != added.size()) {
+            return Optional.empty();
+        }
+        List<BrewingStep> mergedSteps = new ArrayList<>(existing.size());
+        for (int i = 0; i < existing.size(); i++) {
+            Optional<BrewingStep> optionalBrewingStep = existing.get(i).merge(added.get(i));
             if (optionalBrewingStep.isEmpty()) {
                 return Optional.empty();
             }
             optionalBrewingStep.ifPresent(mergedSteps::add);
         }
-        for (int i = mergeCount; i < existingSteps.size(); i++) {
-            mergedSteps.add(existingSteps.get(i));
-        }
-        return Optional.of(existing.withStepsReplaced(mergedSteps));
+        return Optional.of(mergedSteps);
     }
 
     public static Map<Ingredient, Integer> countIngredientTotal(List<BrewingStep> steps) {
