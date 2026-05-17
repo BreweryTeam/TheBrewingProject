@@ -61,6 +61,7 @@ import org.joml.AxisAngle4f;
 import org.joml.Vector3f;
 import org.jspecify.annotations.NonNull;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -69,6 +70,7 @@ import java.util.Optional;
 import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 public class BukkitCauldron implements Cauldron {
 
@@ -221,6 +223,7 @@ public class BukkitCauldron implements Cauldron {
             }
             return false;
         }
+        this.hot = isHeatSource(getBlock().getRelative(BlockFace.DOWN));
         ItemStack addedItem = insertEvent.getItemSource().get();
         Optional<Brew> optionalAddedBrew = BrewAdapterAccess.fromItem(addedItem);
         if (optionalAddedBrew.isPresent()) {
@@ -231,7 +234,6 @@ public class BukkitCauldron implements Cauldron {
             BukkitCauldron.incrementLevel(getBlock());
             updateLevel(getBlock().getBlockData());
         }
-        this.hot = isHeatSource(getBlock().getRelative(BlockFace.DOWN));
         Brew newBrew = withIngredient(BukkitIngredientManager.INSTANCE.getIngredient(addedItem))
                 .witModifiedLastStep(step ->
                         step instanceof BrewingStep.AuthoredStep<?> authoredStep
@@ -277,22 +279,31 @@ public class BukkitCauldron implements Cauldron {
             // Empty cauldron: reinsert brew into the cauldron with 1 water level
             BukkitCauldron.incrementLevel(getBlock());
             updateLevel(getBlock().getBlockData());
-            this.brewExtracted = false;
-            this.hot = isHeatSource(getBlock().getRelative(BlockFace.DOWN));
             recalculateBrewTime();
             playIngredientAddedEffects(item, player);
             return true;
         }
-
-        Optional<Brew> merged = BrewUtil.mergeBrews(this.brew, addedBrew);
+        List<BrewingStep> existing = new ArrayList<>(this.brew.getCompletedSteps());
+        Optional<Brew> merged;
+        if (existing.isEmpty()) {
+            merged = Optional.of(addedBrew);
+        } else {
+            BrewingStep thisStep = existing.removeLast();
+            List<BrewingStep> added = new ArrayList<>(addedBrew.getCompletedSteps());
+            merged = BrewUtil.mergeSteps(existing, added)
+                    .map(steps -> Stream.concat(steps.stream(), Stream.of(thisStep)))
+                    .map(Stream::toList)
+                    .map(this.brew::withStepsReplaced);
+        }
         if (merged.isPresent() && changeBrew(merged.get(), CauldronType.WATER)) {
             BukkitCauldron.incrementLevel(getBlock());
             updateLevel(getBlock().getBlockData());
             playIngredientAddedEffects(item, player);
             return true;
         }
-
-        this.hot = isHeatSource(getBlock().getRelative(BlockFace.DOWN));
+        if (!BrewAdapterAccess.isBrew(item)) {
+            return false;
+        }
         Brew newBrew = withIngredient(BukkitIngredientManager.INSTANCE.getIngredient(item))
                 .witModifiedLastStep(step ->
                         step instanceof BrewingStep.AuthoredStep<?> authoredStep
@@ -326,7 +337,7 @@ public class BukkitCauldron implements Cauldron {
         }
         return shouldChange;
     }
-    
+
     private boolean cauldronHasActiveBrew() {
         return brew.getCompletedSteps().stream().anyMatch(step ->
                 (step instanceof BrewingStep.IngredientsStep i && !i.ingredients().isEmpty())
