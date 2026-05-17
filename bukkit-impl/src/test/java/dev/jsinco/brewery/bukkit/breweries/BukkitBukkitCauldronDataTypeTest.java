@@ -1,5 +1,6 @@
 package dev.jsinco.brewery.bukkit.breweries;
 
+import dev.jsinco.brewery.api.breweries.CauldronType;
 import dev.jsinco.brewery.api.vector.BreweryLocation;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.bukkit.api.BukkitAdapter;
@@ -42,14 +43,14 @@ class BukkitBukkitCauldronDataTypeTest {
         Block block = world.getBlockAt(0, 0, 0);
         block.setType(Material.WATER_CAULDRON);
         BreweryLocation position = BukkitAdapter.toBreweryLocation(block);
-        BukkitCauldron cauldron = new BukkitCauldron(position, true);
+        BukkitCauldron cauldron = new BukkitCauldron(position, true, CauldronType.WATER);
         database.insertValue(BukkitCauldronDataType.INSTANCE, cauldron);
         List<BukkitCauldron> cauldrons = database.findNow(BukkitCauldronDataType.INSTANCE, world.getUID());
         assertEquals(1, cauldrons.size());
         BukkitCauldron retrievedCauldron = cauldrons.get(0);
         assertEquals(cauldron.getBrew(), retrievedCauldron.getBrew());
         assertEquals(cauldron.position(), retrievedCauldron.position());
-        BukkitCauldron updatedValue = new BukkitCauldron(position, true);
+        BukkitCauldron updatedValue = new BukkitCauldron(position, true, CauldronType.WATER);
         database.updateValue(BukkitCauldronDataType.INSTANCE, updatedValue);
         List<BukkitCauldron> updatedCauldrons = database.findNow(BukkitCauldronDataType.INSTANCE, world.getUID());
         assertEquals(1, updatedCauldrons.size());

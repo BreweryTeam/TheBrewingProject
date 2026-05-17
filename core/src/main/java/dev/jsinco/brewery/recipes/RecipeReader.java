@@ -107,7 +107,7 @@ public class RecipeReader<I> {
                 List<String> ingredientList = map.containsKey("ingredients")
                         ? (List<String>) map.get("ingredients") : List.of();
                 CauldronType cauldronType = isStartingStep
-                        ? BreweryRegistry.CAULDRON_TYPE.get(BreweryKey.parse(map.containsKey("cauldron-type") ? map.get("cauldron-type").toString().toLowerCase(Locale.ROOT) : "water"))
+                        ? BreweryRegistry.CAULDRON_TYPE.get(BreweryKey.parse(map.containsKey("cauldron-type") ? map.get("cauldron-type").toString().toLowerCase(Locale.ROOT) : "solution"))
                         : null;
                 yield ingredientManager.getIngredientsWithAmount(ingredientList)
                         .thenApplyAsync(ingredients -> new CookStepImpl(
@@ -127,7 +127,7 @@ public class RecipeReader<I> {
                 List<String> ingredientList = map.containsKey("ingredients")
                         ? (List<String>) map.get("ingredients") : List.of();
                 CauldronType cauldronType = isStartingStep
-                        ? BreweryRegistry.CAULDRON_TYPE.get(BreweryKey.parse(map.containsKey("cauldron-type") ? map.get("cauldron-type").toString().toLowerCase(Locale.ROOT) : "water"))
+                        ? BreweryRegistry.CAULDRON_TYPE.get(BreweryKey.parse(map.containsKey("cauldron-type") ? map.get("cauldron-type").toString().toLowerCase(Locale.ROOT) : "solution"))
                         : null;
                 yield ingredientManager.getIngredientsWithAmount(ingredientList)
                         .thenApplyAsync(ingredients -> new MixStepImpl(

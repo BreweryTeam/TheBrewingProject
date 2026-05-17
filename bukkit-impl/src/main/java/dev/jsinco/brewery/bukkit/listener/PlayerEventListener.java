@@ -3,6 +3,7 @@ package dev.jsinco.brewery.bukkit.listener;
 import com.destroystokyo.paper.event.player.PlayerLaunchProjectileEvent;
 import dev.jsinco.brewery.api.brew.Brew;
 import dev.jsinco.brewery.api.brew.BrewingStep;
+import dev.jsinco.brewery.api.breweries.CauldronType;
 import dev.jsinco.brewery.api.breweries.InventoryAccessible;
 import dev.jsinco.brewery.api.breweries.StructureHolder;
 import dev.jsinco.brewery.api.effect.DrunkState;
@@ -289,7 +290,9 @@ public class PlayerEventListener implements Listener {
         }
         boolean createNewCauldron = cauldron == null;
         if (createNewCauldron) {
-            cauldron = new BukkitCauldron(BukkitAdapter.toBreweryLocation(block), BukkitCauldron.isHeatSource(block.getRelative(BlockFace.DOWN)));
+            CauldronType cauldronType = (block.getType() == Material.CAULDRON && itemStack.getType() == Material.POTION) ?
+                    CauldronType.BREW : BukkitCauldron.findCauldronType(block).orElse(CauldronType.WATER);
+            cauldron = new BukkitCauldron(BukkitAdapter.toBreweryLocation(block), BukkitCauldron.isHeatSource(block.getRelative(BlockFace.DOWN)), cauldronType);
         }
         boolean addedIngredient = cauldron.withIngredient(itemStack, player);
         if (addedIngredient) {
