@@ -99,7 +99,9 @@ public record CookStepImpl(Moment time, Map<? extends Ingredient, Integer> ingre
         long newElapsedTime = (other.time().moment() * other.mergeCount() + this.time().moment() * this.mergeCount) / (other.mergeCount() + this.mergeCount);
         Map<Ingredient, Integer> newIngredients = BrewUtil.averageIngredients(
                 this.ingredients,
-                other.ingredients()
+                other.ingredients(),
+                this.mergeCount,
+                other.mergeCount()
         );
         SequencedSet<UUID> newBrewers = new LinkedHashSet<>(this.brewers);
         newBrewers.addAll(other.brewers());
