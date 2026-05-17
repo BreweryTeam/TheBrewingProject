@@ -25,7 +25,10 @@ import dev.jsinco.brewery.bukkit.integration.structure.TownyIntegration;
 import dev.jsinco.brewery.bukkit.integration.structure.WorldGuardIntegration;
 import dev.jsinco.brewery.bukkit.util.color.ResourcePackColors;
 import dev.jsinco.brewery.util.ClassUtil;
+import dev.jsinco.brewery.configuration.Config;
 
+import java.util.Locale;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Supplier;
 
@@ -68,11 +71,16 @@ public class IntegrationManagerImpl implements IntegrationManager {
 
     @Override
     public <T extends Integration> void register(IntegrationType<? extends T> type, T integration) {
-        if (!integration.isEnabled()) {
+        String fullId = (type.name() + "." + integration.getId()).toLowerCase(Locale.ROOT);
+        if (!integration.isEnabled() || Config.config().integrationBlacklist()
+                .stream()
+                .filter(Objects::nonNull)
+                .map(string -> string.toLowerCase(Locale.ROOT))
+                .anyMatch(fullId::contains)) {
             return;
         }
 
-        Logger.log("Registering integration " + integration.getId() + " with type " + type.name());
+        Logger.log("Registering integration " + integration.getId() + " with type " + type.name() + " integration");
         integrationRegistry.register(type, integration);
     }
 
