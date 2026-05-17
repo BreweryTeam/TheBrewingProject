@@ -240,14 +240,7 @@ public class BukkitCauldron implements Cauldron {
         if (!changeBrew(newBrew, CauldronType.WATER)) {
             return false;
         }
-
-        long delay;
-        if (Config.config().cauldrons().ingredientAddedAnimation() != AnimationDisplay.NONE) {
-            delay = AnimationManager.playIngredientAddAnimation(addedItem, player, getBlock().getLocation().toCenterLocation());
-        } else {
-            delay = 1;
-        }
-        playIngredientAddedEffects(addedItem, delay);
+        playIngredientAddedEffects(addedItem, player);
         return true;
     }
 
@@ -287,7 +280,7 @@ public class BukkitCauldron implements Cauldron {
             this.brewExtracted = false;
             this.hot = isHeatSource(getBlock().getRelative(BlockFace.DOWN));
             recalculateBrewTime();
-            playBrewInsertEffects(item, player);
+            playIngredientAddedEffects(item, player);
             return true;
         }
 
@@ -295,7 +288,7 @@ public class BukkitCauldron implements Cauldron {
         if (merged.isPresent() && changeBrew(merged.get(), CauldronType.WATER)) {
             BukkitCauldron.incrementLevel(getBlock());
             updateLevel(getBlock().getBlockData());
-            playBrewInsertEffects(item, player);
+            playIngredientAddedEffects(item, player);
             return true;
         }
 
@@ -308,7 +301,7 @@ public class BukkitCauldron implements Cauldron {
         if (!changeBrew(newBrew, CauldronType.WATER)) {
             return false;
         }
-        playBrewInsertEffects(item, player);
+        playIngredientAddedEffects(item, player);
         return true;
     }
 
@@ -333,27 +326,7 @@ public class BukkitCauldron implements Cauldron {
         }
         return shouldChange;
     }
-
-    private void playBrewInsertEffects(ItemStack item, Player player) {
-        long delay;
-        if (Config.config().cauldrons().ingredientAddedAnimation() != AnimationDisplay.NONE) {
-            delay = AnimationManager.playIngredientAddAnimation(item, player, getBlock().getLocation().toCenterLocation());
-        } else {
-            delay = 1;
-        }
-        playIngredientAddedEffects(item, delay);
-    }
-
-    private Brew stripShortLastStep(Brew brew) {
-        if (brew.stepAmount() <= 1) return brew;
-        BrewingStep last = brew.lastStep();
-        if ((last instanceof BrewingStep.Cook || last instanceof BrewingStep.Mix)
-                && ((BrewingStep.TimedStep) last).time().moment() < Moment.MINUTE) {
-            return brew.withStepsReplaced(brew.getSteps().subList(0, brew.stepAmount() - 1));
-        }
-        return brew;
-    }
-
+    
     private boolean cauldronHasActiveBrew() {
         return brew.getCompletedSteps().stream().anyMatch(step ->
                 (step instanceof BrewingStep.IngredientsStep i && !i.ingredients().isEmpty())
@@ -424,7 +397,13 @@ public class BukkitCauldron implements Cauldron {
                 });
     }
 
-    public void playIngredientAddedEffects(ItemStack item, long delay) {
+    public void playIngredientAddedEffects(ItemStack item, Player player) {
+        long delay;
+        if (Config.config().cauldrons().ingredientAddedAnimation() != AnimationDisplay.NONE) {
+            delay = AnimationManager.playIngredientAddAnimation(item, player, getBlock().getLocation().toCenterLocation());
+        } else {
+            delay = 1;
+        }
         BukkitAdapter.toLocation(this.location)
                 .map(Location::toCenterLocation)
                 .filter(Location::isChunkLoaded)
