@@ -25,6 +25,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -89,26 +90,28 @@ public class RecipeReader<I> {
 
     private @NonNull CompletableFuture<List<BrewingStep>> parseSteps(List<Map<?, ?>> steps) {
         List<CompletableFuture<BrewingStep>> futures = new java.util.ArrayList<>();
-        boolean firstCookOrMix = true;
+        boolean hasParsedIngredientStep = false;
         for (Map<?, ?> step : steps) {
-            String typeStr = String.valueOf(step.get("type")).toUpperCase(Locale.ROOT);
-            boolean isCookOrMix = typeStr.equals("COOK") || typeStr.equals("MIX");
-            futures.add(parseStep(step, isCookOrMix && firstCookOrMix));
-            if (isCookOrMix) firstCookOrMix = false;
+            BrewingStep.StepType type = BrewingStep.StepType.valueOf(
+                    String.valueOf(step.get("type")).toUpperCase(Locale.ROOT)
+            );
+            checkStep(type, step, hasParsedIngredientStep);
+            futures.add(parseStep(step, type));
+            hasParsedIngredientStep |= Set.of(BrewingStep.StepType.MIX, BrewingStep.StepType.COOK)
+                    .contains(type);
         }
         return FutureUtil.mergeFutures(futures);
     }
 
-    private CompletableFuture<BrewingStep> parseStep(Map<?, ?> map, boolean isStartingStep) {
-        BrewingStep.StepType type = BrewingStep.StepType.valueOf(String.valueOf(map.get("type")).toUpperCase(Locale.ROOT));
-        checkStep(type, map, isStartingStep);
+    private CompletableFuture<BrewingStep> parseStep(Map<?, ?> map, BrewingStep.StepType type) {
+
         return switch (type) {
             case COOK -> {
                 List<String> ingredientList = map.containsKey("ingredients")
                         ? (List<String>) map.get("ingredients") : List.of();
-                CauldronType cauldronType = isStartingStep
-                        ? BreweryRegistry.CAULDRON_TYPE.get(BreweryKey.parse(map.containsKey("cauldron-type") ? map.get("cauldron-type").toString().toLowerCase(Locale.ROOT) : "solution"))
-                        : null;
+                CauldronType cauldronType = map.containsKey("cauldron-type") ? BreweryRegistry.CAULDRON_TYPE.get(
+                        BreweryKey.parse(map.get("cauldron-type").toString().toLowerCase(Locale.ROOT))
+                ) : null;
                 yield ingredientManager.getIngredientsWithAmount(ingredientList)
                         .thenApplyAsync(ingredients -> new CookStepImpl(
                                 parseTime(map, TimeUtil.TimeUnit.COOKING_MINUTES, "time", "cook-time"),
@@ -126,9 +129,9 @@ public class RecipeReader<I> {
             case MIX -> {
                 List<String> ingredientList = map.containsKey("ingredients")
                         ? (List<String>) map.get("ingredients") : List.of();
-                CauldronType cauldronType = isStartingStep
-                        ? BreweryRegistry.CAULDRON_TYPE.get(BreweryKey.parse(map.containsKey("cauldron-type") ? map.get("cauldron-type").toString().toLowerCase(Locale.ROOT) : "solution"))
-                        : null;
+                CauldronType cauldronType = map.containsKey("cauldron-type") ? BreweryRegistry.CAULDRON_TYPE.get(
+                        BreweryKey.parse(map.get("cauldron-type").toString().toLowerCase(Locale.ROOT))
+                ) : null;
                 yield ingredientManager.getIngredientsWithAmount(ingredientList)
                         .thenApplyAsync(ingredients -> new MixStepImpl(
                                 parseTime(map, TimeUtil.TimeUnit.COOKING_MINUTES, "mix-time", "time"),
@@ -158,40 +161,30 @@ public class RecipeReader<I> {
         throw new IllegalArgumentException("Expected a time with any of the following keys " + Arrays.toString(aliases));
     }
 
-    private void checkStep(BrewingStep.StepType type, Map<?, ?> map, boolean isStartingStep) throws IllegalArgumentException {
+    private void checkStep(BrewingStep.StepType type, Map<?, ?> map, boolean hasParsedIngredientStep) throws IllegalArgumentException {
         switch (type) {
             case COOK -> {
                 validTime(map, "time", "cook-time");
-                if (isStartingStep) {
-                    Preconditions.checkArgument(map.get("ingredients") instanceof List, "Expected string list value for 'ingredients' in cook step!");
-                    Preconditions.checkArgument(!map.containsKey("cauldron-type") || map.get("cauldron-type") instanceof String, "Expected string value for 'cauldron-type' in cook step!");
-                    String cauldronType = map.containsKey("cauldron-type") ? (String) map.get("cauldron-type") : "water";
-                    Preconditions.checkArgument(BreweryRegistry.CAULDRON_TYPE.containsKey(BreweryKey.parse(cauldronType)), "Expected a valid cauldron type for 'cauldron-type' in cook step!");
-                } else {
-                    Preconditions.checkArgument(!map.containsKey("ingredients") || map.get("ingredients") instanceof List, "Expected string list value for 'ingredients' in cook step if provided!");
-                    Preconditions.checkArgument(!map.containsKey("cauldron-type"), "Non-starting cook steps must not specify 'cauldron-type'!");
-                }
+                Preconditions.checkArgument(hasParsedIngredientStep || map.get("ingredients") instanceof List, "Expected string list value for 'ingredients' in cook step!");
+                Preconditions.checkArgument(!map.containsKey("cauldron-type") || map.get("cauldron-type") instanceof String, "Expected string value for 'cauldron-type' in cook step!");
+                String cauldronType = (String) map.get("cauldron-type");
+                Preconditions.checkArgument(cauldronType == null || BreweryRegistry.CAULDRON_TYPE.containsKey(BreweryKey.parse(cauldronType)), "Expected a valid cauldron type for 'cauldron-type' in cook step!");
             }
             case DISTILL ->
                     Preconditions.checkArgument(map.get("runs") instanceof Integer integer && integer > 0, "Expected a positive integer value for 'runs' in distill step!");
             case AGE -> {
-                validTime(map, "time", "age-years");
-                Preconditions.checkArgument(parseTime(map, TimeUtil.TimeUnit.AGING_YEARS, "time", "age-years").moment() > Config.config().barrels().agingYearTicks() / 2, "Expected a time longer than half an aging year for 'age-years' in age step!");
+                validTime(map, "time", "age-years", "aging-years");
+                Preconditions.checkArgument(parseTime(map, TimeUtil.TimeUnit.AGING_YEARS, "time", "age-years", "aging-years").moment() > Config.config().barrels().agingYearTicks() / 2, "Expected a time longer than half an aging year for 'age-years' in age step!");
                 Preconditions.checkArgument(!map.containsKey("barrel-type") || map.get("barrel-type") instanceof String, "Expected string value for 'barrel-type' in age step!");
                 String barrelType = map.containsKey("barrel-type") ? (String) map.get("barrel-type") : "any";
                 Preconditions.checkArgument(BreweryRegistry.BARREL_TYPE.containsKey(BreweryKey.parse(barrelType)), "Expected a valid barrel type for 'barrel-type' in age step!");
             }
             case MIX -> {
                 validTime(map, "time", "mix-time");
-                if (isStartingStep) {
-                    Preconditions.checkArgument(map.get("ingredients") instanceof List, "Expected string list value for 'ingredients' in mix step!");
-                    Preconditions.checkArgument(!map.containsKey("cauldron-type") || map.get("cauldron-type") instanceof String, "Expected string value for 'cauldron-type' in mix step!");
-                    String cauldronType = map.containsKey("cauldron-type") ? (String) map.get("cauldron-type") : "water";
-                    Preconditions.checkArgument(BreweryRegistry.CAULDRON_TYPE.containsKey(BreweryKey.parse(cauldronType)), "Expected a valid cauldron type for 'cauldron-type' in mix step!");
-                } else {
-                    Preconditions.checkArgument(!map.containsKey("ingredients") || map.get("ingredients") instanceof List, "Expected string list value for 'ingredients' in mix step if provided!");
-                    Preconditions.checkArgument(!map.containsKey("cauldron-type"), "Non-starting mix steps must not specify 'cauldron-type'!");
-                }
+                Preconditions.checkArgument(hasParsedIngredientStep || map.get("ingredients") instanceof List, "Expected string list value for 'ingredients' in mix step!");
+                Preconditions.checkArgument(!map.containsKey("cauldron-type") || map.get("cauldron-type") instanceof String, "Expected string value for 'cauldron-type' in mix step!");
+                String cauldronType = (String) map.get("cauldron-type");
+                Preconditions.checkArgument(cauldronType == null || BreweryRegistry.CAULDRON_TYPE.containsKey(BreweryKey.parse(cauldronType)), "Expected a valid cauldron type for 'cauldron-type' in cook step!");
             }
         }
     }
