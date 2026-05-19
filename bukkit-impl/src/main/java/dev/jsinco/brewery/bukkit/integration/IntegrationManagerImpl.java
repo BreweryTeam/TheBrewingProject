@@ -23,31 +23,36 @@ import dev.jsinco.brewery.bukkit.integration.structure.HuskClaimsIntegration;
 import dev.jsinco.brewery.bukkit.integration.structure.LandsIntegration;
 import dev.jsinco.brewery.bukkit.integration.structure.TownyIntegration;
 import dev.jsinco.brewery.bukkit.integration.structure.WorldGuardIntegration;
+import dev.jsinco.brewery.util.ClassUtil;
 
 import java.util.Set;
+import java.util.function.Supplier;
 
 public class IntegrationManagerImpl implements IntegrationManager {
     private final IntegrationRegistry integrationRegistry = new IntegrationRegistry();
 
     public void registerIntegrations() {
-        register(IntegrationTypes.STRUCTURE, new WorldGuardIntegration());
-        register(IntegrationTypes.STRUCTURE, new BoltIntegration());
-        register(IntegrationTypes.STRUCTURE, new GriefPreventionIntegration());
-        register(IntegrationTypes.STRUCTURE, new HuskClaimsIntegration());
-        register(IntegrationTypes.STRUCTURE, new LandsIntegration());
-        register(IntegrationTypes.STRUCTURE, new TownyIntegration());
-        register(IntegrationTypes.STRUCTURE, new GriefDefenderIntegration());
-        register(IntegrationTypes.ITEM, new CraftEngineIntegration());
-        register(IntegrationTypes.ITEM, new ItemsAdderIntegration());
-        register(IntegrationTypes.ITEM, new NexoIntegration());
-        register(IntegrationTypes.ITEM, new OraxenIntegration());
-        register(IntegrationTypes.ITEM, new MmoItemsIntegration());
-        register(IntegrationTypes.ITEM, new MythicIntegration());
-        register(IntegrationTypes.PLACEHOLDER, new PlaceholderApiIntegration());
-        register(IntegrationTypes.PLACEHOLDER, new MiniPlaceholdersIntegration());
-        register(IntegrationTypes.CHEST_SHOP, new QuickShopHikariIntegration());
-        register(IntegrationTypes.EVENT, new GSitIntegration());
-        register(IntegrationTypes.EVENT, new BodyHealthIntegration());
+        /*
+        Don't replace these with a method reference. Class loading issues otherwise
+         */
+        register(IntegrationTypes.STRUCTURE, "com.sk89q.worldguard.WorldGuard", () -> new WorldGuardIntegration());
+        register(IntegrationTypes.STRUCTURE, "org.popcraft.bolt.BoltAPI", () -> new BoltIntegration());
+        register(IntegrationTypes.STRUCTURE, "me.ryanhamshire.GriefPrevention.GriefPrevention", () -> new GriefPreventionIntegration());
+        register(IntegrationTypes.STRUCTURE, "net.william278.huskclaims.api.BukkitHuskClaimsAPI", () -> new HuskClaimsIntegration());
+        register(IntegrationTypes.STRUCTURE, "me.angeschossen.lands.api.LandsIntegration", () -> new LandsIntegration());
+        register(IntegrationTypes.STRUCTURE, "com.palmergames.bukkit.towny.utils.PlayerCacheUtil", () -> new TownyIntegration());
+        register(IntegrationTypes.STRUCTURE, "com.griefdefender.api.GriefDefender", () -> new GriefDefenderIntegration());
+        register(IntegrationTypes.ITEM, "net.momirealms.craftengine.bukkit.plugin.BukkitCraftEngine", () -> new CraftEngineIntegration());
+        register(IntegrationTypes.ITEM, "dev.lone.itemsadder.api.CustomStack", () -> new ItemsAdderIntegration());
+        register(IntegrationTypes.ITEM, "com.nexomc.nexo.api.NexoItems", () -> new NexoIntegration());
+        register(IntegrationTypes.ITEM, "io.th0rgal.oraxen.api.OraxenItem", () -> new OraxenIntegration());
+        register(IntegrationTypes.ITEM, "net.Indyuce.mmoitems.MMOItems", () -> new MmoItemsIntegration());
+        register(IntegrationTypes.ITEM, "io.lumine.mythic.bukkit.MythicBukkit", () -> new MythicIntegration());
+        register(IntegrationTypes.PLACEHOLDER, "me.clip.placeholderapi.expansion.PlaceholderExpansion", () -> new PlaceholderApiIntegration());
+        register(IntegrationTypes.PLACEHOLDER, "io.github.miniplaceholders.api.utils.TagsUtils", () -> new MiniPlaceholdersIntegration());
+        register(IntegrationTypes.CHEST_SHOP, "com.ghostchu.quickshop.api.event.general.ShopItemMatchEvent", () -> new QuickShopHikariIntegration());
+        register(IntegrationTypes.EVENT, "dev.geco.gsit.api.GSitAPI", () -> new GSitIntegration());
+        register(IntegrationTypes.EVENT, "bodyhealth.api.BodyHealthAPI", () -> new BodyHealthIntegration());
     }
 
     public void loadIntegrations() {
@@ -68,6 +73,21 @@ public class IntegrationManagerImpl implements IntegrationManager {
 
         Logger.log("Registering integration " + integration.getId() + " with type " + type.name());
         integrationRegistry.register(type, integration);
+    }
+
+    /**
+     * Use this one when loading internally. By some reason you can get class loading issues even though this should be dynamic
+     *
+     * @param type               The integration type
+     * @param classNamePredicate A class name to check if it exists
+     * @param tSupplier          Constructor for integration
+     * @param <T>                The integration type
+     */
+    private <T extends Integration> void register(IntegrationType<? extends T> type, String classNamePredicate, Supplier<T> tSupplier) {
+        if (!ClassUtil.exists(classNamePredicate)) {
+            return;
+        }
+        register(type, tSupplier.get());
     }
 
     public void clear() {

@@ -3,10 +3,10 @@ package dev.jsinco.brewery.bukkit.integration.item;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.bukkit.api.integration.ItemIntegration;
 import dev.jsinco.brewery.util.ClassUtil;
-import io.lumine.mythic.api.items.ItemManager;
 import io.lumine.mythic.bukkit.MythicBukkit;
 import io.lumine.mythic.bukkit.adapters.BukkitItemStack;
 import io.lumine.mythic.core.items.MythicItem;
+import io.papermc.paper.threadedregions.scheduler.ScheduledTask;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.event.Listener;
@@ -75,17 +75,25 @@ public class MythicIntegration implements ItemIntegration, Listener {
 
     @Override
     public void onEnable() {
-        Bukkit.getAsyncScheduler().runAtFixedRate(TheBrewingProject.getInstance(), task -> {
-            ItemManager manager = MythicBukkit.inst().getItemManager();
-            if (manager == null) {
-                return;
-            }
-            Collection<MythicItem> items = manager.getItems();
-            if (items != null && !items.isEmpty()) {
-                initialized.complete(null);
-                task.cancel();
-            }
-        }, 0, 1, TimeUnit.SECONDS);
+        Bukkit.getAsyncScheduler().runAtFixedRate(
+                TheBrewingProject.getInstance(),
+                this::checkEnabled,
+                0,
+                1,
+                TimeUnit.SECONDS
+        );
+    }
+
+    private void checkEnabled(ScheduledTask task) {
+        io.lumine.mythic.api.items.ItemManager manager = MythicBukkit.inst().getItemManager();
+        if (manager == null) {
+            return;
+        }
+        Collection<MythicItem> items = manager.getItems();
+        if (items != null && !items.isEmpty()) {
+            initialized.complete(null);
+            task.cancel();
+        }
     }
 
 }
