@@ -5,33 +5,20 @@ import dev.jsinco.brewery.api.util.BreweryKeyed;
 import dev.jsinco.brewery.api.util.BreweryRegistry;
 import org.jspecify.annotations.Nullable;
 
-import java.util.Arrays;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 public enum CauldronType implements BreweryKeyed {
 
-    WATER("minecraft:water_cauldron"),
-    LAVA("minecraft:lava_cauldron"),
-    SNOW("minecraft:powder_snow_cauldron"),
-    BREW(),
-    SOLUTION(BREW, WATER);
+    WATER("minecraft:water_cauldron", true),
+    LAVA("minecraft:lava_cauldron", true),
+    SNOW("minecraft:powder_snow_cauldron", true),
+    BREW("minecraft:water_cauldron", false);
 
     private String materialKey;
     private boolean legacyValue;
-    private Set<CauldronType> allowedVariations;
 
 
-    CauldronType(String materialKey) {
+    CauldronType(String materialKey, boolean legacyValue) {
         this.materialKey = materialKey;
-        this.legacyValue = true;
-        allowedVariations = Set.of();
-    }
-
-    CauldronType(CauldronType... alternatives) {
-        this.materialKey = "minecraft:water_cauldron";
-        this.legacyValue = false;
-        this.allowedVariations = Arrays.stream(alternatives).collect(Collectors.toSet());
+        this.legacyValue = legacyValue;
     }
 
     @Deprecated
@@ -54,9 +41,6 @@ public enum CauldronType implements BreweryKeyed {
     }
 
     public boolean appliesTo(CauldronType otherType) {
-        if (otherType == this) {
-            return true;
-        }
-        return allowedVariations.contains(otherType);
+        return otherType == this;
     }
 }
