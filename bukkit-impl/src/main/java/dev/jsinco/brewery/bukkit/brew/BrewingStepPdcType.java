@@ -115,13 +115,13 @@ public class BrewingStepPdcType implements PersistentDataType<byte[], BrewingSte
             case BrewingStep.Cook cook -> {
                 encodeMoment(cook.time(), dataOutputStream);
                 encodeIngredients(cook.ingredients(), dataOutputStream);
-                dataOutputStream.writeUTF(cook.cauldronType().key().toString());
+                dataOutputStream.writeUTF(cook.cauldronType() == null ? "null" : cook.cauldronType().key().minimalized());
             }
             case BrewingStep.Distill distill -> dataOutputStream.writeInt(distill.runs());
             case BrewingStep.Mix mix -> {
                 encodeMoment(mix.time(), dataOutputStream);
                 encodeIngredients(mix.ingredients(), dataOutputStream);
-                dataOutputStream.writeUTF(mix.cauldronType().key().toString());
+                dataOutputStream.writeUTF(mix.cauldronType() == null ? "null" : mix.cauldronType().key().minimalized());
             }
             default -> throw new IllegalStateException("Unexpected value: " + complex);
         }
