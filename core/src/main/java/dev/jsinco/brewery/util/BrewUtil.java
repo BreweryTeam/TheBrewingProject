@@ -203,4 +203,13 @@ public class BrewUtil {
         }
         return output;
     }
+
+    public static boolean hasPreviousIngredientStep(List<BrewingStep> steps, int idx) {
+        for (int i = 0; i < Math.clamp(idx, 0, steps.size()); i++) {
+            if (steps.get(i) instanceof BrewingStep.IngredientsStep) {
+                return true;
+            }
+        }
+        return false;
+    }
 }

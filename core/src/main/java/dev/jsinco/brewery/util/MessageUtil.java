@@ -7,6 +7,7 @@ import dev.jsinco.brewery.api.brew.BrewingStep;
 import dev.jsinco.brewery.api.brew.PartialBrewScore;
 import dev.jsinco.brewery.api.brew.ScoreType;
 import dev.jsinco.brewery.api.effect.modifier.DrunkenModifier;
+import dev.jsinco.brewery.api.ingredient.Ingredient;
 import dev.jsinco.brewery.api.recipe.RecipeEffects;
 import dev.jsinco.brewery.api.recipe.RecipeRegistry;
 import dev.jsinco.brewery.api.util.Pair;
@@ -70,7 +71,7 @@ public class MessageUtil {
         );
     }
 
-    public static @NonNull TagResolver getBrewStepTagResolver(BrewingStep brewingStep, Map<ScoreType, PartialBrewScore> scores, double difficulty) {
+    public static @NonNull TagResolver getBrewStepTagResolver(BrewingStep brewingStep, Map<ScoreType, PartialBrewScore> scores, double difficulty, boolean hasInitialIngredient) {
         TagResolver resolver = switch (brewingStep) {
             case BrewingStep.Age age -> TagResolver.resolver(
                     Placeholder.component("barrel_type", GlobalTranslator.render(Component.translatable("tbp.barrel.type." + age.barrelType().name().toLowerCase(Locale.ROOT)), Config.config().language())),
@@ -78,14 +79,8 @@ public class MessageUtil {
             );
             case BrewingStep.Cook cook -> TagResolver.resolver(
                     Placeholder.parsed("cooking_time", TimeFormatter.format(cook.time().moment(), TimeFormat.COOKING_TIME, TimeModifier.COOKING)),
-                    Placeholder.component("ingredients", cook.ingredients().entrySet()
-                            .stream()
-                            .map(entry -> entry.getKey().displayName()
-                                    .append(Component.text("/" + entry.getValue()))
-                            )
-                            .collect(Component.toComponent(Component.text(", ")))
-                    ),
-                    Placeholder.component("cauldron_type", Component.translatable("tbp.cauldron.type." + cook.cauldronType().name().toLowerCase(Locale.ROOT)))
+                    ingredientTagResolver(cook.ingredients(), hasInitialIngredient),
+                    Placeholder.component("cauldron_type", cook.cauldronType() == null ? Component.translatable("tbp.cauldron.type.none") : Component.translatable("tbp.cauldron.type." + cook.cauldronType().name().toLowerCase(Locale.ROOT)))
             );
             case BrewingStep.Distill distill -> TagResolver.resolver(
                     Formatter.number("distill_runs", distill.runs()),
@@ -93,12 +88,8 @@ public class MessageUtil {
             );
             case BrewingStep.Mix mix -> TagResolver.resolver(
                     Placeholder.parsed("mixing_time", TimeFormatter.format(mix.time().moment(), TimeFormat.MIXING_TIME, TimeModifier.COOKING)),
-                    Placeholder.component("ingredients", mix.ingredients().entrySet()
-                            .stream()
-                            .map(entry -> entry.getKey().displayName()
-                                    .append(Component.text("/" + entry.getValue()))
-                            ).collect(Component.toComponent(Component.text(", ")))
-                    )
+                    ingredientTagResolver(mix.ingredients(), hasInitialIngredient),
+                    Placeholder.component("cauldron_type", mix.cauldronType() == null ? Component.translatable("tbp.cauldron.type.none") : Component.translatable("tbp.cauldron.type." + mix.cauldronType().name().toLowerCase(Locale.ROOT)))
             );
             default -> throw new IllegalStateException("Unexpected value: " + brewingStep);
         };
@@ -108,6 +99,17 @@ public class MessageUtil {
                                 BrewScoreImpl.quality(BrewScoreImpl.applyDifficulty(partialBrewScore.score(), difficulty))
                         ))
                 ).toArray(TagResolver[]::new))
+        );
+    }
+
+    private static TagResolver ingredientTagResolver(Map<? extends Ingredient, Integer> ingredients, boolean appendSelf) {
+        Stream<Component> ingredientComponents = ingredients.entrySet()
+                .stream()
+                .map(entry -> entry.getKey().displayName()
+                        .append(Component.text("/" + entry.getValue()))
+                );
+        return Placeholder.component("ingredients", (appendSelf ? Stream.concat(Stream.of(Component.translatable("tbp.brew")), ingredientComponents) : ingredientComponents)
+                .collect(Component.toComponent(Component.text(", ")))
         );
     }
 
@@ -122,14 +124,16 @@ public class MessageUtil {
 
     public static @NonNull Stream<Component> compileBrewInfo(List<BrewingStep> steps, BrewScore score, boolean detailed) {
         Stream.Builder<Component> streamBuilder = Stream.builder();
+        boolean hasInitialIngredient = false;
         for (int i = 0; i < steps.size(); i++) {
             BrewingStep brewingStep = steps.get(i);
             String translationKey = (detailed ? "tbp.brew.detailed-tooltip." : "tbp.brew.tooltip-brewing.") + brewingStep.stepType().name().toLowerCase(Locale.ROOT);
             streamBuilder.add(
                     Component.translatable(translationKey,
-                            Argument.tagResolver(MessageUtil.getBrewStepTagResolver(brewingStep, score.getPartialScores(i), score.brewDifficulty()))
+                            Argument.tagResolver(MessageUtil.getBrewStepTagResolver(brewingStep, score.getPartialScores(i), score.brewDifficulty(), hasInitialIngredient))
                     )
             );
+            hasInitialIngredient |= brewingStep instanceof BrewingStep.IngredientsStep;
         }
         return streamBuilder.build();
     }
