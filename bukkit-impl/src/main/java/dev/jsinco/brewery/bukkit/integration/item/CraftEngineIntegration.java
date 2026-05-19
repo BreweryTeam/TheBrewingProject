@@ -9,7 +9,6 @@ import net.kyori.adventure.text.Component;
 import net.momirealms.craftengine.bukkit.api.event.CraftEngineReloadEvent;
 import net.momirealms.craftengine.bukkit.item.BukkitItem;
 import net.momirealms.craftengine.bukkit.plugin.BukkitCraftEngine;
-import net.momirealms.craftengine.core.item.Item;
 import net.momirealms.craftengine.core.plugin.config.Config;
 import net.momirealms.craftengine.core.util.Key;
 import org.bukkit.Bukkit;
@@ -91,7 +90,7 @@ public class CraftEngineIntegration implements ItemIntegration, Listener {
 
     @Override
     public @Nullable Color color(String id) {
-        Item<ItemStack> item = BukkitCraftEngine.instance().itemManager().createWrappedItem(Key.from(id), null);
+        BukkitItem item = BukkitCraftEngine.instance().itemManager().createWrappedItem(Key.from(id), null);
         if (item == null) {
             return null;
         }
