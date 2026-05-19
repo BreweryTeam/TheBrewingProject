@@ -19,6 +19,7 @@ import dev.jsinco.brewery.configuration.BrewTooltipType;
 import dev.jsinco.brewery.configuration.Config;
 import dev.jsinco.brewery.configuration.DrunkenModifierSection;
 import dev.jsinco.brewery.effect.DrunkStateImpl;
+import dev.jsinco.brewery.util.BrewUtil;
 import dev.jsinco.brewery.util.MessageUtil;
 import io.papermc.paper.datacomponent.DataComponentTypes;
 import io.papermc.paper.datacomponent.item.CustomModelData;
@@ -228,7 +229,14 @@ public class BukkitRecipeResult implements RecipeResult<ItemStack> {
     private void addLastStepLore(Brew brew, Stream.Builder<Component> streamBuilder, BrewScore score, Brew.State state) {
         int lastIndex = brew.getCompletedSteps().size() - 1;
         BrewingStep lastCompleted = brew.lastCompletedStep();
-        streamBuilder.add(lastCompleted.infoDisplay(state, MessageUtil.getBrewStepTagResolver(lastCompleted, score.getPartialScores(lastIndex), score.brewDifficulty())));
+        streamBuilder.add(lastCompleted.infoDisplay(state,
+                        MessageUtil.getBrewStepTagResolver(
+                                lastCompleted,
+                                score.getPartialScores(lastIndex),
+                                score.brewDifficulty(),
+                                BrewUtil.hasPreviousIngredientStep(brew.getCompletedSteps(), lastIndex))
+                )
+        );
     }
 
     private void applyDrunkenTooltips(Brew.State state, Stream.Builder<Component> streamBuilder, TagResolver resolver) {

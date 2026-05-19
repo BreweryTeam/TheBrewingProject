@@ -21,6 +21,7 @@ import dev.jsinco.brewery.configuration.Config;
 import dev.jsinco.brewery.configuration.DrunkenModifierSection;
 import dev.jsinco.brewery.effect.DrunkStateImpl;
 import dev.jsinco.brewery.recipes.RecipeRegistryImpl;
+import dev.jsinco.brewery.util.BrewUtil;
 import dev.jsinco.brewery.util.MessageUtil;
 import io.papermc.paper.datacomponent.DataComponentTypes;
 import io.papermc.paper.datacomponent.item.ItemLore;
@@ -281,7 +282,14 @@ public class RecipeMatcherResultImpl implements RecipeMatcherResult<ItemStack> {
     private void addLastStepLore(Stream.Builder<Component> streamBuilder, BrewScore score, Brew.State state) {
         int lastIndex = matchingSteps.size() - 1;
         BrewingStep lastCompleted = matchingSteps.getLast();
-        streamBuilder.add(lastCompleted.infoDisplay(state, MessageUtil.getBrewStepTagResolver(lastCompleted, score.getPartialScores(lastIndex), score.brewDifficulty())));
+        streamBuilder.add(lastCompleted.infoDisplay(state,
+                        MessageUtil.getBrewStepTagResolver(
+                                lastCompleted,
+                                score.getPartialScores(lastIndex),
+                                score.brewDifficulty(),
+                                BrewUtil.hasPreviousIngredientStep(brew.getCompletedSteps(), lastIndex))
+                )
+        );
     }
 
     private void applyDrunkenTooltips(Brew.State state, Stream.Builder<Component> streamBuilder, TagResolver resolver, RecipeResult<ItemStack> recipeResult) {
