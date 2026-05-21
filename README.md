@@ -76,6 +76,66 @@ public void onLoad() {
     }
 }
 ```
+An item integration might look like this. Note that TBP needs to know when the integration has completed loading its items,
+as it directly validates the config values against these on startup.
+
+```java
+import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+
+public class MyItemIntegration extends ItemIntegration {
+
+    CompletableFuture<Void> initialized = new CompletableFuture<>();
+
+    @Override
+    public Optional<ItemStack> createItem(String id) {
+        return Optional.ofNullable(MyPlugin.createItemWithIdOrNull(id));
+    }
+
+    @Override
+    public boolean isIngredient(String id) {
+        return MyPlugin.isItem(id);
+    }
+
+    @Nullable
+    @Override
+    public Component displayName(String id) {
+        return MyPlugin.itemDisplayName(id);
+    }
+
+    @Nullable
+    @Override
+    public String getItemId(ItemStack itemStack) {
+        return MyPlugin.itemId(itemStack);
+    }
+
+    @NonNull
+    @Override
+    public CompletableFuture<Void> initialized() {
+        return initialized;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return true;
+    }
+
+    @Override
+    public String getId() {
+        return "my_plugin_name";
+    }
+
+    /**
+     * Plugin has completed its initialization?
+     * <p> 
+     * Now you can initialize the item integration and TBP will validate against its items. You have to run this method
+     * when the plugin is done.
+     */
+    public void initialize(){
+        initialized.complete(null);
+    }
+}
+```
 
 **Build**
 
