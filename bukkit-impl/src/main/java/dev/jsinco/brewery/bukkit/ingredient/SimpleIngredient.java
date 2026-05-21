@@ -4,7 +4,7 @@ import dev.jsinco.brewery.api.ingredient.BaseIngredient;
 import dev.jsinco.brewery.api.ingredient.Ingredient;
 import dev.jsinco.brewery.api.util.BreweryKey;
 import dev.jsinco.brewery.bukkit.api.BukkitAdapter;
-import dev.jsinco.brewery.util.ItemColorUtil;
+import dev.jsinco.brewery.util.PresetColorsUtil;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -57,6 +57,6 @@ public record SimpleIngredient(Material material) implements BaseIngredient {
 
     @Override
     public Optional<Color> color() {
-        return Optional.ofNullable(ItemColorUtil.getItemColor(material.key()));
+        return Optional.ofNullable(PresetColorsUtil.getItemColor(material.key()));
     }
 }
