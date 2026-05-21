@@ -17,6 +17,7 @@ import eu.okaeri.configs.OkaeriConfig;
 import eu.okaeri.configs.annotation.Comment;
 import eu.okaeri.configs.annotation.CustomKey;
 import net.kyori.adventure.text.format.NamedTextColor;
+import org.jspecify.annotations.Nullable;
 
 import java.awt.Color;
 import java.util.List;
@@ -41,9 +42,9 @@ public class CauldronSection extends OkaeriConfig implements Configuration.Cauld
     @CustomKey("lava-base-particle-color")
     private Color lavaBaseParticleColor = new Color(Integer.parseInt("d45a12", 16));
 
-    @Comment("The base color water cauldrons have")
+    @Comment("The base color water cauldrons have. If none is provided, the biome color will be used")
     @CustomKey("water-base-particle-color")
-    private Color waterBaseParticleColor = new Color(Integer.parseInt("3F76E4", 16));
+    private @Nullable Color waterBaseParticleColor = null;
 
     @Comment("The base color snow cauldrons have")
     @CustomKey("snow-base-particle-color")
@@ -129,7 +130,7 @@ public class CauldronSection extends OkaeriConfig implements Configuration.Cauld
         return this.lavaBaseParticleColor;
     }
 
-    public Color waterBaseParticleColor() {
+    public @Nullable Color waterBaseParticleColor() {
         return this.waterBaseParticleColor;
     }
 

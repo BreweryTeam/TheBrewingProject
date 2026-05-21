@@ -1,6 +1,8 @@
 package dev.jsinco.brewery.datagenerator;
 
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 import javax.imageio.ImageIO;
 import java.awt.Color;
@@ -8,6 +10,8 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -49,10 +53,46 @@ public class DataGenerator {
         try {
             generateColorData(List.of(Paths.get(uri1), Paths.get(uri2)), outputFolder);
         } catch (FileSystemNotFoundException e) {
-            try (FileSystem fs = FileSystems.newFileSystem(uri1, Collections.emptyMap())) {
+            try (FileSystem ignored = FileSystems.newFileSystem(uri1, Collections.emptyMap())) {
                 generateColorData(List.of(Paths.get(uri1), Paths.get(uri2)), outputFolder);
             }
         }
+        URL url = ClassLoader.getSystemResource("data/minecraft/worldgen/biome/desert.json");
+        try {
+            generateBiomeData(Paths.get(url.toURI()), outputFolder);
+        } catch (FileSystemNotFoundException e) {
+            try (FileSystem ignored = FileSystems.newFileSystem(uri1, Collections.emptyMap())) {
+                generateBiomeData(Paths.get(url.toURI()), outputFolder);
+            }
+        }
+    }
+
+    private static void generateBiomeData(Path path, File outputFolder) throws IOException {
+        JsonObject waterColor = new JsonObject();
+        Path directory = path.getParent();
+        try (Stream<Path> walk = Files.walk(directory)) {
+            Iterator<Path> walkIterator = walk.iterator();
+            while (walkIterator.hasNext()) {
+                Path next = walkIterator.next();
+                if (!next.toString().endsWith(".json")) {
+                    continue;
+                }
+                String name = next.getFileName().toString().replace(".json", "");
+                try (InputStream inputStream = Files.newInputStream(next); Reader reader = new InputStreamReader(inputStream)) {
+                    JsonObject object = JsonParser.parseReader(reader).getAsJsonObject();
+                    JsonElement effectsElement = object.get("effects");
+                    if (!(effectsElement instanceof JsonObject effects)) {
+                        continue;
+                    }
+                    if (effects.has("water_color")) {
+                        waterColor.addProperty(name, effects.get("water_color").getAsString().substring(1));
+                    }
+                }
+            }
+        }
+        JsonObject jsonObject = new JsonObject();
+        jsonObject.add("water_color", waterColor);
+        JsonUtil.dump(jsonObject, new File(outputFolder, "biomes.json"));
     }
 
     private static void generateColorData(List<Path> paths, File outputFolder) throws IOException {

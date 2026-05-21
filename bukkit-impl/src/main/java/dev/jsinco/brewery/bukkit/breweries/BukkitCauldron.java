@@ -29,13 +29,14 @@ import dev.jsinco.brewery.bukkit.listener.ListenerUtil;
 import dev.jsinco.brewery.bukkit.recipe.RecipeMatcherImpl;
 import dev.jsinco.brewery.bukkit.util.BlockUtil;
 import dev.jsinco.brewery.bukkit.util.BukkitIngredientUtil;
-import dev.jsinco.brewery.bukkit.util.color.ColorUtil;
 import dev.jsinco.brewery.bukkit.util.SoundPlayer;
+import dev.jsinco.brewery.bukkit.util.color.ColorUtil;
 import dev.jsinco.brewery.configuration.AnimationDisplay;
 import dev.jsinco.brewery.configuration.Config;
 import dev.jsinco.brewery.configuration.ParticleDefinition;
 import dev.jsinco.brewery.sound.SoundDefinition;
 import dev.jsinco.brewery.util.BrewUtil;
+import dev.jsinco.brewery.util.PresetColorsUtil;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
@@ -354,7 +355,13 @@ public class BukkitCauldron implements Cauldron {
 
     private Color computeBaseParticleColor(Block block) {
         return switch (block.getType()) {
-            case WATER_CAULDRON -> convert(Config.config().cauldrons().waterBaseParticleColor());
+            case WATER_CAULDRON -> {
+                java.awt.Color waterColorOverride = Config.config().cauldrons().waterBaseParticleColor();
+                if (waterColorOverride == null) {
+                    waterColorOverride = PresetColorsUtil.getWaterColor(block.getBiome().key());
+                }
+                yield convert(waterColorOverride == null ? java.awt.Color.BLUE : waterColorOverride);
+            }
             case LAVA_CAULDRON -> convert(Config.config().cauldrons().lavaBaseParticleColor());
             case POWDER_SNOW_CAULDRON -> convert(Config.config().cauldrons().snowBaseParticleColor());
             default -> throw new IllegalStateException("Expected block to be cauldron type");
