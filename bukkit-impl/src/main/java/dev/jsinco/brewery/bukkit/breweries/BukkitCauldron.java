@@ -189,7 +189,7 @@ public class BukkitCauldron implements Cauldron {
             return convert(Config.config().cauldrons().failedParticleColor());
         }
         RecipeResult<ItemStack> recipeResult = matcherResult.recipeResult().orElse(null);
-        if (recipeResult != null) {
+        if (matcherResult.score().completed() && recipeResult != null) {
             return Color.fromRGB(recipeResult.brewColor().getRGB() & 0xFFFFFF);
         }
         Optional<Color> defaultRecipeColor = BrewAdapterAccess.getDefaultRecipe(
