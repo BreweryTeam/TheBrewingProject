@@ -109,7 +109,6 @@ public class MyItemIntegration extends ItemIntegration {
         return MyPlugin.itemId(itemStack);
     }
 
-    @NonNull
     @Override
     public CompletableFuture<Void> initialized() {
         return initialized;
