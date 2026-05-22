@@ -99,7 +99,7 @@ public record MixStepImpl(Moment time, Map<? extends Ingredient, Integer> ingred
         );
         SequencedSet<UUID> newBrewers = new LinkedHashSet<>(this.brewers);
         newBrewers.addAll(other.brewers());
-        return Optional.of(new CookStepImpl(
+        return Optional.of(new MixStepImpl(
                 new PassedMoment(newElapsedTime),
                 newIngredients,
                 cauldronType,
