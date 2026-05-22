@@ -279,7 +279,7 @@ public class BukkitCauldron implements Cauldron {
     }
 
     private boolean handleBrewReaddition(ItemStack item, Brew addedBrew, Player player) {
-        if (getLevel() == 0 && changeBrew(addedBrew)) {
+        if (getLevel() == 0 && changeBrew(addedBrew.withStep(newStep()))) {
             // Empty cauldron: reinsert brew into the cauldron with 1 water level
             incrementLevel(item);
             recalculateBrewTime();
@@ -497,6 +497,24 @@ public class BukkitCauldron implements Cauldron {
                     mix -> mix.withTime(mix.time().withLastStep(time)),
                     () -> new MixStepImpl(new Interval(time, time), Map.of(),
                             getType().orElseThrow(() -> new IllegalStateException("Expected cauldron block type for cauldron")))
+            );
+        }
+    }
+
+    private BrewingStep newStep() {
+        long time = TheBrewingProject.getInstance().getTime();
+        if (hot) {
+            return new CookStepImpl(
+                    new Interval(time, time),
+                    Map.of(),
+                    getType()
+                            .orElseThrow(() -> new IllegalStateException("Expected cauldron block type for cauldron"))
+            );
+        } else {
+            return new MixStepImpl(
+                    new Interval(time, time),
+                    Map.of(),
+                    getType().orElseThrow(() -> new IllegalStateException("Expected cauldron block type for cauldron"))
             );
         }
     }
