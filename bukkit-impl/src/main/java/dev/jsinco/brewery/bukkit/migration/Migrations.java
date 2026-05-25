@@ -63,7 +63,7 @@ public class Migrations {
         }
         YamlFile yaml = new YamlFile(recipesFile);
         try {
-            yaml.load();
+            yaml.loadWithComments();
         } catch (IOException e) {
             Logger.logErr("Unable to read recipes.yml file even though it existed");
             Logger.logErr(e);
