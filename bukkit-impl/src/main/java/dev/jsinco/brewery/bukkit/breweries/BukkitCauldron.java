@@ -130,11 +130,7 @@ public class BukkitCauldron implements Cauldron {
                         .match(brew);
                 dirty = false;
             }
-            Optional<Recipe<ItemStack>> recipeOptional = matcherResult.recipeMatch();
-            Color resultColor = computeResultColor(recipeOptional);
-            Color baseParticleColor = computeBaseParticleColor(getBlock());
-            this.particleColor = recipeOptional.map(recipe -> computeParticleColor(baseParticleColor, resultColor, recipe))
-                    .orElseGet(() -> ColorUtil.getNextColor(baseParticleColor, convert(Config.config().cauldrons().failedParticleColor()), getBrewTime(), Moment.MINUTE * 3));
+            recalculateColor();
             if (waterColorer != null) {
                 setWaterText(waterColorer);
             }
@@ -283,17 +279,19 @@ public class BukkitCauldron implements Cauldron {
     }
 
     private boolean handleBrewReaddition(ItemStack item, Brew addedBrew, Player player) {
-        if (!cauldronHasActiveBrew() && changeBrew(addedBrew)) {
+        if (getLevel() == 0 && changeBrew(addedBrew)) {
             // Empty cauldron: reinsert brew into the cauldron with 1 water level
             incrementLevel(item);
             recalculateBrewTime();
+            recalculateColor();
             playIngredientAddedEffects(item, player);
             return true;
         }
+        boolean hadActiveBrew = !this.brew.getSteps().isEmpty();
         List<BrewingStep> existing = new ArrayList<>(this.brew.getCompletedSteps());
         Optional<Brew> merged;
         if (existing.isEmpty()) {
-            merged = Optional.of(addedBrew);
+            merged = Optional.empty();
         } else {
             BrewingStep thisStep = existing.removeLast();
             List<BrewingStep> added = new ArrayList<>(addedBrew.getCompletedSteps());
@@ -303,7 +301,7 @@ public class BukkitCauldron implements Cauldron {
                     .map(this.brew::withStepsReplaced);
         }
         if (merged.isPresent() && changeBrew(merged.get())) {
-            incrementLevel(item);
+            if (hadActiveBrew) incrementLevel(item);
             playIngredientAddedEffects(item, player);
             return true;
         }
@@ -318,7 +316,7 @@ public class BukkitCauldron implements Cauldron {
         if (!changeBrew(newBrew)) {
             return false;
         }
-        incrementLevel(item);
+        if (hadActiveBrew) incrementLevel(item);
         playIngredientAddedEffects(item, player);
         return true;
     }
@@ -345,14 +343,6 @@ public class BukkitCauldron implements Cauldron {
         return shouldChange;
     }
 
-    private boolean cauldronHasActiveBrew() {
-        return brew.getCompletedSteps().stream().anyMatch(step ->
-                (step instanceof BrewingStep.IngredientsStep i && !i.ingredients().isEmpty())
-                        || step instanceof BrewingStep.Distill
-                        || step instanceof BrewingStep.Age
-        );
-    }
-
     private Color computeBaseParticleColor(Block block) {
         return switch (block.getType()) {
             case WATER_CAULDRON -> {
@@ -366,6 +356,14 @@ public class BukkitCauldron implements Cauldron {
             case POWDER_SNOW_CAULDRON -> convert(Config.config().cauldrons().snowBaseParticleColor());
             default -> throw new IllegalStateException("Expected block to be cauldron type");
         };
+    }
+
+    private void recalculateColor() {
+        Optional<Recipe<ItemStack>> recipeOptional = matcherResult.recipeMatch();
+        Color resultColor = computeResultColor(recipeOptional);
+        Color baseParticleColor = computeBaseParticleColor(getBlock());
+        this.particleColor = recipeOptional.map(recipe -> computeParticleColor(baseParticleColor, resultColor, recipe))
+                .orElseGet(() -> ColorUtil.getNextColor(baseParticleColor, convert(Config.config().cauldrons().failedParticleColor()), getBrewTime(), Moment.MINUTE * 3));
     }
 
     public void playBrewingEffects() {
