@@ -1,6 +1,6 @@
 package dev.jsinco.brewery.api.util;
 
-import dev.faststats.core.ErrorTracker;
+import dev.faststats.ErrorTracker;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.logging.Level;
