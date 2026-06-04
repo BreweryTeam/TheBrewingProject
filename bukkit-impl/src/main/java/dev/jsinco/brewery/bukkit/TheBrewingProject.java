@@ -1,7 +1,7 @@
 package dev.jsinco.brewery.bukkit;
 
 import com.google.common.base.Preconditions;
-import dev.faststats.bukkit.BukkitMetrics;
+import dev.faststats.bukkit.BukkitContext;
 import dev.jsinco.brewery.api.brew.BrewManager;
 import dev.jsinco.brewery.api.breweries.Tickable;
 import dev.jsinco.brewery.api.config.Configuration;
@@ -153,10 +153,13 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
     private ModifierManager modifierManager = new ModifierManagerImpl();
     private BreweryTranslator translator;
     private boolean successfulLoad = false;
-    private final BukkitMetrics metrics = BukkitMetrics.factory()
-            .token("2ee682246967303e517be0d593fe7a01")
-            .errorTracker(Logger.getTracker())
-            .create(this);
+    private final BukkitContext metrics = new BukkitContext.Factory(
+            this,
+            "2ee682246967303e517be0d593fe7a01"
+    ).metrics(Statistics::register)
+            .errorTrackerService(Logger.getTracker())
+            .create();
+
 
     public static TheBrewingProject getInstance() {
         return TheBrewingProject.instance;
