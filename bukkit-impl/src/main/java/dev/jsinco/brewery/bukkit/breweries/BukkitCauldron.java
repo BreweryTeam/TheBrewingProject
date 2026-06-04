@@ -291,7 +291,7 @@ public class BukkitCauldron implements Cauldron {
         List<BrewingStep> existing = new ArrayList<>(this.brew.getCompletedSteps());
         Optional<Brew> merged;
         if (existing.isEmpty()) {
-            merged = Optional.empty();
+            merged = Optional.of(addedBrew);
         } else {
             BrewingStep thisStep = existing.removeLast();
             List<BrewingStep> added = new ArrayList<>(addedBrew.getCompletedSteps());
