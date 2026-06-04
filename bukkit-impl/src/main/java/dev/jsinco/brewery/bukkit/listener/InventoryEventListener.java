@@ -3,6 +3,7 @@ package dev.jsinco.brewery.bukkit.listener;
 import dev.jsinco.brewery.api.brew.Brew;
 import dev.jsinco.brewery.api.brew.BrewingStep;
 import dev.jsinco.brewery.api.breweries.InventoryAccessible;
+import dev.jsinco.brewery.bukkit.Statistics;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.bukkit.api.event.transaction.BarrelExtractEvent;
 import dev.jsinco.brewery.bukkit.api.event.transaction.BarrelInsertEvent;
@@ -19,6 +20,7 @@ import dev.jsinco.brewery.bukkit.breweries.distillery.BukkitDistillery;
 import dev.jsinco.brewery.bukkit.effect.named.PukeNamedExecutable;
 import dev.jsinco.brewery.configuration.Config;
 import dev.jsinco.brewery.database.sql.Database;
+import dev.jsinco.brewery.recipes.BrewScoreImpl;
 import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
@@ -33,6 +35,7 @@ import org.bukkit.event.inventory.InventoryPickupItemEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.persistence.PersistentDataType;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
@@ -94,6 +97,16 @@ public class InventoryEventListener implements Listener {
                 }
                 event.setResult(Event.Result.DENY);
                 return;
+            }
+        }
+        for (ItemTransactionEvent<?> transactionEvent : transactions) {
+            if (transactionEvent instanceof DistilleryExtractEvent || transactionEvent instanceof BarrelExtractEvent) {
+                ItemSource brewItemStack = transactionEvent.getTransactionSession().getResult();
+                if (brewItemStack == null) {
+                    continue;
+                }
+                Optional.ofNullable(brewItemStack.get().getPersistentDataContainer().get(BrewAdapterAccess.BREWERY_SCORE, PersistentDataType.DOUBLE))
+                        .ifPresent(score -> Statistics.registerBrewMade(BrewScoreImpl.quality(score)));
             }
         }
         event.getWhoClicked().getScheduler().run(TheBrewingProject.getInstance(), ignored ->
@@ -293,21 +306,21 @@ public class InventoryEventListener implements Listener {
         if (inventoryAccessible instanceof BukkitDistillery distillery) {
             dev.jsinco.brewery.api.util.CancelState cancelState = brewOptional.isEmpty() ? new dev.jsinco.brewery.api.util.CancelState.Cancelled() :
                     player == null || player.hasPermission("brewery.distillery.access") ? new dev.jsinco.brewery.api.util.CancelState.Allowed() :
-                            new dev.jsinco.brewery.api.util.CancelState.PermissionDenied(Component.translatable("tbp.distillery.access-denied"));
+                    new dev.jsinco.brewery.api.util.CancelState.PermissionDenied(Component.translatable("tbp.distillery.access-denied"));
             return insertion ? new DistilleryInsertEvent(
                     distillery,
                     new ItemTransactionSession<>(transaction, brewOptional
-                            .map(brew -> new ItemSource.BrewBasedSource(brew, new Brew.State.Brewing()))
-                            .orElse(null)
+                                                              .map(brew -> new ItemSource.BrewBasedSource(brew, new Brew.State.Brewing()))
+                                                              .orElse(null)
                     ),
                     cancelState,
                     player
             ) : new DistilleryExtractEvent(
                     distillery,
                     new ItemTransactionSession<>(transaction, brewOptional
-                            .map(brew -> BrewAdapterAccess.toItem(brew, new Brew.State.Other()))
-                            .map(ItemSource.ItemBasedSource::new)
-                            .orElse(null)
+                                                              .map(brew -> BrewAdapterAccess.toItem(brew, new Brew.State.Other()))
+                                                              .map(ItemSource.ItemBasedSource::new)
+                                                              .orElse(null)
                     ),
                     cancelState,
                     player
@@ -316,21 +329,21 @@ public class InventoryEventListener implements Listener {
         if (inventoryAccessible instanceof BukkitBarrel barrel) {
             dev.jsinco.brewery.api.util.CancelState cancelState = brewOptional.isEmpty() ? new dev.jsinco.brewery.api.util.CancelState.Cancelled() :
                     player == null || player.hasPermission("brewery.barrel.access") ? new dev.jsinco.brewery.api.util.CancelState.Allowed() :
-                            new dev.jsinco.brewery.api.util.CancelState.PermissionDenied(Component.translatable("tbp.barrel.access-denied"));
+                    new dev.jsinco.brewery.api.util.CancelState.PermissionDenied(Component.translatable("tbp.barrel.access-denied"));
             return insertion ? new BarrelInsertEvent(
                     barrel,
                     new ItemTransactionSession<>(transaction, brewOptional
-                            .map(brew -> new ItemSource.BrewBasedSource(brew, new Brew.State.Brewing()))
-                            .orElse(null)
+                                                              .map(brew -> new ItemSource.BrewBasedSource(brew, new Brew.State.Brewing()))
+                                                              .orElse(null)
                     ),
                     cancelState,
                     player
             ) : new BarrelExtractEvent(
                     barrel,
                     new ItemTransactionSession<>(transaction, brewOptional
-                            .map(brew -> BrewAdapterAccess.toItem(brew, new Brew.State.Other()))
-                            .map(ItemSource.ItemBasedSource::new)
-                            .orElse(null)),
+                                                              .map(brew -> BrewAdapterAccess.toItem(brew, new Brew.State.Other()))
+                                                              .map(ItemSource.ItemBasedSource::new)
+                                                              .orElse(null)),
                     cancelState,
                     player
             );
