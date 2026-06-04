@@ -14,7 +14,7 @@ import dev.jsinco.brewery.api.util.CancelState;
 import dev.jsinco.brewery.api.util.Logger;
 import dev.jsinco.brewery.api.util.Pair;
 import dev.jsinco.brewery.api.vector.BreweryLocation;
-import dev.jsinco.brewery.bukkit.TheBrewingProject;
+import dev.jsinco.brewery.bukkit.Statistics;
 import dev.jsinco.brewery.bukkit.api.BukkitAdapter;
 import dev.jsinco.brewery.bukkit.api.event.structure.BarrelDestroyEvent;
 import dev.jsinco.brewery.bukkit.api.event.structure.CauldronDestroyEvent;
@@ -120,6 +120,7 @@ public class BlockEventListener implements Listener {
         } catch (PersistenceException e) {
             Logger.logAndTrackErr(e);
         }
+        Statistics.registerStructureCreated(StructureType.BARREL);
     }
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
@@ -142,6 +143,7 @@ public class BlockEventListener implements Listener {
                 }
                 registerDistillery(placedBreweryStructureOptional.get().first());
                 MessageUtil.message(player, "tbp.distillery.create");
+                Statistics.registerStructureCreated(StructureType.DISTILLERY);
                 return;
             }
         }
