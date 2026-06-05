@@ -41,6 +41,7 @@ import org.bukkit.persistence.PersistentDataType;
 import org.jspecify.annotations.Nullable;
 
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -97,6 +98,42 @@ public class RecipeMatcherResultImpl implements RecipeMatcherResult<ItemStack> {
                     MiniMessage.miniMessage().serialize(recipeResult.displayName())
             ));
         }
+        if (!(state instanceof BrewImpl.State.Seal)) {
+            itemStack.editPersistentDataContainer(pdc ->
+                    BrewAdapterAccess.applyBrewData(pdc, brew)
+            );
+        }
+        return itemStack;
+    }
+
+    @Override
+    public ItemStack toItem(Brew.State state, @Nullable DefaultRecipe<ItemStack> preferredDefaultRecipe) {
+        if (recipe == null || score.completed() || preferredDefaultRecipe == null) {
+            return toItem(state);
+        }
+        List<DefaultRecipe<ItemStack>> defaultRecipes = BrewAdapterAccess.getPossibleDefaultRecipes(
+                recipe,
+                TheBrewingProject.getInstance().getRecipeRegistry(),
+                brew,
+                false
+        );
+        Optional<DefaultRecipe<ItemStack>> previous = defaultRecipes.stream()
+                .filter(preferredDefaultRecipe::equals)
+                .findAny();
+        Optional<DefaultRecipe<ItemStack>> bestMatch = defaultRecipes.stream()
+                .max(Comparator.comparingInt(DefaultRecipe::complexity));
+        Optional<DefaultRecipe<ItemStack>> defaultRecipe;
+        if (previous.isPresent()) {
+            defaultRecipe = previous.get().complexity() < bestMatch.get().complexity() ? bestMatch : previous;
+        } else {
+            defaultRecipe = bestMatch;
+        }
+        ItemStack itemStack = defaultRecipe
+                .map(DefaultRecipe::result)
+                .map(RecipeResult::newLorelessItem)
+                .orElse(incompletePotion(brew));
+        defaultRecipe.map(DefaultRecipe::result)
+                .ifPresent(result -> applyLore(itemStack, result, state));
         if (!(state instanceof BrewImpl.State.Seal)) {
             itemStack.editPersistentDataContainer(pdc ->
                     BrewAdapterAccess.applyBrewData(pdc, brew)
