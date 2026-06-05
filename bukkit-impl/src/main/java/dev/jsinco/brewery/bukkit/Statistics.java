@@ -5,13 +5,16 @@ import dev.faststats.Metrics;
 import dev.faststats.data.Metric;
 import dev.jsinco.brewery.api.brew.BrewQuality;
 import dev.jsinco.brewery.api.integration.Integration;
+import dev.jsinco.brewery.api.structure.PlacedStructureRegistry;
 import dev.jsinco.brewery.api.structure.StructureType;
+import dev.jsinco.brewery.api.util.BreweryRegistry;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 public class Statistics {
 
@@ -24,7 +27,12 @@ public class Statistics {
     public static Metrics register(Metrics.Factory factory) {
         factory.addMetric(Metric.numberMap("brews_made", () -> brewsMade));
         factory.addMetric(Metric.numberMap("brews_drunk", () -> brewsDrunk));
-        factory.addMetric(Metric.numberMap("structures_made", () -> structuresMade));
+        factory.addMetric(Metric.numberMap("structures_total", () -> {
+            PlacedStructureRegistry registry = TheBrewingProject.getInstance().getPlacedStructureRegistry();
+            return BreweryRegistry.STRUCTURE_TYPE.values()
+                    .stream()
+                    .collect(Collectors.toMap(type -> type.key().minimalized(), registry::countStructureType));
+        }));
         factory.addMetric(Metric.number("recipes_count", () -> TheBrewingProject.getInstance().getRecipeRegistry().getRecipes().size()));
         factory.addMetric(Metric.stringArray("integrations", () -> TheBrewingProject.getInstance().getIntegrationManager().getIntegrationRegistry().getAllIntegrations()
                 .stream()
