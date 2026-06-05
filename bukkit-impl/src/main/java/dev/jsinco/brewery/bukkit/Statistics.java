@@ -39,6 +39,7 @@ public class Statistics {
             brewsMade.clear();
             structuresMade.clear();
             itemsPuked.set(0);
+            drunkenBlocksTraversed.set(0D);
         });
         return factory.create();
     }
