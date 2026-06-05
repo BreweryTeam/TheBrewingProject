@@ -35,9 +35,12 @@ public class ApplyPotionEffectExecutable implements EventPropertyExecutable {
         if (player == null) {
             return ExecutionResult.CONTINUE;
         }
-
+        NamespacedKey key = NamespacedKey.fromString(potionEffectName);
+        if (key == null) {
+            return ExecutionResult.CONTINUE;
+        }
         PotionEffect potionEffect = new RecipeEffectImpl(
-                Registry.EFFECT.get(NamespacedKey.fromString(potionEffectName)),
+                Registry.EFFECT.get(key),
                 durationBounds,
                 amplifierBounds
         ).newPotionEffect();
