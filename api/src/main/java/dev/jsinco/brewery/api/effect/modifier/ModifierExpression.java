@@ -1,15 +1,19 @@
 package dev.jsinco.brewery.api.effect.modifier;
 
+import dev.jsinco.brewery.api.util.Logger;
 import net.objecthunter.exp4j.Expression;
 import net.objecthunter.exp4j.ExpressionBuilder;
+import net.objecthunter.exp4j.ValidationResult;
 import net.objecthunter.exp4j.function.Function;
-import net.objecthunter.exp4j.function.Functions;
 
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 public record ModifierExpression(String function) {
 
     public static final ModifierExpression ZERO = new ModifierExpression("0");
+    private static final Set<ModifierExpression> invalidExpressions = new HashSet<>();
 
     public double evaluate(Map<String, Double> variables) {
         ExpressionBuilder builder = new ExpressionBuilder(function);
@@ -35,6 +39,14 @@ public record ModifierExpression(String function) {
         Expression expression = builder.build();
         for (Map.Entry<String, Double> entry : variables.entrySet()) {
             expression.setVariable(entry.getKey(), entry.getValue());
+        }
+        ValidationResult validationResult = expression.validate();
+        if (!validationResult.isValid() && !invalidExpressions.contains(this)) {
+            invalidExpressions.add(this);
+            Logger.logWarn("Issue with modifier expression: " + function);
+            validationResult.getErrors()
+                    .forEach(Logger::logWarn);
+            return 0D;
         }
         return expression.evaluate();
     }
