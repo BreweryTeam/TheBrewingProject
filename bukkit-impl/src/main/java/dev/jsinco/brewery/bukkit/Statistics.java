@@ -10,12 +10,14 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class Statistics {
 
     private static final Map<String, Integer> brewsMade = new ConcurrentHashMap<>();
     private static final Map<String, Integer> brewsDrunk = new ConcurrentHashMap<>();
     private static final Map<String, Integer> structuresMade = new ConcurrentHashMap<>();
+    private static AtomicInteger itemsPuked = new AtomicInteger(0);
 
     public static Metrics register(Metrics.Factory factory) {
         factory.addMetric(Metric.numberMap("brews_made", () -> brewsMade));
@@ -28,10 +30,12 @@ public class Statistics {
                 .distinct()
                 .toArray(String[]::new)
         ));
+        factory.addMetric(Metric.number("items_puked", itemsPuked::get));
         factory.onFlush(() -> {
             brewsDrunk.clear();
             brewsMade.clear();
             structuresMade.clear();
+            itemsPuked.set(0);
         });
         return factory.create();
     }
@@ -63,5 +67,9 @@ public class Statistics {
                 type.key().minimalized(),
                 (ignored, value) -> value == null ? 1 : value + 1
         );
+    }
+
+    public static void registerPukedItems(int amount) {
+        itemsPuked.addAndGet(amount);
     }
 }
