@@ -100,6 +100,16 @@ public class BrewAdapterAccess {
                 .max(Comparator.comparing(DefaultRecipe::complexity));
     }
 
+    public static List<DefaultRecipe<ItemStack>> getPossibleDefaultRecipes(@Nullable Recipe<ItemStack> recipe, RecipeRegistryImpl<ItemStack> recipeRegistry, Brew brew, boolean ruined) {
+        return recipeRegistry.getDefaultRecipes()
+                .stream()
+                .filter(defaultRecipe -> defaultRecipe.onlyRuinedBrews() == ruined)
+                .filter(defaultRecipe -> defaultRecipe.recipeConditions().stream().allMatch(recipeCondition ->
+                        recipeCondition.matches(Optional.ofNullable(recipe)
+                                .map(Recipe::getSteps).orElse(null), brew.getCompletedSteps()))
+                ).toList();
+    }
+
     public static void hideTooltips(ItemStack itemStack) {
         if (ClassUtil.exists("io.papermc.paper.datacomponent.item.TooltipDisplay")) {
             itemStack.setData(DataComponentTypes.TOOLTIP_DISPLAY, TooltipDisplay.tooltipDisplay().hiddenComponents(Registry.DATA_COMPONENT_TYPE.stream()

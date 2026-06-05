@@ -28,6 +28,12 @@ public interface RecipeMatcherResult<I> {
     I toItem(Brew.State state, @Nullable BrewQuality overrideQuality);
 
     /**
+     * @param preferredDefaultRecipe The preferred default recipe
+     * @return a complete brew item from the match
+     */
+    I toItem(Brew.State state, @Nullable DefaultRecipe<I> preferredDefaultRecipe);
+
+    /**
      * @return A brew item without lore
      */
     I toLorelessItem(Brew.State state);
