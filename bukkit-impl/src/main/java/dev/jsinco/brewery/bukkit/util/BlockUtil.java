@@ -2,11 +2,12 @@ package dev.jsinco.brewery.bukkit.util;
 
 import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.ProtocolLibrary;
+import com.comphenix.protocol.ProtocolManager;
 import com.comphenix.protocol.events.PacketContainer;
 import com.comphenix.protocol.wrappers.BlockPosition;
+import dev.jsinco.brewery.api.vector.BreweryLocation;
 import dev.jsinco.brewery.bukkit.api.BukkitAdapter;
 import dev.jsinco.brewery.util.ClassUtil;
-import dev.jsinco.brewery.api.vector.BreweryLocation;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -20,7 +21,10 @@ import org.bukkit.util.BoundingBox;
 import org.bukkit.util.Vector;
 import org.bukkit.util.VoxelShape;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.EnumSet;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class BlockUtil {
@@ -53,7 +57,10 @@ public class BlockUtil {
         if (!PROTOCOL_LIB_ENABLED) {
             return;
         }
-
+        ProtocolManager protocolManager = ProtocolLibrary.getProtocolManager();
+        if (protocolManager == null) {
+            return;
+        }
         PacketContainer packet = new PacketContainer(PacketType.Play.Server.BLOCK_ACTION);
         packet.getBlockPositionModifier()
                 .writeSafely(0, new BlockPosition(location.x(), location.y(), location.z()));
@@ -61,12 +68,13 @@ public class BlockUtil {
                 .writeSafely(0, (byte) 1)
                 .writeSafely(1, (byte) 1);
         packet.getIntegers().writeSafely(0, 1); // Block id (this field is not read anyhow
-        ProtocolLibrary.getProtocolManager().sendServerPacket(player, packet);
+        protocolManager.sendServerPacket(player, packet);
     }
 
     public static boolean isFullBlock(Block block) {
         return isFullBlock(block.getCollisionShape());
     }
+
     public static boolean isFullBlock(VoxelShape collisionShape) {
         Collection<BoundingBox> boxes = collisionShape.getBoundingBoxes();
         if (boxes.size() != 1) {
@@ -78,6 +86,7 @@ public class BlockUtil {
 
     /**
      * Gets the tool types that mine a specific block faster than using your hand.
+     *
      * @param blockType the specified block
      * @return set of tool types
      */
