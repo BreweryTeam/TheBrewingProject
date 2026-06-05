@@ -1,7 +1,6 @@
 package dev.jsinco.brewery.bukkit.effect.named;
 
 import dev.jsinco.brewery.api.event.EventPropertyExecutable;
-import dev.jsinco.brewery.api.event.EventStep;
 import dev.jsinco.brewery.api.event.EventStepProperty;
 import dev.jsinco.brewery.api.event.NamedDrunkEvent;
 import dev.jsinco.brewery.api.vector.BreweryLocation;
@@ -27,9 +26,13 @@ public class TeleportNamedExecutable implements EventPropertyExecutable {
         if (player == null) {
             return ExecutionResult.CONTINUE;
         }
-        List<BreweryLocation> locations = EventSection.events().teleportDestinations().stream().flatMap(uncompiledLocation ->
-                uncompiledLocation.stream(LocationUtil::resolveWorld)
-        ).filter(Objects::nonNull).toList();
+        List<BreweryLocation> locations = EventSection.events()
+                .teleportDestinations()
+                .stream()
+                .flatMap(uncompiledLocation ->
+                        uncompiledLocation.stream(LocationUtil::resolveWorld)
+                ).filter(Objects::nonNull)
+                .toList();
         if (locations.isEmpty()) {
             return ExecutionResult.CONTINUE;
         }

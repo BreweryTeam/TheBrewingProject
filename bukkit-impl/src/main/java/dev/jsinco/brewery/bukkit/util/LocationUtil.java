@@ -22,10 +22,11 @@ public class LocationUtil {
 
     /**
      * Resolves an actual valid world UUID from a String that can be a UUID or the world name
+     *
      * @param worldNameOrUUID The world name or UUID
      * @return A valid World UUID
      */
-    public static @NonNull UUID resolveWorld(String worldNameOrUUID) {
+    public static UUID resolveWorld(String worldNameOrUUID) {
         World world;
         try {
             world = Bukkit.getWorld(UUID.fromString(worldNameOrUUID));
@@ -33,7 +34,7 @@ public class LocationUtil {
             world = Bukkit.getWorld(worldNameOrUUID);
         }
         if (world == null) {
-            throw new IllegalArgumentException("Could not find world: " + worldNameOrUUID);
+            return null;
         }
         return world.getUID();
     }
@@ -119,6 +120,7 @@ public class LocationUtil {
 
     /**
      * Checks if a location is within the <strong>vertical</strong> build limit.
+     *
      * @param location The location with a non-null world
      * @return true if the location is within the build limit
      */
@@ -130,6 +132,7 @@ public class LocationUtil {
     public static void dropBrews(BreweryLocation breweryLocation, List<Brew> drops) {
         BukkitAdapter.toLocation(breweryLocation).ifPresent(location -> dropBrews(location, drops));
     }
+
     public static void dropBrews(Location location, List<Brew> drops) {
         Location offset = location.clone().add(0.5, 0, 0.5);
         drops.stream()
