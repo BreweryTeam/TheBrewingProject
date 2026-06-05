@@ -3,6 +3,7 @@ package dev.jsinco.brewery.bukkit;
 import dev.faststats.Metrics;
 import dev.faststats.data.Metric;
 import dev.jsinco.brewery.api.brew.BrewQuality;
+import dev.jsinco.brewery.api.integration.Integration;
 import dev.jsinco.brewery.api.structure.StructureType;
 import org.jetbrains.annotations.Nullable;
 
@@ -21,6 +22,11 @@ public class Statistics {
         factory.addMetric(Metric.numberMap("brews_drunk", () -> brewsDrunk));
         factory.addMetric(Metric.numberMap("structures_made", () -> structuresMade));
         factory.addMetric(Metric.number("recipes_count", () -> TheBrewingProject.getInstance().getRecipeRegistry().getRecipes().size()));
+        factory.addMetric(Metric.stringArray("integrations", () -> TheBrewingProject.getInstance().getIntegrationManager().getIntegrationRegistry().getAllIntegrations()
+                .stream()
+                .map(Integration::getId)
+                .toArray(String[]::new)
+        ));
         factory.onFlush(() -> {
             brewsDrunk.clear();
             brewsMade.clear();
