@@ -27,7 +27,7 @@ public class Statistics {
     public static Metrics register(Metrics.Factory factory) {
         factory.addMetric(Metric.numberMap("brews_made", () -> brewsMade));
         factory.addMetric(Metric.numberMap("brews_drunk", () -> brewsDrunk));
-        factory.addMetric(Metric.numberMap("structures_count", () -> {
+        factory.addMetric(Metric.numberMap("structure_count", () -> {
             PlacedStructureRegistry registry = TheBrewingProject.getInstance().getPlacedStructureRegistry();
             return BreweryRegistry.STRUCTURE_TYPE.values()
                     .stream()
