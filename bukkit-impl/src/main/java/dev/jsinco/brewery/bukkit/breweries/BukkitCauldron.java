@@ -63,6 +63,8 @@ import org.joml.Vector3f;
 import org.jspecify.annotations.NonNull;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -86,6 +88,7 @@ public class BukkitCauldron implements Cauldron {
     private boolean dirty = true;
     private TextDisplay waterColorer = null;
     private final CauldronType cauldronType;
+    private DefaultRecipe<ItemStack> previousDefaultRecipe = null;
 
     public BukkitCauldron(BreweryLocation location, boolean hot, CauldronType cauldronType) {
         this.location = location;
@@ -189,17 +192,33 @@ public class BukkitCauldron implements Cauldron {
         if (matcherResult.score().completed() && recipeResult != null) {
             return Color.fromRGB(recipeResult.brewColor().getRGB() & 0xFFFFFF);
         }
-        Optional<Color> defaultRecipeColor = BrewAdapterAccess.getDefaultRecipe(
-                        recipeOptional.orElse(null),
-                        TheBrewingProject.getInstance().getRecipeRegistry(),
-                        brew,
-                        false
-                ).map(DefaultRecipe::result)
+        List<DefaultRecipe<ItemStack>> defaultRecipes = new ArrayList<>(BrewAdapterAccess.getPossibleDefaultRecipes(
+                recipeOptional.orElse(null),
+                TheBrewingProject.getInstance().getRecipeRegistry(),
+                brew,
+                false
+        ));
+        Optional<DefaultRecipe<ItemStack>> previous = previousDefaultRecipe == null ?
+                Optional.empty() : defaultRecipes.stream()
+                                   .filter(previousDefaultRecipe::equals)
+                                   .findAny();
+        Collections.shuffle(defaultRecipes);
+        Optional<DefaultRecipe<ItemStack>> bestMatch = defaultRecipes.stream()
+                .max(Comparator.comparingInt(DefaultRecipe::complexity));
+        Optional<DefaultRecipe<ItemStack>> defaultRecipe;
+        if (previous.isPresent()) {
+            defaultRecipe = previous.get().complexity() < bestMatch.get().complexity() ? bestMatch : previous;
+        } else {
+            defaultRecipe = bestMatch;
+        }
+        Optional<Color> defaultRecipeColor = defaultRecipe
+                .map(DefaultRecipe::result)
                 .map(RecipeResult::brewColor)
                 .map(java.awt.Color::getRGB)
                 .map(integer -> integer & 0xFFFFFF)
                 .map(Color::fromRGB);
         if (defaultRecipeColor.isPresent()) {
+            previousDefaultRecipe = defaultRecipe.get();
             return defaultRecipeColor.get();
         }
         Map<? extends Ingredient, Integer> ingredients = BrewUtil.countIngredientTotal(brew.getCompletedSteps());
@@ -475,9 +494,15 @@ public class BukkitCauldron implements Cauldron {
         return brew;
     }
 
-    public void extractBrew() {
+    public ItemStack extractBrew(ItemSource itemSource) {
         this.brewExtracted = true;
         playBrewExtractedEffects();
+        if (!(itemSource instanceof ItemSource.BrewBasedSource brewBasedSource)) {
+            return itemSource.get();
+        }
+        return RecipeMatcherImpl.builder().build()
+                .match(brewBasedSource.brew())
+                .toItem(new Brew.State.Other(), previousDefaultRecipe);
     }
 
     private void recalculateBrewTime() {
