@@ -1,5 +1,6 @@
 package dev.jsinco.brewery.bukkit;
 
+import com.google.common.util.concurrent.AtomicDouble;
 import dev.faststats.Metrics;
 import dev.faststats.data.Metric;
 import dev.jsinco.brewery.api.brew.BrewQuality;
@@ -18,6 +19,7 @@ public class Statistics {
     private static final Map<String, Integer> brewsDrunk = new ConcurrentHashMap<>();
     private static final Map<String, Integer> structuresMade = new ConcurrentHashMap<>();
     private static AtomicInteger itemsPuked = new AtomicInteger(0);
+    private static AtomicDouble drunkenBlocksTraversed = new AtomicDouble(0);
 
     public static Metrics register(Metrics.Factory factory) {
         factory.addMetric(Metric.numberMap("brews_made", () -> brewsMade));
@@ -31,6 +33,7 @@ public class Statistics {
                 .toArray(String[]::new)
         ));
         factory.addMetric(Metric.number("items_puked", itemsPuked::get));
+        factory.addMetric(Metric.number("drunken_blocks_traversed", drunkenBlocksTraversed::get));
         factory.onFlush(() -> {
             brewsDrunk.clear();
             brewsMade.clear();
@@ -71,5 +74,9 @@ public class Statistics {
 
     public static void registerPukedItems(int amount) {
         itemsPuked.addAndGet(amount);
+    }
+
+    public static void registerDrunkenTraversedBlocks(double blocks) {
+        drunkenBlocksTraversed.addAndGet(blocks);
     }
 }

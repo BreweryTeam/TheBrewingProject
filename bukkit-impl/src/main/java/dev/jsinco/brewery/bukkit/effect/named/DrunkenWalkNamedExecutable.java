@@ -1,13 +1,14 @@
 package dev.jsinco.brewery.bukkit.effect.named;
 
 import dev.jsinco.brewery.api.event.EventPropertyExecutable;
-import dev.jsinco.brewery.api.event.EventStep;
 import dev.jsinco.brewery.api.event.EventStepProperty;
 import dev.jsinco.brewery.api.event.NamedDrunkEvent;
 import dev.jsinco.brewery.api.util.Pair;
+import dev.jsinco.brewery.bukkit.Statistics;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import io.papermc.paper.threadedregions.scheduler.ScheduledTask;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;
 import org.jspecify.annotations.NonNull;
@@ -23,7 +24,7 @@ public class DrunkenWalkNamedExecutable implements EventPropertyExecutable {
 
 
     @Override
-    public @NonNull ExecutionResult execute(UUID contextPlayer,  List<EventStepProperty> eventStepProperties) {
+    public @NonNull ExecutionResult execute(UUID contextPlayer, List<EventStepProperty> eventStepProperties) {
         Player player = Bukkit.getPlayer(contextPlayer);
         if (player == null) {
             return ExecutionResult.CONTINUE;
@@ -50,6 +51,7 @@ public class DrunkenWalkNamedExecutable implements EventPropertyExecutable {
         private int timestamp = 0;
         private final Player player;
         private Vector currentPush;
+        private final Location startingPoint;
 
         private static int DIRECTION_INTERVAL = 20;
         private static double MINIMUM_PUSH_MAGNITUDE = 0.1;
@@ -61,6 +63,7 @@ public class DrunkenWalkNamedExecutable implements EventPropertyExecutable {
             this.player = player;
             this.vectors = compileRandomVectors(duration);
             pollNewCurrentVector(vectors);
+            this.startingPoint = player.getLocation().clone();
         }
 
         private void pollNewCurrentVector(LinkedList<Pair<Vector, Integer>> vectors) {
@@ -84,6 +87,9 @@ public class DrunkenWalkNamedExecutable implements EventPropertyExecutable {
         public void tick(ScheduledTask task) {
             if (duration <= timestamp++ || currentPush == null) {
                 task.cancel();
+                if (player.isOnline()) {
+                    Statistics.registerDrunkenTraversedBlocks(player.getLocation().distance(startingPoint));
+                }
                 return;
             }
             Vector walk = TheBrewingProject.getInstance().getPlayerWalkListener().getRegisteredMovement(player.getUniqueId());
