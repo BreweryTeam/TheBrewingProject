@@ -25,6 +25,7 @@ public class Statistics {
         factory.addMetric(Metric.stringArray("integrations", () -> TheBrewingProject.getInstance().getIntegrationManager().getIntegrationRegistry().getAllIntegrations()
                 .stream()
                 .map(Integration::getId)
+                .distinct()
                 .toArray(String[]::new)
         ));
         factory.onFlush(() -> {
