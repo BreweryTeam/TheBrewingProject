@@ -1,9 +1,9 @@
 package dev.jsinco.brewery.bukkit.effect.named;
 
 import dev.jsinco.brewery.api.event.EventPropertyExecutable;
-import dev.jsinco.brewery.api.event.EventStep;
 import dev.jsinco.brewery.api.event.EventStepProperty;
 import dev.jsinco.brewery.api.event.NamedDrunkEvent;
+import dev.jsinco.brewery.bukkit.Statistics;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.configuration.EventSection;
 import io.papermc.paper.threadedregions.scheduler.ScheduledTask;
@@ -51,6 +51,7 @@ public class PukeNamedExecutable implements EventPropertyExecutable {
         private final Player player;
 
         PukeHandler(int pukingTicks, Player player) {
+            Statistics.registerPukedItems(pukingTicks);
             this.countDown = pukingTicks;
             this.player = player;
         }
