@@ -64,7 +64,11 @@ public class MythicIntegration implements ItemIntegration, Listener {
 
     @Override
     public @Nullable String getItemId(ItemStack itemStack) {
-        return MythicBukkit.inst().getItemManager().getMythicTypeFromItem(itemStack);
+        try {
+            return MythicBukkit.inst().getItemManager().getMythicTypeFromItem(itemStack);
+        } catch (NoClassDefFoundError noClassDefFoundError) {
+            return null;
+        }
     }
 
     @Override
