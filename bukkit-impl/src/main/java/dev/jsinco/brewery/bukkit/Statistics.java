@@ -21,8 +21,8 @@ public class Statistics {
     private static final Map<String, Integer> brewsMade = new ConcurrentHashMap<>();
     private static final Map<String, Integer> brewsDrunk = new ConcurrentHashMap<>();
     private static final Map<String, Integer> structuresMade = new ConcurrentHashMap<>();
-    private static AtomicInteger itemsPuked = new AtomicInteger(0);
-    private static AtomicDouble drunkenBlocksTraversed = new AtomicDouble(0);
+    private static final AtomicInteger itemsPuked = new AtomicInteger(0);
+    private static final AtomicDouble drunkenBlocksTraversed = new AtomicDouble(0);
 
     public static Metrics register(Metrics.Factory factory) {
         factory.addMetric(Metric.numberMap("brews_made", () -> brewsMade));
