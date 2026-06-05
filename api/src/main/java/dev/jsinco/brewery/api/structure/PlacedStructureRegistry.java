@@ -36,6 +36,13 @@ public interface PlacedStructureRegistry {
     Set<MultiblockStructure<?>> getStructures(Collection<BreweryLocation> locations);
 
     /**
+     *
+     * @param structureType The structure type to count
+     * @return The amount of structures of that type
+     */
+    int countStructureType(StructureType<?> structureType);
+
+    /**
      * Utility method
      *
      * @param location The location to check for a structure
