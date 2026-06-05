@@ -11,6 +11,7 @@ import org.bukkit.entity.Player;
 import org.jspecify.annotations.NonNull;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 public class TeleportExecutable implements EventPropertyExecutable {
@@ -28,6 +29,7 @@ public class TeleportExecutable implements EventPropertyExecutable {
             return ExecutionResult.CONTINUE;
         }
         location.get(LocationUtil::resolveWorld)
+                .filter(Objects::nonNull)
                 .flatMap(BukkitAdapter::toLocation)
                 .ifPresent(player::teleportAsync);
         return ExecutionResult.CONTINUE;
