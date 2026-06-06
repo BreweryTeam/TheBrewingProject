@@ -6,7 +6,6 @@ import dev.faststats.data.Metric;
 import dev.jsinco.brewery.api.brew.BrewQuality;
 import dev.jsinco.brewery.api.integration.Integration;
 import dev.jsinco.brewery.api.structure.PlacedStructureRegistry;
-import dev.jsinco.brewery.api.structure.StructureType;
 import dev.jsinco.brewery.api.util.BreweryRegistry;
 import org.jetbrains.annotations.Nullable;
 
@@ -20,7 +19,6 @@ public class Statistics {
 
     private static final Map<String, Integer> brewsMade = new ConcurrentHashMap<>();
     private static final Map<String, Integer> brewsDrunk = new ConcurrentHashMap<>();
-    private static final Map<String, Integer> structuresMade = new ConcurrentHashMap<>();
     private static final AtomicInteger itemsPuked = new AtomicInteger(0);
     private static final AtomicDouble drunkenBlocksTraversed = new AtomicDouble(0);
 
@@ -45,7 +43,6 @@ public class Statistics {
         factory.onFlush(() -> {
             brewsDrunk.clear();
             brewsMade.clear();
-            structuresMade.clear();
             itemsPuked.set(0);
             drunkenBlocksTraversed.set(0D);
         });
@@ -72,13 +69,6 @@ public class Statistics {
         } else {
             return quality.name().toLowerCase(Locale.ROOT);
         }
-    }
-
-    public static void registerStructureCreated(StructureType<?> type) {
-        structuresMade.compute(
-                type.key().minimalized(),
-                (ignored, value) -> value == null ? 1 : value + 1
-        );
     }
 
     public static void registerPukedItems(int amount) {
