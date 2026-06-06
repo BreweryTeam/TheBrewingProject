@@ -87,7 +87,7 @@ public class DrunkenWalkNamedExecutable implements EventPropertyExecutable {
         public void tick(ScheduledTask task) {
             if (duration <= timestamp++ || currentPush == null) {
                 task.cancel();
-                if (player.isOnline()) {
+                if (player.isOnline() && player.getWorld() == startingPoint.getWorld()) {
                     Statistics.registerDrunkenTraversedBlocks(player.getLocation().distance(startingPoint));
                 }
                 return;
