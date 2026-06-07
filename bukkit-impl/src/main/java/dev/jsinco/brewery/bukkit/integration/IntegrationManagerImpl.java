@@ -49,7 +49,7 @@ public class IntegrationManagerImpl implements IntegrationManager {
         register(IntegrationTypes.ITEM, "net.momirealms.craftengine.bukkit.plugin.BukkitCraftEngine", () -> new CraftEngineIntegration(resourcePackColors));
         register(IntegrationTypes.ITEM, "dev.lone.itemsadder.api.CustomStack", () -> new ItemsAdderIntegration(resourcePackColors));
         register(IntegrationTypes.ITEM, "com.nexomc.nexo.api.NexoItems", () -> new NexoIntegration(resourcePackColors));
-        register(IntegrationTypes.ITEM, "io.th0rgal.oraxen.api.OraxenItem", () -> new OraxenIntegration(resourcePackColors));
+        register(IntegrationTypes.ITEM, "io.th0rgal.oraxen.api.OraxenItems", () -> new OraxenIntegration(resourcePackColors));
         register(IntegrationTypes.ITEM, "net.Indyuce.mmoitems.MMOItems", () -> new MmoItemsIntegration(resourcePackColors));
         register(IntegrationTypes.ITEM, "io.lumine.mythic.bukkit.MythicBukkit", () -> new MythicIntegration(resourcePackColors));
         register(IntegrationTypes.PLACEHOLDER, "me.clip.placeholderapi.expansion.PlaceholderExpansion", () -> new PlaceholderApiIntegration());
