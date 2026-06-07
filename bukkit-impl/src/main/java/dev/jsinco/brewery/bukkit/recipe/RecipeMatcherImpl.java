@@ -32,7 +32,7 @@ public record RecipeMatcherImpl(@Nullable Set<Recipe<ItemStack>> whitelist,
                                         recipe.score(variation)
                                 ))
                 )
-                .filter(pair -> pair.score().score() > 0)
+                .filter(pair -> pair.score().rawScore() > 0)
                 .max(Comparator.comparing(RecipeMatcherResult::score))
                 .orElseGet(() -> new RecipeMatcherResultImpl(
                         null,
