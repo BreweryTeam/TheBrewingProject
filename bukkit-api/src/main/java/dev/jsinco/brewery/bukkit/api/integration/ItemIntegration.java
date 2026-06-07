@@ -10,7 +10,7 @@ import org.bukkit.inventory.ItemStack;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
-import java.awt.Color;
+import java.awt.*;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
@@ -38,7 +38,6 @@ public interface ItemIntegration extends Integration {
                                 return Optional.empty();
                             }
                             if (!isIngredient(id)) {
-                                Logger.logErr("Unknown PluginIngredient '" + id + "' for item integration " + getId());
                                 return Optional.empty();
                             }
                             return Optional.of(new PluginIngredient(new BreweryKey(getId(), id), this));
