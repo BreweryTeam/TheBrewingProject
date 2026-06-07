@@ -24,7 +24,7 @@ import java.util.concurrent.CompletableFuture;
 
 public class OraxenIntegration implements ItemIntegration, Listener {
 
-    private static final boolean ENABLED = ClassUtil.exists("io.th0rgal.oraxen.api.OraxenItem");
+    private static final boolean ENABLED = ClassUtil.exists("io.th0rgal.oraxen.api.OraxenItems");
     private final CompletableFuture<Void> itemsLoadedFuture = new CompletableFuture<>();
     private final CompletableFuture<Void> packGeneratedFuture = new CompletableFuture<>();
     private final CompletableFuture<Void> initializedFuture = CompletableFuture.allOf(itemsLoadedFuture, packGeneratedFuture);
