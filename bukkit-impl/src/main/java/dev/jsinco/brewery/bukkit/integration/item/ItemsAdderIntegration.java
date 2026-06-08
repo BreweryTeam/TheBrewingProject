@@ -1,7 +1,10 @@
 package dev.jsinco.brewery.bukkit.integration.item;
 
 import dev.jsinco.brewery.api.ingredient.Ingredient;
+import dev.jsinco.brewery.api.util.BreweryKey;
+import dev.jsinco.brewery.api.util.Logger;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
+import dev.jsinco.brewery.bukkit.api.ingredient.PluginIngredient;
 import dev.jsinco.brewery.bukkit.api.integration.ItemIntegration;
 import dev.jsinco.brewery.bukkit.util.color.ResourcePackColors;
 import dev.jsinco.brewery.bukkit.util.color.ResourcePackSource;
@@ -18,7 +21,7 @@ import org.bukkit.inventory.ItemStack;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
-import java.awt.Color;
+import java.awt.*;
 import java.io.File;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -55,8 +58,7 @@ public class ItemsAdderIntegration implements ItemIntegration, Listener {
         if (customStack == null) {
             return null;
         }
-        String id = customStack.getId();
-        return id.contains(":") ? id.split(":", 2)[1] : id;
+        return customStack.getNamespacedID();
     }
 
     @Override
@@ -81,10 +83,20 @@ public class ItemsAdderIntegration implements ItemIntegration, Listener {
 
     @Override
     public CompletableFuture<Optional<Ingredient>> createIngredient(String id) {
-        if (id.contains(":")) {
-            id = id.split(":", 2)[1];
-        }
-        return ItemIntegration.super.createIngredient(id);
+        return initialized()
+                .handleAsync((ignored1, exception) -> {
+                            if (exception != null) {
+                                Logger.logErr("Couldn't create PluginIngredient '" + id + "' for item integration " + getId());
+                                Logger.logErr(exception);
+                                return Optional.empty();
+                            }
+                            CustomStack customStack = CustomStack.getInstance(id);
+                            if (customStack == null) {
+                                return Optional.empty();
+                            }
+                            return Optional.of(new PluginIngredient(new BreweryKey(getId(), customStack.getNamespacedID()), this));
+                        }
+                );
     }
 
     @EventHandler
