@@ -8,13 +8,14 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import dev.jsinco.brewery.api.ingredient.Ingredient;
+import dev.jsinco.brewery.api.ingredient.ResolvedIngredientManager;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
-import dev.jsinco.brewery.bukkit.ingredient.BukkitIngredientManager;
 import dev.jsinco.brewery.bukkit.util.BukkitMessageUtil;
 import io.papermc.paper.command.brigadier.MessageComponentSerializer;
 import io.papermc.paper.command.brigadier.argument.CustomArgumentType;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
+import org.bukkit.inventory.ItemStack;
 import org.jspecify.annotations.NonNull;
 
 import java.util.ArrayList;
@@ -25,7 +26,8 @@ import java.util.concurrent.CompletionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-public class IngredientsArgument implements CustomArgumentType.Converted<Map<Ingredient, Integer>, String> {
+public record IngredientsArgument(CompletableFuture<ResolvedIngredientManager<ItemStack>> ingredientManager)
+        implements CustomArgumentType.Converted<Map<Ingredient, Integer>, String> {
 
     private static final SimpleCommandExceptionType TIMEOUT = new SimpleCommandExceptionType(
             MessageComponentSerializer.message().serialize(Component.text("Command timed out, another integrated plugin probably failed on startup"))
@@ -37,13 +39,12 @@ public class IngredientsArgument implements CustomArgumentType.Converted<Map<Ing
     @Override
     public Map<Ingredient, Integer> convert(String nativeType) throws CommandSyntaxException {
         try {
-            return BukkitIngredientManager.INSTANCE.getIngredientsWithAmount(
-                            splitIngredients(nativeType).stream()
-                                    .map(String::strip)
-                                    .filter(string -> !string.isBlank())
-                                    .toList(), true
-                    ).orTimeout(50, TimeUnit.MILLISECONDS)
-                    .join();
+            return ingredientManager.orTimeout(50, TimeUnit.MILLISECONDS)
+                    .join()
+                    .getIngredientsWithAmount(splitIngredients(nativeType).stream()
+                            .map(String::strip)
+                            .filter(string -> !string.isBlank())
+                            .toList(), true);
         } catch (CompletionException e) {
             if (e.getCause() != null && e.getCause() instanceof TimeoutException) {
                 throw TIMEOUT.create();
