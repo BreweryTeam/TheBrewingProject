@@ -21,6 +21,7 @@ import dev.jsinco.brewery.bukkit.Statistics;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.bukkit.api.BukkitAdapter;
 import dev.jsinco.brewery.bukkit.api.event.BrewConsumeEvent;
+import dev.jsinco.brewery.bukkit.api.event.structure.CauldronCreateEvent;
 import dev.jsinco.brewery.bukkit.api.event.transaction.CauldronExtractEvent;
 import dev.jsinco.brewery.bukkit.api.integration.IntegrationTypes;
 import dev.jsinco.brewery.bukkit.api.transaction.ItemSource;
@@ -296,6 +297,11 @@ public class PlayerEventListener implements Listener {
             CauldronType cauldronType = (block.getType() == Material.CAULDRON && itemStack.getType() == Material.POTION) ?
                     CauldronType.BREW : BukkitCauldron.findCauldronType(block).orElse(CauldronType.WATER);
             cauldron = new BukkitCauldron(BukkitAdapter.toBreweryLocation(block), BukkitCauldron.isHeatSource(block.getRelative(BlockFace.DOWN)), cauldronType);
+            CauldronCreateEvent event = new CauldronCreateEvent(new CancelState.Allowed(), player, block.getLocation(), cauldron);
+            if (!event.callEvent()) {
+                event.getCancelState().sendMessage(player);
+                return false;
+            }
         }
         boolean addedIngredient = cauldron.withIngredient(itemStack, player);
         if (addedIngredient) {
