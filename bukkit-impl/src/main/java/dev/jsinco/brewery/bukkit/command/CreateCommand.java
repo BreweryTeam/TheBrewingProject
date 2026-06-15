@@ -16,6 +16,7 @@ import dev.jsinco.brewery.brew.BrewImpl;
 import dev.jsinco.brewery.brew.CookStepImpl;
 import dev.jsinco.brewery.brew.DistillStepImpl;
 import dev.jsinco.brewery.brew.MixStepImpl;
+import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.bukkit.brew.BrewAdapterAccess;
 import dev.jsinco.brewery.bukkit.command.argument.EnumArgument;
 import dev.jsinco.brewery.bukkit.command.argument.FlaggedArgumentBuilder;
@@ -41,12 +42,12 @@ public class CreateCommand {
         FlaggedArgumentBuilder.Flag cook = new FlaggedArgumentBuilder.Flag("cook", "c", List.of(
                 new Pair<>("cook-time", DoubleArgumentType.doubleArg(0)),
                 new Pair<>("cauldron-type", new EnumArgument<>(CauldronType.class)),
-                new Pair<>("cook-ingredients", new IngredientsArgument())
+                new Pair<>("cook-ingredients", new IngredientsArgument(TheBrewingProject.getInstance().getResolvedIngredientManager()))
         ), Set.of(FlaggedArgumentBuilder.FlagProperty.MANDATORY_FIRST, FlaggedArgumentBuilder.FlagProperty.ONLY_FIRST));
         FlaggedArgumentBuilder.Flag mix = new FlaggedArgumentBuilder.Flag("mix", "m", List.of(
                 new Pair<>("mix-time", DoubleArgumentType.doubleArg(0)),
                 new Pair<>("cauldron-type", new EnumArgument<>(CauldronType.class)),
-                new Pair<>("mix-ingredients", new IngredientsArgument())
+                new Pair<>("mix-ingredients", new IngredientsArgument(TheBrewingProject.getInstance().getResolvedIngredientManager()))
         ), Set.of(FlaggedArgumentBuilder.FlagProperty.MANDATORY_FIRST, FlaggedArgumentBuilder.FlagProperty.ONLY_FIRST));
         FlaggedArgumentBuilder.Flag distill = new FlaggedArgumentBuilder.Flag("distill", "d", List.of(
                 new Pair<>("distill-runs", IntegerArgumentType.integer(1))
