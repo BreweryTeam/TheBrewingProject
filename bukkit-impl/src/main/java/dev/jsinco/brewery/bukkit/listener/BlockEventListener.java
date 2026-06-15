@@ -15,8 +15,10 @@ import dev.jsinco.brewery.api.util.Logger;
 import dev.jsinco.brewery.api.util.Pair;
 import dev.jsinco.brewery.api.vector.BreweryLocation;
 import dev.jsinco.brewery.bukkit.api.BukkitAdapter;
+import dev.jsinco.brewery.bukkit.api.event.structure.BarrelCreateEvent;
 import dev.jsinco.brewery.bukkit.api.event.structure.BarrelDestroyEvent;
 import dev.jsinco.brewery.bukkit.api.event.structure.CauldronDestroyEvent;
+import dev.jsinco.brewery.bukkit.api.event.structure.DistilleryCreateEvent;
 import dev.jsinco.brewery.bukkit.api.event.structure.DistilleryDestroyEvent;
 import dev.jsinco.brewery.bukkit.breweries.BreweryRegistry;
 import dev.jsinco.brewery.bukkit.breweries.BukkitCauldron;
@@ -105,12 +107,18 @@ public class BlockEventListener implements Listener {
             // Exit if there's an overlapping structure
             return;
         }
-        if (!event.getPlayer().hasPermission("brewery.barrel.create")) {
-            MessageUtil.message(event.getPlayer(), "tbp.barrel.create-denied");
+        BukkitBarrel barrel = new BukkitBarrel(BukkitAdapter.toLocation(placedBreweryStructure.getUnique()).orElseThrow(), placedBreweryStructure, placedBreweryStructure.getStructure().getMeta(StructureMeta.INVENTORY_SIZE), placedStructurePair.second());
+        BarrelCreateEvent barrelCreateEvent = new BarrelCreateEvent(
+                event.getPlayer().hasPermission("brewery.barrel.create") ?
+                        new CancelState.Allowed() : new CancelState.PermissionDenied(Component.translatable("tbp.barrel.create-denied")),
+                event.getPlayer(),
+                event.getBlock().getLocation(),
+                barrel);
+        if (!barrelCreateEvent.callEvent()) {
+            barrelCreateEvent.getCancelState().sendMessage(event.getPlayer());
             return;
         }
         MessageUtil.message(event.getPlayer(), "tbp.barrel.create");
-        BukkitBarrel barrel = new BukkitBarrel(BukkitAdapter.toLocation(placedBreweryStructure.getUnique()).orElseThrow(), placedBreweryStructure, placedBreweryStructure.getStructure().getMeta(StructureMeta.INVENTORY_SIZE), placedStructurePair.second());
         placedBreweryStructure.setHolder(barrel);
         placedStructureRegistry.registerStructure(placedBreweryStructure);
         breweryRegistry.registerInventory(barrel);
@@ -135,19 +143,25 @@ public class BlockEventListener implements Listener {
                 }
 
                 Player player = placeEvent.getPlayer();
-                if (!player.hasPermission("brewery.distillery.create")) {
-                    MessageUtil.message(player, "tbp.distillery.create-denied");
+                BukkitDistillery bukkitDistillery = new BukkitDistillery(placedBreweryStructureOptional.get().first());
+                DistilleryCreateEvent createEvent = new DistilleryCreateEvent(player.hasPermission("brewery.distillery.create") ?
+                        new CancelState.Allowed() : new CancelState.PermissionDenied(Component.translatable("tbp.distillery.create-denied")),
+                        player,
+                        placeEvent.getBlockPlaced().getLocation(),
+                        bukkitDistillery
+                );
+                if (!createEvent.callEvent()) {
+                    createEvent.getCancelState().sendMessage(placeEvent.getPlayer());
                     return;
                 }
-                registerDistillery(placedBreweryStructureOptional.get().first());
+                registerDistillery(placedBreweryStructureOptional.get().first(), bukkitDistillery);
                 MessageUtil.message(player, "tbp.distillery.create");
                 return;
             }
         }
     }
 
-    private void registerDistillery(PlacedBreweryStructure<BukkitDistillery> distilleryPlacedBreweryStructure) {
-        BukkitDistillery bukkitDistillery = new BukkitDistillery(distilleryPlacedBreweryStructure);
+    private void registerDistillery(PlacedBreweryStructure<BukkitDistillery> distilleryPlacedBreweryStructure, BukkitDistillery bukkitDistillery) {
         distilleryPlacedBreweryStructure.setHolder(bukkitDistillery);
         placedStructureRegistry.registerStructure(distilleryPlacedBreweryStructure);
         try {
