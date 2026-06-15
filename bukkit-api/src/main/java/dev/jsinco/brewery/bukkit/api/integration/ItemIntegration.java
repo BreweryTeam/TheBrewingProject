@@ -7,10 +7,11 @@ import dev.jsinco.brewery.api.util.Logger;
 import dev.jsinco.brewery.bukkit.api.ingredient.PluginIngredient;
 import net.kyori.adventure.text.Component;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.ApiStatus;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
-import java.awt.*;
+import java.awt.Color;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
@@ -43,6 +44,14 @@ public interface ItemIntegration extends Integration {
                             return Optional.of(new PluginIngredient(new BreweryKey(getId(), id), this));
                         }
                 );
+    }
+
+    @ApiStatus.Internal
+    default Optional<Ingredient> createIngredientUnsafe(String id) {
+        if (!isIngredient(id)) {
+            return Optional.empty();
+        }
+        return Optional.of(new PluginIngredient(new BreweryKey(getId(), id), this));
     }
 
     /**

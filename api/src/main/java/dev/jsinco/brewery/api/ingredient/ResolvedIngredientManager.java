@@ -11,26 +11,20 @@ import org.jspecify.annotations.NonNull;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
- * Get an instance of an ingredient from an ItemStack or a string.
- * Used for cauldrons and loading for loading recipes.
+ * Used to avoid completable future hell
  *
- * @param <I> Item stack
+ * @param <I> The item stack type
  */
-@Deprecated(forRemoval = true)
-public interface IngredientManager<I> {
-
+public interface ResolvedIngredientManager<I> {
     Pattern INGREDIENT_META_DATA_RE = Pattern.compile("\\{(.*)\\}");
     Pattern INGREDIENT_META_DATA_KEY_RE = Pattern.compile("[^,{}]+");
 
     /**
-     * Don't use this method on startup, expect unexpected behavior if you do
-     *
      * @param itemStack An item stack
      * @return An ingredient of the item stack
      */
@@ -43,24 +37,19 @@ public interface IngredientManager<I> {
     Optional<I> toItem(Ingredient ingredient);
 
     /**
-     * Pretty much all items plugins initialize items on a delay. This is therefore a necessary measure to use on enable
-     * <p>
-     * Startup friendly :)
-     * </p>
-     *
      * @param ingredientStr A string representing the ingredient
-     * @return A completable future with an optionally present ingredient
+     * @return An optionally present ingredient
      */
-    CompletableFuture<Optional<Ingredient>> getIngredient(@NonNull String ingredientStr);
+    Optional<Ingredient> getIngredient(@NonNull String ingredientStr);
 
     /**
      * Deserialize the ingredient with meta data. Meta data is within curly brackets
      *
      * @param serializedIngredient Serialized form of the ingredient
-     * @return A completable future with an optionally present ingredient
+     * @return An optionally present ingredient
      * @throws IllegalArgumentException if the ingredient meta in the string was invalid
      */
-    default CompletableFuture<Optional<Ingredient>> deserializeIngredient(@NonNull String serializedIngredient) throws IllegalArgumentException {
+    default Optional<Ingredient> deserializeIngredient(@NonNull String serializedIngredient) throws IllegalArgumentException {
         Matcher matcher = INGREDIENT_META_DATA_RE.matcher(serializedIngredient);
         if (!matcher.find()) {
             return getIngredient(serializedIngredient);
@@ -74,9 +63,7 @@ public interface IngredientManager<I> {
         StringUtil.complexSplit(meta)
                 .forEach(metaElement -> addMeta(metaElement, metaBuilder));
         return getIngredient(id)
-                .thenApply(ingredientOptional -> ingredientOptional
-                        .map(ingredient -> new IngredientWithMeta(ingredient, metaBuilder.build()))
-                );
+                .map(ingredient -> new IngredientWithMeta(ingredient, metaBuilder.build()));
     }
 
     private void addMeta(String metaElement, ImmutableMap.Builder<IngredientMeta<?>, Object> metaBuilder) {
@@ -117,10 +104,16 @@ public interface IngredientManager<I> {
      * @return An ingredient/runs pair
      * @throws IllegalArgumentException if the ingredients string is invalid
      */
-    CompletableFuture<Pair<Ingredient, Integer>> getIngredientWithAmount(String ingredientStr) throws IllegalArgumentException;
+    Pair<Ingredient, Integer> getIngredientWithAmount(String ingredientStr) throws IllegalArgumentException;
 
-    CompletableFuture<Pair<Ingredient, Integer>> getIngredientWithAmount(String ingredientStr, boolean withMeta) throws
-            IllegalArgumentException;
+    /**
+     *
+     * @param ingredientStr A string with the format [ingredient-name]/[runs]. Allows not specifying runs, where it will default to 1
+     * @param allowMeta     Whether meta should be allowed
+     * @return An ingredient/runs pair
+     * @throws IllegalArgumentException if the ingredients string is invalid
+     */
+    Pair<Ingredient, Integer> getIngredientWithAmount(String ingredientStr, boolean allowMeta) throws IllegalArgumentException;
 
     /**
      * Parse a list of strings into a map of ingredients with runs
@@ -129,7 +122,7 @@ public interface IngredientManager<I> {
      * @return A map representing ingredients with runs
      * @throws IllegalArgumentException if there's any invalid ingredient string
      */
-    CompletableFuture<Map<Ingredient, Integer>> getIngredientsWithAmount(List<String> stringList) throws IllegalArgumentException;
+    Map<Ingredient, Integer> getIngredientsWithAmount(List<String> stringList) throws IllegalArgumentException;
 
     /**
      * Utility method, merge ingredients amount of both maps
@@ -154,7 +147,6 @@ public interface IngredientManager<I> {
         mutableIngredientsMap.put(ingredient.first(), amount + ingredient.second());
     }
 
-
     /**
      * Parse a list of strings into a map of ingredients with runs
      *
@@ -163,6 +155,6 @@ public interface IngredientManager<I> {
      * @return A map representing ingredients with runs
      * @throws IllegalArgumentException if there's any invalid ingredient string
      */
-    CompletableFuture<Map<Ingredient, Integer>> getIngredientsWithAmount(List<String> stringList, boolean withMeta) throws
+    Map<Ingredient, Integer> getIngredientsWithAmount(List<String> stringList, boolean withMeta) throws
             IllegalArgumentException;
 }
