@@ -5,11 +5,14 @@ import dev.jsinco.brewery.api.config.Configuration;
 import dev.jsinco.brewery.api.effect.DrunksManager;
 import dev.jsinco.brewery.api.effect.modifier.ModifierManager;
 import dev.jsinco.brewery.api.ingredient.IngredientManager;
+import dev.jsinco.brewery.api.ingredient.ResolvedIngredientManager;
 import dev.jsinco.brewery.api.integration.IntegrationManager;
 import dev.jsinco.brewery.api.recipe.RecipeRegistry;
 import dev.jsinco.brewery.api.structure.PlacedStructureRegistry;
 import dev.jsinco.brewery.bukkit.api.effect.DrunkEventManager;
 import org.bukkit.inventory.ItemStack;
+
+import java.util.concurrent.CompletableFuture;
 
 public interface TheBrewingProjectApi {
 
@@ -52,6 +55,11 @@ public interface TheBrewingProjectApi {
      * @return An ingredient-item stack bridge
      */
     IngredientManager<ItemStack> getIngredientManager();
+
+    /**
+     * @return An ingredient-item stack bridge future
+     */
+    CompletableFuture<ResolvedIngredientManager<ItemStack>> getResolvedIngredientManager();
 
     /**
      * @return A manager for events

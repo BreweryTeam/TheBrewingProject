@@ -10,6 +10,7 @@ import dev.jsinco.brewery.api.event.CustomEventRegistry;
 import dev.jsinco.brewery.api.event.EventData;
 import dev.jsinco.brewery.api.event.EventStepRegistry;
 import dev.jsinco.brewery.api.ingredient.IngredientManager;
+import dev.jsinco.brewery.api.ingredient.ResolvedIngredientManager;
 import dev.jsinco.brewery.api.structure.MultiblockStructure;
 import dev.jsinco.brewery.api.structure.StructureType;
 import dev.jsinco.brewery.api.util.Logger;
@@ -24,15 +25,29 @@ import dev.jsinco.brewery.bukkit.breweries.BreweryRegistry;
 import dev.jsinco.brewery.bukkit.breweries.barrel.BukkitBarrel;
 import dev.jsinco.brewery.bukkit.breweries.distillery.BukkitDistillery;
 import dev.jsinco.brewery.bukkit.command.BreweryCommand;
-import dev.jsinco.brewery.bukkit.configuration.serializer.*;
+import dev.jsinco.brewery.bukkit.configuration.serializer.BreweryLocationSerializer;
+import dev.jsinco.brewery.bukkit.configuration.serializer.ColorSerializer;
+import dev.jsinco.brewery.bukkit.configuration.serializer.IngredientInputSerializer;
+import dev.jsinco.brewery.bukkit.configuration.serializer.IntegrationEventSerializer;
+import dev.jsinco.brewery.bukkit.configuration.serializer.MaterialSerializer;
+import dev.jsinco.brewery.bukkit.configuration.serializer.UncheckedIngredientSerializer;
 import dev.jsinco.brewery.bukkit.effect.DrunkEventManagerImpl;
 import dev.jsinco.brewery.bukkit.effect.SqlDrunkStateDataType;
 import dev.jsinco.brewery.bukkit.effect.SqlDrunkenModifierDataType;
 import dev.jsinco.brewery.bukkit.effect.event.ActiveEventsRegistry;
 import dev.jsinco.brewery.bukkit.effect.event.DrunkEventExecutor;
 import dev.jsinco.brewery.bukkit.ingredient.BukkitIngredientManager;
+import dev.jsinco.brewery.bukkit.ingredient.ResolvedIngredientManagerImpl;
 import dev.jsinco.brewery.bukkit.integration.IntegrationManagerImpl;
-import dev.jsinco.brewery.bukkit.listener.*;
+import dev.jsinco.brewery.bukkit.listener.BlockEventListener;
+import dev.jsinco.brewery.bukkit.listener.BrewMigrationListener;
+import dev.jsinco.brewery.bukkit.listener.EntityEventListener;
+import dev.jsinco.brewery.bukkit.listener.InventoryEventListener;
+import dev.jsinco.brewery.bukkit.listener.LegacyPlayerJoinListener;
+import dev.jsinco.brewery.bukkit.listener.PlayerEventListener;
+import dev.jsinco.brewery.bukkit.listener.PlayerJoinListener;
+import dev.jsinco.brewery.bukkit.listener.PlayerWalkListener;
+import dev.jsinco.brewery.bukkit.listener.WorldEventListener;
 import dev.jsinco.brewery.bukkit.migration.Migrations;
 import dev.jsinco.brewery.bukkit.migration.breweryx.BreweryXMigrationListener;
 import dev.jsinco.brewery.bukkit.recipe.BukkitRecipeResultReader;
@@ -40,14 +55,45 @@ import dev.jsinco.brewery.bukkit.recipe.DefaultRecipeReader;
 import dev.jsinco.brewery.bukkit.structure.BreweryStructureConfig;
 import dev.jsinco.brewery.bukkit.structure.StructureMatcher;
 import dev.jsinco.brewery.bukkit.structure.StructureRegistry;
-import dev.jsinco.brewery.bukkit.structure.serializer.*;
+import dev.jsinco.brewery.bukkit.structure.serializer.BreweryVectorListSerializer;
+import dev.jsinco.brewery.bukkit.structure.serializer.BreweryVectorSerializer;
+import dev.jsinco.brewery.bukkit.structure.serializer.MaterialHolderSerializer;
+import dev.jsinco.brewery.bukkit.structure.serializer.MaterialTagSerializer;
+import dev.jsinco.brewery.bukkit.structure.serializer.MaterialsSerializer;
+import dev.jsinco.brewery.bukkit.structure.serializer.StructureMetaSerializer;
+import dev.jsinco.brewery.bukkit.structure.serializer.StructureTypeSerializer;
+import dev.jsinco.brewery.bukkit.structure.serializer.Vector3iSerializer;
 import dev.jsinco.brewery.bukkit.util.BreweryTimeDataType;
 import dev.jsinco.brewery.bukkit.util.BukkitIngredientUtil;
 import dev.jsinco.brewery.bukkit.util.EventUtil;
 import dev.jsinco.brewery.bukkit.util.color.ResourcePackColors;
-import dev.jsinco.brewery.configuration.*;
+import dev.jsinco.brewery.configuration.Config;
+import dev.jsinco.brewery.configuration.DrunkenModifierSection;
+import dev.jsinco.brewery.configuration.EventSection;
+import dev.jsinco.brewery.configuration.IngredientsSection;
+import dev.jsinco.brewery.configuration.OkaeriSerdesBuilder;
 import dev.jsinco.brewery.configuration.locale.BreweryTranslator;
-import dev.jsinco.brewery.configuration.serializers.*;
+import dev.jsinco.brewery.configuration.serializers.BlockReplacementSerializer;
+import dev.jsinco.brewery.configuration.serializers.ComponentSerializer;
+import dev.jsinco.brewery.configuration.serializers.ConditionSerializer;
+import dev.jsinco.brewery.configuration.serializers.ConsumableSerializer;
+import dev.jsinco.brewery.configuration.serializers.CustomEventSerializer;
+import dev.jsinco.brewery.configuration.serializers.DrunkenModifierSerializer;
+import dev.jsinco.brewery.configuration.serializers.EventProbabilitySerializer;
+import dev.jsinco.brewery.configuration.serializers.EventRegistrySerializer;
+import dev.jsinco.brewery.configuration.serializers.EventStepSerializer;
+import dev.jsinco.brewery.configuration.serializers.IntervalSerializer;
+import dev.jsinco.brewery.configuration.serializers.LocaleSerializer;
+import dev.jsinco.brewery.configuration.serializers.MinutesDurationSerializer;
+import dev.jsinco.brewery.configuration.serializers.ModifierDisplaySerializer;
+import dev.jsinco.brewery.configuration.serializers.ModifierExpressionSerializer;
+import dev.jsinco.brewery.configuration.serializers.ModifierTooltipSerializer;
+import dev.jsinco.brewery.configuration.serializers.NamedDrunkEventSerializer;
+import dev.jsinco.brewery.configuration.serializers.ParticleDefinitionSerializer;
+import dev.jsinco.brewery.configuration.serializers.RangeDSerializer;
+import dev.jsinco.brewery.configuration.serializers.SecretKeySerializer;
+import dev.jsinco.brewery.configuration.serializers.SoundDefinitionSerializer;
+import dev.jsinco.brewery.configuration.serializers.TicksDurationSerializer;
 import dev.jsinco.brewery.configuration.structure.StructureMatchers;
 import dev.jsinco.brewery.database.PersistenceException;
 import dev.jsinco.brewery.database.sql.Database;
@@ -105,6 +151,7 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
     private EventStepRegistry eventStepRegistry;
     private DrunkEventExecutor drunkEventExecutor;
     private ResourcePackColors resourcePackColors;
+    private CompletableFuture<ResolvedIngredientManager<ItemStack>> ingredientManagerFuture = new CompletableFuture<>();
     private long time;
     private BrewManager<ItemStack> brewManager = new BukkitBrewManager();
     private final IntegrationManagerImpl integrationManager = new IntegrationManagerImpl();
@@ -152,7 +199,10 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
                 .stream()
                 .map(ItemIntegration::initialized)
                 .toArray(CompletableFuture[]::new)
-        ).thenAccept(ignored -> Bukkit.getAsyncScheduler().runNow(this, ignored2 -> resourcePackColors.init()));
+        ).thenAccept(ignored -> {
+            Bukkit.getAsyncScheduler().runNow(this, ignored2 -> resourcePackColors.init());
+            ingredientManagerFuture.complete(new ResolvedIngredientManagerImpl());
+        });
         initialize();
         integrationManager.loadIntegrations();
         Bukkit.getServicesManager().register(TheBrewingProjectApi.class, this, this, ServicePriority.Normal);
@@ -477,6 +527,11 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
     @Override
     public IngredientManager<ItemStack> getIngredientManager() {
         return BukkitIngredientManager.INSTANCE;
+    }
+
+    @Override
+    public CompletableFuture<ResolvedIngredientManager<ItemStack>> getResolvedIngredientManager() {
+        return null;
     }
 
     @Override

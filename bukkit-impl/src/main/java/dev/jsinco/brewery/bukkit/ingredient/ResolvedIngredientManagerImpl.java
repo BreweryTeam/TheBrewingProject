@@ -1,0 +1,153 @@
+package dev.jsinco.brewery.bukkit.ingredient;
+
+import com.google.common.collect.ImmutableMap;
+import dev.jsinco.brewery.api.brew.BrewQuality;
+import dev.jsinco.brewery.api.ingredient.Ingredient;
+import dev.jsinco.brewery.api.ingredient.IngredientMeta;
+import dev.jsinco.brewery.api.ingredient.IngredientWithMeta;
+import dev.jsinco.brewery.api.ingredient.ResolvedIngredientManager;
+import dev.jsinco.brewery.api.integration.Integration;
+import dev.jsinco.brewery.api.recipe.RecipeResult;
+import dev.jsinco.brewery.api.util.BreweryKey;
+import dev.jsinco.brewery.api.util.Pair;
+import dev.jsinco.brewery.bukkit.TheBrewingProject;
+import dev.jsinco.brewery.bukkit.api.ingredient.PluginIngredient;
+import dev.jsinco.brewery.bukkit.api.integration.IntegrationTypes;
+import dev.jsinco.brewery.bukkit.brew.BrewAdapterAccess;
+import dev.jsinco.brewery.bukkit.integration.IntegrationManagerImpl;
+import io.papermc.paper.persistence.PersistentDataContainerView;
+import me.clip.placeholderapi.libs.kyori.adventure.key.Key;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.MiniMessage;
+import org.bukkit.Material;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.persistence.PersistentDataType;
+import org.jspecify.annotations.NonNull;
+
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+public class ResolvedIngredientManagerImpl implements ResolvedIngredientManager<ItemStack> {
+    private static final Pattern INGREDIENT_WITH_AMOUNT_RE = Pattern.compile("(.+)/([^/]+)");
+
+    @Override
+    public Ingredient getIngredient(@NonNull ItemStack itemStack) {
+        IntegrationManagerImpl integrationManager = TheBrewingProject.getInstance().getIntegrationManager();
+        Ingredient ingredient = integrationManager.getIntegrationRegistry().getIntegrations(IntegrationTypes.ITEM)
+                .stream()
+                .filter(Integration::isEnabled)
+                .map(integration -> integration.getIngredient(itemStack))
+                .flatMap(Optional::stream)
+                .findAny()
+                .or(() -> BreweryIngredient.from(itemStack))
+                .orElse(SimpleIngredient.from(itemStack));
+        PersistentDataContainerView dataContainer = itemStack.getPersistentDataContainer();
+        Double score = dataContainer.get(BrewAdapterAccess.BREWERY_SCORE, PersistentDataType.DOUBLE);
+        ImmutableMap.Builder<IngredientMeta<?>, Object> extraBuilder = new ImmutableMap.Builder<>();
+        String displayNameString = dataContainer.get(BrewAdapterAccess.BREWERY_DISPLAY_NAME, PersistentDataType.STRING);
+        if (displayNameString != null) {
+            Component displayName = MiniMessage.miniMessage().deserialize(displayNameString);
+            extraBuilder.put(IngredientMeta.DISPLAY_NAME, displayName);
+        }
+        if (score != null) {
+            extraBuilder.put(IngredientMeta.SCORE, score);
+        }
+        Map<IngredientMeta<?>, Object> extra = extraBuilder.build();
+        return extra.isEmpty() ? ingredient : new IngredientWithMeta(ingredient, extraBuilder.build());
+    }
+
+    @Override
+    public Optional<ItemStack> toItem(Ingredient ingredient) {
+        double score;
+        if (ingredient instanceof IngredientWithMeta ingredientWithMeta && ingredientWithMeta.get(IngredientMeta.SCORE) instanceof Double scoreOverride) {
+            score = scoreOverride;
+        } else {
+            score = 1D;
+        }
+        Optional<ItemStack> itemStackOptional = switch (ingredient.toBaseIngredient()) {
+            case SimpleIngredient(Material material) -> Optional.of(material.asItemType().createItemStack());
+            case BreweryIngredient(BreweryKey breweryKey) ->
+                    TheBrewingProject.getInstance().getRecipeRegistry().getRecipe(breweryKey.minimalized())
+                            .map(recipe -> {
+                                RecipeResult<ItemStack> result = recipe.getRecipeResult(BrewQuality.quality(score).orElse(null));
+                                ItemStack itemStack = result.newLorelessItem();
+                                itemStack.editPersistentDataContainer(pdc -> BrewAdapterAccess.applyBrewTags(pdc, recipe, score, ""));
+                                return itemStack;
+                            });
+            case PluginIngredient pluginIngredient ->
+                    pluginIngredient.itemIntegration().createItem(pluginIngredient.key().key());
+            default -> Optional.empty();
+        };
+        if (ingredient instanceof IngredientWithMeta ingredientWithMeta) {
+            itemStackOptional.ifPresent(itemStack -> itemStack.editPersistentDataContainer(pdc -> {
+                if (ingredientWithMeta.get(IngredientMeta.SCORE) instanceof Double scoreOverride) {
+                    pdc.set(BrewAdapterAccess.BREWERY_SCORE, PersistentDataType.DOUBLE, scoreOverride);
+                }
+                if (ingredientWithMeta.get(IngredientMeta.DISPLAY_NAME) instanceof Component displayName) {
+                    pdc.set(BrewAdapterAccess.BREWERY_DISPLAY_NAME, PersistentDataType.STRING, MiniMessage.miniMessage().serialize(displayName));
+                }
+            }));
+        }
+        return itemStackOptional;
+    }
+
+    @Override
+    public Optional<Ingredient> getIngredient(@NonNull String ingredientStr) {
+        BreweryKey breweryKey = BreweryKey.parse(ingredientStr, Key.MINECRAFT_NAMESPACE);
+        IntegrationManagerImpl integrationManager = TheBrewingProject.getInstance().getIntegrationManager();
+        return integrationManager.getIntegrationRegistry().getIntegrations(IntegrationTypes.ITEM)
+                .stream()
+                .filter(Integration::isEnabled)
+                .filter(itemIntegration -> itemIntegration.getId().equals(breweryKey.namespace()))
+                .findAny()
+                .map(itemIntegration -> itemIntegration.createIngredientUnsafe(breweryKey.key()))
+                .or(() -> BreweryIngredient.from(breweryKey).map(CompletableFuture::join))
+                .or(() -> SimpleIngredient.from(ingredientStr).map(Optional::of))
+                .orElse(Optional.empty());
+    }
+
+    @Override
+    public Pair<Ingredient, Integer> getIngredientWithAmount(String ingredientStr) throws IllegalArgumentException {
+        return getIngredientWithAmount(ingredientStr, false);
+    }
+
+    @Override
+    public Pair<Ingredient, Integer> getIngredientWithAmount(String ingredientStr, boolean allowMeta) throws IllegalArgumentException {
+        Matcher matcher = INGREDIENT_WITH_AMOUNT_RE.matcher(ingredientStr);
+        int amount;
+        String ingredientString;
+        if (matcher.matches()) {
+            ingredientString = matcher.group(1);
+            amount = Integer.parseInt(matcher.group(2));
+        } else {
+            ingredientString = ingredientStr;
+            amount = 1;
+        }
+        return (allowMeta ? this.deserializeIngredient(ingredientString) : this.getIngredient(ingredientString))
+                .map(ingredient -> new Pair<>(ingredient, amount))
+                .orElseThrow(() -> new IllegalArgumentException("Invalid ingredient string '" + ingredientStr + "' could not parse type"));
+    }
+
+    @Override
+    public Map<Ingredient, Integer> getIngredientsWithAmount(List<String> stringList) throws IllegalArgumentException {
+        return getIngredientsWithAmount(stringList, false);
+    }
+
+    @Override
+    public Map<Ingredient, Integer> getIngredientsWithAmount(List<String> stringList, boolean allowMeta) throws IllegalArgumentException {
+        if (stringList == null || stringList.isEmpty()) {
+            return new LinkedHashMap<>();
+        }
+        List<Pair<Ingredient, Integer>> pairs = stringList.stream()
+                .map(string -> getIngredientWithAmount(string, allowMeta))
+                .toList();
+        Map<Ingredient, Integer> ingredientMap = new LinkedHashMap<>();
+        pairs.forEach(pair -> ResolvedIngredientManager.insertIngredientIntoMap(ingredientMap, pair));
+        return ingredientMap;
+    }
+}
