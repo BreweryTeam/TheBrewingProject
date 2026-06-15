@@ -1,6 +1,7 @@
 package dev.jsinco.brewery.bukkit.listener;
 
 import dev.jsinco.brewery.api.brew.Brew;
+import dev.jsinco.brewery.api.brew.BrewQuality;
 import dev.jsinco.brewery.api.brew.BrewingStep;
 import dev.jsinco.brewery.api.breweries.InventoryAccessible;
 import dev.jsinco.brewery.bukkit.Statistics;
@@ -20,7 +21,6 @@ import dev.jsinco.brewery.bukkit.breweries.distillery.BukkitDistillery;
 import dev.jsinco.brewery.bukkit.effect.named.PukeNamedExecutable;
 import dev.jsinco.brewery.configuration.Config;
 import dev.jsinco.brewery.database.sql.Database;
-import dev.jsinco.brewery.recipes.BrewScoreImpl;
 import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
@@ -106,7 +106,7 @@ public class InventoryEventListener implements Listener {
                     continue;
                 }
                 Optional.ofNullable(brewItemStack.get().getPersistentDataContainer().get(BrewAdapterAccess.BREWERY_SCORE, PersistentDataType.DOUBLE))
-                        .ifPresent(score -> Statistics.registerBrewMade(BrewScoreImpl.quality(score)));
+                        .ifPresent(score -> Statistics.registerBrewMade(BrewQuality.quality(score).orElse(null)));
             }
         }
         event.getWhoClicked().getScheduler().run(TheBrewingProject.getInstance(), ignored ->

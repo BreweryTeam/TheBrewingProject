@@ -2,6 +2,7 @@ package dev.jsinco.brewery.bukkit.listener;
 
 import com.destroystokyo.paper.event.player.PlayerLaunchProjectileEvent;
 import dev.jsinco.brewery.api.brew.Brew;
+import dev.jsinco.brewery.api.brew.BrewQuality;
 import dev.jsinco.brewery.api.brew.BrewingStep;
 import dev.jsinco.brewery.api.breweries.CauldronType;
 import dev.jsinco.brewery.api.breweries.InventoryAccessible;
@@ -45,7 +46,6 @@ import dev.jsinco.brewery.effect.text.DrunkTextTransformer;
 import dev.jsinco.brewery.format.TimeFormat;
 import dev.jsinco.brewery.format.TimeFormatter;
 import dev.jsinco.brewery.format.TimeModifier;
-import dev.jsinco.brewery.recipes.BrewScoreImpl;
 import dev.jsinco.brewery.recipes.RecipeRegistryImpl;
 import dev.jsinco.brewery.structure.PlacedStructureRegistryImpl;
 import dev.jsinco.brewery.util.MessageUtil;
@@ -281,7 +281,7 @@ public class PlayerEventListener implements Listener {
         updateHeldItem(decreaseItem(event.getItem(), player), player, event.getHand());
         player.getWorld().dropItem(player.getLocation(), brewItemStack);
         Optional.ofNullable(brewItemStack.getPersistentDataContainer().get(BrewAdapterAccess.BREWERY_SCORE, PersistentDataType.DOUBLE))
-                .ifPresent(score -> Statistics.registerBrewMade(BrewScoreImpl.quality(score)));
+                .ifPresent(score -> Statistics.registerBrewMade(BrewQuality.quality(score).orElse(null)));
         if (cauldron.decrementLevel()) {
             ListenerUtil.removeActiveSinglePositionStructure(cauldron);
         }
@@ -366,7 +366,7 @@ public class PlayerEventListener implements Listener {
             effects.get().applyTo(event.getPlayer());
             event.setReplacement(consumeEvent.getReplacement());
             Optional.ofNullable(event.getItem().getPersistentDataContainer().get(BrewAdapterAccess.BREWERY_SCORE, PersistentDataType.DOUBLE))
-                    .ifPresent(score -> Statistics.registerBrewDrunk(BrewScoreImpl.quality(score)));
+                    .ifPresent(score -> Statistics.registerBrewDrunk(BrewQuality.quality(score).orElse(null)));
         }
 
         Ingredient ingredient = BukkitIngredientManager.INSTANCE.getIngredient(event.getItem());

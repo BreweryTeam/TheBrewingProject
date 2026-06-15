@@ -39,7 +39,7 @@ public class BrewScoreImpl implements BrewScore {
 
     public @Nullable BrewQuality brewQuality() {
         if (hasQualityOverride()) return this.qualityOverride;
-        return quality(score());
+        return BrewQuality.quality(score()).orElse(null);
     }
 
     public BrewScoreImpl(List<Map<ScoreType, PartialBrewScore>> scores, boolean completed, double brewDifficulty) {
@@ -110,19 +110,6 @@ public class BrewScoreImpl implements BrewScore {
     @Override
     public double brewDifficulty() {
         return brewDifficulty;
-    }
-
-    public static BrewQuality quality(double score) {
-        if (score >= 0.8) {
-            return BrewQuality.EXCELLENT;
-        }
-        if (score >= 0.6) {
-            return BrewQuality.GOOD;
-        }
-        if (score > 0) {
-            return BrewQuality.BAD;
-        }
-        return null;
     }
 
     public boolean hasQualityOverride() {

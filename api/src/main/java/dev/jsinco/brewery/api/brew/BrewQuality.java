@@ -3,6 +3,8 @@ package dev.jsinco.brewery.api.brew;
 
 import org.jspecify.annotations.Nullable;
 
+import java.util.Optional;
+
 public enum BrewQuality {
     BAD(0xFF0000),
     GOOD(0xFFA500),
@@ -21,6 +23,19 @@ public enum BrewQuality {
             case EXCELLENT -> 1D;
             case null -> 0.0;
         };
+    }
+
+    public static Optional<BrewQuality> quality(double score) {
+        if (score >= 0.8) {
+            return Optional.of(BrewQuality.EXCELLENT);
+        }
+        if (score >= 0.6) {
+            return Optional.of(BrewQuality.GOOD);
+        }
+        if (score > 0) {
+            return Optional.of(BrewQuality.BAD);
+        }
+        return Optional.empty();
     }
 
     /**

@@ -96,7 +96,7 @@ public class MessageUtil {
         return TagResolver.resolver(resolver, TagResolver.resolver(scores.values().stream()
                 .map(partialBrewScore ->
                         Placeholder.styling(partialBrewScore.type().colorKey(), resolveQualityColor(
-                                BrewScoreImpl.quality(BrewScoreImpl.applyDifficulty(partialBrewScore.score(), difficulty))
+                                BrewQuality.quality(BrewScoreImpl.applyDifficulty(partialBrewScore.score(), difficulty)).orElse(null)
                         ))
                 ).toArray(TagResolver[]::new))
         );
