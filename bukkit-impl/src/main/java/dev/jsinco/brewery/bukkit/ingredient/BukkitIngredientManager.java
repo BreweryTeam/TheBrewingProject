@@ -1,6 +1,7 @@
 package dev.jsinco.brewery.bukkit.ingredient;
 
 import com.google.common.collect.ImmutableMap;
+import dev.jsinco.brewery.api.brew.BrewQuality;
 import dev.jsinco.brewery.api.ingredient.Ingredient;
 import dev.jsinco.brewery.api.ingredient.IngredientManager;
 import dev.jsinco.brewery.api.ingredient.IngredientMeta;
@@ -14,7 +15,7 @@ import dev.jsinco.brewery.bukkit.api.ingredient.PluginIngredient;
 import dev.jsinco.brewery.bukkit.api.integration.IntegrationTypes;
 import dev.jsinco.brewery.bukkit.brew.BrewAdapterAccess;
 import dev.jsinco.brewery.bukkit.integration.IntegrationManagerImpl;
-import dev.jsinco.brewery.recipes.BrewScoreImpl;
+import dev.jsinco.brewery.util.FutureUtil;
 import io.papermc.paper.persistence.PersistentDataContainerView;
 import me.clip.placeholderapi.libs.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
@@ -23,8 +24,6 @@ import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
 import org.jspecify.annotations.NonNull;
-
-import dev.jsinco.brewery.util.FutureUtil;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -78,7 +77,7 @@ public class BukkitIngredientManager implements IngredientManager<ItemStack> {
             case BreweryIngredient(BreweryKey breweryKey) ->
                     TheBrewingProject.getInstance().getRecipeRegistry().getRecipe(breweryKey.minimalized())
                             .map(recipe -> {
-                                RecipeResult<ItemStack> result = recipe.getRecipeResult(BrewScoreImpl.quality(score));
+                                RecipeResult<ItemStack> result = recipe.getRecipeResult(BrewQuality.quality(score).orElse(null));
                                 ItemStack itemStack = result.newLorelessItem();
                                 itemStack.editPersistentDataContainer(pdc -> BrewAdapterAccess.applyBrewTags(pdc, recipe, score, ""));
                                 return itemStack;

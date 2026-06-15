@@ -50,8 +50,8 @@ public class RecipeImpl<I> implements Recipe<I> {
     public Ingredient toIngredient(double score) {
         BaseIngredient base = IngredientProviderHolder.instance()
                 .breweryIngredient(BreweryKey.parse(recipeName));
-        BrewQuality quality = BrewScoreImpl.quality(score);
-        Preconditions.checkArgument(quality != null, "0 valued scores are not allowed");
+        BrewQuality quality = BrewQuality.quality(score)
+                .orElseThrow(() -> new IllegalArgumentException("0 valued scores are not allowed"));
         return new IngredientWithMeta(base,
                 Map.of(
                         IngredientMeta.SCORE, score,
