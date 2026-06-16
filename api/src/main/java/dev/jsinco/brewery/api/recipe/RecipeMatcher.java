@@ -6,6 +6,12 @@ import java.util.Set;
 
 public interface RecipeMatcher<I> {
 
+    /**
+     * Match against a brew.
+     *
+     * @param brew A brew to match against
+     * @return The result of the match
+     */
     RecipeMatcherResult<I> match(Brew brew);
 
 
