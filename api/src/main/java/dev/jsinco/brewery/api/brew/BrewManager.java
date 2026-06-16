@@ -4,6 +4,7 @@ import dev.jsinco.brewery.api.breweries.BarrelType;
 import dev.jsinco.brewery.api.breweries.CauldronType;
 import dev.jsinco.brewery.api.ingredient.Ingredient;
 import dev.jsinco.brewery.api.meta.MetaData;
+import dev.jsinco.brewery.api.recipe.RecipeMatcher;
 
 import java.util.List;
 import java.util.Map;
@@ -17,6 +18,11 @@ public interface BrewManager<I> {
      */
     Brew createBrew(List<BrewingStep> steps);
 
+    /**
+     * @param steps Steps of the brewing process
+     * @param meta  Extra meta data
+     * @return A new brew with specified steps and meta
+     */
     Brew createBrew(List<BrewingStep> steps, MetaData meta);
 
     /**
@@ -72,4 +78,9 @@ public interface BrewManager<I> {
      * @return A new distill step
      */
     BrewingStep.Distill distillStep(int runs);
+
+    /**
+     * @return A recipe matcher builder
+     */
+    RecipeMatcher.Builder<I> matcher();
 }

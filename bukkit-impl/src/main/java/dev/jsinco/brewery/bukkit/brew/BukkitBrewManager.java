@@ -8,7 +8,13 @@ import dev.jsinco.brewery.api.breweries.CauldronType;
 import dev.jsinco.brewery.api.ingredient.Ingredient;
 import dev.jsinco.brewery.api.meta.MetaData;
 import dev.jsinco.brewery.api.moment.PassedMoment;
-import dev.jsinco.brewery.brew.*;
+import dev.jsinco.brewery.api.recipe.RecipeMatcher;
+import dev.jsinco.brewery.brew.AgeStepImpl;
+import dev.jsinco.brewery.brew.BrewImpl;
+import dev.jsinco.brewery.brew.CookStepImpl;
+import dev.jsinco.brewery.brew.DistillStepImpl;
+import dev.jsinco.brewery.brew.MixStepImpl;
+import dev.jsinco.brewery.bukkit.recipe.RecipeMatcherImpl;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.List;
@@ -75,5 +81,10 @@ public class BukkitBrewManager implements BrewManager<ItemStack> {
     @Override
     public BrewingStep.Distill distillStep(int runs) {
         return new DistillStepImpl(runs);
+    }
+
+    @Override
+    public RecipeMatcher.Builder<ItemStack> matcher() {
+        return new RecipeMatcherImpl.BuilderImpl();
     }
 }
