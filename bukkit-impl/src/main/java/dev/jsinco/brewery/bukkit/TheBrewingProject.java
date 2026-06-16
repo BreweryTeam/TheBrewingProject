@@ -531,7 +531,7 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
 
     @Override
     public CompletableFuture<ResolvedIngredientManager<ItemStack>> getResolvedIngredientManager() {
-        return null;
+        return ingredientManagerFuture;
     }
 
     @Override
