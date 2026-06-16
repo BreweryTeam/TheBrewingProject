@@ -6,8 +6,16 @@ import org.jspecify.annotations.Nullable;
 
 public sealed interface CancelState {
 
+    /**
+     * Send a message to the audience
+     *
+     * @param audience The audience
+     */
     void sendMessage(@Nullable Audience audience);
 
+    /**
+     * The action should cancel silently
+     */
     record Cancelled() implements CancelState {
         @Override
         public void sendMessage(@Nullable Audience audience) {
@@ -15,6 +23,11 @@ public sealed interface CancelState {
         }
     }
 
+    /**
+     * The action should cancel with a message
+     *
+     * @param message Cancel message
+     */
     record PermissionDenied(Component message) implements CancelState {
 
         @Override
@@ -26,10 +39,13 @@ public sealed interface CancelState {
         }
     }
 
+    /**
+     * The action should continue silently
+     */
     record Allowed() implements CancelState {
         @Override
         public void sendMessage(@Nullable Audience audience) {
-
+            // NO-OP
         }
     }
 }

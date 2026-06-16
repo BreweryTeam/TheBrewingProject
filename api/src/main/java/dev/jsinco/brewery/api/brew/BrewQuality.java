@@ -16,6 +16,10 @@ public enum BrewQuality {
         this.color = color;
     }
 
+    /**
+     * @param overrideQuality The quality of the score, null is failed
+     * @return the maximum score for each quality
+     */
     public static double maxScore(@Nullable BrewQuality overrideQuality) {
         return switch (overrideQuality) {
             case BAD -> 0.6D - Math.ulp(0.6D);
@@ -25,6 +29,10 @@ public enum BrewQuality {
         };
     }
 
+    /**
+     * @param score A brew score between 0-1
+     * @return The quality of the score, or empty if score is failed
+     */
     public static Optional<BrewQuality> quality(double score) {
         if (score >= 0.8) {
             return Optional.of(BrewQuality.EXCELLENT);
