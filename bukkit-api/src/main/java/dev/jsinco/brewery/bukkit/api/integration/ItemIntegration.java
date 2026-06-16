@@ -7,7 +7,6 @@ import dev.jsinco.brewery.api.util.Logger;
 import dev.jsinco.brewery.bukkit.api.ingredient.PluginIngredient;
 import net.kyori.adventure.text.Component;
 import org.bukkit.inventory.ItemStack;
-import org.jetbrains.annotations.ApiStatus;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
@@ -38,15 +37,18 @@ public interface ItemIntegration extends Integration {
                                 Logger.logErr(exception);
                                 return Optional.empty();
                             }
-                            if (!isIngredient(id)) {
-                                return Optional.empty();
-                            }
-                            return Optional.of(new PluginIngredient(new BreweryKey(getId(), id), this));
+                            return createIngredientUnsafe(id);
                         }
                 );
     }
 
-    @ApiStatus.Internal
+
+    /**
+     * Create an ingredient from the given identifier, assuming everything has been loaded for the integration.
+     *
+     * @param id The item id excluding its integration namespace
+     * @return An ingredient, if any matched for the integration
+     */
     default Optional<Ingredient> createIngredientUnsafe(String id) {
         if (!isIngredient(id)) {
             return Optional.empty();

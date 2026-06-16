@@ -82,21 +82,12 @@ public class ItemsAdderIntegration implements ItemIntegration, Listener {
     }
 
     @Override
-    public CompletableFuture<Optional<Ingredient>> createIngredient(String id) {
-        return initialized()
-                .handleAsync((ignored1, exception) -> {
-                            if (exception != null) {
-                                Logger.logErr("Couldn't create PluginIngredient '" + id + "' for item integration " + getId());
-                                Logger.logErr(exception);
-                                return Optional.empty();
-                            }
-                            CustomStack customStack = CustomStack.getInstance(id);
-                            if (customStack == null) {
-                                return Optional.empty();
-                            }
-                            return Optional.of(new PluginIngredient(new BreweryKey(getId(), customStack.getNamespacedID()), this));
-                        }
-                );
+    public Optional<Ingredient> createIngredientUnsafe(String id) {
+        CustomStack customStack = CustomStack.getInstance(id);
+        if (customStack == null) {
+            return Optional.empty();
+        }
+        return Optional.of(new PluginIngredient(new BreweryKey(getId(), customStack.getNamespacedID()), this));
     }
 
     @EventHandler
