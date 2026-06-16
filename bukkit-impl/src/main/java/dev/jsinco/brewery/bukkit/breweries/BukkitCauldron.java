@@ -306,7 +306,6 @@ public class BukkitCauldron implements Cauldron {
             playIngredientAddedEffects(item, player);
             return true;
         }
-        boolean hadActiveBrew = !this.brew.getSteps().isEmpty();
         List<BrewingStep> existing = new ArrayList<>(this.brew.getCompletedSteps());
         Optional<Brew> merged;
         if (existing.isEmpty()) {
@@ -320,7 +319,7 @@ public class BukkitCauldron implements Cauldron {
                     .map(this.brew::withStepsReplaced);
         }
         if (merged.isPresent() && changeBrew(merged.get())) {
-            if (hadActiveBrew) incrementLevel(item);
+            if (getCauldronType() == CauldronType.BREW) incrementLevel(item);
             playIngredientAddedEffects(item, player);
             return true;
         }
@@ -335,7 +334,7 @@ public class BukkitCauldron implements Cauldron {
         if (!changeBrew(newBrew)) {
             return false;
         }
-        if (hadActiveBrew) incrementLevel(item);
+        if (getCauldronType() == CauldronType.BREW) incrementLevel(item);
         playIngredientAddedEffects(item, player);
         return true;
     }
