@@ -4,31 +4,28 @@ import dev.jsinco.brewery.api.util.CancelState;
 import dev.jsinco.brewery.bukkit.api.event.PermissibleBreweryEvent;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
-import org.jspecify.annotations.Nullable;
 
 public abstract class BreweryCreateEvent extends PermissibleBreweryEvent {
-    /**
-     * The player that destroyed the structure. Will be null if the structure was destroyed by an explosion, piston,
-     * or any non - player source.
-     */
-    private final @Nullable Player player;
-    /**
-     * The location of the block that was destroyed or changed. If multiple blocks were destroyed,
-     * such as by an explosion, then an arbitrary block is chosen.
-     */
+
+    private final Player player;
     private final Location location;
 
-    public BreweryCreateEvent(CancelState state, @Nullable Player player, Location location) {
+    public BreweryCreateEvent(CancelState state, Player player, Location location) {
         super(state);
         this.player = player;
         this.location = location;
     }
 
-    @Nullable
+    /**
+     * @return The player that created the structure
+     */
     public Player getPlayer() {
         return this.player;
     }
 
+    /**
+     * @return The location the structure was created
+     */
     public Location getLocation() {
         return this.location;
     }

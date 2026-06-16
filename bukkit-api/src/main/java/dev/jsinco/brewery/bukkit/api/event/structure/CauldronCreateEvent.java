@@ -17,6 +17,9 @@ public class CauldronCreateEvent extends BreweryCreateEvent {
         this.cauldron = cauldron;
     }
 
+    /**
+     * @return The cauldron that was created
+     */
     public Cauldron getCauldron() {
         return this.cauldron;
     }

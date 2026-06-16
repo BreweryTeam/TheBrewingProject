@@ -18,6 +18,9 @@ public class DistilleryCreateEvent extends BreweryCreateEvent {
         this.distillery = distillery;
     }
 
+    /**
+     * @return The distillery that was created
+     */
     public DistilleryAccess getDistillery() {
         return distillery;
     }
