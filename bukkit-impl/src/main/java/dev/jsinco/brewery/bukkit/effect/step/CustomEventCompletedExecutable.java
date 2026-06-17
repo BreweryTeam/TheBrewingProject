@@ -4,6 +4,7 @@ import dev.jsinco.brewery.api.event.EventPropertyExecutable;
 import dev.jsinco.brewery.api.event.EventStepProperty;
 import dev.jsinco.brewery.api.event.step.CustomEventCompleted;
 import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 import java.util.UUID;
@@ -22,5 +23,10 @@ public record CustomEventCompletedExecutable(CustomEventCompleted eventCompleted
     @Override
     public CustomEventCompleted toProperty() {
         return eventCompleted;
+    }
+
+    @Override
+    public EventPropertyExecutable withSkipPoint(@Nullable EventPropertyExecutable point) {
+        return this; // NO-OP
     }
 }

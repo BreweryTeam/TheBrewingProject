@@ -1,7 +1,6 @@
 package dev.jsinco.brewery.bukkit.effect.named;
 
 import dev.jsinco.brewery.api.event.EventPropertyExecutable;
-import dev.jsinco.brewery.api.event.EventStep;
 import dev.jsinco.brewery.api.event.EventStepProperty;
 import dev.jsinco.brewery.api.event.NamedDrunkEvent;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
@@ -11,7 +10,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Particle;
-import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockType;
 import org.bukkit.block.data.BlockData;
@@ -71,7 +69,7 @@ public class HallucinationNamedExecutable implements EventPropertyExecutable {
     }
 
     @Override
-    public @NonNull ExecutionResult execute(UUID contextPlayer,  List<EventStepProperty> eventStepProperties) {
+    public @NonNull ExecutionResult execute(UUID contextPlayer, List<EventStepProperty> eventStepProperties) {
         Player player = Bukkit.getPlayer(contextPlayer);
         if (player == null) {
             return ExecutionResult.CONTINUE;
@@ -98,6 +96,10 @@ public class HallucinationNamedExecutable implements EventPropertyExecutable {
         return NamedDrunkEvent.fromKey("hallucination");
     }
 
+    @Override
+    public EventPropertyExecutable withSkipPoint(@Nullable EventPropertyExecutable point) {
+        return this; // NO-OP
+    }
 
     private static @Nullable Hallucination attemptHallucination(Block searchCenter) {
         // The block the player is looking at is preferred, try that first
@@ -129,7 +131,8 @@ public class HallucinationNamedExecutable implements EventPropertyExecutable {
         return null;
     }
 
-    private record Hallucination(Block target, BlockType replacement) {}
+    private record Hallucination(Block target, BlockType replacement) {
+    }
 
     private static boolean canReplace(Block toReplace) {
         // Only replacing full blocks ensures no physics desyncs

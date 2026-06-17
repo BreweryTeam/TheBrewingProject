@@ -19,6 +19,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.util.Vector;
 import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 import java.util.UUID;
@@ -93,5 +94,10 @@ public class PukeNamedExecutable implements EventPropertyExecutable {
     @Override
     public int priority() {
         return -1;
+    }
+
+    @Override
+    public EventPropertyExecutable withSkipPoint(@Nullable EventPropertyExecutable point) {
+        return this; // NO-OP
     }
 }

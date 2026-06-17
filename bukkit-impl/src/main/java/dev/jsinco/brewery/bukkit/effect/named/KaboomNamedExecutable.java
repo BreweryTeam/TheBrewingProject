@@ -1,7 +1,6 @@
 package dev.jsinco.brewery.bukkit.effect.named;
 
 import dev.jsinco.brewery.api.event.EventPropertyExecutable;
-import dev.jsinco.brewery.api.event.EventStep;
 import dev.jsinco.brewery.api.event.EventStepProperty;
 import dev.jsinco.brewery.api.event.NamedDrunkEvent;
 import dev.jsinco.brewery.bukkit.util.SoundPlayer;
@@ -15,6 +14,7 @@ import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;
 import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 import java.util.Random;
@@ -25,7 +25,7 @@ public class KaboomNamedExecutable implements EventPropertyExecutable {
     private static final Random random = new Random();
 
     @Override
-    public @NonNull ExecutionResult execute(UUID contextPlayer,  List<EventStepProperty> eventStepPropertiesx) {
+    public @NonNull ExecutionResult execute(UUID contextPlayer, List<EventStepProperty> eventStepPropertiesx) {
         Player player = Bukkit.getPlayer(contextPlayer);
         if (player == null) {
             return ExecutionResult.CONTINUE;
@@ -68,5 +68,9 @@ public class KaboomNamedExecutable implements EventPropertyExecutable {
         return NamedDrunkEvent.fromKey("kaboom");
     }
 
+    @Override
+    public EventPropertyExecutable withSkipPoint(@Nullable EventPropertyExecutable point) {
+        return this; // NO-OP
+    }
 
 }

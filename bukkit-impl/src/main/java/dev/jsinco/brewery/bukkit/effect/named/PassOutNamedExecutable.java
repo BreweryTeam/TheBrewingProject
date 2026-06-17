@@ -1,7 +1,6 @@
 package dev.jsinco.brewery.bukkit.effect.named;
 
 import dev.jsinco.brewery.api.event.EventPropertyExecutable;
-import dev.jsinco.brewery.api.event.EventStep;
 import dev.jsinco.brewery.api.event.EventStepProperty;
 import dev.jsinco.brewery.api.event.NamedDrunkEvent;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
@@ -15,6 +14,7 @@ import net.kyori.adventure.translation.GlobalTranslator;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 import java.util.UUID;
@@ -58,4 +58,8 @@ public class PassOutNamedExecutable implements EventPropertyExecutable {
         return -1;
     }
 
+    @Override
+    public EventPropertyExecutable withSkipPoint(@Nullable EventPropertyExecutable point) {
+        return this; // NO-OP
+    }
 }

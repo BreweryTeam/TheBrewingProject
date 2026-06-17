@@ -12,6 +12,7 @@ import dev.jsinco.brewery.util.MessageUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 import java.util.Objects;
@@ -67,4 +68,8 @@ public class TeleportNamedExecutable implements EventPropertyExecutable {
         return ExecutionContext.PLAYER;
     }
 
+    @Override
+    public EventPropertyExecutable withSkipPoint(@Nullable EventPropertyExecutable point) {
+        return this; // NO-OP
+    }
 }

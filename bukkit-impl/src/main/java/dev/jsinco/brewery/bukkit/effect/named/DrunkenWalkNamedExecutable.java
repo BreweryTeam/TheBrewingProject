@@ -12,6 +12,7 @@ import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;
 import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -42,6 +43,10 @@ public class DrunkenWalkNamedExecutable implements EventPropertyExecutable {
         return NamedDrunkEvent.fromKey("drunken_walk");
     }
 
+    @Override
+    public EventPropertyExecutable withSkipPoint(@Nullable EventPropertyExecutable point) {
+        return this; // NO-OP
+    }
 
     static class DrunkenWalkHandler {
 

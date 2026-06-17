@@ -1,5 +1,6 @@
 package dev.jsinco.brewery.api.recipe;
 
+import com.google.errorprone.annotations.Immutable;
 import dev.jsinco.brewery.api.brew.Brew;
 import dev.jsinco.brewery.api.brew.BrewScore;
 import dev.jsinco.brewery.api.ingredient.UncheckedIngredient;
@@ -10,11 +11,10 @@ import org.jspecify.annotations.Nullable;
 import java.awt.Color;
 import java.util.List;
 
-import java.awt.Color;
-
 /**
  * @param <I> An item stack type
  */
+@Immutable
 public interface RecipeResult<I> {
 
     /**

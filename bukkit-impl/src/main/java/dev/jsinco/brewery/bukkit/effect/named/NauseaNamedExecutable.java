@@ -1,7 +1,6 @@
 package dev.jsinco.brewery.bukkit.effect.named;
 
 import dev.jsinco.brewery.api.event.EventPropertyExecutable;
-import dev.jsinco.brewery.api.event.EventStep;
 import dev.jsinco.brewery.api.event.EventStepProperty;
 import dev.jsinco.brewery.api.event.NamedDrunkEvent;
 import dev.jsinco.brewery.api.moment.Moment;
@@ -10,6 +9,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 import java.util.UUID;
@@ -42,5 +42,8 @@ public class NauseaNamedExecutable implements EventPropertyExecutable {
         return ExecutionContext.PLAYER;
     }
 
-
+    @Override
+    public EventPropertyExecutable withSkipPoint(@Nullable EventPropertyExecutable point) {
+        return this; // NO-OP
+    }
 }
