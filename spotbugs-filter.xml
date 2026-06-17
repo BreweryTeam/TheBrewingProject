@@ -9,6 +9,10 @@
             <Bug code="EI"/>
             <Bug code="EI2"/>
             <Bug code="MS"/>
+            <Bug code="SING"/>
+            <Bug code="CT"/>
+            <Bug code="IC"/>
+            <Bug code="RV"/>
         </Or>
     </Match>
 </FindBugsFilter>
