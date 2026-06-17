@@ -11,6 +11,7 @@ import org.bukkit.entity.Chicken;
 import org.bukkit.entity.Player;
 import org.bukkit.persistence.PersistentDataType;
 import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 import java.util.UUID;
@@ -40,6 +41,11 @@ public class ChickenNamedExecutable implements EventPropertyExecutable {
     @Override
     public ExecutionContext context() {
         return ExecutionContext.PLAYER;
+    }
+
+    @Override
+    public EventPropertyExecutable withSkipPoint(@Nullable EventPropertyExecutable point) {
+        return this; // NO-OP
     }
 
     @Override

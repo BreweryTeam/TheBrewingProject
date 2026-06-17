@@ -8,6 +8,7 @@ import dev.jsinco.brewery.configuration.EventSection;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 import java.util.UUID;
@@ -36,6 +37,11 @@ public class FeverNamedExecutable implements EventPropertyExecutable {
             player.setFreezeTicks(player.getMaxFreezeTicks());
         }, null, 1, 1);
         return ExecutionResult.CONTINUE;
+    }
+
+    @Override
+    public EventPropertyExecutable withSkipPoint(@Nullable EventPropertyExecutable point) {
+        return this; // NO-OP
     }
 
     @Override

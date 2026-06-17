@@ -1,7 +1,7 @@
 package dev.jsinco.brewery.api.event;
 
 
-import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 import java.util.Random;
@@ -13,11 +13,22 @@ public interface EventPropertyExecutable {
 
     /**
      * @param contextPlayer A UUID of the player
-     * @param remaining     The remaining event step properties to execute
+     * @param remaining     The remaining event step executables to execute
+     * @return Information whether further execution should occur
+     * @deprecated Use {@link #executeFor(UUID, List)} instead
+     */
+    @Deprecated(forRemoval = true)
+    ExecutionResult execute(UUID contextPlayer, List<EventStepProperty> remaining);
+
+    /**
+     *
+     * @param contextPlayer A UUID of the player
      * @return Information whether further execution should occur
      */
-    @NonNull
-    ExecutionResult execute(UUID contextPlayer, List<EventStepProperty> remaining);
+    default ExecutionOutcome executeFor(UUID contextPlayer) {
+        return execute(contextPlayer, List.of()) == ExecutionResult.CONTINUE ?
+                new ExecutionOutcome.Continue() : new ExecutionOutcome.SkipAll();
+    }
 
     /**
      * Priority of the step, just used to make the execution order deterministic
@@ -29,6 +40,15 @@ public interface EventPropertyExecutable {
     default ExecutionContext context() {
         return ExecutionContext.ANY;
     }
+
+    /**
+     * Some event property executables return {@link ExecutionOutcome.Skip}, by running this method,
+     * you can specify to which point that should be skipped past when running the executable.
+     *
+     * @param point The execution property to skip past, or null to not skip
+     * @return A new event property executable
+     */
+    EventPropertyExecutable withSkipPoint(@Nullable EventPropertyExecutable point);
 
     EventStepProperty toProperty();
 

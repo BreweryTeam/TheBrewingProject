@@ -1,5 +1,6 @@
 package dev.jsinco.brewery.api.recipe;
 
+import com.google.errorprone.annotations.Immutable;
 import dev.jsinco.brewery.api.brew.BrewQuality;
 import dev.jsinco.brewery.api.brew.BrewScore;
 import dev.jsinco.brewery.api.brew.BrewingStep;
@@ -8,6 +9,7 @@ import org.jetbrains.annotations.Range;
 
 import java.util.List;
 
+@Immutable
 public interface Recipe<I> {
 
     /**

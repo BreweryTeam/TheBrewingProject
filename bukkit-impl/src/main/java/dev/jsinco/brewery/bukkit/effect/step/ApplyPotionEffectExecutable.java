@@ -2,6 +2,7 @@ package dev.jsinco.brewery.bukkit.effect.step;
 
 import dev.jsinco.brewery.api.event.EventPropertyExecutable;
 import dev.jsinco.brewery.api.event.EventStepProperty;
+import dev.jsinco.brewery.api.event.ExecutionOutcome;
 import dev.jsinco.brewery.api.event.step.ApplyPotionEffect;
 import dev.jsinco.brewery.api.moment.Interval;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
@@ -12,32 +13,31 @@ import org.bukkit.Registry;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
 import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 import java.util.UUID;
 
 
-public class ApplyPotionEffectExecutable implements EventPropertyExecutable {
+public record ApplyPotionEffectExecutable(String potionEffectName, Interval amplifierBounds,
+                                          Interval durationBounds) implements EventPropertyExecutable {
 
-    private final String potionEffectName;
-    private final Interval amplifierBounds;
-    private final Interval durationBounds;
-
-    public ApplyPotionEffectExecutable(String potionEffectName, Interval amplifierBounds, Interval durationBounds) {
-        this.potionEffectName = potionEffectName;
-        this.amplifierBounds = amplifierBounds;
-        this.durationBounds = durationBounds;
-    }
 
     @Override
     public @NonNull ExecutionResult execute(UUID contextPlayer, List<EventStepProperty> eventStepProperties) {
+        executeFor(contextPlayer);
+        return ExecutionResult.CONTINUE;
+    }
+
+    @Override
+    public ExecutionOutcome executeFor(UUID contextPlayer) {
         Player player = Bukkit.getPlayer(contextPlayer);
         if (player == null) {
-            return ExecutionResult.CONTINUE;
+            return new ExecutionOutcome.Continue();
         }
         NamespacedKey key = NamespacedKey.fromString(potionEffectName);
         if (key == null) {
-            return ExecutionResult.CONTINUE;
+            return new ExecutionOutcome.Continue();
         }
         PotionEffect potionEffect = new RecipeEffectImpl(
                 Registry.EFFECT.get(key),
@@ -45,7 +45,7 @@ public class ApplyPotionEffectExecutable implements EventPropertyExecutable {
                 amplifierBounds
         ).newPotionEffect();
         player.getScheduler().run(TheBrewingProject.getInstance(), ignored -> player.addPotionEffect(potionEffect), null);
-        return ExecutionResult.CONTINUE;
+        return new ExecutionOutcome.Continue();
     }
 
     @Override
@@ -61,5 +61,10 @@ public class ApplyPotionEffectExecutable implements EventPropertyExecutable {
     @Override
     public ExecutionContext context() {
         return ExecutionContext.PLAYER;
+    }
+
+    @Override
+    public EventPropertyExecutable withSkipPoint(@Nullable EventPropertyExecutable point) {
+        return this; // NO-OP
     }
 }

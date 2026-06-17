@@ -1,5 +1,8 @@
 package dev.jsinco.brewery.api.util;
 
+import org.jspecify.annotations.NullMarked;
+
+@NullMarked
 public interface BreweryKeyed {
 
     /**

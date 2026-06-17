@@ -3,11 +3,12 @@ package dev.jsinco.brewery.bukkit.effect.step;
 import dev.jsinco.brewery.api.effect.ModifierConsume;
 import dev.jsinco.brewery.api.effect.modifier.DrunkenModifier;
 import dev.jsinco.brewery.api.event.EventPropertyExecutable;
-import dev.jsinco.brewery.api.event.EventStep;
 import dev.jsinco.brewery.api.event.EventStepProperty;
+import dev.jsinco.brewery.api.event.ExecutionOutcome;
 import dev.jsinco.brewery.api.event.step.ConsumeStep;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 import java.util.Map;
@@ -23,11 +24,17 @@ public class ConsumeStepExecutable implements EventPropertyExecutable {
 
     @Override
     public @NonNull ExecutionResult execute(UUID contextPlayer, List<EventStepProperty> eventStepProperties) {
+        executeFor(contextPlayer);
+        return ExecutionResult.CONTINUE;
+    }
+
+    @Override
+    public ExecutionOutcome executeFor(UUID contextPlayer) {
         TheBrewingProject.getInstance().getDrunksManager().consume(contextPlayer, consumeModifiers.entrySet().stream()
                 .map(entry -> new ModifierConsume(entry.getKey(), entry.getValue()))
                 .toList()
         );
-        return ExecutionResult.CONTINUE;
+        return new ExecutionOutcome.Continue();
     }
 
     @Override
@@ -43,6 +50,11 @@ public class ConsumeStepExecutable implements EventPropertyExecutable {
     @Override
     public ExecutionContext context() {
         return ExecutionContext.PLAYER;
+    }
+
+    @Override
+    public EventPropertyExecutable withSkipPoint(@Nullable EventPropertyExecutable point) {
+        return this; // NO-OP
     }
 
 }
