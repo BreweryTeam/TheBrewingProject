@@ -15,6 +15,7 @@ repositories {
 dependencies {
     implementation("net.minecraft:client:${project.findProperty("minecraft.version")!!}:client-extra")
     implementation(libs.gson)
+    implementation(libs.jspecify)
 }
 
 java.toolchain {
