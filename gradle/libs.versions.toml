@@ -61,6 +61,7 @@ exp4j = { group = "net.objecthunter", name = "exp4j", version.ref = "exp4j" }
 faststats-bukkit = { group = "dev.faststats.metrics", name = "bukkit", version.ref = "faststats" }
 faststats-core = { group = "dev.faststats.metrics", name = "core", version.ref = "faststats" }
 creative = { group = "team.unnamed", name = "creative-serializer-minecraft", version = "1.13.4" }
+jspecify = "org.jspecify:jspecify:1.0.0"
 # integrations
 
 bolt-bukkit = { group = "org.popcraft", name = "bolt-bukkit", version.ref = "bolt" }
