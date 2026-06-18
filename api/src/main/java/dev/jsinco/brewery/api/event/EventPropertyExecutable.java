@@ -15,7 +15,7 @@ public interface EventPropertyExecutable {
      * @param contextPlayer A UUID of the player
      * @param remaining     The remaining event step executables to execute
      * @return Information whether further execution should occur
-     * @deprecated Use {@link #executeFor(UUID, List)} instead
+     * @deprecated Use {@link #executeFor(UUID)} instead
      */
     @Deprecated(forRemoval = true)
     ExecutionResult execute(UUID contextPlayer, List<EventStepProperty> remaining);
