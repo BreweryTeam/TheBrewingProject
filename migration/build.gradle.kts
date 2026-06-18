@@ -9,6 +9,7 @@ version = project.property("version")!!
 
 repositories {
     mavenCentral()
+    maven("https://repo.breweryteam.dev/mirror")
     maven("https://repo.jsinco.dev/releases")
     maven("https://repo.papermc.io/repository/maven-public/")
     maven("https://storehouse.okaeri.eu/repository/maven-public/")

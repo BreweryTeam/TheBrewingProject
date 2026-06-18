@@ -17,8 +17,10 @@ plugins {
 
 val supportedPaperVersions = listOf("1.21.8", "1.21.9", "1.21.10", "1.21.11", "26.1.2")
 
+
 repositories {
     mavenCentral()
+    maven("https://repo.breweryteam.dev/mirror")
     maven("https://hub.spigotmc.org/nexus/content/repositories/snapshots/")
     maven("https://jitpack.io")
     maven("https://repo.papermc.io/repository/maven-public/")

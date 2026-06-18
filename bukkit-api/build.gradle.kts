@@ -6,6 +6,7 @@ plugins {
 
 repositories {
     mavenCentral()
+    maven("https://repo.breweryteam.dev/mirror")
     maven("https://repo.papermc.io/repository/maven-public/")
 }
 
