@@ -2,6 +2,7 @@ package dev.jsinco.brewery.bukkit.brew;
 
 import dev.jsinco.brewery.api.brew.Brew;
 import dev.jsinco.brewery.api.brew.BrewManager;
+import dev.jsinco.brewery.api.brew.BrewQuality;
 import dev.jsinco.brewery.api.brew.BrewingStep;
 import dev.jsinco.brewery.api.breweries.BarrelType;
 import dev.jsinco.brewery.api.breweries.CauldronType;
@@ -15,7 +16,10 @@ import dev.jsinco.brewery.brew.CookStepImpl;
 import dev.jsinco.brewery.brew.DistillStepImpl;
 import dev.jsinco.brewery.brew.MixStepImpl;
 import dev.jsinco.brewery.bukkit.recipe.RecipeMatcherImpl;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.persistence.PersistentDataType;
 
 import java.util.List;
 import java.util.Map;
@@ -81,6 +85,33 @@ public class BukkitBrewManager implements BrewManager<ItemStack> {
     @Override
     public BrewingStep.Distill distillStep(int runs) {
         return new DistillStepImpl(runs);
+    }
+
+    @Override
+    public Optional<String> brewName(ItemStack itemStack) {
+        return Optional.ofNullable(
+                itemStack.getPersistentDataContainer().get(BrewAdapterAccess.BREWERY_TAG, PersistentDataType.STRING)
+        );
+    }
+
+    @Override
+    public Optional<Component> brewDisplayName(ItemStack itemStack) {
+        return Optional.ofNullable(
+                itemStack.getPersistentDataContainer().get(BrewAdapterAccess.BREWERY_DISPLAY_NAME, PersistentDataType.STRING)
+        ).map(MiniMessage.miniMessage()::deserialize);
+    }
+
+    @Override
+    public Optional<BrewQuality> brewQuality(ItemStack itemStack) {
+        return brewScore(itemStack)
+                .flatMap(BrewQuality::quality);
+    }
+
+    @Override
+    public Optional<Double> brewScore(ItemStack itemStack) {
+        return Optional.ofNullable(
+                itemStack.getPersistentDataContainer().get(BrewAdapterAccess.BREWERY_SCORE, PersistentDataType.DOUBLE)
+        );
     }
 
     @Override
