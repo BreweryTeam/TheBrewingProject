@@ -10,39 +10,43 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.jspecify.annotations.Nullable;
 
+import java.util.Optional;
+
 public class BreweryXMigrationListener implements Listener {
 
-    private @Nullable ItemStack migrate(@Nullable ItemStack item) {
-        if (item == null) return null;
-        ItemStack migrated = BreweryXMigrationUtils.migrate(item);
-        if (migrated == null) return item;
-        return migrated;
+    private Optional<ItemStack> migrate(@Nullable ItemStack item) {
+        if (item == null) {
+            return Optional.empty();
+        }
+        return Optional.ofNullable(BreweryXMigrationUtils.migrate(item));
     }
 
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
-        if (!Config.config().migrateFromBreweryX()) return;
+        if (!Config.config().migrateFromBreweryX()) {
+            return;
+        }
         Inventory inventory = event.getPlayer().getInventory();
         for (int slot = 0; slot < inventory.getSize(); slot++) {
-            ItemStack itemStack = inventory.getItem(slot);
-            if(itemStack == null) {
-                continue;
-            }
-            inventory.setItem(slot, migrate(itemStack));
+            final int finalSlot = slot;
+            migrate(inventory.getItem(finalSlot))
+                    .ifPresent(itemStack -> inventory.setItem(finalSlot, itemStack));
         }
     }
 
     @EventHandler
     public void onPlayerOpenInventory(InventoryOpenEvent event) {
-        if (!Config.config().migrateFromBreweryX()) return;
+        if (!Config.config().migrateFromBreweryX()) {
+            return;
+        }
         Inventory inventory = event.getInventory();
-        if (inventory.getType() == InventoryType.PLAYER) return;
+        if (inventory.getType() == InventoryType.PLAYER) {
+            return;
+        }
         for (int slot = 0; slot < inventory.getSize(); slot++) {
-            ItemStack itemStack = inventory.getItem(slot);
-            if(itemStack == null) {
-                continue;
-            }
-            inventory.setItem(slot, migrate(itemStack));
+            final int finalSlot = slot;
+            migrate(inventory.getItem(finalSlot))
+                    .ifPresent(itemStack -> inventory.setItem(finalSlot, itemStack));
         }
     }
 
