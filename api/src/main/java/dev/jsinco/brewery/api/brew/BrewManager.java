@@ -5,6 +5,7 @@ import dev.jsinco.brewery.api.breweries.CauldronType;
 import dev.jsinco.brewery.api.ingredient.Ingredient;
 import dev.jsinco.brewery.api.meta.MetaData;
 import dev.jsinco.brewery.api.recipe.RecipeMatcher;
+import net.kyori.adventure.text.Component;
 
 import java.util.List;
 import java.util.Map;
@@ -78,6 +79,32 @@ public interface BrewManager<I> {
      * @return A new distill step
      */
     BrewingStep.Distill distillStep(int runs);
+
+    /**
+     * @param itemStack An item stack
+     * @return A present recipe key for specified item stack, or empty if item has brew no recipe
+     */
+    Optional<String> brewName(I itemStack);
+
+    /**
+     * @param itemStack An item stack
+     * @return A present recipe key for specified item stack, or empty if item has brew no recipe
+     */
+    Optional<Component> brewDisplayName(I itemStack);
+
+    /**
+     * @param itemStack An item stack
+     * @return A present quality if brew has a quality, or empty otherwise
+     */
+    Optional<BrewQuality> brewQuality(I itemStack);
+
+    /**
+     * A brew score is in the range [0, 1].
+     *
+     * @param itemStack An item stack
+     * @return A present score if item has a score, otherwise empty.
+     */
+    Optional<Double> brewScore(I itemStack);
 
     /**
      * @return A recipe matcher builder
