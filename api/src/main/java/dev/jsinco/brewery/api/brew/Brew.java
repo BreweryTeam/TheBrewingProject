@@ -137,9 +137,9 @@ public interface Brew extends MetaContainer<Brew> {
 
     /**
      * Steps can be interpreted differently; one sequence of steps can have an alternate representation with another
-     * sequence of steps.
+     * sequence of steps. Negative values for range looks at the end of the list instead.
      *
-     * @param position  An integer in the range (-{@link #stepAmount()}, {@link #stepAmount()})
+     * @param position  An integer in the range [-{@link #stepAmount()}, {@link #stepAmount()}). Values outside will be interpreted as false
      * @param stepClass The type of the step
      * @param predicate A predicate to check against
      * @param <T>       The step type
