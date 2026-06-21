@@ -13,6 +13,7 @@ import java.util.Optional;
 import java.util.SequencedSet;
 import java.util.UUID;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 @Immutable
@@ -133,6 +134,18 @@ public interface Brew extends MetaContainer<Brew> {
      * @return The amount of steps in this brew
      */
     int stepAmount();
+
+    /**
+     * Steps can be interpreted differently; one sequence of steps can have an alternate representation with another
+     * sequence of steps.
+     *
+     * @param position  An integer in the range (-{@link #stepAmount()}, {@link #stepAmount()})
+     * @param stepClass The type of the step
+     * @param predicate A predicate to check against
+     * @param <T>       The step type
+     * @return True if the step at the specified position matches
+     */
+    <T extends BrewingStep> boolean stepMatches(int position, Class<T> stepClass, Predicate<T> predicate);
 
     /**
      * A state of a brew, mainly indicates how the data should be written when converting into an item

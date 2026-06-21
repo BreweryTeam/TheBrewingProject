@@ -28,6 +28,7 @@ import java.util.SequencedSet;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -155,6 +156,26 @@ public class BrewImpl implements Brew {
     @Override
     public int stepAmount() {
         return steps.size();
+    }
+
+    @Override
+    public <T extends BrewingStep> boolean stepMatches(int position, Class<T> stepClass, Predicate<T> predicate) {
+        for (List<BrewingStep> variation : variations()) {
+            int chosenPosition;
+            if (position < 0) {
+                chosenPosition = variation.size() + position;
+            } else {
+                chosenPosition = position;
+            }
+            if (chosenPosition < 0 || chosenPosition >= variation.size()) {
+                continue;
+            }
+            BrewingStep step = variation.get(chosenPosition);
+            if (stepClass.isInstance(step) && predicate.test(stepClass.cast(step))) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override

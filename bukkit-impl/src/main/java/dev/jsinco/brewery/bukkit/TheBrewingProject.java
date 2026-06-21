@@ -201,7 +201,6 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
                 .toArray(CompletableFuture[]::new)
         ).thenAccept(ignored -> {
             Bukkit.getAsyncScheduler().runNow(this, ignored2 -> resourcePackColors.init());
-            ingredientManagerFuture.complete(new ResolvedIngredientManagerImpl());
         });
         initialize();
         integrationManager.loadIntegrations();
@@ -411,8 +410,7 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
         CompletableFuture.allOf(recipeFutures.toArray(new CompletableFuture[0]))
                 .thenRunAsync(() -> {
                     recipeFutures.stream()
-                            .map(f -> f.getNow(null))
-                            .filter(Objects::nonNull)
+                            .map(CompletableFuture::join)
                             .forEach(recipeRegistry::registerRecipe);
                     new AsyncRecipesLoadedEvent(recipeRegistry).callEvent();
                 });
@@ -426,6 +424,9 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
                     this.recipeRegistry.registerDefaultRecipe(string, defaultRecipe1);
                 })
         );
+        CompletableFuture.allOf(integrationManager.retrieve(IntegrationTypes.ITEM).stream().map(ItemIntegration::initialized)
+                        .toArray(CompletableFuture<?>[]::new))
+                .thenAccept(ignored -> ingredientManagerFuture.complete(new ResolvedIngredientManagerImpl()));
         this.getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS, BreweryCommand::register);
         loadDrunkenReplacements();
         loadTimeFormats();
