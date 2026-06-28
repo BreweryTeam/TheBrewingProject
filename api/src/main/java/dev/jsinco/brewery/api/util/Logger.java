@@ -23,11 +23,12 @@ public final class Logger {
         logger().log(Level.SEVERE, prefixedMessage);
     }
 
-    public static void logErr(Throwable throwable) {
+    public static Void logErr(Throwable throwable) {
         StackTraceElement caller = Thread.currentThread().getStackTrace()[2];
         String className = caller.getClassName().substring(caller.getClassName().lastIndexOf('.') + 1);
         String prefix = "[TBP Error - " + className + ":" + caller.getLineNumber() + "] ";
         logger().log(Level.SEVERE, prefix + throwable.getMessage(), throwable);
+        return null;
     }
 
     public static void logAndTrackErr(String message) {
@@ -35,9 +36,10 @@ public final class Logger {
         ERROR_TRACKER.trackError(message);
     }
 
-    public static void logAndTrackErr(Throwable throwable) {
+    public static Void logAndTrackErr(Throwable throwable) {
         logErr(throwable);
         ERROR_TRACKER.trackError(throwable);
+        return null;
     }
 
     public static ErrorTracker getTracker() {

@@ -5,21 +5,19 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import dev.jsinco.brewery.api.brew.Brew;
 import dev.jsinco.brewery.api.brew.BrewingStep;
-import dev.jsinco.brewery.api.ingredient.IngredientManager;
+import dev.jsinco.brewery.api.ingredient.ResolvedIngredientManager;
 import dev.jsinco.brewery.api.meta.MetaData;
 import dev.jsinco.brewery.meta.MetaSerializer;
-import dev.jsinco.brewery.util.FutureUtil;
 import org.jspecify.annotations.Nullable;
 
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 
 public class BrewSerializer {
 
     public static final BrewSerializer INSTANCE = new BrewSerializer();
     private static final int VERSION = 1;
 
-    public JsonElement serialize(Brew brew, IngredientManager<?> ingredientManager) {
+    public JsonElement serialize(Brew brew, ResolvedIngredientManager<?> ingredientManager) {
         JsonObject obj = new JsonObject();
         obj.addProperty("version", VERSION);
         obj.add("steps", steps(brew, ingredientManager));
@@ -27,7 +25,7 @@ public class BrewSerializer {
         return obj;
     }
 
-    private static JsonArray steps(Brew brew, IngredientManager<?> ingredientManager) {
+    private static JsonArray steps(Brew brew, ResolvedIngredientManager<?> ingredientManager) {
         JsonArray array = new JsonArray();
         for (BrewingStep step : brew.getSteps()) {
             array.add(BrewingStepSerializer.INSTANCE.serialize(step, ingredientManager));
@@ -35,7 +33,7 @@ public class BrewSerializer {
         return array;
     }
 
-    public CompletableFuture<Brew> deserialize(JsonElement jsonElement, IngredientManager<?> ingredientManager) {
+    public Brew deserialize(JsonElement jsonElement, ResolvedIngredientManager<?> ingredientManager) {
         if (jsonElement.isJsonArray()) {
             return deserializeVersion0(jsonElement, ingredientManager);
         }
@@ -44,25 +42,23 @@ public class BrewSerializer {
         if (version < 1 || version > VERSION) {
             throw new RuntimeException("Unsupported version: " + version);
         }
-        return getSteps(jsonObject.getAsJsonArray("steps"), ingredientManager)
-                .thenApplyAsync(steps -> new BrewImpl(
-                        steps, getMeta(jsonObject.getAsJsonObject("meta"))
-                ));
+        return new BrewImpl(
+                getSteps(jsonObject.getAsJsonArray("steps"), ingredientManager),
+                getMeta(jsonObject.getAsJsonObject("meta"))
+        );
     }
 
-    private static CompletableFuture<Brew> deserializeVersion0(JsonElement jsonElement, IngredientManager<?> ingredientManager) {
-        return getSteps(jsonElement.getAsJsonArray(), ingredientManager)
-                .thenApplyAsync(BrewImpl::new);
+    private static Brew deserializeVersion0(JsonElement jsonElement, ResolvedIngredientManager<?> ingredientManager) {
+        return new BrewImpl(getSteps(jsonElement.getAsJsonArray(), ingredientManager));
     }
 
-    private static CompletableFuture<List<BrewingStep>> getSteps(@Nullable JsonArray jsonArray, IngredientManager<?> ingredientManager) {
+    private static List<BrewingStep> getSteps(@Nullable JsonArray jsonArray, ResolvedIngredientManager<?> ingredientManager) {
         if (jsonArray == null) {
-            return CompletableFuture.completedFuture(List.of());
+            return List.of();
         }
-        List<CompletableFuture<BrewingStep>> brewingStepFutures = jsonArray.asList().stream()
+        return jsonArray.asList().stream()
                 .map(element -> BrewingStepSerializer.INSTANCE.deserialize(element, ingredientManager))
                 .toList();
-        return FutureUtil.mergeFutures(brewingStepFutures);
     }
 
     private static MetaData getMeta(@Nullable JsonObject jsonObject) {

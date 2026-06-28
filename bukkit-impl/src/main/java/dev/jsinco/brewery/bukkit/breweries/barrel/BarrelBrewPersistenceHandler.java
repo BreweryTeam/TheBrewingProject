@@ -2,13 +2,12 @@ package dev.jsinco.brewery.bukkit.breweries.barrel;
 
 import dev.jsinco.brewery.api.brew.Brew;
 import dev.jsinco.brewery.api.util.Logger;
-import dev.jsinco.brewery.api.util.Pair;
 import dev.jsinco.brewery.api.vector.BreweryLocation;
-import dev.jsinco.brewery.brew.BarrelBrewDataType;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
-import dev.jsinco.brewery.bukkit.brew.BukkitBarrelBrewDataType;
 import dev.jsinco.brewery.bukkit.breweries.BrewInventoryImpl;
 import dev.jsinco.brewery.bukkit.breweries.BrewPersistenceHandler;
+import dev.jsinco.brewery.bukkit.database.SessionTypes;
+import dev.jsinco.brewery.bukkit.database.barrel.BarrelSession;
 import dev.jsinco.brewery.database.PersistenceException;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
@@ -29,18 +28,20 @@ public class BarrelBrewPersistenceHandler implements BrewPersistenceHandler {
             return;
         }
         try {
+            BarrelSession session = TheBrewingProject.getInstance().getDatabase().startSession(SessionTypes.BARREL_SESSION_TYPE);
             Brew previous = inventory.getBrews()[position];
-            BarrelBrewDataType.BarrelContext context = new BarrelBrewDataType.BarrelContext(unique.x(), unique.y(), unique.z(), position, unique.worldUuid());
-            Pair<Brew, BarrelBrewDataType.BarrelContext> data = new Pair<>(brew, context);
             if (previous == null) {
-                TheBrewingProject.getInstance().getDatabase().insertValue(BukkitBarrelBrewDataType.INSTANCE, data);
+                session.insertBrew(unique, position, brew)
+                        .exceptionally(Logger::logAndTrackErr);
                 return;
             }
             if (brew == null) {
-                TheBrewingProject.getInstance().getDatabase().remove(BukkitBarrelBrewDataType.INSTANCE, data);
+                session.removeBrew(unique, position)
+                        .exceptionally(Logger::logAndTrackErr);
                 return;
             }
-            TheBrewingProject.getInstance().getDatabase().updateValue(BukkitBarrelBrewDataType.INSTANCE, data);
+            session.updateBrew(unique, position, brew)
+                    .exceptionally(Logger::logAndTrackErr);
         } catch (PersistenceException e) {
             Logger.logAndTrackErr(e);
         }

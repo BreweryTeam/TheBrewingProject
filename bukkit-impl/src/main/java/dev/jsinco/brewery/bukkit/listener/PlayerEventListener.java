@@ -28,7 +28,8 @@ import dev.jsinco.brewery.bukkit.api.transaction.ItemSource;
 import dev.jsinco.brewery.bukkit.brew.BrewAdapterAccess;
 import dev.jsinco.brewery.bukkit.breweries.BreweryRegistry;
 import dev.jsinco.brewery.bukkit.breweries.BukkitCauldron;
-import dev.jsinco.brewery.bukkit.breweries.BukkitCauldronDataType;
+import dev.jsinco.brewery.bukkit.database.SessionTypes;
+import dev.jsinco.brewery.bukkit.database.cauldron.CauldronSession;
 import dev.jsinco.brewery.bukkit.effect.ConsumedModifierDisplay;
 import dev.jsinco.brewery.bukkit.effect.event.DrunkEventExecutor;
 import dev.jsinco.brewery.bukkit.ingredient.BukkitIngredientManager;
@@ -40,7 +41,7 @@ import dev.jsinco.brewery.configuration.Config;
 import dev.jsinco.brewery.configuration.DrunkenModifierSection;
 import dev.jsinco.brewery.configuration.serializers.ConsumableSerializer;
 import dev.jsinco.brewery.database.PersistenceException;
-import dev.jsinco.brewery.database.sql.Database;
+import dev.jsinco.brewery.database.sql.SqlDatabase;
 import dev.jsinco.brewery.effect.DrunksManagerImpl;
 import dev.jsinco.brewery.effect.text.DrunkTextRegistry;
 import dev.jsinco.brewery.effect.text.DrunkTextTransformer;
@@ -96,13 +97,13 @@ public class PlayerEventListener implements Listener {
 
     private final PlacedStructureRegistryImpl placedStructureRegistry;
     private final BreweryRegistry breweryRegistry;
-    private final Database database;
+    private final SqlDatabase database;
     private final DrunksManagerImpl<?> drunksManager;
     private final DrunkTextRegistry drunkTextRegistry;
     private final RecipeRegistryImpl<ItemStack> recipeRegistry;
     private final DrunkEventExecutor drunkEventExecutor;
 
-    public PlayerEventListener(PlacedStructureRegistryImpl placedStructureRegistry, BreweryRegistry breweryRegistry, Database database, DrunksManagerImpl<?> drunksManager, DrunkTextRegistry drunkTextRegistry, RecipeRegistryImpl<ItemStack> recipeRegistry, DrunkEventExecutor drunkEventExecutor) {
+    public PlayerEventListener(PlacedStructureRegistryImpl placedStructureRegistry, BreweryRegistry breweryRegistry, SqlDatabase database, DrunksManagerImpl<?> drunksManager, DrunkTextRegistry drunkTextRegistry, RecipeRegistryImpl<ItemStack> recipeRegistry, DrunkEventExecutor drunkEventExecutor) {
         this.placedStructureRegistry = placedStructureRegistry;
         this.breweryRegistry = breweryRegistry;
         this.database = database;
@@ -307,11 +308,14 @@ public class PlayerEventListener implements Listener {
         if (addedIngredient) {
             updateHeldItem(decreaseItem(itemStack, player), player, hand);
             try {
+                CauldronSession session = database.startSession(SessionTypes.CAULDRON_SESSION_TYPE);
                 if (createNewCauldron) {
-                    database.insertValue(BukkitCauldronDataType.INSTANCE, cauldron);
+                    session.insertCauldron(cauldron)
+                            .exceptionally(Logger::logAndTrackErr);
                     breweryRegistry.addActiveSinglePositionStructure(cauldron);
                 } else {
-                    database.updateValue(BukkitCauldronDataType.INSTANCE, cauldron);
+                    session.updateCauldron(cauldron)
+                            .exceptionally(Logger::logAndTrackErr);
                 }
             } catch (PersistenceException e) {
                 Logger.logAndTrackErr(e);
