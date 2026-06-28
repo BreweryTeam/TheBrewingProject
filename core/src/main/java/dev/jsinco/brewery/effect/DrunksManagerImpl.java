@@ -123,47 +123,21 @@ public class DrunksManagerImpl<C> implements DrunksManager {
             }
             newState = newState.setModifier(modifierConsume.modifier(), modifierConsume.value() + newState.modifierValue(modifierConsume.modifier()));
         }
-        DrunkenStateSession session;
-        try {
-            session = sessionSupplier.get();
-        } catch (PersistenceException e) {
-            Logger.logErr(e);
-            return null;
-        }
         if (newState.additionalModifierData().isEmpty() && !isPassedOut(newState)) {
             drunks.remove(playerUuid);
             if (alreadyDrunk) {
-                session.removeState(playerUuid)
-                        .exceptionally(Logger::logAndTrackErr);
+                try {
+                    sessionSupplier.get().removeState(playerUuid)
+                            .exceptionally(Logger::logAndTrackErr);
+                } catch (PersistenceException e) {
+                    Logger.logErr(e);
+                }
             }
             return null;
         }
         drunks.put(playerUuid, newState);
         planEvent(playerUuid);
-        CompletableFuture<Void> future;
-        if (alreadyDrunk) {
-            future = session.updateState(newState, playerUuid)
-                    .exceptionally(Logger::logAndTrackErr);
-        } else {
-            future = session.insertState(newState, playerUuid)
-                    .exceptionally(Logger::logAndTrackErr);
-        }
-        Set<DrunkenModifier> allModifiers = Stream.concat(initialState.additionalModifierData().stream(), newState.additionalModifierData().stream())
-                .map(Pair::first)
-                .collect(Collectors.toSet());
-        Map<DrunkenModifier, Double> newModifiers = newState.modifiers();
-        future.thenAcceptAsync(ignored -> {
-            for (DrunkenModifier modifier : allModifiers) {
-                if (newModifiers.get(modifier) != modifier.minValue()) {
-                    session.insertModifier(modifier, newModifiers.get(modifier), playerUuid)
-                            .exceptionally(Logger::logAndTrackErr);
-                }
-                if (newModifiers.get(modifier) == modifier.minValue()) {
-                    session.removeModifier(modifier, playerUuid)
-                            .exceptionally(Logger::logAndTrackErr);
-                }
-            }
-        });
+        updateState(playerUuid, alreadyDrunk, newState, initialState);
         return newState;
     }
 
@@ -181,15 +155,41 @@ public class DrunksManagerImpl<C> implements DrunksManager {
         }
         if (previousTimestamp + 20 * Moment.SECOND < recalculated.timestamp()) {
             drunks.put(playerUuid, recalculated);
-            try {
-                sessionSupplier.get()
-                        .updateState(recalculated, playerUuid)
-                        .exceptionally(Logger::logAndTrackErr);
-            } catch (PersistenceException e) {
-                Logger.logErr(e);
-            }
+            updateState(playerUuid, true, recalculated, drunkState);
         }
         return recalculated;
+    }
+
+    private void updateState(UUID playerUuid, boolean alreadyDrunk, DrunkState newState, DrunkState oldState) {
+        DrunkenStateSession session;
+        try {
+            session = sessionSupplier.get();
+        } catch (PersistenceException e) {
+            Logger.logErr(e);
+            return;
+        }
+        CompletableFuture<Void> future;
+        if (alreadyDrunk) {
+            future = session.updateState(newState, playerUuid);
+        } else {
+            future = session.insertState(newState, playerUuid);
+        }
+        Set<DrunkenModifier> allModifiers = Stream.concat(oldState.additionalModifierData().stream(), newState.additionalModifierData().stream())
+                .map(Pair::first)
+                .collect(Collectors.toSet());
+        Map<DrunkenModifier, Double> newModifiers = newState.modifiers();
+        future.thenAcceptAsync(ignored -> {
+            for (DrunkenModifier modifier : allModifiers) {
+                if (newModifiers.get(modifier) != modifier.minValue()) {
+                    session.insertModifier(modifier, newModifiers.get(modifier), playerUuid)
+                            .exceptionally(Logger::logAndTrackErr);
+                }
+                if (newModifiers.get(modifier) == modifier.minValue()) {
+                    session.removeModifier(modifier, playerUuid)
+                            .exceptionally(Logger::logAndTrackErr);
+                }
+            }
+        }).exceptionally(Logger::logAndTrackErr);
     }
 
     @Override
