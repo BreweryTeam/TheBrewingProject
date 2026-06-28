@@ -8,7 +8,7 @@ import dev.jsinco.brewery.brew.CookStepImpl
 import dev.jsinco.brewery.bukkit.TheBrewingProject
 import dev.jsinco.brewery.bukkit.api.BukkitAdapter
 import dev.jsinco.brewery.bukkit.breweries.BukkitCauldron
-import dev.jsinco.brewery.bukkit.breweries.BukkitCauldronDataType
+import dev.jsinco.brewery.bukkit.database.SessionTypes
 import org.bukkit.World
 
 object CauldronMigration {
@@ -18,8 +18,9 @@ object CauldronMigration {
             .filter { it.block.world == world }
             .mapNotNull { convertToTbpCauldron(it) }
             .filter { TheBrewingProject.getInstance().breweryRegistry.getActiveSinglePositionStructure(it.position()).isEmpty }
-            .forEach {
-                TheBrewingProject.getInstance().database.insertValue(BukkitCauldronDataType.INSTANCE, it)
+            .forEach { cauldron ->
+                TheBrewingProject.getInstance().database.startSession(SessionTypes.CAULDRON_SESSION_TYPE)
+                    .insertCauldron(cauldron)
             }
     }
 

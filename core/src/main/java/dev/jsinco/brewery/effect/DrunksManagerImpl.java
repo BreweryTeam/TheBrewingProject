@@ -16,7 +16,8 @@ import dev.jsinco.brewery.api.util.Pair;
 import dev.jsinco.brewery.configuration.DrunkenModifierSection;
 import dev.jsinco.brewery.configuration.EventSection;
 import dev.jsinco.brewery.database.PersistenceException;
-import dev.jsinco.brewery.database.PersistenceHandler;
+import dev.jsinco.brewery.database.PersistenceSupplier;
+import dev.jsinco.brewery.database.session.DrunkenStateSession;
 import dev.jsinco.brewery.util.RandomUtil;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
@@ -43,9 +44,7 @@ import java.util.stream.Stream;
 public class DrunksManagerImpl<C> implements DrunksManager {
 
     private final CustomEventRegistry eventRegistry;
-    private final PersistenceHandler<C> persistenceHandler;
-    private final DrunkStateDataType<C> drunkStateDataType;
-    private final DrunkenModifierDataType<C> drunkenModifierDataType;
+    private final PersistenceSupplier<DrunkenStateSession> sessionSupplier;
     private final Function<EventData, Optional<DrunkEvent>> eventSupplier;
     private Set<EventData> allowedEvents;
     private List<NamedDrunkEvent> namedDrunkEvents = initializeDrunkEventsWithOverrides();
@@ -56,22 +55,24 @@ public class DrunksManagerImpl<C> implements DrunksManager {
 
     private static final Random RANDOM = new Random();
 
-    public DrunksManagerImpl(CustomEventRegistry registry, Set<EventData> allowedEvents, Function<EventData, Optional<DrunkEvent>> eventSupplier, LongSupplier timeSupplier,
-                             PersistenceHandler<C> persistenceHandler, DrunkStateDataType<C> drunkStateDataType, DrunkenModifierDataType<C> drunkenModifierDataType) {
+    public DrunksManagerImpl(CustomEventRegistry registry, Set<EventData> allowedEvents,
+                             Function<EventData, Optional<DrunkEvent>> eventSupplier, LongSupplier timeSupplier,
+                             PersistenceSupplier<DrunkenStateSession> sessionSupplier) {
         this.eventRegistry = registry;
         this.allowedEvents = allowedEvents;
         this.timeSupplier = timeSupplier;
-        this.persistenceHandler = persistenceHandler;
-        this.drunkStateDataType = drunkStateDataType;
-        this.drunkenModifierDataType = drunkenModifierDataType;
         this.eventSupplier = eventSupplier;
+        this.sessionSupplier = sessionSupplier;
         loadDrunkStates();
     }
 
     private void loadDrunkStates() {
         try {
-            persistenceHandler.retrieveAllNow(drunkStateDataType)
-                    .forEach(pair -> drunks.put(pair.second(), pair.first()));
+            DrunkenStateSession session = sessionSupplier.get();
+            session.retrieveAllStates()
+                    .thenAccept(states ->
+                            states.forEach(state -> drunks.put(state.playerUuid(), state.state()))
+                    ).exceptionally(Logger::logAndTrackErr);
         } catch (PersistenceException e) {
             Logger.logErr(e);
         }
@@ -103,8 +104,8 @@ public class DrunksManagerImpl<C> implements DrunksManager {
         boolean alreadyDrunk = drunks.containsKey(playerUuid);
         DrunkState initialState = (alreadyDrunk ? drunks.get(playerUuid).recalculate(timestamp) : new DrunkStateImpl(
                 timestamp, -1, DrunkenModifierSection.modifiers()
-                .drunkenModifiers().stream()
-                .collect(Collectors.toUnmodifiableMap(temp -> temp, DrunkenModifier::minValue))
+                               .drunkenModifiers().stream()
+                               .collect(Collectors.toUnmodifiableMap(temp -> temp, DrunkenModifier::minValue))
         ));
         DrunkState newState = initialState;
         // Behave exactly the same when a modifier is changing
@@ -122,48 +123,47 @@ public class DrunksManagerImpl<C> implements DrunksManager {
             }
             newState = newState.setModifier(modifierConsume.modifier(), modifierConsume.value() + newState.modifierValue(modifierConsume.modifier()));
         }
+        DrunkenStateSession session;
+        try {
+            session = sessionSupplier.get();
+        } catch (PersistenceException e) {
+            Logger.logErr(e);
+            return null;
+        }
         if (newState.additionalModifierData().isEmpty() && !isPassedOut(newState)) {
             drunks.remove(playerUuid);
             if (alreadyDrunk) {
-                try {
-                    persistenceHandler.remove(drunkStateDataType, playerUuid);
-                } catch (PersistenceException e) {
-                    Logger.logErr(e);
-                }
+                session.removeState(playerUuid)
+                        .exceptionally(Logger::logAndTrackErr);
             }
             return null;
         }
         drunks.put(playerUuid, newState);
         planEvent(playerUuid);
-        try {
-            CompletableFuture<Void> future;
-            if (alreadyDrunk) {
-                future = persistenceHandler.updateValue(drunkStateDataType, new Pair<>(newState, playerUuid));
-            } else {
-                future = persistenceHandler.insertValue(drunkStateDataType, new Pair<>(newState, playerUuid));
-            }
-            Set<DrunkenModifier> allModifiers = Stream.concat(initialState.additionalModifierData().stream(), newState.additionalModifierData().stream())
-                    .map(Pair::first)
-                    .collect(Collectors.toSet());
-            Map<DrunkenModifier, Double> newModifiers = newState.modifiers();
-            future.thenAcceptAsync(ignored -> {
-                try {
-                    for (DrunkenModifier modifier : allModifiers) {
-                        if (newModifiers.get(modifier) != modifier.minValue()) {
-                            persistenceHandler.insertValue(drunkenModifierDataType, new Pair<>(new DrunkenModifierDataType.Data(modifier, playerUuid), newModifiers.get(modifier)));
-                        }
-                        if (newModifiers.get(modifier) == modifier.minValue()) {
-                            persistenceHandler.remove(drunkenModifierDataType, new DrunkenModifierDataType.Data(modifier, playerUuid));
-                        }
-                    }
-                } catch (PersistenceException e) {
-                    Logger.logErr(e);
-                }
-            });
-
-        } catch (PersistenceException e) {
-            Logger.logErr(e);
+        CompletableFuture<Void> future;
+        if (alreadyDrunk) {
+            future = session.updateState(newState, playerUuid)
+                    .exceptionally(Logger::logAndTrackErr);
+        } else {
+            future = session.insertState(newState, playerUuid)
+                    .exceptionally(Logger::logAndTrackErr);
         }
+        Set<DrunkenModifier> allModifiers = Stream.concat(initialState.additionalModifierData().stream(), newState.additionalModifierData().stream())
+                .map(Pair::first)
+                .collect(Collectors.toSet());
+        Map<DrunkenModifier, Double> newModifiers = newState.modifiers();
+        future.thenAcceptAsync(ignored -> {
+            for (DrunkenModifier modifier : allModifiers) {
+                if (newModifiers.get(modifier) != modifier.minValue()) {
+                    session.insertModifier(modifier, newModifiers.get(modifier), playerUuid)
+                            .exceptionally(Logger::logAndTrackErr);
+                }
+                if (newModifiers.get(modifier) == modifier.minValue()) {
+                    session.removeModifier(modifier, playerUuid)
+                            .exceptionally(Logger::logAndTrackErr);
+                }
+            }
+        });
         return newState;
     }
 
@@ -182,7 +182,9 @@ public class DrunksManagerImpl<C> implements DrunksManager {
         if (previousTimestamp + 20 * Moment.SECOND < recalculated.timestamp()) {
             drunks.put(playerUuid, recalculated);
             try {
-                persistenceHandler.updateValue(drunkStateDataType, new Pair<>(recalculated, playerUuid));
+                sessionSupplier.get()
+                        .updateState(recalculated, playerUuid)
+                        .exceptionally(Logger::logAndTrackErr);
             } catch (PersistenceException e) {
                 Logger.logErr(e);
             }
@@ -218,7 +220,8 @@ public class DrunksManagerImpl<C> implements DrunksManager {
         Long plannedEventTime = plannedEvents.remove(playerUuid);
         drunks.remove(playerUuid);
         try {
-            persistenceHandler.remove(drunkStateDataType, playerUuid);
+            sessionSupplier.get().removeState(playerUuid)
+                    .exceptionally(Logger::logAndTrackErr);
         } catch (PersistenceException e) {
             Logger.logErr(e);
         }

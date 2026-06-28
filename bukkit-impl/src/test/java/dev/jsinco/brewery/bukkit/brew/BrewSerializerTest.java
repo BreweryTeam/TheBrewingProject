@@ -3,7 +3,6 @@ package dev.jsinco.brewery.bukkit.brew;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import dev.jsinco.brewery.api.brew.Brew;
-import dev.jsinco.brewery.api.breweries.BarrelType;
 import dev.jsinco.brewery.api.breweries.BarrelTypes;
 import dev.jsinco.brewery.api.breweries.CauldronType;
 import dev.jsinco.brewery.api.meta.MetaDataType;
@@ -13,7 +12,7 @@ import dev.jsinco.brewery.brew.BrewImpl;
 import dev.jsinco.brewery.brew.CookStepImpl;
 import dev.jsinco.brewery.brew.DistillStepImpl;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
-import dev.jsinco.brewery.bukkit.ingredient.BukkitIngredientManager;
+import dev.jsinco.brewery.bukkit.ingredient.ResolvedIngredientManagerImpl;
 import dev.jsinco.brewery.bukkit.ingredient.SimpleIngredient;
 import dev.jsinco.brewery.bukkit.testutil.TBPServerMock;
 import net.kyori.adventure.key.Key;
@@ -25,14 +24,11 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockbukkit.mockbukkit.MockBukkit;
 
-import java.time.Duration;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTimeout;
 
 public class BrewSerializerTest {
 
@@ -41,6 +37,7 @@ public class BrewSerializerTest {
         MockBukkit.mock(new TBPServerMock());
         MockBukkit.load(TheBrewingProject.class);
     }
+
     @AfterEach
     public void tearDown() {
         MockBukkit.unmock();
@@ -49,10 +46,9 @@ public class BrewSerializerTest {
     @ParameterizedTest
     @MethodSource("brews")
     void roundTrip(Brew brew) {
-        JsonElement serialized = BrewImpl.SERIALIZER.serialize(brew, BukkitIngredientManager.INSTANCE);
+        JsonElement serialized = BrewImpl.SERIALIZER.serialize(brew, new ResolvedIngredientManagerImpl());
 
-        CompletableFuture<Brew> future = BrewImpl.SERIALIZER.deserialize(serialized, BukkitIngredientManager.INSTANCE);
-        Brew deserialized = assertTimeout(Duration.ofSeconds(5), () -> future.get());
+        Brew deserialized = BrewImpl.SERIALIZER.deserialize(serialized, new ResolvedIngredientManagerImpl());
         assertEquals(brew, deserialized);
     }
 
@@ -74,8 +70,7 @@ public class BrewSerializerTest {
                 [{"type":"cook","brew_time":20,"cauldron_type":"brewery:lava","ingredients":{"minecraft:wheat":1}},{"type":"distill","runs":3},{"type":"age","age":20,"barrel_type":"brewery:acacia"}]""";
         JsonElement json = JsonParser.parseString(jsonStr);
 
-        CompletableFuture<Brew> future = BrewImpl.SERIALIZER.deserialize(json, BukkitIngredientManager.INSTANCE);
-        Brew deserialized = assertTimeout(Duration.ofSeconds(5), () -> future.get());
+        Brew deserialized = BrewImpl.SERIALIZER.deserialize(json, new ResolvedIngredientManagerImpl());
         assertEquals(sampleBrew(), deserialized);
     }
 

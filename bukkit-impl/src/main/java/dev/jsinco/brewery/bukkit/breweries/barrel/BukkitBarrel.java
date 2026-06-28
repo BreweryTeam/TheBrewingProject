@@ -254,7 +254,7 @@ public class BukkitBarrel implements Barrel<BukkitBarrel, ItemStack, Inventory>,
         return structure;
     }
 
-    World getWorld() {
+    public World getWorld() {
         return uniqueLocation.getWorld();
     }
 

@@ -7,7 +7,7 @@ import dev.jsinco.brewery.bukkit.brew.BrewAdapterAccess;
 import dev.jsinco.brewery.bukkit.breweries.BreweryRegistry;
 import dev.jsinco.brewery.bukkit.effect.named.PukeNamedExecutable;
 import dev.jsinco.brewery.configuration.Config;
-import dev.jsinco.brewery.database.sql.Database;
+import dev.jsinco.brewery.database.sql.SqlDatabase;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -30,12 +30,12 @@ import java.util.stream.Stream;
 public class InventoryEventListener implements Listener {
 
     private final BreweryRegistry registry;
-    private final Database database;
+    private final SqlDatabase database;
     private static final Set<InventoryAction> CLICKED_INVENTORY_ITEM_MOVE = Set.of(InventoryAction.PLACE_SOME,
             InventoryAction.PLACE_ONE, InventoryAction.PLACE_ALL, InventoryAction.PICKUP_ALL, InventoryAction.PICKUP_HALF,
             InventoryAction.PICKUP_SOME, InventoryAction.PICKUP_ONE);
 
-    public InventoryEventListener(BreweryRegistry registry, Database database) {
+    public InventoryEventListener(BreweryRegistry registry, SqlDatabase database) {
         this.registry = registry;
         this.database = database;
     }

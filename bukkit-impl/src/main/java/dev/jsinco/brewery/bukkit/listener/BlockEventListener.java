@@ -23,16 +23,15 @@ import dev.jsinco.brewery.bukkit.api.event.structure.DistilleryDestroyEvent;
 import dev.jsinco.brewery.bukkit.breweries.BreweryRegistry;
 import dev.jsinco.brewery.bukkit.breweries.BukkitCauldron;
 import dev.jsinco.brewery.bukkit.breweries.barrel.BukkitBarrel;
-import dev.jsinco.brewery.bukkit.breweries.barrel.BukkitBarrelDataType;
 import dev.jsinco.brewery.bukkit.breweries.distillery.BukkitDistillery;
-import dev.jsinco.brewery.bukkit.breweries.distillery.BukkitDistilleryDataType;
+import dev.jsinco.brewery.bukkit.database.SessionTypes;
 import dev.jsinco.brewery.bukkit.structure.BreweryStructure;
 import dev.jsinco.brewery.bukkit.structure.PlacedBreweryStructure;
 import dev.jsinco.brewery.bukkit.structure.StructureRegistry;
 import dev.jsinco.brewery.bukkit.util.LocationUtil;
 import dev.jsinco.brewery.configuration.Config;
 import dev.jsinco.brewery.database.PersistenceException;
-import dev.jsinco.brewery.database.sql.Database;
+import dev.jsinco.brewery.database.sql.SqlDatabase;
 import dev.jsinco.brewery.structure.PlacedStructureRegistryImpl;
 import dev.jsinco.brewery.util.MessageUtil;
 import net.kyori.adventure.audience.Audience;
@@ -75,10 +74,10 @@ public class BlockEventListener implements Listener {
 
     private final StructureRegistry structureRegistry;
     private final PlacedStructureRegistryImpl placedStructureRegistry;
-    private final Database database;
+    private final SqlDatabase database;
     private final BreweryRegistry breweryRegistry;
 
-    public BlockEventListener(StructureRegistry structureRegistry, PlacedStructureRegistryImpl placedStructureRegistry, Database database, BreweryRegistry breweryRegistry) {
+    public BlockEventListener(StructureRegistry structureRegistry, PlacedStructureRegistryImpl placedStructureRegistry, SqlDatabase database, BreweryRegistry breweryRegistry) {
         this.structureRegistry = structureRegistry;
         this.placedStructureRegistry = placedStructureRegistry;
         this.database = database;
@@ -123,9 +122,10 @@ public class BlockEventListener implements Listener {
         placedStructureRegistry.registerStructure(placedBreweryStructure);
         breweryRegistry.registerInventory(barrel);
         try {
-            database.insertValue(BukkitBarrelDataType.INSTANCE, barrel);
+            database.startSession(SessionTypes.BARREL_SESSION_TYPE).insertBarrel(barrel)
+                    .exceptionally(Logger::logAndTrackErr);
         } catch (PersistenceException e) {
-            Logger.logAndTrackErr(e);
+            Logger.logErr(e);
         }
     }
 
@@ -165,10 +165,11 @@ public class BlockEventListener implements Listener {
         distilleryPlacedBreweryStructure.setHolder(bukkitDistillery);
         placedStructureRegistry.registerStructure(distilleryPlacedBreweryStructure);
         try {
-            database.insertValue(BukkitDistilleryDataType.INSTANCE, bukkitDistillery);
+            database.startSession(SessionTypes.DISTILLERY_SESSION_TYPE).insertDistillery(bukkitDistillery)
+                    .exceptionally(Logger::logAndTrackErr);
             breweryRegistry.registerInventory(bukkitDistillery);
         } catch (PersistenceException e) {
-            Logger.logAndTrackErr(e);
+            Logger.logErr(e);
         }
     }
 
@@ -412,16 +413,18 @@ public class BlockEventListener implements Listener {
             switch (holder) {
                 case BukkitBarrel barrel -> {
                     barrel.destroyWithoutDrops();
-                    database.remove(BukkitBarrelDataType.INSTANCE, barrel);
+                    database.startSession(SessionTypes.BARREL_SESSION_TYPE).removeBarrel(barrel)
+                            .exceptionally(Logger::logAndTrackErr);
                 }
                 case BukkitDistillery distillery -> {
                     distillery.destroyWithoutDrops();
-                    database.remove(BukkitDistilleryDataType.INSTANCE, distillery);
+                    database.startSession(SessionTypes.DISTILLERY_SESSION_TYPE).removeDistillery(distillery)
+                            .exceptionally(Logger::logAndTrackErr);
                 }
                 default -> throw new IllegalArgumentException("Unknown structure type");
             }
         } catch (PersistenceException e) {
-            Logger.logAndTrackErr(e);
+            Logger.logErr(e);
         }
     }
 }

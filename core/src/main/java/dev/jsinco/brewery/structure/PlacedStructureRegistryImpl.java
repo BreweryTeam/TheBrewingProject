@@ -18,7 +18,7 @@ import java.util.UUID;
 public class PlacedStructureRegistryImpl implements PlacedStructureRegistry {
 
     private final Map<UUID, Map<BreweryVector, MultiblockStructure<? extends StructureHolder<?>>>> structures = new HashMap<>();
-    private final Map<StructureType, Set<MultiblockStructure<?>>> typedMultiBlockStructureMap = new HashMap<>();
+    private final Map<StructureType<?>, Set<MultiblockStructure<?>>> typedMultiBlockStructureMap = new HashMap<>();
 
     public synchronized void registerStructures(Collection<? extends MultiblockStructure<?>> multiblockStructures) {
         multiblockStructures.forEach(this::registerStructure);

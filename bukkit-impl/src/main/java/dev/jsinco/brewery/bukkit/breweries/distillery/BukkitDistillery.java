@@ -19,6 +19,7 @@ import dev.jsinco.brewery.bukkit.api.BukkitAdapter;
 import dev.jsinco.brewery.bukkit.api.event.process.BrewDistillEvent;
 import dev.jsinco.brewery.bukkit.brew.BrewAdapterAccess;
 import dev.jsinco.brewery.bukkit.breweries.BrewInventoryImpl;
+import dev.jsinco.brewery.bukkit.database.SessionTypes;
 import dev.jsinco.brewery.bukkit.structure.BreweryStructure;
 import dev.jsinco.brewery.bukkit.structure.PlacedBreweryStructure;
 import dev.jsinco.brewery.bukkit.util.BlockUtil;
@@ -271,6 +272,10 @@ public class BukkitDistillery implements Distillery<BukkitDistillery, ItemStack,
     public void tick() {
         BreweryLocation unique = getStructure().getUnique();
         long timeProcessed = getTimeProcessed();
+        if (timeProcessed < 0) {
+            resetStartTime();
+            return;
+        }
         long processTime = getProcessTime();
         int processedBrews = (int) ((timeProcessed / processTime) * getStructure().getStructure().getMeta(StructureMeta.PROCESS_AMOUNT));
         if (!BlockUtil.isChunkLoaded(unique)
@@ -280,7 +285,7 @@ public class BukkitDistillery implements Distillery<BukkitDistillery, ItemStack,
         }
         BukkitAdapter.scheduleIfLoaded(unique, TheBrewingProject.getInstance(), location -> {
             checkDirty();
-            if (timeProcessed % processTime == 0 && timeProcessed != 0) {
+            if (timeProcessed % processTime == 0 && timeProcessed > 0) {
                 SoundPlayer.playSoundEffect(
                         Config.config().sounds().distilleryProcess(),
                         Sound.Source.BLOCK,
@@ -308,7 +313,7 @@ public class BukkitDistillery implements Distillery<BukkitDistillery, ItemStack,
             Bukkit.getAsyncScheduler().runNow(TheBrewingProject.getInstance(), ignored ->
                     TheBrewingProject.getInstance().getBreweryRegistry().unregisterOpened(this)
             );
-            
+
             // Distilling results can be computed later on
             this.recentlyAccessed = -1L;
             return;
@@ -370,9 +375,11 @@ public class BukkitDistillery implements Distillery<BukkitDistillery, ItemStack,
     private void resetStartTime() {
         startTime = TheBrewingProject.getInstance().getTime();
         try {
-            TheBrewingProject.getInstance().getDatabase().updateValue(BukkitDistilleryDataType.INSTANCE, this);
+            TheBrewingProject.getInstance().getDatabase().startSession(SessionTypes.DISTILLERY_SESSION_TYPE)
+                    .updateDistillery(this)
+                    .exceptionally(Logger::logAndTrackErr);
         } catch (PersistenceException e) {
-            Logger.logAndTrackErr(e);
+            Logger.logErr(e);
         }
     }
 

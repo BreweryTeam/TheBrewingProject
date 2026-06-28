@@ -8,7 +8,7 @@ import dev.jsinco.brewery.api.util.Pair
 import dev.jsinco.brewery.bukkit.TheBrewingProject
 import dev.jsinco.brewery.bukkit.api.BukkitAdapter
 import dev.jsinco.brewery.bukkit.breweries.barrel.BukkitBarrel
-import dev.jsinco.brewery.bukkit.breweries.barrel.BukkitBarrelDataType
+import dev.jsinco.brewery.bukkit.database.SessionTypes
 import dev.jsinco.brewery.bukkit.structure.PlacedBreweryStructure
 import org.bukkit.Location
 import org.bukkit.World
@@ -23,8 +23,9 @@ object BarrelMigration {
                 TheBrewingProject.getInstance().placedStructureRegistry.getStructures(it.structure.positions())
                     .isEmpty()
             }
-            .forEach {
-                TheBrewingProject.getInstance().database.insertValue(BukkitBarrelDataType.INSTANCE, it)
+            .forEach { barrel ->
+                TheBrewingProject.getInstance().database.startSession(SessionTypes.BARREL_SESSION_TYPE)
+                    .insertBarrel(barrel)
             }
     }
 

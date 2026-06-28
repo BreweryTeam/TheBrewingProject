@@ -11,6 +11,7 @@ import org.jspecify.annotations.Nullable;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -68,6 +69,10 @@ public final class BreweryRegistry {
 
     public synchronized void registerInventory(InventoryAccessible<ItemStack, Inventory> inventoryAccessible) {
         inventoryAccessible.getInventories().forEach(inventory -> inventories.put(inventory, inventoryAccessible));
+    }
+
+    public synchronized void registerInventories(List<? extends InventoryAccessible<ItemStack, Inventory>> inventoryAccessible) {
+        inventoryAccessible.forEach(this::registerInventory);
     }
 
     public synchronized void unregisterInventory(InventoryAccessible<ItemStack, Inventory> inventoryAccessible) {

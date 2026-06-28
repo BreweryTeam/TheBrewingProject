@@ -7,12 +7,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class SqlStatements {
 
     private final String folder;
-    private final Map<Type, String> statements = new ConcurrentHashMap<>();
+    private final Map<String, String> statements = new ConcurrentHashMap<>();
 
     public SqlStatements(String folder) {
         this.folder = folder;
@@ -21,25 +22,46 @@ public class SqlStatements {
 
     public void init() {
         for (Type type : Type.values()) {
-            try (InputStream inputStream = SqlStatements.class.getResourceAsStream(type.path(folder))) {
-                if (inputStream == null) {
-                    continue;
-                }
-                String statement = new String(inputStream.readAllBytes());
-                statements.put(type, statement);
-            } catch (IOException e) {
-                Logger.logErr(e);
-            }
+            read(type.path(folder))
+                    .ifPresent(statement ->
+                            statements.put(type.name().toLowerCase(Locale.ROOT), statement)
+                    );
         }
+    }
+
+    private Optional<String> read(String path) {
+        try (InputStream inputStream = SqlStatements.class.getResourceAsStream(path)) {
+            if (inputStream == null) {
+                return Optional.empty();
+            }
+            return Optional.of(new String(inputStream.readAllBytes()));
+        } catch (IOException e) {
+            Logger.logErr(e);
+        }
+        return Optional.empty();
     }
 
     public @NonNull String get(Type type) {
-        if (!statements.containsKey(type)) {
-            throw new IllegalArgumentException("Statement does not exists.");
+        if (!statements.containsKey(type.name().toLowerCase(Locale.ROOT))) {
+            throw new IllegalArgumentException("Statement does not exist");
         }
-        return statements.get(type);
+        return statements.get(type.name().toLowerCase(Locale.ROOT));
     }
 
+    public @NonNull String get(String type) {
+        String lowercaseType = type.toLowerCase(Locale.ROOT);
+        if (!statements.containsKey(lowercaseType)) {
+            String statement = read(compilePath(folder, lowercaseType))
+                    .orElseThrow(() -> new IllegalArgumentException("Statement does not exist."));
+            statements.put(lowercaseType, statement);
+            return statement;
+        }
+        return statements.get(lowercaseType);
+    }
+
+    private static String compilePath(String root, String type) {
+        return root + "/" + type.toLowerCase(Locale.ROOT) + ".sql";
+    }
 
     public enum Type {
         SELECT_ALL,

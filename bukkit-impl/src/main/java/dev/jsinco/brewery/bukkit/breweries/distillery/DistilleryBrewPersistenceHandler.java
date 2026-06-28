@@ -2,12 +2,12 @@ package dev.jsinco.brewery.bukkit.breweries.distillery;
 
 import dev.jsinco.brewery.api.brew.Brew;
 import dev.jsinco.brewery.api.util.Logger;
-import dev.jsinco.brewery.api.util.Pair;
 import dev.jsinco.brewery.api.vector.BreweryLocation;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
-import dev.jsinco.brewery.bukkit.brew.BukkitDistilleryBrewDataType;
 import dev.jsinco.brewery.bukkit.breweries.BrewInventoryImpl;
 import dev.jsinco.brewery.bukkit.breweries.BrewPersistenceHandler;
+import dev.jsinco.brewery.bukkit.database.SessionTypes;
+import dev.jsinco.brewery.bukkit.database.distillery.DistillerySession;
 import dev.jsinco.brewery.database.PersistenceException;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
@@ -38,25 +38,23 @@ public class DistilleryBrewPersistenceHandler implements BrewPersistenceHandler 
             return;
         }
         try {
+            DistillerySession session = TheBrewingProject.getInstance().getDatabase().startSession(SessionTypes.DISTILLERY_SESSION_TYPE);
             Brew previous = inventory.getBrews()[position];
-            BukkitDistilleryBrewDataType.DistilleryContext context = contextProvider(position);
-            Pair<Brew, BukkitDistilleryBrewDataType.DistilleryContext> data = new Pair<>(brew, context);
             if (previous == null) {
-                TheBrewingProject.getInstance().getDatabase().insertValue(BukkitDistilleryBrewDataType.INSTANCE, data);
+                session.insertBrew(unique, position, distillate, brew)
+                        .exceptionally(Logger::logAndTrackErr);
                 return;
             }
             if (brew == null) {
-                TheBrewingProject.getInstance().getDatabase().remove(BukkitDistilleryBrewDataType.INSTANCE, data);
+                session.removeBrew(unique, position, distillate)
+                        .exceptionally(Logger::logAndTrackErr);
                 return;
             }
-            TheBrewingProject.getInstance().getDatabase().updateValue(BukkitDistilleryBrewDataType.INSTANCE, data);
+            session.updateBrew(unique, position, distillate, brew)
+                    .exceptionally(Logger::logAndTrackErr);
         } catch (PersistenceException e) {
-            Logger.logAndTrackErr(e);
+            Logger.logErr(e);
         }
 
-    }
-
-    private BukkitDistilleryBrewDataType.DistilleryContext contextProvider(int position) {
-        return new BukkitDistilleryBrewDataType.DistilleryContext(unique.x(), unique.y(), unique.z(), unique.worldUuid(), position, distillate);
     }
 }

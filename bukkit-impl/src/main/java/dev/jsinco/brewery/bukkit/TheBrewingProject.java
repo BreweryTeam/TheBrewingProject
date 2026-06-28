@@ -31,9 +31,8 @@ import dev.jsinco.brewery.bukkit.configuration.serializer.IngredientInputSeriali
 import dev.jsinco.brewery.bukkit.configuration.serializer.IntegrationEventSerializer;
 import dev.jsinco.brewery.bukkit.configuration.serializer.MaterialSerializer;
 import dev.jsinco.brewery.bukkit.configuration.serializer.UncheckedIngredientSerializer;
+import dev.jsinco.brewery.bukkit.database.SessionTypes;
 import dev.jsinco.brewery.bukkit.effect.DrunkEventManagerImpl;
-import dev.jsinco.brewery.bukkit.effect.SqlDrunkStateDataType;
-import dev.jsinco.brewery.bukkit.effect.SqlDrunkenModifierDataType;
 import dev.jsinco.brewery.bukkit.effect.event.ActiveEventsRegistry;
 import dev.jsinco.brewery.bukkit.effect.event.DrunkEventExecutor;
 import dev.jsinco.brewery.bukkit.ingredient.BukkitIngredientManager;
@@ -63,7 +62,6 @@ import dev.jsinco.brewery.bukkit.structure.serializer.MaterialsSerializer;
 import dev.jsinco.brewery.bukkit.structure.serializer.StructureMetaSerializer;
 import dev.jsinco.brewery.bukkit.structure.serializer.StructureTypeSerializer;
 import dev.jsinco.brewery.bukkit.structure.serializer.Vector3iSerializer;
-import dev.jsinco.brewery.bukkit.util.BreweryTimeDataType;
 import dev.jsinco.brewery.bukkit.util.BukkitIngredientUtil;
 import dev.jsinco.brewery.bukkit.util.EventUtil;
 import dev.jsinco.brewery.bukkit.util.color.ResourcePackColors;
@@ -96,8 +94,8 @@ import dev.jsinco.brewery.configuration.serializers.SoundDefinitionSerializer;
 import dev.jsinco.brewery.configuration.serializers.TicksDurationSerializer;
 import dev.jsinco.brewery.configuration.structure.StructureMatchers;
 import dev.jsinco.brewery.database.PersistenceException;
-import dev.jsinco.brewery.database.sql.Database;
 import dev.jsinco.brewery.database.sql.DatabaseDriver;
+import dev.jsinco.brewery.database.sql.SqlDatabase;
 import dev.jsinco.brewery.effect.DrunksManagerImpl;
 import dev.jsinco.brewery.effect.ModifierManagerImpl;
 import dev.jsinco.brewery.effect.text.DrunkTextRegistry;
@@ -141,7 +139,7 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
     private PlacedStructureRegistryImpl placedStructureRegistry;
     private RecipeRegistryImpl<ItemStack> recipeRegistry;
     private BreweryRegistry breweryRegistry;
-    private Database database;
+    private SqlDatabase database;
     private DrunkTextRegistry drunkTextRegistry;
     private TimeFormatRegistry timeFormatRegistry;
     private DrunksManagerImpl<Connection> drunksManager;
@@ -262,7 +260,7 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
         this.drunkEventExecutor.clear();
         this.customDrunkEventRegistry = EventSection.events().customEvents();
         saveResources();
-        this.database = new Database(DatabaseDriver.SQLITE);
+        this.database = new SqlDatabase(DatabaseDriver.SQLITE);
         try {
             database.init(this.getDataFolder());
         } catch (IOException | SQLException e) {
@@ -368,10 +366,13 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
         Preconditions.checkState(successfulLoad, "Plugin loading failed, see above exception in load stage");
         loadStructures();
         integrationManager.enableIntegrations();
-        this.database = new Database(DatabaseDriver.SQLITE);
+        this.database = new SqlDatabase(DatabaseDriver.SQLITE);
         try {
             database.init(this.getDataFolder());
-            this.time = database.getSingletonNow(BreweryTimeDataType.INSTANCE);
+            database.startSession(SessionTypes.MISC_SESSION_TYPE).getTime()
+                    .thenAccept(time -> this.time = time)
+                    .join();
+
         } catch (IOException | PersistenceException | SQLException e) {
             throw new RuntimeException(e); // Hard exit if any issues here
         }
@@ -380,7 +381,7 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
         EventSection.postValidate();
         this.customDrunkEventRegistry = EventSection.events().customEvents();
         this.drunksManager = new DrunksManagerImpl<>(customDrunkEventRegistry, EventSection.events().enabledRandomEvents().stream().map(EventData::deserialize).collect(Collectors.toSet()),
-                EventUtil::fromData, () -> this.time, database, SqlDrunkStateDataType.INSTANCE, SqlDrunkenModifierDataType.INSTANCE);
+                EventUtil::fromData, () -> this.time, () -> database.startSession(SessionTypes.DRUNK_STATE_SESSION_TYPE));
         this.drunkEventExecutor = new DrunkEventExecutor();
         this.drunkEventManager = new DrunkEventManagerImpl(customDrunkEventRegistry, drunkEventExecutor);
         PluginManager pluginManager = Bukkit.getPluginManager();
@@ -447,10 +448,12 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
             Logger.logAndTrackErr(e);
         }
         try {
-            database.setSingleton(BreweryTimeDataType.INSTANCE, time).join();
+            database.startSession(SessionTypes.MISC_SESSION_TYPE)
+                    .setTime(time)
+                    .exceptionally(Logger::logAndTrackErr);
             database.flush().join();
         } catch (PersistenceException e) {
-            Logger.logAndTrackErr(e);
+            Logger.logErr(e);
         }
     }
 
@@ -491,12 +494,14 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
             return; // Don't tick if the server is frozen, debug purposes
         }
         drunksManager.tick(drunkEventExecutor::doDrunkEvent, uuid -> Bukkit.getPlayer(uuid) != null);
-        try {
-            if (++time % 200 == 0) {
-                database.setSingleton(BreweryTimeDataType.INSTANCE, time);
+        if (++time % 200 == 0) {
+            try {
+                database.startSession(SessionTypes.MISC_SESSION_TYPE)
+                        .setTime(time)
+                        .exceptionally(Logger::logAndTrackErr);
+            } catch (PersistenceException e) {
+                Logger.logAndTrackErr(e);
             }
-        } catch (PersistenceException e) {
-            Logger.logAndTrackErr(e);
         }
     }
 
@@ -556,7 +561,7 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
         return this.breweryRegistry;
     }
 
-    public Database getDatabase() {
+    public SqlDatabase getDatabase() {
         return this.database;
     }
 
