@@ -117,6 +117,14 @@ public class IngredientsSection extends OkaeriConfig {
 
         private CompletableFuture<Optional<Ingredient>> create(IngredientManager<?> ingredientManager, Function<String, List<String>> tagResolver) {
             List<CompletableFuture<Optional<Ingredient>>> group = new ArrayList<>();
+            if (displayName == null) {
+                Logger.logErr("Ingredient groups must have a display-name");
+                return CompletableFuture.completedFuture(Optional.empty());
+            }
+            if (key == null) {
+                Logger.logErr("Ingredient groups must have a key");
+                return CompletableFuture.completedFuture(Optional.empty());
+            }
             for (String material : materials) {
                 if (INGREDIENT_GROUP_PATTERN.matcher(material).find()) {
                     Logger.logErr("Ingredient groups are not allowed to reference other groups!");
