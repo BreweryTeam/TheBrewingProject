@@ -41,7 +41,9 @@ public class BukkitAdapter {
         }
         CompletableFuture<Void> output = new CompletableFuture<>();
         Bukkit.getRegionScheduler().run(owner, locationOptional.get(), ignored -> {
-            locationConsumer.accept(locationOptional.get());
+            if (locationOptional.get().isChunkLoaded()) {
+                locationConsumer.accept(locationOptional.get());
+            }
             output.complete(null);
         });
         return output;
