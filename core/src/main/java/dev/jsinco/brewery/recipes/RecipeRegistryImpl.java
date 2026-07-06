@@ -35,7 +35,7 @@ public class RecipeRegistryImpl<I> implements RecipeRegistry<I> {
 
     public void registerRecipes(@NonNull Map<String, Recipe<I>> recipes) {
         this.clear();
-        recipes.forEach((_, recipe) -> registerRecipe(recipe));
+        recipes.forEach((ignored, recipe) -> registerRecipe(recipe));
     }
 
     @Override
