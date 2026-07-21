@@ -10,7 +10,8 @@ import java.util.Map;
 
 public class ScoreConditions {
 
-    public record SingletonConditionImpl(AmountCondition amountCondition, ScoreType type) implements ScoreCondition.SingletonCondition {
+    public record SingletonConditionImpl(AmountCondition amountCondition,
+                                         ScoreType type) implements ScoreCondition.SingletonCondition {
 
         @Override
         public boolean matches(@Nullable BrewingStep expected, BrewingStep actual) {
@@ -26,9 +27,15 @@ public class ScoreConditions {
                         && amountCondition.matches(actualDistill.runs(), expectedDistill.runs());
             };
         }
+
+        @Override
+        public int complexity() {
+            return 1;
+        }
     }
 
-    public record IngredientsConditionImpl(Map<Ingredient, AmountCondition> conditions) implements ScoreCondition.IngredientsCondition {
+    public record IngredientsConditionImpl(
+            Map<Ingredient, AmountCondition> conditions) implements ScoreCondition.IngredientsCondition {
         @Override
         public boolean matches(@Nullable BrewingStep expected, BrewingStep actual) {
             if (!(actual instanceof BrewingStep.IngredientsStep actualIngredients)) {
@@ -37,10 +44,7 @@ public class ScoreConditions {
             for (Map.Entry<Ingredient, AmountCondition> condition : conditions.entrySet()) {
                 int actualAmount = actualIngredients.ingredients().getOrDefault(condition.getKey(), -1);
                 if (!(expected instanceof BrewingStep.IngredientsStep expectedIngredients)) {
-                    if (condition.getValue() != AmountCondition.ANY) {
-                        return false;
-                    }
-                    continue;
+                    return false;
                 }
                 int expectedAmount = expectedIngredients.ingredients().getOrDefault(condition.getKey(), -1);
                 if (actualAmount == -1) {
@@ -57,6 +61,11 @@ public class ScoreConditions {
                 }
             }
             return true;
+        }
+
+        @Override
+        public int complexity() {
+            return conditions.size() + 1;
         }
     }
 }
