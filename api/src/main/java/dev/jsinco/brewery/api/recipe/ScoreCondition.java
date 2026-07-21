@@ -11,6 +11,8 @@ public interface ScoreCondition {
 
     boolean matches(@Nullable BrewingStep expected, BrewingStep actual);
 
+    int complexity();
+
     interface SingletonCondition extends ScoreCondition {
 
         AmountCondition amountCondition();
