@@ -1,6 +1,5 @@
 package dev.jsinco.brewery.bukkit.util.color;
 
-import dev.jsinco.brewery.api.util.Logger;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import org.jspecify.annotations.Nullable;
 import software.amazon.awssdk.http.HttpStatusCode;
@@ -30,8 +29,10 @@ public interface ResourcePackSource {
 
     ResourcePack readPack() throws IOException, InterruptedException;
 
+    String asString();
+
     record HttpResourcePackSource(String url, boolean sha256,
-                                         @Nullable UUID playerUuid) implements ResourcePackSource {
+                                  @Nullable UUID playerUuid) implements ResourcePackSource {
 
 
         @Override
@@ -65,6 +66,11 @@ public interface ResourcePackSource {
                 throw new IllegalStateException(e);
             }
         }
+
+        @Override
+        public String asString() {
+            return url;
+        }
     }
 
     record PathResourcePackSource(Path file) implements ResourcePackSource {
@@ -72,6 +78,11 @@ public interface ResourcePackSource {
         @Override
         public ResourcePack readPack() throws IOException, InterruptedException {
             return READER.readFromZipFile(file);
+        }
+
+        @Override
+        public String asString() {
+            return file.toString();
         }
     }
 
@@ -85,10 +96,15 @@ public interface ResourcePackSource {
                 return READER.readFromZipFile(file);
             }
         }
+
+        @Override
+        public String asString() {
+            return file.toString();
+        }
     }
 
     record InputStreamResourcePackSource(
-            InputStreamSupplier inputStreamSupplier) implements ResourcePackSource {
+            InputStreamSupplier inputStreamSupplier, String alias) implements ResourcePackSource {
 
         @Override
         public ResourcePack readPack() throws IOException, InterruptedException {
@@ -96,5 +112,11 @@ public interface ResourcePackSource {
                 return READER.readFromInputStream(inputStream);
             }
         }
+
+        @Override
+        public String asString() {
+            return alias;
+        }
+
     }
 }

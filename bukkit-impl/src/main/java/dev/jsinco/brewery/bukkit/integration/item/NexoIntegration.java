@@ -99,7 +99,7 @@ public class NexoIntegration implements ItemIntegration, Listener {
     public void onResourcePackLoaded(NexoPackUploadEvent packUploadEvent) {
         try {
             URL url = URI.create(packUploadEvent.getUrl()).toURL();
-            resourcePackColors.addSource(new ResourcePackSource.InputStreamResourcePackSource(url::openStream));
+            resourcePackColors.addSource(new ResourcePackSource.InputStreamResourcePackSource(url::openStream, packUploadEvent.getUrl()));
         } catch (MalformedURLException e) {
             Logger.logAndTrackErr(e);
         } finally {

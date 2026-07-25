@@ -18,7 +18,6 @@ import team.unnamed.creative.item.special.HeadSpecialRender;
 import team.unnamed.creative.model.ItemOverride;
 import team.unnamed.creative.model.Model;
 import team.unnamed.creative.model.ModelTexture;
-import team.unnamed.creative.serialize.minecraft.MinecraftResourcePackReader;
 import team.unnamed.creative.texture.Texture;
 
 import javax.imageio.ImageIO;
@@ -39,7 +38,7 @@ public class ResourcePackColors {
 
     private final Map<Key, Color> itemModelColors = new ConcurrentHashMap<>();
     private final Map<Key, Map<Float, Color>> customModelDataColors = new ConcurrentHashMap<>();
-    private List<ResourcePackSource> sources = new ArrayList<>();
+    private final List<ResourcePackSource> sources = new ArrayList<>();
 
     public void init() {
         List<ResourcePack> resourcePacks;
@@ -67,6 +66,7 @@ public class ResourcePackColors {
 
     private void readContainerContent(Collection<Item> containerContent, ResourceResolver resolver) {
         if (containerContent.isEmpty()) {
+            return;
         }
         for (Item item : containerContent) {
             ItemModel itemModel = item.model();
@@ -83,6 +83,7 @@ public class ResourcePackColors {
             }
             BufferedImage modelImage = readItemModel(item.model(), resolver);
             if (modelImage == null) {
+                Logger.logWarn("Could not read item model '%s', unsupported format".formatted(item.key().asMinimalString()));
                 continue;
             }
             itemModelColors.put(item.key(), ColorUtil.getDistinctColor(modelImage));
@@ -97,12 +98,13 @@ public class ResourcePackColors {
             }
             sources.add(new ResourcePackSource.HttpResourcePackSource(bukkitPack.getUrl(), false, null));
         }
-        MinecraftResourcePackReader reader = MinecraftResourcePackReader.builder()
-                .lenient(true)
-                .build();
         List<ResourcePack> output = new ArrayList<>();
         for (ResourcePackSource source : List.copyOf(sources)) {
-            output.add(source.readPack());
+            try {
+                output.add(source.readPack());
+            } catch (Exception e) {
+                Logger.logWarn("Could not read resource pack '%s', invalid format".formatted(source.asString()));
+            }
         }
         return output;
     }
@@ -153,9 +155,7 @@ public class ResourcePackColors {
                 }
                 BufferedImage image = readModel(resolver.resolveModel(override.model()), resolver);
                 if (image == null) {
-                    Model overrideModel = resolver.resolveModel(override.model());
-                    if (overrideModel != null) {
-                    }
+                    Logger.logWarn("Could not resolve model override '%s' for model '%s'".formatted(i, model.key().asMinimalString()));
                     continue;
                 }
                 customModelDataColors.computeIfAbsent(model.key(), ignored -> new HashMap<>())
@@ -183,6 +183,7 @@ public class ResourcePackColors {
                 .map(modelTexture -> readItemModel(modelTexture, resolver))
                 .toList();
         if (layers.isEmpty()) {
+            return null;
         }
         return mergeImages(layers);
     }
