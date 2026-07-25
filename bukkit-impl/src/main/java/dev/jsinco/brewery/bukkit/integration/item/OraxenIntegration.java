@@ -86,7 +86,7 @@ public class OraxenIntegration implements ItemIntegration, Listener {
     public void onPackGenerate(OraxenPackGeneratedEvent event) {
         event.getOutput()
                 .stream()
-                .map(virtualFile -> new ResourcePackSource.InputStreamResourcePackSource(virtualFile::getInputStream))
+                .map(virtualFile -> new ResourcePackSource.InputStreamResourcePackSource(virtualFile::getInputStream, virtualFile.getPath()))
                 .forEach(resourcePackColors::addSource);
         packGeneratedFuture.complete(null);
     }
