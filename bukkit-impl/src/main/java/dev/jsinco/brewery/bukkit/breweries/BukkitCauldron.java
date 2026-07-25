@@ -170,15 +170,14 @@ public class BukkitCauldron implements Cauldron {
     }
 
     private Color computeParticleColor(Color baseColor, Color resultColor, Recipe<ItemStack> recipe) {
-        int lastIdx = brew.getCompletedSteps().size() - 1;
+        List<BrewingStep> matchingSteps = matcherResult.matchingSteps();
+        int lastIdx = matchingSteps.size() - 1;
         if (lastIdx >= recipe.getSteps().size()) {
             return baseColor;
         }
-        if (brew.lastStep() instanceof BrewingStep.Cook cook) {
-            BrewingStep.Cook expectedCook = (BrewingStep.Cook) recipe.getSteps().get(lastIdx);
+        if (brew.lastStep() instanceof BrewingStep.Cook cook && recipe.getSteps().get(lastIdx) instanceof BrewingStep.Cook expectedCook) {
             return ColorUtil.getNextColor(baseColor, resultColor, cook.time().moment(), expectedCook.time().moment());
-        } else if (brew.lastStep() instanceof BrewingStep.Mix mix) {
-            BrewingStep.Mix expectedMix = (BrewingStep.Mix) recipe.getSteps().get(lastIdx);
+        } else if (brew.lastStep() instanceof BrewingStep.Mix mix && recipe.getSteps().get(lastIdx) instanceof BrewingStep.Mix expectedMix) {
             return ColorUtil.getNextColor(baseColor, resultColor, mix.time().moment(), expectedMix.time().moment());
         }
         return baseColor;
@@ -309,7 +308,7 @@ public class BukkitCauldron implements Cauldron {
         List<BrewingStep> existing = new ArrayList<>(this.brew.getCompletedSteps());
         Optional<Brew> merged;
         if (existing.isEmpty()) {
-            merged = Optional.of(addedBrew);
+            merged = Optional.of(addedBrew.withStep(newStep()));
         } else {
             BrewingStep thisStep = existing.removeLast();
             List<BrewingStep> added = new ArrayList<>(addedBrew.getCompletedSteps());
