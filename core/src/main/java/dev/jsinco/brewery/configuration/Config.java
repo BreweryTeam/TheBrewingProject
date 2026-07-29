@@ -1,6 +1,7 @@
 package dev.jsinco.brewery.configuration;
 
 import dev.jsinco.brewery.api.config.Configuration;
+import dev.jsinco.brewery.api.util.LoggingModule;
 import dev.jsinco.brewery.configuration.structure.BarrelSection;
 import dev.jsinco.brewery.configuration.structure.CauldronSection;
 import eu.okaeri.configs.ConfigManager;
@@ -18,6 +19,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 
 public class Config extends OkaeriConfig implements Configuration {
 
@@ -115,6 +117,11 @@ public class Config extends OkaeriConfig implements Configuration {
             "Matches against an integration type and integration name.",
             "for example 'item.nexo' for exact match, and just 'nexo' to match with all nexo integrations"})
     private List<String> integrationBlacklist = List.of();
+
+    @CustomKey("verbose-logging")
+    @Comment({"What modules should show verbose logs to the console,",
+            "can be a list with the allowed [resource_pack_parsing]"})
+    private Set<LoggingModule> verboseLogging = Set.of();
 
     @Exclude
     private static Config instance;
@@ -233,5 +240,9 @@ public class Config extends OkaeriConfig implements Configuration {
 
     public List<String> integrationBlacklist() {
         return this.integrationBlacklist;
+    }
+
+    public Set<LoggingModule> verboseLogging() {
+        return verboseLogging;
     }
 }

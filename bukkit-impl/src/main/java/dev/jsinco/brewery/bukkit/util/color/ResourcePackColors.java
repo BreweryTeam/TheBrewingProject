@@ -1,6 +1,7 @@
 package dev.jsinco.brewery.bukkit.util.color;
 
 import dev.jsinco.brewery.api.util.Logger;
+import dev.jsinco.brewery.api.util.LoggingModule;
 import net.kyori.adventure.key.Key;
 import org.bukkit.Bukkit;
 import org.jetbrains.annotations.NotNull;
@@ -8,6 +9,7 @@ import org.jspecify.annotations.Nullable;
 import team.unnamed.creative.ResourcePack;
 import team.unnamed.creative.item.CompositeItemModel;
 import team.unnamed.creative.item.ConditionItemModel;
+import team.unnamed.creative.item.EmptyItemModel;
 import team.unnamed.creative.item.Item;
 import team.unnamed.creative.item.ItemModel;
 import team.unnamed.creative.item.RangeDispatchItemModel;
@@ -32,6 +34,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class ResourcePackColors {
@@ -83,7 +86,7 @@ public class ResourcePackColors {
             }
             BufferedImage modelImage = readItemModel(item.model(), resolver);
             if (modelImage == null) {
-                Logger.logWarn("Could not read item model '%s', unsupported format".formatted(item.key().asMinimalString()));
+                Logger.logDev("Could not read item model '%s'".formatted(item.key().asMinimalString()), LoggingModule.RESOURCE_PACK_PARSING);
                 continue;
             }
             itemModelColors.put(item.key(), ColorUtil.getDistinctColor(modelImage));
@@ -103,7 +106,7 @@ public class ResourcePackColors {
             try {
                 output.add(source.readPack());
             } catch (Exception e) {
-                Logger.logWarn("Could not read resource pack '%s', invalid format".formatted(source.asString()));
+                Logger.logDev("Could not read resource pack '%s', invalid format".formatted(source.asString()), LoggingModule.RESOURCE_PACK_PARSING);
             }
         }
         return output;
@@ -121,7 +124,12 @@ public class ResourcePackColors {
             case SelectItemModel selectItemModel -> readItemModel(
                     selectItemModel.fallback(), resolver
             );
-            case null, default -> null;
+            case EmptyItemModel ignored -> new BufferedImage(1, 1, BufferedImage.TYPE_INT_RGB);
+            case null -> null;
+            default -> {
+                Logger.logDev("Unsupported item model format '%s'".formatted(itemModel.getClass().getSimpleName()), LoggingModule.RESOURCE_PACK_PARSING);
+                yield null;
+            }
         };
     }
 
@@ -155,7 +163,7 @@ public class ResourcePackColors {
                 }
                 BufferedImage image = readModel(resolver.resolveModel(override.model()), resolver);
                 if (image == null) {
-                    Logger.logWarn("Could not resolve model override '%s' for model '%s'".formatted(i, model.key().asMinimalString()));
+                    Logger.logDev("Could not resolve model override '%s' for model '%s'".formatted(i, model.key().asMinimalString()), LoggingModule.RESOURCE_PACK_PARSING);
                     continue;
                 }
                 customModelDataColors.computeIfAbsent(model.key(), ignored -> new HashMap<>())
@@ -181,6 +189,7 @@ public class ResourcePackColors {
         List<BufferedImage> layers = compositeItemModel.models()
                 .stream()
                 .map(modelTexture -> readItemModel(modelTexture, resolver))
+                .filter(Objects::nonNull)
                 .toList();
         if (layers.isEmpty()) {
             return null;
@@ -249,6 +258,4 @@ public class ResourcePackColors {
         return customModelDataColors.getOrDefault(key, Map.of())
                 .get((float) customModelData);
     }
-
-
 }
