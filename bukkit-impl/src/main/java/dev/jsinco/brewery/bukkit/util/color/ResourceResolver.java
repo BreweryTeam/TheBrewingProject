@@ -1,5 +1,7 @@
 package dev.jsinco.brewery.bukkit.util.color;
 
+import dev.jsinco.brewery.api.util.Logger;
+import dev.jsinco.brewery.api.util.LoggingModule;
 import net.kyori.adventure.key.Key;
 import org.jspecify.annotations.Nullable;
 import team.unnamed.creative.ResourcePack;
@@ -17,7 +19,11 @@ record ResourceResolver(ResourcePack resourcePack) {
                 return model;
             }
         }
-        return resourcePack.model(key);
+        Model output = resourcePack.model(key);
+        if (output == null) {
+            Logger.logDev("Could not find model '%s'".formatted(key.asMinimalString()), LoggingModule.RESOURCE_PACK_PARSING);
+        }
+        return output;
     }
 
     public @Nullable Texture resolveTexture(Key key) {
@@ -30,6 +36,10 @@ record ResourceResolver(ResourcePack resourcePack) {
                 return texture;
             }
         }
-        return resourcePack.texture(key);
+        Texture output = resourcePack.texture(key);
+        if (output == null) {
+            Logger.logDev("Could not find texture '%s'".formatted(key.asMinimalString()), LoggingModule.RESOURCE_PACK_PARSING);
+        }
+        return output;
     }
 }
