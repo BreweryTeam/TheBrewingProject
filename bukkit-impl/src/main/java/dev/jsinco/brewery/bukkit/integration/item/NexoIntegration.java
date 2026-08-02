@@ -10,6 +10,7 @@ import dev.jsinco.brewery.bukkit.api.integration.ItemIntegration;
 import dev.jsinco.brewery.bukkit.util.color.ResourcePackColors;
 import dev.jsinco.brewery.bukkit.util.color.ResourcePackSource;
 import dev.jsinco.brewery.util.ClassUtil;
+import io.papermc.paper.datacomponent.item.CustomModelData;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
@@ -115,11 +116,14 @@ public class NexoIntegration implements ItemIntegration, Listener {
         }
         Key model = builder.getItemModel();
         if (model == null) {
-            Integer customModelData = builder.getCustomModelData();
+            CustomModelData customModelData = builder.getCustomModelData();
             if (customModelData == null) {
                 return null;
             }
-            return resourcePackColors.customModelDataColor(builder.build().getType().key(), customModelData);
+            if (customModelData.floats().isEmpty()) {
+                return null;
+            }
+            return resourcePackColors.customModelDataColor(builder.build().getType().key(), customModelData.floats().getFirst().intValue());
         }
         return resourcePackColors.modelColor(model);
     }
