@@ -27,6 +27,8 @@ import dev.jsinco.brewery.bukkit.util.LocationUtil;
 import dev.jsinco.brewery.bukkit.util.SoundPlayer;
 import dev.jsinco.brewery.bukkit.util.VectorUtil;
 import dev.jsinco.brewery.configuration.Config;
+import dev.jsinco.brewery.configuration.features.FeatureFlag;
+import dev.jsinco.brewery.configuration.features.FeaturesConfig;
 import dev.jsinco.brewery.database.PersistenceException;
 import dev.jsinco.brewery.util.MessageUtil;
 import net.kyori.adventure.sound.Sound;
@@ -96,6 +98,9 @@ public class BukkitDistillery implements Distillery<BukkitDistillery, ItemStack,
 
     @Override
     public boolean open(@NonNull BreweryLocation breweryLocation, @NonNull UUID playerUuid) {
+        if (!FeaturesConfig.test(FeatureFlag.DISTILLERIES, structure.getWorldOrigin().getWorld().getName())) {
+            return false;
+        }
         Optional<Holder.Player> playerHolder = HolderProviderHolder.instance().player(playerUuid);
         CancelState cancelState = playerHolder
                 .map(player -> open(breweryLocation, player))
