@@ -70,6 +70,7 @@ import dev.jsinco.brewery.configuration.DrunkenModifierSection;
 import dev.jsinco.brewery.configuration.EventSection;
 import dev.jsinco.brewery.configuration.IngredientsSection;
 import dev.jsinco.brewery.configuration.OkaeriSerdesBuilder;
+import dev.jsinco.brewery.configuration.features.FeaturesConfig;
 import dev.jsinco.brewery.configuration.locale.BreweryTranslator;
 import dev.jsinco.brewery.configuration.serializers.BlockReplacementSerializer;
 import dev.jsinco.brewery.configuration.serializers.ComponentSerializer;
@@ -80,6 +81,7 @@ import dev.jsinco.brewery.configuration.serializers.DrunkenModifierSerializer;
 import dev.jsinco.brewery.configuration.serializers.EventProbabilitySerializer;
 import dev.jsinco.brewery.configuration.serializers.EventRegistrySerializer;
 import dev.jsinco.brewery.configuration.serializers.EventStepSerializer;
+import dev.jsinco.brewery.configuration.serializers.FeaturePredicateSerializer;
 import dev.jsinco.brewery.configuration.serializers.IntervalSerializer;
 import dev.jsinco.brewery.configuration.serializers.LocaleSerializer;
 import dev.jsinco.brewery.configuration.serializers.MinutesDurationSerializer;
@@ -192,6 +194,9 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
         this.resourcePackColors = new ResourcePackColors();
         EventSection.migrateEvents(getDataFolder());
         Config.load(this.getDataFolder(), serializers());
+        FeaturesConfig.load(this.getDataFolder(), new OkaeriSerdesBuilder()
+                .add(new FeaturePredicateSerializer())
+                .build());
         integrationManager.registerIntegrations(resourcePackColors);
         CompletableFuture.allOf(integrationManager.retrieve(IntegrationTypes.ITEM)
                 .stream()
@@ -242,6 +247,7 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
         saveResources();
         closeDatabase();
         Config.config().load(true);
+        FeaturesConfig.reload();
         DrunkenModifierSection.modifiers().load(true);
         EventSection.events().load(true);
         DrunkenModifierSection.postValidate();
