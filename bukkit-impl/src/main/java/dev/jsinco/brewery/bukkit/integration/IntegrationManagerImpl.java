@@ -64,9 +64,13 @@ public class IntegrationManagerImpl implements IntegrationManager {
                 .forEach(Integration::onLoad);
     }
 
-    public void enableIntegrations() {
+    public void enableIntegrations(boolean serverAlreadyRunning) {
         integrationRegistry.getAllIntegrations()
-                .forEach(Integration::onEnable);
+                .forEach(integration -> {
+                    integration.onEnable();
+                    if (serverAlreadyRunning)
+                        integration.onHotReload();
+                });
     }
 
     @Override
