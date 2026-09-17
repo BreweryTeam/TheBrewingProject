@@ -15,7 +15,10 @@ import java.io.File;
 import java.util.Map;
 import java.util.Set;
 
-@Header("Specify if you want to disable or enable features globally or in a world")
+@Header({"Specify if you want to disable or enable features globally or in a world",
+        "Global only features: [resource_pack_colors, client_side_translations, hopper_listening]",
+        "Locally applicable: [automation, brew_making, barrels, cauldrons, distilleries, dispose_brew, sealing, colored_cauldrons, brew_drinking, brew_effects, modifier_change]"
+})
 public class FeaturesConfig extends OkaeriConfig {
     @Comment("Whitelist or blacklist features")
     @CustomKey("global")

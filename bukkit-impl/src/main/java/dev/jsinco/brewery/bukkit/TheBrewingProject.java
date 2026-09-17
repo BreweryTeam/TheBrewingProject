@@ -42,6 +42,7 @@ import dev.jsinco.brewery.bukkit.integration.IntegrationManagerImpl;
 import dev.jsinco.brewery.bukkit.listener.BlockEventListener;
 import dev.jsinco.brewery.bukkit.listener.BrewMigrationListener;
 import dev.jsinco.brewery.bukkit.listener.EntityEventListener;
+import dev.jsinco.brewery.bukkit.listener.HopperEventListener;
 import dev.jsinco.brewery.bukkit.listener.InventoryEventListener;
 import dev.jsinco.brewery.bukkit.listener.LegacyPlayerJoinListener;
 import dev.jsinco.brewery.bukkit.listener.PlayerEventListener;
@@ -418,6 +419,9 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
             pluginManager.registerEvents(new PlayerJoinListener(), this);
         } else {
             pluginManager.registerEvents(new LegacyPlayerJoinListener(), this);
+        }
+        if (FeaturesConfig.test(FeatureFlag.HOPPER_LISTENING, null)) {
+            pluginManager.registerEvents(new HopperEventListener(placedStructureRegistry, breweryRegistry), this);
         }
         pluginManager.registerEvents(new BreweryXMigrationListener(), this);
         Bukkit.getGlobalRegionScheduler().runAtFixedRate(this, this::updateStructures, 1, 1);

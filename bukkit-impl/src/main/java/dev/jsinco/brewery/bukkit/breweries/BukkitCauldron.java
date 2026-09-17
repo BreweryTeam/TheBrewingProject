@@ -39,6 +39,8 @@ import dev.jsinco.brewery.bukkit.util.color.ColorUtil;
 import dev.jsinco.brewery.configuration.AnimationDisplay;
 import dev.jsinco.brewery.configuration.Config;
 import dev.jsinco.brewery.configuration.ParticleDefinition;
+import dev.jsinco.brewery.configuration.features.FeatureFlag;
+import dev.jsinco.brewery.configuration.features.FeaturesConfig;
 import dev.jsinco.brewery.sound.SoundDefinition;
 import dev.jsinco.brewery.util.BrewUtil;
 import dev.jsinco.brewery.util.PresetColorsUtil;
@@ -124,7 +126,7 @@ public class BukkitCauldron implements Cauldron {
             }
             this.hot = isHeatSource(getBlock().getRelative(BlockFace.DOWN));
             recalculateBrewTime();
-            if (Config.config().cauldrons().coloredWater() && (waterColorer == null || waterColorer.isDead())) {
+            if (FeaturesConfig.test(FeatureFlag.COLORED_CAULDRONS, bukkitLocation.getWorld().getName()) && (waterColorer == null || waterColorer.isDead())) {
                 waterColorer = getBlock().getWorld().spawn(bukkitLocation.clone().add(0.5, 0, 0.5), TextDisplay.class, textDisplay -> {
                     setWaterText(textDisplay);
                     textDisplay.setTransformation(compileTransformation(bukkitLocation.getBlock().getBlockData()));
