@@ -54,10 +54,6 @@ public class CauldronSection extends OkaeriConfig implements Configuration.Cauld
     @CustomKey("failed-particle-color")
     private Color failedParticleColor = new Color(NamedTextColor.GRAY.value());
 
-    @Comment("Whether to color the water in cauldrons using a text display")
-    @CustomKey("colored-water")
-    private boolean coloredWater = true;
-
     @Comment("The water color is a text display, this defines the opacity of the text display (0 - 255)")
     @CustomKey("water-color-opacity")
     private int waterColorOpacity = (128 & 0xFF);
@@ -144,10 +140,6 @@ public class CauldronSection extends OkaeriConfig implements Configuration.Cauld
 
     public Color failedParticleColor() {
         return this.failedParticleColor;
-    }
-
-    public boolean coloredWater() {
-        return this.coloredWater;
     }
 
     public int waterColorOpacity() {

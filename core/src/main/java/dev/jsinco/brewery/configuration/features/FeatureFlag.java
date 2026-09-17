@@ -5,7 +5,12 @@ import java.util.Collections;
 import java.util.List;
 
 public enum FeatureFlag {
+    // GLOBAL
     RESOURCE_PACK_COLORS,
+    CLIENT_SIDE_TRANSLATIONS,
+    HOPPER_LISTENING,
+    // LOCAL
+    AUTOMATION,
     BREW_MAKING,
     BARRELS(BREW_MAKING),
     CAULDRONS(BREW_MAKING),

@@ -31,10 +31,6 @@ public class Config extends OkaeriConfig implements Configuration {
     @CustomKey("language")
     private Locale language = Locale.US;
 
-    @Comment("Allow hoppers to interact with distilleries and barrels")
-    @CustomKey("automation-enabled")
-    private boolean automation = true;
-
     @Comment("Whether an ingredient can be added into a brew regardless if it's not in any of the recipes")
     @CustomKey("allow-unregistered-ingredients")
     private boolean allowUnregisteredIngredients = false;
@@ -42,10 +38,6 @@ public class Config extends OkaeriConfig implements Configuration {
     @Comment("Whether items should be consumed when in creative mode when using it on tbp structures")
     @CustomKey("consume-items-in-creative")
     private boolean consumeItemsInCreative = false;
-
-    @Comment("Whether everything non-item related should be translated to the players locale")
-    @CustomKey("client-side-translations")
-    private boolean clientSideTranslations = false;
 
     @Comment({"Some clients and tools allow players to see the NBT data of an item, which, for our potions, includes",
             "all the brewing steps it went through. Encrypt this data to prevent it from being abused as a recipe?"})
@@ -162,20 +154,12 @@ public class Config extends OkaeriConfig implements Configuration {
         return this.language;
     }
 
-    public boolean automation() {
-        return this.automation;
-    }
-
     public boolean allowUnregisteredIngredients() {
         return this.allowUnregisteredIngredients;
     }
 
     public boolean consumeItemsInCreative() {
         return this.consumeItemsInCreative;
-    }
-
-    public boolean clientSideTranslations() {
-        return this.clientSideTranslations;
     }
 
     public boolean encryptSensitiveData() {

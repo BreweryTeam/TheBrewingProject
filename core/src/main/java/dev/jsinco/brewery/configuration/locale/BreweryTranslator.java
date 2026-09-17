@@ -3,6 +3,8 @@ package dev.jsinco.brewery.configuration.locale;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import dev.jsinco.brewery.configuration.Config;
+import dev.jsinco.brewery.configuration.features.FeatureFlag;
+import dev.jsinco.brewery.configuration.features.FeaturesConfig;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.minimessage.translation.MiniMessageTranslator;
 import org.jspecify.annotations.NonNull;
@@ -145,7 +147,7 @@ public class BreweryTranslator extends MiniMessageTranslator {
     @Override
     public @Nullable String getMiniMessageString(@NonNull String key, @NonNull Locale locale) {
         Properties translations = null;
-        if (Config.config().clientSideTranslations()) {
+        if (FeaturesConfig.test(FeatureFlag.CLIENT_SIDE_TRANSLATIONS, null)) {
             translations = this.translations.get(locale);
         }
         if (translations == null) {
