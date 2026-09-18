@@ -7,12 +7,14 @@ import dev.jsinco.brewery.api.ingredient.BaseIngredient;
 import dev.jsinco.brewery.api.ingredient.Ingredient;
 import dev.jsinco.brewery.api.recipe.DefaultRecipe;
 import dev.jsinco.brewery.api.recipe.Recipe;
+import dev.jsinco.brewery.api.recipe.RecipeGroup;
 import dev.jsinco.brewery.api.recipe.RecipeRegistry;
 import dev.jsinco.brewery.api.util.Logger;
 import dev.jsinco.brewery.api.util.Pair;
 import dev.jsinco.brewery.util.BrewUtil;
 import org.jspecify.annotations.NonNull;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -31,7 +33,7 @@ public class RecipeRegistryImpl<I> implements RecipeRegistry<I> {
     private final Map<String, Recipe<I>> recipes = Collections.synchronizedMap(new LinkedHashMap<>());
     private final Map<String, DefaultRecipe<I>> defaultRecipes = Collections.synchronizedMap(new LinkedHashMap<>());
     private final Map<BaseIngredient, Set<Recipe<I>>> baseIngredientToRecipes = Collections.synchronizedMap(new HashMap<>());
-
+    private final Map<String, RecipeGroup<I>> recipeGroups = Collections.synchronizedMap(new LinkedHashMap<>());
 
     public void registerRecipes(@NonNull Map<String, Recipe<I>> recipes) {
         this.clear();
@@ -152,6 +154,26 @@ public class RecipeRegistryImpl<I> implements RecipeRegistry<I> {
     @Override
     public Set<BaseIngredient> registeredIngredients() {
         return baseIngredientToRecipes.keySet();
+    }
+
+    @Override
+    public List<String> registerGroup(RecipeGroup<I> recipeGroup) {
+        if (recipeGroups.containsKey(recipeGroup.id())) {
+            return List.of("Unable to register recipe group with id '%s': id clash"
+                    .formatted(recipeGroup.id())
+            );
+        }
+        List<String> errorMessages = new ArrayList<>();
+        for (Recipe<I> recipe : recipeGroup.recipes()) {
+            if (recipes.containsKey(recipe.getRecipeName())) {
+                errorMessages.add("Unable to register recipe with id '%s': id clash"
+                        .formatted(recipe.getRecipeName())
+                );
+                continue;
+            }
+            registerRecipe(recipe);
+        }
+        return errorMessages;
     }
 
     public void clear() {
