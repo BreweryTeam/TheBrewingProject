@@ -1,0 +1,51 @@
+recipes:
+  pumpkin_ale:
+    alcohol: 5
+    brew-difficulty: 5
+    effects:
+      - resistance/1/100-220
+    potion-attributes:
+      color: ff7518
+      lore:
+        - ++Rich with pumpkin and spice
+        - +++Perfectly spiced and deeply
+        - +++flavorful
+      name: Pumpkin Ale/Pumpkin Ale/Exquisite Pumpkin Ale
+    steps:
+      - type: cook
+        cauldron-type: water
+        ingredients:
+          - pumpkin/3
+          - wheat/2
+        cook-time: 10
+      - type: distill
+        runs: 2
+      - type: age
+        age-years: 2
+        barrel-type: any
+  carrot_ale:
+    alcohol: 6
+    brew-difficulty: 6
+    effects:
+      - ++night_vision/1/100-220
+      - +++night_vision/1/300-420
+    potion-attributes:
+      color: ffa500
+      lore:
+        - +With hints of carrot
+        - ++Carrots are good for you...
+        - ++Always
+        - +++From the land of orange
+      name: Orange Ale/Carrot Ale/Dutch Carrot Ale
+    steps:
+      - type: cook
+        cauldron-type: water
+        ingredients:
+          - carrot/5
+          - wheat/8
+        cook-time: 10
+      - type: distill
+        runs: 2
+      - type: age
+        age-years: 2
+        barrel-type: any

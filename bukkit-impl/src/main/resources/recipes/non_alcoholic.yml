@@ -1,0 +1,92 @@
+enabled: false
+recipes:
+  apple_juice:
+    brew-difficulty: 1
+    potion-attributes.color: af2a2d
+    potion-attributes.name: Apple Juice
+    steps:
+      - type: cook
+        cook-time: 6
+        cauldron-type: water
+        ingredients:
+          - apple/9
+          - sugar/6
+  hangover_detox:
+    modifiers:
+      hangover: -20
+      toxins: -10
+    brew-difficulty: 8
+    potion-attributes.color: 32CD32
+    potion-attributes.name: Hangover detox
+    steps:
+      - type: mix
+        mix-time: 3
+        ingredients:
+          - apple/1
+          - chorus_fruit/1
+          - melon/1
+          - cooked_rabbit/1
+          - golden_carrot/1
+          - cake/1
+  potato_soup:
+    brew-difficulty: 1
+    effects:
+      - instant_health/0-1
+    potion-attributes.color: ORANGE
+    potion-attributes.name: Potato soup
+    steps:
+      - cauldron-type: water
+        cook-time: 3
+        ingredients:
+          - Potato/5
+          - Short_Grass/3
+        type: cook
+  iced_coffee:
+    modifiers:
+      alcohol: -8
+      toxins: -4/-5/-7
+    brew-difficulty: 4
+    effects:
+      - REGENERATION/30
+      - SPEED/10
+    potion-attributes.color: BLACK
+    potion-attributes.name: Watery Coffee/Iced Coffee/Strong Iced Coffee
+    steps:
+      - type: mix
+        mix-time: 1
+        ingredients:
+          - cookie/8
+          - snowball/4
+          - milk_bucket/1
+  hot_choc:
+    brew-difficulty: 2
+    effects:
+      - haste/40
+    potion-attributes.color: DARK_RED
+    potion-attributes.name: Hot Chocolate
+    steps:
+      - cauldron-type: water
+        cook-time: 2
+        ingredients:
+          - cocoa_beans/12
+          - milk_bucket/2
+          - sugar/6
+        type: cook
+  coffee:
+    modifiers:
+      alcohol: -6
+      toxins: -2/-3/-4
+    brew-difficulty: 3
+    effects:
+      - regeneration/1/2-5
+      - speed/1/30-140
+    potion-attributes.color: BLACK
+    potion-attributes.lore:
+      - +<dark_gray>Probably a week old
+    potion-attributes.name: Stale Coffee/Coffee/Strong Coffee
+    steps:
+      - cauldron-type: water
+        cook-time: 2
+        ingredients:
+          - cocoa_beans/12
+        type: cook

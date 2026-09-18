@@ -1,0 +1,73 @@
+enabled: false
+recipes:
+  mead:
+    alcohol: 5
+    brew-difficulty: 5
+    effects:
+      - +++absorption/0-1/300-420
+    potion-attributes:
+      color: ffaa00
+      lore:
+        - +++A divine mead
+      name: Mead/Mead/Viking Mead
+    steps:
+      - type: cook
+        cauldron-type: water
+        ingredients:
+          - honey_bottle/4
+        cook-time: 7
+      - type: distill
+        runs: 2
+      - type: age
+        age-years: 1
+        barrel-type: birch
+  mushroom_mead:
+    alcohol: 5
+    brew-difficulty: 8
+    effects:
+      - saturation/1/100–200
+    potion-attributes:
+      color: 8b4513/8b4513/8b4513
+      lore:
+        - ++Hearty!
+        - +++Deeply flavorful and perfectly aged
+      name: Funky Mead/Hearty Mushroom Mead/Shroom Mead
+    steps:
+      - type: cook
+        cauldron-type: water
+        ingredients:
+          - red_mushroom/3
+          - brown_mushroom/3
+          - honey_bottle/2
+        cook-time: 7
+      - type: distill
+        runs: 2
+      - type: age
+        age-years: 1
+        barrel-type: dark_oak
+  potato_mead:
+    alcohol: 5/5/5
+    brew-difficulty: 6
+    effects:
+      - saturation/1/100–200
+    potion-attributes:
+      color: ffec8b
+      lore:
+        - +We throwin potatoes at everything,
+        - +Are we?
+        - ++Sometimes potatoes fit the bill?
+        - +++Crisp taste
+      name: Potato Mead/Potato Mead/Exquisite Potato Mead
+      append-brew-info-lore: true/true/true
+    steps:
+      - type: cook
+        cauldron-type: water
+        ingredients:
+          - potato/4
+          - honey_bottle/2
+        cook-time: 7
+      - type: distill
+        runs: 2
+      - type: age
+        age-years: 1
+        barrel-type: any
