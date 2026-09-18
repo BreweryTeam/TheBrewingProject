@@ -1,0 +1,24 @@
+enabled: false
+recipes:
+  wine:
+    alcohol: 8
+    brew-difficulty: 7
+    potion-attributes:
+      color: c70039
+      lore:
+        - +<dark_gray>Harsh
+        - +<dark_gray>Corked
+        - ++<dark_gray>Mellow
+        - +++<dark_gray>Full-Bodied
+      name: Red Wine
+    steps:
+      - type: cook
+        cauldron-type: water
+        ingredients:
+          - sweet_berries/5
+        cook-time: 7
+      - type: distill
+        runs: 1
+      - type: age
+        age-years: 4
+        barrel-type: spruce
