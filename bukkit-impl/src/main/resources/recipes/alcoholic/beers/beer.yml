@@ -1,0 +1,87 @@
+enabled: true
+recipes:
+  beetroot_beer:
+    alcohol: 7
+    brew-difficulty: 6
+    effects:
+      - saturation/1/300-420
+    potion-attributes:
+      color: 8b0000
+      lore:
+        - +With a hint of beetroot
+        - ++Rich with earthy undertones
+        - +++Deeply flavorful and perfectly
+        - +++aged
+      name: Weak Beetroot Beer/Beetroot Beer/Exquisite Beetroot Beer
+    steps:
+      - type: cook
+        cauldron-type: water
+        ingredients:
+          - beetroot/4
+          - wheat/5
+        cook-time: 10
+      - type: distill
+        runs: 2
+      - type: age
+        age-years: 2
+        barrel-type: dark_oak
+  pufferfish_pilsner:
+    alcohol: 7
+    brew-difficulty: 10
+    effects:
+      - conduit_power/1/300-420
+    potion-attributes:
+      color: ffd700/ffd700/ffd700
+      lore:
+        - +With a hint of pufferfish
+        - ++Rich with oceanic undertones
+        - +++Perfectly aged and intensely flavorful
+      name: Weak Puffer Pilsner/Puffer Pilsner/Puffer Pilsner
+    steps:
+      - type: cook
+        cauldron-type: water
+        ingredients:
+          - pufferfish/3
+          - wheat/6
+        cook-time: 15
+      - type: distill
+        runs: 3
+      - type: age
+        age-years: 2
+        barrel-type: mangrove
+  beer:
+    modifiers:
+      alcohol: 6
+      toxins: 3/2/1
+    brew-difficulty: 1
+    potion-attributes.color: ffd333
+    potion-attributes.lore:
+      - +++<dark_gray>Crisp taste
+    potion-attributes.name: Skunky Beer/Beer/Fine Beer
+    steps:
+      - cauldron-type: water
+        cook-time: 8
+        ingredients:
+          - Wheat/6
+        type: cook
+      - age-years: 3
+        barrel-type: any
+        type: age
+  wheatbeer:
+    modifiers:
+      alcohol: 5
+      toxins: 3/2/1
+    brew-difficulty: 1
+    potion-attributes.color: ffb84d
+    potion-attributes.lore:
+      - +++<dark_gray>Refreshing
+    potion-attributes.name: Skunky Wheatbeer/Wheatbeer/Fine Wheatbeer
+    steps:
+      - cauldron-type: water
+        cook-time: 8
+        ingredients:
+          - Wheat/3
+        type: cook
+      - age-years: 2
+        barrel-type: birch
+        type: age

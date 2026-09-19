@@ -1,0 +1,65 @@
+enabled: true
+recipes:
+  vodka:
+    alcohol: 17/20/23
+    brew-difficulty: 7
+    potion-attributes:
+      color: f5f5dc
+      lore:
+        - +Made by someone that already
+        - +had <red>too much vodka</red>
+      name: Lousy Vodka/Vodka/Russian Vodka
+    steps:
+      - type: cook
+        cauldron-type: water
+        ingredients:
+          - potato/10
+        cook-time: 15
+      - type: distill
+        runs: 3
+  golden_vodka:
+    modifiers:
+      alcohol: 20
+      toxins: 15/5/3
+    brew-difficulty: 6
+    effects:
+      - WEAKNESS/28
+      - POISON/4
+    potion-attributes.color: ORANGE
+    potion-attributes.name: Rancid Vodka/<gold>Golden Vodka/<gold>Shimmering Golden
+      Vodka
+    potion-attributes.lore:
+      - +With bits of gold in it
+    steps:
+      - cauldron-type: water
+        cook-time: 18
+        ingredients:
+          - Potato/10
+          - Gold_Nugget/2
+        type: cook
+      - runs: 3
+        type: distill
+  shroom_vodka:
+    modifiers:
+      alcohol: 18
+      toxins:
+    brew-difficulty: 7
+    effects:
+      - +++night_vision/50-80
+      - blindness/2-12
+      - slowness/3-10
+      - +++glowing/50-80
+    potion-attributes.color: ff9999
+    potion-attributes.lore:
+      - +++<green>Glows in the dark
+    potion-attributes.name: Mushroom Vodka/Mushroom Vodka/Glowing Mushroom Vodka
+    steps:
+      - cauldron-type: water
+        cook-time: 18
+        ingredients:
+          - Potato/10
+          - Red_Mushroom/3
+          - Brown_Mushroom/3
+        type: cook
+      - runs: 5
+        type: distill

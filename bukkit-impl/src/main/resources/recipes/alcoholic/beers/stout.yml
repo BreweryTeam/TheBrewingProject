@@ -1,0 +1,74 @@
+enabled: true
+recipes:
+  nether_wart_stout:
+    alcohol: 6
+    brew-difficulty: 6
+    effects:
+      - fire_resistance/1/100-420
+    potion-attributes:
+      color: 8b0000
+      lore:
+        - +++Perfectly balanced and deeply flavorful
+      name: Basic Nether Wart Stout/Nether Wart Stout/Exquisite Nether Wart Stout
+    steps:
+      - type: cook
+        cauldron-type: water
+        ingredients:
+          - nether_wart/5
+          - wheat/3
+        cook-time: 20
+      - type: distill
+        runs: 4
+      - type: age
+        age-years: 1
+        barrel-type: crimson
+  potato_stout:
+    alcohol: 6
+    brew-difficulty: 7
+    effects:
+      - strength/0-1/300-420
+    potion-attributes:
+      color: 8b4513
+      lore:
+        - +With few bubbles in it
+        - ++Well-rounded with earthy flavors
+        - +++The tater is in there, and
+        - +++somehow, it just works
+      name: De-fizzed Tater Stout/Tater Stout/Exquisite Tater Stout
+    steps:
+      - type: cook
+        cauldron-type: water
+        ingredients:
+          - potato/5
+          - wheat/6
+        cook-time: 16
+      - type: distill
+        runs: 2
+      - type: age
+        age-years: 1
+        barrel-type: any
+  rotten_stout:
+    alcohol: 6
+    brew-difficulty: 6
+    effects:
+      - hunger/1-2/300-420
+      - +++haste/0-1/300-420
+    potion-attributes:
+      color: 2f4f4f
+      lore:
+        - +Maybe zombies like this?
+        - ++Drinkable even though its content
+        - +++An acquired taste?
+      name: Skunky Rotten Stout/Rotten Stout/Rotten Stout
+    steps:
+      - type: cook
+        cauldron-type: water
+        ingredients:
+          - rotten_flesh/4
+          - wheat/3
+        cook-time: 15
+      - type: distill
+        runs: 3
+      - type: age
+        age-years: 2
+        barrel-type: dark_oak

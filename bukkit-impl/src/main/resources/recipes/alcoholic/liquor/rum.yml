@@ -1,0 +1,82 @@
+enabled: true
+recipes:
+  cocoa_rum:
+    alcohol: 18/20/23
+    brew-difficulty: 7
+    effects:
+      - strength/0-1/300-420
+      - saturation/1/300-420
+    potion-attributes:
+      color: 3b170b
+      lore:
+        - +Cloudy rum with chocolate hints
+        - +++Perfectly balanced with
+        - +++hints of bitterness
+      name: Cloudy Cocoa Rum/Cocoa Rum/Exquisite Cocoa Rum
+    steps:
+      - type: cook
+        cauldron-type: water
+        ingredients:
+          - sugar_cane/7
+        cook-time: 15
+      - type: distill
+        runs: 3
+      - type: mix
+        mix-time: 2
+        cauldron-type: brew
+        ingredients:
+          - cocoa_beans/4
+      - type: age
+        age-years: 3
+        barrel-type: jungle
+  rum:
+    alcohol: 10/18/18
+    brew-difficulty: 7
+    effects:
+      - saturation/0/300-420
+    potion-attributes:
+      color: FFBF54
+      lore:
+        - +Too sweet to drink
+        - ++<dark_gray>Spiced by the barrel
+        - +++<yellow>Spiced Gold
+      name: Sweet Rum/Rum/Exquisite Rum
+      append-brew-info-lore: true/true/true
+    steps:
+      - type: cook
+        cauldron-type: water
+        ingredients:
+          - sugar_cane/8
+        cook-time: 15
+      - type: distill
+        runs: 3
+      - type: age
+        age-years: 3
+        barrel-type: any
+  tropical_rum:
+    alcohol: 18
+    brew-difficulty: 7
+    effects:
+      - water_breathing/1/100-420
+      - dolphins_grace/1/100-420
+      - conduit_power/1/100-420
+    potion-attributes:
+      color: ffa07a
+      lore:
+        - +Has a weak putrid smell
+        - +of fermented fish
+        - +++WHERE'S NEMO???
+      name: Foul Fish Rum/Tropical Rum/Nemo Rum
+    steps:
+      - type: cook
+        cauldron-type: water
+        ingredients:
+          - horn_coral/4
+          - sugar/4
+          - tropical_fish/1
+        cook-time: 15
+      - type: distill
+        runs: 3
+      - type: age
+        age-years: 2
+        barrel-type: jungle
