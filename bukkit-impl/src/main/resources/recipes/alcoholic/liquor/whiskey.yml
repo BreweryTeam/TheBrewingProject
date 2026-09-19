@@ -1,4 +1,4 @@
-enabled: false
+enabled: true
 recipes:
   whiskey:
     alcohol: 10/18/20
@@ -10,9 +10,8 @@ recipes:
       lore:
         - +A sweet whiskey with
         - +less alcohol
-        - +++Drinking this might make
-        - +++ya sing as if you're in
-        - +++an Irish pub
+        - +++Fondly served in
+        - +++Irish pubs
       name: Sweet Whiskey/Whiskey/Irish Whiskey
     steps:
       - type: cook
@@ -31,7 +30,7 @@ recipes:
       toxins: 20/10/5
     brew-difficulty: 7
     messages.message: You get a burning feeling in your mouth
-    potion-attributes.color: gold
+    potion-attributes.color: orange
     potion-attributes.name: Powdery Whiskey/Burning Whiskey/Blazing Whiskey
     steps:
       - cauldron-type: water

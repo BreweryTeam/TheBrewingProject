@@ -50,18 +50,26 @@ public class RecipeReader<I> {
     public CompletableFuture<List<RecipeGroup<I>>> readRecipeGroups() {
         return ingredientManager.thenApply(
                 resolvedIngredientManager -> {
-                    List<RecipeFileContext<I>> groups = new ArrayList<>(readRecipeGroups(folder, resolvedIngredientManager, List.of()));
+                    try {
+                        List<RecipeFileContext<I>> groups = new ArrayList<>(readRecipeGroups(new File(folder, "recipes"), resolvedIngredientManager, List.of()));
 
-                    readRecipeFile(resolvedIngredientManager, new File(folder, "recipes.yml"), List.of("undefined"))
-                            .ifPresent(groups::add);
-                    return compileGroups(groups);
+                        File recipesFile = new File(folder, "recipes.yml");
+                        if (recipesFile.isFile()) {
+                            readRecipeFile(resolvedIngredientManager, recipesFile, List.of("recipes"))
+                                    .ifPresent(groups::add);
+                        }
+                        return compileGroups(groups);
+                    } catch (Throwable e) {
+                        Logger.logErr(e);
+                        throw e;
+                    }
                 }
         );
     }
 
     private List<RecipeFileContext<I>> readRecipeGroups(File recipeFolder, ResolvedIngredientManager<I> resolvedIngredientManager, List<String> parentId) {
         List<RecipeFileContext<I>> groups = new ArrayList<>();
-        File[] recipesInRecipeFolder = new File(recipeFolder, "recipes").listFiles();
+        File[] recipesInRecipeFolder = recipeFolder.listFiles();
         if (recipesInRecipeFolder == null) {
             return groups;
         }
@@ -185,9 +193,12 @@ public class RecipeReader<I> {
         }
 
         ConfigurationSection recipesSection = recipesFile.getConfigurationSection("recipes");
+        if (recipesSection == null) {
+            return Optional.empty();
+        }
         List<Recipe<I>> recipes = recipesSection.getKeys(false)
                 .stream()
-                .map(key -> getRecipe(recipesSection.getConfigurationSection(key), key, resolvedIngredientManager))
+                .map(key -> getRecipe(recipesSection.getConfigurationSection(key), key, resolvedIngredientManager, path.getPath()))
                 .flatMap(Optional::stream)
                 .map(recipeImpl -> (Recipe<I>) recipeImpl)
                 .toList();
@@ -204,7 +215,7 @@ public class RecipeReader<I> {
      * @param recipeName The name/id of the recipe to obtain. Ex: 'example_recipe'
      * @return A Recipe object with all the attributes of the recipe.
      */
-    private Optional<RecipeImpl<I>> getRecipe(ConfigurationSection recipe, String recipeName, ResolvedIngredientManager<I> resolvedIngredientManager) {
+    private Optional<RecipeImpl<I>> getRecipe(ConfigurationSection recipe, String recipeName, ResolvedIngredientManager<I> resolvedIngredientManager, String fileContext) {
         try {
             List<BrewingStep> steps = parseSteps(recipe.getMapList("steps"), resolvedIngredientManager);
             return Optional.of(new RecipeImpl.Builder<I>(recipeName)
@@ -214,6 +225,7 @@ public class RecipeReader<I> {
                     .build()
             );
         } catch (Throwable throwable) {
+            Logger.logErr("Could not read recipe '%s' in file '%s'".formatted(recipeName, fileContext));
             Logger.logErr(throwable.getMessage());
             return Optional.empty();
         }
