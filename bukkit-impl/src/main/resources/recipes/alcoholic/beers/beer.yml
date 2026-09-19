@@ -1,4 +1,4 @@
-enabled: false
+enabled: true
 recipes:
   beetroot_beer:
     alcohol: 7
@@ -49,6 +49,24 @@ recipes:
       - type: age
         age-years: 2
         barrel-type: mangrove
+  beer:
+    modifiers:
+      alcohol: 6
+      toxins: 3/2/1
+    brew-difficulty: 1
+    potion-attributes.color: ffd333
+    potion-attributes.lore:
+      - +++<dark_gray>Crisp taste
+    potion-attributes.name: Skunky Beer/Beer/Fine Beer
+    steps:
+      - cauldron-type: water
+        cook-time: 8
+        ingredients:
+          - Wheat/6
+        type: cook
+      - age-years: 3
+        barrel-type: any
+        type: age
   wheatbeer:
     modifiers:
       alcohol: 5

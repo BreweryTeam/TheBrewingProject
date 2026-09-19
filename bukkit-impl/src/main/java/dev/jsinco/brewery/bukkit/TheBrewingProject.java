@@ -108,6 +108,7 @@ import dev.jsinco.brewery.recipes.RecipeReader;
 import dev.jsinco.brewery.recipes.RecipeRegistryImpl;
 import dev.jsinco.brewery.structure.PlacedStructureRegistryImpl;
 import dev.jsinco.brewery.util.ClassUtil;
+import dev.jsinco.brewery.util.FileUtil;
 import eu.okaeri.configs.ConfigManager;
 import eu.okaeri.configs.json.gson.JsonGsonConfigurer;
 import eu.okaeri.configs.serdes.OkaeriSerdes;
@@ -194,6 +195,9 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
         instance = this;
         this.hotLoaded = !Bukkit.getWorlds().isEmpty(); // Highly scientific hot-load detection™
         saveResources();
+        if (!new File(getDataFolder(), "recipes.yml").exists() && !new File(getDataFolder(), "recipes").exists()) {
+            FileUtil.saveDirectory("/recipes", getDataPath().resolve("recipes"));
+        }
         Migrations.migrateAllConfigFiles(this.getDataFolder());
         this.resourcePackColors = new ResourcePackColors();
         EventSection.migrateEvents(getDataFolder());
@@ -249,6 +253,9 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
     public void reload() {
         Migrations.migrateAllConfigFiles(this.getDataFolder());
         saveResources();
+        if (!new File(getDataFolder(), "recipes.yml").exists() && !new File(getDataFolder(), "recipes").exists()) {
+            FileUtil.saveDirectory("/recipes", getDataPath().resolve("recipes"));
+        }
         closeDatabase();
         Config.config().load(true);
         FeaturesConfig.reload();
@@ -475,7 +482,7 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
     }
 
     private void saveResources() {
-        Stream.of("recipes.yml", "incomplete-recipes.yml", "locale/en-US.drunk_text.json", "locale/ru.drunk_text.json", "locale/lol-US.drunk_text.json")
+        Stream.of("incomplete-recipes.yml", "locale/en-US.drunk_text.json", "locale/ru.drunk_text.json", "locale/lol-US.drunk_text.json")
                 .forEach(this::saveResourceIfNotExists);
     }
 
