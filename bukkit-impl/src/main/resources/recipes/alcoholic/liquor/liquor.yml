@@ -1,4 +1,4 @@
-enabled: false
+enabled: true
 recipes:
   glowberry_schnapps:
     alcohol: 20
@@ -40,8 +40,8 @@ recipes:
         - +A cloudy sake with bamboo
         - +bits at the bottom
         - ++Clear sake
-        - +++Sake made out of the
-        - +++Freshest bamboo sprouts
+        - +++<dark_green>From the freshest
+        - +++<dark_green>bamboo sprouts
       name: Basic Bamboo Sake/Bamboo Sake/Exquisite Bamboo Sake
     steps:
       - type: cook

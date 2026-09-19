@@ -1,4 +1,4 @@
-enabled: false
+enabled: true
 recipes:
   mead:
     alcohol: 5
@@ -25,9 +25,9 @@ recipes:
     alcohol: 5
     brew-difficulty: 8
     effects:
-      - saturation/1/100–200
+      - saturation/1/100-200
     potion-attributes:
-      color: 8b4513/8b4513/8b4513
+      color: 8b4513
       lore:
         - ++Hearty!
         - +++Deeply flavorful and perfectly aged
@@ -46,10 +46,10 @@ recipes:
         age-years: 1
         barrel-type: dark_oak
   potato_mead:
-    alcohol: 5/5/5
+    alcohol: 5
     brew-difficulty: 6
     effects:
-      - saturation/1/100–200
+      - saturation/1/100-200
     potion-attributes:
       color: ffec8b
       lore:
@@ -58,7 +58,6 @@ recipes:
         - ++Sometimes potatoes fit the bill?
         - +++Crisp taste
       name: Potato Mead/Potato Mead/Exquisite Potato Mead
-      append-brew-info-lore: true/true/true
     steps:
       - type: cook
         cauldron-type: water

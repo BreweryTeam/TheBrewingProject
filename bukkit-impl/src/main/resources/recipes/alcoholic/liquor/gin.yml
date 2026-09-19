@@ -1,4 +1,4 @@
-enabled: false
+enabled: true
 recipes:
   spider_eye_gin:
     alcohol: 12
@@ -56,5 +56,5 @@ recipes:
         ingredients:
           - blue_orchid/6
       - type: age
-        aging-years: 1
+        age-years: 1
         barrel-type: copper

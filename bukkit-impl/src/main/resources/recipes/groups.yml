@@ -9,8 +9,8 @@ display-name:
   rum: <gradient:gold:yellow>Rum
   vodka: <white>Vodka
   whiskey: <color:#d2b48c>Whiskey
-  cider: <lime>Cider
+  cider: <green>Cider
   cocktail: <rainbow>Cocktail
   mead: <gradient:gold:yellow>Mead
-  non_alcoholic: <lime>Non-Alcoholic
+  non_alcoholic: <green>Non-Alcoholic
   wine: <red>Wine
