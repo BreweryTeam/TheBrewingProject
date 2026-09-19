@@ -14,7 +14,6 @@ import dev.jsinco.brewery.api.util.Pair;
 import dev.jsinco.brewery.util.BrewUtil;
 import org.jspecify.annotations.NonNull;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -157,28 +156,20 @@ public class RecipeRegistryImpl<I> implements RecipeRegistry<I> {
     }
 
     @Override
-    public List<String> registerGroup(RecipeGroup<I> recipeGroup) {
-        if (recipeGroups.containsKey(recipeGroup.id())) {
-            return List.of("Unable to register recipe group with id '%s': id clash"
-                    .formatted(recipeGroup.id())
-            );
-        }
-        List<String> errorMessages = new ArrayList<>();
-        for (Recipe<I> recipe : recipeGroup.recipes()) {
-            if (recipes.containsKey(recipe.getRecipeName())) {
-                errorMessages.add("Unable to register recipe with id '%s': id clash"
-                        .formatted(recipe.getRecipeName())
-                );
-                continue;
-            }
-            registerRecipe(recipe);
-        }
-        return errorMessages;
+    public void registerGroup(RecipeGroup<I> recipeGroup) {
+        recipeGroup.recipes().forEach(this::registerRecipe);
+        recipeGroups.put(recipeGroup.id(), recipeGroup);
+    }
+
+    @Override
+    public Optional<RecipeGroup<I>> getRecipeGroup(String id) {
+        return Optional.ofNullable(recipeGroups.get(id));
     }
 
     public void clear() {
         recipes.clear();
         defaultRecipes.clear();
         baseIngredientToRecipes.clear();
+        recipeGroups.clear();
     }
 }

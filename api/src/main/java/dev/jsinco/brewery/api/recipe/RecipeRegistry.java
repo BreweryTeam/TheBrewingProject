@@ -87,7 +87,8 @@ public interface RecipeRegistry<I> {
 
     /**
      * @param recipeGroup The recipe group to register
-     * @return a list of error messages
      */
-    List<String> registerGroup(RecipeGroup<I> recipeGroup);
+    void registerGroup(RecipeGroup<I> recipeGroup);
+
+    Optional<RecipeGroup<I>> getRecipeGroup(String id);
 }
