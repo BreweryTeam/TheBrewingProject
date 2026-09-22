@@ -1,0 +1,46 @@
+enabled: true
+recipes:
+  hangover_detox:
+    modifiers:
+      hangover: -20
+      toxins: -10
+    brew-difficulty: 8
+    potion-attributes.color: 32CD32
+    potion-attributes.name: Hangover detox
+    steps:
+      - type: mix
+        mix-time: 3
+        ingredients:
+          - apple/1
+          - chorus_fruit/1
+          - melon/1
+          - cooked_rabbit/1
+          - golden_carrot/1
+          - cake/1
+  potato_soup:
+    brew-difficulty: 1
+    effects:
+      - instant_health/0-1
+    potion-attributes.color: ORANGE
+    potion-attributes.name: Potato soup
+    steps:
+      - cauldron-type: water
+        cook-time: 3
+        ingredients:
+          - Potato/5
+          - Short_Grass/3
+        type: cook
+  hot_choc:
+    brew-difficulty: 2
+    effects:
+      - haste/40
+    potion-attributes.color: DARK_RED
+    potion-attributes.name: Hot Chocolate
+    steps:
+      - cauldron-type: water
+        cook-time: 2
+        ingredients:
+          - cocoa_beans/12
+          - milk_bucket/2
+          - sugar/6
+        type: cook

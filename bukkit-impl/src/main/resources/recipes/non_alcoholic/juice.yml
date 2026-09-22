@@ -1,0 +1,34 @@
+enabled: true
+recipes:
+  apple_juice:
+    brew-difficulty: 1
+    potion-attributes.color: af2a2d
+    potion-attributes.name: Apple Juice
+    steps:
+      - type: cook
+        cook-time: 6
+        cauldron-type: water
+        ingredients:
+          - apple/9
+          - sugar/6
+  sweet_berry_juice:
+    brew-difficulty: 1
+    potion-attributes.color: CF7272
+    potion-attributes.name: Sweet Berry Juice
+    steps:
+      - type: cook
+        cook-time: 6
+        cauldron-type: water
+        ingredients:
+          - sweet_berries/9
+          - sugar/6
+  sugarcane_juice:
+    brew-difficulty: 1
+    potion-attributes.color: AADB9C
+    potion-attributes.name: Sugar Cane Juice
+    steps:
+      - type: cook
+        cook-time: 6
+        cauldron-type: water
+        ingredients:
+          - sugar_cane/12
