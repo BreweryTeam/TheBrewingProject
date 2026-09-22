@@ -1,0 +1,92 @@
+enabled: true
+recipes:
+  kelp_tea:
+    brew-difficulty: 2
+    effects:
+      - saturation/1/10-20
+    potion-attributes.color: 009b14
+    potion-attributes.lore:
+      - +++Made for true sailors
+    potion-attributes.name: Kelp Tea
+    steps:
+      - cauldron-type: water
+        cook-time: 2
+        ingredients:
+          - dried_kelp/4
+        type: cook
+  green_tea:
+    brew-difficulty: 1
+    effects:
+      - regeneration/1/10-20
+    potion-attributes.color: green
+    potion-attributes.lore:
+      - Soothing and comforting
+    potion-attributes.name: Green Tea
+    steps:
+      - cauldron-type: water
+        cook-time: 1
+        ingredients:
+          - azalea_leaves/3
+        type: cook
+  white_tea:
+    brew-difficulty: 4
+    effects:
+      - regeneration/1/30-50
+    potion-attributes.color: white
+    potion-attributes.lore:
+      - Luxurious!
+    potion-attributes.name: White Tea
+    steps:
+      - cauldron-type: water
+        cook-time: 1
+        ingredients:
+          - flowering_azalea_leaves/3
+        type: cook
+  earl_gray:
+    brew-difficulty: 1
+    effects:
+      - speed/1/10-15
+    potion-attributes.color: BLACK
+    potion-attributes.lore:
+      - Refreshing and energizing
+    potion-attributes.name: Black Tea/Black Tea/Earl Gray
+    steps:
+      - cauldron-type: water
+        cook-time: 1
+        ingredients:
+          - acacia_leaves/4
+        type: cook
+  chai_tea:
+    brew-difficulty: 5
+    effects:
+      - speed/1/10-15
+    potion-attributes.color: 9b6a00
+    potion-attributes.lore:
+      - With a fresh smell of cinnamon
+    potion-attributes.name: Chai Tea
+    steps:
+      - cauldron-type: water
+        cook-time: 4
+        ingredients:
+          - acacia_leaves/3
+          - jungle_sapling/1
+          - cactus_flower/1
+          - sugar/2
+          - milk_bucket/1
+        type: cook
+  herb_tea:
+    brew-difficulty: 5
+    effects:
+      - speed/1/10-15
+    potion-attributes.color: 49fc61
+    potion-attributes.lore:
+      - No caffeine, still soothing
+    potion-attributes.name: Herb Tea
+    steps:
+      - cauldron-type: water
+        cook-time: 2
+        ingredients:
+          - birch_leaves/3
+          - azure_bluet/2
+          - wheat_seeds/2
+        type: cook

@@ -1,0 +1,37 @@
+enabled: true
+recipes:
+  coffee:
+    modifiers:
+      alcohol: -6
+      toxins: -2/-3/-4
+    brew-difficulty: 3
+    effects:
+      - regeneration/1/2-5
+      - speed/1/30-140
+    potion-attributes.color: BLACK
+    potion-attributes.lore:
+      - +<dark_gray>Probably a week old
+    potion-attributes.name: Stale Coffee/Coffee/Strong Coffee
+    steps:
+      - cauldron-type: water
+        cook-time: 2
+        ingredients:
+          - cocoa_beans/12
+        type: cook
+  iced_coffee:
+    modifiers:
+      alcohol: -8
+      toxins: -4/-5/-7
+    brew-difficulty: 4
+    effects:
+      - REGENERATION/30
+      - SPEED/10
+    potion-attributes.color: BLACK
+    potion-attributes.name: Watery Coffee/Iced Coffee/Strong Iced Coffee
+    steps:
+      - type: mix
+        cauldron-type: snow
+        mix-time: 1
+        ingredients:
+          - cocoa_beans/8
+          - milk_bucket/1
