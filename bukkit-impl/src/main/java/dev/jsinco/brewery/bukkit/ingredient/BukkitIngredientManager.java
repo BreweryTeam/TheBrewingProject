@@ -33,6 +33,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+
 public class BukkitIngredientManager implements IngredientManager<ItemStack> {
 
     public static final BukkitIngredientManager INSTANCE = new BukkitIngredientManager();
@@ -103,13 +104,19 @@ public class BukkitIngredientManager implements IngredientManager<ItemStack> {
     public CompletableFuture<Optional<Ingredient>> getIngredient(@NonNull String id) {
         BreweryKey breweryKey = BreweryKey.parse(id, Key.MINECRAFT_NAMESPACE);
         IntegrationManagerImpl integrationManager = TheBrewingProject.getInstance().getIntegrationManager();
+        if (breweryKey.namespace().startsWith("#")) {
+            return TheBrewingProject.getInstance().getResolvedIngredientManager()
+                    .thenApply(resolved -> resolved.getIngredientGroup(breweryKey)
+                            .map(Ingredient.class::cast)
+                    );
+        }
         return integrationManager.getIntegrationRegistry().getIntegrations(IntegrationTypes.ITEM)
                 .stream()
                 .filter(Integration::isEnabled)
                 .filter(itemIntegration -> itemIntegration.getId().equals(breweryKey.namespace()))
                 .findAny()
                 .map(itemIntegration -> itemIntegration.createIngredient(breweryKey.key()))
-                .or(() -> BreweryIngredient.from(breweryKey))
+                .or(() -> BreweryIngredient.from(breweryKey).map(Optional::of).map(CompletableFuture::completedFuture))
                 .or(() -> SimpleIngredient.from(id).map(Optional::of).map(CompletableFuture::completedFuture))
                 .orElse(CompletableFuture.completedFuture(Optional.empty()));
     }

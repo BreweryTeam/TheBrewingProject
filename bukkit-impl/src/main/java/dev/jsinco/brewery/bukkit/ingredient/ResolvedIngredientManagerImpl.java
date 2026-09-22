@@ -1,8 +1,10 @@
 package dev.jsinco.brewery.bukkit.ingredient;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import dev.jsinco.brewery.api.brew.BrewQuality;
 import dev.jsinco.brewery.api.ingredient.Ingredient;
+import dev.jsinco.brewery.api.ingredient.IngredientGroup;
 import dev.jsinco.brewery.api.ingredient.IngredientMeta;
 import dev.jsinco.brewery.api.ingredient.IngredientWithMeta;
 import dev.jsinco.brewery.api.ingredient.ResolvedIngredientManager;
@@ -28,12 +30,13 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class ResolvedIngredientManagerImpl implements ResolvedIngredientManager<ItemStack> {
     private static final Pattern INGREDIENT_WITH_AMOUNT_RE = Pattern.compile("(.+)/([^/]+)");
+    private final Map<BreweryKey, IngredientGroup> validatedIngredientGroups = new ConcurrentHashMap<>();
 
     @Override
     public Ingredient getIngredient(@NonNull ItemStack itemStack) {
@@ -99,6 +102,10 @@ public class ResolvedIngredientManagerImpl implements ResolvedIngredientManager<
     @Override
     public Optional<Ingredient> getIngredient(@NonNull String ingredientStr) {
         BreweryKey breweryKey = BreweryKey.parse(ingredientStr, Key.MINECRAFT_NAMESPACE);
+        IngredientGroup possibleIngredientGroup = validatedIngredientGroups.get(breweryKey);
+        if (possibleIngredientGroup != null) {
+            return Optional.of(possibleIngredientGroup);
+        }
         IntegrationManagerImpl integrationManager = TheBrewingProject.getInstance().getIntegrationManager();
         return integrationManager.getIntegrationRegistry().getIntegrations(IntegrationTypes.ITEM)
                 .stream()
@@ -106,7 +113,7 @@ public class ResolvedIngredientManagerImpl implements ResolvedIngredientManager<
                 .filter(itemIntegration -> itemIntegration.getId().equals(breweryKey.namespace()))
                 .findAny()
                 .map(itemIntegration -> itemIntegration.createIngredientUnsafe(breweryKey.key()))
-                .or(() -> BreweryIngredient.from(breweryKey).map(CompletableFuture::join))
+                .or(() -> BreweryIngredient.from(breweryKey).map(Optional::of))
                 .or(() -> SimpleIngredient.from(ingredientStr).map(Optional::of))
                 .orElse(Optional.empty());
     }
@@ -149,5 +156,16 @@ public class ResolvedIngredientManagerImpl implements ResolvedIngredientManager<
         Map<Ingredient, Integer> ingredientMap = new LinkedHashMap<>();
         pairs.forEach(pair -> ResolvedIngredientManager.insertIngredientIntoMap(ingredientMap, pair));
         return ingredientMap;
+    }
+
+    @Override
+    public Optional<IngredientGroup> getIngredientGroup(BreweryKey breweryKey) {
+        return Optional.ofNullable(validatedIngredientGroups.get(breweryKey));
+    }
+
+    @Override
+    public void registerIngredientGroup(IngredientGroup ingredientGroup) {
+        Preconditions.checkArgument(ingredientGroup.key().namespace().startsWith("#"), "Ingredient groups has to has '#' prefix on key");
+        validatedIngredientGroups.put(ingredientGroup.key(), ingredientGroup);
     }
 }
