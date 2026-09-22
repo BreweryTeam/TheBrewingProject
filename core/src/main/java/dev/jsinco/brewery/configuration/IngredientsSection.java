@@ -1,15 +1,13 @@
 package dev.jsinco.brewery.configuration;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableMap;
 import dev.jsinco.brewery.api.ingredient.Ingredient;
 import dev.jsinco.brewery.api.ingredient.IngredientGroup;
-import dev.jsinco.brewery.api.ingredient.IngredientManager;
 import dev.jsinco.brewery.api.ingredient.IngredientMeta;
 import dev.jsinco.brewery.api.ingredient.IngredientWithMeta;
+import dev.jsinco.brewery.api.ingredient.ResolvedIngredientManager;
 import dev.jsinco.brewery.api.util.BreweryKey;
 import dev.jsinco.brewery.api.util.Logger;
-import dev.jsinco.brewery.util.FutureUtil;
 import eu.okaeri.configs.ConfigManager;
 import eu.okaeri.configs.OkaeriConfig;
 import eu.okaeri.configs.annotation.Comment;
@@ -18,17 +16,14 @@ import eu.okaeri.configs.annotation.Exclude;
 import eu.okaeri.configs.serdes.OkaeriSerdes;
 import eu.okaeri.configs.yaml.snakeyaml.YamlSnakeYamlConfigurer;
 import net.kyori.adventure.text.Component;
-import org.jspecify.annotations.NonNull;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 
@@ -58,8 +53,6 @@ public class IngredientsSection extends OkaeriConfig {
 
     @Exclude
     private static IngredientsSection instance;
-    @Exclude
-    private static Map<BreweryKey, CompletableFuture<Optional<Ingredient>>> validatedIngredients;
 
     public static IngredientsSection ingredients() {
         return instance;
@@ -75,21 +68,16 @@ public class IngredientsSection extends OkaeriConfig {
         });
     }
 
-    public static void validate(IngredientManager<?> ingredientManager, Function<String, List<String>> tagResolver) {
+    public static <I> ResolvedIngredientManager<I> register(ResolvedIngredientManager<I> ingredientManager, Function<String, List<String>> tagResolver) {
         Set<String> keys = new HashSet<>();
-        ImmutableMap.Builder<@NonNull BreweryKey, @NonNull CompletableFuture<Optional<Ingredient>>> ingredientsFutures = new ImmutableMap.Builder<>();
         for (IngredientGroupSection ingredientGroup : instance.ingredientGroups()) {
             String key = ingredientGroup.key;
             Preconditions.checkArgument(!keys.contains(key), "Can't have two ingredient groups with the same key (ingredients.yml): " + key);
             keys.add(key);
-            ingredientsFutures.put(new BreweryKey("#brewery", key.toLowerCase(Locale.ROOT)), ingredientGroup.create(ingredientManager, tagResolver));
+            ingredientGroup.create(ingredientManager, tagResolver)
+                    .ifPresent(ingredientManager::registerIngredientGroup);
         }
-        validatedIngredients = ingredientsFutures.build();
-    }
-
-    public CompletableFuture<Optional<Ingredient>> getIngredient(BreweryKey key) {
-        return Optional.ofNullable(validatedIngredients.get(key))
-                .orElse(CompletableFuture.completedFuture(Optional.empty()));
+        return ingredientManager;
     }
 
     public List<IngredientGroupSection> ingredientGroups() {
@@ -115,20 +103,24 @@ public class IngredientsSection extends OkaeriConfig {
             this.materials = materials;
         }
 
-        private CompletableFuture<Optional<Ingredient>> create(IngredientManager<?> ingredientManager, Function<String, List<String>> tagResolver) {
-            List<CompletableFuture<Optional<Ingredient>>> group = new ArrayList<>();
+        private Optional<IngredientGroup> create(ResolvedIngredientManager<?> ingredientManager, Function<String, List<String>> tagResolver) {
+            List<Ingredient> group = new ArrayList<>();
             if (displayName == null) {
                 Logger.logErr("Ingredient groups must have a display-name");
-                return CompletableFuture.completedFuture(Optional.empty());
+                return Optional.empty();
             }
             if (key == null) {
                 Logger.logErr("Ingredient groups must have a key");
-                return CompletableFuture.completedFuture(Optional.empty());
+                return Optional.empty();
+            }
+            if (key.contains(":")) {
+                Logger.logErr("Invalid ingredient group key containing ':': %s".formatted(key));
+                return Optional.empty();
             }
             for (String material : materials) {
                 if (INGREDIENT_GROUP_PATTERN.matcher(material).find()) {
                     Logger.logErr("Ingredient groups are not allowed to reference other groups!");
-                    return CompletableFuture.completedFuture(Optional.empty());
+                    return Optional.empty();
                 }
                 List<String> strings;
                 String withoutScores = material.replaceAll("^\\+{1,3}", "");
@@ -136,36 +128,25 @@ public class IngredientsSection extends OkaeriConfig {
                     strings = tagResolver.apply(withoutScores.replaceFirst("#", ""));
                     if (strings == null) {
                         Logger.logErr("Invalid item tag: " + withoutScores);
-                        return CompletableFuture.completedFuture(Optional.empty());
+                        return Optional.empty();
                     }
                 } else {
                     strings = List.of(withoutScores);
                 }
-                strings.forEach(tagMaterial -> group.add(ingredientManager.getIngredient(tagMaterial)
-                        .thenApplyAsync(ingredient -> {
-                                    Optional<Ingredient> ingredientOptional = ingredient.map(
-                                            ingredient0 -> parseScore(ingredient0, material)
-                                    );
-                                    if (ingredientOptional.isEmpty()) {
-                                        Logger.logErr("Unknown ingredient: " + tagMaterial);
-                                    }
-                                    return ingredientOptional;
-                                }
-                        )));
+                strings.stream()
+                        .map(tagMaterial -> {
+                            Optional<Ingredient> ingredientOptional = ingredientManager.getIngredient(tagMaterial).map(
+                                    ingredient0 -> parseScore(ingredient0, material)
+                            );
+                            if (ingredientOptional.isEmpty()) {
+                                Logger.logErr("Unknown ingredient: " + tagMaterial);
+                            }
+                            return ingredientOptional;
+                        })
+                        .flatMap(Optional::stream)
+                        .forEach(group::add);
             }
-            return FutureUtil.mergeFutures(group)
-                    .thenApplyAsync(ingredients -> {
-                        if (ingredients.stream().anyMatch(Optional::isEmpty)) {
-                            return Optional.empty();
-                        }
-                        return Optional.of(new IngredientGroup(
-                                new BreweryKey("#brewery", key),
-                                displayName,
-                                ingredients.stream()
-                                        .flatMap(Optional::stream)
-                                        .toList()
-                        ));
-                    });
+            return Optional.of(new IngredientGroup(new BreweryKey("#brewery", key), displayName, group));
         }
 
         private Ingredient parseScore(Ingredient ingredient, String ingredientString) {
