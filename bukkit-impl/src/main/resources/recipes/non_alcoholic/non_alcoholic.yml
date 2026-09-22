@@ -1,16 +1,5 @@
 enabled: true
 recipes:
-  apple_juice:
-    brew-difficulty: 1
-    potion-attributes.color: af2a2d
-    potion-attributes.name: Apple Juice
-    steps:
-      - type: cook
-        cook-time: 6
-        cauldron-type: water
-        ingredients:
-          - apple/9
-          - sugar/6
   hangover_detox:
     modifiers:
       hangover: -20
