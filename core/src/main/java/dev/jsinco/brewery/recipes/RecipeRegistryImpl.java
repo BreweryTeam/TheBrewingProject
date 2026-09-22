@@ -7,6 +7,7 @@ import dev.jsinco.brewery.api.ingredient.BaseIngredient;
 import dev.jsinco.brewery.api.ingredient.Ingredient;
 import dev.jsinco.brewery.api.recipe.DefaultRecipe;
 import dev.jsinco.brewery.api.recipe.Recipe;
+import dev.jsinco.brewery.api.recipe.RecipeGroup;
 import dev.jsinco.brewery.api.recipe.RecipeRegistry;
 import dev.jsinco.brewery.api.util.Logger;
 import dev.jsinco.brewery.api.util.Pair;
@@ -31,7 +32,7 @@ public class RecipeRegistryImpl<I> implements RecipeRegistry<I> {
     private final Map<String, Recipe<I>> recipes = Collections.synchronizedMap(new LinkedHashMap<>());
     private final Map<String, DefaultRecipe<I>> defaultRecipes = Collections.synchronizedMap(new LinkedHashMap<>());
     private final Map<BaseIngredient, Set<Recipe<I>>> baseIngredientToRecipes = Collections.synchronizedMap(new HashMap<>());
-
+    private final Map<String, RecipeGroup<I>> recipeGroups = Collections.synchronizedMap(new LinkedHashMap<>());
 
     public void registerRecipes(@NonNull Map<String, Recipe<I>> recipes) {
         this.clear();
@@ -154,9 +155,21 @@ public class RecipeRegistryImpl<I> implements RecipeRegistry<I> {
         return baseIngredientToRecipes.keySet();
     }
 
+    @Override
+    public void registerGroup(RecipeGroup<I> recipeGroup) {
+        recipeGroup.recipes().forEach(this::registerRecipe);
+        recipeGroups.put(recipeGroup.id(), recipeGroup);
+    }
+
+    @Override
+    public Optional<RecipeGroup<I>> getRecipeGroup(String id) {
+        return Optional.ofNullable(recipeGroups.get(id));
+    }
+
     public void clear() {
         recipes.clear();
         defaultRecipes.clear();
         baseIngredientToRecipes.clear();
+        recipeGroups.clear();
     }
 }

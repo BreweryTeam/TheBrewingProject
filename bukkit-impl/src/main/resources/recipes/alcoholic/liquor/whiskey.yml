@@ -1,0 +1,46 @@
+enabled: true
+recipes:
+  whiskey:
+    alcohol: 10/18/20
+    brew-difficulty: 8
+    effects:
+      - saturation/0/200-320
+    potion-attributes:
+      color: d2b48c
+      lore:
+        - +A sweet whiskey with
+        - +less alcohol
+        - +++Fondly served in
+        - +++Irish pubs
+      name: Sweet Whiskey/Whiskey/Irish Whiskey
+    steps:
+      - type: cook
+        cauldron-type: water
+        ingredients:
+          - wheat/8
+        cook-time: 14
+      - type: distill
+        runs: 5
+      - type: age
+        age-years: 14
+        barrel-type: birch
+  fire_whiskey:
+    modifiers:
+      alcohol: 28
+      toxins: 20/10/5
+    brew-difficulty: 7
+    messages.message: You get a burning feeling in your mouth
+    potion-attributes.color: orange
+    potion-attributes.name: Powdery Whiskey/Burning Whiskey/Blazing Whiskey
+    steps:
+      - cauldron-type: water
+        cook-time: 12
+        ingredients:
+          - Wheat/10
+          - Blaze_Powder/2
+        type: cook
+      - runs: 3
+        type: distill
+      - age-years: 18
+        barrel-type: spruce
+        type: age

@@ -1,0 +1,65 @@
+enabled: true
+recipes:
+  melon_cider:
+    alcohol: 6
+    brew-difficulty: 6
+    effects:
+      - regeneration/0-1/300-420
+      - +++health_boost/1-2/300-420
+    potion-attributes:
+      color: ffa500
+      lore:
+        - +A cider with almost no bubbles
+      name: De-fizzed Melon Cider/Melon Cider/Exquisite Melon Cider
+    steps:
+      - type: cook
+        cauldron-type: water
+        ingredients:
+          - melon/5
+          - apple/2
+        cook-time: 10
+      - type: distill
+        runs: 2
+      - type: age
+        age-years: 1
+        barrel-type: any
+  applejack:
+    alcohol: 8
+    brew-difficulty: 5
+    effects:
+      - strength/0-1/200-420
+    potion-attributes:
+      color: ffd700
+      lore:
+        - ++Well-balanced
+        - +++A superb applejack, bursting
+        - +++with the essence of fresh apples
+      name: Basic Applejack/Applejack/Exquisite Applejack
+    steps:
+      - type: cook
+        cauldron-type: water
+        ingredients:
+          - apple/5
+          - sugar/2
+        cook-time: 20
+      - type: distill
+        runs: 2
+      - type: age
+        age-years: 1
+        barrel-type: oak
+  cider:
+    modifiers:
+      alcohol: 7
+      toxins: 3/2/1
+    brew-difficulty: 4
+    potion-attributes.color: f86820
+    potion-attributes.name: Poor Cider/Apple Cider/Great Apple Cider
+    steps:
+      - cauldron-type: water
+        cook-time: 7
+        ingredients:
+          - Apple/14
+        type: cook
+      - age-years: 3
+        barrel-type: any
+        type: age

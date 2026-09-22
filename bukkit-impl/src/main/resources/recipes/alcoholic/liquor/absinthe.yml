@@ -1,0 +1,43 @@
+enabled: true
+recipes:
+  absinthe:
+    modifiers:
+      alcohol: 42
+      toxins: 32/16/8
+    brew-difficulty: 8
+    effects:
+      - POISON/15-25
+    potion-attributes.color: GREEN
+    potion-attributes.lore:
+      - +++<dark_gray>High proof liquor
+    potion-attributes.name: Poor Absinthe/Absinthe/Strong Absinthe
+    steps:
+      - cauldron-type: water
+        cook-time: 3
+        ingredients:
+          - "#brewery:grass/15"
+        type: cook
+      - runs: 6
+        type: distill
+  green_absinthe:
+    modifiers:
+      alcohol: 46
+      toxins: 40/30/20
+    brew-difficulty: 9
+    effects:
+      - poison/25-40
+      - instant_damage/2
+      - night_vision/40-60
+    potion-attributes.color: LIME
+    potion-attributes.lore:
+      - <green>Looks poisonous
+    potion-attributes.name: Poor Absinthe/Green Absinthe/Bright Green Absinthe
+    steps:
+      - cauldron-type: water
+        cook-time: 5
+        ingredients:
+          - Short_Grass/17
+          - Poisonous_Potato/2
+        type: cook
+      - runs: 6
+        type: distill

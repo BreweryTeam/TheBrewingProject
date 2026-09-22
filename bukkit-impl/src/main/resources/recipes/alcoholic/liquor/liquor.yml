@@ -1,0 +1,127 @@
+enabled: true
+recipes:
+  glowberry_schnapps:
+    alcohol: 20
+    brew-difficulty: 7
+    effects:
+      - haste/0-1/100-320
+    potion-attributes:
+      color: ffd700/ffd700/ffd700
+      lore:
+        - +A bright schnapps with
+        - +a hint of glowberry
+        - +++A radiant schnapps, perfectly
+        - +++balanced and flavorful
+      name: Weak Glowberry Schnapps/Glowberry Schnapps/Exquisite Glowberry Schnapps
+    steps:
+      - type: cook
+        cauldron-type: water
+        ingredients:
+          - glow_berries/7
+        cook-time: 10
+      - type: distill
+        runs: 6
+      - type: mix
+        mix-time: 2
+        cauldron-type: brew
+        ingredients:
+          - cornflower
+      - type: age
+        age-years: 2
+        barrel-type: any
+  bamboo_sake:
+    alcohol: 12
+    brew-difficulty: 6
+    effects:
+      - jump_boost/0-1/300-420
+    potion-attributes:
+      color: A4D94C/D7FF99/D7FF99
+      lore:
+        - +A cloudy sake with bamboo
+        - +bits at the bottom
+        - ++Clear sake
+        - +++<dark_green>From the freshest
+        - +++<dark_green>bamboo sprouts
+      name: Basic Bamboo Sake/Bamboo Sake/Exquisite Bamboo Sake
+    steps:
+      - type: cook
+        cauldron-type: water
+        ingredients:
+          - bamboo/5
+          - sugar/2
+        cook-time: 10
+      - type: distill
+        runs: 2
+      - type: age
+        age-years: 2
+        barrel-type: bamboo
+  tequila:
+    alcohol: 25
+    brew-difficulty: 6
+    effects:
+      - haste/0-1/100-220
+    potion-attributes:
+      color: FFFFFF
+      lore:
+        - +Has an off smell
+        - +++Desert spirit
+      name: Mezcal/Tequila/Exquisite Tequila
+    steps:
+      - type: cook
+        cauldron-type: water
+        ingredients:
+          - cactus/5
+          - sugar/3
+        cook-time: 10
+      - type: distill
+        runs: 3
+      - type: age
+        age-years: 3
+        barrel-type: oak
+  pufferfish_punch:
+    alcohol: 15
+    brew-difficulty: 9
+    effects:
+      - +poison/0-1/20-40
+      - dolphins_grace/1/200-420
+      - conduit_power/1/200-420
+    potion-attributes:
+      color: ffd700
+      lore:
+        - +Smells a bit fishy
+        - +You hope it's not poisonous
+        - +++A punch which reminds you
+        - +++of the sea
+      name: Fishy Punch/Pufferfish Punch/Sailors Punch
+    steps:
+      - type: cook
+        cauldron-type: water
+        ingredients:
+          - pufferfish/3
+          - kelp/2
+        cook-time: 12
+      - type: distill
+        runs: 3
+      - type: age
+        age-years: 3
+        barrel-type: any
+  eggnog:
+    modifiers:
+      alcohol: 10
+      toxins: 6/3/1
+    brew-difficulty: 4
+    potion-attributes.color: ffe680
+    potion-attributes.lore:
+      - Made with raw egg
+    potion-attributes.name: Egg Liquor/Eggnog/Advocaat
+    steps:
+      - cauldron-type: water
+        cook-time: 2
+        ingredients:
+          - "#brewery:egg/5"
+          - Sugar/2
+          - Milk_Bucket/1
+        type: cook
+      - age-years: 3
+        barrel-type: any
+        type: age

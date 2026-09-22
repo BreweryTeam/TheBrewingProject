@@ -1,0 +1,101 @@
+enabled: true
+recipes:
+  brandy:
+    modifiers:
+      alcohol: 35
+      toxins: 20/10/5
+    brew-difficulty: 8
+    potion-attributes.color: cc7241
+    potion-attributes.lore:
+      - +Scandaleux! Imbuvable!!!
+    potion-attributes.name: Unsightly Brandy/Brandy/French Brandy
+    steps:
+      - type: cook
+        cauldron-type: water
+        cook-time: 5
+        ingredients:
+          - Sweet_Berries/5
+      - type: distill
+        runs: 4
+      - type: age
+        age-years: 12
+        barrel-type: dark_oak
+  chorus_fruit_brandy:
+    alcohol: 5
+    brew-difficulty: 10
+    effects:
+      - +blindness/1/10
+      - +levitation/1/10
+      - +blindness/1/5
+      - ++levitation/1/20
+      - +++levitation/1/40
+    potion-attributes:
+      color: 9400d3
+      lore:
+        - +A brandy with slightly shifting colors.
+        - +Is this safe to drink?
+        - +++An exceptional brandy,
+        - +++with eldritch vibes
+      name: Unstable Brandy/Chorus Fruit Brandy/Eldritch Brandy
+    steps:
+      - type: cook
+        cauldron-type: water
+        ingredients:
+          - chorus_fruit/4
+          - sugar/3
+        cook-time: 12
+      - type: distill
+        runs: 4
+      - type: age
+        age-years: 3
+        barrel-type: warped
+  apple_brandy:
+    modifiers:
+      alcohol: 14
+      toxins: 8/4/2
+    brew-difficulty: 5
+    potion-attributes.color: BRIGHT_RED
+    potion-attributes.lore:
+      - +Sour like Acid
+      - +++Autumn vibes
+    potion-attributes.name: Sour Apple Brandy/Apple Brandy/Calvados
+    steps:
+      - cauldron-type: water
+        cook-time: 16
+        ingredients:
+          - Apple/12
+        type: cook
+      - runs: 3
+        type: distill
+      - age-years: 6
+        barrel-type: acacia
+        type: age
+  golden_carrot_brandy:
+    alcohol: 10
+    brew-difficulty: 9
+    effects:
+      - ++night_vision/1/100-120
+      - ++absorption/1-2/100-220
+      - ++night_vision/1/200-420
+      - +++absorption/2/200-220
+      - +++night_vision/1/200-420
+    potion-attributes:
+      color: ffd700
+      lore:
+        - +Weak liqueur, someone
+        - +skimped on the ingredients
+        - +++An exquisite liqueur, acceptable
+        - +++for the most picky rabbit
+      name: Weak Golden Brandy/Golden Brandy/Dutch Golden Brandy
+    steps:
+      - type: cook
+        cauldron-type: water
+        ingredients:
+          - golden_carrot/5
+          - honey_bottle/2
+        cook-time: 12
+      - type: distill
+        runs: 3
+      - type: age
+        age-years: 3
+        barrel-type: any

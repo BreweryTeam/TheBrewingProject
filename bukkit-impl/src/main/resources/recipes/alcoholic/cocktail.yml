@@ -1,0 +1,131 @@
+enabled: true
+recipes:
+  gin_and_tonic:
+    modifiers:
+      alcohol: 16
+      toxins: 10/5/3
+    brew-difficulty: 1
+    potion-attributes.color: 70a0b8
+    potion-attributes.name: Pale Gin With Tonic/Gin And Tonic/Old Tom Gin With Tonic
+    steps:
+      - type: mix
+        mix-time: 3
+        cauldron-type: brew
+        ingredients:
+          - brewery:gin/3
+          - chorus_fruit/6
+  french_75:
+    modifiers:
+      alcohol: 20
+      toxins: 12/6/3
+    brew-difficulty: 3
+    potion-attributes.color: ffe491
+    potion-attributes.name: French 75
+    steps:
+      - type: mix
+        mix-time: 3
+        cauldron-type: brew
+        ingredients:
+          - brewery:apple_juice/1
+          - brewery:gin/2
+          - sugar/4
+  red_sangria:
+    modifiers:
+      alcohol: 25
+      toxins: 12/6/3
+    brew-difficulty: 5
+    potion-attributes.color: 4a0408
+    potion-attributes.name: Red Sangria
+    steps:
+      - type: mix
+        mix-time: 4
+        cauldron-type: brew
+        ingredients:
+          - brewery:wine/1
+          - brewery:apple_liquor/1
+          - brewery:brandy/1
+          - sugar/6
+          - apple/1
+      - type: age
+        age-years: 1
+        barrel-type: copper
+  irish_coffee:
+    modifiers:
+      alcohol: 25
+      toxins: 12/6/3
+    brew-difficulty: 2
+    potion-attributes:
+      color: black
+      name: Irish Coffee
+      lore:
+        - +++Only for the most
+        - +++sophisticated alcoholics
+    steps:
+      - type: mix
+        cauldron-type: brew
+        mix-time: 1
+        ingredients:
+          - "#brewery:whiskey/1"
+          - milk_bucket/1
+          - brewery:coffee/2
+          - sugar/1
+          - cocoa_beans/1
+  vodka_sweet_berry:
+    alcohol: 21
+    brew-difficulty: 1
+    potion-attributes:
+      color: D18E8E
+      name: Vodka Sweet Berry
+      lore:
+        - Fruity vibes
+    steps:
+      - type: mix
+        mix-time: 1
+        cauldron-type: brew
+        ingredients:
+          - "#brewery:vodka/2"
+          - brewery:sweet_berry_juice/1
+  san_francisco:
+    alcohol: 15
+    brew-difficulty: 1
+    potion-attributes:
+      color: F5AA4E
+      name: San Francisco
+    steps:
+      - type: mix
+        mix-time: 1
+        ingredients:
+          - "#brewery:vodka/1"
+          - brewery:golden_carrot_brandy/1
+          - brewery:sugar_cane_juice/1
+  snowball:
+    alcohol: 10
+    brew-difficulty: 3
+    potion-attributes:
+      color: FCFBE8
+      name: Snowball
+      lore:
+        - Not for throwing
+    steps:
+      - type: mix
+        mix-time: 2
+        cauldron-type: brew
+        ingredients:
+          - brewery:eggnog/2
+          - brewery:apple_juice/1
+          - ice/1
+  shandy:
+    alcohol: 4
+    brew-difficulty: 1
+    potion-attributes:
+      color: F5DB9A
+      name: Shandy
+      lore:
+        - 𝆺𝅥𝅯 God Save the King 𝆺𝅥𝅯
+    steps:
+      - type: mix
+        mix-time: 2
+        cauldron-type: brew
+        ingredients:
+          - "#brewery:beer/2"
+          - brewery:apple_juice/1

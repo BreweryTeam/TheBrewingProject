@@ -1,0 +1,60 @@
+enabled: true
+recipes:
+  spider_eye_gin:
+    alcohol: 12
+    brew-difficulty: 8
+    effects:
+      - +++invisibility/0-1/300-420
+    potion-attributes:
+      color: 6b8e23
+      lore:
+        - ++With a hint of spider eye
+        - +++An inspiring brew for
+        - +++sneaking past mobs
+      name: Basic Spider Eye Gin/Spider Eye Gin/Exquisite Spider Eye Gin
+      append-brew-info-lore: true/true/true
+    steps:
+      - type: cook
+        cauldron-type: water
+        ingredients:
+          - sweet_berries/2
+        cook-time: 15
+      - type: distill
+        runs: 3
+      - type: mix
+        mix-time: 2
+        cauldron-type: brew
+        ingredients:
+          - spider_eye/1
+      - type: age
+        age-years: 2
+        barrel-type: spruce
+  gin:
+    modifiers:
+      alcohol: 20
+      toxins: 15/5/3
+    brew-difficulty: 6
+    potion-attributes.color: 99ddff
+    potion-attributes.lore:
+      - ++With the
+      - ++taste of juniper
+      - +++Perfectly finished off
+      - +++with juniper
+    potion-attributes.name: Pale Gin/Gin/Old Tom Gin
+    steps:
+      - cauldron-type: water
+        cook-time: 6
+        ingredients:
+          - Wheat/9
+          - Apple/1
+        type: cook
+      - runs: 2
+        type: distill
+      - type: mix
+        mix-time: 2
+        cauldron-type: brew
+        ingredients:
+          - blue_orchid/6
+      - type: age
+        age-years: 1
+        barrel-type: copper
