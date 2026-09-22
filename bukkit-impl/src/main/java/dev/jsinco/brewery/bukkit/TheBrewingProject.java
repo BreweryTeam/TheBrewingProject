@@ -154,6 +154,7 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
     private EventStepRegistry eventStepRegistry;
     private DrunkEventExecutor drunkEventExecutor;
     private ResourcePackColors resourcePackColors;
+    private CompletableFuture<ResolvedIngredientManager<ItemStack>> integrationsLoadedFuture = new CompletableFuture<>();
     private CompletableFuture<ResolvedIngredientManager<ItemStack>> ingredientManagerFuture = new CompletableFuture<>();
     private long time;
     private BrewManager<ItemStack> brewManager = new BukkitBrewManager();
@@ -264,7 +265,17 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
         DrunkenModifierSection.postValidate();
         EventSection.postValidate();
         IngredientsSection.ingredients().load(true);
-        IngredientsSection.validate(BukkitIngredientManager.INSTANCE, BukkitIngredientUtil::tagValuesFromString);
+        RecipeReader<ItemStack> recipeReader = new RecipeReader<>(this.getDataFolder(), new BukkitRecipeResultReader());
+        integrationsLoadedFuture
+                .thenAccept(resolvedIngredients -> {
+                            recipeReader.findIngredientGroups()
+                                    .forEach(resolvedIngredients::registerIngredientGroup);
+                            IngredientsSection.register(
+                                    resolvedIngredients, BukkitIngredientUtil::tagValuesFromString
+                            );
+                            ingredientManagerFuture.complete(resolvedIngredients);
+                        }
+                ).exceptionally(Logger::logErr);
         translator.reload();
         this.structureRegistry.clear();
         this.placedStructureRegistry.clear();
@@ -286,12 +297,10 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
         this.drunksManager.reset(EventSection.events().enabledRandomEvents().stream().map(EventData::deserialize).collect(Collectors.toSet()));
         worldEventListener.init();
         recipeRegistry.clear();
-        RecipeReader<ItemStack> recipeReader = new RecipeReader<>(this.getDataFolder(), new BukkitRecipeResultReader(), ingredientManagerFuture);
 
-        recipeReader.readRecipeGroups()
-                .thenAccept(groups ->
-                        groups.forEach(recipeRegistry::registerGroup)
-                );
+        recipeReader.readRecipeGroups(ingredientManagerFuture)
+                .thenAccept(groups -> groups.forEach(recipeRegistry::registerGroup))
+                .exceptionally(Logger::logErr);
         DefaultRecipeReader.readDefaultRecipes(this.getDataFolder()).forEach((string, defaultRecipe) -> defaultRecipe
                 .whenComplete((defaultRecipe1, throwable) -> {
                     if (throwable != null) {
@@ -426,12 +435,21 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
         Bukkit.getGlobalRegionScheduler().runAtFixedRate(this, this::updateStructures, 1, 1);
         Bukkit.getGlobalRegionScheduler().runAtFixedRate(this, this::otherTicking, 1, 1);
         IngredientsSection.load(this.getDataFolder(), serializers());
-        IngredientsSection.validate(BukkitIngredientManager.INSTANCE, BukkitIngredientUtil::tagValuesFromString);
-        RecipeReader<ItemStack> recipeReader = new RecipeReader<>(this.getDataFolder(), new BukkitRecipeResultReader(), ingredientManagerFuture);
-        recipeReader.readRecipeGroups()
+        RecipeReader<ItemStack> recipeReader = new RecipeReader<>(this.getDataFolder(), new BukkitRecipeResultReader());
+        integrationsLoadedFuture
+                .thenAccept(resolvedIngredients -> {
+                            recipeReader.findIngredientGroups()
+                                    .forEach(resolvedIngredients::registerIngredientGroup);
+                            IngredientsSection.register(
+                                    resolvedIngredients, BukkitIngredientUtil::tagValuesFromString
+                            );
+                            ingredientManagerFuture.complete(resolvedIngredients);
+                        }
+                ).exceptionally(Logger::logErr);
+        recipeReader.readRecipeGroups(ingredientManagerFuture)
                 .thenAccept(groups ->
                         groups.forEach(recipeRegistry::registerGroup)
-                );
+                ).exceptionally(Logger::logErr);
 
         DefaultRecipeReader.readDefaultRecipes(this.getDataFolder()).forEach((string, defaultRecipe) -> defaultRecipe
                 .whenComplete((defaultRecipe1, throwable) -> {
@@ -445,7 +463,7 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
         );
         CompletableFuture.allOf(integrationManager.retrieve(IntegrationTypes.ITEM).stream().map(ItemIntegration::initialized)
                         .toArray(CompletableFuture<?>[]::new))
-                .thenAccept(ignored -> ingredientManagerFuture.complete(new ResolvedIngredientManagerImpl()));
+                .thenAccept(ignored -> integrationsLoadedFuture.complete(new ResolvedIngredientManagerImpl()));
         registerCommands();
         loadDrunkenReplacements();
         loadTimeFormats();

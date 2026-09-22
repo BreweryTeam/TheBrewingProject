@@ -3,6 +3,9 @@ package dev.jsinco.brewery.recipes;
 import com.google.common.base.Preconditions;
 import dev.jsinco.brewery.api.brew.BrewingStep;
 import dev.jsinco.brewery.api.breweries.CauldronType;
+import dev.jsinco.brewery.api.ingredient.Ingredient;
+import dev.jsinco.brewery.api.ingredient.IngredientGroup;
+import dev.jsinco.brewery.api.ingredient.IngredientProviderHolder;
 import dev.jsinco.brewery.api.ingredient.ResolvedIngredientManager;
 import dev.jsinco.brewery.api.moment.PassedMoment;
 import dev.jsinco.brewery.api.recipe.Recipe;
@@ -25,6 +28,7 @@ import org.simpleyaml.configuration.file.YamlFile;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -37,17 +41,112 @@ import java.util.stream.Stream;
 
 public class RecipeReader<I> {
 
+    private static final Set<BrewingStep.StepType> INGREDIENT_STEPS = Set.of(BrewingStep.StepType.MIX, BrewingStep.StepType.COOK);
+
     private final File folder;
     private final RecipeResultReader<I> recipeResultReader;
-    private final CompletableFuture<ResolvedIngredientManager<I>> ingredientManager;
+    private final Map<String, Component> groupDisplayNames;
 
-    public RecipeReader(File folder, RecipeResultReader<I> recipeResultReader, CompletableFuture<ResolvedIngredientManager<I>> ingredientManager) {
+    public RecipeReader(File folder, RecipeResultReader<I> recipeResultReader) {
         this.folder = folder;
         this.recipeResultReader = recipeResultReader;
-        this.ingredientManager = ingredientManager;
+        this.groupDisplayNames = readGroupDisplayNames();
     }
 
-    public CompletableFuture<List<RecipeGroup<I>>> readRecipeGroups() {
+    public List<IngredientGroup> findIngredientGroups() {
+        try {
+            List<IngredientGroup> output = new ArrayList<>();
+            File recipeFolder = new File(folder, "recipes");
+            if (recipeFolder.isDirectory()) {
+                findIngredientGroups(recipeFolder)
+                        .entrySet()
+                        .stream()
+                        .filter(entry -> !entry.getValue().isEmpty())
+                        .map(entry -> new IngredientGroup(
+                                new BreweryKey("#brewery", entry.getKey()),
+                                groupDisplayNames.getOrDefault(entry.getKey(), Component.text(entry.getKey())),
+                                entry.getValue().stream()
+                                        .map(BreweryKey::parse)
+                                        .map(IngredientProviderHolder.instance()::breweryIngredient)
+                                        .map(Ingredient.class::cast)
+                                        .toList()
+                        )).forEach(output::add);
+            }
+            return output;
+        } catch (Exception e) {
+            Logger.logErr(e);
+            return List.of();
+        }
+    }
+
+    private Map<String, Set<String>> findIngredientGroups(File folder) {
+        Map<String, Set<String>> ingredientGroups = new HashMap<>();
+        File[] recipesInRecipeFolder = folder.listFiles();
+        if (recipesInRecipeFolder == null) {
+            return ingredientGroups;
+        }
+        for (File recipeFile : recipesInRecipeFolder) {
+            if (recipeFile.isDirectory()) {
+                Map<String, Set<String>> childGroup = findIngredientGroups(recipeFile);
+                ingredientGroups.put(recipeFile.getName().toLowerCase(Locale.ROOT), childGroup.values()
+                        .stream()
+                        .flatMap(Collection::stream)
+                        .collect(Collectors.toSet())
+                );
+                ingredientGroups.putAll(childGroup);
+                continue;
+            }
+            ingredientGroups.put(recipeFile.getName().toLowerCase(Locale.ROOT).replaceAll("\\.yml", ""), listRecipes(recipeFile));
+        }
+        return ingredientGroups;
+    }
+
+    private Set<String> listRecipes(File file) {
+        if (!file.isFile()) {
+            return Set.of();
+        }
+        YamlFile recipesFile = new YamlFile(file);
+
+        try {
+            recipesFile.createOrLoadWithComments();
+        } catch (Exception e) {
+            Logger.logErr(e);
+            return Set.of();
+        }
+
+        if (!recipesFile.getBoolean("enabled", true)) {
+            return Set.of();
+        }
+
+        ConfigurationSection recipesSection = recipesFile.getConfigurationSection("recipes");
+        if (recipesSection == null) {
+            return Set.of();
+        }
+        return recipesSection.getKeys(false)
+                .stream()
+                .filter(recipesSection::isConfigurationSection)
+                .filter(key -> validRecipeFormat(recipesSection.getConfigurationSection(key)))
+                .collect(Collectors.toSet());
+    }
+
+    private boolean validRecipeFormat(ConfigurationSection recipeSection) {
+        try {
+            boolean hasParsedIngredientStep = false;
+            for (Map<?, ?> step : recipeSection.getMapList("steps")) {
+                BrewingStep.StepType type = BrewingStep.StepType.valueOf(
+                        String.valueOf(step.get("type")).toUpperCase(Locale.ROOT)
+                );
+                checkStep(type, step, hasParsedIngredientStep);
+                hasParsedIngredientStep |= INGREDIENT_STEPS.contains(type);
+            }
+            recipeResultReader.readRecipeResults(recipeSection);
+        } catch (Exception e) {
+            return false;
+        }
+        return true;
+    }
+
+    public CompletableFuture<List<RecipeGroup<I>>> readRecipeGroups(CompletableFuture<ResolvedIngredientManager<I>> ingredientManager) {
         return ingredientManager.thenApply(
                 resolvedIngredientManager -> {
                     try {
@@ -126,9 +225,33 @@ public class RecipeReader<I> {
                     .map("- %s"::formatted)
                     .forEach(Logger::logWarn);
         }
+
+        List<RecipeGroup<I>> recipeGroups = new ArrayList<>();
+        for (Map.Entry<String, List<Recipe<I>>> entry : groupsWithSameId.entrySet()) {
+            List<Recipe<I>> recipes = entry.getValue()
+                    .stream()
+                    .filter(recipe -> !clashingRecipes.contains(recipe.getRecipeName()))
+                    .toList();
+            if (recipes.isEmpty()) {
+                Logger.logWarn("Group '%s' has no recipes - Unregistering");
+                continue;
+            }
+            recipeGroups.add(new RecipeGroupImpl<>(
+                    entry.getKey(),
+                    groupDisplayNames.getOrDefault(entry.getKey(), Component.text(entry.getKey())),
+                    recipes
+            ));
+        }
+        return recipeGroups;
+    }
+
+    private Map<String, Component> readGroupDisplayNames() {
         Map<String, Component> groupDisplayNames = new HashMap<>();
         try {
             File groupsFile = new File(folder, "recipes/groups.yml");
+            if (!groupsFile.isFile()) {
+                return groupDisplayNames;
+            }
             YamlFile groupsYamlFile = new YamlFile(groupsFile);
             groupsYamlFile.load();
             ConfigurationSection displayNames = groupsYamlFile.getConfigurationSection("display-name");
@@ -151,24 +274,7 @@ public class RecipeReader<I> {
             }
         } catch (Exception ignored) {
         }
-
-        List<RecipeGroup<I>> recipeGroups = new ArrayList<>();
-        for (Map.Entry<String, List<Recipe<I>>> entry : groupsWithSameId.entrySet()) {
-            List<Recipe<I>> recipes = entry.getValue()
-                    .stream()
-                    .filter(recipe -> !clashingRecipes.contains(recipe.getRecipeName()))
-                    .toList();
-            if (recipes.isEmpty()) {
-                Logger.logWarn("Group '%s' has no recipes - Unregistering");
-                continue;
-            }
-            recipeGroups.add(new RecipeGroupImpl<>(
-                    entry.getKey(),
-                    groupDisplayNames.getOrDefault(entry.getKey(), Component.text(entry.getKey())),
-                    recipes
-            ));
-        }
-        return recipeGroups;
+        return groupDisplayNames;
     }
 
     private List<String> branch(List<String> parent, String child) {
@@ -240,8 +346,7 @@ public class RecipeReader<I> {
             );
             checkStep(type, step, hasParsedIngredientStep);
             parsedSteps.add(parseStep(step, type, resolvedIngredientManager));
-            hasParsedIngredientStep |= Set.of(BrewingStep.StepType.MIX, BrewingStep.StepType.COOK)
-                    .contains(type);
+            hasParsedIngredientStep |= INGREDIENT_STEPS.contains(type);
         }
         return parsedSteps;
     }

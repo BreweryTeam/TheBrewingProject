@@ -21,6 +21,7 @@ import java.util.stream.Collectors;
  * Used for cauldrons and loading for loading recipes.
  *
  * @param <I> Item stack
+ * @deprecated For removal, less tested
  */
 @Deprecated(forRemoval = true)
 public interface IngredientManager<I> {
