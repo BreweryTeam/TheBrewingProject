@@ -24,8 +24,8 @@ import dev.jsinco.brewery.bukkit.integration.structure.LandsIntegration;
 import dev.jsinco.brewery.bukkit.integration.structure.TownyIntegration;
 import dev.jsinco.brewery.bukkit.integration.structure.WorldGuardIntegration;
 import dev.jsinco.brewery.bukkit.util.color.ResourcePackColors;
-import dev.jsinco.brewery.configuration.Config;
 import dev.jsinco.brewery.util.ClassUtil;
+import dev.jsinco.brewery.configuration.Config;
 
 import java.util.Locale;
 import java.util.Objects;
@@ -61,26 +61,12 @@ public class IntegrationManagerImpl implements IntegrationManager {
 
     public void loadIntegrations() {
         integrationRegistry.getAllIntegrations()
-                .forEach(integration -> {
-                    try {
-                        integration.onLoad();
-                    } catch (Throwable e) {
-                        Logger.logErr("Failed loading integration: %s".formatted(integration.getId()));
-                        Logger.logAndTrackErr(e);
-                    }
-                });
+                .forEach(Integration::onLoad);
     }
 
     public void enableIntegrations() {
         integrationRegistry.getAllIntegrations()
-                .forEach(integration -> {
-                    try {
-                        integration.onEnable();
-                    } catch (Throwable e) {
-                        Logger.logErr("Failed loading integration: %s".formatted(integration.getId()));
-                        Logger.logAndTrackErr(e);
-                    }
-                });
+                .forEach(Integration::onEnable);
     }
 
     @Override
