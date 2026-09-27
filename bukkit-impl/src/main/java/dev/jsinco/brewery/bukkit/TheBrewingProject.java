@@ -16,6 +16,7 @@ import dev.jsinco.brewery.api.structure.StructureType;
 import dev.jsinco.brewery.api.util.Logger;
 import dev.jsinco.brewery.bukkit.api.TheBrewingProjectApi;
 import dev.jsinco.brewery.bukkit.api.effect.DrunkEventManager;
+import dev.jsinco.brewery.bukkit.api.event.AsyncRecipesLoadedEvent;
 import dev.jsinco.brewery.bukkit.api.event.TBPReloadEvent;
 import dev.jsinco.brewery.bukkit.api.integration.IntegrationTypes;
 import dev.jsinco.brewery.bukkit.api.integration.ItemIntegration;
@@ -104,6 +105,7 @@ import dev.jsinco.brewery.effect.DrunksManagerImpl;
 import dev.jsinco.brewery.effect.ModifierManagerImpl;
 import dev.jsinco.brewery.effect.text.DrunkTextRegistry;
 import dev.jsinco.brewery.format.TimeFormatRegistry;
+import dev.jsinco.brewery.recipes.RecipeImpl;
 import dev.jsinco.brewery.recipes.RecipeReader;
 import dev.jsinco.brewery.recipes.RecipeRegistryImpl;
 import dev.jsinco.brewery.structure.PlacedStructureRegistryImpl;
@@ -132,6 +134,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -279,12 +282,17 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
         this.drunksManager.reset(EventSection.events().enabledRandomEvents().stream().map(EventData::deserialize).collect(Collectors.toSet()));
         worldEventListener.init();
         recipeRegistry.clear();
-        RecipeReader<ItemStack> recipeReader = new RecipeReader<>(this.getDataFolder(), new BukkitRecipeResultReader(), ingredientManagerFuture);
+        RecipeReader<ItemStack> recipeReader = new RecipeReader<>(this.getDataFolder(), new BukkitRecipeResultReader(), BukkitIngredientManager.INSTANCE);
 
-        recipeReader.readRecipeGroups()
-                .thenAccept(groups ->
-                        groups.forEach(recipeRegistry::registerGroup)
-                );
+        List<CompletableFuture<RecipeImpl<ItemStack>>> recipeFutures = recipeReader.readRecipes();
+        CompletableFuture.allOf(recipeFutures.toArray(CompletableFuture<?>[]::new))
+                .thenRunAsync(() -> {
+                    recipeFutures.stream()
+                            .map(f -> f.getNow(null))
+                            .filter(Objects::nonNull)
+                            .forEach(recipeRegistry::registerRecipe);
+                    new AsyncRecipesLoadedEvent(recipeRegistry).callEvent();
+                });
         DefaultRecipeReader.readDefaultRecipes(this.getDataFolder()).forEach((string, defaultRecipe) -> defaultRecipe
                 .whenComplete((defaultRecipe1, throwable) -> {
                     if (throwable != null) {
@@ -420,12 +428,16 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
         Bukkit.getGlobalRegionScheduler().runAtFixedRate(this, this::otherTicking, 1, 1);
         IngredientsSection.load(this.getDataFolder(), serializers());
         IngredientsSection.validate(BukkitIngredientManager.INSTANCE, BukkitIngredientUtil::tagValuesFromString);
-        RecipeReader<ItemStack> recipeReader = new RecipeReader<>(this.getDataFolder(), new BukkitRecipeResultReader(), ingredientManagerFuture);
-        recipeReader.readRecipeGroups()
-                .thenAccept(groups ->
-                        groups.forEach(recipeRegistry::registerGroup)
-                );
+        RecipeReader<ItemStack> recipeReader = new RecipeReader<>(this.getDataFolder(), new BukkitRecipeResultReader(), BukkitIngredientManager.INSTANCE);
 
+        List<CompletableFuture<RecipeImpl<ItemStack>>> recipeFutures = recipeReader.readRecipes();
+        CompletableFuture.allOf(recipeFutures.toArray(new CompletableFuture[0]))
+                .thenRunAsync(() -> {
+                    recipeFutures.stream()
+                            .map(CompletableFuture::join)
+                            .forEach(recipeRegistry::registerRecipe);
+                    new AsyncRecipesLoadedEvent(recipeRegistry).callEvent();
+                });
         DefaultRecipeReader.readDefaultRecipes(this.getDataFolder()).forEach((string, defaultRecipe) -> defaultRecipe
                 .whenComplete((defaultRecipe1, throwable) -> {
                     if (throwable != null) {
