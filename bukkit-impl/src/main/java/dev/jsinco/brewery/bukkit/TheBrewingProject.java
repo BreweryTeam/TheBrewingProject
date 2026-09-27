@@ -25,7 +25,6 @@ import dev.jsinco.brewery.bukkit.breweries.BreweryRegistry;
 import dev.jsinco.brewery.bukkit.breweries.barrel.BukkitBarrel;
 import dev.jsinco.brewery.bukkit.breweries.distillery.BukkitDistillery;
 import dev.jsinco.brewery.bukkit.command.BreweryCommand;
-import dev.jsinco.brewery.bukkit.command.SketchyCommandInjector;
 import dev.jsinco.brewery.bukkit.configuration.serializer.BreweryLocationSerializer;
 import dev.jsinco.brewery.bukkit.configuration.serializer.ColorSerializer;
 import dev.jsinco.brewery.bukkit.configuration.serializer.IngredientInputSerializer;
@@ -159,7 +158,6 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
     private ModifierManager modifierManager = new ModifierManagerImpl();
     private BreweryTranslator translator;
     private boolean successfulLoad = false;
-    private boolean hotLoaded = false;
     private final BukkitContext metrics = new BukkitContext.Factory(
             this,
             "2ee682246967303e517be0d593fe7a01"
@@ -189,7 +187,6 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
     @Override
     public void onLoad() {
         instance = this;
-        this.hotLoaded = !Bukkit.getWorlds().isEmpty(); // Highly scientific hot-load detection™
         saveResources();
         Migrations.migrateAllConfigFiles(this.getDataFolder());
         this.resourcePackColors = new ResourcePackColors();
@@ -368,7 +365,7 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
     public void onEnable() {
         Preconditions.checkState(successfulLoad, "Plugin loading failed, see above exception in load stage");
         loadStructures();
-        integrationManager.enableIntegrations(hotLoaded);
+        integrationManager.enableIntegrations();
         this.database = new SqlDatabase(DatabaseDriver.SQLITE);
         try {
             database.init(this.getDataFolder());
@@ -431,22 +428,16 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
         CompletableFuture.allOf(integrationManager.retrieve(IntegrationTypes.ITEM).stream().map(ItemIntegration::initialized)
                         .toArray(CompletableFuture<?>[]::new))
                 .thenAccept(ignored -> ingredientManagerFuture.complete(new ResolvedIngredientManagerImpl()));
-        registerCommands();
+        this.getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS, BreweryCommand::register);
         loadDrunkenReplacements();
         loadTimeFormats();
         this.metrics.ready();
-    }
-
-    private void registerCommands() {
-        this.getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS, BreweryCommand::register);
-        if (hotLoaded) SketchyCommandInjector.inject(this, BreweryCommand.build(), Config.config().commandAliases());
     }
 
     @Override
     public void onDisable() {
         closeDatabase();
         this.metrics.shutdown();
-        GlobalTranslator.translator().removeSource(this.translator);
     }
 
     private void closeDatabase() {

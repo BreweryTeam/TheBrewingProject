@@ -4,7 +4,6 @@ import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
-import com.mojang.brigadier.tree.LiteralCommandNode;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.bukkit.command.argument.EventArgument;
 import dev.jsinco.brewery.bukkit.command.argument.OfflinePlayerArgument;
@@ -33,10 +32,6 @@ public class BreweryCommand {
     );
 
     public static void register(ReloadableRegistrarEvent<Commands> commands) {
-        commands.registrar().register(build(), Config.config().commandAliases());
-    }
-
-    public static LiteralCommandNode<CommandSourceStack> build() {
         ArgumentBuilder<CommandSourceStack, ?> eventCommand = Commands.argument("event-type", new EventArgument())
                 .executes(context -> {
                     Player target = getPlayer(context);
@@ -44,7 +39,7 @@ public class BreweryCommand {
                     TheBrewingProject.getInstance().getDrunkEventExecutor().doDrunkEvent(target.getUniqueId(), event);
                     return com.mojang.brigadier.Command.SINGLE_SUCCESS;
                 });
-        return Commands.literal("tbp")
+        commands.registrar().register(Commands.literal("tbp")
                 .then(CreateCommand.command()
                         .requires(commandSourceStack -> commandSourceStack.getSender().hasPermission("brewery.command.create")))
                 .then(InfoCommand.command("info", false)
@@ -86,7 +81,7 @@ public class BreweryCommand {
                 ).then(DebugDumpCommand.command()
                         .requires(commandSourceStack -> commandSourceStack.getSender().hasPermission("brewery.command.dump"))
                 )
-                .build();
+                .build(), Config.config().commandAliases());
     }
 
     public static ArgumentBuilder<CommandSourceStack, ?> playerBranch(Consumer<ArgumentBuilder<CommandSourceStack, ?>> childAction) {

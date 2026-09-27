@@ -24,11 +24,4 @@ public interface Integration {
      */
     default void onEnable() {
     }
-
-    /**
-     * Called after #onEnable() when the plugin was enabled
-     * after the server had already finished starting
-     */
-    default void onHotReload() {
-    }
 }
