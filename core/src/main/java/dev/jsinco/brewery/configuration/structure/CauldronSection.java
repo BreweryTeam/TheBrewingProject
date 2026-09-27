@@ -66,10 +66,6 @@ public class CauldronSection extends OkaeriConfig implements Configuration.Cauld
     @CustomKey("ingredient-added-animation-display")
     private AnimationDisplay ingredientAddedAnimation = AnimationDisplay.NONE;
 
-    @Comment("Reset the ingredient cook time whenever a new ingredient is added")
-    @CustomKey("reset-cook-time-on-ingredient-add")
-    private boolean resetCookTimeOnIngredientAdd = true;
-
     @Comment("How to display the time [action_bar, chat, title]")
     @CustomKey("clock-display")
     private ModifierDisplay.DisplayWindow clockDisplay = ModifierDisplay.DisplayWindow.ACTION_BAR;
@@ -176,9 +172,5 @@ public class CauldronSection extends OkaeriConfig implements Configuration.Cauld
 
     public List<ParticleDefinition> mixParticleDefinitions() {
         return mixParticleDefinitions;
-    }
-
-    public boolean resetCookTimeOnIngredientAdd() {
-        return resetCookTimeOnIngredientAdd;
     }
 }
