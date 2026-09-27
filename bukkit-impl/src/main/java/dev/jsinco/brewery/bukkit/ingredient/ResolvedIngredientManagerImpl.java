@@ -137,7 +137,7 @@ public class ResolvedIngredientManagerImpl implements ResolvedIngredientManager<
         }
         return (allowMeta ? this.deserializeIngredient(ingredientString) : this.getIngredient(ingredientString))
                 .map(ingredient -> new Pair<>(ingredient, amount))
-                .orElseThrow(() -> new IllegalArgumentException("Invalid ingredient '" + ingredientStr + "', not a registered ingredient"));
+                .orElseThrow(() -> new IllegalArgumentException("Invalid ingredient string '" + ingredientStr + "' could not parse type"));
     }
 
     @Override
