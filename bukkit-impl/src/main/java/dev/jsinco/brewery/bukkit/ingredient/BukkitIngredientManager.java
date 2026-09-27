@@ -142,7 +142,7 @@ public class BukkitIngredientManager implements IngredientManager<ItemStack> {
         return (withMeta ? this.deserializeIngredient(ingredientString) : this.getIngredient(ingredientString))
                 .thenApplyAsync(ingredientOptional ->
                         ingredientOptional.map(ingredient -> new Pair<>(ingredient, amount))
-                                .orElseThrow(() -> new IllegalArgumentException("Invalid ingredient string '" + ingredientStr + "' could not parse type"))
+                                .orElseThrow(() -> new IllegalArgumentException("Invalid ingredient '" + ingredientStr + "', not a registered ingredient"))
                 );
     }
 
