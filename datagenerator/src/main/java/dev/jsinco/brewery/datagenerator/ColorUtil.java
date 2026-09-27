@@ -13,7 +13,6 @@ public class ColorUtil {
         for (int i = 0; i < buckets.length; i++) {
             buckets[i] = new Bucket();
         }
-        Bucket opaque = new Bucket();
         for (int x = 0; x < image.getWidth(); x++) {
             for (int y = 0; y < image.getHeight(); y++) {
                 Color pixel = new Color(image.getRGB(x, y), true);
@@ -25,7 +24,6 @@ public class ColorUtil {
                 float h = hsb[0];
                 float s = hsb[1];
                 float b = hsb[2];
-                opaque.add(h, s, b);
                 if (b < 0.2F) {
                     continue;
                 }
@@ -36,10 +34,10 @@ public class ColorUtil {
         }
         int minCount = imageSize >> 3;
         return Arrays.stream(buckets)
-                .filter(bucket -> bucket.count > 0 && bucket.count >= minCount)
+                .filter(bucket -> bucket.count >= minCount)
                 .max(Comparator.comparingDouble(Bucket::weightedScore))
                 .map(Bucket::average)
-                .orElseGet(opaque::average);
+                .orElse(Color.GRAY);
     }
 
     static class Bucket {
