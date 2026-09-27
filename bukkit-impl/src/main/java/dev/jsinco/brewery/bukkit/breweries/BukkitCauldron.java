@@ -669,7 +669,7 @@ public class BukkitCauldron implements Cauldron {
     @Override
     public void destroy() {
         if (waterColorer != null) {
-            runLocally(() -> waterColorer.remove());
+            waterColorer.remove();
         }
     }
 
