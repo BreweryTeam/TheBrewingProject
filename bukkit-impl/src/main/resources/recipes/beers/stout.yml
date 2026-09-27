@@ -1,4 +1,4 @@
-enabled: true
+enabled: false
 recipes:
   nether_wart_stout:
     alcohol: 6

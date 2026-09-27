@@ -1,4 +1,4 @@
-enabled: true
+enabled: false
 recipes:
   gin_and_tonic:
     modifiers:

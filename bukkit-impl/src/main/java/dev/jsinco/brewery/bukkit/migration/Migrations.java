@@ -19,11 +19,7 @@ public class Migrations {
     private static final Pattern SIMPLE_NUMBER_PATTERN = Pattern.compile("(-|)\\d+(\\.\\d+|)");
 
     public static void migrateAllConfigFiles(File pluginFolder) {
-        File recipesFolder = new File(pluginFolder, "recipes");
-        if (recipesFolder.isDirectory()) {
-            updateRecipes(recipesFolder);
-        }
-        updateRecipesFile(new File(pluginFolder, "recipes.yml"));
+        updateRecipes(new File(pluginFolder, "recipes.yml"));
         updateIncompleteRecipes(pluginFolder);
         migrateEncryptionKey(pluginFolder);
     }
@@ -61,22 +57,7 @@ public class Migrations {
         }
     }
 
-    private static void updateRecipes(File recipeFolder) {
-        File[] children = recipeFolder.listFiles();
-        if (children == null) {
-            return;
-        }
-        for (File child : children) {
-            if (child.isFile() && child.getName().endsWith(".yml")) {
-                updateRecipesFile(child);
-            }
-            if (child.isDirectory()) {
-                updateRecipes(child);
-            }
-        }
-    }
-
-    private static void updateRecipesFile(File recipesFile) {
+    private static void updateRecipes(File recipesFile) {
         if (!recipesFile.exists()) {
             return;
         }
@@ -84,17 +65,11 @@ public class Migrations {
         try {
             yaml.loadWithComments();
         } catch (IOException e) {
-            Logger.logErr("Unable to read '%s' file even though it existed"
-                    .formatted(recipesFile)
-            );
+            Logger.logErr("Unable to read recipes.yml file even though it existed");
             Logger.logErr(e);
             return;
         }
         ConfigurationSection section = yaml.getConfigurationSection("recipes");
-        if (section == null) {
-            return;
-        }
-        boolean modified = false;
         for (String recipeKey : section.getKeys(false)) {
             ConfigurationSection recipe = section.getConfigurationSection(recipeKey);
             for (String key : recipe.getKeys(false)) {
@@ -110,7 +85,7 @@ public class Migrations {
                                         case GOOD -> aDouble * 1 / 2;
                                         case EXCELLENT -> aDouble > 0 ? aDouble * 1 / 4 : aDouble * 2 / 3;
                                     })
-                                    .map("%.1f"::formatted)
+                                    .map(String::valueOf)
                     );
                     if (SIMPLE_NUMBER_PATTERN.matcher(alcoholString).matches()) {
                         modifiers.set("alcohol", Double.parseDouble(alcoholString));
@@ -119,12 +94,8 @@ public class Migrations {
                     }
                     recipe.remove("alcohol");
                     modifiers.set("toxins", toxinsString);
-                    modified = true;
                 }
             }
-        }
-        if (!modified) {
-            return;
         }
         try {
             yaml.save();
@@ -140,9 +111,7 @@ public class Migrations {
      */
     private static void migrateEncryptionKey(File pluginFolder) {
         File configFile = new File(pluginFolder, "config.yml");
-        if (!configFile.exists()) {
-            return;
-        }
+        if (!configFile.exists()) return;
 
         YamlFile yaml = new YamlFile(configFile);
         try {
@@ -184,11 +153,7 @@ public class Migrations {
     private static final class ParsedKey {
         final boolean decodable;
         final int rawLength;
-
-        ParsedKey(boolean decodable, int rawLength) {
-            this.decodable = decodable;
-            this.rawLength = rawLength;
-        }
+        ParsedKey(boolean decodable, int rawLength) { this.decodable = decodable; this.rawLength = rawLength; }
     }
 
     private static ParsedKey parseKey(String token) {

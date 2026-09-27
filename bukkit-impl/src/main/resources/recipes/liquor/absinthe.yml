@@ -1,4 +1,4 @@
-enabled: true
+enabled: false
 recipes:
   absinthe:
     modifiers:
@@ -25,7 +25,7 @@ recipes:
       toxins: 40/30/20
     brew-difficulty: 9
     effects:
-      - poison/25-40
+      - posion/25-40
       - instant_damage/2
       - night_vision/40-60
     potion-attributes.color: LIME

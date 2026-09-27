@@ -1,4 +1,4 @@
-enabled: true
+enabled: false
 recipes:
   apple_juice:
     brew-difficulty: 1
