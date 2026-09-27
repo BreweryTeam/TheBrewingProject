@@ -7,6 +7,7 @@ import dev.jsinco.brewery.api.recipe.RecipeResult;
 import dev.jsinco.brewery.api.util.BreweryKey;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.bukkit.brew.BrewAdapterAccess;
+import dev.jsinco.brewery.configuration.IngredientsSection;
 import io.papermc.paper.persistence.PersistentDataContainerView;
 import net.kyori.adventure.text.Component;
 import org.bukkit.inventory.ItemStack;
@@ -15,6 +16,7 @@ import org.jspecify.annotations.NonNull;
 
 import java.awt.Color;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 public record BreweryIngredient(BreweryKey key) implements BaseIngredient {
 
@@ -36,11 +38,17 @@ public record BreweryIngredient(BreweryKey key) implements BaseIngredient {
         return Optional.of(new BreweryIngredient(breweryKey));
     }
 
-    public static Optional<Ingredient> from(BreweryKey id) {
-        if (!id.namespace().equalsIgnoreCase("brewery")) {
+    public static Optional<CompletableFuture<Optional<Ingredient>>> from(BreweryKey id) {
+        if (!id.namespace().equals("brewery") && !id.namespace().equals("#brewery")) {
             return Optional.empty();
         }
-        return Optional.of(new BreweryIngredient(id));
+        if (id.namespace().startsWith("#")) {
+            return Optional.of(IngredientsSection.ingredients()
+                    .getIngredient(id));
+        }
+        return Optional.<Ingredient>of(new BreweryIngredient(id))
+                .map(Optional::of)
+                .map(CompletableFuture::completedFuture);
     }
 
     @Override

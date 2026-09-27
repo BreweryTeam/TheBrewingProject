@@ -6,7 +6,6 @@ import dev.jsinco.brewery.api.util.BreweryKey;
 import dev.jsinco.brewery.api.util.BreweryRegistry;
 import dev.jsinco.brewery.api.util.Pair;
 import dev.jsinco.brewery.api.util.StringUtil;
-import org.jetbrains.annotations.ApiStatus;
 import org.jspecify.annotations.NonNull;
 
 import java.util.List;
@@ -158,16 +157,4 @@ public interface ResolvedIngredientManager<I> {
      */
     Map<Ingredient, Integer> getIngredientsWithAmount(List<String> stringList, boolean withMeta) throws
             IllegalArgumentException;
-
-    /**
-     * @param breweryKey The key of the ingredient group you want to look up
-     * @return An optionally present ingredient group
-     */
-    Optional<IngredientGroup> getIngredientGroup(BreweryKey breweryKey);
-
-    /**
-     * Marked internal as this is inaccessible when using the api
-     */
-    @ApiStatus.Internal
-    void registerIngredientGroup(IngredientGroup ingredientGroup);
 }
