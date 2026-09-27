@@ -5,8 +5,6 @@ import dev.jsinco.brewery.api.event.EventStepProperty;
 import dev.jsinco.brewery.api.event.NamedDrunkEvent;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.configuration.EventSection;
-import dev.jsinco.brewery.configuration.features.FeatureFlag;
-import dev.jsinco.brewery.configuration.features.FeaturesConfig;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.jspecify.annotations.NonNull;
@@ -21,7 +19,7 @@ public class FeverNamedExecutable implements EventPropertyExecutable {
     @Override
     public @NonNull ExecutionResult execute(UUID contextPlayer, List<EventStepProperty> eventStepProperties) {
         Player player = Bukkit.getPlayer(contextPlayer);
-        if (player == null || !FeaturesConfig.test(FeatureFlag.BREW_EFFECTS, player.getWorld().getName())) {
+        if (player == null) {
             return ExecutionResult.CONTINUE;
         }
         AtomicInteger ticksRan = new AtomicInteger(0);

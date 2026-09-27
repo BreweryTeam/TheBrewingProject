@@ -6,8 +6,6 @@ import dev.jsinco.brewery.api.event.NamedDrunkEvent;
 import dev.jsinco.brewery.bukkit.Statistics;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.configuration.EventSection;
-import dev.jsinco.brewery.configuration.features.FeatureFlag;
-import dev.jsinco.brewery.configuration.features.FeaturesConfig;
 import io.papermc.paper.threadedregions.scheduler.ScheduledTask;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -61,7 +59,7 @@ public class PukeNamedExecutable implements EventPropertyExecutable {
 
 
         public void tick(ScheduledTask task) {
-            if (!player.isOnline() || countDown-- <= 0 || !FeaturesConfig.test(FeatureFlag.BREW_EFFECTS, player.getWorld().getName())) {
+            if (!player.isOnline() || countDown-- <= 0) {
                 task.cancel();
                 return;
             }

@@ -20,8 +20,6 @@ import dev.jsinco.brewery.bukkit.util.BukkitMessageUtil;
 import dev.jsinco.brewery.bukkit.util.EventUtil;
 import dev.jsinco.brewery.bukkit.util.ListPersistentDataType;
 import dev.jsinco.brewery.configuration.DrunkenModifierSection;
-import dev.jsinco.brewery.configuration.features.FeatureFlag;
-import dev.jsinco.brewery.configuration.features.FeaturesConfig;
 import dev.jsinco.brewery.effect.DrunksManagerImpl;
 import dev.jsinco.brewery.util.MessageUtil;
 import io.papermc.paper.persistence.PersistentDataContainerView;
@@ -166,13 +164,10 @@ public class RecipeEffectsImpl implements RecipeEffects {
     }
 
     public void applyTo(Player player) {
-        if (!FeaturesConfig.test(FeatureFlag.BREW_EFFECTS, player.getWorld().getName())) {
-            return;
-        }
         DrunksManagerImpl<?> drunksManager = TheBrewingProject.getInstance().getDrunksManager();
         DrunkState beforeState = drunksManager.getDrunkState(player.getUniqueId());
         DrunkState afterState = null;
-        if (!player.hasPermission("brewery.override.drunk") && FeaturesConfig.test(FeatureFlag.MODIFIER_CHANGE, player.getWorld().getName())) {
+        if (!player.hasPermission("brewery.override.drunk")) {
             afterState = drunksManager.consume(player.getUniqueId(),
                     modifiers.entrySet().stream()
                             .map(entry -> new ModifierConsume(entry.getKey(), entry.getValue(), true))

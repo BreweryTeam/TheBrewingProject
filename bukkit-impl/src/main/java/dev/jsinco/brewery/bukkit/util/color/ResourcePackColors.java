@@ -2,8 +2,6 @@ package dev.jsinco.brewery.bukkit.util.color;
 
 import dev.jsinco.brewery.api.util.Logger;
 import dev.jsinco.brewery.api.util.LoggingModule;
-import dev.jsinco.brewery.configuration.features.FeatureFlag;
-import dev.jsinco.brewery.configuration.features.FeaturesConfig;
 import net.kyori.adventure.key.Key;
 import org.bukkit.Bukkit;
 import org.jspecify.annotations.NullMarked;
@@ -47,9 +45,6 @@ public class ResourcePackColors {
     private final List<ResourcePackSource> sources = new ArrayList<>();
 
     public void init() {
-        if (!FeaturesConfig.test(FeatureFlag.RESOURCE_PACK_COLORS, null)) {
-            return;
-        }
         List<ResourcePack> resourcePacks;
         try {
             resourcePacks = readResourcePacks();

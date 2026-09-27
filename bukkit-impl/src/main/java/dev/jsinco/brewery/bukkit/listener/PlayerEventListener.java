@@ -40,8 +40,6 @@ import dev.jsinco.brewery.bukkit.util.BukkitIngredientUtil;
 import dev.jsinco.brewery.bukkit.util.SoundPlayer;
 import dev.jsinco.brewery.configuration.Config;
 import dev.jsinco.brewery.configuration.DrunkenModifierSection;
-import dev.jsinco.brewery.configuration.features.FeatureFlag;
-import dev.jsinco.brewery.configuration.features.FeaturesConfig;
 import dev.jsinco.brewery.configuration.serializers.ConsumableSerializer;
 import dev.jsinco.brewery.database.PersistenceException;
 import dev.jsinco.brewery.database.sql.SqlDatabase;
@@ -152,7 +150,7 @@ public class PlayerEventListener implements Listener {
             return;
         }
 
-        boolean cauldron = Tag.CAULDRONS.isTagged(block.getType()) && FeaturesConfig.test(FeatureFlag.CAULDRONS, event.getClickedBlock().getWorld().getName());
+        boolean cauldron = Tag.CAULDRONS.isTagged(block.getType());
         if (!TheBrewingProject.getInstance().getIntegrationManager().retrieve(IntegrationTypes.STRUCTURE)
                 .stream()
                 .map(structureIntegration -> structureIntegration.hasAccess(event.getClickedBlock(), event.getPlayer(),
@@ -176,10 +174,9 @@ public class PlayerEventListener implements Listener {
 
         PlayerInventory inventory = event.getPlayer().getInventory();
         ItemStack offHand = inventory.getItemInOffHand();
-        if (FeaturesConfig.test(FeatureFlag.SEALING, event.getClickedBlock().getWorld().getName())
-                && block.getType() == Material.CRAFTING_TABLE && offHand.getType() == Material.PAPER
-                && event.getPlayer().isSneaking()
-                && event.getAction() == Action.RIGHT_CLICK_BLOCK) {
+        if (block.getType() == Material.CRAFTING_TABLE && offHand.getType() == Material.PAPER && event.getPlayer().
+
+                isSneaking() && event.getAction() == Action.RIGHT_CLICK_BLOCK) {
             ItemStack mainHand = inventory.getItemInMainHand();
             ItemStack sealed = BrewAdapterAccess.fromItem(mainHand)
                     .map(brew -> BrewAdapterAccess.toItem(brew, new BrewImpl.State.Seal(offHand.hasData(DataComponentTypes.CUSTOM_NAME) ? MiniMessage.miniMessage().serialize(offHand.getData(DataComponentTypes.CUSTOM_NAME)) : null)))
@@ -189,9 +186,7 @@ public class PlayerEventListener implements Listener {
             decreaseItem(offHand, event.getPlayer());
             inventory.setItemInOffHand(offHand);
         }
-        if (FeaturesConfig.test(FeatureFlag.DISPOSE_BREW, event.getClickedBlock().getWorld().getName())
-                && block.getType() == Material.HOPPER
-                && event.getItem() != null) {
+        if (block.getType() == Material.HOPPER && event.getItem() != null) {
             PersistentDataContainerView view = event.getItem().getPersistentDataContainer();
             Double score = view.get(BrewAdapterAccess.BREWERY_SCORE, PersistentDataType.DOUBLE);
             if ((Config.config().emptyAnyDrinkUsingHopper() || (score != null && score == 0))
@@ -369,9 +364,6 @@ public class PlayerEventListener implements Listener {
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.LOW)
     public void onAsyncChat(AsyncPlayerChatEvent event) {
-        if (!FeaturesConfig.test(FeatureFlag.BREW_EFFECTS, event.getPlayer().getWorld().getName())) {
-            return;
-        }
         UUID playerUuid = event.getPlayer().getUniqueId();
         DrunkState drunkState = drunksManager.getDrunkState(playerUuid);
         if (drunkState == null) {
@@ -384,9 +376,6 @@ public class PlayerEventListener implements Listener {
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
     public void onPlayerItemConsume(PlayerItemConsumeEvent event) {
-        if (!FeaturesConfig.test(FeatureFlag.BREW_DRINKING, event.getPlayer().getWorld().getName())) {
-            return;
-        }
         Optional<RecipeEffectsImpl> effects = RecipeEffectsImpl.fromItem(event.getItem());
         if (effects.isPresent()) {
             BrewConsumeEvent consumeEvent = new BrewConsumeEvent(event.getPlayer(), event.getItem(), event.getHand(), event.getReplacement(), effects.get());
@@ -400,9 +389,6 @@ public class PlayerEventListener implements Listener {
                     .ifPresent(score -> Statistics.registerBrewDrunk(BrewQuality.quality(score).orElse(null)));
         }
 
-        if (!FeaturesConfig.test(FeatureFlag.MODIFIER_CHANGE, event.getPlayer().getWorld().getName())) {
-            return;
-        }
         Ingredient ingredient = BukkitIngredientManager.INSTANCE.getIngredient(event.getItem());
         for (ConsumableSerializer.Consumable consumable : DrunkenModifierSection.modifiers().consumables()) {
             String key = consumable.type().contains(":") ? consumable.type() : "minecraft:" + consumable.type();
