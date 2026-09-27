@@ -62,7 +62,7 @@ class TbpMigratorPlugin : JavaPlugin() {
             return
         }
         Preconditions.checkState(loadSuccess, "Failed on load, check on load logs!")
-        Bukkit.getGlobalRegionScheduler().run(this) { t ->
+        Bukkit.getScheduler().runTask(this) { ->
             Bukkit.getWorlds().forEach(BarrelMigration::migrateWorld)
             Bukkit.getWorlds().forEach(CauldronMigration::migrateWorld)
             TheBrewingProject.getInstance().database.flush().join()
