@@ -77,7 +77,7 @@ recipes:
   herb_tea:
     brew-difficulty: 5
     effects:
-      - speed/1/10-15
+      - regeneration/1/10-15
     potion-attributes.color: 49fc61
     potion-attributes.lore:
       - No caffeine, still soothing
