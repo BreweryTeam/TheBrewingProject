@@ -4,7 +4,6 @@ import dev.jsinco.brewery.api.brew.Brew;
 import dev.jsinco.brewery.api.brew.BrewQuality;
 import dev.jsinco.brewery.api.brew.BrewScore;
 import dev.jsinco.brewery.api.brew.BrewingStep;
-import dev.jsinco.brewery.api.brew.IncompleteBehavior;
 import dev.jsinco.brewery.api.ingredient.Ingredient;
 import dev.jsinco.brewery.api.ingredient.IngredientManager;
 import dev.jsinco.brewery.api.recipe.DefaultRecipe;
@@ -75,11 +74,7 @@ public class RecipeMatcherResultImpl implements RecipeMatcherResult<ItemStack> {
     public ItemStack toItem(Brew.State state, @Nullable BrewQuality overrideQuality) {
         RecipeRegistryImpl<ItemStack> recipeRegistry = TheBrewingProject.getInstance().getRecipeRegistry();
         ItemStack itemStack;
-        if (overrideQuality == null || recipe == null
-                || (!score.completed()
-                && recipe.getSteps().size() == matchingSteps.size()
-                && recipe.getSteps().getLast().incompleteBehavior() == IncompleteBehavior.FAIL)
-        ) {
+        if (overrideQuality == null || recipe == null) {
             itemStack = fromDefaultRecipe(recipe, recipeRegistry, brew, state, true);
             itemStack.editPersistentDataContainer(pdc -> {
                 pdc.set(BrewAdapterAccess.BREWERY_SCORE, PersistentDataType.DOUBLE, 0D);
