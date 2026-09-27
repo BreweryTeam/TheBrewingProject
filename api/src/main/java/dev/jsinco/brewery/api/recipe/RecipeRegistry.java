@@ -90,11 +90,5 @@ public interface RecipeRegistry<I> {
      */
     void registerGroup(RecipeGroup<I> recipeGroup);
 
-    /**
-     * Get a group of recipes
-     *
-     * @param id the group id
-     * @return a group of recipes
-     */
     Optional<RecipeGroup<I>> getRecipeGroup(String id);
 }
