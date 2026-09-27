@@ -4,6 +4,7 @@ import net.kyori.adventure.text.Component;
 import org.jspecify.annotations.NullMarked;
 
 import java.util.List;
+import java.util.Optional;
 
 @NullMarked
 public interface RecipeGroup<I> {
@@ -16,7 +17,7 @@ public interface RecipeGroup<I> {
     /**
      * @return the display name representing this recipe group
      */
-    Component displayName();
+    Optional<Component> displayName();
 
     /**
      * @return all recipes linked to this recipe group
