@@ -97,4 +97,9 @@ public interface RecipeRegistry<I> {
      * @return a group of recipes
      */
     Optional<RecipeGroup<I>> getRecipeGroup(String id);
+
+    /**
+     * @return All recipe groups registered at the moment
+     */
+    Collection<RecipeGroup<I>> getRecipeGroups();
 }
