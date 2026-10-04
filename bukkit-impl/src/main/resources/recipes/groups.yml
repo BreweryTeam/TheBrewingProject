@@ -1,8 +1,11 @@
 display-name:
+  alcoholic: <gradient:gold:white>Alcoholic
+  beers: <gold>Beers
   ale: <gradient:red:gold>Ale
   beer: <gold>Beer
   stout: <gradient:white:gold>Stout
   absinthe: <green>Absinthe
+  aperitifs: <color:#d6b589>Apéritif
   brandy: <gradient:red:dark_red>Brandy
   gin: <color:#6ec0ff>Gin
   liquor: <gradient:red:gold>Liquor
@@ -12,5 +15,8 @@ display-name:
   cider: <green>Cider
   cocktail: <rainbow>Cocktail
   mead: <gradient:gold:yellow>Mead
-  non_alcoholic: <green>Non-Alcoholic
   wine: <red>Wine
+  coffee: <color:#875800>Coffee
+  juice: <aqua>Juice
+  non_alcoholic: <green>Non-Alcoholic
+  tea: <gradient:dark_green:green>Tea
