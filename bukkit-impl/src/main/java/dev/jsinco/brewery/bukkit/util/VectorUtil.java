@@ -2,16 +2,18 @@ package dev.jsinco.brewery.bukkit.util;
 
 import dev.jsinco.brewery.api.vector.BreweryVector;
 import org.bukkit.util.Vector;
-import org.joml.Matrix3d;
-import org.joml.Vector3d;
-import org.joml.Vector3i;
+import org.joml.*;
 
+import java.lang.Math;
 import java.util.Random;
 
 public class VectorUtil {
 
     public static Vector lerp(Vector from, Vector to, double t) {
         return from.clone().multiply(1.0 - t).add(to.clone().multiply(t));
+    }
+    public static Vector3f lerp(Vector3fc from, Vector3fc to, float t) {
+        return new Vector3f(from).mul(1.0f - t).add(new Vector3f(to).mul(t));
     }
 
     public static Vector randomUnitVector(Random random) {
