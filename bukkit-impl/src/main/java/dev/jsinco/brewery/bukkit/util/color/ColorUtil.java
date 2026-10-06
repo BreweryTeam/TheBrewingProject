@@ -1,6 +1,9 @@
 package dev.jsinco.brewery.bukkit.util.color;
 
+import dev.jsinco.brewery.bukkit.util.VectorUtil;
 import org.bukkit.Color;
+import org.joml.Vector3f;
+import org.joml.Vector3fc;
 
 import java.awt.image.BufferedImage;
 import java.util.Arrays;
@@ -9,7 +12,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class ColorUtil {
-
 
     public static final Map<String, Color> NAME_TO_COLOR_MAP = new HashMap<>();
 
@@ -38,25 +40,17 @@ public class ColorUtil {
     }
 
     public static Color closestColorLimitedOpacity(Color target, Color background, int maxOpacity) {
-        int r = Math.abs(target.getRed() - background.getRed());
-        int g = Math.abs(target.getGreen() - background.getGreen());
-        int b = Math.abs(target.getBlue() - background.getBlue());
+        Vector3f targetLab = toOklab(target);
+        Vector3f backgroundLab = toOklab(background);
 
-        int a = Math.min(maxOpacity, Math.max(r, Math.max(g, b)));
-        return Color.fromARGB(
-                a,
-                calculateColor(target.getRed(), background.getRed(), a),
-                calculateColor(target.getGreen(), background.getGreen(), a),
-                calculateColor(target.getBlue(), background.getBlue(), a)
-        );
-    }
-
-    private static int calculateColor(int colorBand, int backgroundBand, int alpha) {
+        float distance = targetLab.distance(backgroundLab);
+        float alpha = Math.clamp(distance / 0.4f, 0.0f, maxOpacity / 255.0f);
         if (alpha == 0) {
-            return 255;
+            return Color.fromARGB(0, 255, 255, 255);
         }
-        int modifiedBand = colorBand * (2 * 255 - alpha) - backgroundBand * (255 - alpha);
-        return Math.max(0, Math.min(255, modifiedBand / 255));
+
+        Vector3f blended = targetLab.mul(2.0f - alpha).sub(backgroundLab.mul(1.0f - alpha));
+        return fromOklab(blended).setAlpha((int) (alpha * 255.0f));
     }
 
     public static Color parseColorString(String hexOrValue) {
@@ -77,11 +71,80 @@ public class ColorUtil {
     // Returns a color closer to the destination color based on the interval and totalDuration
     public static Color getNextColor(Color current, Color destination, long step, long duration) {
         float ratio = Math.min((float) step / (duration - 1), 1f);
-        int red = (int) (ratio * destination.getRed() + (1f - ratio) * current.getRed());
-        int green = (int) (ratio * destination.getGreen() + (1f - ratio) * current.getGreen());
-        int blue = (int) (ratio * destination.getBlue() + (1f - ratio) * current.getBlue());
+        return lerp(current, destination, ratio);
+    }
 
-        return Color.fromRGB(red, green, blue);
+    public static Color lerp(Color a, Color b, float t) {
+        return fromOklab(VectorUtil.lerp(toOklab(a), toOklab(b), t));
+    }
+
+    // https://bottosson.github.io/posts/oklab/
+    public static Vector3f toOklab(Color color) {
+        Vector3f vec = toLinearSRGB(color);
+        float r = vec.x;
+        float g = vec.y;
+        float b = vec.z;
+
+        float l = 0.4122214708f * r + 0.5363325363f * g + 0.0514459929f * b;
+        float m = 0.2119034982f * r + 0.6806995451f * g + 0.1073969566f * b;
+        float s = 0.0883024619f * r + 0.2817188376f * g + 0.6299787005f * b;
+
+        float l_ = (float) Math.cbrt(l);
+        float m_ = (float) Math.cbrt(m);
+        float s_ = (float) Math.cbrt(s);
+
+        return new Vector3f(
+                0.2104542553f * l_ + 0.7936177850f * m_ - 0.0040720468f * s_,
+                1.9779984951f * l_ - 2.4285922050f * m_ + 0.4505937099f * s_,
+                0.0259040371f * l_ + 0.7827717662f * m_ - 0.8086757660f * s_
+        );
+    }
+
+    public static Color fromOklab(Vector3fc oklab) {
+        float L = oklab.x();
+        float a = oklab.y();
+        float b = oklab.z();
+
+        float l_ = L + 0.3963377774f * a + 0.2158037573f * b;
+        float m_ = L - 0.1055613458f * a - 0.0638541728f * b;
+        float s_ = L - 0.0894841775f * a - 1.2914855480f * b;
+
+        float l = l_ * l_ * l_;
+        float m = m_ * m_ * m_;
+        float s = s_ * s_ * s_;
+
+        Vector3f vec = new Vector3f(
+                4.0767416621f * l - 3.3077115913f * m + 0.2309699292f * s,
+                -1.2684380046f * l + 2.6097574011f * m - 0.3413193965f * s,
+                -0.0041960863f * l - 0.7034186147f * m + 1.7076147010f * s
+        );
+        return fromLinearSRGB(vec);
+    }
+
+    private static Vector3f toLinearSRGB(Color color) {
+        return new Vector3f(
+                f_inv(color.getRed() / 255.0f),
+                f_inv(color.getGreen() / 255.0f),
+                f_inv(color.getBlue() / 255.0f)
+        );
+    }
+    private static Color fromLinearSRGB(Vector3f vec) {
+        return Color.fromRGB(toIntScale(f(vec.x)), toIntScale(f(vec.y)), toIntScale(f(vec.z)));
+    }
+    private static int toIntScale(float f) {
+        return Math.clamp((int) (255.0f * f), 0, 255);
+    }
+
+    // https://bottosson.github.io/posts/colorwrong/
+    private static float f(float c) {
+        return c >= 0.0031308f
+                ? 1.055f * (float) Math.pow(c, 1.0f / 2.4f) - 0.055f
+                : 12.92f * c;
+    }
+    private static float f_inv(float c) {
+        return c >= 0.04045
+                ? (float) Math.pow((c + 0.055f) / 1.055f, 2.4f)
+                : c / 12.92f;
     }
 
     public static java.awt.Color getDistinctColor(BufferedImage image) {
