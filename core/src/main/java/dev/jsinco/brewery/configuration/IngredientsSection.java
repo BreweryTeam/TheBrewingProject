@@ -113,10 +113,6 @@ public class IngredientsSection extends OkaeriConfig {
                 Logger.logErr("Ingredient groups must have a key");
                 return Optional.empty();
             }
-            if (key.contains(":")) {
-                Logger.logErr("Invalid ingredient group key containing ':': %s".formatted(key));
-                return Optional.empty();
-            }
             for (String material : materials) {
                 if (INGREDIENT_GROUP_PATTERN.matcher(material).find()) {
                     Logger.logErr("Ingredient groups are not allowed to reference other groups!");
