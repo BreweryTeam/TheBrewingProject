@@ -1,6 +1,7 @@
 package dev.jsinco.brewery.configuration.serializers;
 
 import dev.jsinco.brewery.api.util.BreweryKey;
+import dev.jsinco.brewery.api.util.Logger;
 import dev.jsinco.brewery.api.util.Materials;
 import dev.jsinco.brewery.configuration.structure.BlockReplacement;
 import dev.jsinco.brewery.configuration.structure.GenericBlockReplacement;
@@ -33,8 +34,12 @@ public class BlockReplacementSerializer implements ObjectSerializer<BlockReplace
         try {
             Map<BreweryKey, GenericBlockReplacement> readData = new HashMap<>();
             for (String key : keys) {
-                Map<String, Materials> declaration = data.getAsMap(key, String.class, Materials.class);
-                readData.put(BreweryKey.parse(key), new GenericBlockReplacement(declaration));
+                try {
+                    Map<String, Materials> declaration = data.getAsMap(key, String.class, Materials.class);
+                    readData.put(BreweryKey.parse(key), new GenericBlockReplacement(declaration));
+                } catch (IllegalArgumentException | OkaeriConfigException e) {
+                    Logger.logErr("Invalid structure matcher of type %s:\n %s".formatted(key, e.getMessage()));
+                }
             }
             return new KeyedBlockReplacement(readData);
         } catch (IllegalArgumentException | OkaeriConfigException e) {
