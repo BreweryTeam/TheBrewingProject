@@ -2,7 +2,6 @@ package dev.jsinco.brewery.bukkit.structure.serializer;
 
 import dev.jsinco.brewery.api.util.BreweryKey;
 import dev.jsinco.brewery.api.util.Holder;
-import dev.jsinco.brewery.api.util.Logger;
 import dev.jsinco.brewery.api.util.Materials;
 import eu.okaeri.configs.exception.OkaeriConfigException;
 import eu.okaeri.configs.schema.GenericsDeclaration;
@@ -33,19 +32,27 @@ public class MaterialsSerializer implements ObjectSerializer<Materials> {
 
     @Override
     public Materials deserialize(@NonNull DeserializationData data, @NonNull GenericsDeclaration generics) {
-        try {
+        if (isList(data)) {
             return new Materials.SetBacked(data.getValueAsList(Materials.class)
                     .stream()
                     .map(Materials::values)
                     .flatMap(Collection::stream)
                     .collect(Collectors.toSet())
             );
-        } catch (IllegalArgumentException | OkaeriConfigException ignored) {
         }
         String value = data.getValue(String.class);
         if (value.startsWith("#")) {
             return new Materials.TagBacked(BreweryKey.parse(value.replaceFirst("^#", ""), Key.MINECRAFT_NAMESPACE));
         }
         return new Materials.Singleton(data.getValue(Holder.Material.class));
+    }
+
+    private boolean isList(DeserializationData data) {
+        try {
+            data.getValueAsList(String.class);
+            return true;
+        } catch (IllegalArgumentException | OkaeriConfigException e) {
+            return false;
+        }
     }
 }
