@@ -111,6 +111,7 @@ public class Migrations {
                                         case EXCELLENT -> aDouble > 0 ? aDouble * 1 / 4 : aDouble * 2 / 3;
                                     })
                                     .map("%.1f"::formatted)
+                                    .map(string -> string.replace(",", "."))
                     );
                     if (SIMPLE_NUMBER_PATTERN.matcher(alcoholString).matches()) {
                         modifiers.set("alcohol", Double.parseDouble(alcoholString));
