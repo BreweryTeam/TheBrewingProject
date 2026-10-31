@@ -6,12 +6,22 @@ import org.jspecify.annotations.NonNull;
 import java.util.Locale;
 
 /**
- * Utility class with minimal pattern requirements. Always lower case
+ * Utility class with minimal pattern requirements.
+ * Namespaces are always lower case.
+ * Keys are lower case, except when the namespace is "mythic".
  *
  * @param namespace A namespace (can not contain ":")
  * @param key       A key
  */
 public record BreweryKey(String namespace, String key) {
+
+    public BreweryKey {
+        namespace = namespace.toLowerCase(Locale.ROOT);
+        // mythic item identifiers are case-sensitive
+        if (!namespace.equals("mythic")) {
+            key = key.toLowerCase(Locale.ROOT);
+        }
+    }
 
     public String minimalized() {
         return minimalized("brewery");
@@ -44,12 +54,10 @@ public record BreweryKey(String namespace, String key) {
     public static @NonNull BreweryKey parse(@NonNull String input, @NonNull String defaultNamespace) {
         String[] split = input.split(":", 2); // Allow recursive namespaced keys
         if (split.length == 1) {
-            return new BreweryKey(defaultNamespace, split[0].toLowerCase(Locale.ROOT));
+            return new BreweryKey(defaultNamespace, split[0]);
         }
         if (split.length == 2) {
-            return new BreweryKey(split[0].toLowerCase(Locale.ROOT), split[0]
-                    .equalsIgnoreCase("mythic") ? // mythic item identifiers are case-sensitive
-                    split[1] : split[1].toLowerCase(Locale.ROOT));
+            return new BreweryKey(split[0], split[1]);
         }
         throw new IllegalArgumentException("Invalid Brewery Key: " + input);
     }
