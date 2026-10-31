@@ -55,7 +55,7 @@ public class ColorUtil {
             return NAME_TO_COLOR_MAP.get(hexOrValue);
         }
         if (hexOrValue.length() != 6) {
-            throw new IllegalArgumentException("Invalid color string: " + hexOrValue);
+            throw new IllegalArgumentException("Invalid color string '%s': Not a hex color".formatted(hexOrValue));
         }
         try {
             return Color.fromRGB(
