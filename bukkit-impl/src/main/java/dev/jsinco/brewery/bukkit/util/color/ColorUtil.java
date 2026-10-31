@@ -1,34 +1,30 @@
 package dev.jsinco.brewery.bukkit.util.color;
 
 import dev.jsinco.brewery.bukkit.util.VectorUtil;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Color;
+import org.jetbrains.annotations.VisibleForTesting;
 import org.joml.Vector3f;
 import org.joml.Vector3fc;
 
 import java.awt.image.BufferedImage;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class ColorUtil {
 
+    @VisibleForTesting
     public static final Map<String, Color> NAME_TO_COLOR_MAP = new HashMap<>();
+    private static final HexFormat EXPLICIT_HEX_FORMAT = HexFormat.of().withPrefix("#");
 
     static {
-        NAME_TO_COLOR_MAP.put("WHITE", Color.WHITE);
+        for (NamedTextColor color : NamedTextColor.NAMES.values()) {
+            NAME_TO_COLOR_MAP.put(color.toString().toUpperCase(Locale.ROOT), Color.fromRGB(color.value()));
+        }
         NAME_TO_COLOR_MAP.put("SILVER", Color.SILVER);
-        NAME_TO_COLOR_MAP.put("GRAY", Color.GRAY);
-        NAME_TO_COLOR_MAP.put("BLACK", Color.BLACK);
-        NAME_TO_COLOR_MAP.put("RED", Color.RED);
         NAME_TO_COLOR_MAP.put("MAROON", Color.MAROON);
-        NAME_TO_COLOR_MAP.put("YELLOW", Color.YELLOW);
         NAME_TO_COLOR_MAP.put("OLIVE", Color.OLIVE);
         NAME_TO_COLOR_MAP.put("LIME", Color.LIME);
-        NAME_TO_COLOR_MAP.put("GREEN", Color.GREEN);
-        NAME_TO_COLOR_MAP.put("AQUA", Color.AQUA);
         NAME_TO_COLOR_MAP.put("TEAL", Color.TEAL);
-        NAME_TO_COLOR_MAP.put("BLUE", Color.BLUE);
         NAME_TO_COLOR_MAP.put("NAVY", Color.NAVY);
         NAME_TO_COLOR_MAP.put("FUCHSIA", Color.FUCHSIA);
         NAME_TO_COLOR_MAP.put("PURPLE", Color.PURPLE);
@@ -36,7 +32,7 @@ public class ColorUtil {
         NAME_TO_COLOR_MAP.put("PINK", Color.FUCHSIA);
         NAME_TO_COLOR_MAP.put("BRIGHT_GRAY", Color.SILVER);
         NAME_TO_COLOR_MAP.put("BRIGHT_RED", Color.fromRGB(255, 0, 0));
-        NAME_TO_COLOR_MAP.put("DARK_RED", Color.fromRGB(128, 0, 0));
+        NAME_TO_COLOR_MAP.put("DARK_RED", Color.fromRGB(128, 0, 0)); // NamedTextColor uses 170,0,0
     }
 
     public static Color closestColorLimitedOpacity(Color target, Color background, int maxOpacity) {
@@ -69,6 +65,16 @@ public class ColorUtil {
         } catch (NumberFormatException e) {
             throw new IllegalArgumentException("Invalid color string: " + hexOrValue);
         }
+    }
+
+    public static String colorToString(Color color) {
+        Color opaque = color.setAlpha(255);
+        for (Map.Entry<String, Color> entry : ColorUtil.NAME_TO_COLOR_MAP.entrySet()) {
+            if (opaque.equals(entry.getValue())) {
+                return entry.getKey();
+            }
+        }
+        return "#" + EXPLICIT_HEX_FORMAT.toHexDigits(opaque.asRGB(), 6);
     }
 
     // Returns a color closer to the destination color based on the interval and totalDuration
