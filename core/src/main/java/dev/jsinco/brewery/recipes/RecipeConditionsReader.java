@@ -4,36 +4,36 @@ import com.google.common.base.Preconditions;
 import dev.jsinco.brewery.api.brew.BrewingStep;
 import dev.jsinco.brewery.api.brew.ScoreType;
 import dev.jsinco.brewery.api.ingredient.Ingredient;
-import dev.jsinco.brewery.api.ingredient.IngredientManager;
+import dev.jsinco.brewery.api.ingredient.ResolvedIngredientManager;
 import dev.jsinco.brewery.api.recipe.RecipeCondition;
 import dev.jsinco.brewery.api.recipe.ScoreCondition;
 import dev.jsinco.brewery.api.util.Logger;
 import dev.jsinco.brewery.api.util.Pair;
-import dev.jsinco.brewery.util.FutureUtil;
+import dev.jsinco.brewery.util.ClassUtil;
 import org.simpleyaml.configuration.ConfigurationSection;
 
-import java.util.*;
-import java.util.concurrent.CompletableFuture;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Locale;
+import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class RecipeConditionsReader {
 
-    private static final List<String> ALL_STEP_CONDITIONS = List.of(
-            "final-step",
-            "exact-step",
-            "any-step",
-            "first-step"
-    );
+    private static final Pattern INGREDIENT_PATTERN = Pattern.compile("^(.+)/([^/]+)$");
 
-    public static CompletableFuture<List<RecipeCondition>> fromConfigSection(ConfigurationSection section, IngredientManager<?> ingredientManager) {
-        List<CompletableFuture<RecipeCondition>> recipeConditionFutures = new ArrayList<>();
+    public static List<RecipeCondition> fromConfigSection(ConfigurationSection section, ResolvedIngredientManager<?> ingredientManager) {
+        List<RecipeCondition> recipeConditions = new ArrayList<>();
         for (String stepKey : section.getKeys(false)) {
             if (!section.isConfigurationSection(stepKey)) {
                 continue;
             }
             ConfigurationSection configurationSection = section.getConfigurationSection(stepKey);
             Preconditions.checkArgument(configurationSection.contains("type"), "Unspecified step type for final-step");
-            List<CompletableFuture<ScoreCondition>> scoreConditions = new ArrayList<>();
+            List<ScoreCondition> scoreConditions = new ArrayList<>();
             for (String key : configurationSection.getKeys(false)) {
                 if (key.equals("type")) {
                     continue;
@@ -41,20 +41,18 @@ public class RecipeConditionsReader {
                 ScoreType scoreType = Arrays.stream(ScoreType.values()).filter(score -> score.hasAlias(key))
                         .findAny().orElseThrow(() -> new IllegalArgumentException("Expected a valid score type, got: " + key));
                 scoreConditions.add(switch (scoreType) {
-                    case TIME, DISTILL_AMOUNT -> CompletableFuture.completedFuture(
-                            parseSingletonCondition(configurationSection.getString(key), scoreType)
-                    );
+                    case TIME, DISTILL_AMOUNT ->
+                            parseSingletonCondition(configurationSection.getString(key), scoreType);
                     case INGREDIENTS ->
                             parseIngredientsCondition(configurationSection.getStringList(key), ingredientManager);
-                    case BARREL_TYPE -> throw new UnsupportedOperationException("Unsupported score type: " + key);
+                    case BARREL_TYPE -> throw new IllegalArgumentException("Unsupported score type: " + key);
                 });
             }
-            recipeConditionFutures.add(
-                    FutureUtil.mergeFutures(scoreConditions)
-                            .thenApplyAsync(conditions -> newRecipeCondition(conditions, stepKey, configurationSection))
+            recipeConditions.add(
+                    newRecipeCondition(scoreConditions, stepKey, configurationSection)
             );
         }
-        return FutureUtil.mergeFutures(recipeConditionFutures);
+        return recipeConditions;
     }
 
     private static RecipeCondition newRecipeCondition(List<ScoreCondition> conditions, String stepKey, ConfigurationSection configurationSection) {
@@ -69,35 +67,37 @@ public class RecipeConditionsReader {
         };
     }
 
-    private static CompletableFuture<ScoreCondition> parseIngredientsCondition(List<String> stringList, IngredientManager<?> ingredientManager) {
-        List<CompletableFuture<Pair<Optional<Ingredient>, ScoreCondition.AmountCondition>>> ingredientsFutures = new ArrayList<>();
+    private static ScoreCondition parseIngredientsCondition(List<String> stringList, ResolvedIngredientManager<?> ingredientManager) {
+        List<Pair<Ingredient, ScoreCondition.AmountCondition>> ingredientsFutures = new ArrayList<>();
         for (String string : stringList) {
-            if (!string.contains("/")) {
-                ingredientsFutures.add(ingredientManager.getIngredient(string)
-                        .thenApplyAsync(ingredient -> {
-                            if (ingredient.isEmpty()) {
-                                Logger.logErr("Unknown ingredient: " + string);
-                            }
-                            return new Pair<>(ingredient, ScoreCondition.AmountCondition.ANY);
-                        }));
+            Matcher matcher = INGREDIENT_PATTERN.matcher(string);
+            String ingredientString;
+            ScoreCondition.AmountCondition amountCondition;
+            if (!matcher.matches()) {
+                ingredientString = string;
+                amountCondition = ScoreCondition.AmountCondition.ANY;
             } else {
-                String[] split = string.split("/", 2);
-                ScoreCondition.AmountCondition condition = ScoreCondition.AmountCondition.valueOf(split[1].toUpperCase(Locale.ROOT));
-                ingredientsFutures.add(ingredientManager.getIngredient(split[0])
-                        .thenApplyAsync(ingredient -> {
-                            if (ingredient.isEmpty()) {
-                                Logger.logErr("Unknown ingredient: " + string);
-                            }
-                            return new Pair<>(ingredient, condition);
-                        }));
+                ingredientString = matcher.group(1);
+                Optional<ScoreCondition.AmountCondition> optionalAmountCondition = ClassUtil.findInstance(ScoreCondition.AmountCondition.class, matcher.group(2));
+                if (optionalAmountCondition.isEmpty()) {
+                    Logger.logErr("Invalid amount condition, expected any of: %s".formatted(
+                            Arrays.toString(ScoreCondition.AmountCondition.values())
+                    ));
+                }
+                amountCondition = optionalAmountCondition.orElse(ScoreCondition.AmountCondition.ANY);
             }
+            Optional<Ingredient> ingredient = ingredientManager.getIngredient(ingredientString);
+            if (ingredient.isEmpty()) {
+                Logger.logErr("Unknown ingredient: " + ingredientString);
+                continue;
+            }
+            ingredientsFutures.add(new Pair<>(ingredient.get(), amountCondition));
         }
-        return FutureUtil.mergeFutures(ingredientsFutures)
-                .thenApplyAsync(ingredients -> new ScoreConditions.IngredientsConditionImpl(
-                        ingredients.stream()
-                                .filter(pair -> pair.first().isPresent())
-                                .collect(Collectors.toUnmodifiableMap(pair -> pair.first().get(), Pair::second))
-                ));
+        return new ScoreConditions.IngredientsConditionImpl(ingredientsFutures
+                .stream()
+                .collect(Collectors.toMap(Pair::first, Pair::second))
+        );
+
     }
 
     private static ScoreCondition.SingletonCondition parseSingletonCondition(String amount, ScoreType type) {

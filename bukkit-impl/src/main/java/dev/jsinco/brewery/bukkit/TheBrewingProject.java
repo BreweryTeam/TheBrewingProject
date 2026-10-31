@@ -301,16 +301,12 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
         recipeReader.readRecipeGroups(ingredientManagerFuture)
                 .thenAccept(groups -> groups.forEach(recipeRegistry::registerGroup))
                 .exceptionally(Logger::logErr);
-        DefaultRecipeReader.readDefaultRecipes(this.getDataFolder()).forEach((string, defaultRecipe) -> defaultRecipe
-                .whenComplete((defaultRecipe1, throwable) -> {
-                    if (throwable != null) {
-                        Logger.logErr("Could not read default recipe: " + string);
-                        Logger.logErr(throwable);
-                        return;
-                    }
-                    this.recipeRegistry.registerDefaultRecipe(string, defaultRecipe1);
-                })
-        );
+        ingredientManagerFuture.thenAcceptAsync(ingredientManager -> {
+            DefaultRecipeReader.readDefaultRecipes(this.getDataFolder(), ingredientManager)
+                    .forEach((string, defaultRecipe) -> {
+                        recipeRegistry.registerDefaultRecipe(string, defaultRecipe);
+                    });
+        });
         loadDrunkenReplacements();
         loadTimeFormats();
         new TBPReloadEvent().callEvent();
@@ -450,17 +446,13 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
                 .thenAccept(groups ->
                         groups.forEach(recipeRegistry::registerGroup)
                 ).exceptionally(Logger::logErr);
-
-        DefaultRecipeReader.readDefaultRecipes(this.getDataFolder()).forEach((string, defaultRecipe) -> defaultRecipe
-                .whenComplete((defaultRecipe1, throwable) -> {
-                    if (throwable != null) {
-                        Logger.logErr("Could not read default recipe: " + string);
-                        Logger.logErr(throwable);
-                        return;
-                    }
-                    this.recipeRegistry.registerDefaultRecipe(string, defaultRecipe1);
-                })
-        );
+        
+        ingredientManagerFuture.thenAcceptAsync(ingredientManager -> {
+            DefaultRecipeReader.readDefaultRecipes(this.getDataFolder(), ingredientManager)
+                    .forEach((string, defaultRecipe) -> {
+                        recipeRegistry.registerDefaultRecipe(string, defaultRecipe);
+                    });
+        });
         CompletableFuture.allOf(integrationManager.retrieve(IntegrationTypes.ITEM).stream().map(ItemIntegration::initialized)
                         .toArray(CompletableFuture<?>[]::new))
                 .thenAccept(ignored -> integrationsLoadedFuture.complete(new ResolvedIngredientManagerImpl()));
