@@ -80,16 +80,17 @@ public class RecipeConditionsReader {
                             }
                             return new Pair<>(ingredient, ScoreCondition.AmountCondition.ANY);
                         }));
+            } else {
+                String[] split = string.split("/", 2);
+                ScoreCondition.AmountCondition.valueOf(split[1].toUpperCase(Locale.ROOT));
+                ingredientsFutures.add(ingredientManager.getIngredient(split[0])
+                        .thenApplyAsync(ingredient -> {
+                            if (ingredient.isEmpty()) {
+                                Logger.logErr("Unknown ingredient: " + string);
+                            }
+                            return new Pair<>(ingredient, ScoreCondition.AmountCondition.ANY);
+                        }));
             }
-            String[] split = string.split("/", 2);
-            ScoreCondition.AmountCondition.valueOf(split[1].toUpperCase(Locale.ROOT));
-            ingredientsFutures.add(ingredientManager.getIngredient(split[0])
-                    .thenApplyAsync(ingredient -> {
-                        if (ingredient.isEmpty()) {
-                            Logger.logErr("Unknown ingredient: " + string);
-                        }
-                        return new Pair<>(ingredient, ScoreCondition.AmountCondition.ANY);
-                    }));
         }
         return FutureUtil.mergeFutures(ingredientsFutures)
                 .thenApplyAsync(ingredients -> new ScoreConditions.IngredientsConditionImpl(
