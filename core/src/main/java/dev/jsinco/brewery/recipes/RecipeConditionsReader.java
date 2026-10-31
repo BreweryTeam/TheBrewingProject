@@ -82,13 +82,13 @@ public class RecipeConditionsReader {
                         }));
             } else {
                 String[] split = string.split("/", 2);
-                ScoreCondition.AmountCondition.valueOf(split[1].toUpperCase(Locale.ROOT));
+                ScoreCondition.AmountCondition condition = ScoreCondition.AmountCondition.valueOf(split[1].toUpperCase(Locale.ROOT));
                 ingredientsFutures.add(ingredientManager.getIngredient(split[0])
                         .thenApplyAsync(ingredient -> {
                             if (ingredient.isEmpty()) {
                                 Logger.logErr("Unknown ingredient: " + string);
                             }
-                            return new Pair<>(ingredient, ScoreCondition.AmountCondition.ANY);
+                            return new Pair<>(ingredient, condition);
                         }));
             }
         }
