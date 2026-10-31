@@ -9,6 +9,7 @@ import dev.jsinco.brewery.api.recipe.RecipeCondition;
 import dev.jsinco.brewery.api.recipe.ScoreCondition;
 import dev.jsinco.brewery.api.util.Logger;
 import dev.jsinco.brewery.api.util.Pair;
+import dev.jsinco.brewery.util.ClassUtil;
 import org.simpleyaml.configuration.ConfigurationSection;
 
 import java.util.ArrayList;
@@ -16,9 +17,13 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class RecipeConditionsReader {
+
+    private static final Pattern INGREDIENT_PATTERN = Pattern.compile("^(.+)/([^/]+)$");
 
     public static List<RecipeCondition> fromConfigSection(ConfigurationSection section, ResolvedIngredientManager<?> ingredientManager) {
         List<RecipeCondition> recipeConditions = new ArrayList<>();
@@ -40,7 +45,7 @@ public class RecipeConditionsReader {
                             parseSingletonCondition(configurationSection.getString(key), scoreType);
                     case INGREDIENTS ->
                             parseIngredientsCondition(configurationSection.getStringList(key), ingredientManager);
-                    case BARREL_TYPE -> throw new UnsupportedOperationException("Unsupported score type: " + key);
+                    case BARREL_TYPE -> throw new IllegalArgumentException("Unsupported score type: " + key);
                 });
             }
             recipeConditions.add(
@@ -65,19 +70,25 @@ public class RecipeConditionsReader {
     private static ScoreCondition parseIngredientsCondition(List<String> stringList, ResolvedIngredientManager<?> ingredientManager) {
         List<Pair<Ingredient, ScoreCondition.AmountCondition>> ingredientsFutures = new ArrayList<>();
         for (String string : stringList) {
-            if (!string.contains("/")) {
-                Optional<Ingredient> ingredient = ingredientManager.getIngredient(string);
-                if (ingredient.isEmpty()) {
-                    Logger.logErr("Unknown ingredient: " + string);
-                    continue;
+            Matcher matcher = INGREDIENT_PATTERN.matcher(string);
+            String ingredientString;
+            ScoreCondition.AmountCondition amountCondition;
+            if (!matcher.matches()) {
+                ingredientString = string;
+                amountCondition = ScoreCondition.AmountCondition.ANY;
+            } else {
+                ingredientString = matcher.group(1);
+                Optional<ScoreCondition.AmountCondition> optionalAmountCondition = ClassUtil.findInstance(ScoreCondition.AmountCondition.class, matcher.group(2));
+                if (optionalAmountCondition.isEmpty()) {
+                    Logger.logErr("Invalid amount condition, expected any of: %s".formatted(
+                            Arrays.toString(ScoreCondition.AmountCondition.values())
+                    ));
                 }
-                ingredientsFutures.add(new Pair<>(ingredient.get(), ScoreCondition.AmountCondition.ANY));
+                amountCondition = optionalAmountCondition.orElse(ScoreCondition.AmountCondition.ANY);
             }
-            String[] split = string.split("/", 2);
-            ScoreCondition.AmountCondition amountCondition = ScoreCondition.AmountCondition.valueOf(split[1].toUpperCase(Locale.ROOT));
-            Optional<Ingredient> ingredient = ingredientManager.getIngredient(split[0]);
+            Optional<Ingredient> ingredient = ingredientManager.getIngredient(ingredientString);
             if (ingredient.isEmpty()) {
-                Logger.logErr("Unknown ingredient: " + string);
+                Logger.logErr("Unknown ingredient: " + ingredientString);
                 continue;
             }
             ingredientsFutures.add(new Pair<>(ingredient.get(), amountCondition));

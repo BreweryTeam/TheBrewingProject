@@ -2,6 +2,7 @@ package dev.jsinco.brewery.util;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.Optional;
 
 public class ClassUtil {
@@ -37,5 +38,11 @@ public class ClassUtil {
         } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
             return Optional.empty();
         }
+    }
+
+    public static <E extends Enum<E>> Optional<E> findInstance(Class<E> eClass, String name) {
+        return Arrays.stream(eClass.getEnumConstants())
+                .filter(e -> e.name().equalsIgnoreCase(name))
+                .findFirst();
     }
 }
