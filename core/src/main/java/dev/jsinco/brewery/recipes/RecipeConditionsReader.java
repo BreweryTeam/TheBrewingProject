@@ -9,7 +9,7 @@ import dev.jsinco.brewery.api.recipe.RecipeCondition;
 import dev.jsinco.brewery.api.recipe.ScoreCondition;
 import dev.jsinco.brewery.api.util.Logger;
 import dev.jsinco.brewery.api.util.Pair;
-import dev.jsinco.brewery.util.ClassUtil;
+import dev.jsinco.brewery.api.util.ClassUtil;
 import org.simpleyaml.configuration.ConfigurationSection;
 
 import java.util.ArrayList;

@@ -6,14 +6,14 @@ import dev.jsinco.brewery.api.meta.MetaData;
 import dev.jsinco.brewery.api.recipe.DefaultRecipe;
 import dev.jsinco.brewery.api.recipe.Recipe;
 import dev.jsinco.brewery.api.util.BreweryKey;
+import dev.jsinco.brewery.api.util.ClassUtil;
 import dev.jsinco.brewery.brew.BrewImpl;
-import dev.jsinco.brewery.bukkit.TheBrewingProject;
+import dev.jsinco.brewery.bukkit.api.TheBrewingProjectApi;
 import dev.jsinco.brewery.bukkit.meta.MetaDataPdcType;
 import dev.jsinco.brewery.bukkit.recipe.RecipeMatcherImpl;
 import dev.jsinco.brewery.bukkit.util.ListPersistentDataType;
 import dev.jsinco.brewery.configuration.Config;
 import dev.jsinco.brewery.recipes.RecipeRegistryImpl;
-import dev.jsinco.brewery.util.ClassUtil;
 import io.papermc.paper.datacomponent.DataComponentTypes;
 import io.papermc.paper.datacomponent.item.TooltipDisplay;
 import io.papermc.paper.persistence.PersistentDataContainerView;
@@ -40,13 +40,13 @@ public class BrewAdapterAccess {
     private static final int DATA_VERSION = 0;
     private static final Random RANDOM = new Random();
 
-    private static final NamespacedKey BREWING_STEPS = TheBrewingProject.key("steps");
-    private static final NamespacedKey BREWERY_DATA_VERSION = TheBrewingProject.key("version");
-    private static final NamespacedKey BREWERY_CIPHERED = TheBrewingProject.key("ciphered");
-    private static final NamespacedKey BREWERY_META = TheBrewingProject.key("meta");
-    public static final NamespacedKey BREWERY_TAG = TheBrewingProject.key("tag");
-    public static final NamespacedKey BREWERY_SCORE = TheBrewingProject.key("score");
-    public static final NamespacedKey BREWERY_DISPLAY_NAME = TheBrewingProject.key("display_name");
+    private static final NamespacedKey BREWING_STEPS = TheBrewingProjectApi.key("steps");
+    private static final NamespacedKey BREWERY_DATA_VERSION = TheBrewingProjectApi.key("version");
+    private static final NamespacedKey BREWERY_CIPHERED = TheBrewingProjectApi.key("ciphered");
+    private static final NamespacedKey BREWERY_META = TheBrewingProjectApi.key("meta");
+    public static final NamespacedKey BREWERY_TAG = TheBrewingProjectApi.key("tag");
+    public static final NamespacedKey BREWERY_SCORE = TheBrewingProjectApi.key("score");
+    public static final NamespacedKey BREWERY_DISPLAY_NAME = TheBrewingProjectApi.key("display_name");
 
     public static ItemStack toItem(Brew brew, Brew.State state) {
         return RecipeMatcherImpl.builder()

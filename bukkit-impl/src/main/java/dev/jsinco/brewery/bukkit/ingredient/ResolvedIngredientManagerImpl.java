@@ -18,7 +18,7 @@ import dev.jsinco.brewery.bukkit.api.integration.IntegrationTypes;
 import dev.jsinco.brewery.bukkit.brew.BrewAdapterAccess;
 import dev.jsinco.brewery.bukkit.integration.IntegrationManagerImpl;
 import io.papermc.paper.persistence.PersistentDataContainerView;
-import me.clip.placeholderapi.libs.kyori.adventure.key.Key;
+import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Material;

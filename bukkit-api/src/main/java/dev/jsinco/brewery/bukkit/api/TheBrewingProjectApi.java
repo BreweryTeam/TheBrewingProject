@@ -10,6 +10,7 @@ import dev.jsinco.brewery.api.integration.IntegrationManager;
 import dev.jsinco.brewery.api.recipe.RecipeRegistry;
 import dev.jsinco.brewery.api.structure.PlacedStructureRegistry;
 import dev.jsinco.brewery.bukkit.api.effect.DrunkEventManager;
+import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.concurrent.CompletableFuture;
@@ -65,4 +66,18 @@ public interface TheBrewingProjectApi {
      * @return A manager for events
      */
     DrunkEventManager getDrunkenEventManager();
+
+    /**
+     * Defaults to the brewery namespace
+     *
+     * @param key Key string with optional namespace
+     * @return Namespaced key
+     */
+    static NamespacedKey key(String key) {
+        if (key.contains(":")) {
+            String[] split = key.split(":", 2);
+            return new NamespacedKey(split[0], split[1]);
+        }
+        return new NamespacedKey("brewery", key);
+    }
 }

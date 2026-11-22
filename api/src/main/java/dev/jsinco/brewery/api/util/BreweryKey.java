@@ -70,4 +70,5 @@ public record BreweryKey(String namespace, String key) {
     public @NonNull String toString() {
         return namespace + ":" + key;
     }
+
 }
