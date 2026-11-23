@@ -59,6 +59,8 @@ public class BukkitRecipeResultReader implements RecipeResultReader<ItemStack> {
         qualityDataBuilder.addOptionalString(configurationSection.getString("messages.title"), RecipeEffectsImpl.Builder::title);
         qualityDataBuilder.addOptionalString(configurationSection.getString("messages.message"), RecipeEffectsImpl.Builder::message);
         qualityDataBuilder.addOptionalList(configurationSection.getStringList("effects"), BukkitRecipeResultReader::getEffect, RecipeEffectsImpl.Builder::effects);
+        qualityDataBuilder.addOptionalList(configurationSection.getStringList("attribute-modifiers"),
+                modifier -> RecipeAttributeModifierImpl.parseConfig(modifier, configurationSection.getName()), RecipeEffectsImpl.Builder::attributeModifiers);
         qualityDataBuilder.addOptionalList(configurationSection.getStringList("events"), EventData::deserialize, RecipeEffectsImpl.Builder::eventData);
         qualityDataBuilder.add(parseModifiers(configurationSection), RecipeEffectsImpl.Builder::addModifiers);
         return qualityDataBuilder.build();

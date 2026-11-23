@@ -32,6 +32,7 @@ import dev.jsinco.brewery.bukkit.configuration.serializer.IntegrationEventSerial
 import dev.jsinco.brewery.bukkit.configuration.serializer.MaterialSerializer;
 import dev.jsinco.brewery.bukkit.configuration.serializer.UncheckedIngredientSerializer;
 import dev.jsinco.brewery.bukkit.database.SessionTypes;
+import dev.jsinco.brewery.bukkit.effect.BrewAttributeModifierManager;
 import dev.jsinco.brewery.bukkit.effect.DrunkEventManagerImpl;
 import dev.jsinco.brewery.bukkit.effect.event.ActiveEventsRegistry;
 import dev.jsinco.brewery.bukkit.effect.event.DrunkEventExecutor;
@@ -162,6 +163,7 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
     private final ActiveEventsRegistry activeEventsRegistry = new ActiveEventsRegistry();
     private PlayerWalkListener playerWalkListener;
     private ModifierManager modifierManager = new ModifierManagerImpl();
+    private final BrewAttributeModifierManager brewAttributeModifierManager = new BrewAttributeModifierManager();
     private BreweryTranslator translator;
     private boolean successfulLoad = false;
     private boolean hotLoaded = false;
@@ -419,6 +421,7 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
         pluginManager.registerEvents(worldEventListener, this);
         pluginManager.registerEvents(playerWalkListener, this);
         pluginManager.registerEvents(new EntityEventListener(), this);
+        pluginManager.registerEvents(brewAttributeModifierManager, this);
         if (ClassUtil.exists("io.papermc.paper.event.connection.PlayerConnectionValidateLoginEvent")) {
             pluginManager.registerEvents(new PlayerJoinListener(), this);
         } else {
@@ -469,6 +472,11 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
 
     @Override
     public void onDisable() {
+        try {
+            brewAttributeModifierManager.clearAll();
+        } catch (Throwable e) {
+            Logger.logErr(e);
+        }
         closeDatabase();
         this.metrics.shutdown();
         GlobalTranslator.translator().removeSource(this.translator);
@@ -656,5 +664,8 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
     public ModifierManager getModifierManager() {
         return this.modifierManager;
     }
-}
 
+    public BrewAttributeModifierManager getBrewAttributeModifierManager() {
+        return this.brewAttributeModifierManager;
+    }
+}

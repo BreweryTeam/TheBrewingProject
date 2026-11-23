@@ -55,22 +55,26 @@ public class RecipeEffectsImpl implements RecipeEffects {
     public static final NamespacedKey MODIFIERS = TheBrewingProject.key("modifiers");
     public static final NamespacedKey EVENTS = TheBrewingProject.key("events");
     public static final NamespacedKey EFFECTS = TheBrewingProject.key("effects");
-    private static final List<NamespacedKey> PDC_TYPES = List.of(COMMANDS, MESSAGE, ACTION_BAR, TITLE, ALCOHOL, TOXINS, EVENTS);
+    public static final NamespacedKey ATTRIBUTE_MODIFIERS = TheBrewingProject.key("attribute_modifiers");
+    private static final List<NamespacedKey> PDC_TYPES = List.of(COMMANDS, MESSAGE, ACTION_BAR, TITLE, ALCOHOL, TOXINS, EVENTS, ATTRIBUTE_MODIFIERS);
 
     public static final RecipeEffectsImpl GENERIC = new Builder()
             .effects(List.of())
             .build();
 
     private final @NonNull List<RecipeEffectImpl> effects;
+    private final @NonNull List<RecipeAttributeModifierImpl> attributeModifiers;
     private final @Nullable String title;
     private final @Nullable String message;
     private final @Nullable String actionBar;
     private final @NonNull Map<DrunkenModifier, Double> modifiers;
     private final @NonNull List<EventData> events;
 
-    private RecipeEffectsImpl(@NonNull List<RecipeEffectImpl> effects, @Nullable String title, @Nullable String message,
+    private RecipeEffectsImpl(@NonNull List<RecipeEffectImpl> effects, @NonNull List<RecipeAttributeModifierImpl> attributeModifiers,
+                              @Nullable String title, @Nullable String message,
                               @Nullable String actionBar, @NonNull List<EventData> events, @NonNull Map<DrunkenModifier, Double> modifiers) {
         this.effects = effects;
+        this.attributeModifiers = attributeModifiers;
         this.title = title;
         this.message = message;
         this.actionBar = actionBar;
@@ -114,6 +118,9 @@ public class RecipeEffectsImpl implements RecipeEffects {
         if (!effects.isEmpty()) {
             container.set(EFFECTS, RecipeEffectPersistentDataType.INSTANCE, effects);
         }
+        if (!attributeModifiers.isEmpty()) {
+            container.set(ATTRIBUTE_MODIFIERS, RecipeAttributeModifierPersistentDataType.INSTANCE, attributeModifiers);
+        }
     }
 
     public static Optional<RecipeEffectsImpl> fromEntity(Entity entity) {
@@ -153,8 +160,11 @@ public class RecipeEffectsImpl implements RecipeEffects {
         if (persistentDataContainer.has(EFFECTS, RecipeEffectPersistentDataType.INSTANCE)) {
             builder.effects(persistentDataContainer.get(EFFECTS, RecipeEffectPersistentDataType.INSTANCE));
         }
+        if (persistentDataContainer.has(ATTRIBUTE_MODIFIERS, RecipeAttributeModifierPersistentDataType.INSTANCE)) {
+            builder.attributeModifiers(persistentDataContainer.get(ATTRIBUTE_MODIFIERS, RecipeAttributeModifierPersistentDataType.INSTANCE));
+        }
         RecipeEffectsImpl output = builder.build();
-        if (output.effects.isEmpty() && output.modifiers.isEmpty() && output.events.isEmpty()
+        if (output.effects.isEmpty() && output.attributeModifiers.isEmpty() && output.modifiers.isEmpty() && output.events.isEmpty()
                 && output.actionBar == null && output.message == null && output.title == null) {
             return Optional.empty();
         }
@@ -215,6 +225,7 @@ public class RecipeEffectsImpl implements RecipeEffects {
         getEffects().stream()
                 .map(RecipeEffectImpl::newPotionEffect)
                 .forEach(player::addPotionEffect);
+        TheBrewingProject.getInstance().getBrewAttributeModifierManager().apply(player, attributeModifiers);
     }
 
     public void applyTo(Projectile projectile) {
@@ -270,6 +281,11 @@ public class RecipeEffectsImpl implements RecipeEffects {
         return this.effects;
     }
 
+    @NonNull
+    public List<RecipeAttributeModifierImpl> getAttributeModifiers() {
+        return this.attributeModifiers;
+    }
+
     @Nullable
     public String getTitle() {
         return this.title;
@@ -293,6 +309,7 @@ public class RecipeEffectsImpl implements RecipeEffects {
     public static class Builder implements dev.jsinco.brewery.api.util.Builder<RecipeEffectsImpl> {
 
         private List<RecipeEffectImpl> effects = List.of();
+        private List<RecipeAttributeModifierImpl> attributeModifiers = List.of();
         private @Nullable String title;
         private @Nullable String message;
         private @Nullable String actionBar;
@@ -302,6 +319,12 @@ public class RecipeEffectsImpl implements RecipeEffects {
         public Builder effects(@NonNull List<RecipeEffectImpl> effects) {
             Preconditions.checkNotNull(effects);
             this.effects = effects;
+            return this;
+        }
+
+        public Builder attributeModifiers(@NonNull List<RecipeAttributeModifierImpl> attributeModifiers) {
+            Preconditions.checkNotNull(attributeModifiers);
+            this.attributeModifiers = List.copyOf(attributeModifiers);
             return this;
         }
 
@@ -338,7 +361,7 @@ public class RecipeEffectsImpl implements RecipeEffects {
         }
 
         public RecipeEffectsImpl build() {
-            return new RecipeEffectsImpl(effects, title, message, actionBar, events, modifiers.build());
+            return new RecipeEffectsImpl(effects, attributeModifiers, title, message, actionBar, events, modifiers.build());
         }
 
     }
