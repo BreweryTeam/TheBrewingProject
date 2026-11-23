@@ -41,18 +41,29 @@ public class DataGenerator {
         blocks.put("redstone_dust", 0xfc3100);
         blocks.put("melon_stem", 0x8ab348);
         blocks.put("pumpkin_stem", 0x8ab348);
+        blocks.put("attached_melon_stem", 0x8ab348);
+        blocks.put("attached_pumpkin_stem", 0x8ab348);
         blocks.put("grass_block_top", 0x7cbd6b);
         blocks.put("grass_block_side_overlay", 0x7cbd6b);
         blocks.put("short_grass", 0x7cbd6b);
         blocks.put("tall_grass", 0x7cbd6b);
         blocks.put("fern", 0x7cbd6b);
-        blocks.put("_leaves", 0x71a74d);
+        blocks.put("large_fern", 0x7cbd6b);
+        blocks.put("oak_leaves", 0x71a74d);
+        blocks.put("spruce_leaves", 0x71a74d);
+        blocks.put("birch_leaves", 0x71a74d);
+        blocks.put("jungle_leaves", 0x71a74d);
+        blocks.put("acacia_leaves", 0x71a74d);
+        blocks.put("dark_oak_leaves", 0x71a74d);
+        blocks.put("mangrove_leaves", 0x71a74d);
         blocks.put("vine", 0x48b518);
         blocks.put("sugar_cane", 0x8eb971);
         blocks.put("lily_pad", 0x208030);
         blocks.put("seagrass", 0x4d9e3f);
+        blocks.put("tall_seagrass", 0x4d9e3f);
         blocks.put("kelp", 0x4d9e3f);
-        blocks.put("dry_grass", 0xa89060);
+        blocks.put("short_dry_grass", 0xa89060);
+        blocks.put("tall_dry_grass", 0xa89060);
         blocks.put("dry_bush", 0x946b44);
         blocks.put("bush", 0x71a74d);
         return Collections.unmodifiableMap(blocks);
@@ -168,9 +179,10 @@ public class DataGenerator {
     }
 
     private static Color replaceBiomeColors(Color initial, String name) {
-        for (String edgeCase : BIOME_COLORED_BLOCKS.keySet()) {
-            if (name.contains(edgeCase)) {
-                return new Color(BIOME_COLORED_BLOCKS.get(edgeCase));
+        for (Map.Entry<String, Integer> entry : BIOME_COLORED_BLOCKS.entrySet()) {
+            String key = entry.getKey();
+            if (name.equals(key) || name.startsWith(key + "_")) {
+                return new Color(entry.getValue());
             }
         }
         return initial;
