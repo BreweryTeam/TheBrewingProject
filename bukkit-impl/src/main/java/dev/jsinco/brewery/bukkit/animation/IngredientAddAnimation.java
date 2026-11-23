@@ -44,7 +44,7 @@ public class IngredientAddAnimation implements Consumer<ScheduledTask> {
         this.travelingDirection = offset.clone().normalize().multiply(-1);
         this.v0x = G * (offset.clone().subtract(randomZX)).length() / (V0Y * 2);
         this.from = to.clone().add(offset);
-        this.entity = entityProvider.apply(from);
+        this.entity = entityProvider.apply(this.from);
         /*
          * Equation definitions are defined within square brackets []
          * Equation of movement under gravity in 2d
@@ -87,11 +87,14 @@ public class IngredientAddAnimation implements Consumer<ScheduledTask> {
                 new Transformation(previous.getTranslation(), previous.getLeftRotation().rotationAxis(new AxisAngle4f((float) Math.PI * time / 10 + startingRotation, 0, 1, 0)), previous.getScale(), previous.getRightRotation())
         );
         time++;
+        entity.teleportAsync(from.clone().add(delta()));
+    }
+
+    private Vector delta() {
         double timeSeconds = time / 20D;
-        Vector travelingPoint = travelingDirection.clone()
+        return travelingDirection.clone()
                 .multiply(timeSeconds * v0x)
                 .setY((V0Y - G * timeSeconds / 2) * timeSeconds);
-        entity.teleportAsync(from.clone().add(travelingPoint));
     }
 
     public void close() {
