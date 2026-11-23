@@ -5,6 +5,7 @@ import dev.jsinco.brewery.api.effect.modifier.DrunkenModifier;
 import dev.jsinco.brewery.api.event.DrunkEvent;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.bukkit.api.integration.IntegrationTypes;
+import dev.jsinco.brewery.bukkit.recipe.RecipeAttributeModifierImpl;
 import dev.jsinco.brewery.bukkit.recipe.RecipeEffectImpl;
 import dev.jsinco.brewery.bukkit.recipe.RecipeEffectsImpl;
 import io.papermc.paper.command.brigadier.MessageComponentSerializer;
@@ -42,6 +43,10 @@ public class BukkitMessageUtil {
         TagResolver.Builder builder = TagResolver.builder()
                 .resolver(Placeholder.component("potion_effects", effects.getEffects().stream()
                         .map(RecipeEffectImpl::displayName)
+                        .collect(Component.toComponent(Component.text(", ")))
+                ))
+                .resolver(Placeholder.component("attribute_modifiers", effects.getAttributeModifiers().stream()
+                        .map(RecipeAttributeModifierImpl::displayName)
                         .collect(Component.toComponent(Component.text(", ")))
                 ))
                 .resolver(Placeholder.parsed("effect_title_message", effects.getTitle() == null ? "" : effects.getTitle()))
