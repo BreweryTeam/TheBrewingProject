@@ -1,0 +1,33 @@
+sources:
+  cook:
+    type: tbp/cook
+    multiplier: 1
+    xp: 10
+    mode: completed
+    display_name: Cook
+    menu_item:
+      material: cauldron
+  mix:
+    type: tbp/mix
+    multiplier: 1
+    xp: 10
+    mode: completed
+    display_name: Mix
+    menu_item:
+      material: cauldron
+  distill:
+    type: tbp/distill
+    multiplier: 1
+    xp: 10
+    mode: completed
+    display_name: Distill
+    menu_item:
+      material: brewing_stand
+  age:
+    type: tbp/age
+    multiplier: 5
+    xp: 10
+    mode: completed
+    display_name: Age
+    menu_item:
+      material: barrel

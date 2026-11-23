@@ -73,10 +73,10 @@ tasks {
         if (project.findProperty("testing.integrations")!! == "true") {
             downloadPlugins {
                 modrinth("worldedit", "JUWRHdru")
-                modrinth("craftengine", "26.5")
                 modrinth("bolt", "1f2gAAFO")
                 modrinth("bodyhealth", "4.1.0")
                 url("https://api.spiget.org/v2/resources/62325/download")
+                modrinth("auraskills", "2.4.0")
             }
         }
     }
@@ -274,7 +274,8 @@ bukkit {
         "QuickShop",
         "GriefDefender",
         "GSit",
-        "BodyHealth"
+        "BodyHealth",
+        "AuraSkills"
     )
 }
 

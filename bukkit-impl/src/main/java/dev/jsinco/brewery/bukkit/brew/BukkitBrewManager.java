@@ -15,7 +15,9 @@ import dev.jsinco.brewery.brew.BrewImpl;
 import dev.jsinco.brewery.brew.CookStepImpl;
 import dev.jsinco.brewery.brew.DistillStepImpl;
 import dev.jsinco.brewery.brew.MixStepImpl;
+import dev.jsinco.brewery.bukkit.meta.MetaDataPdcType;
 import dev.jsinco.brewery.bukkit.recipe.RecipeMatcherImpl;
+import io.papermc.paper.persistence.PersistentDataContainerView;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.inventory.ItemStack;
@@ -112,6 +114,19 @@ public class BukkitBrewManager implements BrewManager<ItemStack> {
         return Optional.ofNullable(
                 itemStack.getPersistentDataContainer().get(BrewAdapterAccess.BREWERY_SCORE, PersistentDataType.DOUBLE)
         );
+    }
+
+    @Override
+    public Optional<MetaData> brewMeta(ItemStack itemStack) {
+        PersistentDataContainerView pdc = itemStack.getPersistentDataContainer();
+        return Optional.ofNullable(pdc.get(BrewAdapterAccess.BREWERY_META, MetaDataPdcType.INSTANCE));
+    }
+
+    @Override
+    public void setMeta(ItemStack itemStack, MetaData metaData) {
+        itemStack.editPersistentDataContainer(pdc -> {
+            pdc.set(BrewAdapterAccess.BREWERY_META, MetaDataPdcType.INSTANCE, metaData);
+        });
     }
 
     @Override

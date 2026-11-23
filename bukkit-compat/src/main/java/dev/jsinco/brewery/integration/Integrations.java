@@ -4,24 +4,25 @@ import dev.jsinco.brewery.api.integration.IntegrationManager;
 import dev.jsinco.brewery.api.util.color.ResourcePackColors;
 import dev.jsinco.brewery.bukkit.api.TheBrewingProjectApi;
 import dev.jsinco.brewery.bukkit.api.integration.IntegrationTypes;
-import dev.jsinco.brewery.integration.imported.chest_shop.QuickShopHikariIntegration;
-import dev.jsinco.brewery.integration.imported.event.BodyHealthIntegration;
-import dev.jsinco.brewery.integration.imported.event.GSitIntegration;
-import dev.jsinco.brewery.integration.imported.item.CraftEngineIntegration;
-import dev.jsinco.brewery.integration.imported.item.ItemsAdderIntegration;
-import dev.jsinco.brewery.integration.imported.item.MmoItemsIntegration;
-import dev.jsinco.brewery.integration.imported.item.MythicIntegration;
-import dev.jsinco.brewery.integration.imported.item.NexoIntegration;
-import dev.jsinco.brewery.integration.imported.item.OraxenIntegration;
-import dev.jsinco.brewery.integration.imported.placeholder.MiniPlaceholdersIntegration;
-import dev.jsinco.brewery.integration.imported.placeholder.PlaceholderApiIntegration;
-import dev.jsinco.brewery.integration.imported.structure.BoltIntegration;
-import dev.jsinco.brewery.integration.imported.structure.GriefDefenderIntegration;
-import dev.jsinco.brewery.integration.imported.structure.GriefPreventionIntegration;
-import dev.jsinco.brewery.integration.imported.structure.HuskClaimsIntegration;
-import dev.jsinco.brewery.integration.imported.structure.LandsIntegration;
-import dev.jsinco.brewery.integration.imported.structure.TownyIntegration;
-import dev.jsinco.brewery.integration.imported.structure.WorldGuardIntegration;
+import dev.jsinco.brewery.integration.hook.auraskills.AuraSkillsIntegration;
+import dev.jsinco.brewery.integration.chest_shop.QuickShopHikariIntegration;
+import dev.jsinco.brewery.integration.event.BodyHealthIntegration;
+import dev.jsinco.brewery.integration.event.GSitIntegration;
+import dev.jsinco.brewery.integration.item.CraftEngineIntegration;
+import dev.jsinco.brewery.integration.item.ItemsAdderIntegration;
+import dev.jsinco.brewery.integration.item.MmoItemsIntegration;
+import dev.jsinco.brewery.integration.item.MythicIntegration;
+import dev.jsinco.brewery.integration.item.NexoIntegration;
+import dev.jsinco.brewery.integration.item.OraxenIntegration;
+import dev.jsinco.brewery.integration.placeholder.MiniPlaceholdersIntegration;
+import dev.jsinco.brewery.integration.placeholder.PlaceholderApiIntegration;
+import dev.jsinco.brewery.integration.structure.BoltIntegration;
+import dev.jsinco.brewery.integration.structure.GriefDefenderIntegration;
+import dev.jsinco.brewery.integration.structure.GriefPreventionIntegration;
+import dev.jsinco.brewery.integration.structure.HuskClaimsIntegration;
+import dev.jsinco.brewery.integration.structure.LandsIntegration;
+import dev.jsinco.brewery.integration.structure.TownyIntegration;
+import dev.jsinco.brewery.integration.structure.WorldGuardIntegration;
 import org.bukkit.plugin.Plugin;
 
 public final class Integrations {
@@ -53,5 +54,6 @@ public final class Integrations {
         manager.register(IntegrationTypes.CHEST_SHOP, "com.ghostchu.quickshop.api.event.general.ShopItemMatchEvent", () -> new QuickShopHikariIntegration(api, owner));
         manager.register(IntegrationTypes.EVENT, "dev.geco.gsit.api.GSitAPI", () -> new GSitIntegration(owner));
         manager.register(IntegrationTypes.EVENT, "bodyhealth.api.BodyHealthAPI", () -> new BodyHealthIntegration());
+        manager.register(IntegrationTypes.GENERIC, "dev.aurelium.auraskills.api.AuraSkillsApi", () -> new AuraSkillsIntegration(owner, api));
     }
 }

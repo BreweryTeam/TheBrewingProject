@@ -43,7 +43,7 @@ public class BrewAdapterAccess {
     private static final NamespacedKey BREWING_STEPS = TheBrewingProjectApi.key("steps");
     private static final NamespacedKey BREWERY_DATA_VERSION = TheBrewingProjectApi.key("version");
     private static final NamespacedKey BREWERY_CIPHERED = TheBrewingProjectApi.key("ciphered");
-    private static final NamespacedKey BREWERY_META = TheBrewingProjectApi.key("meta");
+    public static final NamespacedKey BREWERY_META = TheBrewingProjectApi.key("meta");
     public static final NamespacedKey BREWERY_TAG = TheBrewingProjectApi.key("tag");
     public static final NamespacedKey BREWERY_SCORE = TheBrewingProjectApi.key("score");
     public static final NamespacedKey BREWERY_DISPLAY_NAME = TheBrewingProjectApi.key("display_name");
