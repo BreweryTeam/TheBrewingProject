@@ -13,6 +13,7 @@ import dev.jsinco.brewery.api.ingredient.IngredientManager;
 import dev.jsinco.brewery.api.ingredient.ResolvedIngredientManager;
 import dev.jsinco.brewery.api.structure.MultiblockStructure;
 import dev.jsinco.brewery.api.structure.StructureType;
+import dev.jsinco.brewery.api.util.ClassUtil;
 import dev.jsinco.brewery.api.util.Logger;
 import dev.jsinco.brewery.bukkit.api.TheBrewingProjectApi;
 import dev.jsinco.brewery.bukkit.api.effect.DrunkEventManager;
@@ -65,7 +66,7 @@ import dev.jsinco.brewery.bukkit.structure.serializer.StructureTypeSerializer;
 import dev.jsinco.brewery.bukkit.structure.serializer.Vector3iSerializer;
 import dev.jsinco.brewery.bukkit.util.BukkitIngredientUtil;
 import dev.jsinco.brewery.bukkit.util.EventUtil;
-import dev.jsinco.brewery.bukkit.util.color.ResourcePackColors;
+import dev.jsinco.brewery.bukkit.util.color.ResourcePackColorsImpl;
 import dev.jsinco.brewery.configuration.Config;
 import dev.jsinco.brewery.configuration.DrunkenModifierSection;
 import dev.jsinco.brewery.configuration.EventSection;
@@ -104,10 +105,10 @@ import dev.jsinco.brewery.effect.DrunksManagerImpl;
 import dev.jsinco.brewery.effect.ModifierManagerImpl;
 import dev.jsinco.brewery.effect.text.DrunkTextRegistry;
 import dev.jsinco.brewery.format.TimeFormatRegistry;
+import dev.jsinco.brewery.integration.Integrations;
 import dev.jsinco.brewery.recipes.RecipeReader;
 import dev.jsinco.brewery.recipes.RecipeRegistryImpl;
 import dev.jsinco.brewery.structure.PlacedStructureRegistryImpl;
-import dev.jsinco.brewery.util.ClassUtil;
 import dev.jsinco.brewery.util.FileUtil;
 import eu.okaeri.configs.ConfigManager;
 import eu.okaeri.configs.json.gson.JsonGsonConfigurer;
@@ -116,7 +117,6 @@ import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
 import io.papermc.paper.threadedregions.scheduler.ScheduledTask;
 import net.kyori.adventure.translation.GlobalTranslator;
 import org.bukkit.Bukkit;
-import org.bukkit.NamespacedKey;
 import org.bukkit.ServerTickManager;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
@@ -153,7 +153,7 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
     private WorldEventListener worldEventListener;
     private EventStepRegistry eventStepRegistry;
     private DrunkEventExecutor drunkEventExecutor;
-    private ResourcePackColors resourcePackColors;
+    private ResourcePackColorsImpl resourcePackColors;
     private CompletableFuture<ResolvedIngredientManager<ItemStack>> integrationsLoadedFuture = new CompletableFuture<>();
     private CompletableFuture<ResolvedIngredientManager<ItemStack>> ingredientManagerFuture = new CompletableFuture<>();
     private long time;
@@ -200,13 +200,13 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
             FileUtil.saveDirectory("/recipes", getDataPath().resolve("recipes"));
         }
         Migrations.migrateAllConfigFiles(this.getDataFolder());
-        this.resourcePackColors = new ResourcePackColors();
+        this.resourcePackColors = new ResourcePackColorsImpl();
         EventSection.migrateEvents(getDataFolder());
         Config.load(this.getDataFolder(), serializers());
         FeaturesConfig.load(this.getDataFolder(), new OkaeriSerdesBuilder()
                 .add(new FeaturePredicateSerializer())
                 .build());
-        integrationManager.registerIntegrations(resourcePackColors);
+        Integrations.registerIntegrations(resourcePackColors, this, this);
         CompletableFuture.allOf(integrationManager.retrieve(IntegrationTypes.ITEM)
                 .stream()
                 .map(ItemIntegration::initialized)
@@ -446,7 +446,7 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
                 .thenAccept(groups ->
                         groups.forEach(recipeRegistry::registerGroup)
                 ).exceptionally(Logger::logErr);
-        
+
         ingredientManagerFuture.thenAcceptAsync(ingredientManager -> {
             DefaultRecipeReader.readDefaultRecipes(this.getDataFolder(), ingredientManager)
                     .forEach((string, defaultRecipe) -> {
@@ -543,20 +543,6 @@ public class TheBrewingProject extends JavaPlugin implements TheBrewingProjectAp
                 Logger.logAndTrackErr(e);
             }
         }
-    }
-
-    /**
-     * Defaults to the brewery namespace
-     *
-     * @param key Key string with optional namespace
-     * @return Namespaced key
-     */
-    public static NamespacedKey key(String key) {
-        if (key.contains(":")) {
-            String[] split = key.split(":", 2);
-            return new NamespacedKey(split[0], split[1]);
-        }
-        return new NamespacedKey("brewery", key);
     }
 
     public Configuration getConfiguration() {

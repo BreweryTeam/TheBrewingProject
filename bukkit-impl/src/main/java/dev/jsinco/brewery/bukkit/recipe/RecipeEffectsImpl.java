@@ -14,6 +14,7 @@ import dev.jsinco.brewery.api.util.BreweryKey;
 import dev.jsinco.brewery.api.util.Holder;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import dev.jsinco.brewery.bukkit.api.BukkitAdapter;
+import dev.jsinco.brewery.bukkit.api.TheBrewingProjectApi;
 import dev.jsinco.brewery.bukkit.effect.ConsumedModifierDisplay;
 import dev.jsinco.brewery.bukkit.effect.ModifierConsumePdcType;
 import dev.jsinco.brewery.bukkit.util.BukkitMessageUtil;
@@ -46,15 +47,15 @@ import java.util.stream.Collectors;
 
 public class RecipeEffectsImpl implements RecipeEffects {
 
-    public static final NamespacedKey COMMANDS = TheBrewingProject.key("commands");
-    public static final NamespacedKey MESSAGE = TheBrewingProject.key("message");
-    public static final NamespacedKey ACTION_BAR = TheBrewingProject.key("action_bar");
-    public static final NamespacedKey TITLE = TheBrewingProject.key("titles");
-    public static final NamespacedKey ALCOHOL = TheBrewingProject.key("alcohol");
-    public static final NamespacedKey TOXINS = TheBrewingProject.key("toxins");
-    public static final NamespacedKey MODIFIERS = TheBrewingProject.key("modifiers");
-    public static final NamespacedKey EVENTS = TheBrewingProject.key("events");
-    public static final NamespacedKey EFFECTS = TheBrewingProject.key("effects");
+    public static final NamespacedKey COMMANDS = TheBrewingProjectApi.key("commands");
+    public static final NamespacedKey MESSAGE = TheBrewingProjectApi.key("message");
+    public static final NamespacedKey ACTION_BAR = TheBrewingProjectApi.key("action_bar");
+    public static final NamespacedKey TITLE = TheBrewingProjectApi.key("titles");
+    public static final NamespacedKey ALCOHOL = TheBrewingProjectApi.key("alcohol");
+    public static final NamespacedKey TOXINS = TheBrewingProjectApi.key("toxins");
+    public static final NamespacedKey MODIFIERS = TheBrewingProjectApi.key("modifiers");
+    public static final NamespacedKey EVENTS = TheBrewingProjectApi.key("events");
+    public static final NamespacedKey EFFECTS = TheBrewingProjectApi.key("effects");
     private static final List<NamespacedKey> PDC_TYPES = List.of(COMMANDS, MESSAGE, ACTION_BAR, TITLE, ALCOHOL, TOXINS, EVENTS);
 
     public static final RecipeEffectsImpl GENERIC = new Builder()

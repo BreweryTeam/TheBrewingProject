@@ -18,6 +18,7 @@ dependencies {
     compileOnly(libs.adventure.text.minimessage)
     compileOnly(libs.exp4j)
     compileOnly(libs.faststats.core)
+    compileOnly(libs.creative)
     // test
     testImplementation(libs.junit.jupiter)
     testRuntimeOnly(libs.junit.platform.launcher)

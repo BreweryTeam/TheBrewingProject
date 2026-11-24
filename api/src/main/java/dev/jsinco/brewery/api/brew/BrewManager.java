@@ -107,6 +107,22 @@ public interface BrewManager<I> {
     Optional<Double> brewScore(I itemStack);
 
     /**
+     * Get the brew meta of an item stack
+     *
+     * @param itemStack An item stack
+     * @return The brew meta, if present
+     */
+    Optional<MetaData> brewMeta(I itemStack);
+
+    /**
+     * Modify an item stack, set the brew meta
+     *
+     * @param itemStack The item stack to modify
+     * @param metaData  The brew meta
+     */
+    void setMeta(I itemStack, MetaData metaData);
+
+    /**
      * @return A recipe matcher builder
      */
     RecipeMatcher.Builder<I> matcher();

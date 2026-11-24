@@ -18,7 +18,7 @@ bolt = "1.1.66"
 craft-engine = "26.5"
 griefprevention = "17.0.0"
 huskclaims = "1.5.9"
-itemsadder = "4.0.10"
+itemsadder = "4.0.17"
 landsapi = "7.15.20"
 miniplaceholders = "2.3.0"
 mmoitems-api = "6.10.1-20260912.121047-66"
@@ -70,7 +70,7 @@ craft-engine-bukkit = { group = "net.momirealms", name = "craft-engine-bukkit", 
 craft-engine-core = { group = "net.momirealms", name = "craft-engine-core", version.ref = "craft-engine" }
 griefprevention = { group = "com.github.GriefPrevention", name = "GriefPrevention", version.ref = "griefprevention" }
 huskclaims-bukkit = { group = "net.william278.huskclaims", name = "huskclaims-bukkit", version.ref = "huskclaims" }
-itemsadder = { group = "dev.lone", name = "api-itemsadder", version.ref = "itemsadder" }
+itemsadder = { group = "beer.devs", name = "itemsadder-api", version.ref = "itemsadder" }
 landsapi = { group = "com.github.Angeschossen", name = "LandsAPI", version.ref = "landsapi" }
 miniplaceholders = { group = "io.github.miniplaceholders", name = "miniplaceholders-api", version.ref = "miniplaceholders" }
 mmoitems-api = { group = "net.Indyuce", name = "MMOItems-API", version.ref = "mmoitems-api" }
@@ -86,6 +86,8 @@ mythic-crucible = { group = "io.lumine", name = "MythicCrucible-Dist", version.r
 griefdefender = { group = "com.griefdefender", name = "api", version.ref = "griefdefender" }
 gsit = { group = "com.github.gecolay.GSit", name = "core", version.ref = "gsit" }
 bodyhealth = { group = "com.github.Mitality", name = "BodyHealth", version = "4.1.0" }
+jobs = "com.github.Zrips:Jobs:v5.2.6.2"
+auraskills = "dev.aurelium:auraskills-api-bukkit:2.2.4"
 # other
 jetbrains-annotations = { group = "org.jetbrains", name = "annotations", version.ref = "jetbrainsAnnotations" }
 
