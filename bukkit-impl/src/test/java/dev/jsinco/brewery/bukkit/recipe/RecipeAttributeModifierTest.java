@@ -54,37 +54,37 @@ class RecipeAttributeModifierTest {
 
     @Test
     void parseConfig() {
-        RecipeAttributeModifierImpl modifier = RecipeAttributeModifierImpl.parseConfig("gravity/-0.08;-0.04/30-60/add_value", "Moon Juice");
+        RecipeAttributeModifierImpl modifier = RecipeAttributeModifierImpl.parseConfig("gravity/-0.08;-0.04/30-60/add_value", "Moon Juice", "test");
         assertEquals(Attribute.GRAVITY, modifier.attribute());
         assertEquals(AttributeModifier.Operation.ADD_NUMBER, modifier.operation());
         assertEquals(new RecipeAttributeModifierImpl.DoubleRange(-0.08, -0.04), modifier.amountRange());
         assertEquals(new Interval(600, 1200), modifier.durationRange());
         assertEquals(new NamespacedKey("brewery", "brew/moon_juice/minecraft/gravity/add_number"), modifier.key());
 
-        RecipeAttributeModifierImpl defaultOperation = RecipeAttributeModifierImpl.parseConfig("minecraft:scale/0.5/10", "tiny");
+        RecipeAttributeModifierImpl defaultOperation = RecipeAttributeModifierImpl.parseConfig("minecraft:scale/0.5/10", "tiny", "test");
         assertEquals(AttributeModifier.Operation.ADD_NUMBER, defaultOperation.operation());
         assertEquals(new Interval(200, 200), defaultOperation.durationRange());
 
-        assertThrows(IllegalArgumentException.class, () -> RecipeAttributeModifierImpl.parseConfig("scale/0.5", "tiny"));
+        assertThrows(IllegalArgumentException.class, () -> RecipeAttributeModifierImpl.parseConfig("scale/0.5", "tiny", "test"));
 
-        RecipeAttributeModifierImpl manualKey = RecipeAttributeModifierImpl.parseConfig("scale/0.5/10/add_value/low_gravity", "tiny");
+        RecipeAttributeModifierImpl manualKey = RecipeAttributeModifierImpl.parseConfig("scale/0.5/10/add_value/low_gravity", "tiny", "test");
         assertEquals(new NamespacedKey("brewery", "low_gravity"), manualKey.key());
-        RecipeAttributeModifierImpl manualNamespacedKey = RecipeAttributeModifierImpl.parseConfig("scale/0.5/10/add_value/myserver:Low_Gravity", "tiny");
+        RecipeAttributeModifierImpl manualNamespacedKey = RecipeAttributeModifierImpl.parseConfig("scale/0.5/10/add_value/myserver:Low_Gravity", "tiny", "test");
         assertEquals(new NamespacedKey("myserver", "low_gravity"), manualNamespacedKey.key());
 
         assertEquals(
-                RecipeAttributeModifierImpl.parseConfig("scale/0.5/10", "tiny").key(),
-                RecipeAttributeModifierImpl.parseConfig("scale/0.2/20", "tiny").key()
+                RecipeAttributeModifierImpl.parseConfig("scale/0.5/10", "tiny", "test").key(),
+                RecipeAttributeModifierImpl.parseConfig("scale/0.2/20", "tiny", "test").key()
         );
         assertNotEquals(
-                RecipeAttributeModifierImpl.parseConfig("scale/0.5/10", "tiny").key(),
-                RecipeAttributeModifierImpl.parseConfig("scale/0.5/10", "huge").key()
+                RecipeAttributeModifierImpl.parseConfig("scale/0.5/10", "tiny", "test").key(),
+                RecipeAttributeModifierImpl.parseConfig("scale/0.5/10", "huge", "test").key()
         );
     }
 
     @Test
     void pdcRoundTrip() {
-        RecipeAttributeModifierImpl modifier = RecipeAttributeModifierImpl.parseConfig("gravity/-0.08;-0.04/30-60/add_multiplied_base/shared", "moon_juice");
+        RecipeAttributeModifierImpl modifier = RecipeAttributeModifierImpl.parseConfig("gravity/-0.08;-0.04/30-60/add_multiplied_base/shared", "moon_juice", "test");
         RecipeAttributeModifierPersistentDataType type = new RecipeAttributeModifierPersistentDataType();
         PersistentDataAdapterContext context = () -> null;
         assertEquals(modifier, type.fromPrimitive(type.toPrimitive(modifier, context), context));

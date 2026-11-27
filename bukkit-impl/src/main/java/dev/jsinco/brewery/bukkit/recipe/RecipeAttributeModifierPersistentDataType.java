@@ -40,7 +40,7 @@ public class RecipeAttributeModifierPersistentDataType implements PersistentData
         Attribute attribute = key == null ? null : Registry.ATTRIBUTE.get(key);
         Preconditions.checkArgument(attribute != null, "Attribute can not be null");
         AttributeModifier.Operation operation = AttributeModifier.Operation.valueOf(split[1]);
-        RecipeAttributeModifierImpl.DoubleRange amount = RecipeAttributeModifierImpl.DoubleRange.parse(split[2]);
+        RecipeAttributeModifierImpl.DoubleRange amount = RecipeAttributeModifierImpl.DoubleRange.parse(split[2], "pdc#read");
         Interval duration = Interval.parseString(split[3]);
         NamespacedKey modifierKey = NamespacedKey.fromString(split[4]);
         Preconditions.checkArgument(modifierKey != null, "Invalid attribute modifier key: " + split[4]);

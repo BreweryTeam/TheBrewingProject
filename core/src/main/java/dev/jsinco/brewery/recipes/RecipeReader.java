@@ -139,7 +139,7 @@ public class RecipeReader<I> {
                 checkStep(type, step, hasParsedIngredientStep);
                 hasParsedIngredientStep |= INGREDIENT_STEPS.contains(type);
             }
-            recipeResultReader.readRecipeResults(recipeSection);
+            recipeResultReader.readRecipeResults(recipeSection, null);
         } catch (Exception e) {
             return false;
         }
@@ -326,7 +326,9 @@ public class RecipeReader<I> {
             List<BrewingStep> steps = parseSteps(recipe.getMapList("steps"), resolvedIngredientManager);
             return Optional.of(new RecipeImpl.Builder<I>(recipeName)
                     .brewDifficulty(recipe.getDouble("brew-difficulty", 1D))
-                    .recipeResults(recipeResultReader.readRecipeResults(recipe))
+                    .recipeResults(recipeResultReader.readRecipeResults(recipe, "%s#recipes.%s"
+                            .formatted(fileContext, recipeName)
+                    ))
                     .steps(steps)
                     .build()
             );

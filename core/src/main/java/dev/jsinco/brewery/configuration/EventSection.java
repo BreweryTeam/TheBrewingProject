@@ -57,11 +57,30 @@ public class EventSection extends OkaeriConfig {
 
     @Comment("Drunken messages to send if the drunk_message event is enabled (not recommended to have enabled, gets a bit spammy)")
     @CustomKey("messages")
-    private List<String> drunkMessages = List.of("I love you <random_player_name>, you're my best friend.",
-            "I could do one more.",
-            "Who is she?",
-            "Watch this!",
-            "I'm not drunk. You're drunk.");
+    private List<String> drunkMessages = List.of(
+            "Is the floor supposed to be moving?",
+            "I'm fine. I'm totally fine. Why is everything sideways?",
+            "Where's my bed? Who stole my bed? Was it you, <random_player_name>?",
+            "I'm so tired. What time is it? What day is it? What year?",
+            "I could do one more. Maybe three. Definitely four.",
+            "Okay but hear me out... Never mind I forgot.",
+            "I should call my mom. Do I have a mom?",
+            "I miss my dog... I don't even have a dog :(",
+            "Who's walking in circles? Is it me? It's me!",
+            "Water is just wet air. Think about it.",
+            "Wait, was I supposed to be somewhere?",
+            "I just wanna hug a creeper right now...",
+            "Who moved my house? It was right here.",
+            "Do sheep dream? I bet sheep dream!",
+            "I could do one more. Maybe two.",
+            "Wait, which way is up again?",
+            "Where did the ground go?",
+            "Why are there two suns??",
+            "Everyone stop spinning for a second.",
+            "I think I'm getting better at walking.",
+            "My legs aren't working. Did I forget to charge them?",
+            "Who said that? Was it me? It was me!"
+    );
 
     @CustomKey("puke")
     private PukeSection puke = new PukeSection();
