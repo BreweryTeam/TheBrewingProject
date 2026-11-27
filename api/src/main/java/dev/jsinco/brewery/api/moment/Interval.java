@@ -84,4 +84,8 @@ public record Interval(long start, long stop) implements Moment {
     public Interval multiply(int factor) {
         return new Interval(start * factor, stop * factor);
     }
+
+    public boolean isInverted() {
+        return start > stop;
+    }
 }

@@ -38,7 +38,6 @@ public class AnimationManager {
         return ingredientThrowAnimation(ingredient, player, toLocation);
     }
 
-
     private static long ingredientThrowAnimation(ItemStack ingredient, Player player, Location toLocation) {
         Function<Location, ItemDisplay> itemDisplay = (location) -> player.getWorld().spawn(location, ItemDisplay.class, entity -> {
             entity.setPersistent(false);

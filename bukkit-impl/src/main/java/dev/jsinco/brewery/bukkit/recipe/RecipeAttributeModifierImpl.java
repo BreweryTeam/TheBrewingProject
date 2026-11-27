@@ -3,6 +3,7 @@ package dev.jsinco.brewery.bukkit.recipe;
 import com.google.common.base.Preconditions;
 import dev.jsinco.brewery.api.moment.Interval;
 import dev.jsinco.brewery.api.moment.Moment;
+import dev.jsinco.brewery.api.util.Logger;
 import dev.jsinco.brewery.bukkit.TheBrewingProject;
 import net.kyori.adventure.text.Component;
 import org.bukkit.NamespacedKey;
@@ -10,6 +11,7 @@ import org.bukkit.Registry;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeModifier;
 import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
 import java.util.Locale;
@@ -83,12 +85,15 @@ public record RecipeAttributeModifierImpl(@NonNull Attribute attribute, Attribut
     }
 
     // <attribute>/<amount>/<duration in seconds>[/<operation>[/<key>]]
-    public static RecipeAttributeModifierImpl parseConfig(@NonNull String string, @NonNull String recipeId) throws IllegalArgumentException {
+    public static RecipeAttributeModifierImpl parseConfig(@NonNull String string, @NonNull String recipeId, @Nullable String context) throws IllegalArgumentException {
         String[] parts = string.trim().split("/");
         Preconditions.checkArgument(parts.length >= 3 && parts.length <= 5,
                 "Expected attribute modifier with format <attribute>/<amount>/<duration>[/<operation>[/<key>]], got: " + string);
         Attribute attribute = parseAttribute(parts[0]);
-        DoubleRange amount = DoubleRange.parse(parts[1]);
+        DoubleRange amount = DoubleRange.parse(parts[1], context);
+        if (amount.max < amount.min) {
+
+        }
         Interval duration = Interval.parseString(parts[2].trim()).multiply(Moment.SECOND);
         Preconditions.checkArgument(duration.start() >= 0 && duration.stop() >= duration.start(),
                 "Invalid duration for attribute modifier: " + parts[2]);
@@ -148,6 +153,7 @@ public record RecipeAttributeModifierImpl(@NonNull Attribute attribute, Attribut
         };
     }
 
+    @NullMarked
     public record DoubleRange(double min, double max) {
 
         public DoubleRange {
@@ -160,12 +166,17 @@ public record RecipeAttributeModifierImpl(@NonNull Attribute attribute, Attribut
         }
 
         // e.g. -0.08;-0.04
-        public static DoubleRange parse(String string) {
+        public static DoubleRange parse(String string, @Nullable String context) {
             String trimmed = string.trim();
             if (trimmed.contains(";")) {
                 String[] split = trimmed.split(";");
                 Preconditions.checkArgument(split.length == 2, "Expected range with format <min>;<max>, got: " + string);
-                return new DoubleRange(Double.parseDouble(split[0].trim()), Double.parseDouble(split[1].trim()));
+                double min = Double.parseDouble(split[0].trim());
+                double max = Double.parseDouble(split[1].trim());
+                if (min > max && context != null) {
+                    Logger.logWarn("Invalid double range for amount in attribute-modifier at '%s': Expected a min value at the start of range definition".formatted(context));
+                }
+                return new DoubleRange(min, max);
             }
             double value = Double.parseDouble(trimmed);
             return new DoubleRange(value, value);

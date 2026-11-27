@@ -8,6 +8,7 @@ import dev.jsinco.brewery.api.moment.Moment;
 import dev.jsinco.brewery.api.recipe.QualityData;
 import dev.jsinco.brewery.api.recipe.QualityDataBuilder;
 import dev.jsinco.brewery.api.recipe.RecipeResult;
+import dev.jsinco.brewery.api.util.Logger;
 import dev.jsinco.brewery.bukkit.util.color.ColorUtil;
 import dev.jsinco.brewery.configuration.DrunkenModifierSection;
 import dev.jsinco.brewery.recipes.RecipeResultReader;
@@ -15,15 +16,19 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.Registry;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffectType;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 import org.simpleyaml.configuration.ConfigurationSection;
 
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.function.Function;
 
+@NullMarked
 public class BukkitRecipeResultReader implements RecipeResultReader<ItemStack> {
     @Override
-    public QualityData<RecipeResult<ItemStack>> readRecipeResults(ConfigurationSection configurationSection) {
+    public QualityData<RecipeResult<ItemStack>> readRecipeResults(ConfigurationSection configurationSection, @Nullable String context) {
         QualityDataBuilder<RecipeResult<ItemStack>, BukkitRecipeResult.Builder> qualityDataBuilder = new QualityDataBuilder<>(BukkitRecipeResult.Builder::new);
         qualityDataBuilder.addOptional(configurationSection.getString("potion-attributes.custom-model-data"),
                 Integer::parseInt,
@@ -49,18 +54,18 @@ public class BukkitRecipeResultReader implements RecipeResultReader<ItemStack> {
                 BukkitRecipeResult.Builder::appendBrewInfoLore
         );
         qualityDataBuilder.addOptionalString(configurationSection.getString("potion-attributes.custom-id"), BukkitRecipeResult.Builder::customId);
-        qualityDataBuilder.add(getRecipeEffects(configurationSection), BukkitRecipeResult.Builder::recipeEffects);
+        qualityDataBuilder.add(getRecipeEffects(configurationSection, context), BukkitRecipeResult.Builder::recipeEffects);
         return qualityDataBuilder.build();
     }
 
-    private static QualityData<RecipeEffectsImpl> getRecipeEffects(ConfigurationSection configurationSection) {
+    private static QualityData<RecipeEffectsImpl> getRecipeEffects(ConfigurationSection configurationSection, @Nullable String context) {
         QualityDataBuilder<RecipeEffectsImpl, RecipeEffectsImpl.Builder> qualityDataBuilder = new QualityDataBuilder<>(RecipeEffectsImpl.Builder::new);
         qualityDataBuilder.addOptionalString(configurationSection.getString("messages.action-bar"), RecipeEffectsImpl.Builder::actionBar);
         qualityDataBuilder.addOptionalString(configurationSection.getString("messages.title"), RecipeEffectsImpl.Builder::title);
         qualityDataBuilder.addOptionalString(configurationSection.getString("messages.message"), RecipeEffectsImpl.Builder::message);
-        qualityDataBuilder.addOptionalList(configurationSection.getStringList("effects"), BukkitRecipeResultReader::getEffect, RecipeEffectsImpl.Builder::effects);
+        qualityDataBuilder.addOptionalList(configurationSection.getStringList("effects"), effectParser(context), RecipeEffectsImpl.Builder::effects);
         qualityDataBuilder.addOptionalList(configurationSection.getStringList("attribute-modifiers"),
-                modifier -> RecipeAttributeModifierImpl.parseConfig(modifier, configurationSection.getName()), RecipeEffectsImpl.Builder::attributeModifiers);
+                modifier -> RecipeAttributeModifierImpl.parseConfig(modifier, configurationSection.getName(), context), RecipeEffectsImpl.Builder::attributeModifiers);
         qualityDataBuilder.addOptionalList(configurationSection.getStringList("events"), EventData::deserialize, RecipeEffectsImpl.Builder::eventData);
         qualityDataBuilder.add(parseModifiers(configurationSection), RecipeEffectsImpl.Builder::addModifiers);
         return qualityDataBuilder.build();
@@ -79,6 +84,35 @@ public class BukkitRecipeResultReader implements RecipeResultReader<ItemStack> {
         QualityData<HashMap<DrunkenModifier, Double>> output = QualityData.fromValueMapper(ignored -> new HashMap<>());
         modifierQualityMap.forEach((modifier, qualityData) -> qualityData.forEach(((quality, aDouble) -> output.get(quality).put(modifier, aDouble))));
         return output.map(Map::copyOf);
+    }
+
+    public static Function<String, RecipeEffectImpl> effectParser(@Nullable String context) {
+        return effectString -> {
+            RecipeEffectImpl effect = getEffect(effectString);
+            Interval amplifierRange;
+            if (effect.amplifierRange().isInverted()) {
+                amplifierRange = new Interval(effect.amplifierRange().stop(), effect.amplifierRange().start());
+                if (context != null) {
+                    Logger.logWarn("Invalid range for amplifier in effect '%s' at '%s': Expected a min value at the start of range definition"
+                            .formatted(effectString, context)
+                    );
+                }
+            } else {
+                amplifierRange = effect.amplifierRange();
+            }
+            Interval durationRange;
+            if (effect.durationRange().isInverted()) {
+                durationRange = new Interval(effect.durationRange().stop(), effect.durationRange().start());
+                if (context != null) {
+                    Logger.logWarn("Invalid range for duration in effect '%s' at '%s': Expected a min value at the start of range definition"
+                            .formatted(effect, context)
+                    );
+                }
+            } else {
+                durationRange = effect.durationRange();
+            }
+            return new RecipeEffectImpl(effect.type(), amplifierRange, durationRange);
+        };
     }
 
     private static RecipeEffectImpl getEffect(String string) {
